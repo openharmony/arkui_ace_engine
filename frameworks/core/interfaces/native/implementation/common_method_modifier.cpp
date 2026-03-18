@@ -826,6 +826,10 @@ auto g_bindMenuOptionsParam = [](
     menuParam.minKeyboardAvoidDistance = convValue;
     auto material = OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(nullptr);
     menuParam.systemMaterial = material ? material->Copy() : nullptr;
+    auto scrollBarOpt = OptConvert<DisplayMode>(menuOptions.scrollBar);
+    if (scrollBarOpt.has_value()) {
+        menuParam.scrollBar = scrollBarOpt.value();
+    }
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -3270,8 +3274,22 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
     auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
         TouchEventInfo& info) {
         PipelineContext::SetCallBackNode(node);
-        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
-        arkCallback.InvokeSync(event.ArkValue());
+        Ark_TouchEventProxy proxy = {
+            .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+            .timeStamp = Converter::ArkValue<Ark_Int64>(
+                static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+            .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+            .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+            .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+            .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+            .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+            .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+            .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+            .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+            .ptr = &info
+        };
+        arkCallback.InvokeSync(proxy);
     };
     ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
 }
@@ -3318,9 +3336,23 @@ void SetOnTouchImpl(Ark_NativePointer node,
         ViewAbstract::DisableOnTouch(frameNode);
         return;
     }
-    auto onEvent = [callback = CallbackHelper(*optValue)](TouchEventInfo& info) {
-        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
-        callback.InvokeSync(event.ArkValue());
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](TouchEventInfo& info) {
+        Ark_TouchEventProxy proxy = {
+            .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+            .timeStamp = Converter::ArkValue<Ark_Int64>(
+                static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+            .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+            .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+            .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+            .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+            .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+            .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+            .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+            .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+            .ptr = &info
+        };
+        arkCallback.InvokeSync(proxy);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -5150,7 +5182,7 @@ void SetMonopolizeEventsImpl(Ark_NativePointer node,
     ViewAbstract::SetMonopolizeEvents(frameNode, *convValue);
 }
 void SetOnTouchInterceptImpl(Ark_NativePointer node,
-                             const Opt_Callback_TouchEvent_HitTestMode* value)
+                             const Opt_Callback_TouchEventProxy_HitTestMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5162,9 +5194,23 @@ void SetOnTouchInterceptImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onTouchIntercept = [arkCallback = CallbackHelper(*optValue), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
-        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
+        Ark_TouchEventProxy proxy = {
+            .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+            .timeStamp = Converter::ArkValue<Ark_Int64>(
+                static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+            .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+            .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+            .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+            .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+            .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+            .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+            .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+            .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+            .ptr = &info
+        };
         auto resultOpt = arkCallback.InvokeWithOptConvertResult<
-            HitTestMode, Ark_HitTestMode, Callback_HitTestMode_Void>(event.ArkValue());
+            HitTestMode, Ark_HitTestMode, Callback_HitTestMode_Void>(proxy);
         return resultOpt.value_or(HitTestMode::HTMDEFAULT);
     };
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));

@@ -15,7 +15,7 @@
 
 import { FrameNode, LayoutConstraint } from '../FrameNode';
 import { KPointer } from '@koalaui/interop'
-import { UIContextImpl } from '../base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { int32 } from '@koalaui/compat';
 import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer'
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -42,7 +42,7 @@ export class FrameNodeTransfer {
         if (nodeTypeESValue.isString()) {
             nodeType = nodeTypeESValue.toString();
         }
-        let uiContext = new UIContextImpl(instanceId as int32);
+        let uiContext = new UIContext(instanceId as int32);
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
         let nodePtr = ESValue.wrap(input).getProperty('nodePtr_');

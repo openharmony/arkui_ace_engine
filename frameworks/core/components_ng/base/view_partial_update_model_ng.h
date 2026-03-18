@@ -38,8 +38,8 @@ public:
 
     bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) override;
 
-    bool RegisterUpdateInstanceForEnvFunc(
-        const WeakPtr<AceType>& node, std::function<void(int32_t)>&& updateInstanceForEnvValueFunc) override;
+    bool RegisterUpdateJSInstanceCallback(
+        const WeakPtr<AceType>& node, std::function<void(int32_t)>&& instanceChangeCallback) override;
 };
 
 } // namespace OHOS::Ace::NG

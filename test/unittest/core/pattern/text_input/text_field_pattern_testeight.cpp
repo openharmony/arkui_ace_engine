@@ -1851,7 +1851,7 @@ HWTEST_F(TextFieldPatternTestEight, IsReachedBoundary001, TestSize.Level0)
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateMaxLines(3);
     float offset = 0.1f;
-    pattern_->IsReachedBoundary(offset);
+    pattern_->IsReachedBoundary(offset, Axis::HORIZONTAL);
     EXPECT_TRUE(layoutProperty->HasMaxLines());
 }
 

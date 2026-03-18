@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, TouchEvent_serializer, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, Curve, BorderStyle, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -1573,7 +1573,11 @@ export class BuilderNodeOps implements MaterializedBase {
         thisSerializer.release()
     }
     private postTouchEvent_serialize(event: TouchEvent): boolean {
-        const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postTouchEvent(this.peer!.ptr, toPeerPtr(event))
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const eventTransformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(event)
+        TouchEventProxy_serializer.write(thisSerializer, eventTransformed)
+        const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postTouchEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private postInputEvent_serialize(event?: InputEventType): boolean {
@@ -1584,7 +1588,8 @@ export class BuilderNodeOps implements MaterializedBase {
             if (eventTmpValue instanceof TouchEvent) {
                 thisSerializer.writeInt8((0).toByte())
                 const eventTmpValueForIdx0 = eventTmpValue as TouchEvent
-                TouchEvent_serializer.write(thisSerializer, eventTmpValueForIdx0)
+                const eventTmpValueForIdx0Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventTmpValueForIdx0)
+                TouchEventProxy_serializer.write(thisSerializer, eventTmpValueForIdx0Transformed)
             } else if (eventTmpValue instanceof MouseEvent) {
                 thisSerializer.writeInt8((1).toByte())
                 const eventTmpValueForIdx1 = eventTmpValue as MouseEvent
@@ -6112,6 +6117,56 @@ export class ToggleExtender {
         return retval
     }
 }
+export class TouchEventExtender {
+    public static getNativePtr(event: TouchEvent): KPointer {
+        const event_casted = event as (TouchEvent)
+        return TouchEventExtender.getNativePtr_serialize(event_casted)
+    }
+    public static stopPropagation(ptr: KPointer): void {
+        const ptr_casted = ptr as (KPointer)
+        TouchEventExtender.stopPropagation_serialize(ptr_casted)
+        return
+    }
+    public static getHistoricalPoints(ptr: KPointer): Array<HistoricalPoint> | undefined {
+        const ptr_casted = ptr as (KPointer)
+        return TouchEventExtender.getHistoricalPoints_serialize(ptr_casted)
+    }
+    public static preventDefault(ptr: KPointer): void {
+        const ptr_casted = ptr as (KPointer)
+        TouchEventExtender.preventDefault_serialize(ptr_casted)
+        return
+    }
+    private static getNativePtr_serialize(event: TouchEvent): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const eventTransformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(event)
+        TouchEventProxy_serializer.write(thisSerializer, eventTransformed)
+        const retval = ArkUIGeneratedNativeModule._TouchEventExtender_getNativePtr(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private static stopPropagation_serialize(ptr: KPointer): void {
+        ArkUIGeneratedNativeModule._TouchEventExtender_stopPropagation(ptr)
+    }
+    private static getHistoricalPoints_serialize(ptr: KPointer): Array<HistoricalPoint> | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchEventExtender_getHistoricalPoints(ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<HistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferOptLength, (arg0: int32):HistoricalPoint => {
+            return HistoricalPoint_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<HistoricalPoint> | undefined = buffer
+        return returnResult
+    }
+    private static preventDefault_serialize(ptr: KPointer): void {
+        ArkUIGeneratedNativeModule._TouchEventExtender_preventDefault(ptr)
+    }
+}
+
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
@@ -6534,6 +6589,26 @@ export class LengthMetricsCustom {
 }
 export type Callback_Long_Void = (value: int64) => void;
 export type GestureEventHandler = (event: GestureEvent) => void;
+export class TouchEventProxy {
+    target: EventTarget = initializers.arkui.component.idlize.TouchEventProxyNS.target;
+    timeStamp: int64 = initializers.arkui.component.idlize.TouchEventProxyNS.timeStamp;
+    source: SourceType = initializers.arkui.component.idlize.TouchEventProxyNS.source;
+    axisHorizontal?: double | undefined;
+    axisVertical?: double | undefined;
+    pressure: double = initializers.arkui.component.idlize.TouchEventProxyNS.pressure;
+    tiltX: double = initializers.arkui.component.idlize.TouchEventProxyNS.tiltX;
+    tiltY: double = initializers.arkui.component.idlize.TouchEventProxyNS.tiltY;
+    rollAngle?: double | undefined;
+    sourceTool: SourceTool = initializers.arkui.component.idlize.TouchEventProxyNS.sourceTool;
+    getModifierKeyState?: ModifierKeyStateGetter | undefined;
+    deviceId?: int32 | undefined;
+    targetDisplayId?: int32 | undefined;
+    axisPinch?: double | undefined;
+    type: TouchType = initializers.arkui.component.idlize.TouchEventProxyNS.type;
+    touches: Array<TouchObject> = initializers.arkui.component.idlize.TouchEventProxyNS.touches;
+    changedTouches: Array<TouchObject> = initializers.arkui.component.idlize.TouchEventProxyNS.changedTouches;
+    ptr: KPointer = initializers.arkui.component.idlize.TouchEventProxyNS.ptr;
+}
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;
@@ -10098,6 +10173,189 @@ export class CustomDialogControllerOptionsExtender_serializer {
         }
         const focusableTmpResult: boolean | undefined = focusableTmpBuf
         let value: CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrderExtender: levelOrderExtenderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        return value
+    }
+}
+export class TouchEventProxy_serializer {
+    public static write(buffer: SerializerBase, value: TouchEventProxy): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForTarget = value.target
+        EventTarget_serializer.write(valueSerializer, valueHolderForTarget)
+        const valueHolderForTimeStamp = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+        const valueHolderForSource = value.source
+        valueSerializer.writeInt32(valueHolderForSource.valueOf())
+        const valueHolderForAxisHorizontal = value.axisHorizontal
+        if (valueHolderForAxisHorizontal !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAxisHorizontalTmpValue = valueHolderForAxisHorizontal!
+            valueSerializer.writeFloat64(valueHolderForAxisHorizontalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAxisVertical = value.axisVertical
+        if (valueHolderForAxisVertical !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAxisVerticalTmpValue = valueHolderForAxisVertical!
+            valueSerializer.writeFloat64(valueHolderForAxisVerticalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPressure = value.pressure
+        valueSerializer.writeFloat64(valueHolderForPressure)
+        const valueHolderForTiltX = value.tiltX
+        valueSerializer.writeFloat64(valueHolderForTiltX)
+        const valueHolderForTiltY = value.tiltY
+        valueSerializer.writeFloat64(valueHolderForTiltY)
+        const valueHolderForRollAngle = value.rollAngle
+        if (valueHolderForRollAngle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRollAngleTmpValue = valueHolderForRollAngle!
+            valueSerializer.writeFloat64(valueHolderForRollAngleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSourceTool = value.sourceTool
+        valueSerializer.writeInt32(valueHolderForSourceTool.valueOf())
+        const valueHolderForGetModifierKeyState = value.getModifierKeyState
+        if (valueHolderForGetModifierKeyState !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGetModifierKeyStateTmpValue = valueHolderForGetModifierKeyState!
+            valueSerializer.holdAndWriteCallback(valueHolderForGetModifierKeyStateTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDeviceId = value.deviceId
+        if (valueHolderForDeviceId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDeviceIdTmpValue = valueHolderForDeviceId!
+            valueSerializer.writeInt32(valueHolderForDeviceIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTargetDisplayId = value.targetDisplayId
+        if (valueHolderForTargetDisplayId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTargetDisplayIdTmpValue = valueHolderForTargetDisplayId!
+            valueSerializer.writeInt32(valueHolderForTargetDisplayIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAxisPinch = value.axisPinch
+        if (valueHolderForAxisPinch !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAxisPinchTmpValue = valueHolderForAxisPinch!
+            valueSerializer.writeFloat64(valueHolderForAxisPinchTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForType = value.type
+        valueSerializer.writeInt32(valueHolderForType.valueOf())
+        const valueHolderForTouches = value.touches
+        valueSerializer.writeInt32((valueHolderForTouches.length).toInt())
+        for (let valueHolderForTouchesCounterI = 0; valueHolderForTouchesCounterI < valueHolderForTouches.length; valueHolderForTouchesCounterI++) {
+            const valueHolderForTouchesTmpElement: TouchObject = valueHolderForTouches[valueHolderForTouchesCounterI]
+            TouchObject_serializer.write(valueSerializer, valueHolderForTouchesTmpElement)
+        }
+        const valueHolderForChangedTouches = value.changedTouches
+        valueSerializer.writeInt32((valueHolderForChangedTouches.length).toInt())
+        for (let valueHolderForChangedTouchesCounterI = 0; valueHolderForChangedTouchesCounterI < valueHolderForChangedTouches.length; valueHolderForChangedTouchesCounterI++) {
+            const valueHolderForChangedTouchesTmpElement: TouchObject = valueHolderForChangedTouches[valueHolderForChangedTouchesCounterI]
+            TouchObject_serializer.write(valueSerializer, valueHolderForChangedTouchesTmpElement)
+        }
+        const valueHolderForPtr = value.ptr
+        valueSerializer.writePointer(valueHolderForPtr)
+    }
+    public static read(buffer: DeserializerBase): TouchEventProxy {
+        let valueDeserializer: DeserializerBase = buffer
+        const targetTmpResult: EventTarget = EventTarget_serializer.read(valueDeserializer)
+        const timeStampTmpResult: int64 = valueDeserializer.readInt64()
+        const sourceTmpResult: SourceType = SourceType.fromValue(valueDeserializer.readInt32())
+        const axisHorizontalTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let axisHorizontalTmpBuf: double | undefined = undefined
+        if ((axisHorizontalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            axisHorizontalTmpBuf = valueDeserializer.readFloat64()
+        }
+        const axisHorizontalTmpResult: double | undefined = axisHorizontalTmpBuf
+        const axisVerticalTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let axisVerticalTmpBuf: double | undefined = undefined
+        if ((axisVerticalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            axisVerticalTmpBuf = valueDeserializer.readFloat64()
+        }
+        const axisVerticalTmpResult: double | undefined = axisVerticalTmpBuf
+        const pressureTmpResult: double = valueDeserializer.readFloat64()
+        const tiltXTmpResult: double = valueDeserializer.readFloat64()
+        const tiltYTmpResult: double = valueDeserializer.readFloat64()
+        const rollAngleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let rollAngleTmpBuf: double | undefined = undefined
+        if ((rollAngleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            rollAngleTmpBuf = valueDeserializer.readFloat64()
+        }
+        const rollAngleTmpResult: double | undefined = rollAngleTmpBuf
+        const sourceToolTmpResult: SourceTool = SourceTool.fromValue(valueDeserializer.readInt32())
+        const getModifierKeyStateTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let getModifierKeyStateTmpBuf: ModifierKeyStateGetter | undefined = undefined
+        
+        if ((getModifierKeyStateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const getModifierKeyStateTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const getModifierKeyStateTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const getModifierKeyStateTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const getModifierKeyStateTmpBufOptClosure = (keys: Array<string>):boolean => {
+                const getModifierKeyStateTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                getModifierKeyStateTmpBufOptBufArgsSerializer.writeInt32(getModifierKeyStateTmpBufOptBufResource.resourceId);
+                getModifierKeyStateTmpBufOptBufArgsSerializer.writePointer(getModifierKeyStateTmpBufOptBufCall);
+                getModifierKeyStateTmpBufOptBufArgsSerializer.writePointer(getModifierKeyStateTmpBufOptBufCallSync);
+                getModifierKeyStateTmpBufOptBufArgsSerializer.writeInt32((keys.length).toInt());
+                for (let keysCounterI = 0; keysCounterI < keys.length; keysCounterI++) {
+                    const keysTmpElement: string = keys[keysCounterI];
+                    getModifierKeyStateTmpBufOptBufArgsSerializer.writeString(keysTmpElement);
+                }
+                let getModifierKeyStateTmpBufOptBufContinuationValue: boolean | undefined;
+                const getModifierKeyStateTmpBufOptBufContinuationCallback: ((isSelected: boolean) => void) = (value: boolean):void => {
+                getModifierKeyStateTmpBufOptBufContinuationValue = value;
+            }
+                getModifierKeyStateTmpBufOptBufArgsSerializer.holdAndWriteCallback(getModifierKeyStateTmpBufOptBufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, -1142029296, getModifierKeyStateTmpBufOptBufArgsSerializer.asBuffer(), getModifierKeyStateTmpBufOptBufArgsSerializer.length());
+                getModifierKeyStateTmpBufOptBufArgsSerializer.release();
+                return (getModifierKeyStateTmpBufOptBufContinuationValue as boolean);
+            }
+            /*
+            resourceFinalizerRegister(getModifierKeyStateTmpBufOptClosure, getModifierKeyStateTmpBufOptBufResource)
+            getModifierKeyStateTmpBuf = getModifierKeyStateTmpBufOptClosure
+            */
+        }
+        const getModifierKeyStateTmpResult: ModifierKeyStateGetter | undefined = getModifierKeyStateTmpBuf
+        const deviceIdTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let deviceIdTmpBuf: int32 | undefined = undefined
+        if ((deviceIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            deviceIdTmpBuf = valueDeserializer.readInt32()
+        }
+        const deviceIdTmpResult: int32 | undefined = deviceIdTmpBuf
+        const targetDisplayIdTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let targetDisplayIdTmpBuf: int32 | undefined = undefined
+        if ((targetDisplayIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            targetDisplayIdTmpBuf = valueDeserializer.readInt32()
+        }
+        const targetDisplayIdTmpResult: int32 | undefined = targetDisplayIdTmpBuf
+        const axisPinchTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let axisPinchTmpBuf: double | undefined = undefined
+        if ((axisPinchTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            axisPinchTmpBuf = valueDeserializer.readFloat64()
+        }
+        const axisPinchTmpResult: double | undefined = axisPinchTmpBuf
+        const typeTmpResult: TouchType = TouchType.fromValue(valueDeserializer.readInt32())
+        const touchesTmpBufLength: int32 = valueDeserializer.readInt32()
+        const touchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(touchesTmpBufLength, (arg0: int32):TouchObject => {
+            return TouchObject_serializer.read(valueDeserializer);
+        })
+        const touchesTmpResult: Array<TouchObject> = touchesTmpBuf
+        const changedTouchesTmpBufLength: int32 = valueDeserializer.readInt32()
+        const changedTouchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(changedTouchesTmpBufLength, (arg0: int32):TouchObject => {
+            return TouchObject_serializer.read(valueDeserializer);
+        })
+        const changedTouchesTmpResult: Array<TouchObject> = changedTouchesTmpBuf
+        const ptrTmpResult: KPointer = valueDeserializer.readPointer()
+        let value: TouchEventProxy = ({target: targetTmpResult, timeStamp: timeStampTmpResult, source: sourceTmpResult, axisHorizontal: axisHorizontalTmpResult, axisVertical: axisVerticalTmpResult, pressure: pressureTmpResult, tiltX: tiltXTmpResult, tiltY: tiltYTmpResult, rollAngle: rollAngleTmpResult, sourceTool: sourceToolTmpResult, getModifierKeyState: getModifierKeyStateTmpResult, deviceId: deviceIdTmpResult, targetDisplayId: targetDisplayIdTmpResult, axisPinch: axisPinchTmpResult, type: typeTmpResult, touches: touchesTmpResult, changedTouches: changedTouchesTmpResult, ptr: ptrTmpResult} as TouchEventProxy)
         return value
     }
 }

@@ -19,7 +19,7 @@
 import { NodePosition, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "./Graphics"
 import { BorderStyle } from "./component/enums"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule, nullptr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { PeerNode } from "./PeerNode"
 import { FrameNode } from "./FrameNode"
@@ -70,6 +70,7 @@ export class RenderNode implements MaterializedBase {
     private translationValue: Vector2 = { x: 0, y: 0 }
     private markNodeGroupValue: boolean = false
     private frameNode_: WeakRef<FrameNode> | undefined = undefined
+    private isDisposed_: boolean = false;
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -462,15 +463,24 @@ export class RenderNode implements MaterializedBase {
         return
     }
     dispose() {
+        if (this.isDisposed()) {
+            return;
+        }
         this.frameNode_?.deref()?.resetNodePtr()
         if (this.peer?.ptr) {
             this.peer?.close();
         }
+        this.isDisposed_ = true;
+    }
+    public isDisposed(): boolean {
+        const ptr = this.peer?.ptr;
+        return this.isDisposed_ && (ptr === undefined || ptr === null || ptr === nullptr);
     }
     resetNodePtr() {
         if (this.peer?.ptr) {
             this.peer?.close();
         }
+        this.isDisposed_ = true;
     }
     private setClipToFrame(clipToFrame: boolean): void {
         RenderNodeExtender.setClipToFrame(this, clipToFrame)

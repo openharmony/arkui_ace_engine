@@ -84,6 +84,15 @@ void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, a
     env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
 }
 
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getCommonAniModifier()->isEasySplit(instanceId);
+}
+
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1740,6 +1749,32 @@ ani_boolean GetBaseEventModifierKeyState(
     char** pressedKeys = nullptr;
     int32_t pressedKeysLength = 0;
     modifier->getCommonAniModifier()->getBaseEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+ani_boolean GetTouchEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getTouchEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
     bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
     ReleaseCharArray(modifierKeys, modifierLength);
     if (pressedKeys) {

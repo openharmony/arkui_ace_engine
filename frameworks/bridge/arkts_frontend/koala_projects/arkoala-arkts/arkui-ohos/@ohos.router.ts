@@ -17,7 +17,7 @@ import { Router } from "arkui/base"
 import { PeerNode } from "arkui/PeerNode"
 import { UserViewBuilder } from "arkui/UserView"
 import { ComputableState, IncrementalNode } from "@koalaui/runtime"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIContext } from '@ohos/arkui/UIContext';
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 
 namespace router {
@@ -56,7 +56,7 @@ namespace router {
     let pageEntries: Map<string, string>
 
     export function setRouter(routerImp: Router): void {
-        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let uiContext: UIContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         uiContext.setRouter(routerImp)
     }
 
@@ -117,7 +117,7 @@ namespace router {
     }
 
     export function runPage(options: RouterOptions, builder: UserViewBuilder): void {
-        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let uiContext : UIContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const globalRouterImpl = uiContext.getRouter().getRouter();
         globalRouterImpl.runStartPage(options, builder);
     }

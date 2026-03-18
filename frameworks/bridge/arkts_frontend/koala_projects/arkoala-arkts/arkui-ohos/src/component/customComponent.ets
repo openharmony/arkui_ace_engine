@@ -17,7 +17,8 @@ import { __context, StateManager, remember, scheduleCallback, GlobalStateManager
 import { int32 } from '@koalaui/common';
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
-import { InteropNativeModule } from '@koalaui/interop'
+import { InteropNativeModule, SerializerBase, RuntimeType, KPointer } from '@koalaui/interop'
+import { ArkUIGeneratedNativeModule } from "#components"
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { ArkStructBase } from '../ArkStructBase';
 import { ArkUIAniModule, ArkUIAniCustomNodeModule } from 'arkui.ani';
@@ -32,7 +33,6 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
@@ -151,6 +151,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     /** @memo */
     private styles: ((instance: T) => void) | undefined;
     private executedAboutToDisappear: boolean = false;
+    private sourceLine: string = '';
+    private moduleName: string | undefined = undefined;
 
     constructor(
         uiContext: UIContext | undefined,
@@ -178,7 +180,11 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
         this.styles?.(this.instance as T)
     }
- 
+
+    setDebugLine(sourceLine: string, moduleName?: string): void {
+        this.sourceLine = sourceLine;
+        this.moduleName = moduleName;
+    }
     getInstance(): ExtendableComponent {
         return this.instance;
     }
@@ -364,6 +370,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     override __aboutToRecycle_Internal(): void {
         this.instance.__aboutToRecycle_Internal();
+    }
+    
+    override __debugLine_Internal(ptr: KPointer): void {
+        if (this.sourceLine == '') {
+            return;
+        }
+        const thisSerializer: SerializerBase = SerializerBase.hold();
+        if (this.moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT);
+            const moduleNameTmpValue = this.moduleName!;
+            thisSerializer.writeString(moduleNameTmpValue);
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED);
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(ptr, this.sourceLine, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
     }
 
     switchHasBeenRecycle(recycle: boolean): void {
@@ -601,6 +623,15 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
 
     __set__commonStyle__Internal(val: Array<(instance: CommonMethod) => void>): void {
         this.__commonStyles = val;
+    }
+
+    override debugLine(sourceLine: string, moduleName?: string): this {
+        const delegate = this.__getDelegate__Internal<BaseCustomComponent<T_Options>, T_Options>();
+        if (!delegate) {
+            return this;
+        }
+        delegate.setDebugLine(sourceLine, moduleName);
+        return this;
     }
 
     override __is_CustomComponent__Internal(): boolean {

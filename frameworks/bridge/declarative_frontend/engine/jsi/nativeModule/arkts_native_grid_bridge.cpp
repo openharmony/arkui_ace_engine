@@ -959,6 +959,11 @@ ArkUINativeModuleValue GridBridge::SetGridScroller(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> scrollerVal = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    bool isBindController = false;
+    if (runtimeCallInfo->GetArgsNumber() > CALL_ARG_2) {
+        Local<JSValueRef> bindArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+        isBindController = bindArg->IsBoolean() && bindArg->ToBoolean(vm)->Value();
+    }
     RefPtr<ScrollControllerBase> positionController;
     RefPtr<ScrollProxy> scrollBarProxy;
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -968,12 +973,22 @@ ArkUINativeModuleValue GridBridge::SetGridScroller(ArkUIRuntimeCallInfo* runtime
                                ->Unwrap<Framework::JSScroller>();
         if (jsScroller) {
             jsScroller->SetInstanceId(Container::CurrentIdSafely());
-            positionController = AceType::MakeRefPtr<ScrollableController>();
+            if (isBindController) {
+                auto controller = GetArkUINodeModifiers()->getGridModifier()->getController(nativeNode);
+                positionController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(controller));
+            } else {
+                positionController = AceType::MakeRefPtr<ScrollableController>();
+            }
             jsScroller->SetController(positionController);
             scrollBarProxy = jsScroller->GetScrollBarProxy();
             if (!scrollBarProxy) {
                 scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(scrollBarProxy);
+            }
+            if (isBindController) {
+                auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(scrollBarProxy));
+                GetArkUINodeModifiers()->getGridModifier()->setScrollBarProxy(nativeNode, proxyPtr);
+                return panda::JSValueRef::Undefined(vm);
             }
         }
     }

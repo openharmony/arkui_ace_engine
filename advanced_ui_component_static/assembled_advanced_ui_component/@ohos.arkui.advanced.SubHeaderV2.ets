@@ -69,6 +69,7 @@ export interface SubHeaderV2TitleOptions {
   secondaryTitle?: ResourceStr;
   secondaryTitleModifier?: TextModifier;
   titleAccessibilityText?: ResourceStr;
+  id?: string;
 }
 
 @ObservedV2
@@ -83,6 +84,8 @@ export class SubHeaderV2Title {
   public secondaryTitleModifier?: TextModifier;
   @Trace
   public titleAccessibilityText?: ResourceStr;
+  @Trace
+  public id?: string;
 
   constructor(options: SubHeaderV2TitleOptions) {
     this.primaryTitle = options.primaryTitle;
@@ -90,6 +93,7 @@ export class SubHeaderV2Title {
     this.secondaryTitle = options.secondaryTitle;
     this.secondaryTitleModifier = options.secondaryTitleModifier;
     this.titleAccessibilityText = options.titleAccessibilityText;
+    this.id = options.id;
   }
 }
 
@@ -101,6 +105,7 @@ export interface SubHeaderV2SelectOptions {
   selectedContent?: ResourceStr;
   onSelect?: SubHeaderV2SelectOnSelect;
   defaultFocus?: boolean;
+  id?: string;
 }
 
 export interface BuildSelectOptions {
@@ -119,6 +124,8 @@ export class SubHeaderV2Select {
   public onSelect?: SubHeaderV2SelectOnSelect;
   @Trace
   public defaultFocus?: boolean;
+  @Trace
+  public id?: string;
 
   constructor(options: SubHeaderV2SelectOptions) {
     this.options = options.options;
@@ -126,6 +133,7 @@ export class SubHeaderV2Select {
     this.selectedContent = options.selectedContent;
     this.onSelect = options.onSelect;
     this.defaultFocus = options.defaultFocus;
+    this.id = options.id;
   }
 }
 
@@ -147,6 +155,7 @@ export interface SubHeaderV2OperationItemOptions {
   accessibilityDescription?: ResourceStr;
   accessibilityLevel?: string;
   defaultFocus?: boolean;
+  id?: string;
 }
 
 @ObservedV2
@@ -163,6 +172,8 @@ export class SubHeaderV2OperationItem {
   public accessibilityLevel?: string;
   @Trace
   public defaultFocus?: boolean;
+  @Trace
+  public id?: string;
 
   constructor(options: SubHeaderV2OperationItemOptions) {
     this.content = options.content;
@@ -171,6 +182,7 @@ export class SubHeaderV2OperationItem {
     this.accessibilityDescription = options.accessibilityDescription;
     this.accessibilityLevel = options.accessibilityLevel;
     this.defaultFocus = options.defaultFocus;
+    this.id = options.id;
   }
 }
 
@@ -183,6 +195,7 @@ interface ContentIconOption {
   accessibilityText?: ResourceStr;
   accessibilityDescription?: ResourceStr;
   defaultFocus?: boolean;
+  id?: string;
 }
 
 @ObservedV2
@@ -426,6 +439,7 @@ export struct SubHeaderV2 {
   @Builder
   SelectStyle(selectParam: BuildSelectOptions): void {
     Select(selectParam.params.options)
+      .id(selectParam.params.id)
       .selected(this.selectedIndex)
       .value(this.selectedContent)
       .defaultFocus(this.select?.defaultFocus)
@@ -684,6 +698,7 @@ export struct SubHeaderV2 {
           .defaultFocus(this.operationItems[0].defaultFocus)
           .focusable(true)
       }
+      .id(this.operationType === undefined ? this.operationItems[0]?.id : undefined)
       .focusable(true)
       .focusBox({
         margin: new LengthMetrics(INDEX_ZERO, LengthUnit.VP),
@@ -876,6 +891,7 @@ export struct SubHeaderV2 {
         if (index <= INDEX_TWO) {
           SingleIconStyle({
             item: {
+              id: this.operationItems?.[index.toInt()].id,
               iconOptions: this.operationItems?.[index.toInt()].content,
               action: this.operationItems?.[index.toInt()].action,
               defaultFocus: this.operationItems?.[index.toInt()].defaultFocus,
@@ -942,6 +958,7 @@ export struct SubHeaderV2 {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItems?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -979,6 +996,7 @@ export struct SubHeaderV2 {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItems?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -1089,6 +1107,7 @@ export struct SubHeaderV2 {
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
         .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.title?.id)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -1111,6 +1130,7 @@ export struct SubHeaderV2 {
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
         .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
+        .id(this.select ? undefined : this.title?.id)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -1255,6 +1275,7 @@ struct SingleIconStyle {
       Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
         this.IconZone();
       }
+      .id(this.item?.id)
       .focusable(true)
       .defaultFocus(this.item?.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)

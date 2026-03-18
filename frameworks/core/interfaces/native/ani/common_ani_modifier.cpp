@@ -103,6 +103,16 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
 static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
+ani_boolean IsEasySplit(ArkUI_Int32 instanceId)
+{
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "IsEasySplit-ani can not get current context.");
+        return false;
+    }
+    return context->IsDisplayInForceSplitMode();
+}
+
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
     auto context = NG::PipelineContext::GetCurrentContextSafely();
@@ -788,8 +798,8 @@ void* TransferHoverEventPointer(ani_long nativePtr)
 void* GetTouchEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
-    auto peer = reinterpret_cast<Ark_TouchEvent>(nativePtr);
-    return reinterpret_cast<void*>(peer->GetEventInfo());
+    // delete part
+    return nullptr;
 }
 
 void* GetMouseEventPointer(ani_long nativePtr)
@@ -1030,9 +1040,61 @@ void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
     }
 }
 
+void GetPressedModifierKeyForTouch(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    CHECK_NULL_VOID(nativePtr);
+    auto eventKeys = reinterpret_cast<BaseEventInfo*>(nativePtr)->GetPressedKeyCodes();
+    auto size = static_cast<int32_t>(eventKeys.size());
+    if (size <= 0) {
+        return;
+    }
+    *length = size;
+    *keys = new char* [size];
+    for (auto index = 0; index < size; index++) {
+        std::string keyStr;
+        switch (eventKeys[index]) {
+            case KeyCode::KEY_CTRL_LEFT:
+            case KeyCode::KEY_CTRL_RIGHT:
+                keyStr = "ctrl";
+                break;
+            case KeyCode::KEY_SHIFT_LEFT:
+            case KeyCode::KEY_SHIFT_RIGHT:
+                keyStr = "shift";
+                break;
+            case KeyCode::KEY_ALT_LEFT:
+            case KeyCode::KEY_ALT_RIGHT:
+                keyStr = "alt";
+                break;
+            case KeyCode::KEY_FN:
+                keyStr = "fn";
+                break;
+            default:
+                keyStr = "";
+                break;
+        }
+        (*keys)[index] = new char[keyStr.length() + 1];
+        auto result = strcpy_s((*keys)[index], keyStr.length() + 1, keyStr.c_str());
+        if (result != 0) {
+            TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "GetPressedModifierKey error: strcpy_s with error code: %d", result);
+            for (auto i = 0; i <= index; i++) {
+                delete[](*keys)[i];
+            }
+            delete[] * keys;
+            *keys = nullptr;
+            *length = 0;
+            return;
+        }
+    }
+}
+
 void GetBaseEventPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
 {
     GetPressedModifierKey<Ark_BaseEvent>(nativePtr, keys, length);
+}
+
+void GetTouchEventPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    GetPressedModifierKeyForTouch(nativePtr, keys, length);
 }
 
 void GetKeyEventPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
@@ -1058,15 +1120,7 @@ ani_boolean SetClickEventPreventDefault(ani_long nativePtr)
 ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, true);
-    auto accessor = reinterpret_cast<Ark_TouchEvent>(nativePtr);
-    CHECK_NULL_RETURN(accessor && accessor->GetBaseInfo(), true);
-    auto eventInfo = accessor->GetBaseInfo();
-    CHECK_NULL_RETURN(eventInfo, true);
-    auto patternName = eventInfo->GetPatternName();
-    if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
-        return false;
-    }
-    eventInfo->SetPreventDefault(true);
+    // delete part
     return true;
 }
 void GetCallingScopeUIContext(int32_t& instanceId)
@@ -1189,6 +1243,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId,
         .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getBaseEventPressedModifierKey = OHOS::Ace::NG::GetBaseEventPressedModifierKey,
+        .getTouchEventPressedModifierKey = OHOS::Ace::NG::GetTouchEventPressedModifierKey,
         .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
         .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
         .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault,
@@ -1198,6 +1253,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
+        .isEasySplit = OHOS::Ace::NG::IsEasySplit,
     };
     return &impl;
 }

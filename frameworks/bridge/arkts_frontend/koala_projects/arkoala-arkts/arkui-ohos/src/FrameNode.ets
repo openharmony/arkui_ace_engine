@@ -14,7 +14,6 @@
  */
 
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIEventHelper } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk,
@@ -110,7 +109,7 @@ import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/ma
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
 import { XComponentType, AnimationPropertyType, EventQueryType } from './component/enums'
-import { ComponentContent } from './ComponentContent';
+import { ComponentContent, ReactiveComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
@@ -212,8 +211,9 @@ errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the no
 errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
 
 export class FrameNode implements MaterializedBase {
+    private isDisposed_: boolean = false;
     peer?: Finalizable | undefined = undefined
-    uiContext: UIContextImpl | undefined = undefined
+    uiContext: UIContext | undefined = undefined
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
     // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
@@ -254,7 +254,7 @@ export class FrameNode implements MaterializedBase {
     }
     constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
-            this.uiContext = uiContext as UIContextImpl;
+            this.uiContext = uiContext as UIContext;
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
             this._supportMultiThread = options?.supportMultiThread ?? false;
@@ -313,6 +313,24 @@ export class FrameNode implements MaterializedBase {
         return
     }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
+        if (content === undefined || content === null || content.getFrameNode() == undefined ||
+            content.getFrameNode() == null || content.getNodePtr() == undefined) {
+            return;
+        }
+        if (!this.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        let node = content.getNodeWithoutProxy();
+        if (this.peer?.ptr && node) {
+            ArkUIAniModule._AddComponent_ToFrameNode(this.peer!.ptr, node!);
+            content.setAttachedParent(new WeakRef<FrameNode>(this));
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public addComponentContent<T = undefined>(content: ComponentContent<T> | ReactiveComponentContent) {
         if (content === undefined || content === null || content.getFrameNode() == undefined ||
             content.getFrameNode() == null || content.getNodePtr() == undefined) {
             return;
@@ -479,12 +497,16 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getChildrenCount(this);
     }
     public dispose(): void {
+        if (this.isDisposed()) {
+            return;
+        }
         if (this.peer?.ptr) {
             ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
             this.peer?.close();
         }
         this.nodePtr_ = undefined;
-        this.renderNode_?.resetNodePtr();
+        this.renderNode_?.dispose();
+        this.isDisposed_ = true;
     }
     public isDisposed(): boolean {
         return (this.nodePtr_ == undefined);
@@ -493,6 +515,8 @@ export class FrameNode implements MaterializedBase {
         if (this.peer?.ptr) {
             this.peer?.close();
         }
+        this.nodePtr_ = undefined;
+        this.isDisposed_ = true;
     }
     public getOpacity(): double {
         let opacity: double = FrameNodeExtender.getOpacity(this);
@@ -2570,6 +2594,7 @@ export class NodeAdapter implements MaterializedBase {
     private attachedNodeRef_?: WeakRef<FrameNode>;
     private count_: int = 0;
     private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
+    private isDisposed_: boolean = false;
 
     onDisposeChild(index: int32, node: FrameNode) {
 
@@ -2599,6 +2624,12 @@ export class NodeAdapter implements MaterializedBase {
         if (this.peer?.ptr) {
             this.peer?.close();
         }
+        this.isDisposed_ = true;
+    }
+
+    public isDisposed(): boolean {
+        const ptr = this.peer?.ptr;
+        return this.isDisposed_ && (ptr === undefined || ptr === null || ptr === nullptr)
     }
 
     set totalNodeCount(count: int) {

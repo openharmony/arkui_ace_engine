@@ -2137,11 +2137,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
+
+    bool enableCustomComponentCrossAbility =
+        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
+        });
+    AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d",
+         "useNewPipe: %{public}d, enableCustomComponentCrossAbility: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, apiCompatibleVersion, apiTargetVersion,
-        apiReleaseType.c_str(), useNewPipe);
+        apiReleaseType.c_str(), useNewPipe, enableCustomComponentCrossAbility);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
@@ -3949,18 +3955,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas] {
-            if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
-                context->AnimateOnSafeAreaUpdate();
-            }
-            AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
-        taskExecutor->PostSyncTask([reason, instanceId = instanceId_,
+        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
             pipelineContext, info, container] {
-            if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
-            }
-            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAvoid");
+                if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
+                    context->AnimateOnSafeAreaUpdate();
+                }
+                AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+                if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+                }
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 

@@ -2245,7 +2245,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTouchInterceptImpl(Ark_NativePointer node,
-                                 const Opt_Callback_TouchEvent_HitTestMode* value)
+                                 const Opt_Callback_TouchEventProxy_HitTestMode* value)
     {
     }
     void SetOnSizeChangeImpl(Ark_NativePointer node,
@@ -8039,6 +8039,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Boolean* value)
     {
     }
+    void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node,
+                                                const Opt_Boolean* value)
+    {
+    }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                    const Opt_OnScrollFrameBeginCallback* value)
     {
@@ -8653,6 +8657,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
                                          const Opt_Boolean* value)
+    {
+    }
+    void SetAiSessionOptionsImpl(Ark_NativePointer node,
+                                 const Opt_Array_AISessionEvent* value)
     {
     }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
@@ -11004,6 +11012,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::SetLayoutDirectionImpl,
             WaterFlowAttributeModifier::SetCachedCount0Impl,
             WaterFlowAttributeModifier::SetSyncLoadImpl,
+            WaterFlowAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
             WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::SetOnScrollIndexImpl,
             WaterFlowAttributeModifier::SetOnWillScrollImpl,
@@ -11163,6 +11172,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+            WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
@@ -12393,7 +12403,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
-                                   Ark_TouchEvent event)
+                                   const Ark_TouchEventProxy* event)
     {
         return {};
     }
@@ -12946,6 +12956,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                              const Ark_String* textBaseline)
+    {
+    }
+    Opt_Boolean GetAntialiasImpl(Ark_CanvasRenderer peer)
+    {
+        return {};
+    }
+    void SetAntialiasImpl(Ark_CanvasRenderer peer,
+                          const Opt_Boolean* antialias)
     {
     }
     } // CanvasRendererAccessor
@@ -20034,7 +20052,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_TouchEvent ConstructImpl()
+    Ark_TouchEventProxy ConstructImpl()
     {
         return {};
     }
@@ -20077,6 +20095,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // TouchEventAccessor
+    namespace TouchEventExtenderAccessor {
+    Ark_NativePointer GetNativePtrImpl(const Ark_TouchEventProxy* event)
+    {
+        return {};
+    }
+    void StopPropagationImpl(Ark_NativePointer ptr)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_NativePointer ptr)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    void PreventDefaultImpl(Ark_NativePointer ptr)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // TouchEventExtenderAccessor
     namespace TouchRecognizerAccessor {
     void DestroyPeerImpl(Ark_TouchRecognizer peer)
     {
@@ -20214,7 +20254,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTouchImpl(Ark_UICommonEvent peer,
-                        const Opt_Callback_TouchEvent_Void* callback_)
+                        const Opt_Callback_TouchEventProxy_Void* callback_)
     {
     }
     void SetOnAppearImpl(Ark_UICommonEvent peer,
@@ -21616,6 +21656,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererAccessor::SetTextAlignImpl,
             CanvasRendererAccessor::GetTextBaselineImpl,
             CanvasRendererAccessor::SetTextBaselineImpl,
+            CanvasRendererAccessor::GetAntialiasImpl,
+            CanvasRendererAccessor::SetAntialiasImpl,
         };
         return &CanvasRendererAccessorImpl;
     }
@@ -24691,6 +24733,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TouchEventPeer {
         virtual ~TouchEventPeer() = default;
     };
+    const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor()
+    {
+        static const GENERATED_ArkUITouchEventExtenderAccessor TouchEventExtenderAccessorImpl {
+            TouchEventExtenderAccessor::GetNativePtrImpl,
+            TouchEventExtenderAccessor::StopPropagationImpl,
+            TouchEventExtenderAccessor::GetHistoricalPointsImpl,
+            TouchEventExtenderAccessor::PreventDefaultImpl,
+        };
+        return &TouchEventExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
     {
         static const GENERATED_ArkUITouchRecognizerAccessor TouchRecognizerAccessorImpl {
@@ -25347,6 +25400,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetThemeOpsAccessor,
             GetToggleExtenderAccessor,
             GetTouchEventAccessor,
+            GetTouchEventExtenderAccessor,
             GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,

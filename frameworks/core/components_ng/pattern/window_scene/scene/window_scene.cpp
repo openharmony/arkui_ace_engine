@@ -688,6 +688,20 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     DelayAddAppWindowForDmaResume(session_->GetCallingPid());
+    if (isScaledSnapshot_) {
+        auto scenePersistence = session_->GetScenePersistence();
+        CHECK_NULL_VOID(scenePersistence);
+        CHECK_NULL_VOID(snapshotWindow_);
+        auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto key = session_->GetScreenSnapshotStatus();
+        auto freeMultiWindow = session_->freeMultiWindow_.load();
+        std::string path = scenePersistence->GetSnapshotFilePath(key, true, freeMultiWindow);
+        ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + path);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        ClearImageCache(sourceInfo, key, freeMultiWindow, true);
+        snapshotWindow_->MarkModifyDone();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);

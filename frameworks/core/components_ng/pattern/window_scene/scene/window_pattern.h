@@ -81,7 +81,8 @@ protected:
     void CreateBlankWindow(RefPtr<FrameNode>& window);
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
-    void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow);
+    void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow,
+        bool isScaledSnapshot);
     bool AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const RefPtr<NG::FrameNode>& host);
     void DelayAddAppWindowForDmaResume(int32_t pid);
@@ -126,6 +127,7 @@ protected:
     const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
+    bool isScaledSnapshot_ = false;
     bool syncStartingWindow_ = false;
     bool dmaReclaimEnabled_ = false;
     std::atomic_bool isPrelaunch_ = false;

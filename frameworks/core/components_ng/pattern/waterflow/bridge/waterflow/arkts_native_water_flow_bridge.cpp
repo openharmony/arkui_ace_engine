@@ -608,6 +608,7 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         "setJSScrollBar",
         "setJSScrollBarWidth",
         "setJSScrollBarColor",
+        "setSupportLazyLoadingEmptyBranch",
     };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(vm, WaterFlowBridge::CreateWaterFlow),
@@ -658,6 +659,7 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(vm, WaterFlowBridge::SetJSScrollBar),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetJSScrollBarWidth),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetJSScrollBarColor),
+        panda::FunctionRef::New(vm, WaterFlowBridge::SetSupportLazyLoadingEmptyBranch),
     };
     auto waterflow = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "waterFlow"), waterflow);
@@ -1790,6 +1792,22 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSScrollBarColor(ArkUIRuntimeCallInfo
         GetArkUINodeModifiers()->getWaterFlowModifier()->createWaterFlowScrollBarColorWithResourceObj(
             nativeNode, AceType::RawPtr(resObj));
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::SetSupportLazyLoadingEmptyBranch(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> arg_support = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, node, vm), true, panda::JSValueRef::Undefined(vm));
+    if (ArkTSUtils::IsJsView(node, vm)) {
+        nativeNode = nodePtr(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    }
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setSupportLazyLoadingEmptyBranch(
+        nativeNode, arg_support->IsBoolean() ? arg_support->ToBoolean(vm)->Value() : false);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

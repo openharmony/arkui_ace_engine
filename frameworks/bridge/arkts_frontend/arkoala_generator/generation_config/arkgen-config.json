@@ -56,6 +56,10 @@
         {
             "from": "arkui.component.styledString.CustomSpan",
             "to": "arkui.component.idlize.CustomSpanWrapper"
+        },
+        {
+            "from": "arkui.component.common.TouchEvent",
+            "to": "arkui.component.idlize.TouchEventProxy"
         }
     ],
     "forceMaterialized": [

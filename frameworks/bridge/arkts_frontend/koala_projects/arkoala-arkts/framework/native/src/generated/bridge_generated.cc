@@ -2574,7 +2574,7 @@ void impl_CommonMethod_setOnAccessibilityHoverTransparent(Ark_NativePointer this
         Opt_AccessibilityTransparentCallback valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ACCESSIBILITYTRANSPARENTCALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ACCESSIBILITYTRANSPARENTCALLBACK))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ACCESSIBILITYTRANSPARENTCALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ACCESSIBILITYTRANSPARENTCALLBACK))))};
         }
         Opt_AccessibilityTransparentCallback valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getCommonMethodModifier()->setOnAccessibilityHoverTransparent(self, static_cast<Opt_AccessibilityTransparentCallback*>(&valueValueTemp));
@@ -2613,7 +2613,7 @@ void impl_CommonMethod_setOnTouch(Ark_NativePointer thisPtr, KSerializerBuffer t
         Opt_Callback_TouchEvent_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))))};
         }
         Opt_Callback_TouchEvent_Void valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getCommonMethodModifier()->setOnTouch(self, static_cast<Opt_Callback_TouchEvent_Void*>(&valueValueTemp));
@@ -4222,13 +4222,13 @@ void impl_CommonMethod_setOnTouchIntercept(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_TouchEvent_HitTestMode valueValueTempTmpBuf = {};
+        Opt_Callback_TouchEventProxy_HitTestMode valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent data, const Callback_HitTestMode_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent data, const Callback_HitTestMode_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data, const Callback_HitTestMode_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data, const Callback_HitTestMode_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE))))};
         }
-        Opt_Callback_TouchEvent_HitTestMode valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setOnTouchIntercept(self, static_cast<Opt_Callback_TouchEvent_HitTestMode*>(&valueValueTemp));
+        Opt_Callback_TouchEventProxy_HitTestMode valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnTouchIntercept(self, static_cast<Opt_Callback_TouchEventProxy_HitTestMode*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnTouchIntercept, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setOnSizeChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -25933,6 +25933,19 @@ void impl_WaterFlowAttribute_setSyncLoad(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getWaterFlowModifier()->setSyncLoad(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_setSyncLoad, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WaterFlowAttribute_setSupportEmptyBranchInLazyLoading(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWaterFlowModifier()->setSupportEmptyBranchInLazyLoading(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_setSupportEmptyBranchInLazyLoading, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WaterFlowAttribute_setOnScrollFrameBegin(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -27948,6 +27961,26 @@ void impl_WebAttribute_setEnableDefaultContextMenu(Ark_NativePointer thisPtr, KS
         GetNodeModifiers()->getWebModifier()->setEnableDefaultContextMenu(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableDefaultContextMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_setAiSessionOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_AISessionEvent valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBufOptLength = thisDeserializer.readInt32();
+            Array_AISessionEvent valueValueTempTmpBufOpt = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBufOpt)>::type,
+        std::decay<decltype(*valueValueTempTmpBufOpt.array)>::type>(&valueValueTempTmpBufOpt, valueValueTempTmpBufOptLength);
+            for (int valueValueTempTmpBufOptBufCounterI = 0; valueValueTempTmpBufOptBufCounterI < valueValueTempTmpBufOptLength; valueValueTempTmpBufOptBufCounterI++) {
+                valueValueTempTmpBufOpt.array[valueValueTempTmpBufOptBufCounterI] = AISessionEvent_serializer::read(thisDeserializer);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBufOpt;
+        }
+        Opt_Array_AISessionEvent valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setAiSessionOptions(self, static_cast<Opt_Array_AISessionEvent*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_setAiSessionOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setRegisterNativeEmbedRule(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -30062,11 +30095,13 @@ void impl_BuilderNodeOps_setOptions(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getBuilderNodeOpsAccessor()->setOptions(self, static_cast<Ark_BuilderNodeOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_setOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Boolean impl_BuilderNodeOps_postTouchEvent(Ark_NativePointer thisPtr, Ark_NativePointer event) {
+Ark_Boolean impl_BuilderNodeOps_postTouchEvent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
-        return GetAccessors()->getBuilderNodeOpsAccessor()->postTouchEvent(self, static_cast<Ark_TouchEvent>(event));
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TouchEventProxy eventValueTemp = TouchEventProxy_serializer::read(thisDeserializer);;
+        return GetAccessors()->getBuilderNodeOpsAccessor()->postTouchEvent(self, static_cast<Ark_TouchEventProxy*>(&eventValueTemp));
 }
-KOALA_INTEROP_DIRECT_2(BuilderNodeOps_postTouchEvent, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_3(BuilderNodeOps_postTouchEvent, Ark_Boolean, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Boolean impl_BuilderNodeOps_postInputEvent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -30079,7 +30114,7 @@ Ark_Boolean impl_BuilderNodeOps_postInputEvent(Ark_NativePointer thisPtr, KSeria
             eventValueTempTmpBufOpt.selector = eventValueTempTmpBufOptUnionSelector;
             if (eventValueTempTmpBufOptUnionSelector == 0) {
                 eventValueTempTmpBufOpt.selector = 0;
-                eventValueTempTmpBufOpt.value0 = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+                eventValueTempTmpBufOpt.value0 = TouchEventProxy_serializer::read(thisDeserializer);
             } else if (eventValueTempTmpBufOptUnionSelector == 1) {
                 eventValueTempTmpBufOpt.selector = 1;
                 eventValueTempTmpBufOpt.value1 = static_cast<Ark_MouseEvent>(MouseEvent_serializer::read(thisDeserializer));
@@ -30978,6 +31013,33 @@ void impl_CanvasRenderer_setTextBaseline(Ark_NativePointer thisPtr, const KStrin
         GetAccessors()->getCanvasRendererAccessor()->setTextBaseline(self, (const Ark_String*) (&textBaseline));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setTextBaseline, Ark_NativePointer, KStringPtr)
+KInteropReturnBuffer impl_CanvasRenderer_getAntialias(Ark_NativePointer thisPtr) {
+        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
+        const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->getAntialias(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeBoolean(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(CanvasRenderer_getAntialias, KInteropReturnBuffer, Ark_NativePointer)
+void impl_CanvasRenderer_setAntialias(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto antialiasValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean antialiasValueTempTmpBuf = {};
+        antialiasValueTempTmpBuf.tag = antialiasValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((antialiasValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            antialiasValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean antialiasValueTemp = antialiasValueTempTmpBuf;;
+        GetAccessors()->getCanvasRendererAccessor()->setAntialias(self, static_cast<Opt_Boolean*>(&antialiasValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setAntialias, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CanvasRenderingContext2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto settingsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -37412,7 +37474,7 @@ void impl_NodeContainerOps_setOnTouchEvent(Ark_NativePointer self, KSerializerBu
         Opt_Callback_TouchEvent_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))))};
         }
         Opt_Callback_TouchEvent_Void valueValueTemp = valueValueTempTmpBuf;;
         GetAccessors()->getNodeContainerOpsAccessor()->setOnTouchEvent(self, static_cast<Opt_Callback_TouchEvent_Void*>(&valueValueTemp));
@@ -42360,22 +42422,18 @@ Ark_NativePointer impl_ToggleExtender_constructCheckbox(Ark_Int32 id, Ark_Int32 
         return GetAccessors()->getToggleExtenderAccessor()->constructCheckbox(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(ToggleExtender_constructCheckbox, Ark_NativePointer, Ark_Int32, Ark_Int32)
-Ark_NativePointer impl_TouchEvent_construct() {
-        return GetAccessors()->getTouchEventAccessor()->construct();
+Ark_NativePointer impl_TouchEventExtender_getNativePtr(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TouchEventProxy eventValueTemp = TouchEventProxy_serializer::read(thisDeserializer);;
+        return GetAccessors()->getTouchEventExtenderAccessor()->getNativePtr(static_cast<Ark_TouchEventProxy*>(&eventValueTemp));
 }
-KOALA_INTEROP_DIRECT_0(TouchEvent_construct, Ark_NativePointer)
-Ark_NativePointer impl_TouchEvent_getFinalizer() {
-        return GetAccessors()->getTouchEventAccessor()->getFinalizer();
+KOALA_INTEROP_DIRECT_2(TouchEventExtender_getNativePtr, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TouchEventExtender_stopPropagation(Ark_NativePointer ptr) {
+        GetAccessors()->getTouchEventExtenderAccessor()->stopPropagation(ptr);
 }
-KOALA_INTEROP_DIRECT_0(TouchEvent_getFinalizer, Ark_NativePointer)
-void impl_TouchEvent_stopPropagation(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        GetAccessors()->getTouchEventAccessor()->stopPropagation(self);
-}
-KOALA_INTEROP_DIRECT_V1(TouchEvent_stopPropagation, Ark_NativePointer)
-KInteropReturnBuffer impl_TouchEvent_getHistoricalPoints(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        const auto &retValue = GetAccessors()->getTouchEventAccessor()->getHistoricalPoints(self);
+KOALA_INTEROP_DIRECT_V1(TouchEventExtender_stopPropagation, Ark_NativePointer)
+KInteropReturnBuffer impl_TouchEventExtender_getHistoricalPoints(Ark_NativePointer ptr) {
+        const auto &retValue = GetAccessors()->getTouchEventExtenderAccessor()->getHistoricalPoints(ptr);
         SerializerBase _retSerializer {};
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
@@ -42390,74 +42448,11 @@ KInteropReturnBuffer impl_TouchEvent_getHistoricalPoints(Ark_NativePointer thisP
         }
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_1(TouchEvent_getHistoricalPoints, KInteropReturnBuffer, Ark_NativePointer)
-void impl_TouchEvent_preventDefault(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        GetAccessors()->getTouchEventAccessor()->preventDefault(self);
+KOALA_INTEROP_1(TouchEventExtender_getHistoricalPoints, KInteropReturnBuffer, Ark_NativePointer)
+void impl_TouchEventExtender_preventDefault(Ark_NativePointer ptr) {
+        GetAccessors()->getTouchEventExtenderAccessor()->preventDefault(ptr);
 }
-KOALA_INTEROP_DIRECT_V1(TouchEvent_preventDefault, Ark_NativePointer)
-Ark_Int32 impl_TouchEvent_getType(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        return GetAccessors()->getTouchEventAccessor()->getType(self);
-}
-KOALA_INTEROP_DIRECT_1(TouchEvent_getType, Ark_Int32, Ark_NativePointer)
-void impl_TouchEvent_setType(Ark_NativePointer thisPtr, Ark_Int32 type) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        GetAccessors()->getTouchEventAccessor()->setType(self, static_cast<Ark_TouchType>(type));
-}
-KOALA_INTEROP_DIRECT_V2(TouchEvent_setType, Ark_NativePointer, Ark_Int32)
-KInteropReturnBuffer impl_TouchEvent_getTouches(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        const auto &retValue = GetAccessors()->getTouchEventAccessor()->getTouches(self);
-        SerializerBase _retSerializer {};
-        _retSerializer.writeInt32(retValue.length);
-        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
-            const Ark_TouchObject retValueTmpElement = retValue.array[retValueCounterI];
-            TouchObject_serializer::write(_retSerializer, retValueTmpElement);
-        }
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(TouchEvent_getTouches, KInteropReturnBuffer, Ark_NativePointer)
-void impl_TouchEvent_setTouches(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int32 touchesValueTempTmpBufLength = thisDeserializer.readInt32();
-        Array_TouchObject touchesValueTempTmpBuf = {};
-        thisDeserializer.resizeArray<std::decay<decltype(touchesValueTempTmpBuf)>::type,
-        std::decay<decltype(*touchesValueTempTmpBuf.array)>::type>(&touchesValueTempTmpBuf, touchesValueTempTmpBufLength);
-        for (int touchesValueTempTmpBufBufCounterI = 0; touchesValueTempTmpBufBufCounterI < touchesValueTempTmpBufLength; touchesValueTempTmpBufBufCounterI++) {
-            touchesValueTempTmpBuf.array[touchesValueTempTmpBufBufCounterI] = TouchObject_serializer::read(thisDeserializer);
-        }
-        Array_TouchObject touchesValueTemp = touchesValueTempTmpBuf;;
-        GetAccessors()->getTouchEventAccessor()->setTouches(self, static_cast<Array_TouchObject*>(&touchesValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(TouchEvent_setTouches, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_TouchEvent_getChangedTouches(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        const auto &retValue = GetAccessors()->getTouchEventAccessor()->getChangedTouches(self);
-        SerializerBase _retSerializer {};
-        _retSerializer.writeInt32(retValue.length);
-        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
-            const Ark_TouchObject retValueTmpElement = retValue.array[retValueCounterI];
-            TouchObject_serializer::write(_retSerializer, retValueTmpElement);
-        }
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(TouchEvent_getChangedTouches, KInteropReturnBuffer, Ark_NativePointer)
-void impl_TouchEvent_setChangedTouches(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int32 changedTouchesValueTempTmpBufLength = thisDeserializer.readInt32();
-        Array_TouchObject changedTouchesValueTempTmpBuf = {};
-        thisDeserializer.resizeArray<std::decay<decltype(changedTouchesValueTempTmpBuf)>::type,
-        std::decay<decltype(*changedTouchesValueTempTmpBuf.array)>::type>(&changedTouchesValueTempTmpBuf, changedTouchesValueTempTmpBufLength);
-        for (int changedTouchesValueTempTmpBufBufCounterI = 0; changedTouchesValueTempTmpBufBufCounterI < changedTouchesValueTempTmpBufLength; changedTouchesValueTempTmpBufBufCounterI++) {
-            changedTouchesValueTempTmpBuf.array[changedTouchesValueTempTmpBufBufCounterI] = TouchObject_serializer::read(thisDeserializer);
-        }
-        Array_TouchObject changedTouchesValueTemp = changedTouchesValueTempTmpBuf;;
-        GetAccessors()->getTouchEventAccessor()->setChangedTouches(self, static_cast<Array_TouchObject*>(&changedTouchesValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(TouchEvent_setChangedTouches, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(TouchEventExtender_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_TouchRecognizer_construct() {
         return GetAccessors()->getTouchRecognizerAccessor()->construct();
 }
@@ -42599,13 +42594,13 @@ void impl_UICommonEvent_setOnTouch(Ark_NativePointer thisPtr, KSerializerBuffer 
         Ark_UICommonEvent self = reinterpret_cast<Ark_UICommonEvent>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_TouchEvent_Void callback_ValueTempTmpBuf = {};
+        Opt_Callback_TouchEventProxy_Void callback_ValueTempTmpBuf = {};
         callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))))};
+            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENTPROXY_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENTPROXY_VOID))))};
         }
-        Opt_Callback_TouchEvent_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
-        GetAccessors()->getUICommonEventAccessor()->setOnTouch(self, static_cast<Opt_Callback_TouchEvent_Void*>(&callback_ValueTemp));
+        Opt_Callback_TouchEventProxy_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
+        GetAccessors()->getUICommonEventAccessor()->setOnTouch(self, static_cast<Opt_Callback_TouchEventProxy_Void*>(&callback_ValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(UICommonEvent_setOnTouch, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_UICommonEvent_setOnAppear(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

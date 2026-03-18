@@ -47,7 +47,7 @@ public:
             g_onLongPress = true;
         };
         param.onLongPress = Converter::ArkCallback<Opt_Callback_GestureEvent_Void>(onLongPress, resId);
-        param.onTouch = Converter::ArkValue<Opt_Callback_TouchEvent_Void>();
+        param.onTouch = Converter::ArkValue<Opt_Callback_TouchEventProxy_Void>();
         auto optParam = Converter::ArkValue<Opt_GestureStyleInterface>(param);
         return accessor_->construct(&optParam);
     }

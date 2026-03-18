@@ -68,7 +68,7 @@ RefPtr<LayoutWrapperNode> WrapLayoutAlgorithmTest::CreateParam()
 RefPtr<LayoutWrapperNode> WrapLayoutAlgorithmTest::CreateLayoutWrapper()
 {
     FrameNode *node = new (FrameNode)(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
-    RefCounter* ref = ThreadSafeRef::Create();
+    RefCounter* ref = RefCounter::Create();
     ref->IncStrongRef();
     WeakPtr<FrameNode> wrapFrameNode(node, ref);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

@@ -1898,14 +1898,17 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         // The maximum of the form-animation-playback duration value is 2000 ms.
         if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
-            // If the duration exceeds 2000ms, init it to 0 ms.
-            if (formAnimationTimeInterval > FORM_MAX_DURATION) {
+            auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                                       ? FORM_MAX_DURATION
+                                       : DEFAULT_DURATION;
+            // If the duration exceeds max, init it to 0 ms.
+            if (formAnimationTimeInterval > formMaxDuration) {
                 animationOptionResult->SetDuration(0);
-            } else if (animationOptionResult->GetDuration() > (FORM_MAX_DURATION - formAnimationTimeInterval)) {
-                // If remaining time is less than 2000ms, check for update duration.
-                animationOptionResult->SetDuration(FORM_MAX_DURATION - formAnimationTimeInterval);
+            } else if (animationOptionResult->GetDuration() > (formMaxDuration - formAnimationTimeInterval)) {
+                // If remaining time is less than max, check for update duration.
+                animationOptionResult->SetDuration(formMaxDuration - formAnimationTimeInterval);
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation]  Form Transition SetDuration: %{public}lld ms",
-                    static_cast<long long>(FORM_MAX_DURATION - formAnimationTimeInterval));
+                    static_cast<long long>(formMaxDuration - formAnimationTimeInterval));
             }
         }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);

@@ -27,6 +27,7 @@ import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
 import { IExtendableComponent } from './component/extendableComponent';
 import { LifeCycleEvent } from './component/customComponent';
+import { KPointer } from '@koalaui/interop'
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
@@ -64,6 +65,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     aboutToRecycle(): void {}
     __aboutToReuse_Internal(param?: RecordData): void { }
     __aboutToRecycle_Internal(): void { }
+    __debugLine_Internal(ptr: KPointer): void { }
     switchHasBeenRecycle(recycle: boolean) {}
     // Can be overridden as an effect of @Prop, @Watch etc
     protected __updateStruct(initializers?: T_Options): void { }
@@ -144,6 +146,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                     this.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_BUILD);
                     this.onDidBuild();
                 })
+                if (node.peer) {
+                    this.__debugLine_Internal(node.peer.ptr);
+                }
             });
             node.setOnRecycle(() =>
                 this.__aboutToRecycle_Internal()

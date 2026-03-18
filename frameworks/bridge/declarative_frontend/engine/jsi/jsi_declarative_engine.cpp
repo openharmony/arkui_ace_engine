@@ -3534,6 +3534,29 @@ void JsiDeclarativeEngine::JsSetAceDebugMode()
 #endif
 }
 
+void JsiDeclarativeEngine::JsEnableSwitchInstance()
+{
+#if defined(PREVIEW)
+    return;
+#else
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> enableSwitchInstance = globalObject->GetProperty("enableSwitchInstance");
+    if (!enableSwitchInstance->IsFunction()) {
+        return;
+    }
+    const auto func = JSRef<JSFunc>::Cast(enableSwitchInstance);
+    ContainerScope scope(instanceId_);
+    func->Call(globalObject);
+#endif
+}
+
 void JsiDeclarativeEngine::JsUnregisterInstanceId()
 {
 #if defined(PREVIEW)

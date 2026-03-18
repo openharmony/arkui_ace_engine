@@ -2228,4 +2228,24 @@ HWTEST_F(NavDestinationModelTestNg, NavigationModelNG_GetNavigationStack002, Tes
 
     NavDestinationModelTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetFreeze001
+ * @tc.desc: Test SetFreeze with freeze = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetFreeze001, TestSize.Level1)
+{
+    NavDestinationModelTestNg::SetUpTestCase();
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFreeze(false);
+    
+    navdestinationModel.SetFreeze(true, true);
+    EXPECT_TRUE(renderContext->propFreeze_);
+}
 } // namespace OHOS::Ace::NG

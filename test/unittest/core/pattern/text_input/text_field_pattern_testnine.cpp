@@ -343,7 +343,7 @@ HWTEST_F(TextFieldPatternTestNine, CalcAutoScrollStepOffset001, TestSize.Level0)
     Offset localOffset(1, 2);
     pattern_->axis_ = Axis::HORIZONTAL;
     pattern_->contentRect_.width_ = 10;
-    auto ret = pattern_->CalcAutoScrollStepOffset(localOffset);
+    auto ret = pattern_->CalcAutoScrollStepOffset(localOffset, Axis::HORIZONTAL);
     EXPECT_EQ(static_cast<int>(ret.value()), 28);
 }
 

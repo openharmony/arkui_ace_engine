@@ -4006,6 +4006,7 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             return;
         }
+        ACE_SCOPED_TRACE("Modal lifecycle onWillAppear");
         if (onWillAppear) {
             onWillAppear();
         }
@@ -4138,6 +4139,7 @@ void OverlayManager::HandleModalPop(
     auto modalTransition = modalPresentationPattern->GetType();
     // lost focus
     ModalPageLostFocus(topModalNode);
+    ACE_SCOPED_TRACE("Modal lifecycle onWillDisappear");
     if (onWillDisappear) {
         onWillDisappear();
     }

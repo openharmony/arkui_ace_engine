@@ -208,7 +208,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel001, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    EXPECT_EQ(static_cast<int32_t>(ViewStackProcessor::GetInstance()->elementsStack_.size()), 1);
+    EXPECT_EQ(ViewStackProcessor::GetInstance()->elementsStack_.size(), 1);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -224,6 +224,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel002, TestSize.Level0)
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     richEditorModel.SetDraggable(true);
+    /**
+     * @tc.steps: step1. test draggable
+     */
     EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode()->draggable_);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();

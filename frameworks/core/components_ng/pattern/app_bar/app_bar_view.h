@@ -78,6 +78,7 @@ private:
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
     void FireExtensionHostParams();
+    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     int32_t sessionId_ = 0;

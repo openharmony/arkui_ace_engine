@@ -24,7 +24,9 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/touch_event.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -140,7 +142,7 @@ void SetOptionsImpl(Ark_BuilderNodeOps peer, const Ark_BuilderNodeOptions* optio
     }
 }
 
-Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, Ark_TouchEvent event)
+Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, const Ark_TouchEventProxy* event)
 {
     return Converter::ArkValue<Ark_Boolean>(false);
 }
@@ -182,7 +184,86 @@ Ark_Boolean GetTouchEvent(const TouchEventInfo* touchEventInfo, TouchEvent& touc
     }
     return true;
 }
- 	 
+
+void GetTouchEventFromProxy(const Ark_TouchEventProxy& proxy, TouchEvent& touchEvent)
+{
+    auto target = Converter::Convert<EventTarget>(proxy.target);
+    auto timeStamp = Converter::Convert<int64_t>(proxy.timeStamp);
+    auto pressure = Converter::Convert<double>(proxy.pressure);
+    auto tiltX = Converter::Convert<double>(proxy.tiltX);
+    auto tiltY = Converter::Convert<double>(proxy.tiltY);
+    auto deviceId = Converter::Convert<std::optional<int32_t>>(proxy.deviceId).value_or(-1);
+    auto targetDisplayId = Converter::Convert<std::optional<int32_t>>(proxy.targetDisplayId).value_or(-1);
+    auto sourceType = Converter::Convert<SourceType>(proxy.source);
+    auto sourceTool = Converter::Convert<SourceTool>(proxy.sourceTool);
+    auto type = Converter::Convert<std::optional<TouchType>>(proxy.type).value_or(TouchType::UNKNOWN);
+    auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(proxy.touches);
+    auto changedTouchList = Converter::Convert<std::list<TouchLocationInfo>>(proxy.changedTouches);
+
+    if (!changedTouchList.empty()) {
+        touchEvent.x = static_cast<float>(changedTouchList.front().GetGlobalLocation().GetX());
+        touchEvent.y = static_cast<float>(changedTouchList.front().GetGlobalLocation().GetY());
+        touchEvent.screenX = static_cast<float>(changedTouchList.front().GetScreenLocation().GetX());
+        touchEvent.screenY = static_cast<float>(changedTouchList.front().GetScreenLocation().GetY());
+        touchEvent.localX = static_cast<float>(changedTouchList.front().GetLocalLocation().GetX());
+        touchEvent.localY = static_cast<float>(changedTouchList.front().GetLocalLocation().GetY());
+        touchEvent.globalDisplayX = static_cast<double>(changedTouchList.front().GetGlobalDisplayLocation().GetX());
+        touchEvent.globalDisplayY = static_cast<double>(changedTouchList.front().GetGlobalDisplayLocation().GetY());
+        touchEvent.id = changedTouchList.front().GetFingerId();
+        touchEvent.force = changedTouchList.front().GetForce();
+        touchEvent.type = changedTouchList.front().GetTouchType();
+        touchEvent.tiltX = changedTouchList.front().GetTiltX();
+        touchEvent.tiltY = changedTouchList.front().GetTiltY();
+        touchEvent.rollAngle = changedTouchList.front().GetRollAngle();
+        touchEvent.width = changedTouchList.front().GetWidth();
+        touchEvent.height = changedTouchList.front().GetHeight();
+        touchEvent.pressedTime = changedTouchList.front().GetPressedTime();
+        const auto& targetLocalOffset = changedTouchList.front().GetTarget().area.GetOffset();
+        const auto& targetOrigin = changedTouchList.front().GetTarget().origin;
+        touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.widthArea = changedTouchList.front().GetTarget().area.GetWidth().ConvertToPx();
+        touchEvent.heightArea = changedTouchList.front().GetTarget().area.GetHeight().ConvertToPx();
+        touchEvent.deviceId = changedTouchList.front().GetDeviceId();
+        touchEvent.modifierKeyState = CalculateModifierKeyState(changedTouchList.front().GetPressedKeyCodes());
+    }
+    touchEvent.time = TimeStamp(std::chrono::microseconds(timeStamp));
+    touchEvent.force = pressure;
+    touchEvent.tiltX = tiltX;
+    touchEvent.tiltY = tiltY;
+    touchEvent.deviceId = deviceId;
+    touchEvent.targetDisplayId = targetDisplayId;
+    touchEvent.sourceType = sourceType;
+    touchEvent.sourceTool = sourceTool;
+    touchEvent.operatingHand = changedTouchList.front().GetOperatingHand();
+    touchEvent.type = type;
+    for (const auto& touch : touchList) {
+        TouchPoint point;
+        point.id = touch.GetFingerId();
+        point.x = touch.GetGlobalLocation().GetX();
+        point.y = touch.GetGlobalLocation().GetY();
+        point.screenX = touch.GetScreenLocation().GetX();
+        point.screenY = touch.GetScreenLocation().GetY();
+        point.originalId = touch.GetFingerId();
+        point.force = touch.GetForce();
+        point.width = touch.GetWidth();
+        point.height = touch.GetHeight();
+        point.globalDisplayX = touch.GetGlobalDisplayLocation().GetX();
+        point.globalDisplayY = touch.GetGlobalDisplayLocation().GetY();
+        point.operatingHand = touch.GetOperatingHand();
+        point.downTime = touch.GetPressedTime();
+        touchEvent.pointers.emplace_back(point);
+    }
+    if (proxy.ptr) {
+        auto infoPtr = static_cast<TouchEventInfo*>(proxy.ptr);
+        if (infoPtr) {
+            touchEvent.SetPressedKeyCodes(infoPtr->GetPressedKeyCodes());
+        }
+    }
+}
+
 Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event)
 {
     const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
@@ -200,12 +281,9 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
     auto arkEevent = event->value;
     switch (arkEevent.selector) {
         case SELECTOR_ID_0: {
-            auto touchEventInfo = arkEevent.value0->GetEventInfo();
-            CHECK_NULL_RETURN(touchEventInfo, errValue);
+            auto proxy = arkEevent.value0;
             TouchEvent touchEvent;
-            if (!GetTouchEvent(touchEventInfo, touchEvent)) {
-                return errValue;
-            }
+            GetTouchEventFromProxy(proxy, touchEvent);
             result = postEventManager->PostTouchEvent(peer->realNode_, std::move(touchEvent));
             break;
         }

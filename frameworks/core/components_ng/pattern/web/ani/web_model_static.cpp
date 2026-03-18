@@ -1665,4 +1665,15 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
 }
+
+void WebModelStatic::SetAISessionOptions(
+    FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
+    const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+}
 } // namespace OHOS::Ace::NG

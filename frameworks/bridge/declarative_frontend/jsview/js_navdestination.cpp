@@ -559,6 +559,17 @@ void JSNavDestination::SetBackgroundColor(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetBackgroundColor(backgroundColor, isValid, backgroundColorResObj);
 }
 
+void JSNavDestination::SetFreeze(const JSCallbackInfo& info)
+{
+    bool freeze = false;
+    bool isValid = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        freeze = info[0]->ToBoolean();
+        isValid = true;
+    }
+    NavDestinationModel::GetInstance()->SetFreeze(freeze, isValid);
+}
+
 void JSNavDestination::SetWillAppear(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -801,6 +812,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("hideBackButton", &JSNavDestination::SetHideBackButton);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
+    JSClass<JSNavDestination>::StaticMethod("freeze", &JSNavDestination::SetFreeze);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);

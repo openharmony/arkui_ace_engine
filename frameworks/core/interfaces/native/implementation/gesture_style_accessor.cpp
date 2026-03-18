@@ -57,8 +57,22 @@ Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 
     if (onTouchOpt) {
         auto onTouch = [arkCallback = CallbackHelper(*onTouchOpt)](TouchEventInfo& info) -> void {
-            const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
-            arkCallback.Invoke(event.ArkValue());
+            Ark_TouchEventProxy proxy = {
+                .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+                .timeStamp = Converter::ArkValue<Ark_Int64>(
+                    static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+                .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+                .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+                .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+                .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+                .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+                .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+                .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+                .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+                .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+                .ptr = &info
+            };
+            arkCallback.InvokeSync(proxy);
         };
         gestureInfo.onTouch = std::move(onTouch);
     }

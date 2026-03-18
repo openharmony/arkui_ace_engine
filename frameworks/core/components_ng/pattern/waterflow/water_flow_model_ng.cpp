@@ -1049,4 +1049,24 @@ void WaterFlowModelNG::ParseResObjItemMaxHeight(FrameNode* frameNode, const RefP
     };
     pattern->AddResObj("waterflow.itemMaxHeight", resObj, std::move(updateFunc));
 }
+
+void WaterFlowModelNG::SetSupportLazyLoadingEmptyBranch(bool enable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SupportLazyLoadingEmptyBranch, enable);
+}
+
+void WaterFlowModelNG::SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        WaterFlowLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode);
+}
+
+bool WaterFlowModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
+{
+    bool enable = false;
+    CHECK_NULL_RETURN(frameNode, enable);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        WaterFlowLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
+    return enable;
+}
 } // namespace OHOS::Ace::NG

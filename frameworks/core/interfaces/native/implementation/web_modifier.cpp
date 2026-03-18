@@ -2413,6 +2413,57 @@ void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEvent* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<std::vector<Ark_AISessionEvent>>(*value)
+        .value_or(std::vector<Ark_AISessionEvent>{});
+    for (auto event : convValue) {
+        auto type = event.aiSessionType;
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        AISessionCallback onCreateAISession = [arkCallback = CallbackHelper(event.onCreateAISession)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            auto arkParams = Converter::ArkValue<Ark_String>(params);
+            auto cont = CallbackKeeper::Claim<OnAISessionCallback>(
+                [callback = std::move(callback)](Ark_AISessionResultType state, Ark_String content) {
+                    auto contentStr = Converter::Convert<std::string>(content);
+                    callback(static_cast<uint32_t>(state), contentStr);
+                });
+            const auto result = arkCallback.InvokeWithOptConvertResult<
+                bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(arkId, arkParams, cont.ArkValue());
+            return result.value_or(false);
+        };
+        AISessionCallback onExecuteAIAction = [arkCallback = CallbackHelper(event.onExecuteAIAction)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            auto arkParams = Converter::ArkValue<Ark_String>(params);
+            auto cont = CallbackKeeper::Claim<OnAISessionCallback>(
+                [callback = std::move(callback)](Ark_AISessionResultType state, Ark_String content) {
+                    auto contentStr = Converter::Convert<std::string>(content);
+                    callback(static_cast<uint32_t>(state), contentStr);
+                });
+            arkCallback.Invoke(arkId, arkParams, cont.ArkValue());
+            return true;
+        };
+        AISessionCallback onDestroyAISession = [arkCallback = CallbackHelper(event.onDestroyAISession)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            arkCallback.Invoke(arkId);
+            return true;
+        };
+        WebModelStatic::SetAISessionOptions(frameNode, type - 1,
+            std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
+    }
+#endif // WEB_SUPPORTED
+}
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -3168,6 +3219,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };

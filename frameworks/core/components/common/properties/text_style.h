@@ -202,6 +202,7 @@ enum class TextFlipDirection {
 };
 namespace StringUtils {
 std::string ToString(const TextFlipDirection& textFlipDirection);
+std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList);
 
 ACE_FORCE_EXPORT std::string ToString(const TextDirection& textDirection);
 } // namespace StringUtils
@@ -1456,9 +1457,9 @@ inline std::string SymbolColorListToString(const std::vector<Color>& colorList)
 {
     std::string symbolColorList = "";
     if (!colorList.empty()) {
-        symbolColorList = colorList[0].ToString();
+        symbolColorList = colorList[0].ColorToString();
         for (uint32_t i = 1; i < colorList.size(); ++i) {
-            symbolColorList += ", " + colorList[i].ToString();
+            symbolColorList += ", " + colorList[i].ColorToString();
         }
     }
     return symbolColorList;

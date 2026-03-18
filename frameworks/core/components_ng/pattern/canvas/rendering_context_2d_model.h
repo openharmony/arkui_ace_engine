@@ -41,6 +41,11 @@ public:
     virtual void SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo) = 0;
     virtual void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) = 0;
     virtual void SetAntiAlias(bool anti) = 0;
+    virtual std::optional<bool> GetAntialiasExt() const
+    {
+        return std::nullopt;
+    }
+    virtual void SetAntialiasExt(std::optional<bool> isEnabled) {}
     virtual void SetFontWeight(const FontWeight& weight) = 0;
     virtual void SetFontStyle(const FontStyle& fontStyle) = 0;
     virtual void SetFontFamilies(const std::vector<std::string>& families) = 0;

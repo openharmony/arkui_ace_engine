@@ -1244,7 +1244,9 @@ void ListItemPattern::InitHoverEvent()
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleHoverEvent(isHover, pattern->GetHost());
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->HandleHoverEvent(isHover, host);
         }
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -1280,7 +1282,9 @@ void ListItemPattern::InitPressEvent()
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN || touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->HandlePressEvent(touchType == TouchType::DOWN, host);
         }
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -1289,6 +1293,7 @@ void ListItemPattern::InitPressEvent()
 
 void ListItemPattern::HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode)
 {
+    CHECK_NULL_VOID(itemNode);
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = GetContext();

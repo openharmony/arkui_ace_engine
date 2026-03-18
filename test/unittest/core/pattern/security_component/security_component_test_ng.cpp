@@ -698,6 +698,29 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, 
 }
 
 /**
+ * @tc.name: SecurityComponentSavePatternTest003
+ * @tc.desc: Test security component without background keeps transparent after modifyDone
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest003, TestSize.Level0)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+}
+
+/**
  * @tc.name: SecurityComponentLocationPatternTest002
  * @tc.desc: Test event callback
  * @tc.type: FUNC

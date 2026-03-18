@@ -998,4 +998,90 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest123, TestSize.Level1)
     auto colorMode = frameNode->GetLocalColorMode();
     EXPECT_EQ(colorMode, Ace::Kit::ColorMode::COLOR_MODE_UNDEFINED);
 }
+
+/**
+ * @tc.name: FrameNodeTestTest124
+ * @tc.desc: test GetFrameNode returns wrapper without caching kit node
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest124, TestSize.Level1)
+{
+    auto aceFrameNode =
+        NG::FrameNode::GetOrCreateFrameNode("TEST124", 124, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    ASSERT_NE(aceFrameNode, nullptr);
+
+    auto first = Kit::FrameNode::GetFrameNode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(aceFrameNode)));
+    auto second = Kit::FrameNode::GetFrameNode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(aceFrameNode)));
+    ASSERT_NE(first, nullptr);
+    ASSERT_NE(second, nullptr);
+    EXPECT_EQ(first->GetId(), 124);
+    EXPECT_EQ(second->GetId(), 124);
+    EXPECT_EQ(first->GetTag(), "TEST124");
+    EXPECT_EQ(second->GetTag(), "TEST124");
+    EXPECT_EQ(aceFrameNode->GetKitNode(), nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest125
+ * @tc.desc: test Measure copies optional layout constraint values
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest125, TestSize.Level1)
+{
+    constexpr char tag[] = "TEST125";
+    const int32_t id = 125;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    LayoutConstraintInfo constraint { .minWidth = 30.0f,
+        .minHeight = 40.0f,
+        .maxWidth = 30.0f,
+        .maxHeight = 40.0f,
+        .percentReferWidth = 100.0f,
+        .percentReferHeight = 200.0f,
+        .parentIdealSizeWidth = 50.0f,
+        .parentIdealSizeHeight = 60.0f };
+    frameNode->Measure(constraint);
+
+    auto res = frameNode->GetLayoutConstraint();
+    EXPECT_TRUE(NearEqual(res.minWidth, 30.0f));
+    EXPECT_TRUE(NearEqual(res.minHeight, 40.0f));
+    EXPECT_TRUE(NearEqual(res.maxWidth, 30.0f));
+    EXPECT_TRUE(NearEqual(res.maxHeight, 40.0f));
+    ASSERT_TRUE(res.parentIdealSizeWidth.has_value());
+    ASSERT_TRUE(res.parentIdealSizeHeight.has_value());
+    EXPECT_TRUE(NearEqual(res.parentIdealSizeWidth.value(), 50.0f));
+    EXPECT_TRUE(NearEqual(res.parentIdealSizeHeight.value(), 60.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestTest126
+ * @tc.desc: test Measure keeps parent ideal size empty when not provided
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest126, TestSize.Level1)
+{
+    constexpr char tag[] = "TEST126";
+    const int32_t id = 126;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    LayoutConstraintInfo constraint { .minWidth = 10.0f,
+        .minHeight = 20.0f,
+        .maxWidth = 30.0f,
+        .maxHeight = 40.0f,
+        .percentReferWidth = 50.0f,
+        .percentReferHeight = 60.0f };
+    frameNode->Measure(constraint);
+
+    auto res = frameNode->GetLayoutConstraint();
+    EXPECT_TRUE(NearEqual(res.minWidth, 10.0f));
+    EXPECT_TRUE(NearEqual(res.minHeight, 20.0f));
+    EXPECT_TRUE(NearEqual(res.maxWidth, 30.0f));
+    EXPECT_TRUE(NearEqual(res.maxHeight, 40.0f));
+    EXPECT_FALSE(res.parentIdealSizeWidth.has_value());
+    EXPECT_FALSE(res.parentIdealSizeHeight.has_value());
+}
 } // namespace OHOS::Ace

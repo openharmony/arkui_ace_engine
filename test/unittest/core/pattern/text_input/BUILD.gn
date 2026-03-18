@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_input_test") {
-  module_name = "DrawingSet-Line"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
@@ -70,6 +70,7 @@ ace_unittest("text_field_test_ng") {
   type = "new"
   sources = [
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "text_field_layout_algorithm_test.cpp",
     "text_field_pattern_func_test_two.cpp",
     "text_field_pattern_func_test_three.cpp",
     "text_field_test_ng_five.cpp",

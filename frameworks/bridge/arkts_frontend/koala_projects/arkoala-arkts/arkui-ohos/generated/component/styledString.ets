@@ -28,7 +28,7 @@ import { global_resource_Resource_serializer } from './../framework/resource'
 import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
-import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer, TouchEvent_serializer } from './common'
+import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer } from './common'
 // instuctive change begin
 // no need import the CustomSpan
 import { extractors } from '#handwritten'
@@ -42,6 +42,7 @@ import { CustomSpanWrapper, CustomSpanWrapper_serializer } from './idlize'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { GestureEvent, GestureEvent_serializer } from './gesture'
+import { TouchEventProxy, TouchEventProxy_serializer } from './idlize'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class BackgroundColorStyleInternal {
     public static fromPtr(ptr: KPointer): BackgroundColorStyle {
@@ -1397,7 +1398,7 @@ export interface DecorationStyleInterface {
 export interface GestureStyleInterface {
     onClick?: ((event: ClickEvent) => void);
     onLongPress?: arkui_component_common_Callback<GestureEvent, void>;
-    onTouch?: ((event: TouchEvent) => void);
+    onTouch?: arkui_component_common_Callback<TouchEvent, void>;
 }
 export interface ParagraphStyleInterface {
     textAlign?: TextAlign;
@@ -1764,25 +1765,26 @@ export class GestureStyleInterface_serializer {
         }
         const onLongPressTmpResult: arkui_component_common_Callback<GestureEvent, void> | undefined = onLongPressTmpBuf
         const onTouchTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let onTouchTmpBuf: ((event: TouchEvent) => void) | undefined = undefined
+        let onTouchTmpBuf: arkui_component_common_Callback<TouchEvent, void> | undefined = undefined
         if ((onTouchTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onTouchTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
             const onTouchTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
             const onTouchTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
-            const onTouchTmpBufOptClosure = (event: TouchEvent):void => {
+            const onTouchTmpBufOptClosure = (data: TouchEvent):void => {
                 const onTouchTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
                 onTouchTmpBufOptBufArgsSerializer.writeInt32(onTouchTmpBufOptBufResource.resourceId);
                 onTouchTmpBufOptBufArgsSerializer.writePointer(onTouchTmpBufOptBufCall);
                 onTouchTmpBufOptBufArgsSerializer.writePointer(onTouchTmpBufOptBufCallSync);
-                TouchEvent_serializer.write(onTouchTmpBufOptBufArgsSerializer, event);
-                InteropNativeModule._CallCallbackSync(10, 965069254, onTouchTmpBufOptBufArgsSerializer.asBuffer(), onTouchTmpBufOptBufArgsSerializer.length());
+                const dataTransformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(data);
+                TouchEventProxy_serializer.write(onTouchTmpBufOptBufArgsSerializer, dataTransformed);
+                InteropNativeModule._CallCallbackSync(10, -705678038, onTouchTmpBufOptBufArgsSerializer.asBuffer(), onTouchTmpBufOptBufArgsSerializer.length());
                 onTouchTmpBufOptBufArgsSerializer.release();
                 return;
             }
             resourceFinalizerRegister(onTouchTmpBufOptClosure, onTouchTmpBufOptBufResource)
             onTouchTmpBuf = onTouchTmpBufOptClosure
         }
-        const onTouchTmpResult: ((event: TouchEvent) => void) | undefined = onTouchTmpBuf
+        const onTouchTmpResult: arkui_component_common_Callback<TouchEvent, void> | undefined = onTouchTmpBuf
         let value: GestureStyleInterface = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult, onTouch: onTouchTmpResult} as GestureStyleInterface)
         return value
     }

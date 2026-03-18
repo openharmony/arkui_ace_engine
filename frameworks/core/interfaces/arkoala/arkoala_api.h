@@ -4347,6 +4347,8 @@ struct ArkUIListModifier {
 
     void (*setSupportEmptyBranchInLazyLoading)(ArkUINodeHandle node, ArkUI_Bool enable);
     ArkUI_Bool (*getSupportEmptyBranchInLazyLoading)(ArkUINodeHandle node);
+    void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
+    ArkUINodeHandle (*getController)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -4824,6 +4826,8 @@ struct ArkUIGridModifier {
         ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool support);
     ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
+    void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
+    ArkUINodeHandle (*getController)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -5564,6 +5568,9 @@ struct ArkUITextAreaModifier {
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetHorizontalScrolling)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getHorizontalScrolling)(ArkUINodeHandle node);
     void (*setTextAreaStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);
@@ -6573,6 +6580,8 @@ struct ArkUIWaterFlowModifier {
     void* (*createScrollBarProxy)();
     void* (*getEventSetHandler)(uint32_t kind);
     void* (*getEventResetHandler)(uint32_t kind);
+    void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool enable);
+    ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
 };
 
 struct ArkUIWaterFlowItemModifier {

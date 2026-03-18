@@ -1076,6 +1076,13 @@ void JSCanvasRenderer::JsSetGlobalAlpha(const JSCallbackInfo& info)
 {
     double alpha = 0.0;
     if (GetDoubleArg(info, 0, alpha, isJudgeSpecialValue_)) { // Index0: the 1st arg.
+        // Clamp alpha to valid range [0.0, 1.0]
+        if (LessNotEqual(alpha, 0.0)) {
+            alpha = 0.0;
+        }
+        if (GreatNotEqual(alpha, 1.0)) {
+            alpha = 1.0;
+        }
         renderingContext2DModel_->SetGlobalAlpha(alpha);
     }
 }
@@ -1718,4 +1725,29 @@ void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
     paintState_.SetLetterSpacing(letterSpacingCal);
     renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
 }
+
+// antialias: boolean | undefined
+void JSCanvasRenderer::JsGetAntialias(const JSCallbackInfo& info)
+{
+    std::optional<bool> antialias = renderingContext2DModel_->GetAntialiasExt();
+    if (antialias.has_value()) {
+        auto returnValue = JSVal(ToJSValue(antialias.value()));
+        auto returnPtr = JSRef<JSVal>::Make(returnValue);
+        info.SetReturnValue(returnPtr);
+    } else {
+        info.SetReturnValue(JSVal::Undefined());
+    }
+}
+
+// antialias: boolean | undefined
+void JSCanvasRenderer::JsSetAntialias(const JSCallbackInfo& info)
+{
+    bool antialias = false;
+    if (info.GetBooleanArg(0, antialias)) {
+        renderingContext2DModel_->SetAntialiasExt(antialias);
+    } else {
+        renderingContext2DModel_->SetAntialiasExt(std::nullopt);
+    }
+}
+
 } // namespace OHOS::Ace::Framework

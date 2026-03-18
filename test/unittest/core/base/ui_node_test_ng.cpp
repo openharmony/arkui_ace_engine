@@ -29,16 +29,19 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/builder_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 
 using namespace testing;
@@ -1792,6 +1795,120 @@ HWTEST_F(UINodeTestNg, UINodeTestUpdateThemeScopeIdWithChange, TestSize.Level1)
     EXPECT_EQ(parent->GetThemeScopeId(), NEW_THEME_SCOPE_ID);
     EXPECT_EQ(child->GetThemeScopeId(), NEW_THEME_SCOPE_ID);
     parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetThemeDefaultNodeScopeId
+ * @tc.desc: Test GetTheme uses node theme scope id by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetThemeDefaultNodeScopeId, TestSize.Level1)
+{
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<ButtonTheme>();
+    node->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    EXPECT_CALL(*themeManager, GetTheme(_, NEW_THEME_SCOPE_ID)).WillOnce(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+
+    auto result = node->GetTheme<ButtonTheme>();
+
+    EXPECT_EQ(result, theme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    node->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetThemeWithIsolationDisabled
+ * @tc.desc: Test GetTheme uses node theme scope id when api version isolation is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetThemeWithIsolationDisabled, TestSize.Level1)
+{
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<ButtonTheme>();
+    node->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    EXPECT_CALL(*themeManager, GetTheme(_, NEW_THEME_SCOPE_ID)).WillOnce(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+
+    auto result = node->GetTheme<ButtonTheme>(false);
+
+    EXPECT_EQ(result, theme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    node->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetThemeWithIsolationEnabledBelowApi26
+ * @tc.desc: Test GetTheme uses invalid themeScopeId when api version isolation is enabled below api 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetThemeWithIsolationEnabledBelowApi26, TestSize.Level1)
+{
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<ButtonTheme>();
+    node->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    auto context = MockPipelineContext::GetCurrent();
+    node->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    EXPECT_CALL(*themeManager, GetTheme(_, TokenThemeStorage::INVALID_THEME_SCOPE_ID)).WillOnce(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+
+    auto result = node->GetTheme<ButtonTheme>(true);
+
+    EXPECT_EQ(result, theme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    MockPipelineContext::GetCurrent()->SetApiTargetVersion(0);
+    node->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetThemeWithIsolationEnabledAtApi26
+ * @tc.desc: Test GetTheme uses node themeScopeId when api version isolation is enabled at api 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetThemeWithIsolationEnabledAtApi26, TestSize.Level1)
+{
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<ButtonTheme>();
+    node->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    node->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    EXPECT_CALL(*themeManager, GetTheme(_, NEW_THEME_SCOPE_ID)).WillOnce(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+
+    auto result = node->GetTheme<ButtonTheme>(true);
+
+    EXPECT_EQ(result, theme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    node->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetThemeWithoutContext
+ * @tc.desc: Test GetTheme returns nullptr when context is unavailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetThemeWithoutContext, TestSize.Level1)
+{
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto backupPipeline = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_.Reset();
+
+    auto result = node->GetTheme<ButtonTheme>();
+
+    EXPECT_EQ(result, nullptr);
+    MockPipelineContext::pipeline_ = backupPipeline;
+    node->Clean();
 }
 
 /**

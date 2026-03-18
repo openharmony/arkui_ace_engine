@@ -32,6 +32,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetStrokeText(const PaintState& s
 
 void OffscreenCanvasRenderingContext2DModelNG::SetAntiAlias(bool anti) {}
 
+std::optional<bool> OffscreenCanvasRenderingContext2DModelNG::GetAntialiasExt() const
+{
+    return std::nullopt;
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetAntialiasExt(std::optional<bool> isEnabled) {}
+
 void OffscreenCanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight) {}
 
 void OffscreenCanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle) {}

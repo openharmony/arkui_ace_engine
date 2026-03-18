@@ -1433,4 +1433,29 @@ HWTEST_F(AppBarTestNg, TestCreateServicePanelNotFirstTry, TestSize.Level1)
     appBar->GetModalUIExtensionCallbacks(false);
     EXPECT_EQ(appBar->sessionId_, 0);
 }
+
+
+/**
+  * @tc.name: UpdateVisibilityOfMenuBarRow001
+  * @tc.desc: Test UpdateVisiblityOfMenuBarRow
+  * @tc.type: FUNC
+  */
+HWTEST_F(AppBarTestNg, UpdateVisibilityOfMenuBarRow001, TestSize.Level1)
+{
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    auto menubarRow = appBar->BuildMenuBarRow();
+    ASSERT_TRUE(menubarRow);
+    auto menubarRowNode = AceType::DynamicCast<FrameNode>(menubarRow);
+    ASSERT_TRUE(menubarRowNode);
+    auto container = MockContainer::Current();
+    ASSERT_TRUE(container);
+    menubarRowNode->SetLayoutProperty(AceType::MakeRefPtr<LinearLayoutProperty>(true));
+    auto layoutProperty = menubarRowNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_TRUE(layoutProperty);
+
+    EXPECT_CALL(*container, IsSubWindow()).Times(AnyNumber()).WillRepeatedly(Return(true));
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    AppBarView::UpdateVisibilityOfMenuBarRow(menubarRow, container);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+}
 } // namespace OHOS::Ace::NG

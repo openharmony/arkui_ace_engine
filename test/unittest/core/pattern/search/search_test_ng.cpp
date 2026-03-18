@@ -298,6 +298,21 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest002, TestSize.Level1)
     KeyEvent keyEventSeven(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
     focusHub->ProcessOnKeyEventInternal(keyEventSeven);
+
+    /**
+     * @tc.cases: case8.
+     */
+    KeyEvent keyEventEight(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventEight));
+
+    /**
+     * @tc.cases: case9.
+     */
+    KeyEvent keyEventNine(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventNine));
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 
 /**

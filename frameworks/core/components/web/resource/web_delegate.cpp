@@ -116,6 +116,7 @@ constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
+constexpr uint32_t AUTOFILL_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
 
@@ -7259,6 +7260,9 @@ void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason)
     if (nweb_) {
         nweb_->OnFocus(reason);
     }
+    if (hasPendingAutoFill_) {
+        DoFillAutoFillData();
+    }
 }
 
 bool WebDelegate::NeedSoftKeyboard()
@@ -7512,12 +7516,32 @@ void WebDelegate::HandleAccessibilityHoverEvent(
 void WebDelegate::NotifyAutoFillViewData(
     const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type)
 {
+    if (hasPendingAutoFill_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::NotifyAutoFillViewData already has pending autofill data");
+        return;
+    }
+    pendingAutoFillJsonStr_ = jsonStr;
+    pendingAutoFillType_ = type;
+    hasPendingAutoFill_ = true;
+    DoFillAutoFillData(type == OHOS::NWeb::NWebAutoFillTriggerType::PASTE_REQUEST ? 0 : AUTOFILL_DELAY_MILLISECONDS);
+}
+
+void WebDelegate::DoFillAutoFillData(uint32_t delayMs)
+{
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), jsonStr, type]() {
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this), jsonStr = pendingAutoFillJsonStr_, type = pendingAutoFillType_, delayMs]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            if (!delegate->hasPendingAutoFill_) {
+                return;
+            }
+            if (delayMs > 0) {
+                TAG_LOGW(AceLogTag::ACE_WEB, "WebDelegate::NotifyAutoFillViewData fallback, type = %{public}d", type);
+            }
+            delegate->hasPendingAutoFill_ = false;
+            delegate->pendingAutoFillJsonStr_ = "";
             CHECK_NULL_VOID(delegate->nweb_);
             auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
             romMessage->SetType(NWebRomValue::Type::STRING);
@@ -7534,7 +7558,7 @@ void WebDelegate::NotifyAutoFillViewData(
                 delegate->nweb_->FillAutofillData(webMessage);
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
+        TaskExecutor::TaskType::PLATFORM, delayMs, "ArkUIWebPendingAutoFill");
 }
 
 void WebDelegate::AutofillCancel(const std::string& fillContent)
@@ -8152,6 +8176,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
         std::string embedId = dataInfo->GetEmbedId();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnNativeEmbedAllDestory embdedid=%{public}s", embedId.c_str());
         std::string surfaceId = dataInfo->GetSurfaceId();
+        NG::SameLayerSurface::RemoveSameLayerSurfaceId(surfaceId);
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
@@ -8212,6 +8237,33 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
     return webAccessibilityId;
 }
 
+void WebDelegate::HandleNativeEmbedLifecycle(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
+{
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+
+        std::string embedId = dataInfo->GetEmbedId();
+        std::string surfaceId = dataInfo->GetSurfaceId();
+        auto status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
+
+        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
+            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
+            NG::SameLayerSurface::SetSameLayerSurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
+            embedDataInfo_.insert_or_assign(embedId, dataInfo);
+        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
+            NG::SameLayerSurface::RemoveSameLayerSurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
+            auto iter = embedDataInfo_.find(embedId);
+            if (iter != embedDataInfo_.end()) {
+                embedDataInfo_.erase(iter);
+            }
+        }
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -8226,30 +8278,13 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         embedId = dataInfo->GetEmbedId();
         surfaceId = dataInfo->GetSurfaceId();
         status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
-        auto context = context_.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto accessibilityManager = context->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = { embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(), embedInfo->GetUrl(),
                 embedInfo->GetTag(), embedInfo->GetWidth(), embedInfo->GetHeight(), embedInfo->GetX(),
                 embedInfo->GetY(), embedInfo->GetParams() };
         }
-
-        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
-            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
-            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
-            embedDataInfo_.insert_or_assign(embedId, dataInfo);
-        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
-            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
-            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
-            auto iter = embedDataInfo_.find(embedId);
-            if (iter != embedDataInfo_.end()) {
-                embedDataInfo_.erase(iter);
-            }
-        }
+        HandleNativeEmbedLifecycle(dataInfo);
     }
 
     CHECK_NULL_VOID(taskExecutor_);

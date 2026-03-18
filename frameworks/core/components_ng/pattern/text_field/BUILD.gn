@@ -37,6 +37,8 @@ build_component_ng("text_field_pattern_ng") {
     "text_input_ai_checker.cpp",
     "text_input_response_area.cpp",
     "text_select_controller.cpp",
+    "text_field_free_scroller.cpp",
+    "text_field_gesture_event_hub.cpp",
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]

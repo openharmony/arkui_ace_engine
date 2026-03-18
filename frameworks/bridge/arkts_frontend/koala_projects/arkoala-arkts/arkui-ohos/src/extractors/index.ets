@@ -17,7 +17,8 @@ import { int32 } from "@koalaui/common";
 import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
-import { ColorMetricsExt } from '#generated'
+import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
+import { TouchEvent } from '../component/common'
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -92,7 +93,6 @@ import { pointer } from "@koalaui/interop";
 import { Scene } from "graphics3d.Scene"
 import { Animation, Environment } from "graphics3d.SceneResources"
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
@@ -351,8 +351,8 @@ export namespace extractors {
   }
 
   export function toUIContextPtr(value: UIContext): KPointer {
-    let uicontextImpl = value as UIContextImpl;
-    let instanceId = uicontextImpl.instanceId_;
+    let uiContext = value as UIContext;
+    let instanceId = uiContext.instanceId_;
     return instanceId as KPointer;
   }
   export function fromUIContextPtr(ptr: KPointer): UIContext {
@@ -699,6 +699,47 @@ export namespace extractors {
     colorMetrics.setResourceId(colorMetricsExt.resourceId)
     return colorMetrics
   }
+
+  export function transform_Ark_TouchEventProxy_to_Ark_TouchEvent (proxy: TouchEventProxy): TouchEvent {
+    const touchEventHandwritten = new TouchEventHandwritten(proxy.ptr);
+    touchEventHandwritten.target = proxy.target
+    touchEventHandwritten.timestamp = proxy.timeStamp
+    touchEventHandwritten.source = proxy.source
+    touchEventHandwritten.pressure = proxy.pressure
+    touchEventHandwritten.tiltX = proxy.tiltX
+    touchEventHandwritten.tiltY = proxy.tiltY
+    touchEventHandwritten.sourceTool = proxy.sourceTool
+    touchEventHandwritten.deviceId = proxy.deviceId
+    touchEventHandwritten.targetDisplayId = proxy.targetDisplayId
+    touchEventHandwritten.type = proxy.type
+    touchEventHandwritten.touches = proxy.touches
+    touchEventHandwritten.changedTouches = proxy.changedTouches
+    touchEventHandwritten.ptr = proxy.ptr
+    return touchEventHandwritten;
+  }
+
+  export function transform_Ark_TouchEvent_to_Ark_TouchEventProxy (event: TouchEvent): TouchEventProxy {
+    const proxy = new TouchEventProxy();
+    proxy.target = event.target;
+    proxy.timeStamp = event.timestamp;
+    proxy.source = event.source;
+    proxy.pressure = event.pressure;
+    proxy.tiltX = event.tiltX;
+    proxy.tiltY = event.tiltY;
+    proxy.sourceTool = event.sourceTool;
+    proxy.deviceId = event.deviceId;
+    proxy.targetDisplayId = event.targetDisplayId;
+    proxy.type = event.type;
+    proxy.touches = event.touches;
+    proxy.changedTouches = event.changedTouches;
+    proxy.ptr = nullptr
+    if (event instanceof TouchEventHandwritten) {
+      const tmp = event as TouchEventHandwritten
+      proxy.ptr = tmp.ptr
+    }
+    return proxy;
+  }
+
   export function transform_Ark_BusinessError_Void_to_Ark_BusinessErrorInterface_Void(from: BusinessError<void>): BusinessErrorInterface<void> {
         return {
             name: from.name,

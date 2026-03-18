@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List支持展开指定ListItem的swipeAction
-  * Writer: renxiaowen
-  */
+/*
+ * Description: List支持展开指定ListItem的swipeAction
+ * Writer: renxiaowen
+ */
 
 import { BusinessError } from '@ohos.base';
-import { ListDataSource } from './ListDataSource/ListDataSource1';
+import { ListDataSource } from '../ListDataSource/ListDataSource';
 
 @Entry
 @Component
@@ -67,7 +67,7 @@ struct ListItemExample2 {
     let count: number = node?.getChildrenCount() ?? 0;
     for (let i = 0; i < count; i++) {
       let child: FrameNode | undefined | null = node?.getChild(i);
-      if (child?.getNodeType() === "List") {
+      if (child?.getNodeType() === 'List') {
         return child;
       }
     }
@@ -79,7 +79,7 @@ struct ListItemExample2 {
     let listItemGroupCount: number = 0;
     for (let i = 0; i < count; i++) {
       let child: FrameNode | undefined | null = list?.getChild(i);
-      if (child?.getNodeType() === "ListItemGroup") {
+      if (child?.getNodeType() === 'ListItemGroup') {
         if (listItemGroupCount === index) {
           return child;
         }
@@ -101,16 +101,16 @@ struct ListItemExample2 {
   build() {
     Flex({ wrap: FlexWrap.Wrap }) {
       Flex({ wrap: FlexWrap.Wrap }) {
-        TextInput({ placeholder: "请输入需要滑动item的索引", text: $$this.text }).width(80)
-        Button("directions " + this.directions[this.dirIndex])
+        TextInput({ placeholder: '请输入需要滑动item的索引', text: $$this.text }).width(80)
+        Button('directions ' + this.directions[this.dirIndex])
           .onClick(() => {
             this.dirIndex = (this.dirIndex + 1) % this.directions.length;
           })
-        Button("listItemGroup " + this.listItemGroupIndex)
+        Button('listItemGroup ' + this.listItemGroupIndex)
           .onClick(() => {
             this.listItemGroupIndex = (this.listItemGroupIndex + 1) % this.arr2.length;
           })
-        Button("expand inList")
+        Button('expand inList')
           .onClick(() => {
             try {
               // 测试点：观察指定列表项是否展开
@@ -118,22 +118,22 @@ struct ListItemExample2 {
               ListItemSwipeActionManager.expand(this.getList()?.getChild(Number(this.text)),
                 this.directions[this.dirIndex])
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })
-        Button("collapse inList")
+        Button('collapse inList')
           .onClick(() => {
             try {
               // 测试点：观察指定列表项是否收起
               // 预期结果：指定列表项收起
               ListItemSwipeActionManager.collapse(this.getList()?.getChild(Number(this.text)))
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })
-        Button("expand inListItemGroup")
+        Button('expand inListItemGroup')
           .onClick(() => {
             try {
               let group = this.getListItemGroup(this.listItemGroupIndex, this.getList() ?? undefined);
@@ -141,11 +141,11 @@ struct ListItemExample2 {
               // 预期结果：指定列表项分组展开
               ListItemSwipeActionManager.expand(group?.getChild(Number(this.text)), this.directions[this.dirIndex])
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })
-        Button("collapse inListItemGroup")
+        Button('collapse inListItemGroup')
           .onClick(() => {
             try {
               let group = this.getListItemGroup(this.listItemGroupIndex, this.getList() ?? undefined);
@@ -153,7 +153,7 @@ struct ListItemExample2 {
               // 预期结果：指定列表项分组收起
               ListItemSwipeActionManager.collapse(group?.getChild(Number(this.text)))
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })
@@ -161,7 +161,7 @@ struct ListItemExample2 {
 
       List({ space: 10, scroller: this.scroller }) {
         ListItem() {
-          Button("生态场景expand inList")
+          Button('生态场景expand inList')
             .width('50%')
             .height(40)
             .fontSize(16)
@@ -175,7 +175,7 @@ struct ListItemExample2 {
                 ListItemSwipeActionManager.expand(this.getList()?.getChild(Number(this.text)),
                   this.directions[this.dirIndex])
               } catch (error) {
-                console.error("CXN Error expanding ite m:", (error as BusinessError).code,
+                console.error('CXN Error expanding ite m:', (error as BusinessError).code,
                   (error as BusinessError).message);
               }
             })
@@ -326,7 +326,7 @@ struct ListItemExample2 {
           }
         }, (item: number) => item.toString())
         ListItem() {
-          Text("end")
+          Text('end')
             .width('100%')
             .height(100)
             .fontSize(16)

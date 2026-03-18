@@ -14153,6 +14153,22 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
+class TextAreaHorizontalScrollingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().textArea.setHorizontalScrolling(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaHorizontalScrollingModifier.identity = Symbol('textAreaHorizontalScrolling');
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14209,6 +14225,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  horizontalScrolling(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHorizontalScrollingModifier.identity, TextAreaHorizontalScrollingModifier, value);
     return this;
   }
   allowChildCount() {

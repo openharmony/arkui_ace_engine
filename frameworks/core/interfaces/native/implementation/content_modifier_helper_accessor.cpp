@@ -395,16 +395,8 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
         arkConfig->selected_ = config.selected_;
         arkConfig->index_ = config.index_;
         arkConfig->node_ = node;
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode =  CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
             boxNode->AddChild(uiNode);
             boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);

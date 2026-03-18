@@ -295,6 +295,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0093, TestSize.Level1)
     frameNode1->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     frameNode->children_.push_back(frameNode1);
     EXPECT_TRUE(focusHub->IsFocusableNode());
+
     focusHub->currentFocus_ = true;
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
@@ -335,6 +336,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     focusHub1->focusType_ = FocusType::NODE;
     focusHub1->focusCallbackEvents_->tabIndex_ = 1;
     focusHub1->currentFocus_ = true;
+
     KeyEvent keyEvent;
     TabIndexNodeList tabIndexNodes;
     keyEvent.action = KeyAction::DOWN;
@@ -371,6 +373,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0096, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = true;
+
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
@@ -413,6 +416,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0097, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub1->parentFocusable_ = false;
+
     auto res = focusHub->RequestFocusImmediatelyById("123");
     EXPECT_FALSE(res);
 }
@@ -437,6 +441,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0098, TestSize.Level1)
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusType_ = FocusType::SCOPE;
+
     frameNode1->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     frameNode->children_.push_back(frameNode1);
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
@@ -487,6 +492,7 @@ HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
         AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
+    
      /**
      * @tc.Calling LostFocusToViewRoot to increase coverage
      */

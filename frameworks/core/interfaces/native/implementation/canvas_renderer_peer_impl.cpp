@@ -1097,6 +1097,16 @@ void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacin
     renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
     letterSpacing_ = letterSpacing;
 }
+std::optional<bool> CanvasRendererPeerImpl::GetAntialias() const
+{
+    CHECK_NULL_RETURN(renderingContext2DModel_, std::optional<bool>());
+    return renderingContext2DModel_->GetAntialiasExt();
+}
+void CanvasRendererPeerImpl::SetAntialias(std::optional<bool> enabled)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetAntialiasExt(enabled);
+}
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {

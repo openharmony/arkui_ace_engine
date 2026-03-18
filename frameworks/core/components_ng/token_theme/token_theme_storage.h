@@ -28,6 +28,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TokenThemeStorage final {
 public:
+    static constexpr int32_t INVALID_THEME_SCOPE_ID = -3;
+
     ACE_FORCE_EXPORT static TokenThemeStorage* GetInstance();
     ~TokenThemeStorage() = default;
 

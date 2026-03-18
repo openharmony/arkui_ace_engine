@@ -2580,6 +2580,24 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
     return context_->LessThanAPITargetVersion(version);
 }
 
+int32_t UINode::GetThemeScopeIdForTheme(bool useApiVersionIsolation) const
+{
+    if (!useApiVersionIsolation) {
+        return GetThemeScopeId();
+    }
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return GetThemeScopeId();
+    }
+    return TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+}
+
+RefPtr<Theme> UINode::GetThemeByType(ThemeType type, bool useApiVersionIsolation) const
+{
+    auto* context = GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetThemeByType(type, GetThemeScopeIdForTheme(useApiVersionIsolation));
+}
+
 void UINode::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
 {
     if (isObservedByDrawChildren_) {

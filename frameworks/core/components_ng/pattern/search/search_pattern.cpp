@@ -955,13 +955,15 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         RequestKeyboard();
         return true;
     }
-    // If the focus is on the search button, press Enter to submit the content.
-    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH_BUTTON) {
+    // If the focus is on the search button, press Enter/Space to submit the content.
+    if ((event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) &&
+        focusChoice_ == FocusChoice::SEARCH_BUTTON) {
         OnClickButtonAndImage();
         return true;
     }
-    // If the focus is on the Delete button, press Enter to delete the content.
-    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+    // If the focus is on the Delete button, press Enter/Space to delete the content.
+    if ((event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) &&
+        focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         OnClickCancelButton();
         PaintFocusState();
         return true;

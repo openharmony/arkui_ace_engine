@@ -571,7 +571,8 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.j
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @arkui001
+frameworks/bridge/declarative_frontend/ark_component/components/arktextclock.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -1043,8 +1044,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_clock_bridge.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_clock_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.cpp @arkui001

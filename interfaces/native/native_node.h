@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3321,19 +3321,22 @@ typedef enum {
      */
     NODE_IMAGE_FILL_COLOR,
     /**
-     * @brief Sets the resizable image options.
+     * @brief Resize the image when stretching it with array or a lattice object.
+     * The parameter types for setting and getting should be the same.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32: width of the left edge. The unit is vp. \n
      * .value[1].f32: width of the top edge. The unit is vp. \n
      * .value[2].f32: width of the right edge. The unit is vp. \n
      * .value[3].f32: width of the bottom edge. The unit is vp. \n
-     * \n
+     * .object: The parameter type is {@link OH_Drawing_Lattice},add since api 24.\n
+     *
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32: width of the left edge. The unit is vp. \n
      * .value[1].f32: width of the top edge. The unit is vp. \n
      * .value[2].f32: width of the right edge. The unit is vp. \n
      * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * .object: The parameter type is {@link OH_Drawing_Lattice},add since api 24.\n
      *
      */
     NODE_IMAGE_RESIZABLE,
@@ -3365,14 +3368,17 @@ typedef enum {
      */
     NODE_IMAGE_SOURCE_SIZE = 4013,
     /**
-     * @brief Defines the display tranformation matrix for an image.
+     * @brief Support the implementation of affine image transformations using floating-point numbers or matrix objects.
      * This attribute can be set, reset, and obtained as required through APIs.
+     * The parameter types for setting and getting should be the same.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0...15].f32: 16 floating-point numbers.\n
-     * \n
+     * .object: The parameter type is {@link ArkUI_Matrix4},add since api 24.\n
+     *
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0...15].f32: 16 floating-point numbers.\n
+     * .object: The parameter type is {@link ArkUI_Matrix4},add since api 24.\n
      *
      * @since 21
      */
@@ -4771,6 +4777,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_FALLBACK_LINE_SPACING = 8042,
+
+    /**
+     * @brief Whether to enable horizontal scrolling when text is wider than the view.
+     * The default value is false, and text will be wrapped by the view.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether enable the feature, true means enable this feature, false means disable. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether enable the feature. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_AREA_HORIZONTAL_SCROLLING = 8043,
 
     /**
      * @brief Writing direction of the text.
@@ -6744,6 +6764,7 @@ typedef enum {
 
     /**
      * @brief Scroll a specified distance.
+     * List/Scroll/WaterFlow support since API version 12, Grid support since API version 26.0.0.
      * 
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32：Horizontal scrolling distance in vp; \n
@@ -8121,6 +8142,25 @@ typedef enum {
     NODE_WATER_FLOW_COLUMN_TEMPLATE_ITEMFILLPOLICY = 1010013,
 
     /**
+ 	 * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>WaterFlow</b> container.
+ 	 * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+ 	 * empty branches (items without content) in the <b>WaterFlow</b> will be rendered and set to width 0 and height 0, 
+ 	 * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+ 	 * data source may have gaps or when maintaining specific layout positions is required.
+ 	 *
+ 	 * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+ 	 * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+ 	 * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+ 	 * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+ 	 * \n
+ 	 * Format of the return value {@link ArkUI_AttributeItem}:\n
+ 	 * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+ 	 *
+ 	 * @since 26.0.0
+ 	 */
+ 	NODE_WATER_FLOW_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1010014,
+ 	
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
@@ -8199,6 +8239,13 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1].i32: whether to display cached nodes. 0 means not display, 1 means display.
+     * This parameter is optional, default value is 0. This parameter is supported since API version 26.0.0.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of cached items in the grid adapter. \n
+     * .value[1].i32: whether to display cached nodes. 0 means not display, 1 means display.
+     * This parameter is supported since API version 26.0.0.\n
      */
     NODE_GRID_CACHED_COUNT,
 

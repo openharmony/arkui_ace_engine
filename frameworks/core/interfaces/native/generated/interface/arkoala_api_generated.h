@@ -963,9 +963,6 @@ typedef struct TextTimerControllerPeer* Ark_TextTimerController;
 typedef struct Opt_TextTimerController Opt_TextTimerController;
 typedef struct Ark_TimePickerResult Ark_TimePickerResult;
 typedef struct Opt_TimePickerResult Opt_TimePickerResult;
-typedef struct TouchEventPeer TouchEventPeer;
-typedef struct TouchEventPeer* Ark_TouchEvent;
-typedef struct Opt_TouchEvent Opt_TouchEvent;
 typedef struct TouchRecognizerPeer TouchRecognizerPeer;
 typedef struct TouchRecognizerPeer* Ark_TouchRecognizer;
 typedef struct Opt_TouchRecognizer Opt_TouchRecognizer;
@@ -1178,6 +1175,8 @@ typedef struct arkui_component_idlize_Callback_I32_Void arkui_component_idlize_C
 typedef struct Opt_arkui_component_idlize_Callback_I32_Void Opt_arkui_component_idlize_Callback_I32_Void;
 typedef struct Array_AcceptableFileType Array_AcceptableFileType;
 typedef struct Opt_Array_AcceptableFileType Opt_Array_AcceptableFileType;
+typedef struct Array_AISessionEvent Array_AISessionEvent;
+typedef struct Opt_Array_AISessionEvent Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
 typedef struct Opt_Array_AlertDialogButtonOptions Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_AnimationPropertyType Array_AnimationPropertyType;
@@ -1734,10 +1733,12 @@ typedef struct Callback_TextRange_Void Callback_TextRange_Void;
 typedef struct Opt_Callback_TextRange_Void Opt_Callback_TextRange_Void;
 typedef struct Callback_TimePickerResult_Void Callback_TimePickerResult_Void;
 typedef struct Opt_Callback_TimePickerResult_Void Opt_Callback_TimePickerResult_Void;
-typedef struct Callback_TouchEvent_HitTestMode Callback_TouchEvent_HitTestMode;
-typedef struct Opt_Callback_TouchEvent_HitTestMode Opt_Callback_TouchEvent_HitTestMode;
 typedef struct Callback_TouchEvent_Void Callback_TouchEvent_Void;
 typedef struct Opt_Callback_TouchEvent_Void Opt_Callback_TouchEvent_Void;
+typedef struct Callback_TouchEventProxy_HitTestMode Callback_TouchEventProxy_HitTestMode;
+typedef struct Opt_Callback_TouchEventProxy_HitTestMode Opt_Callback_TouchEventProxy_HitTestMode;
+typedef struct Callback_TouchEventProxy_Void Callback_TouchEventProxy_Void;
+typedef struct Opt_Callback_TouchEventProxy_Void Opt_Callback_TouchEventProxy_Void;
 typedef struct Callback_TouchResult_Void Callback_TouchResult_Void;
 typedef struct Opt_Callback_TouchResult_Void Opt_Callback_TouchResult_Void;
 typedef struct Callback_Tuple_I32_I32_I32_I32_Void Callback_Tuple_I32_I32_I32_I32_Void;
@@ -1834,6 +1835,8 @@ typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
 typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
+typedef struct OnAISessionCallback OnAISessionCallback;
+typedef struct Opt_OnAISessionCallback Opt_OnAISessionCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback OnAlphabetIndexerPopupSelectCallback;
 typedef struct Opt_OnAlphabetIndexerPopupSelectCallback Opt_OnAlphabetIndexerPopupSelectCallback;
 typedef struct OnAlphabetIndexerRequestPopupDataCallback OnAlphabetIndexerRequestPopupDataCallback;
@@ -1850,8 +1853,12 @@ typedef struct OnContentScrollCallback OnContentScrollCallback;
 typedef struct Opt_OnContentScrollCallback Opt_OnContentScrollCallback;
 typedef struct OnContextMenuHideCallback OnContextMenuHideCallback;
 typedef struct Opt_OnContextMenuHideCallback Opt_OnContextMenuHideCallback;
+typedef struct OnCreateAISession OnCreateAISession;
+typedef struct Opt_OnCreateAISession Opt_OnCreateAISession;
 typedef struct OnCreateMenuCallback OnCreateMenuCallback;
 typedef struct Opt_OnCreateMenuCallback Opt_OnCreateMenuCallback;
+typedef struct OnDestroyAISession OnDestroyAISession;
+typedef struct Opt_OnDestroyAISession Opt_OnDestroyAISession;
 typedef struct OnDetectBlankScreenCallback OnDetectBlankScreenCallback;
 typedef struct Opt_OnDetectBlankScreenCallback Opt_OnDetectBlankScreenCallback;
 typedef struct OnDidChangeCallback OnDidChangeCallback;
@@ -1860,6 +1867,8 @@ typedef struct OnDidStopDraggingCallback OnDidStopDraggingCallback;
 typedef struct Opt_OnDidStopDraggingCallback Opt_OnDidStopDraggingCallback;
 typedef struct OnDragEventCallback OnDragEventCallback;
 typedef struct Opt_OnDragEventCallback Opt_OnDragEventCallback;
+typedef struct OnExecuteAIAction OnExecuteAIAction;
+typedef struct Opt_OnExecuteAIAction Opt_OnExecuteAIAction;
 typedef struct OnFirstMeaningfulPaintCallback OnFirstMeaningfulPaintCallback;
 typedef struct Opt_OnFirstMeaningfulPaintCallback Opt_OnFirstMeaningfulPaintCallback;
 typedef struct OnFirstScreenPaintCallback OnFirstScreenPaintCallback;
@@ -2104,6 +2113,8 @@ typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
 typedef struct Opt_AdsBlockedDetails Opt_AdsBlockedDetails;
+typedef struct Ark_AISessionEvent Ark_AISessionEvent;
+typedef struct Opt_AISessionEvent Opt_AISessionEvent;
 typedef struct Ark_AlertDialogTextStyleOptions Ark_AlertDialogTextStyleOptions;
 typedef struct Opt_AlertDialogTextStyleOptions Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_AnimationNumberRange Ark_AnimationNumberRange;
@@ -2362,8 +2373,6 @@ typedef struct Ark_ImageCompleteEvent Ark_ImageCompleteEvent;
 typedef struct Opt_ImageCompleteEvent Opt_ImageCompleteEvent;
 typedef struct Ark_InnerGestureObserverConfigs Ark_InnerGestureObserverConfigs;
 typedef struct Opt_InnerGestureObserverConfigs Opt_InnerGestureObserverConfigs;
-typedef struct Ark_InputEventType Ark_InputEventType;
-typedef struct Opt_InputEventType Opt_InputEventType;
 typedef struct Ark_InsertValue Ark_InsertValue;
 typedef struct Opt_InsertValue Opt_InsertValue;
 typedef struct Ark_IntelligentTrackingPreventionDetails Ark_IntelligentTrackingPreventionDetails;
@@ -2426,8 +2435,6 @@ typedef struct Ark_NativeEmbedParamDataInfo Ark_NativeEmbedParamDataInfo;
 typedef struct Opt_NativeEmbedParamDataInfo Opt_NativeEmbedParamDataInfo;
 typedef struct Ark_NativeEmbedParamItem Ark_NativeEmbedParamItem;
 typedef struct Opt_NativeEmbedParamItem Opt_NativeEmbedParamItem;
-typedef struct Ark_NativeEmbedTouchInfo Ark_NativeEmbedTouchInfo;
-typedef struct Opt_NativeEmbedTouchInfo Opt_NativeEmbedTouchInfo;
 typedef struct Ark_NativeEmbedVisibilityInfo Ark_NativeEmbedVisibilityInfo;
 typedef struct Opt_NativeEmbedVisibilityInfo Opt_NativeEmbedVisibilityInfo;
 typedef struct Ark_NavContentInfo Ark_NavContentInfo;
@@ -3560,6 +3567,8 @@ typedef struct Ark_TextBackgroundStyle Ark_TextBackgroundStyle;
 typedef struct Opt_TextBackgroundStyle Opt_TextBackgroundStyle;
 typedef struct Ark_TextPickerTextStyle Ark_TextPickerTextStyle;
 typedef struct Opt_TextPickerTextStyle Opt_TextPickerTextStyle;
+typedef struct Ark_TouchEventProxy Ark_TouchEventProxy;
+typedef struct Opt_TouchEventProxy Opt_TouchEventProxy;
 typedef struct Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
 typedef struct Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
 typedef struct Ark_Union_BadgeParamWithNumber_BadgeParamWithString Ark_Union_BadgeParamWithNumber_BadgeParamWithString;
@@ -3582,8 +3591,12 @@ typedef struct Ark_GridRowOptions Ark_GridRowOptions;
 typedef struct Opt_GridRowOptions Opt_GridRowOptions;
 typedef struct Ark_ImageAttachmentInterface Ark_ImageAttachmentInterface;
 typedef struct Opt_ImageAttachmentInterface Opt_ImageAttachmentInterface;
+typedef struct Ark_InputEventType Ark_InputEventType;
+typedef struct Opt_InputEventType Opt_InputEventType;
 typedef struct Ark_NativeEmbedDataInfo Ark_NativeEmbedDataInfo;
 typedef struct Opt_NativeEmbedDataInfo Opt_NativeEmbedDataInfo;
+typedef struct Ark_NativeEmbedTouchInfo Ark_NativeEmbedTouchInfo;
+typedef struct Opt_NativeEmbedTouchInfo Opt_NativeEmbedTouchInfo;
 typedef struct Ark_ParticleOptionsInner Ark_ParticleOptionsInner;
 typedef struct Opt_ParticleOptionsInner Opt_ParticleOptionsInner;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
@@ -3814,6 +3827,28 @@ typedef struct Opt_AdaptiveColor {
     Ark_Tag tag;
     Ark_AdaptiveColor value;
 } Opt_AdaptiveColor;
+typedef enum Ark_AISessionResultType {
+    ARK_AISESSION_RESULT_TYPE_SUCCESS = 0,
+    ARK_AISESSION_RESULT_TYPE_FAILURE = 1,
+    ARK_AISESSION_RESULT_TYPE_RUNNING = 2,
+} Ark_AISessionResultType;
+typedef struct Opt_AISessionResultType {
+    Ark_Tag tag;
+    Ark_AISessionResultType value;
+} Opt_AISessionResultType;
+typedef enum Ark_AISessionType {
+    ARK_AISESSION_TYPE_TRANSLATOR = 1,
+    ARK_AISESSION_TYPE_LANGUAGE_DETECTOR = 2,
+    ARK_AISESSION_TYPE_SUMMARIZER = 3,
+    ARK_AISESSION_TYPE_WRITER = 4,
+    ARK_AISESSION_TYPE_REWRITER = 5,
+    ARK_AISESSION_TYPE_PROMPT = 6,
+    ARK_AISESSION_TYPE_PROOFREADER = 7,
+} Ark_AISessionType;
+typedef struct Opt_AISessionType {
+    Ark_Tag tag;
+    Ark_AISessionType value;
+} Opt_AISessionType;
 typedef enum Ark_Alignment {
     ARK_ALIGNMENT_TOP_START = 0,
     ARK_ALIGNMENT_TOP = 1,
@@ -7809,8 +7844,8 @@ typedef struct Opt_AccessibilityFocusCallback {
 typedef struct AccessibilityTransparentCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEvent event);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event);
+    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event);
 } AccessibilityTransparentCallback;
 typedef struct Opt_AccessibilityTransparentCallback {
     Ark_Tag tag;
@@ -9244,10 +9279,6 @@ typedef struct Opt_TimePickerResult {
     Ark_Tag tag;
     Ark_TimePickerResult value;
 } Opt_TimePickerResult;
-typedef struct Opt_TouchEvent {
-    Ark_Tag tag;
-    Ark_TouchEvent value;
-} Opt_TouchEvent;
 typedef struct Opt_TouchRecognizer {
     Ark_Tag tag;
     Ark_TouchRecognizer value;
@@ -10060,6 +10091,15 @@ typedef struct Opt_Array_AcceptableFileType {
     Ark_Tag tag;
     Array_AcceptableFileType value;
 } Opt_Array_AcceptableFileType;
+typedef struct Array_AISessionEvent {
+    /* kind: ContainerType */
+    Ark_AISessionEvent* array;
+    Ark_Int32 length;
+} Array_AISessionEvent;
+typedef struct Opt_Array_AISessionEvent {
+    Ark_Tag tag;
+    Array_AISessionEvent value;
+} Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions {
     /* kind: ContainerType */
     Ark_AlertDialogButtonOptions* array;
@@ -12736,26 +12776,36 @@ typedef struct Opt_Callback_TimePickerResult_Void {
     Ark_Tag tag;
     Callback_TimePickerResult_Void value;
 } Opt_Callback_TimePickerResult_Void;
-typedef struct Callback_TouchEvent_HitTestMode {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEvent data, const Callback_HitTestMode_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent data, const Callback_HitTestMode_Void continuation);
-} Callback_TouchEvent_HitTestMode;
-typedef struct Opt_Callback_TouchEvent_HitTestMode {
-    Ark_Tag tag;
-    Callback_TouchEvent_HitTestMode value;
-} Opt_Callback_TouchEvent_HitTestMode;
 typedef struct Callback_TouchEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEvent event);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event);
+    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event);
 } Callback_TouchEvent_Void;
 typedef struct Opt_Callback_TouchEvent_Void {
     Ark_Tag tag;
     Callback_TouchEvent_Void value;
 } Opt_Callback_TouchEvent_Void;
+typedef struct Callback_TouchEventProxy_HitTestMode {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data, const Callback_HitTestMode_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data, const Callback_HitTestMode_Void continuation);
+} Callback_TouchEventProxy_HitTestMode;
+typedef struct Opt_Callback_TouchEventProxy_HitTestMode {
+    Ark_Tag tag;
+    Callback_TouchEventProxy_HitTestMode value;
+} Opt_Callback_TouchEventProxy_HitTestMode;
+typedef struct Callback_TouchEventProxy_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data);
+} Callback_TouchEventProxy_Void;
+typedef struct Opt_Callback_TouchEventProxy_Void {
+    Ark_Tag tag;
+    Callback_TouchEventProxy_Void value;
+} Opt_Callback_TouchEventProxy_Void;
 typedef struct Callback_TouchResult_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13236,6 +13286,16 @@ typedef struct Opt_OnAdsBlockedCallback {
     Ark_Tag tag;
     OnAdsBlockedCallback value;
 } Opt_OnAdsBlockedCallback;
+typedef struct OnAISessionCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_AISessionResultType state, const Ark_String content);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AISessionResultType state, const Ark_String content);
+} OnAISessionCallback;
+typedef struct Opt_OnAISessionCallback {
+    Ark_Tag tag;
+    OnAISessionCallback value;
+} Opt_OnAISessionCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13316,6 +13376,16 @@ typedef struct Opt_OnContextMenuHideCallback {
     Ark_Tag tag;
     OnContextMenuHideCallback value;
 } Opt_OnContextMenuHideCallback;
+typedef struct OnCreateAISession {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result, const synthetic_Callback_Boolean_Void continuation);
+} OnCreateAISession;
+typedef struct Opt_OnCreateAISession {
+    Ark_Tag tag;
+    OnCreateAISession value;
+} Opt_OnCreateAISession;
 typedef struct OnCreateMenuCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13326,6 +13396,16 @@ typedef struct Opt_OnCreateMenuCallback {
     Ark_Tag tag;
     OnCreateMenuCallback value;
 } Opt_OnCreateMenuCallback;
+typedef struct OnDestroyAISession {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id);
+} OnDestroyAISession;
+typedef struct Opt_OnDestroyAISession {
+    Ark_Tag tag;
+    OnDestroyAISession value;
+} Opt_OnDestroyAISession;
 typedef struct OnDetectBlankScreenCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13366,6 +13446,16 @@ typedef struct Opt_OnDragEventCallback {
     Ark_Tag tag;
     OnDragEventCallback value;
 } Opt_OnDragEventCallback;
+typedef struct OnExecuteAIAction {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result);
+} OnExecuteAIAction;
+typedef struct Opt_OnExecuteAIAction {
+    Ark_Tag tag;
+    OnExecuteAIAction value;
+} Opt_OnExecuteAIAction;
 typedef struct OnFirstMeaningfulPaintCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14584,6 +14674,17 @@ typedef struct Opt_AdsBlockedDetails {
     Ark_Tag tag;
     Ark_AdsBlockedDetails value;
 } Opt_AdsBlockedDetails;
+typedef struct Ark_AISessionEvent {
+    /* kind: Interface */
+    Ark_AISessionType aiSessionType;
+    OnCreateAISession onCreateAISession;
+    OnExecuteAIAction onExecuteAIAction;
+    OnDestroyAISession onDestroyAISession;
+} Ark_AISessionEvent;
+typedef struct Opt_AISessionEvent {
+    Ark_Tag tag;
+    Ark_AISessionEvent value;
+} Opt_AISessionEvent;
 typedef struct Ark_AlertDialogTextStyleOptions {
     /* kind: Interface */
     Opt_WordBreak wordBreak;
@@ -15750,7 +15851,7 @@ typedef struct Ark_GestureStyleInterface {
     /* kind: Interface */
     Opt_Callback_ClickEvent_Void onClick;
     Opt_Callback_GestureEvent_Void onLongPress;
-    Opt_Callback_TouchEvent_Void onTouch;
+    Opt_Callback_TouchEventProxy_Void onTouch;
 } Ark_GestureStyleInterface;
 typedef struct Opt_GestureStyleInterface {
     Ark_Tag tag;
@@ -15882,19 +15983,6 @@ typedef struct Opt_InnerGestureObserverConfigs {
     Ark_Tag tag;
     Ark_InnerGestureObserverConfigs value;
 } Opt_InnerGestureObserverConfigs;
-typedef struct Ark_InputEventType {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_TouchEvent value0;
-        Ark_MouseEvent value1;
-        Ark_AxisEvent value2;
-    };
-} Ark_InputEventType;
-typedef struct Opt_InputEventType {
-    Ark_Tag tag;
-    Ark_InputEventType value;
-} Opt_InputEventType;
 typedef struct Ark_InsertValue {
     /* kind: Interface */
     Ark_Int32 insertOffset;
@@ -16236,16 +16324,6 @@ typedef struct Opt_NativeEmbedParamItem {
     Ark_Tag tag;
     Ark_NativeEmbedParamItem value;
 } Opt_NativeEmbedParamItem;
-typedef struct Ark_NativeEmbedTouchInfo {
-    /* kind: Interface */
-    Opt_String embedId;
-    Opt_TouchEvent touchEvent;
-    Opt_EventResult result;
-} Ark_NativeEmbedTouchInfo;
-typedef struct Opt_NativeEmbedTouchInfo {
-    Ark_Tag tag;
-    Ark_NativeEmbedTouchInfo value;
-} Opt_NativeEmbedTouchInfo;
 typedef struct Ark_NativeEmbedVisibilityInfo {
     /* kind: Interface */
     Ark_Boolean visibility;
@@ -22330,6 +22408,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BarState scrollBar;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -22554,6 +22633,7 @@ typedef struct Ark_MenuOptions {
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BarState scrollBar;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;
@@ -22890,6 +22970,31 @@ typedef struct Opt_TextPickerTextStyle {
     Ark_Tag tag;
     Ark_TextPickerTextStyle value;
 } Opt_TextPickerTextStyle;
+typedef struct Ark_TouchEventProxy {
+    /* kind: Interface */
+    Ark_EventTarget target;
+    Ark_Int64 timeStamp;
+    Ark_SourceType source;
+    Opt_Float64 axisHorizontal;
+    Opt_Float64 axisVertical;
+    Ark_Float64 pressure;
+    Ark_Float64 tiltX;
+    Ark_Float64 tiltY;
+    Opt_Float64 rollAngle;
+    Ark_SourceTool sourceTool;
+    Opt_ModifierKeyStateGetter getModifierKeyState;
+    Opt_Int32 deviceId;
+    Opt_Int32 targetDisplayId;
+    Opt_Float64 axisPinch;
+    Ark_TouchType type;
+    Array_TouchObject touches;
+    Array_TouchObject changedTouches;
+    Ark_NativePointer ptr;
+} Ark_TouchEventProxy;
+typedef struct Opt_TouchEventProxy {
+    Ark_Tag tag;
+    Ark_TouchEventProxy value;
+} Opt_TouchEventProxy;
 typedef struct Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23072,6 +23177,19 @@ typedef struct Opt_ImageAttachmentInterface {
     Ark_Tag tag;
     Ark_ImageAttachmentInterface value;
 } Opt_ImageAttachmentInterface;
+typedef struct Ark_InputEventType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_TouchEventProxy value0;
+        Ark_MouseEvent value1;
+        Ark_AxisEvent value2;
+    };
+} Ark_InputEventType;
+typedef struct Opt_InputEventType {
+    Ark_Tag tag;
+    Ark_InputEventType value;
+} Opt_InputEventType;
 typedef struct Ark_NativeEmbedDataInfo {
     /* kind: Interface */
     Opt_NativeEmbedStatus status;
@@ -23083,6 +23201,16 @@ typedef struct Opt_NativeEmbedDataInfo {
     Ark_Tag tag;
     Ark_NativeEmbedDataInfo value;
 } Opt_NativeEmbedDataInfo;
+typedef struct Ark_NativeEmbedTouchInfo {
+    /* kind: Interface */
+    Opt_String embedId;
+    Opt_TouchEventProxy touchEvent;
+    Opt_EventResult result;
+} Ark_NativeEmbedTouchInfo;
+typedef struct Opt_NativeEmbedTouchInfo {
+    Ark_Tag tag;
+    Ark_NativeEmbedTouchInfo value;
+} Opt_NativeEmbedTouchInfo;
 typedef struct Ark_ParticleOptionsInner {
     /* kind: Interface */
     Ark_EmitterOptionsInner emitter;
@@ -24038,7 +24166,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setMonopolizeEvents)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
     void (*setOnTouchIntercept)(Ark_NativePointer node,
-                                const Opt_Callback_TouchEvent_HitTestMode* value);
+                                const Opt_Callback_TouchEventProxy_HitTestMode* value);
     void (*setOnSizeChange)(Ark_NativePointer node,
                             const Opt_SizeChangeCallback* value);
     void (*setAccessibilityFocusDrawLevel)(Ark_NativePointer node,
@@ -26972,6 +27100,8 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
                             const Opt_Int32* value);
     void (*setSyncLoad)(Ark_NativePointer node,
                         const Opt_Boolean* value);
+    void (*setSupportEmptyBranchInLazyLoading)(Ark_NativePointer node,
+                                               const Opt_Boolean* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
@@ -27280,6 +27410,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value);
     void (*setEnableDefaultContextMenu)(Ark_NativePointer node,
                                         const Opt_Boolean* value);
+    void (*setAiSessionOptions)(Ark_NativePointer node,
+                                const Opt_Array_AISessionEvent* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
@@ -27737,7 +27869,7 @@ typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
     void (*setOptions)(Ark_BuilderNodeOps peer,
                        const Ark_BuilderNodeOptions* options);
     Ark_Boolean (*postTouchEvent)(Ark_BuilderNodeOps peer,
-                                  Ark_TouchEvent event);
+                                  const Ark_TouchEventProxy* event);
     Ark_Boolean (*postInputEvent)(Ark_BuilderNodeOps peer,
                                   const Opt_InputEventType* event);
     Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
@@ -28015,6 +28147,9 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_String (*getTextBaseline)(Ark_CanvasRenderer peer);
     void (*setTextBaseline)(Ark_CanvasRenderer peer,
                             const Ark_String* textBaseline);
+    Opt_Boolean (*getAntialias)(Ark_CanvasRenderer peer);
+    void (*setAntialias)(Ark_CanvasRenderer peer,
+                         const Opt_Boolean* antialias);
 } GENERATED_ArkUICanvasRendererAccessor;
 
 typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
@@ -30863,23 +30998,12 @@ typedef struct GENERATED_ArkUIToggleExtenderAccessor {
                                            Ark_Int32 flags);
 } GENERATED_ArkUIToggleExtenderAccessor;
 
-typedef struct GENERATED_ArkUITouchEventAccessor {
-    void (*destroyPeer)(Ark_TouchEvent peer);
-    Ark_TouchEvent (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*stopPropagation)(Ark_TouchEvent peer);
-    Opt_Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
-    void (*preventDefault)(Ark_TouchEvent peer);
-    Ark_TouchType (*getType)(Ark_TouchEvent peer);
-    void (*setType)(Ark_TouchEvent peer,
-                    Ark_TouchType type);
-    Array_TouchObject (*getTouches)(Ark_TouchEvent peer);
-    void (*setTouches)(Ark_TouchEvent peer,
-                       const Array_TouchObject* touches);
-    Array_TouchObject (*getChangedTouches)(Ark_TouchEvent peer);
-    void (*setChangedTouches)(Ark_TouchEvent peer,
-                              const Array_TouchObject* changedTouches);
-} GENERATED_ArkUITouchEventAccessor;
+typedef struct GENERATED_ArkUITouchEventExtenderAccessor {
+    Ark_NativePointer (*getNativePtr)(const Ark_TouchEventProxy* event);
+    void (*stopPropagation)(Ark_NativePointer ptr);
+    Opt_Array_HistoricalPoint (*getHistoricalPoints)(Ark_NativePointer ptr);
+    void (*preventDefault)(Ark_NativePointer ptr);
+} GENERATED_ArkUITouchEventExtenderAccessor;
 
 typedef struct GENERATED_ArkUITouchRecognizerAccessor {
     void (*destroyPeer)(Ark_TouchRecognizer peer);
@@ -30923,7 +31047,7 @@ typedef struct GENERATED_ArkUIUICommonEventAccessor {
     void (*setOnClick)(Ark_UICommonEvent peer,
                        const Opt_Callback_ClickEvent_Void* callback_);
     void (*setOnTouch)(Ark_UICommonEvent peer,
-                       const Opt_Callback_TouchEvent_Void* callback_);
+                       const Opt_Callback_TouchEventProxy_Void* callback_);
     void (*setOnAppear)(Ark_UICommonEvent peer,
                         const Opt_VoidCallback* callback_);
     void (*setOnDisappear)(Ark_UICommonEvent peer,
@@ -31572,7 +31696,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITextTimerControllerAccessor* (*getTextTimerControllerAccessor)();
     const GENERATED_ArkUIThemeOpsAccessor* (*getThemeOpsAccessor)();
     const GENERATED_ArkUIToggleExtenderAccessor* (*getToggleExtenderAccessor)();
-    const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
+    // const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
+    const GENERATED_ArkUITouchEventExtenderAccessor* (*getTouchEventExtenderAccessor)();
     const GENERATED_ArkUITouchRecognizerAccessor* (*getTouchRecognizerAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();
     const GENERATED_ArkUIUICommonEventAccessor* (*getUICommonEventAccessor)();

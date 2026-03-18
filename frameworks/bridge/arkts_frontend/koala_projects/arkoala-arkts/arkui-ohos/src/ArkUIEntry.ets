@@ -32,7 +32,8 @@ import { checkEvents, registerApiEventHandler, wrapSystemCallback, KUint8ArrayPt
 import { Routed } from "./base"
 import { RouterImpl } from "./base/Router"
 import router from "@ohos/router"
-import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
+import { UIContext } from '@ohos/arkui/UIContext';
+import { ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { updateLazyItems } from "arkui/base/LazyForEachImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework/peers/CallbackDeserializeCall'
@@ -40,7 +41,7 @@ import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
 import { flushBuilderRootNode } from './BuilderNode'
-import { EnvDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorEnv";
+import { EnvDecoratedVariable } from './stateManagement/decoratorImpl/decoratorEnv';
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -102,17 +103,17 @@ function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, Detached
             `get DetachedRoots by current instanceId: ${instanceId}`);
     }
 
-    let context = UIContextUtil.getOrCreateUIContextById(instanceId) as UIContextImpl;
+    let context = UIContextUtil.getOrCreateUIContextById(instanceId) as UIContext;
     return context.getDetachedRootEntryManager().getDetachedRoots();
 }
 
-function getUicontextByInstanceId(instanceId: int32): UIContextImpl {
+function getUicontextByInstanceId(instanceId: int32): UIContext {
     let uicontext = UIContextUtil.getUIContextById(instanceId);
     if (uicontext === undefined) {
         uicontext = UIContextUtil.getOrCreateCurrentUIContext();
     }
 
-    return uicontext as UIContextImpl;
+    return uicontext as UIContext;
 }
 
 export function createUiDetachedRoot(
@@ -199,7 +200,7 @@ function drawCurrentCrash(crash: Object) {
 
 export class Application {
     private manager: StateManager | undefined = undefined
-    private uiContext: UIContextImpl | undefined = undefined
+    private uiContext: UIContext | undefined = undefined
     private rootState: ComputableState<PeerNode> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
@@ -241,7 +242,7 @@ export class Application {
         router.runPage(routerOption, builder)
     }
 
-    static createMemoRootStateByName(initName: string, context: UIContextImpl) {
+    static createMemoRootStateByName(initName: string, context: UIContext) {
         let routerImpl = new RouterImpl("")
         router.setRouter(routerImpl)
         let routerOptions: router.NamedRouterOptions = { name: initName }
@@ -273,7 +274,7 @@ export class Application {
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance;
-            let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let uiContext: UIContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             this.instanceId = uiContext.getInstanceId();
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;

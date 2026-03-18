@@ -231,7 +231,7 @@ RefPtr<FrameNode> BubbleTestFourNg::CreateBubbleNode(const TestProperty& testPro
  * @tc.desc: Test GetPositionWithPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest006, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -266,7 +266,7 @@ HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest006, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintOuterBorder.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePaintMethod004, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePaintMethod004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -315,7 +315,7 @@ HWTEST_F(BubbleTestFourNg, BubblePaintMethod004, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod BuildDoubleBorderPath.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePaintMethod005, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePaintMethod005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -352,7 +352,7 @@ HWTEST_F(BubbleTestFourNg, BubblePaintMethod005, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest017, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -382,7 +382,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest017, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest018, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get bubblePattern.
@@ -423,7 +423,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest018, TestSize.Level1)
  * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest019, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest019, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -480,7 +480,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest019, TestSize.Level1)
  * @tc.desc: Test bubble GetButtonRowNode.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest020, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest020, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -527,7 +527,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest020, TestSize.Level1)
  * @tc.desc: Test bubble callback function
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest023, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest023, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -569,7 +569,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest023, TestSize.Level1)
  * @tc.desc: Test bubble callback function
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubblePatternTest024, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubblePatternTest024, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -624,7 +624,7 @@ HWTEST_F(BubbleTestFourNg, BubblePatternTest024, TestSize.Level1)
  * @tc.desc: Test bubble ClipBubbleWithPath.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest007, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -680,7 +680,7 @@ HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest007, TestSize.Level1)
  * @tc.desc: Test bubble UpdateChildPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest008, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -736,7 +736,7 @@ HWTEST_F(BubbleTestFourNg, BubbleAlgorithmTest008, TestSize.Level1)
  * @tc.desc: Test BubblePattern::CreateAccessibilityProperty function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest001, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -763,7 +763,7 @@ HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest001, TestSize.Level1)
  * @tc.desc: Test BubbleAccessibilityProperty::SetShowedState function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest002, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -806,7 +806,7 @@ HWTEST_F(BubbleTestFourNg, BubbleAccessibilityTest002, TestSize.Level1)
  * @tc.desc: Test HandleKeyboard function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, HandleKeyboardTest, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, HandleKeyboardTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -851,7 +851,7 @@ HWTEST_F(BubbleTestFourNg, HandleKeyboardTest, TestSize.Level1)
  * @tc.desc: Test AdjustPositionNew function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, AdjustPositionNewTest, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, AdjustPositionNewTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -898,7 +898,7 @@ HWTEST_F(BubbleTestFourNg, AdjustPositionNewTest, TestSize.Level1)
  * @tc.desc: Test GetBubblePosition function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, GetBubblePositionTest, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, GetBubblePositionTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -943,7 +943,7 @@ HWTEST_F(BubbleTestFourNg, GetBubblePositionTest, TestSize.Level1)
  * @tc.desc: Test CheckArrowPosition function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, CheckArrowPositionTest, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, CheckArrowPositionTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -988,7 +988,7 @@ HWTEST_F(BubbleTestFourNg, CheckArrowPositionTest, TestSize.Level1)
  * @tc.desc: Test UpdateBubbleText function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, UpdateBubbleText, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, UpdateBubbleText, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1044,7 +1044,7 @@ HWTEST_F(BubbleTestFourNg, UpdateBubbleText, TestSize.Level1)
  * @tc.desc: Test UpdateBubbleText function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, UpdateBubbleText01, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, UpdateBubbleText01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1096,7 +1096,7 @@ HWTEST_F(BubbleTestFourNg, UpdateBubbleText01, TestSize.Level1)
  * @tc.desc: Test HandleUIExtensionKeyboard function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, HandleUIExtensionKeyboard, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, HandleUIExtensionKeyboard, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1142,7 +1142,7 @@ HWTEST_F(BubbleTestFourNg, HandleUIExtensionKeyboard, TestSize.Level1)
  * @tc.desc: Test CheckIfNeedRemoveArrow function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, CheckIfNeedRemoveArrow, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, CheckIfNeedRemoveArrow, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1204,7 +1204,7 @@ HWTEST_F(BubbleTestFourNg, CheckIfNeedRemoveArrow, TestSize.Level1)
  * @tc.desc: Test UpdateScrollHeight function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, UpdateScrollHeight, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, UpdateScrollHeight, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1255,7 +1255,7 @@ HWTEST_F(BubbleTestFourNg, UpdateScrollHeight, TestSize.Level1)
  * @tc.desc: Test CheckArrowPosition1 function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, CheckArrowPosition1, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, CheckArrowPosition1, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1298,7 +1298,7 @@ HWTEST_F(BubbleTestFourNg, CheckArrowPosition1, TestSize.Level1)
  * @tc.desc: Test IsUIExtensionWindow function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, IsUIExtensionWindow, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, IsUIExtensionWindow, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1332,7 +1332,7 @@ HWTEST_F(BubbleTestFourNg, IsUIExtensionWindow, TestSize.Level1)
  * @tc.desc: Test InitWrapperRect function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, InitWrapperRect, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, InitWrapperRect, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1381,7 +1381,7 @@ HWTEST_F(BubbleTestFourNg, InitWrapperRect, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with istips Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, CreateBubbleNode001, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, CreateBubbleNode001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1430,7 +1430,7 @@ HWTEST_F(BubbleTestFourNg, CreateBubbleNode001, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with istips Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestFourNg, FitAvailableRect001, TestSize.Level1)
+HWTEST_F(BubbleTestFourNg, FitAvailableRect001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();

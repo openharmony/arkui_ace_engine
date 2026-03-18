@@ -1367,6 +1367,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "registerUpdateJSInstanceCallback", &JSViewPartialUpdate::JSRegisterUpdateJSInstanceCallback);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
@@ -1420,26 +1422,92 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         LOGE("NativeViewPartialUpdate JSRegisterUpdateInstanceForEnvFunc argument invalid");
         return;
     }
- 
-    auto updateInstanceForEnvValue = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-    CHECK_NULL_VOID(updateInstanceForEnvValue);
-    auto updateInstanceForEnvValueFunc = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
-        func = std::move(updateInstanceForEnvValue)](int32_t instanceId) {
+
+    auto jsCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    CHECK_NULL_VOID(jsCallback);
+
+    // Save Env callback
+    updateInstanceForEnvCallback_ = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
+                                     func = std::move(jsCallback)](int32_t instanceId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
+
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
+
+        // Env scenario logic: check GetLatestInstanceId
         if (self->GetLatestInstanceId() == instanceId) {
             return;
         }
+
         self->SetLatestInstanceId(instanceId);
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
         func->ExecuteJS(1, param);
     };
-    ViewPartialUpdateModel::GetInstance()->RegisterUpdateInstanceForEnvFunc(viewNode_,
-        std::move(updateInstanceForEnvValueFunc));
+
+    // Re-register combined callback
+    RegisterCombinedCallbackToBackend();
 }
+
+void JSViewPartialUpdate::JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("NativeViewPartialUpdate JSRegisterUpdateJSInstanceCallback argument invalid");
+        return;
+    }
+
+    auto jsCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    CHECK_NULL_VOID(jsCallback);
+
+    // Save Switch callback
+    updateJSInstanceCallback_ = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
+                                 func = std::move(jsCallback), viewNode = this->viewNode_](int32_t instanceId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        // Switch scenario logic: check GetInstanceId
+        if (self->GetInstanceId() != instanceId) {
+            self->SetInstanceId(instanceId);
+            // Call the frontend callback to clear dirtDescendantElementIds_ when needRebuild is true
+            RefPtr<AceType> node = viewNode.Upgrade();
+            auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
+            CHECK_NULL_VOID(customNodeBase);
+            if (customNodeBase->NeedRebuild()) {
+                func->ExecuteJS(0, nullptr);
+                customNodeBase->ResetNeedRebuild();
+            }
+        }
+    };
+
+    // Re-register combined callback
+    RegisterCombinedCallbackToBackend();
+}
+
+void JSViewPartialUpdate::RegisterCombinedCallbackToBackend()
+{
+    // Create combined callback
+    auto combinedCallback = [weak = WeakClaim(this)](int32_t instanceId) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        // Call Env callback
+        if (self->updateInstanceForEnvCallback_) {
+            self->updateInstanceForEnvCallback_(instanceId);
+        }
+
+        // Call Switch callback (check needRebuild_ first)
+        if (self->updateJSInstanceCallback_) {
+            self->updateJSInstanceCallback_(instanceId);
+        }
+    };
+
+    // Register combined callback to backend using RegisterUpdateJSInstanceCallback
+    // This directly sets updateJSInstanceCallback_ without needRebuild_ check
+    ViewPartialUpdateModel::GetInstance()->RegisterUpdateJSInstanceCallback(
+        viewNode_, std::move(combinedCallback));
+}
+
 
 void JSViewPartialUpdate::SetLatestInstanceId(const int32_t instanceId)
 {

@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #include "node_model.h"
 #include "node_model_safely.h"
+#include "frameworks/core/components_ng/base/ui_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -758,4 +759,90 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest028, TestSize.Level1)
     ArkUI_NodeHandle node = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_UNDEFINED);
     ASSERT_EQ(node, nullptr);
     DisposeNodeSafely(node);
+}
+
+/**
+ * @tc.name: NodeModelSafelyTest029
+ * @tc.desc: Test safely interfaces return invalid thread result for attached node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest029, TestSize.Level1)
+{
+    ArkUI_NodeHandle node = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->uiNodeHandle, nullptr);
+    auto* uiNode = reinterpret_cast<OHOS::Ace::NG::UINode*>(node->uiNodeHandle);
+    ASSERT_NE(uiNode, nullptr);
+    uiNode->SetIsFree(false);
+
+    int userData = 1;
+    auto eventReceiver = [](ArkUI_NodeEvent* event) {};
+    EXPECT_EQ(SetUserDataSafely(node, &userData), OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(GetUserDataSafely(node), nullptr);
+    EXPECT_EQ(AddNodeEventReceiverSafely(node, eventReceiver),
+        OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(RemoveNodeEventReceiverSafely(node, eventReceiver),
+        OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+
+    uiNode->SetIsFree(true);
+    DisposeNodeSafely(node);
+}
+
+/**
+ * @tc.name: NodeModelSafelyTest030
+ * @tc.desc: Test DisposeNodeSafely and RemoveAllChildrenSafely invalid thread branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest030, TestSize.Level1)
+{
+    ArkUI_NodeHandle parent = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(parent, nullptr);
+    ArkUI_NodeHandle child = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(child, nullptr);
+    ASSERT_EQ(AddChildSafely(parent, child), OHOS::Ace::ERROR_CODE_NO_ERROR);
+
+    auto* parentUiNode = reinterpret_cast<OHOS::Ace::NG::UINode*>(parent->uiNodeHandle);
+    ASSERT_NE(parentUiNode, nullptr);
+    parentUiNode->SetIsFree(false);
+    EXPECT_EQ(RemoveAllChildrenSafely(parent), OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(GetParentSafely(child), parent);
+
+    DisposeNodeSafely(parent);
+    EXPECT_TRUE(IsValidArkUINodeMultiThread(parent));
+
+    parentUiNode->SetIsFree(true);
+    EXPECT_EQ(RemoveAllChildrenSafely(parent), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(GetTotalChildCountSafely(parent), 0);
+
+    DisposeNodeSafely(parent);
+    DisposeNodeSafely(child);
+}
+
+/**
+ * @tc.name: NodeModelSafelyTest031
+ * @tc.desc: Test GetPreviousSiblingSafely function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest031, TestSize.Level1)
+{
+    ArkUI_NodeHandle parent = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(parent, nullptr);
+    ArkUI_NodeHandle child1 = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(child1, nullptr);
+    ArkUI_NodeHandle child2 = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+    ASSERT_NE(child2, nullptr);
+    AddChildSafely(parent, child1);
+    AddChildSafely(parent, child2);
+
+    ArkUI_NodeHandle ret = GetPreviousSiblingSafely(nullptr);
+    EXPECT_EQ(ret, nullptr);
+
+    ret = GetPreviousSiblingSafely(child2);
+    EXPECT_EQ(ret, child1);
+
+    RemoveChildSafely(parent, child1);
+    RemoveChildSafely(parent, child2);
+    DisposeNodeSafely(parent);
+    DisposeNodeSafely(child1);
+    DisposeNodeSafely(child2);
 }

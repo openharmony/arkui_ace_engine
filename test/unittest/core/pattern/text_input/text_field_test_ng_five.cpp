@@ -664,4 +664,32 @@ HWTEST_F(TextFieldTestNgFive, ResetChainWeight001, TestSize.Level1)
     EXPECT_NE(frameNode_, nullptr);
 }
 
+/**
+ * @tc.name: IsHorizontalScrollEnabled
+ * @tc.desc: Test IsHorizontalScrollEnabled with all conditions at boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgFive, IsHorizontalScrollEnabled, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextArea node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetTextInputFlag(false);
+
+    pattern_->SetHorizontalScrolling(false);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    EXPECT_FALSE(pattern_->IsHorizontalScrollEnabled());
+
+    pattern_->SetHorizontalScrolling(true);
+    TextFieldModelNG::SetMaxLines(AceType::RawPtr(frameNode_), 1);
+    EXPECT_FALSE(pattern_->IsHorizontalScrollEnabled());
+
+    pattern_->SetHorizontalScrolling(true);
+    TextFieldModelNG::SetMaxLines(AceType::RawPtr(frameNode_), 10);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    TextFieldModelNG::SetType(AceType::RawPtr(frameNode_), TextInputType::UNSPECIFIED);
+    EXPECT_TRUE(pattern_->IsHorizontalScrollEnabled());
+}
 } // namespace OHOS::Ace::NG

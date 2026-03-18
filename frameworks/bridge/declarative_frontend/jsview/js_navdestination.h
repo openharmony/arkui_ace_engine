@@ -57,6 +57,7 @@ public:
     static void SetPreferredOrientation(const JSCallbackInfo& info);
     static void EnableStatusBar(const JSCallbackInfo& info);
     static void EnableNavigationIndicator(const JSCallbackInfo& info);
+    static void SetFreeze(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

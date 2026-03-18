@@ -3039,6 +3039,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_setSyncLoad(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _WaterFlowAttribute_setSupportEmptyBranchInLazyLoading(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WaterFlowAttribute_setOnScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_setOnScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -3342,6 +3344,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebAttribute_setOnMicrophoneCaptureStateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableDefaultContextMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _WebAttribute_setAiSessionOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -3774,7 +3778,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BuilderNodeOps_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _BuilderNodeOps_postTouchEvent(ptr: KPointer, event: KPointer): boolean
+    native static _BuilderNodeOps_postTouchEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): boolean
     @ani.unsafe.Direct
     native static _BuilderNodeOps_postInputEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): boolean
     @ani.unsafe.Direct
@@ -3983,6 +3987,10 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_getTextBaseline(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _CanvasRenderer_setTextBaseline(ptr: KPointer, textBaseline: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getAntialias(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CanvasRenderer_setAntialias(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
@@ -6558,6 +6566,14 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TouchEventExtender_getNativePtr(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _TouchEventExtender_stopPropagation(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _TouchEventExtender_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchEventExtender_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _TouchRecognizer_construct(): KPointer
     @ani.unsafe.Direct

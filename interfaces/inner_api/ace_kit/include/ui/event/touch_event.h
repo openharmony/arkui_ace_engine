@@ -142,6 +142,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetSourceType(SourceType sourceType);
     TouchEvent& SetSourceTool(SourceTool sourceTool);
     TouchEvent& SetTouchEventId(int32_t touchEventId);
+    TouchEvent& SetEventHandleId(int32_t eventHandleId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
     TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);

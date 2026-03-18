@@ -69,6 +69,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/text/text_emoji_processor.h"
@@ -154,11 +155,8 @@ constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 constexpr float TIME_UNIT = 1000.0f;
 constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
-constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
-constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
 constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
-constexpr Dimension MOUSE_SCROLL_BAR_REGION_WIDTH = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
@@ -330,6 +328,9 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         textFieldOverlayModifier_ =
             AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
         SetScrollBarOverlayModifier(textFieldOverlayModifier_);
+    }
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->AttachModifier(textFieldOverlayModifier_);
     }
     if (!textFieldForegroundModifier_) {
         textFieldForegroundModifier_ = AceType::MakeRefPtr<TextFieldForegroundModifier>(WeakClaim(this));
@@ -799,7 +800,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
-    StopScrollable();
+    StopScrolling();
     CheckScrollable();
     UpdateTextFieldScrollBarRegion(oldContentRect != contentRect_);
     if (config.frameSizeChange) {
@@ -1175,9 +1176,19 @@ void TextFieldPattern::OnScrollEndCallback()
     }
 }
 
+void TextFieldPattern::OnScrollEndCallbackWithAxis(Axis axis)
+{
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->ScheduleDisappearDelayTaskWitAxis(axis);
+    }
+    if (!IsUsingMouse() && SelectOverlayIsOn() && isTextSelectionMenuShow_ && CheckSelectAreaVisible()) {
+        selectOverlay_->ShowMenu();
+    }
+}
+
 void TextFieldPattern::OnTextAreaScroll(float offset)
 {
-    if (!IsTextArea() || textRect_.Height() <= contentRect_.Height()) {
+    if (textRect_.Height() <= contentRect_.Height()) {
         return;
     }
     if (textRect_.GetY() + offset > contentRect_.GetY()) {
@@ -1187,13 +1198,16 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     }
     currentOffset_ = textRect_.GetY() + offset;
     textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
-    UpdateHandlesOffsetOnScroll(offset);
-    UpdateScrollBarOffset();
+    UpdateHandlesOffsetOnScroll(offset, true);
+    UpdateScrollBarOffsetWithAxis(Axis::VERTICAL);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::OnTextInputScroll(float offset)
 {
-    if (IsTextArea() || textRect_.Width() <= contentRect_.Width()) {
+    if (textRect_.Width() <= contentRect_.Width()) {
         return;
     }
     if (textRect_.GetX() + offset > contentRect_.GetX()) {
@@ -1203,7 +1217,8 @@ void TextFieldPattern::OnTextInputScroll(float offset)
     }
     currentOffset_ = textRect_.GetX() + offset;
     textRect_.SetOffset(OffsetF(currentOffset_, textRect_.GetY()));
-    UpdateHandlesOffsetOnScroll(offset);
+    UpdateHandlesOffsetOnScroll(offset, false);
+    UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1879,6 +1894,9 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         }
         return true;
     }
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_SPACE && focusIndex_ != FocuseIndex::TEXT) {
+        return HandleSpaceKeyClickEvent();
+    }
     if (directionKeysMoveFocusOut_ && (IsMoveFocusOutFromLeft(event) || IsMoveFocusOutFromRight(event))) {
         TextInputClient::HandleKeyEvent(event);
         return false;
@@ -2550,7 +2568,11 @@ void TextFieldPattern::HandleTouchUp()
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
-    ScheduleDisappearDelayTask();
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->ScheduleScrollingDisappearDelayTask();
+    } else {
+        ScheduleDisappearDelayTask();
+    }
 }
 
 void TextFieldPattern::ResetTouchAndMoveCaretState()
@@ -3035,7 +3057,7 @@ void TextFieldPattern::InitDragDropCallBack()
         Offset localOffset =
             Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
         if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
-            pattern->UpdateContentScroller(localOffset, AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION, false);
+            pattern->UpdateContentScroller(localOffset, true, AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION, false);
         } else {
             pattern->contentScroller_.OnBeforeScrollingCallback(localOffset);
             pattern->PauseContentScroll();
@@ -3234,6 +3256,10 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 
 bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
 {
+    if (IsFreeScrollEnabled() && hasMousePressed_) {
+        return freeScroller_->CheckMousePressedOverScrollBar(info);
+    }
+
     if (IsMouseOverScrollBar(&info) && hasMousePressed_) {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
@@ -3829,6 +3855,9 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
 
 void TextFieldPattern::ProcessScroll()
 {
+    if (HandleHorizontalScroll()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (IsTextArea() || IsNormalInlineState()) {
@@ -3858,6 +3887,95 @@ void TextFieldPattern::ProcessScroll()
             SetScrollEnabled(false);
         }
     }
+}
+
+bool TextFieldPattern::HandleHorizontalScroll()
+{
+    if (!IsHorizontalScrollEnabled()) {
+        if (freeScroller_ && freeScroller_->IsAttachedModifier()) {
+            RemoveOverlayModifier();
+        }
+        freeScroller_.Reset();
+        return false;
+    }
+    // Disable vertical scrollbar and setup horizontal scroll
+    SetAxis(Axis::NONE);
+    SetScrollBar(DisplayMode::OFF);
+    SetScrollEnabled(false);
+    // Remove existing scrollable event
+    if (auto scrollableEvent = GetScrollableEvent()) {
+        if (auto gestureHub = GetGestureHub()) {
+            gestureHub->RemoveScrollableEvent(scrollableEvent);
+        }
+    }
+    // Create free scroller if needed
+    if (!freeScroller_) {
+        freeScroller_ = MakeRefPtr<TextFieldFreeScroller>(WeakClaim(this));
+    }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+    if (!barState_.has_value()) {
+        barState_ = barState;
+    }
+    scrollBarVisible_ = (barState != DisplayMode::OFF);
+    freeScroller_->SetScrollBar(barState);
+    freeScroller_->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
+    if (!freeScroller_->IsAttachedModifier()) {
+        RemoveOverlayModifier();
+    }
+    return true;
+}
+
+void TextFieldPattern::RemoveOverlayModifier()
+{
+    if (textFieldOverlayModifier_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RemoveOverlayModifier(textFieldOverlayModifier_);
+        SetScrollBarOverlayModifier(nullptr);
+        textFieldOverlayModifier_.Reset();
+    }
+}
+
+
+bool TextFieldPattern::OnScrollWithAxisCallback(float offset, int32_t source, Axis axis)
+{
+    if (source == SCROLL_FROM_START) {
+        PlayScrollBarAppearAnimation(axis);
+        if (selectOverlay_->IsCurrentMenuVisibile()) {
+            isTextSelectionMenuShow_ = true;
+        } else if (CheckSelectAreaVisible()) {
+            isTextSelectionMenuShow_ = false;
+        }
+        selectOverlay_->HideMenu(true);
+        return true;
+    }
+    if (IsReachedBoundary(offset, axis)) {
+        return false;
+    }
+    PlayScrollBarAppearAnimation(axis);
+    if (axis == Axis::HORIZONTAL) {
+        OnTextInputScroll(offset);
+    } else if (axis == Axis::VERTICAL) {
+        OnTextAreaScroll(offset);
+    }
+    return true;
+}
+
+bool TextFieldPattern::IsScrollEnabled() const
+{
+    return GetScrollEnabled() || IsHorizontalScrollEnabled();
+}
+
+void TextFieldPattern::StopScrolling()
+{
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->StopScrolling();
+    }
+    StopScrollable();
 }
 
 void TextFieldPattern::HandleDeleteOnCounterScene()
@@ -4525,7 +4643,7 @@ bool TextFieldPattern::BetweenSelectedPosition(GestureEvent& info)
         return false;
     }
     auto localOffset = info.GetLocalLocation();
-    auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+    auto offsetX = IsTextArea() && !IsHorizontalScrollEnabled() ? contentRect_.GetX() : textRect_.GetX();
     auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
     Offset offset = localOffset - Offset(offsetX, offsetY);
     for (const auto& rect : selectController_->GetSelectedRects()) {
@@ -5029,12 +5147,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
-    auto scrollBar = GetScrollBar();
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
     windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
-    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || IsMouseOverScrollBar(&info))) {
+    if (HandleMouseEventByScrollBar(info)) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
@@ -5060,6 +5177,22 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (!IsSelected()) {
         ResetOriginCaretPosition();
     }
+}
+
+bool TextFieldPattern::HandleMouseEventByScrollBar(MouseInfo& info)
+{
+    auto scrollBar = GetScrollBar();
+    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || IsMouseOverScrollBar(&info))) {
+        return true;
+    }
+
+    if (IsFreeScrollEnabled() && freeScroller_->HandleMouseEventByScrollBar(info)) {
+        if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+            StopContentScroll();
+        }
+        return true;
+    }
+    return false;
 }
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
@@ -5196,7 +5329,11 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     if (GetTextUtf16Value().empty()) {
         return;
     }
-    selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->UpdateSecondHandleInfoByMouse(info);
+    } else {
+        selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    }
     showSelect_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -5220,6 +5357,7 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
         NotifyOnEditChanged(true);
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    StopContentScroll();
 }
 
 void TextFieldPattern::FreeMouseStyleHoldNode(const Offset location)
@@ -7185,7 +7323,7 @@ void TextFieldPattern::HandleOnPageUp()
     float frameRectHeight = std::max(frameRect_.Height(), PreferredLineHeight());
     float maxFrameHeight =
         frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
-    OnScrollCallback(maxFrameHeight, SCROLL_FROM_JUMP);
+    OnScrollWithAxisCallback(maxFrameHeight, SCROLL_FROM_JUMP, Axis::VERTICAL);
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
     selectController_->UpdateCaretInfoByOffset(offset, true);
@@ -7201,7 +7339,7 @@ void TextFieldPattern::HandleOnPageDown()
     float frameRectHeight = std::max(frameRect_.Height(), PreferredLineHeight());
     float maxFrameHeight =
         frameRectHeight - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
-    OnScrollCallback(-maxFrameHeight, SCROLL_FROM_JUMP);
+    OnScrollWithAxisCallback(-maxFrameHeight, SCROLL_FROM_JUMP, Axis::VERTICAL);
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), maxFrameHeight);
     selectController_->UpdateCaretInfoByOffset(offset, true);
@@ -8229,6 +8367,16 @@ std::string TextFieldPattern::GetBarStateString() const
 
 void TextFieldPattern::UpdateScrollBarOffset()
 {
+    UpdateScrollBarOffsetWithAxis(Axis::VERTICAL);
+    UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL);
+}
+
+void TextFieldPattern::UpdateScrollBarOffsetWithAxis(Axis axis)
+{
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->UpdateScrollBarOffsetWithAxis(axis);
+        return;
+    }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -8267,16 +8415,24 @@ void TextFieldPattern::UpdateTextFieldScrollBarRegion(bool needUpdateOffset)
     UpdateScrollBarOffset();
 }
 
-void TextFieldPattern::PlayScrollBarAppearAnimation()
+void TextFieldPattern::PlayScrollBarAppearAnimation(Axis axis)
 {
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->PlayScrollBarAppearAnimation(axis);
+        return;
+    }
     auto scrollBar = GetScrollBar();
-    if (scrollBar) {
+    if (scrollBar && axis == Axis::VERTICAL) {
         scrollBar->PlayScrollBarAppearAnimation();
     }
 }
 
 void TextFieldPattern::ScheduleDisappearDelayTask()
 {
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->ScheduleDisappearDelayTask();
+        return;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->SetPressed(false);
@@ -8287,23 +8443,8 @@ void TextFieldPattern::ScheduleDisappearDelayTask()
 
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
-    if (source == SCROLL_FROM_START) {
-        PlayScrollBarAppearAnimation();
-        if (selectOverlay_->IsCurrentMenuVisibile()) {
-            isTextSelectionMenuShow_ = true;
-        } else if (CheckSelectAreaVisible()) {
-            isTextSelectionMenuShow_ = false;
-        }
-        selectOverlay_->HideMenu(true);
-        return true;
-    }
-    if (IsReachedBoundary(offset)) {
-        return false;
-    }
-    PlayScrollBarAppearAnimation();
-    OnTextInputScroll(offset);
-    OnTextAreaScroll(offset);
-    return true;
+    auto axis = IsTextArea() ? Axis::VERTICAL : Axis::HORIZONTAL;
+    return OnScrollWithAxisCallback(offset, source, axis);
 }
 
 void TextFieldPattern::CheckScrollable()
@@ -9471,9 +9612,9 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-bool TextFieldPattern::IsReachedBoundary(float offset)
+bool TextFieldPattern::IsReachedBoundary(float offset, Axis axis)
 {
-    if (IsTextArea()) {
+    if (axis == Axis::VERTICAL) {
         return (NearEqual(textRect_.GetY(), contentRect_.GetY()) && GreatNotEqual(offset, 0.0f)) ||
                (NearEqual(textRect_.GetY() + textRect_.Height(), contentRect_.GetY() + contentRect_.Height()) &&
                    LessNotEqual(offset, 0.0f));
@@ -9636,7 +9777,7 @@ size_t TextFieldPattern::GetLineCount() const
     return paragraph_ ? paragraph_->GetLineCount() : 0;
 }
 
-void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
+void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset, bool isVertical)
 {
     if (SelectOverlayIsOn()) {
         selectController_->UpdateSecondHandleOffset();
@@ -9645,11 +9786,11 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
             selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
             selectOverlay_->UpdateAllHandlesOffset();
         } else {
-            selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+            selectController_->UpdateCaretOffset(isVertical ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectOverlay_->UpdateSecondHandleOffset();
         }
     } else {
-        selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+        selectController_->UpdateCaretOffset(isVertical ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
     }
 }
 
@@ -9971,6 +10112,47 @@ bool TextFieldPattern::HandleSpaceEvent()
             UnitResponseKeyEvent();
         }
         return true;
+    }
+    return false;
+}
+
+bool TextFieldPattern::HandleSpaceKeyClickEvent()
+{
+    if (focusIndex_ == FocuseIndex::CANCEL) {
+        auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        CHECK_NULL_RETURN(cleanNodeArea, false);
+        auto frameNode = cleanNodeArea->GetFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, false);
+        gestureHub->ActClick();
+        return true;
+    }
+    if (focusIndex_ == FocuseIndex::VOICE) {
+        auto voiceNodeArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+        CHECK_NULL_RETURN(voiceNodeArea, false);
+        auto frameNode = voiceNodeArea->GetFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, false);
+        gestureHub->ActClick();
+        return true;
+    }
+    if (focusIndex_ == FocuseIndex::UNIT) {
+        if (IsShowPasswordIcon()) {
+            auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+            CHECK_NULL_RETURN(passwordArea, false);
+            auto frameNode = passwordArea->GetFrameNode();
+            CHECK_NULL_RETURN(frameNode, false);
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(gestureHub, false);
+            gestureHub->ActClick();
+            return true;
+        }
+        if (IsShowUnit()) {
+            UnitResponseKeyEvent();
+            return true;
+        }
     }
     return false;
 }
@@ -11352,12 +11534,21 @@ bool TextFieldPattern::IsTextEditableForStylus() const
     return !IsInPasswordMode();
 }
 
-void TextFieldPattern::UpdateContentScroller(const Offset& offset, float delay, bool enableScrollOutside)
+void TextFieldPattern::UpdateContentScroller(
+    const Offset& offset, bool hasHotArea, float delay, bool enableScrollOutside)
 {
     auto localOffset = enableScrollOutside ? AdjustAutoScrollOffset(offset) : offset;
-    auto scrollStep = CalcAutoScrollStepOffset(localOffset);
+    auto axis = GetAxis();
+    std::optional<float> scrollStep;
+    if (IsFreeScrollEnabled()) {
+        freeScroller_->UpdateAutoScrollStepOffset(
+            { .offset = offset, .hasHotArea = hasHotArea, .enableScrollOutside = enableScrollOutside }, axis,
+            scrollStep);
+    } else {
+        scrollStep = CalcAutoScrollStepOffset(localOffset, axis);
+    }
     // 在热区外移动
-    if (!scrollStep || (!GetScrollEnabled() && !moveCaretState_.isMoveCaret)) {
+    if (!scrollStep || (!IsScrollEnabled() && !moveCaretState_.isMoveCaret)) {
         contentScroller_.OnBeforeScrollingCallback(localOffset);
         PauseContentScroll();
         contentScroller_.hotAreaOffset.reset();
@@ -11365,6 +11556,7 @@ void TextFieldPattern::UpdateContentScroller(const Offset& offset, float delay, 
     }
     contentScroller_.stepOffset = scrollStep.value();
     contentScroller_.localOffset = localOffset;
+    contentScroller_.axis = axis;
     if (contentScroller_.isScrolling) {
         return;
     }
@@ -11394,10 +11586,9 @@ Offset TextFieldPattern::AdjustAutoScrollOffset(const Offset& offset)
     return Offset(offsetX, offsetY);
 }
 
-std::optional<float> TextFieldPattern::CalcAutoScrollStepOffset(const Offset& localOffset)
+std::optional<float> TextFieldPattern::CalcAutoScrollStepOffset(const Offset& localOffset, Axis axis)
 {
     auto contentRect = GetContentRect();
-    auto axis = GetAxis();
     auto isVertical = (axis == Axis::VERTICAL);
     auto hotArea = isVertical ? AUTO_SCROLL_HOT_ZONE_HEIGHT.ConvertToPx() : AUTO_SCROLL_HOT_ZONE_WIDTH.ConvertToPx();
     if (isVertical) {
@@ -11470,7 +11661,8 @@ void TextFieldPattern::ScheduleContentScroll(float delay)
         CHECK_NULL_VOID(pattern);
         pattern->contentScroller_.isScrolling = true;
         pattern->contentScroller_.hotAreaOffset = std::nullopt;
-        pattern->OnScrollCallback(pattern->contentScroller_.stepOffset, SCROLL_FROM_UPDATE);
+        pattern->OnScrollWithAxisCallback(
+            pattern->contentScroller_.stepOffset, SCROLL_FROM_UPDATE, pattern->contentScroller_.axis);
         if (pattern->contentScroller_.scrollingCallback) {
             pattern->contentScroller_.scrollingCallback(pattern->contentScroller_.localOffset);
         }
@@ -12363,7 +12555,7 @@ bool TextFieldPattern::BetweenSelectedPosition(const Offset& globalOffset)
         return false;
     }
     auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
-    auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+    auto offsetX = IsTextArea() && !IsHorizontalScrollEnabled() ? contentRect_.GetX() : textRect_.GetX();
     auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
     Offset offset = localOffset - Offset(offsetX, offsetY);
     for (const auto& rect : selectController_->GetSelectedRects()) {
@@ -13328,10 +13520,15 @@ void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
     if (start > end) {
         return;
     }
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    auto isRTL = layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    float destX;
-    float destY;
+    float destX = 0.0f;
+    float destY = 0.0f;
+    CalculateScrollDestination(start, end, destX, destY);
+    PerformScrollToPosition(destX, destY);
+    UpdateOverlayHandleOffsetAfterScroll();
+}
+
+void TextFieldPattern::CalculateScrollDestination(int32_t start, int32_t end, float& destX, float& destY)
+{
     if (start == end) {
         auto caretRect = selectController_->GetCaretRectByIndex(start, TextAffinity::DOWNSTREAM);
         destX = caretRect.Left() - textRect_.Left();
@@ -13342,6 +13539,9 @@ void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
         if (textBoxes.empty()) {
             return;
         }
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
         destX = isRTL ? textBoxes[0].Right() : textBoxes[0].Left();
         destY = textBoxes[0].Top();
         for (const auto& rect : textBoxes) {
@@ -13349,14 +13549,29 @@ void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
             destY = std::min(destY, rect.GetY());
         }
     }
-    StopScrollable();
+}
+
+void TextFieldPattern::PerformScrollToPosition(float destX, float destY)
+{
+    StopScrolling();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto contentEdge = isRTL ? contentRect_.Right() : contentRect_.Left();
+    auto horizontalDelta = contentEdge - (textRect_.Left() + destX);
     if (IsTextArea()) {
-        OnScrollCallback(contentRect_.Top() - (textRect_.Top() + destY), SCROLL_FROM_NONE);
+        OnScrollWithAxisCallback(contentRect_.Top() - (textRect_.Top() + destY), SCROLL_FROM_NONE, Axis::VERTICAL);
+        if (IsHorizontalScrollEnabled()) {
+            OnScrollWithAxisCallback(horizontalDelta, SCROLL_FROM_NONE, Axis::HORIZONTAL);
+        }
     } else {
-        auto contentEdge = isRTL ? contentRect_.Right() : contentRect_.Left();
-        OnScrollCallback(contentEdge - (textRect_.Left() + destX), SCROLL_FROM_NONE);
+        OnScrollWithAxisCallback(horizontalDelta, SCROLL_FROM_NONE, Axis::HORIZONTAL);
     }
     OnScrollEndCallback();
+}
+
+void TextFieldPattern::UpdateOverlayHandleOffsetAfterScroll()
+{
     if (selectOverlay_->SelectOverlayIsCreating()) {
         selectOverlay_->AddTaskAfterShowOverlay([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();

@@ -1399,4 +1399,98 @@ HWTEST_F(MenuPattern2TestNg, GetLastMenuItem001, TestSize.Level1)
     auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
     EXPECT_EQ(menuPattern->GetLastMenuItem(), menuItemNode);
 }
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode001
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "CustomNode");
+    customNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(customNode), nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode002
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    scrollNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto scrollPaintProperty = scrollNode->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(scrollPaintProperty, nullptr);
+    EXPECT_EQ(scrollPaintProperty->GetScrollBarMode().value(), DisplayMode::ON);
+
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode003
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto dummyScrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    dummyScrollNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto paintProperty = dummyScrollNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
+
+    auto scrollPattern = dummyScrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_EQ(scrollPattern, nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode004
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode004, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    textNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto paintProperty = textNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
+}
 } // namespace OHOS::Ace::NG

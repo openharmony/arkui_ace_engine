@@ -1670,13 +1670,13 @@ const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controll
       getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
     }],
     ['List', (node: FrameNode, controller: Scroller) => {
-      getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+      getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller, true);
     }],
     ['WaterFlow', (node: FrameNode, controller: Scroller) => {
       getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
     }],
     ['Grid', (node: FrameNode, controller: Scroller) => {
-      getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+      getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller, true);
     }],
     ['Text', (node: FrameNode, controller: TextController) => {
       getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });

@@ -203,11 +203,13 @@ HWTEST_F(WebPatternBranchTestUT, IsRootNeedExportTexture, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
+    std::string surfaceId = "123";
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     frameNode->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     frameNode->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_DISPLAY);
+    frameNode->exportTextureInfo_->SetSurfaceId(surfaceId);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     RefPtr<UINode> son = frameNode;
@@ -218,10 +220,13 @@ HWTEST_F(WebPatternBranchTestUT, IsRootNeedExportTexture, TestSize.Level1)
     parent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     grandParent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     parent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_DISPLAY);
+    parent->exportTextureInfo_->SetSurfaceId(surfaceId);
     grandParent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
+    grandParent->exportTextureInfo_->SetSurfaceId(surfaceId);
     son->SetParent(parent);
     parent->SetParent(grandParent);
     ASSERT_NE(webPattern, nullptr);
+    NG::SameLayerSurface::SetSameLayerSurfaceId(surfaceId);
     webPattern->OnModifyDone();
     bool flag = webPattern->IsRootNeedExportTexture();
     ASSERT_TRUE(flag);

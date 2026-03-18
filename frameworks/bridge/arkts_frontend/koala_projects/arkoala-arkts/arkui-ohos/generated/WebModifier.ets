@@ -20,7 +20,7 @@ import { CommonMethodModifier } from './CommonMethodModifier'
 import { AttributeModifier } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from './component/web'
+import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, AISessionEvent, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from './component/web'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions } from './component/common'
@@ -191,6 +191,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     public _onCameraCaptureStateChange_0_0value?: OnCameraCaptureStateChangeCallback | undefined
     public _onMicrophoneCaptureStateChange_0_0value?: OnMicrophoneCaptureStateChangeCallback | undefined
     public _enableDefaultContextMenu_0_0value?: boolean | undefined
+    public _aiSessionOptions_0_0value?: Array<AISessionEvent> | undefined
     public _registerNativeEmbedRule_0_0value?: string | undefined
     public _registerNativeEmbedRule_0_1value?: string | undefined
     public _bindSelectionMenu_0_0value?: WebElementType | undefined
@@ -2694,7 +2695,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         if (flagArray[145] != 0) {
             switch (flagArray[145]) {
                 case 1: {
-                    peer.setRegisterNativeEmbedRuleAttribute((this._registerNativeEmbedRule_0_0value as string | undefined), (this._registerNativeEmbedRule_0_1value as string | undefined));
+                    peer.setAiSessionOptionsAttribute((this._aiSessionOptions_0_0value as Array<AISessionEvent> | undefined));
                     flagArray[145] = 2;
                     break;
                 }
@@ -2704,14 +2705,14 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[145] = 0;
-                    peer.setRegisterNativeEmbedRuleAttribute((undefined as string | undefined), (undefined as string | undefined));
+                    peer.setAiSessionOptionsAttribute((undefined as Array<AISessionEvent> | undefined));
                 }
             }
         }
         if (flagArray[146] != 0) {
             switch (flagArray[146]) {
                 case 1: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
+                    peer.setRegisterNativeEmbedRuleAttribute((this._registerNativeEmbedRule_0_0value as string | undefined), (this._registerNativeEmbedRule_0_1value as string | undefined));
                     flagArray[146] = 2;
                     break;
                 }
@@ -2721,6 +2722,23 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[146] = 0;
+                    peer.setRegisterNativeEmbedRuleAttribute((undefined as string | undefined), (undefined as string | undefined));
+                }
+            }
+        }
+        if (flagArray[147] != 0) {
+            switch (flagArray[147]) {
+                case 1: {
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
+                    flagArray[147] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[147] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[147] = 0;
                     peer.setBindSelectionMenuAttribute((undefined as WebElementType | undefined), (undefined as CustomBuilder | undefined), (undefined as WebResponseType | undefined), (undefined as SelectionMenuOptionsExt | undefined | undefined));
                 }
             }
@@ -4498,6 +4516,18 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
             switch (flagArray[145]) {
                 case 1:
                 case 3: {
+                    this.aiSessionOptions((modifier._aiSessionOptions_0_0value as Array<AISessionEvent> | undefined));
+                    break;
+                }
+                default: {
+                    this.aiSessionOptions((undefined as Array<AISessionEvent> | undefined));
+                }
+            }
+        }
+        if (flagArray[146] != 0) {
+            switch (flagArray[146]) {
+                case 1:
+                case 3: {
                     this.registerNativeEmbedRule((modifier._registerNativeEmbedRule_0_0value as string | undefined), (modifier._registerNativeEmbedRule_0_1value as string | undefined));
                     break;
                 }
@@ -4506,8 +4536,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (flagArray[146] != 0) {
-            switch (flagArray[146]) {
+        if (flagArray[147] != 0) {
+            switch (flagArray[147]) {
                 case 1:
                 case 3: {
                     this.bindSelectionMenu((modifier._bindSelectionMenu_0_0value as WebElementType | undefined), (modifier._bindSelectionMenu_0_1value as CustomBuilder | undefined), (modifier._bindSelectionMenu_0_2value as WebResponseType | undefined), (modifier._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined));
@@ -5969,27 +5999,37 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
-    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        if (((this._flagArray[145]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
+    aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        if (((this._flagArray[145]) == (0)) || (true)) {
             this._flagArray[145] = 1
-            this._registerNativeEmbedRule_0_0value = tag
-            this._registerNativeEmbedRule_0_1value = type
+            this._aiSessionOptions_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[145] = 3
         }
         return this
     }
-    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        if (((this._flagArray[146]) == (0)) || (true) || (true) || (true) || (true)) {
+    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+        if (((this._flagArray[146]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
             this._flagArray[146] = 1
+            this._registerNativeEmbedRule_0_0value = tag
+            this._registerNativeEmbedRule_0_1value = type
+            this._state.fireChange()
+        } else {
+            this._flagArray[146] = 3
+        }
+        return this
+    }
+    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+        if (((this._flagArray[147]) == (0)) || (true) || (true) || (true) || (true)) {
+            this._flagArray[147] = 1
             this._bindSelectionMenu_0_0value = elementType
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
             this._state.fireChange()
         } else {
-            this._flagArray[146] = 3
+            this._flagArray[147] = 3
         }
         return this
     }

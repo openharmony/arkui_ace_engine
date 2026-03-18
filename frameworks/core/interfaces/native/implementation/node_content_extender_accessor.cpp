@@ -57,13 +57,18 @@ Ark_Int32 AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
     CHECK_NULL_RETURN(peerImpl->content, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
-    CHECK_NULL_RETURN(frameNodePeer->node, ERROR_CODE_PARAM_INVALID);
-    if (frameNodePeer->node->IsAdopted()) {
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    bool isValidNode = frameNodePeer->node || frameNode->GetIsRootBuilderNode();
+    if (!isValidNode) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (frameNode->IsAdopted()) {
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peerImpl->content);
     CHECK_NULL_RETURN(nodeContent, ERROR_CODE_PARAM_INVALID);
-    auto childNode = AceType::DynamicCast<UINode>(frameNodePeer->node);
+    auto childNode = AceType::DynamicCast<UINode>(frameNode);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);

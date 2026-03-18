@@ -559,17 +559,23 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (IsJsView(firstArg, vm) && !hourArg->IsObject(vm)) {
+        nodeModifiers->getTextClockModifier()->setDateTimeOptions(nativeNode, static_cast<ArkUI_Int32>(hourType));
+        return panda::JSValueRef::Undefined(vm);
+    }
     std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
-    if (hourArg->IsString(vm)) {
-        std::string hour = hourArg->ToString(vm)->ToString(vm);
+    auto paramObject = hourArg->ToObject(vm);
+    auto hourValue = paramObject->Get(vm, panda::StringRef::NewFromUtf8(vm, hour.c_str()));
+    if (hourValue->IsString(vm)) {
+        std::string hour = hourValue->ToString(vm)->ToString(vm);
         if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
             hourType = ZeroPrefixType::SHOW;
         } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
             hourType = ZeroPrefixType::HIDE;
         }
     }
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getTextClockModifier()->setDateTimeOptions(nativeNode, static_cast<ArkUI_Int32>(hourType));
     return panda::JSValueRef::Undefined(vm);
 }

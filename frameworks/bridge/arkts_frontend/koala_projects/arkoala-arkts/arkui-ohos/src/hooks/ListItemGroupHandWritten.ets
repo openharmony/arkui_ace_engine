@@ -16,7 +16,7 @@
 import { ArkUIAniModule } from 'arkui.ani'
 import { ListItemGroupOptions, ArkListItemGroupComponent, ListItemGroupStyle } from '../component/listItemGroup'
 import { PeerNode, findPeerNode } from 'arkui/PeerNode'
-import { UIContextImpl } from 'arkui/base/UIContextImpl'
+import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextUtil } from 'arkui/base/UIContextUtil'
 import { CustomBuilder, ArkComponentRootPeer } from 'arkui/framework'
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -38,7 +38,7 @@ export class ListItemGroupHandWritten {
             ArkUIAniModule._SetListItemGroupHeaderContent(
                 node.getPeer().peer.ptr, options.headerComponent!.getNodePtr()!)
         } else if (options.header !== undefined) {
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             if (options.header instanceof CustomBuilder) {
                 const valueBuilder = options.header as CustomBuilder
                 const old = GlobalStateManager.instance;
@@ -63,7 +63,7 @@ export class ListItemGroupHandWritten {
             ArkUIAniModule._SetListItemGroupFooterContent(
                 node.getPeer().peer.ptr, options.footerComponent!.getNodePtr()!)
         } else if (options.footer !== undefined) {
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             if (options.footer instanceof CustomBuilder) {
                 const valueBuilder = options.footer as CustomBuilder
                 const old = GlobalStateManager.instance;

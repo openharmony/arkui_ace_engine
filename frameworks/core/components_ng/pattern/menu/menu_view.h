@@ -142,6 +142,7 @@ private:
     static void UpdateMenuOutlineWithArrow(
         const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

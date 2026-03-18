@@ -29,6 +29,7 @@ private:
     ani_vm* vm_ = nullptr;
     ani_ref func_ = nullptr;
 };
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instaceId);
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key);
 void SetFrameRateRange([[maybe_unused]] ani_env* env, ani_object obj, ani_long key, ani_object value, ani_int type);
 ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env);
@@ -124,6 +125,8 @@ ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_objec
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId);
 ani_boolean GetBaseEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+ani_boolean GetTouchEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 ani_boolean GetDragEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);

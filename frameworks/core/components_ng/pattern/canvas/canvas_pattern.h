@@ -111,6 +111,8 @@ public:
     }
 
     void SetAntiAlias(bool isEnabled);
+    std::optional<bool> GetAntialiasExt() const;
+    void SetAntialiasExt(std::optional<bool> isEnabled);
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);

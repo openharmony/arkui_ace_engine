@@ -428,6 +428,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
     public initialRenderView(): void {
         stateMgmtProfiler.begin(`ViewV2: initialRenderView`);
+        // Register callback for instanceId changes
+        // Only register when enableSwitchInstance is true which set in config.json5
+        if (getEnableSwitchInstance()) {
+          this.__registerUpdateJSInstanceCallback__Internal(this.__onJSInstanceIdUpdate__Internal.bind(this));
+        }
         if (this.isReusable_ === true) {
             const isReusableAllowed = this.allowReusableV2Descendant();
             if (!isReusableAllowed) {

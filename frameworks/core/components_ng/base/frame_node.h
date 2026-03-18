@@ -316,7 +316,7 @@ public:
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
-    void SetNodeFreeze(bool isFreeze);
+    virtual void SetNodeFreeze(bool isFreeze);
 
     const RefPtr<RenderContext>& GetRenderContext() const
     {

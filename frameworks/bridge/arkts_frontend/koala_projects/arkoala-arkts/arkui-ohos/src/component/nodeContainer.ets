@@ -25,7 +25,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent,TouchEvent 
 import { NodeAttach, remember } from '@koalaui/runtime';
 import { NodeController } from '../NodeController';
 import { UIContext } from '@ohos/arkui/UIContext';
-import { UIContextImpl, ContextRecord } from 'arkui/base/UIContextImpl';
+import { ContextRecord } from 'arkui/base/UIContextImpl';
 import { FrameNode } from 'arkui/FrameNode';
 import { Size } from '../Graphics';
 import { StateManager } from '@koalaui/runtime';
