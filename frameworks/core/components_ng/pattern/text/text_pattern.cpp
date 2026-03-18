@@ -3578,6 +3578,8 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         pattern->blockPress_ = false;
         pattern->InitAiSelection(point);
         if (pattern->BetweenSelectedPosition(point) || pattern->IsAiSelected()) {
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
             const auto& children = pattern->GetChildNodes();
             std::list<RefPtr<FrameNode>> imageChildren;
             for (const auto& child : children) {
@@ -3591,14 +3593,14 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                 }
             }
             auto info = pattern->CreateTextDragInfo();
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
-                auto option = pattern->GetHost()->GetDragPreviewOption();
+                auto option = host->GetDragPreviewOption();
                 option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
                 option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
                 ShadowStyle::OuterFloatingSM);
-                pattern->GetHost()->SetDragPreviewOptions(option);
+                host->SetDragPreviewOptions(option);
             }
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }

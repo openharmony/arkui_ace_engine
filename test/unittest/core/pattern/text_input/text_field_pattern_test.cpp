@@ -3296,6 +3296,16 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread4, TestSize.Level1
     pattern->ProcessDefaultStyleAndBehaviorsMultiThread();
 }
 
+HWTEST_F(TextFieldPatternTest, TextPatternIsDisabled001, TestSize.Level1)
+{
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(eventHub_, nullptr);
+    EXPECT_FALSE(pattern_->IsDisabled());
+    eventHub_->SetEnabled(false);
+    EXPECT_TRUE(pattern_->IsDisabled());
+}
+
 /**
  * @tc.name: TextInputResponseAreaGetChildOffset
  * @tc.desc: test TextInputResponseArea GetChildOffset method

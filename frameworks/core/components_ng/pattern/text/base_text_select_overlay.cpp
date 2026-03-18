@@ -355,7 +355,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
     if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED && !isGlobal) {
         return visibleContentRect;
     }
-    return GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    return GetVisibleRect(host, visibleContentRect);
 }
 
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
@@ -476,7 +476,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRectWithTransform(float epsilon)
     visibleContentRect.SetWidth(width);
     visibleContentRect.SetHeight(height);
     GetGlobalRectWithTransform(visibleContentRect);
-    return GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    return GetVisibleRect(host, visibleContentRect);
 }
 
 void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& points)

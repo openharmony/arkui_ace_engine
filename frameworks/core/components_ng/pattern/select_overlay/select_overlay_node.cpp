@@ -3762,7 +3762,9 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     }
 
     if (pattern->IsCustomMenu()) {
-        for (auto& child : pattern->GetHost()->GetChildren()) {
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        for (auto& child : host->GetChildren()) {
             auto childFrameNode = DynamicCast<FrameNode>(child);
             if (!childFrameNode) {
                 continue;
