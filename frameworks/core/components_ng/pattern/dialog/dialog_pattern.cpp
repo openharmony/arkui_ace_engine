@@ -2800,7 +2800,7 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
     auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
     auto json = InspectorJsonUtil::Create();
     json->Put("buttonText", textDisplay.c_str());
-    TAG_LOGI(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
         "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
@@ -2919,7 +2919,7 @@ int32_t DialogPattern::HandleActionSheetClickCmd(const std::unique_ptr<JsonValue
 
 int32_t DialogPattern::HandleActionMenuButtonClickCmd(const std::unique_ptr<JsonValue>& json)
 {
-    TAG_LOGI(AceLogTag::ACE_DIALOG, "HandleActionMenuButtonClickCmd enter!");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "HandleActionMenuButtonClickCmd enter!");
     if (!json || json->IsNull()) {
         ReportActionMenuOnInjectionEvent(false, "Incorrect JSON format!", "");
         return RET_FAILED;
