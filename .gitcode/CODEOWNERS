@@ -3544,6 +3544,11 @@ test/mock/core/animation/mock_animation_manager.cpp @arkuiscroll
 test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
+test/mock/core/common/mock_scrollable.cpp @arkuiscroll
+test/mock/core/common/mock_scrollable_ng.cpp @arkuiscroll
+test/mock/core/pattern/mock_nestable_scroll_container.h @arkuiscroll
+test/mock/core/modifier/mock_flow_item_modifier.cpp @arkuiscroll
+test/mock/core/modifier/mock_water_flow_modifier.cpp @arkuiscroll
 test/unittest/adapter/ @arkui_framework_xnode
 test/unittest/adapter/ohos/capability/html_to_spanstring_test.cpp @huawei_g_five
 test/unittest/core/accessibility/ @ArkUI_ability_group

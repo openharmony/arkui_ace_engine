@@ -16,15 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_H
 
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <optional>
+#include <string>
 
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_mode.h"
+
+namespace OHOS::Ace {
+class ScrollControllerBase;
+class ScrollProxy;
+}
+
+namespace OHOS::Ace::NG {
+class UINode;
+class WaterFlowSections;
+}
 
 namespace OHOS::Ace {
 class WaterFlowModel {
