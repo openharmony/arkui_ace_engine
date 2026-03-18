@@ -1733,13 +1733,22 @@ HWTEST_F(OverlayTestUpdate, ToastTest030, TestSize.Level1)
      */
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     ASSERT_NE(safeAreaManager, nullptr);
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     const auto& safeArea = toastProps->GetSafeAreaInsets();
-    float safeAreaBottom =
-        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    float safeAreaBottom = safeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight()- safeAreaTop - safeAreaBottom);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight() - expectedSafeAreaTop - safeAreaBottom);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
 }
 
 /**
@@ -1856,10 +1865,19 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
     /**
      * @tc.steps: step5. Test in hover mode, hover mode area is default, avoid keyboard toast's wrapper rect.
      */
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - expectedSafeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
     auto reset = safeAreaManager->UpdateKeyboardSafeArea(0.0f);
     EXPECT_EQ(reset, true);
 }
@@ -1917,10 +1935,19 @@ HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
     /**
      * @tc.steps: step5. Test in hover mode, hover mode area is TOP_SCREEN.
      */
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - expectedSafeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
 }
 
 /**
