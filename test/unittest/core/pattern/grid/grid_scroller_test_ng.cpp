@@ -1109,4 +1109,24 @@ HWTEST_F(GridScrollerTestNg, ReportComponentChangeEventTest001, TestSize.Level1)
     pattern_->OnInjectionEvent(command);
     EXPECT_EQ(pattern_->info_.currentOffset_, 0);
 }
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id for Grid component
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the grid frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
+}
 } // namespace OHOS::Ace::NG

@@ -1213,4 +1213,23 @@ HWTEST_F(WaterFlowScrollerTestNg, HorizontalFocus001, TestSize.Level1)
     auto cmp = GetChildFocusHub(frameNode_, 1);
     EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
 }
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id for WaterFlow component
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the waterflow frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
+}
 } // namespace OHOS::Ace::NG
