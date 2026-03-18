@@ -636,4 +636,53 @@ HWTEST_F(ScrollControllerTestNg, ReportComponentChangeEventTest001, TestSize.Lev
     pattern_->OnInjectionEvent(command);
     EXPECT_EQ(pattern_->currentOffset_, 0);
 }
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id after scroll is created
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the scroll frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId002
+ * @tc.desc: Test GetBindingFrameNodeId returns -1 when pattern is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a standalone controller without binding to any pattern
+     * @tc.expected: GetBindingFrameNodeId should return -1
+     */
+    auto controller = AceType::MakeRefPtr<ScrollableController>();
+    EXPECT_EQ(controller->GetBindingFrameNodeId(), -1);
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId003
+ * @tc.desc: Test ScrollControllerBase default GetBindingFrameNodeId returns -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call base class GetBindingFrameNodeId
+     * @tc.expected: Default implementation should return -1
+     */
+    auto baseController = AceType::MakeRefPtr<ScrollControllerBase>();
+    EXPECT_EQ(baseController->GetBindingFrameNodeId(), -1);
+}
 } // namespace OHOS::Ace::NG

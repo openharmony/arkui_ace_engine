@@ -1933,4 +1933,23 @@ HWTEST_F(ListScrollerTestNg, BigItemScrollWithScrollbar, TestSize.Level1)
 
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id for List component
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the list frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
+}
 } // namespace OHOS::Ace::NG

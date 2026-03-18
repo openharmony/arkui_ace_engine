@@ -137,6 +137,11 @@ public:
         return NG::SizeF();
     }
 
+    virtual int32_t GetBindingFrameNodeId() const
+    {
+        return -1;
+    }
+
     virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
     {
         return Rect();
