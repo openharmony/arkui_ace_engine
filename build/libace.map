@@ -3884,6 +3884,7 @@
       vtable?for?OHOS::Ace::NG::PinchGesture;
       vtable?for?OHOS::Ace::NG::PlaceholderSpanItem;
       vtable?for?OHOS::Ace::NG::SaveButtonModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollableAccessibilityProperty;
       vtable?for?OHOS::Ace::NG::ScrollableController;
       vtable?for?OHOS::Ace::NG::ScrollableLayoutProperty;
       vtable?for?OHOS::Ace::NG::ScrollableModelNG;
