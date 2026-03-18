@@ -3820,10 +3820,6 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
             if ((isForward || isBackward) && NextPositionBlocksMove(curPos, nextPos, isVertical) && isDefault) {
                 return nullptr;
             }
-            // Scroll and display the ListItem.
-            if (IsListItem(nextFocusNode)) {
-                AdjustScrollPosition(nextIndex, curIndex);
-            }
             return nextFocusNode;
         }
         nextIndex += moveStep;

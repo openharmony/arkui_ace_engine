@@ -864,7 +864,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
 
     /**
      * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
@@ -877,7 +877,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, 4));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 100);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 /**
