@@ -1398,6 +1398,9 @@ public:
 
     void SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId);
 
+    void AddAsyncLoadTask(std::function<void()>&& task);
+    void FlushAsyncLoadTask() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1707,6 +1710,7 @@ private:
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
+    std::list<std::function<void()>> asyncLoadTasks_;
 
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;

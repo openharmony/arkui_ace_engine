@@ -534,6 +534,7 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
         return;
     }
+    FlushAsyncLoadTask();
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -1240,6 +1241,19 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     }
     CHECK_NULL_RETURN(rootNode_, nullptr);
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+void PipelineContext::AddAsyncLoadTask(std::function<void()>&& task)
+{
+    asyncLoadTasks_.emplace_back(task);
+}
+
+void PipelineContext::FlushAsyncLoadTask()
+{
+    auto asyncLoadTasks = std::move(asyncLoadTasks_);
+    for (auto& task : asyncLoadTasks) {
+        task();
+    }
 }
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

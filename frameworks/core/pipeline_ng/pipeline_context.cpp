@@ -7654,4 +7654,18 @@ bool PipelineContext::IsDisplayInForceSplitMode() const
     CHECK_NULL_RETURN(stageManager_, isCurrentInForceSplitMode_);
     return stageManager_->IsDisplaySplitMode();
 }
+
+void PipelineContext::AddAsyncLoadTask(std::function<void()>&& task)
+{
+    asyncLoadTasks_.emplace_back(std::move(task));
+    window_->RequestFrame();
+}
+
+void PipelineContext::FlushAsyncLoadTask()
+{
+    auto asyncLoadTasks = std::move(asyncLoadTasks_);
+    for (auto& task : asyncLoadTasks) {
+        task();
+    }
+}
 } // namespace OHOS::Ace::NG

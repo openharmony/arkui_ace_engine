@@ -160,6 +160,7 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     if (sections_ && layoutInfo_->segmentTails_.empty()) {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
     }
+    layoutInfo_->measureInNextFrame_ = false;
 
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
@@ -379,16 +380,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     if (layoutInfo_->measureInNextFrame_) {
-        auto context = GetContext();
-        CHECK_NULL_RETURN(context, false);
-        context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
-            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
-            auto waterFlow = weak.Upgrade();
-            if (waterFlow) {
-                waterFlow->MarkDirtyNodeSelf();
-                waterFlow->layoutInfo_->measureInNextFrame_ = false;
-            }
-        });
+        ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+        PostAsyncLoadTask();
     } else {
         isInitialized_ = true;
     }
@@ -1115,5 +1108,20 @@ void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event
 int32_t WaterFlowPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void WaterFlowPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->layoutInfo_->measureInNextFrame_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG
