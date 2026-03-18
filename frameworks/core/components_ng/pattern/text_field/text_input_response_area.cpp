@@ -422,6 +422,12 @@ void PasswordResponseArea::Refresh()
         if (stackLayoutProperty && layoutProperty) {
             stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
         }
+        if (stackLayoutProperty) {
+            auto iconSize = GetIconSize();
+            auto rightOffset = GetIconRightOffset();
+            auto hotZoneSize = iconSize + rightOffset;
+            stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
+        }
     }
 
     // update node symbol

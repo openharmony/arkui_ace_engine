@@ -81,10 +81,13 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 LayoutConstraintF MarqueeLayoutAlgorithm::CreateTextLayoutConstraint(LayoutWrapper* layoutWrapper, const SizeF& maxSize)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
     auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, textLayoutConstraint);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, textLayoutConstraint);
     // use marquee constrain size as text child max constrain size
     if (layoutConstraint->selfIdealSize.Height().has_value()) {
         textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
