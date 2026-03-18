@@ -153,7 +153,7 @@ bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstAr
 
 void ParseSearchValueObject(EcmaVM* vm, const Local<JSValueRef>& changeEventVal)
 {
-    if (changeEventVal->IsNull() || changeEventVal->IsUndefined()) {
+    if (changeEventVal.IsEmpty() || changeEventVal->IsNull() || changeEventVal->IsUndefined()) {
         return;
     }
     CHECK_NULL_VOID(changeEventVal->IsFunction(vm));

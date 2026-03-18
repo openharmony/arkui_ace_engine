@@ -2486,10 +2486,9 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
             CHECK_NULL_VOID(node);
             auto symbolNode = Referenced::RawPtr(node);
             auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
-            if (customModifier) {
-                customModifier->initialSymbol(symbolNode, symbolId);
-                customModifier->setFontSize(symbolNode, symbolSize);
-            }
+            CHECK_NULL_VOID(customModifier);
+            customModifier->initialSymbol(symbolNode, symbolId);
+            customModifier->setFontSize(symbolNode, symbolSize);
             if (!symbolColor.empty()) {
                 customModifier->setFontColor(symbolNode, symbolColor);
             }
@@ -2792,10 +2791,9 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
                 auto symbolNode = weak.Upgrade();
                 auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
-                if (customModifier) {
-                    customModifier->initialSymbol(RawPtr(symbolNode), symbolId);
-                    customModifier->setFontSize(RawPtr(symbolNode), symbolSize);
-                }
+                CHECK_NULL_VOID(customModifier);
+                customModifier->initialSymbol(RawPtr(symbolNode), symbolId);
+                customModifier->setFontSize(RawPtr(symbolNode), symbolSize);
                 if (!symbolColor.empty()) {
                     customModifier->setFontColor(RawPtr(symbolNode), symbolColor);
                 }

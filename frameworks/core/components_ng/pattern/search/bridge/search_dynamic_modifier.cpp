@@ -82,7 +82,13 @@ SearchModel* GetInstance()
 SearchModel* GetSearchModelImpl()
 {
     static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
-    static SearchModel* instance = loader ? reinterpret_cast<SearchModel*>(loader->CreateModel()) : nullptr;
+    if (loader == nullptr) {
+        LOGF_ABORT("Can't find search loader");
+    }
+    static SearchModel* instance = reinterpret_cast<SearchModel*>(loader->CreateModel());
+    if (instance == nullptr) {
+        LOGF_ABORT("search loader CreateModel fail");
+    }
     return instance;
 }
 #endif
