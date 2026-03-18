@@ -35,7 +35,7 @@ enum LifeCycleEvent {
 const transitionTable: { [key in __CustomComponentLifecycleState__Internal]: { [key in LifeCycleEvent]?: __CustomComponentLifecycleState__Internal } } = {
     [__CustomComponentLifecycleState__Internal.INIT]: {
         [LifeCycleEvent.ON_APPEAR]: __CustomComponentLifecycleState__Internal.APPEARED,
-        [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED  
+        [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED
     },
     [__CustomComponentLifecycleState__Internal.APPEARED]: {
         [LifeCycleEvent.ON_BUILD]: __CustomComponentLifecycleState__Internal.BUILT
@@ -58,7 +58,41 @@ class CustomComponentLifecycle {
     private currentState_: __CustomComponentLifecycleState__Internal = __CustomComponentLifecycleState__Internal.INIT;
     private owningView_: PUV2ViewBase;
     private observers_: Array<CustomComponentLifecycleObserver> = new Array<CustomComponentLifecycleObserver>();
-    
+
+    private readonly observerFunctionMap_: Map<string, (observer: CustomComponentLifecycleObserver) => void> = new Map([
+        ['ComponentAppear', (observer: CustomComponentLifecycleObserver): void => {
+            if (typeof observer.aboutToAppear === 'function') {
+                observer.aboutToAppear();
+            }
+        }],
+        ['ComponentBuilt', (observer: CustomComponentLifecycleObserver): void => {
+            if (typeof observer.onDidBuild === 'function') {
+                observer.onDidBuild();
+            }
+        }],
+        ['ComponentRecycle', (observer: CustomComponentLifecycleObserver): void => {
+            if (typeof observer.aboutToRecycle === 'function') {
+                observer.aboutToRecycle();
+            }
+        }],
+        ['ComponentReuse', (observer: CustomComponentLifecycleObserver): void => {
+            if (typeof observer.aboutToReuse !== 'function') {
+                return;
+            }
+            if (this.owningView_ instanceof ViewV2) {
+                observer.aboutToReuse();
+            }
+            if (this.owningView_ instanceof ViewPU) {
+                observer.aboutToReuse(this.__reusableUpdateParams__);
+            }
+        }],
+        ['ComponentDisappear', (observer: CustomComponentLifecycleObserver): void => {
+            if (typeof observer.aboutToDisappear === 'function') {
+                observer.aboutToDisappear();
+            }
+        }],
+    ]);
+
     constructor(view: PUV2ViewBase) {
         this.owningView_ = view;
     }
@@ -87,73 +121,45 @@ class CustomComponentLifecycle {
         let watchProp = Symbol.for('APPEAR_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentAppearFunctions = this.owningView_[watchProp];
         if (componentAppearFunctions instanceof Array) {
-            componentAppearFunctions.forEach((componentAppearFunction) => {
-                componentAppearFunction.call(this.owningView_);
-            })
+            this.executeInternalFunction(componentAppearFunctions, 'ComponentAppear');
         }
-        for (const observer of this.observers_) {
-            observer.aboutToAppear?.();
-        }
+        this.handleObserverFunction('ComponentAppear');
     }
 
     public executeOnDidBuild(): void {
         let watchProp = Symbol.for('BUILT_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentBuiltFunctions = this.owningView_[watchProp];
         if (componentBuiltFunctions instanceof Array) {
-            componentBuiltFunctions.forEach((componentBuiltFunction) => {
-                componentBuiltFunction.call(this.owningView_);
-            })
+            this.executeInternalFunction(componentBuiltFunctions, 'ComponentBuilt');
         }
-        for (const observer of this.observers_) {
-            observer.onDidBuild?.();
-        }
+        this.handleObserverFunction('ComponentBuilt');
     }
 
     public executeAboutToRecycle(): void {
         let watchProp = Symbol.for('RECYCLE_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentRecycleFunctions = this.owningView_[watchProp];
         if (componentRecycleFunctions instanceof Array) {
-            componentRecycleFunctions.forEach((componentRecycleFunction) => {
-                componentRecycleFunction.call(this.owningView_);
-            })
+            this.executeInternalFunction(componentRecycleFunctions, 'ComponentRecycle');
         }
-        for (const observer of this.observers_) {
-            observer.aboutToRecycle?.();
-        }
+        this.handleObserverFunction('ComponentRecycle');
     }
 
     public executeAboutToReuse(): void {
         let watchProp = Symbol.for('REUSE_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentReuseFunctions = this.owningView_[watchProp];
         if (componentReuseFunctions instanceof Array) {
-            componentReuseFunctions.forEach((componentReuseFunction) => {
-                if (this.owningView_ instanceof ViewV2) {
-                    componentReuseFunction.call(this.owningView_);
-                } else {
-                    componentReuseFunction.call(this.owningView_, this.__reusableUpdateParams__);
-                }
-            })
+            this.executeReuseFunction(componentReuseFunctions, 'ComponentReuse');
         }
-        for (const observer of this.observers_) {
-            if (this.owningView_ instanceof ViewV2) {
-                observer.aboutToReuse?.();
-            } else {
-                observer.aboutToReuse?.(this.__reusableUpdateParams__);
-            }
-        }
+        this.handleObserverFunction('ComponentReuse');
     }
 
     public executeAboutToDisappear(): void {
         let watchProp = Symbol.for('DISAPPEAR_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentDisappearFunctions = this.owningView_[watchProp];
         if (componentDisappearFunctions instanceof Array) {
-            componentDisappearFunctions.forEach((componentDisappearFunction) => {
-                componentDisappearFunction.call(this.owningView_);
-            })
+            this.executeInternalFunction(componentDisappearFunctions, 'ComponentDisappear');
         }
-        for (const observer of this.observers_) {
-            observer.aboutToDisappear?.();
-        }
+        this.handleObserverFunction('ComponentDisappear');
         this.observers_.length = 0;
     }
 
@@ -174,7 +180,8 @@ class CustomComponentLifecycle {
     }
 
     public addObserver(target: CustomComponentLifecycleObserver): void {
-        if (target === undefined || target === null) {
+        if (!this.checkValidObserver(target)) {
+            stateMgmtConsole.frequentApplicationError(`addObserver: invalid CustomComponentLifecycleObserver, ${this.owningView_.debugInfo__()}.`);
             return;
         }
         this.owningView_['__newLifecycleNeedWork__Internal'] = true;
@@ -184,16 +191,75 @@ class CustomComponentLifecycle {
     }
 
     public removeObserver(target: CustomComponentLifecycleObserver): void {
-        if (target === undefined || target === null) {
+        if (!this.checkValidObserver(target)) {
+            stateMgmtConsole.frequentApplicationError(`removeObserver: invalid CustomComponentLifecycleObserver, ${this.owningView_.debugInfo__()}.`);
             return;
         }
         this.observers_ = this.observers_.filter(obs => obs !== target);
     }
 
+    private checkValidObserver(target: CustomComponentLifecycleObserver): boolean {
+        if (!target || typeof target !== 'object') {
+            return false;
+        }
+        if (typeof target.aboutToAppear === 'function' ||
+            typeof target.onDidBuild === 'function' ||
+            typeof target.aboutToDisappear === 'function' ||
+            typeof target.aboutToReuse === 'function' ||
+            typeof target.aboutToRecycle === 'function') {
+            return true;
+        }
+        return false;
+    }
+
+    private executeInternalFunction(componentFunctions: Array<Function>, executeName: string): void {
+        try {
+            componentFunctions.forEach((componentFunction) => {
+                componentFunction.call(this.owningView_);
+            });
+        } catch (e) {
+            stateMgmtConsole.frequentApplicationError(`Lifecycle ${executeName} error, ${this.owningView_.debugInfo__()}, ${e.message} ${e.stack}`);
+            throw e;
+        }
+    }
+
+    private executeReuseFunction(componentFunctions: Array<Function>, executeName: string): void {
+        try {
+            componentFunctions.forEach((componentFunction) => {
+                if (this.owningView_ instanceof ViewV2) {
+                    componentFunction.call(this.owningView_);
+                }
+                if (this.owningView_ instanceof ViewPU) {
+                    componentFunction.call(this.owningView_, this.__reusableUpdateParams__);
+                }
+            });
+        } catch (e) {
+            stateMgmtConsole.frequentApplicationError(`Lifecycle ${executeName} error, ${this.owningView_.debugInfo__()}, ${e.message} ${e.stack}`);
+            throw e;
+        }
+    }
+
+    private handleObserverFunction(executeName: string): void {
+        try {
+            for (const observer of this.observers_) {
+                this.executeObserverFunction(observer, executeName);
+            }
+        } catch (e) {
+            stateMgmtConsole.frequentApplicationError(`CustomComponentLifecycleObserver error, ${this.owningView_.debugInfo__()}, ${e.message} ${e.stack}`);
+            throw e;
+        }
+    }
+
+    private executeObserverFunction(observer: CustomComponentLifecycleObserver, executeName: string): void {
+        const func = this.observerFunctionMap_.get(executeName);
+        if (typeof func === 'function') {
+            func(observer);
+        }
+    }
+
     public toJSON(): Object {
         return {};
     }
-
 }
 
 interface CustomComponentLifecycleObserver {
