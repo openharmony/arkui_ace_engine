@@ -34,7 +34,6 @@ arkui_modules = [
   "dynamiclayout",
   "datapanel",
   "flowitem",
-  "gauge",
   "patternlock",
   "counter",
   "sidebarcontainer",
@@ -78,6 +77,17 @@ foreach(item, arkui_modules) {
   arkui_abc(item) {
   }
   module_targets += [ ":$item" ]
+}
+
+# Special components (directly referenced from ark_direct_component)
+# TODO: Unify arkui_modules and special_components arrays in future refactoring
+special_components = [
+  "arkgauge",
+]
+
+# Add special components to module_targets
+foreach(item, special_components) {
+  module_targets += [ "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:$item" ]
 }
 
 group("module_group") {
