@@ -1009,4 +1009,41 @@ HWTEST_F(RadioPatternTwoTestNg, UpdateGroupManager001, TestSize.Level1)
     pattern->UpdateGroupManager();
     EXPECT_NE(pattern->groupManager_.Upgrade(), nullptr);
 }
+
+/**
+ * @tc.name: RadioNodeTestEventChange
+ * @tc.desc: Verify SetRadioChecked triggers change event reporting
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioNodeTestEventChange, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetRadioChecked(true);
+
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
+}
+
+HWTEST_F(RadioPatternTwoTestNg, RadioNodeTest_OnClick_Report, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnClick();
+
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_TRUE(paintProperty->GetRadioCheckValue());
+}
 } // namespace OHOS::Ace::NG
