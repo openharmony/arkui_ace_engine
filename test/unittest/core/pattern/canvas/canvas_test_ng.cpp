@@ -95,7 +95,7 @@ RefPtr<FrameNode> CanvasTestNg::CreateCanvasNode(CanvasTestProperty& testPropert
  * @tc.desc: Test the function 'IsPercentStr' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -128,7 +128,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
  * @tc.desc: CanvasPattern::OnSizeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -231,7 +231,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
  * @tc.desc: CanvasPattern::EnableAnalyzer
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level0)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -257,7 +257,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level1)
  * @tc.desc: CanvasPattern::UpdateTextDefaultDirection
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level0)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -278,7 +278,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
  * @tc.desc: CanvasLayoutAlgorithm::MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, MeasureContentTest001, TestSize.Level1)
+HWTEST_F(CanvasTestNg, MeasureContentTest001, TestSize.Level0)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -314,7 +314,7 @@ HWTEST_F(CanvasTestNg, MeasureContentTest001, TestSize.Level1)
  * @tc.desc: GetQuality
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level0)
 {
     double dRet = 0.0;
     std::string strRet = "";
@@ -361,7 +361,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
  * @tc.desc: OffscreenCanvasPattern::SetTextDirection && UpdateTextDefaultDirection
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level0)
 {
     auto offPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100);
     ASSERT_NE(offPattern, nullptr);
@@ -395,7 +395,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
  * @tc.desc: CustomPaintPaintMethod::HasShadow
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level0)
 {
     auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
@@ -419,7 +419,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
  * @tc.desc: CanvasPattern::OnAttachToMainTree
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -458,7 +458,7 @@ HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level1)
  * @tc.desc: CanvasPattern::FireOnContext2DAttach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -489,7 +489,7 @@ HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level1)
  * @tc.desc: CanvasPattern::FireOnContext2DDetach
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -520,7 +520,7 @@ HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level1)
  * @tc.desc: CanvasPattern::GetImageData
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -562,7 +562,7 @@ HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
  * @tc.desc: CanvasPaintMethod::CalculatePixelMapRect
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest001, TestSize.Level0)
 {
     auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
@@ -618,7 +618,7 @@ HWTEST_F(CanvasTestNg, CanvasPaintMethodTest001, TestSize.Level1)
  * @tc.desc: CanvasPaintMethod::CalculatePixelMapRect
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPaintMethodTest002, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest002, TestSize.Level0)
 {
     auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
@@ -674,7 +674,7 @@ HWTEST_F(CanvasTestNg, CanvasPaintMethodTest002, TestSize.Level1)
  * @tc.desc: CanvasPaintMethod::SetCustomTextType
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPaintMethodTest003, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest003, TestSize.Level0)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -717,7 +717,7 @@ HWTEST_F(CanvasTestNg, CanvasPaintMethodTest003, TestSize.Level1)
  * @tc.desc: CanvasPattern::IsEnableMatchParent
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -742,7 +742,7 @@ HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
  * @tc.desc: CanvasPatternNoCache
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level0)
 {
     g_canvasTestProperty.immediateRender = true;
     g_canvasTestProperty.unit = CanvasUnit::PX;
@@ -781,7 +781,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
  * @tc.desc: CanvasPatternCache
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level0)
 {
     g_canvasTestProperty.immediateRender = false;
     g_canvasTestProperty.unit = CanvasUnit::DEFAULT;
@@ -818,7 +818,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level1)
  * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - First registration success
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest001, TestSize.Level1)
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest001, TestSize.Level0)
 {
     /**
      * @tc.steps1: Create Canvas node and setup pipeline context.
@@ -857,7 +857,7 @@ HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest001, TestSize.Level1)
  * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - Duplicate registration ignored
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level1)
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level0)
 {
     /**
      * @tc.steps1: Create Canvas node and setup pipeline context.
@@ -896,7 +896,7 @@ HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level1)
  * @tc.desc: Verify ACE_UINODE_TRACE is called in CanvasPaintMethod::UpdateRecordingCanvas
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasUINodeTraceTest001, TestSize.Level1)
+HWTEST_F(CanvasTestNg, CanvasUINodeTraceTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create Canvas node.

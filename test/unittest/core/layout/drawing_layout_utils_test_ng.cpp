@@ -57,7 +57,7 @@ public:
  * @tc.desc: Test MeasureLayoutPolicySize
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Level1)
+HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -123,7 +123,7 @@ HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Leve
  * @tc.desc: Test MeasureLayoutPolicySize
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest002, TestSize.Level1)
+HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest002, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
