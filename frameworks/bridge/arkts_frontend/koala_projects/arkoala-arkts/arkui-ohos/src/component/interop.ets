@@ -347,14 +347,14 @@ export function registerMakeBuilderParameterStaticProxy(): void {
 export function registerTransferCompatibleBuilderCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
-    const callback = (builder: Any) => { return transferCompatibleBuilder(builder).unwrap()!};
+    const callback = (builder: Function) => { return transferCompatibleBuilder(builder).unwrap()!};
     registerCallback.invoke(callback);
 }
 
 export function registerTransferCompatibleUpdatableBuilderCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Object>(builder).unwrap()!};
+    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Any>(builder).unwrap()!};
     registerCallback.invoke(callback);
 }
 
@@ -540,7 +540,7 @@ export function transferCompatibleBuilder<T extends Function>(
 }
 
 
-export function transferCompatibleUpdatableBuilder<T extends Object>(
+export function transferCompatibleUpdatableBuilder<T>(
     /** @memo */
     builder: (args: T) => void
 ): ESValue {

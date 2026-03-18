@@ -119,7 +119,7 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
     return attributeSet_;
 }
 
-export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier, MethodComponent extends ArkCommonMethodComponent>
+export function applyAttributeModifierBase<T, MethodSet extends T, MethodComponent extends ArkCommonMethodComponent>
     (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer,
     isStateStyle: boolean = true): void {
     let attributeSet_ = applyAttributeModifierNoCommonMethod(modifier, attributeSet, func, updaterReceiver, node, isStateStyle) as CommonMethodModifier;
