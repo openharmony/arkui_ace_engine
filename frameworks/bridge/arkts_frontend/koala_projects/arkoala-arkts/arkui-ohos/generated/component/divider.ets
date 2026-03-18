@@ -194,15 +194,12 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
 export function DividerImpl(
     @memo @memo_skip
     style: ((attributes: DividerAttribute) => void) | undefined,
-    @memo @memo_skip
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkDividerComponent>((): ArkDividerComponent => {
         return new ArkDividerComponent()
     })
     NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (_: ArkDividerPeer): void => {
         style?.(receiver)
-        content_?.()
     })
 }
 
