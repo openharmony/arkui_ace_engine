@@ -7020,7 +7020,7 @@ struct ArkUISearchModifier {
     void (*setSearchTextAlign)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSearchTextAlign)(ArkUINodeHandle node);
     void (*setSearchCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-        const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes);
+        const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes, bool isThemeColor);
     void (*setJsSearchCancelButton)(ArkUI_Int32 style, const struct ArkUIIconOptionsStruct* value,
         ArkUIImageIconRes* imageIconRes, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
     void (*setJsSearchDefaultCancelButton)(ArkUI_Int32 style);

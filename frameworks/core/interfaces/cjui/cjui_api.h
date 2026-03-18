@@ -2827,7 +2827,7 @@ struct CJUISearchModifier {
     void (*setSearchTextAlign)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSearchTextAlign)(ArkUINodeHandle node);
     void (*setSearchCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-        const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes);
+        const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes, bool isThemeColor);
     void (*resetSearchCancelButton)(ArkUINodeHandle node);
     void (*setSearchEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnableKeyboardOnFocus)(ArkUINodeHandle node);

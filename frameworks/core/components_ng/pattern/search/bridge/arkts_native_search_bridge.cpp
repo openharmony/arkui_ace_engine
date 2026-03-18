@@ -894,11 +894,13 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Color color;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    bool isThemeColor = false;
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
         ArkTSUtils::ParseJsColorAlphaForMaterial(vm, forthArg, value, colorObject, nodeInfo)) {
         color = value;
     } else {
         color = theme->GetSearchIconColor();
+        isThemeColor = true;
     }
     std::string srcStr;
     RefPtr<ResourceObject> srcObject;
@@ -911,7 +913,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     searchButtonIconObj.colorObj = AceType::RawPtr(colorObject);
     searchButtonIconObj.srcObj = AceType::RawPtr(srcObject);
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(
-        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj);
+        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj, isThemeColor);
     return panda::JSValueRef::Undefined(vm);
 }
 

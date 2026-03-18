@@ -1462,6 +1462,7 @@ void SearchModelNG::SetSearchSrcPath(FrameNode* frameNode, const std::string& sr
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchSrcPath(src, "", "");
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser, frameNode);
 }
 
 void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOptions)

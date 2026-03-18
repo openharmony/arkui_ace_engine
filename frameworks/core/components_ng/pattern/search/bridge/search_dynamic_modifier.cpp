@@ -321,14 +321,17 @@ void SetJsSearchDefaultCancelButton(ArkUI_Int32 style)
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
+    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes, bool isThemeColor)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
     const auto* colorPtr = reinterpret_cast<const Color*>(color);
-    NG::IconOptions cancelIconOptions = NG::IconOptions(
-        *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    NG::IconOptions cancelIconOptions = isThemeColor && SystemProperties::ConfigChangePerform() ?
+        NG::IconOptions(
+            Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+        NG::IconOptions(
+            *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -412,7 +415,7 @@ void RegisterSearchIconResources(const RefPtr<Pattern>& pattern, const struct Ar
     ArkUIImageIconRes* imageIconRes, const Color& iconColor, bool isJsView)
 {
     CHECK_NULL_VOID(pattern);
-    std::string resourceName = isJsView ? "searchButtonIconSrc" : "searchIconSrc";
+    std::string resourceName = "searchIconSrc";
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
         pattern->RegisterResource<CalcDimension>(
@@ -461,7 +464,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     CHECK_NULL_VOID(value);
@@ -491,7 +494,7 @@ void SetSearchDefaultIcon(ArkUINodeHandle node)
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     SearchModelNG::SetSearchDefaultIcon(frameNode);
