@@ -517,7 +517,9 @@ public:
     // 用于属性字符串
     struct SpanResourceUpdater {
         RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
+        std::function<void(
+            const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&, const RefPtr<FrameNode>& frameNode)>
+            updateFunc;
     };
     void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
     void RemoveResourceObj(const std::string& key);

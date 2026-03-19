@@ -138,11 +138,14 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         Color color;
         RefPtr<ResourceObject> resObj;
         if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
-            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_VOID(context);
-            auto theme = context->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            color = theme->GetTextStyle().GetTextColor();
+            // From version 26 and above, styledString's withTheme takes effect.
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(context);
+                auto theme = context->GetTheme<TextTheme>();
+                CHECK_NULL_VOID(theme);
+                color = theme->GetTextStyle().GetTextColor();
+            }
         }
         if (resObj) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);

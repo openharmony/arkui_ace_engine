@@ -5692,6 +5692,10 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         CHECK_NULL_RETURN(textTheme, false);
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
+    
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        UpdateStyledStringByColorMode();
+    }
     return false;
 }
 
@@ -6484,18 +6488,23 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
 
 void TextPattern::StyledStringRegisterResource()
 {
+    auto weak = AceType::WeakClaim(this);
     for (const auto& item : spans_) {
         if (!item) {
             continue;
         }
         for (const auto& [key, resourceUpdater] : item->GetResMap()) {
-            auto&& spanUpdateFunc = [func = resourceUpdater.updateFunc, weakSpan = WeakClaim(Referenced::RawPtr(item))](
-                                        const RefPtr<ResourceObject>& resObj) {
+            auto&& spanUpdateFunc = [func = resourceUpdater.updateFunc, weakSpan = WeakClaim(Referenced::RawPtr(item)),
+                                        weakThis = weak](const RefPtr<ResourceObject>& resObj) {
                 auto spanItem = weakSpan.Upgrade();
                 CHECK_NULL_VOID(spanItem);
                 auto updateValue = func;
                 CHECK_NULL_VOID(updateValue);
-                updateValue(spanItem, resObj);
+                auto textPattern = weakThis.Upgrade();
+                CHECK_NULL_VOID(textPattern);
+                auto host = textPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                updateValue(spanItem, resObj, host);
             };
             item->AddResObj(key, resourceUpdater.obj, std::move(spanUpdateFunc));
         }
