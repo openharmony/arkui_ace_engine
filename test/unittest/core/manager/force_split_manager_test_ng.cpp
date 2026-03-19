@@ -339,6 +339,25 @@ HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetForceSplitEnable003
+ * @tc.desc: Branch: if (needUpdateViewport) { => false
+ *                   if (delayedIsForceSplitEnable_.has_value()) { => true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable003, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedIsForceSplitEnable_ = true;
+    manager->SetForceSplitEnable(false, false);
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
+}
+
+/**
  * @tc.name: RegisterSurfaceChangeCallbackIfNeeded001
  * @tc.desc: Test RegisterSurfaceChangeCallbackIfNeeded when callback already registered
  * @tc.type: FUNC

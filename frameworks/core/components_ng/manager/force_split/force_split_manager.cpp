@@ -30,7 +30,7 @@ void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason type) {
-        if (type != WindowSizeChangeReason::ROTATION) {
+        if (type != WindowSizeChangeReason::ROTATION && type != WindowSizeChangeReason::UNDEFINED) {
             return;
         }
         auto mgr = weakMgr.Upgrade();
@@ -72,6 +72,11 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
         delayedIsForceSplitEnable_ = isForceSplit;
         RegisterSurfaceChangeCallbackIfNeeded();
         return;
+    }
+    if (delayedIsForceSplitEnable_.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed isForceSplitEnable:%{public}d",
+            delayedIsForceSplitEnable_.value());
+        delayedIsForceSplitEnable_ = std::nullopt;
     }
     if (isForceSplitEnable_ == isForceSplit) {
         return;
