@@ -102,6 +102,7 @@ group("core_pattern_unittest") {
     "select:select_test_ng",
     "select_overlay:select_overlay_test_ng",
     "shape:shape_test_ng",
+    "smart_layout:smart_layout_test_ng",
     "side_bar:side_bar_test_ng",
     "slider:slider_test_ng",
     "stack:stack_test_ng",

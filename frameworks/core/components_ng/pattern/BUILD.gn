@@ -634,6 +634,13 @@ build_component_ng("pattern_ng") {
   deps = [
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
+    "smart_layout/engine:smartlayout",
+  ]
+
+  # SmartLayout algorithm
+  sources += [
+    "smart_layout/smart_layout_algorithm.cpp",
+    "smart_layout/smart_layout_engine_loader.cpp",
   ]
 
  if (enable_player_framework) {

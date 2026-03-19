@@ -20,8 +20,8 @@
 #include <set>
 #include <sstream>
 
-#include "../solver_src/sls_solver_overall/nia_ls.h"
-#include "../solver_src/utils/ration_num.h"
+#include "nia_ls.h"
+#include "ration_num.h"
 
 namespace localsmt {
 
@@ -155,7 +155,7 @@ double Expr::Value() const
         return 0;
     }
     if (primaryName_.empty()) {
-        std::cout << "value() only works on simple variable Expr";
+        std::cout << "value() only works on simple Variable Expr";
         return 0;
     }
     return engine_->GetVariable(primaryName_);
@@ -436,14 +436,16 @@ void Engine::AllocateSolverLits(niaOverall::LsSolver& solver, const std::vector<
         }
     }
     for (auto& kv : varBounds_) {
-        if (kv.second.lo > -1e17)
+        if (kv.second.lo > -1e17) {
             totalLits++;
-        if (kv.second.hi < 1e17)
+        }
+        if (kv.second.hi < 1e17) {
             totalLits++;
+        }
     }
 
     solver.MakeLitsSpace(totalLits + 1);
-    solver._lits[0].litsIndex = 0;
+    solver.lits[0].litsIndex = 0;
 
     for (auto& name : varNames_) {
         solver.TransferNameToVar(name, true);
@@ -456,7 +458,7 @@ void Engine::BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::ve
 {
     for (auto& ac : active) {
         auto& ci = constraints_[ac.idx];
-        niaOverall::lit& l = solver._lits[ac.solverLitId];
+        niaOverall::Lit& l = solver.lits[ac.solverLitId];
         l.isNiaLit = true;
         l.litsIndex = ac.solverLitId;
 
@@ -488,10 +490,10 @@ void Engine::BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::ve
     }
 }
 
-void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& bound_lits)
+void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits)
 {
-    for (auto& bl : bound_lits) {
-        niaOverall::lit& l = solver._lits[bl.solverLitId];
+    for (auto& bl : boundLits) {
+        niaOverall::Lit& l = solver.lits[bl.solverLitId];
         l.isNiaLit = true;
         l.litsIndex = bl.solverLitId;
         uint64_t vi = solver.name2var[bl.var];
@@ -509,42 +511,42 @@ void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<
 }
 
 void Engine::BuildClauses(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active,
-    const std::vector<BoundLit>& bound_lits, std::map<int, int>& user_to_solver)
+    const std::vector<BoundLit>& boundLits, std::map<int, int>& userToSolver)
 {
     for (auto& ac : active) {
-        user_to_solver[constraints_[ac.idx].litId] = ac.solverLitId;
+        userToSolver[constraints_[ac.idx].litId] = ac.solverLitId;
     }
 
-    std::set<int> in_user_clause;
+    std::set<int> inUserClause;
     for (auto& cl : clauses_) {
         for (int uid : cl) {
-            in_user_clause.insert(std::abs(uid));
+            inUserClause.insert(std::abs(uid));
         }
     }
 
     auto& ov = solver.originalVec;
 
     for (auto& ac : active) {
-        if (!in_user_clause.count(constraints_[ac.idx].litId)) {
+        if (!inUserClause.count(constraints_[ac.idx].litId)) {
             ov.push_back({ ac.solverLitId });
         }
     }
 
     for (auto& cl : clauses_) {
-        std::vector<int> solver_cl;
+        std::vector<int> solverCl;
         for (int uid : cl) {
             int sign = (uid > 0) ? 1 : -1;
-            auto it = user_to_solver.find(std::abs(uid));
-            if (it != user_to_solver.end()) {
-                solver_cl.push_back(sign * it->second);
+            auto it = userToSolver.find(std::abs(uid));
+            if (it != userToSolver.end()) {
+                solverCl.push_back(sign * it->second);
             }
         }
-        if (!solver_cl.empty()) {
-            ov.push_back(solver_cl);
+        if (!solverCl.empty()) {
+            ov.push_back(solverCl);
         }
     }
 
-    for (auto& bl : bound_lits) {
+    for (auto& bl : boundLits) {
         ov.push_back({ bl.solverLitId });
     }
 
@@ -556,7 +558,7 @@ void Engine::FinalizeSolver(niaOverall::LsSolver& solver)
     solver.basicComponentName = "BC";
     solver.bcWidthIdx = static_cast<int>(solver.name2var[".w"]);
     solver.bcHightIdx = static_cast<int>(solver.name2var["BC_hight"]);
-    solver.numVars = static_cast<int>(solver._vars.size());
+    solver.numVars = static_cast<int>(solver.vars.size());
     solver.litAppear.resize(solver.numLits);
     solver.litsInCls = new Array(solver.numLits);
     solver.PrepareComponentsIdx();
@@ -585,10 +587,10 @@ bool Engine::SolveAndExtract(niaOverall::LsSolver& solver, int width, int height
     }
 
     solution_.resize(varNames_.size(), 0.0);
-    for (size_t i = 0; i < solver._vars.size() && i < solver._solution.size(); i++) {
-        auto it = varIndex_.find(solver._vars[i].varName);
+    for (size_t i = 0; i < solver.vars.size() && i < solver.solution.size(); i++) {
+        auto it = varIndex_.find(solver.vars[i].varName);
         if (it != varIndex_.end()) {
-            solution_[it->second] = solver._solution[i].ToDouble();
+            solution_[it->second] = solver.solution[i].ToDouble();
         }
     }
     return true;
