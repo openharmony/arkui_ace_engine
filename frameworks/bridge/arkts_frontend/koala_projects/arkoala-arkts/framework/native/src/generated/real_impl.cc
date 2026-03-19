@@ -5175,6 +5175,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_ScrollBarMargin* value)
     {
     }
+    void SetAutoAdjustScrollBarMarginImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
+    {
+    }
     void SetNestedScrollImpl(Ark_NativePointer node,
                              const Opt_NestedScrollOptions* value)
     {
@@ -10158,6 +10162,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetScrollBarColorImpl,
             ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
             ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
+            ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMarginImpl,
             ScrollableCommonMethodModifier::SetNestedScrollImpl,
             ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::SetFrictionImpl,

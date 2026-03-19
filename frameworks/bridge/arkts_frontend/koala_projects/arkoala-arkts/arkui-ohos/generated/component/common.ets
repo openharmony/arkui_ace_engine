@@ -6403,6 +6403,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAutoAdjustScrollBarMarginAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setAutoAdjustScrollBarMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setNestedScrollAttribute(value: NestedScrollOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -10441,6 +10453,9 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBarMargin(value: ScrollBarMargin | undefined): this {
         throw new Error('Unimplemented method scrollBarMargin')
     }
+    autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        throw new Error('Unimplemented method autoAdjustScrollBarMargin')
+    }
     nestedScroll(value: NestedScrollOptions | undefined): this {
         throw new Error('Unimplemented method nestedScroll')
     }
@@ -11860,6 +11875,11 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public scrollBarMargin(value: ScrollBarMargin | undefined): this {
         const value_casted = value as (ScrollBarMargin | undefined)
         this.getPeer()?.setScrollBarMarginAttribute(value_casted)
+        return this
+    }
+    public autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setAutoAdjustScrollBarMarginAttribute(value_casted)
         return this
     }
     public nestedScroll(value: NestedScrollOptions | undefined): this {

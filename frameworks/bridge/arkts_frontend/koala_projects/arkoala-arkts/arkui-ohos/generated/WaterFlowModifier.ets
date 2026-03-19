@@ -68,6 +68,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     public _scrollBarColor_0_0value?: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined
     public _scrollBarWidth_0_0value?: double | string | undefined
     public _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
+    public _autoAdjustScrollBarMargin_0_0value?: boolean | undefined
     public _nestedScroll_0_0value?: NestedScrollOptions | undefined
     public _enableScrollInteraction_0_0value?: boolean | undefined
     public _friction_0_0value?: double | global_resource_Resource | undefined
@@ -408,7 +409,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         if (flagArray[18] != 0) {
             switch (flagArray[18]) {
                 case 1: {
-                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as NestedScrollOptions | undefined));
+                    peer.setAutoAdjustScrollBarMarginAttribute((this._autoAdjustScrollBarMargin_0_0value as boolean | undefined));
                     flagArray[18] = 2;
                     break;
                 }
@@ -418,14 +419,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[18] = 0;
-                    peer.setNestedScrollAttribute((undefined as NestedScrollOptions | undefined));
+                    peer.setAutoAdjustScrollBarMarginAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[19] != 0) {
             switch (flagArray[19]) {
                 case 1: {
-                    peer.setEnableScrollInteractionAttribute((this._enableScrollInteraction_0_0value as boolean | undefined));
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as NestedScrollOptions | undefined));
                     flagArray[19] = 2;
                     break;
                 }
@@ -435,7 +436,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setEnableScrollInteractionAttribute((undefined as boolean | undefined));
+                    peer.setNestedScrollAttribute((undefined as NestedScrollOptions | undefined));
                 }
             }
         }
@@ -444,7 +445,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         if (flagArray[20] != 0) {
             switch (flagArray[20]) {
                 case 1: {
-                    peer.setFrictionAttribute((this._friction_0_0value as double | global_resource_Resource | undefined));
+                    peer.setEnableScrollInteractionAttribute((this._enableScrollInteraction_0_0value as boolean | undefined));
                     flagArray[20] = 2;
                     break;
                 }
@@ -454,14 +455,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[20] = 0;
-                    peer.setFrictionAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setEnableScrollInteractionAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[21] != 0) {
             switch (flagArray[21]) {
                 case 1: {
-                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
+                    peer.setFrictionAttribute((this._friction_0_0value as double | global_resource_Resource | undefined));
                     flagArray[21] = 2;
                     break;
                 }
@@ -471,14 +472,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[21] = 0;
-                    peer.setContentStartOffsetAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setFrictionAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[22] != 0) {
             switch (flagArray[22]) {
                 case 1: {
-                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
                     flagArray[22] = 2;
                     break;
                 }
@@ -488,14 +489,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[22] = 0;
-                    peer.setContentEndOffsetAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setContentStartOffsetAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[23] != 0) {
             switch (flagArray[23]) {
                 case 1: {
-                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
                     flagArray[23] = 2;
                     break;
                 }
@@ -505,14 +506,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[23] = 0;
-                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                    peer.setContentEndOffsetAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[24] != 0) {
             switch (flagArray[24]) {
                 case 1: {
-                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
                     flagArray[24] = 2;
                     break;
                 }
@@ -522,14 +523,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[24] = 0;
-                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[25] != 0) {
             switch (flagArray[25]) {
                 case 1: {
-                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
                     flagArray[25] = 2;
                     break;
                 }
@@ -539,14 +540,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
                 }
             }
         }
         if (flagArray[26] != 0) {
             switch (flagArray[26]) {
                 case 1: {
-                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
                     flagArray[26] = 2;
                     break;
                 }
@@ -556,14 +557,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
                 }
             }
         }
         if (flagArray[27] != 0) {
             switch (flagArray[27]) {
                 case 1: {
-                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
                     flagArray[27] = 2;
                     break;
                 }
@@ -573,14 +574,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[28] != 0) {
             switch (flagArray[28]) {
                 case 1: {
-                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
                     flagArray[28] = 2;
                     break;
                 }
@@ -590,14 +591,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[29] != 0) {
             switch (flagArray[29]) {
                 case 1: {
-                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
                     flagArray[29] = 2;
                     break;
                 }
@@ -607,14 +608,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[30] != 0) {
             switch (flagArray[30]) {
                 case 1: {
-                    peer.setOnScrollStartAttribute((this._onScrollStart_0_0value as (() => void) | undefined));
+                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -624,14 +625,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setOnScrollStartAttribute((undefined as (() => void) | undefined));
+                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[31] != 0) {
             switch (flagArray[31]) {
                 case 1: {
-                    peer.setOnScrollStopAttribute((this._onScrollStop_0_0value as (() => void) | undefined));
+                    peer.setOnScrollStartAttribute((this._onScrollStart_0_0value as (() => void) | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -641,14 +642,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setOnScrollStopAttribute((undefined as (() => void) | undefined));
+                    peer.setOnScrollStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[32] != 0) {
             switch (flagArray[32]) {
                 case 1: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
+                    peer.setOnScrollStopAttribute((this._onScrollStop_0_0value as (() => void) | undefined));
                     flagArray[32] = 2;
                     break;
                 }
@@ -658,14 +659,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[32] = 0;
-                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
+                    peer.setOnScrollStopAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[33] != 0) {
             switch (flagArray[33]) {
                 case 1: {
-                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     flagArray[33] = 2;
                     break;
                 }
@@ -675,14 +676,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
         if (flagArray[34] != 0) {
             switch (flagArray[34]) {
                 case 1: {
-                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
                     flagArray[34] = 2;
                     break;
                 }
@@ -692,14 +693,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
                 }
             }
         }
         if (flagArray[35] != 0) {
             switch (flagArray[35]) {
                 case 1: {
-                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
                     flagArray[35] = 2;
                     break;
                 }
@@ -709,14 +710,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
         if (flagArray[36] != 0) {
             switch (flagArray[36]) {
                 case 1: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
+                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
                     flagArray[36] = 2;
                     break;
                 }
@@ -726,14 +727,14 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
+                    peer.setBackToTopAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[37] != 0) {
             switch (flagArray[37]) {
                 case 1: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
                     flagArray[37] = 2;
                     break;
                 }
@@ -743,6 +744,23 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     flagArray[37] = 0;
+                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    flagArray[38] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[38] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[38] = 0;
                     peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined));
                 }
             }
@@ -976,6 +994,18 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
             switch (flagArray[18]) {
                 case 1:
                 case 3: {
+                    this.autoAdjustScrollBarMargin((modifier._autoAdjustScrollBarMargin_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.autoAdjustScrollBarMargin((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
                     this.nestedScroll((modifier._nestedScroll_0_0value as NestedScrollOptions | undefined));
                     break;
                 }
@@ -984,8 +1014,10 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[19] != 0) {
-            switch (flagArray[19]) {
+    }
+    mergeModifier1(modifier: WaterFlowModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
                 case 1:
                 case 3: {
                     this.enableScrollInteraction((modifier._enableScrollInteraction_0_0value as boolean | undefined));
@@ -996,10 +1028,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-    }
-    mergeModifier1(modifier: WaterFlowModifier, flagArray: Uint8Array): void {
-        if (flagArray[20] != 0) {
-            switch (flagArray[20]) {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
                 case 1:
                 case 3: {
                     this.friction((modifier._friction_0_0value as double | global_resource_Resource | undefined));
@@ -1010,8 +1040,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[21] != 0) {
-            switch (flagArray[21]) {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
                 case 1:
                 case 3: {
                     this.contentStartOffset((modifier._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
@@ -1022,8 +1052,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[22] != 0) {
-            switch (flagArray[22]) {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
                 case 1:
                 case 3: {
                     this.contentEndOffset((modifier._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
@@ -1034,8 +1064,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[23] != 0) {
-            switch (flagArray[23]) {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
                 case 1:
                 case 3: {
                     this.onWillStartDragging((modifier._onWillStartDragging_0_0value as VoidCallback | undefined));
@@ -1046,8 +1076,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[24] != 0) {
-            switch (flagArray[24]) {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
                 case 1:
                 case 3: {
                     this.onWillStopDragging((modifier._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
@@ -1058,8 +1088,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[25] != 0) {
-            switch (flagArray[25]) {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
                 case 1:
                 case 3: {
                     this.onDidStopDragging((modifier._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
@@ -1070,8 +1100,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[26] != 0) {
-            switch (flagArray[26]) {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
                 case 1:
                 case 3: {
                     this.onWillStartFling((modifier._onWillStartFling_0_0value as VoidCallback | undefined));
@@ -1082,8 +1112,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[27] != 0) {
-            switch (flagArray[27]) {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
                 case 1:
                 case 3: {
                     this.onDidStopFling((modifier._onDidStopFling_0_0value as VoidCallback | undefined));
@@ -1094,8 +1124,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[28] != 0) {
-            switch (flagArray[28]) {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
                 case 1:
                 case 3: {
                     this.onReachStart((modifier._onReachStart_0_0value as (() => void) | undefined));
@@ -1106,8 +1136,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[29] != 0) {
-            switch (flagArray[29]) {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
                 case 1:
                 case 3: {
                     this.onReachEnd((modifier._onReachEnd_0_0value as (() => void) | undefined));
@@ -1118,8 +1148,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[30] != 0) {
-            switch (flagArray[30]) {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
                 case 1:
                 case 3: {
                     this.onScrollStart((modifier._onScrollStart_0_0value as (() => void) | undefined));
@@ -1130,8 +1160,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[31] != 0) {
-            switch (flagArray[31]) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1:
                 case 3: {
                     this.onScrollStop((modifier._onScrollStop_0_0value as (() => void) | undefined));
@@ -1142,8 +1172,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[32] != 0) {
-            switch (flagArray[32]) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1:
                 case 3: {
                     this.flingSpeedLimit((modifier._flingSpeedLimit_0_0value as double | undefined));
@@ -1154,8 +1184,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[33] != 0) {
-            switch (flagArray[33]) {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
                 case 1:
                 case 3: {
                     this.clipContent((modifier._clipContent_0_0value as ContentClipMode | RectShape | undefined));
@@ -1166,8 +1196,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[34] != 0) {
-            switch (flagArray[34]) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1:
                 case 3: {
                     this.digitalCrownSensitivity((modifier._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
@@ -1178,8 +1208,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[35] != 0) {
-            switch (flagArray[35]) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1:
                 case 3: {
                     this.backToTop((modifier._backToTop_0_0value as boolean | undefined));
@@ -1190,8 +1220,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[36] != 0) {
-            switch (flagArray[36]) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1:
                 case 3: {
                     this.edgeEffect((modifier._edgeEffect_0_0value as EdgeEffect | undefined), (modifier._edgeEffect_0_1value as EdgeEffectOptions | undefined));
@@ -1202,8 +1232,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
             }
         }
-        if (flagArray[37] != 0) {
-            switch (flagArray[37]) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1:
                 case 3: {
                     this.fadingEdge((modifier._fadingEdge_0_0value as boolean | undefined), (modifier._fadingEdge_0_1value as FadingEdgeOptions | undefined));
@@ -1396,205 +1426,215 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    nestedScroll(value: NestedScrollOptions | undefined): this {
-        if (((this._flagArray[18]) == (0)) || (true)) {
+    autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        if (((this._flagArray[18]) == (0)) || ((this._autoAdjustScrollBarMargin_0_0value) !== (value))) {
             this._flagArray[18] = 1
-            this._nestedScroll_0_0value = value
+            this._autoAdjustScrollBarMargin_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[18] = 3
         }
         return this
     }
-    enableScrollInteraction(value: boolean | undefined): this {
-        if (((this._flagArray[19]) == (0)) || ((this._enableScrollInteraction_0_0value) !== (value))) {
+    nestedScroll(value: NestedScrollOptions | undefined): this {
+        if (((this._flagArray[19]) == (0)) || (true)) {
             this._flagArray[19] = 1
-            this._enableScrollInteraction_0_0value = value
+            this._nestedScroll_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[19] = 3
         }
         return this
     }
-    friction(value: double | global_resource_Resource | undefined): this {
-        if (((this._flagArray[20]) == (0)) || (true)) {
+    enableScrollInteraction(value: boolean | undefined): this {
+        if (((this._flagArray[20]) == (0)) || ((this._enableScrollInteraction_0_0value) !== (value))) {
             this._flagArray[20] = 1
-            this._friction_0_0value = value
+            this._enableScrollInteraction_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[20] = 3
         }
         return this
     }
-    contentStartOffset(value: double | global_resource_Resource | undefined): this {
+    friction(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[21]) == (0)) || (true)) {
             this._flagArray[21] = 1
-            this._contentStartOffset_0_0value = value
+            this._friction_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[21] = 3
         }
         return this
     }
-    contentEndOffset(value: double | global_resource_Resource | undefined): this {
+    contentStartOffset(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[22]) == (0)) || (true)) {
             this._flagArray[22] = 1
-            this._contentEndOffset_0_0value = value
+            this._contentStartOffset_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[22] = 3
         }
         return this
     }
-    onWillStartDragging(value: VoidCallback | undefined): this {
+    contentEndOffset(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[23]) == (0)) || (true)) {
             this._flagArray[23] = 1
-            this._onWillStartDragging_0_0value = value
+            this._contentEndOffset_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[23] = 3
         }
         return this
     }
-    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+    onWillStartDragging(value: VoidCallback | undefined): this {
         if (((this._flagArray[24]) == (0)) || (true)) {
             this._flagArray[24] = 1
-            this._onWillStopDragging_0_0value = value
+            this._onWillStartDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[24] = 3
         }
         return this
     }
-    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
         if (((this._flagArray[25]) == (0)) || (true)) {
             this._flagArray[25] = 1
-            this._onDidStopDragging_0_0value = value
+            this._onWillStopDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[25] = 3
         }
         return this
     }
-    onWillStartFling(value: VoidCallback | undefined): this {
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
         if (((this._flagArray[26]) == (0)) || (true)) {
             this._flagArray[26] = 1
-            this._onWillStartFling_0_0value = value
+            this._onDidStopDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[26] = 3
         }
         return this
     }
-    onDidStopFling(value: VoidCallback | undefined): this {
+    onWillStartFling(value: VoidCallback | undefined): this {
         if (((this._flagArray[27]) == (0)) || (true)) {
             this._flagArray[27] = 1
-            this._onDidStopFling_0_0value = value
+            this._onWillStartFling_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[27] = 3
         }
         return this
     }
-    onReachStart(value: (() => void) | undefined): this {
+    onDidStopFling(value: VoidCallback | undefined): this {
         if (((this._flagArray[28]) == (0)) || (true)) {
             this._flagArray[28] = 1
-            this._onReachStart_0_0value = value
+            this._onDidStopFling_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[28] = 3
         }
         return this
     }
-    onReachEnd(value: (() => void) | undefined): this {
+    onReachStart(value: (() => void) | undefined): this {
         if (((this._flagArray[29]) == (0)) || (true)) {
             this._flagArray[29] = 1
-            this._onReachEnd_0_0value = value
+            this._onReachStart_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[29] = 3
         }
         return this
     }
-    onScrollStart(value: (() => void) | undefined): this {
+    onReachEnd(value: (() => void) | undefined): this {
         if (((this._flagArray[30]) == (0)) || (true)) {
             this._flagArray[30] = 1
-            this._onScrollStart_0_0value = value
+            this._onReachEnd_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[30] = 3
         }
         return this
     }
-    onScrollStop(value: (() => void) | undefined): this {
+    onScrollStart(value: (() => void) | undefined): this {
         if (((this._flagArray[31]) == (0)) || (true)) {
             this._flagArray[31] = 1
-            this._onScrollStop_0_0value = value
+            this._onScrollStart_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[31] = 3
         }
         return this
     }
-    flingSpeedLimit(value: double | undefined): this {
-        if (((this._flagArray[32]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
+    onScrollStop(value: (() => void) | undefined): this {
+        if (((this._flagArray[32]) == (0)) || (true)) {
             this._flagArray[32] = 1
-            this._flingSpeedLimit_0_0value = value
+            this._onScrollStop_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[32] = 3
         }
         return this
     }
-    clipContent(value: ContentClipMode | RectShape | undefined): this {
-        if (((this._flagArray[33]) == (0)) || (true)) {
+    flingSpeedLimit(value: double | undefined): this {
+        if (((this._flagArray[33]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
             this._flagArray[33] = 1
-            this._clipContent_0_0value = value
+            this._flingSpeedLimit_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[33] = 3
         }
         return this
     }
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
         if (((this._flagArray[34]) == (0)) || (true)) {
             this._flagArray[34] = 1
-            this._digitalCrownSensitivity_0_0value = value
+            this._clipContent_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[34] = 3
         }
         return this
     }
-    backToTop(value: boolean | undefined): this {
-        if (((this._flagArray[35]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        if (((this._flagArray[35]) == (0)) || (true)) {
             this._flagArray[35] = 1
-            this._backToTop_0_0value = value
+            this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[35] = 3
         }
         return this
     }
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        if (((this._flagArray[36]) == (0)) || (true) || (true)) {
+    backToTop(value: boolean | undefined): this {
+        if (((this._flagArray[36]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
             this._flagArray[36] = 1
-            this._edgeEffect_0_0value = edgeEffect
-            this._edgeEffect_0_1value = options
+            this._backToTop_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[36] = 3
         }
         return this
     }
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
-        if (((this._flagArray[37]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        if (((this._flagArray[37]) == (0)) || (true) || (true)) {
             this._flagArray[37] = 1
+            this._edgeEffect_0_0value = edgeEffect
+            this._edgeEffect_0_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[37] = 3
+        }
+        return this
+    }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        if (((this._flagArray[38]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+            this._flagArray[38] = 1
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
             this._state.fireChange()
         } else {
-            this._flagArray[37] = 3
+            this._flagArray[38] = 3
         }
         return this
     }

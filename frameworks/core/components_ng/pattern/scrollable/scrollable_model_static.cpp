@@ -355,5 +355,12 @@ void ScrollableModelStatic::SetOnDidStopFling(FrameNode* frameNode, OnDidStopFli
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidStopFling(std::move(event));
 }
+
+void ScrollableModelStatic::SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, AutoAdjustScrollBarMargin, autoAdjust.value_or(false), frameNode);
+}
 } // namespace OHOS::Ace::NG
  

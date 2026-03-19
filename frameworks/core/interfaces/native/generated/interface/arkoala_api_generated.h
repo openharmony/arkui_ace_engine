@@ -25658,6 +25658,8 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
                               const Opt_Union_F64_String* value);
     void (*setScrollBarMargin)(Ark_NativePointer node,
                                const Opt_ScrollBarMargin* value);
+    void (*setAutoAdjustScrollBarMargin)(Ark_NativePointer node,
+                                         const Opt_Boolean* value);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Opt_NestedScrollOptions* value);
     void (*setEnableScrollInteraction)(Ark_NativePointer node,

@@ -7340,6 +7340,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
 
+class AutoAdjustScrollBarMarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetAutoAdjustScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setAutoAdjustScrollBarMargin(node, this.value);
+    }
+  }
+}
+AutoAdjustScrollBarMarginModifier.identity = Symbol('autoAdjustScrollBarMargin');
+
 class OnWillStopDraggingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7482,6 +7496,10 @@ class ArkScrollable extends ArkComponent {
   }
   scrollBarMargin(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, value);
+    return this;
+  }
+  autoAdjustScrollBarMargin(value) {
+    modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
     return this;
   }
   onWillStopDragging(value) {

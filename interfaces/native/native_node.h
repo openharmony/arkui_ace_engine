@@ -6951,7 +6951,20 @@ typedef enum {
      * @since 20
      */
     NODE_SCROLL_ENABLE_BOUNCES_ZOOM = 1002026,
-    
+
+    /**
+     * @brief Sets whether to automatically adjust the margin of the scrollbar to avoid the component's <b>NODE_PADDING</b>, <b>NODE_SCROLL_CONTENT_START_OFFSET</b>, and <b>NODE_SCROLL_CONTENT_END_OFFSET</b> areas.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute\n
+     * .value[0].i32: whether to automatically adjust the margin of the scrollbar. <b>0</b>: yes; <b>1</b>: no. Default value: <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to automatically adjust the margin of the scrollbar. <b>0</b>: yes; <b>1</b>: no. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_SCROLL_AUTO_ADJUST_MARGIN = 1002028,
+
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.

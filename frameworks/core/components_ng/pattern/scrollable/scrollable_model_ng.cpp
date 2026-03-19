@@ -689,4 +689,32 @@ float ScrollableModelNG::GetContentEndOffset(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
     return static_cast<float>(layoutProperty->GetContentEndOffset().value_or(0.0f));
 }
+
+void ScrollableModelNG::SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetAutoAdjustScrollBarMargin(frameNode, autoAdjust);
+}
+
+void ScrollableModelNG::SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, AutoAdjustScrollBarMargin, autoAdjust.value_or(false), frameNode);
+}
+
+void ScrollableModelNG::ResetAutoAdjustScrollBarMargin(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        ScrollablePaintProperty, AutoAdjustScrollBarMargin, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+bool ScrollableModelNG::GetAutoAdjustScrollBarMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetAutoAdjustScrollBarMargin().value_or(false);
+}
 } // namespace OHOS::Ace::NG
