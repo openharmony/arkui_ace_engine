@@ -75,6 +75,10 @@ struct ArkUI_SelectedDragPreviewStyle {
     ArkUI_OptionalUint color;
 };
 
+struct OH_ArkUI_TextController {
+    ArkUI_NodeHandle node = nullptr;
+};
+
 #ifdef __cplusplus
 }
 #endif

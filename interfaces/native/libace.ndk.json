@@ -6576,11 +6576,24 @@
  	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
     },
     {
+<<<<<<< HEAD
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue"
     },
     {
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
+=======
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_Create"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_Destroy"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_SetStyledString"
+>>>>>>> 7b3afe6c01c (TextCapi)
     }
 ]

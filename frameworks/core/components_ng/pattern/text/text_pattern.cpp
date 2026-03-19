@@ -6461,7 +6461,7 @@ bool TextPattern::IsShowMenu(MenuPolicy options, bool defaultValue)
     return defaultValue;
 }
 
-void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay, bool isReplace)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6473,9 +6473,14 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     if (closeSelectOverlay) {
         CloseSelectOverlay();
     }
-    auto length = styledString_->GetLength();
-    styledString_->RemoveCustomSpan();
-    styledString_->ReplaceSpanString(0, length, value);
+    auto origin = DynamicCast<MutableSpanString>(value);
+    if (isReplace && origin) {
+        styledString_ = origin;
+    } else {
+        auto length = styledString_->GetLength();
+        styledString_->RemoveCustomSpan();
+        styledString_->ReplaceSpanString(0, length, value);
+    }
     spans_ = styledString_->GetSpanItems();
     StyledStringRegisterResource();
     if (SystemProperties::GetTextTraceEnabled()) {

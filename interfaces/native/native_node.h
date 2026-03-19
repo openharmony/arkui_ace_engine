@@ -3023,6 +3023,17 @@ typedef enum {
     NODE_TEXT_SELECTED_DRAG_PREVIEW_STYLE = 1053,
 
     /**
+     * @brief Sets the controller of the text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the controller of the text. The parameter type is
+     * {@link OH_ArkUI_TextController }.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_CONTROLLER = 1054,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
