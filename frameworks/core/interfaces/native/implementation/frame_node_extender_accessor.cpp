@@ -1321,10 +1321,12 @@ Array_F64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vec
     if (!sameParentNode) {
         return errValue;
     }
-    auto xFloat = Converter::Convert<float>(vector2->x);
-    auto yFloat = Converter::Convert<float>(vector2->y);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(vector2->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(vector2->y));
     auto offset =
         currentNode->ConvertPoint(NG::OffsetF(xFloat, yFloat), targetNode);
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     ParseArrayResultNumber(indexes, offset);
     Array_F64 resultValue = Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     return resultValue;

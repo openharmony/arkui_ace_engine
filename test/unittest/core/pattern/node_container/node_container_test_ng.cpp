@@ -250,8 +250,8 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.L
     layoutWrapper.GetContentChanges().ToString();
     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNodeOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<Pattern>());
-    RefPtr<FrameNode> childNodeTwo = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNodeOne = FrameNode::CreateFrameNode(RENDER_NODE, 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNodeTwo = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
      
     auto childLayoutProperty=childNodeTwo->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
@@ -299,7 +299,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure003, TestSize.L
     layoutWrapper.GetContentChanges().ToString();
     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
     auto childLayoutProperty = childNode->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
@@ -341,7 +341,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure004, TestSize.L
     layoutWrapper.GetContentChanges().ToString();
     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
     auto childLayoutProperty = childNode->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
@@ -384,7 +384,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure005, TestSize.L
     layoutWrapper.GetContentChanges().ToString();
     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
     auto childLayoutProperty = childNode->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
@@ -427,7 +427,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure006, TestSize.L
     layoutWrapper.GetContentChanges().ToString();
     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
     auto childLayoutProperty = childNode->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
