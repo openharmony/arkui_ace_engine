@@ -150,6 +150,9 @@ class ObserveV2 {
 
   public __interopInStaticRendering_internal_ : boolean = false;
 
+  // define a lambda for fireChange to call instead of calling this.updateDirty.bind(this) every time
+  private updateDirtyBoundFunction_: () => void = () => { this.updateDirty(); };
+
   public static getObserve(): ObserveV2 {
     if (!this.obsInstance_) {
       this.obsInstance_ = new ObserveV2();
@@ -550,27 +553,18 @@ class ObserveV2 {
       }
     }
 
-    if (!target[ObserveV2.SYMBOL_REFS]) {
+    let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
+
+    if (!targetSymbolRefs) {
       return;
     }
 
     const bound = this.stackOfRenderedComponents_.top();
-    if (this.calculatingComputedProp_) {
-      const prop = bound ? (bound[1] as ComputedV2).getProp() : 'unknown computed property';
-      const error = `Usage of ILLEGAL @Computed function detected for ${prop}! The @Computed function MUST NOT change the state of any observed state variable!`;
-      stateMgmtConsole.applicationError(error);
-      // used code, can be removed
-      throw new Error(error);
-    }
 
-    let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
     // enable this trace marker for more fine grained tracing of the update pipeline
     // note: two (!) end markers need to be enabled
 
-    let changedIdSet: Set<number> | undefined = undefined;
-    if (targetSymbolRefs[attrName] != undefined) {
-      changedIdSet = targetSymbolRefs[attrName];
-    }
+    let changedIdSet: Set<number> | undefined = targetSymbolRefs[attrName];
     // Ignore for SynMonitor
     // Map/Set always fire in pairs SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY and  ObserveV2.OB_LENGTH
     // Condition below will ignore all attrs for Map and Set with the exception of
@@ -586,7 +580,7 @@ class ObserveV2 {
       }
       targetSymbolRefs[MonitorV2.OB_ANY].forEach(item => changedIdSet!.add(item))
     }
-    if (changedIdSet === undefined || changedIdSet.size === 0) {
+    if (!changedIdSet || changedIdSet.size === 0) {
       return;
     }
 
@@ -614,7 +608,7 @@ class ObserveV2 {
       const shouldUpdateDirty = (!hasPendingChanges && !this.startDirty_ && !isReuseInProgress);
 
       if (shouldUpdateDirty) {
-        Promise.resolve().then(this.updateDirty.bind(this))
+        Promise.resolve().then(this.updateDirtyBoundFunction_)
           .catch(error => {
             stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
             _arkUIUncaughtPromiseError(error);

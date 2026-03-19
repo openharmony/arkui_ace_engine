@@ -30,8 +30,6 @@ class VariableUtilV2 {
      * @param newValue - update to new value
      */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
-      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      VariableUtilV2.checkInvalidUsage(meta, attrName);
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
@@ -48,7 +46,6 @@ class VariableUtilV2 {
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      VariableUtilV2.checkInvalidUsage(meta, attrName);
 
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       // @Observed class and @Track attrName
