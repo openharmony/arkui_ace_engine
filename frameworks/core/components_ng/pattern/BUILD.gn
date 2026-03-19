@@ -666,7 +666,10 @@ build_component_ng("pattern_ng") {
       "napi:ace_napi",
     ]
     if (!use_mingw_win && !use_mac && !use_linux) {
-      external_deps += [ "window_manager:scene_session" ]
+      external_deps += [
+        "window_manager:scene_session",
+        "accessibility:accessibility_common",
+        ]
     }
     if (!build_ohos_sdk) {
       sources += [
