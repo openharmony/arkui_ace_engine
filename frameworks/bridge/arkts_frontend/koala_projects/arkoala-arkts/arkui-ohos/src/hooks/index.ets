@@ -83,7 +83,7 @@ import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from '#generated';
 import { ListHandWritten } from "./ListHandWritten"
-import { ArkWebComponent, JavaScriptProxy } from '#generated';
+import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
@@ -900,6 +900,21 @@ export function hookListItemGroupChildrenMainSizeImpl(peer: ArkListItemGroupPeer
 export function hookJavaScriptProxy(
   component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
   WebHandWritten.hookJavaScriptProxyImpl(component, value);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, priKeyFile: string, certChainFile: string): void {
+  WebHandWritten.hookConfirmImpl(handler, priKeyFile, certChainFile);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, authUri: string): void {
+  WebHandWritten.hookConfirmImpl(handler, authUri);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, identity: string, credentialTypeOrCertChainFile: CredentialType | string): void {
+  WebHandWritten.hookConfirmImpl(handler, identity, credentialTypeOrCertChainFile);
 }
 
 export function hookVideoOnError(

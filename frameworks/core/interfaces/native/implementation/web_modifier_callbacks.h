@@ -107,6 +107,8 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthenticationEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+bool OnVerifyPin(const CallbackHelper<OnVerifyPinCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 void OnWindowNewExt(const CallbackHelper<Callback_OnWindowNewExtEvent_Void>& arkCallback,
