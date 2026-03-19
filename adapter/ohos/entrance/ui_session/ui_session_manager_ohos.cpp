@@ -618,6 +618,7 @@ void UiSessionManagerOhos::ReportSelectText()
 
 void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
