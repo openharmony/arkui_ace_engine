@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#include "text_input_base.h"
-#include "base/json/json_util.h"
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "text_input_base.h"
+
+#include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/property/border_property.h"
+
 
 namespace OHOS::Ace::NG {
 
-class TextFieldModelStaticTest  : public TextInputBases {
+class TextFieldModelStaticTest : public TextInputBases {
 public:
 };
 
@@ -73,16 +74,16 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextInputNode_Empt
     std::optional<std::u16string> value = std::nullopt;
 
     auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTINPUT_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
     EXPECT_EQ(textFieldLayoutProperty->GetMaxLinesValue(0), 1);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderMaxLinesValue(0), 1);
-    
+
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
@@ -103,16 +104,16 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextInputNode_Empt
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"Default value");
 
     auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTINPUT_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
     EXPECT_EQ(textFieldLayoutProperty->GetMaxLinesValue(0), 1);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderMaxLinesValue(0), 1);
-    
+
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
@@ -133,16 +134,16 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextInputNode_Empt
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"");
 
     auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTINPUT_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"Enter text");
     EXPECT_EQ(textFieldLayoutProperty->GetMaxLinesValue(0), 1);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderMaxLinesValue(0), 1);
-    
+
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
@@ -163,21 +164,21 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_Norma
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"Default value");
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"Enter text here");
     EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderMaxLinesValue(0) == Infinity<uint32_t>());
-    
+
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     EXPECT_NE(pattern, nullptr);
     EXPECT_NE(pattern->GetTextFieldController(), nullptr);
-    
+
     auto controller = pattern->GetTextFieldController();
     auto textFieldController = pattern->GetTextFieldController();
     int32_t caretIndex = textFieldController->GetCaretIndex();
@@ -196,10 +197,10 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_Empty
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"Default value");
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
@@ -218,10 +219,10 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_Empty
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"");
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"Enter text here");
@@ -240,10 +241,10 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_NoPla
     std::optional<std::u16string> value = std::make_optional<std::u16string>(u"Default value");
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
@@ -262,10 +263,10 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_NoVal
     std::optional<std::u16string> value = std::nullopt;
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"Enter text here");
@@ -284,10 +285,10 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_NoPar
     std::optional<std::u16string> value = std::nullopt;
 
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
-    
+
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
-    
+
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(textFieldLayoutProperty, nullptr);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
@@ -301,15 +302,14 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_NoPar
  */
 HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_SetBackgroundColor_Normal, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextFieldPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto node = Referenced::RawPtr(frameNode);
-    
+
     std::optional<Color> color = Color::RED;
     TextFieldModelStatic::SetBackgroundColor(node, color);
-    
+
     // Verify that the background color is set correctly
     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
@@ -336,15 +336,14 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_SetBackgroundColor_NullF
  */
 HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_SetBackgroundColor_EmptyColor, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextFieldPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto node = Referenced::RawPtr(frameNode);
-    
+
     std::optional<Color> color = std::nullopt;
     TextFieldModelStatic::SetBackgroundColor(node, color);
-    
+
     // Verify that the background color property is reset
     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
@@ -376,7 +375,7 @@ HWTEST_F(TextFieldModelStaticTest, SetPasswordIcon001, TestSize.Level1)
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     auto node = Referenced::RawPtr(textFieldNode);
-    
+
     // Test case 3: passwordIconOpt is nullopt, should use default resources
     TextFieldModelStatic::SetPasswordIcon(node, std::nullopt);
     EXPECT_FALSE(pattern->IsShowPasswordSymbol());
@@ -598,7 +597,7 @@ HWTEST_F(TextFieldModelStaticTest, SetNormalUnderlineColor001, TestSize.Level1)
     std::optional<Color> normalColor2 = std::nullopt;
     TextFieldModelStatic::SetNormalUnderlineColor(node, normalColor2);
     // We can't directly check the normal underline color, but we ensure no crash
-    
+
     // All test cases passed if no crash occurred
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
@@ -624,7 +623,7 @@ HWTEST_F(TextFieldModelStaticTest, SetEnterKeyType001, TestSize.Level1)
     ASSERT_NE(inputPattern, nullptr);
     inputPattern->SetTextInputFlag(true);
     auto node = Referenced::RawPtr(textInputNode);
-    
+
     // Create a text area node
     auto textAreaNode = FrameNode::GetOrCreateFrameNode(V2::TEXTAREA_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
@@ -657,7 +656,7 @@ HWTEST_F(TextFieldModelStaticTest, SetEnterKeyType001, TestSize.Level1)
     // Test case 5: valueOpt is nullopt and node is text area, should set to NEW_LINE
     TextFieldModelStatic::SetEnterKeyType(node1, valueOpt2);
     // We can't directly check the enter key type, but we ensure no crash
-    
+
     // All test cases passed if no crash occurred
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
@@ -710,8 +709,8 @@ HWTEST_F(TextFieldModelStaticTest, SetPlaceholderFont001, TestSize.Level1)
     font3.fontStyle = Ace::FontStyle::ITALIC;
     std::optional<Font> valueOpt3 = font3;
     TextFieldModelStatic::SetPlaceholderFont(node, valueOpt3);
-    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderItalicFontStyleValue(Ace::FontStyle::NORMAL),
-        Ace::FontStyle::ITALIC);
+    EXPECT_EQ(
+        textFieldLayoutProperty->GetPlaceholderItalicFontStyleValue(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
     EXPECT_TRUE(textFieldLayoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdateValue(false));
 
     // Test case 6: valueOpt has value without fontStyle but has placeholder font style, should reset font style
@@ -830,9 +829,7 @@ HWTEST_F(TextFieldModelStaticTest, SetOnSecurityStateChange, TestSize.Level1)
 
     // Test case 3: func is valid, should set the security state change callback
     bool callBackCalled = false;
-    TextFieldModelStatic::SetOnSecurityStateChange(node, [&callBackCalled](bool value) {
-        callBackCalled = true;
-    });
+    TextFieldModelStatic::SetOnSecurityStateChange(node, [&callBackCalled](bool value) { callBackCalled = true; });
     // We cannot directly check if the callback is set without access to getter methods in eventHub
 
     // All test cases executed without crash
@@ -871,9 +868,7 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic015, TestSize.Level1)
 
     // Test case 3: func is valid, should set the paste callback
     bool callBackCalled = false;
-    TextFieldModelStatic::SetOnPaste(node, [&callBackCalled](const std::u16string& value) {
-        callBackCalled = true;
-    });
+    TextFieldModelStatic::SetOnPaste(node, [&callBackCalled](const std::u16string& value) { callBackCalled = true; });
     // We cannot directly check if the callback is set without access to getter methods in eventHub
 
     // All test cases executed without crash
@@ -912,9 +907,8 @@ HWTEST_F(TextFieldModelStaticTest, SetOnChangeEvent, TestSize.Level1)
 
     // Test case 3: func is valid, should set the change event callback
     bool callBackCalled = false;
-    TextFieldModelStatic::SetOnChangeEvent(node, [&callBackCalled](const std::u16string& value) {
-        callBackCalled = true;
-    });
+    TextFieldModelStatic::SetOnChangeEvent(
+        node, [&callBackCalled](const std::u16string& value) { callBackCalled = true; });
     // We cannot directly check if the callback is set without access to getter methods in eventHub
 
     // All test cases executed without crash
@@ -1078,7 +1072,7 @@ HWTEST_F(TextFieldModelStaticTest, SetPadding, TestSize.Level1)
     auto theme = pattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto node = Referenced::RawPtr(textFieldNode);
-    
+
     NG::PaddingProperty paddingProperty;
     paddingProperty.top = NG::CalcLength(10.0_fp);
     paddingProperty.bottom = NG::CalcLength(10.0_fp);
@@ -1122,7 +1116,7 @@ HWTEST_F(TextFieldModelStaticTest, SetMargin, TestSize.Level1)
     auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     auto node = Referenced::RawPtr(textFieldNode);
-    
+
     // Initialize margin property
     MarginProperty marginProperty;
     marginProperty.top = CalcLength(10.0_px);
@@ -1200,14 +1194,14 @@ HWTEST_F(TextFieldModelStaticTest, SetFontFeature, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     auto node = Referenced::RawPtr(textFieldNode);
 
-    FONT_FEATURES_LIST featureList1 = {{"\"subs\" on", 1}};
+    FONT_FEATURES_LIST featureList1 = { { "\"subs\" on", 1 } };
     TextFieldModelStatic::SetFontFeature(node, featureList1);
     EXPECT_TRUE(textFieldLayoutProperty->HasFontFeature());
 
-    FONT_FEATURES_LIST featureList2 = {{"", 1}};
+    FONT_FEATURES_LIST featureList2 = { { "", 1 } };
     TextFieldModelStatic::SetFontFeature(node, featureList2);
     EXPECT_TRUE(textFieldLayoutProperty->HasFontFeature());
-    
+
     TextFieldModelStatic::SetFontFeature(node, std::nullopt);
     EXPECT_FALSE(textFieldLayoutProperty->HasFontFeature());
 }
@@ -1248,7 +1242,7 @@ HWTEST_F(TextFieldModelStaticTest, SetBackBorder, TestSize.Level1)
     BorderRadiusProperty radiusProperty;
     radiusProperty.radiusTopStart = Dimension(5.0f, OHOS::Ace::DimensionUnit::PX);
     radiusProperty.radiusTopEnd = Dimension(5.0f, OHOS::Ace::DimensionUnit::PX);
-    radiusProperty.radiusBottomStart = Dimension(5.0f, OHOS::Ace::DimensionUnit::PX);;
+    radiusProperty.radiusBottomStart = Dimension(5.0f, OHOS::Ace::DimensionUnit::PX);
     radiusProperty.radiusBottomEnd = Dimension(5.0f, OHOS::Ace::DimensionUnit::PX);
     renderContext->UpdateBorderRadius(radiusProperty);
     TextFieldModelStatic::SetBackBorder(node);
@@ -1297,5 +1291,793 @@ HWTEST_F(TextFieldModelStaticTest, SetBackBorder, TestSize.Level1)
     // All test cases executed without crash
     layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     EXPECT_TRUE(layoutProperty->HasTextInputType());
+}
+
+/**
+ * @tc.name: SetShowUnit001
+ * @tc.desc: Test TextFieldModelStatic SetShowUnit with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowUnit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node to verify null handling doesn't affect other nodes
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    TextFieldModelStatic::SetShowUnit(nullptr, []() { return AceType::MakeRefPtr<FrameNode>("test", -1, nullptr); });
+
+    /**
+     * @tc.expected: step1. Null frameNode should not crash and existing node should be valid
+     */
+    EXPECT_NE(textFieldNode->GetPattern<TextFieldPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetShowUnit002
+ * @tc.desc: Test TextFieldModelStatic SetShowUnit with null builder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowUnit002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and call SetShowUnit with null builder
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetShowUnit(node, nullptr);
+
+    /**
+     * @tc.expected: step1. Should not crash and pattern should remain valid
+     */
+    EXPECT_NE(textFieldNode->GetPattern<TextFieldPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetShowUnit003
+ * @tc.desc: Test TextFieldModelStatic SetShowUnit with valid builder returning null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowUnit003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and call SetShowUnit with builder returning null
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetShowUnit(node, []() -> RefPtr<UINode> { return nullptr; });
+
+    /**
+     * @tc.expected: step1. Should not crash when builder returns null and pattern remains valid
+     */
+    EXPECT_NE(textFieldNode->GetPattern<TextFieldPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetShowUnit004
+ * @tc.desc: Test TextFieldModelStatic SetShowUnit with valid builder and unitNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowUnit004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and unit node with valid builder
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    auto unitFrameNode = FrameNode::CreateFrameNode(
+        "UnitNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(unitFrameNode, nullptr);
+
+    TextFieldModelStatic::SetShowUnit(node, [&unitFrameNode]() -> RefPtr<UINode> { return unitFrameNode; });
+
+    /**
+     * @tc.expected: step1. Should set unitNode and pattern should process response area
+     */
+    EXPECT_NE(textFieldNode->GetPattern<TextFieldPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetShowUnit005
+ * @tc.desc: Test TextFieldModelStatic SetShowUnit with unitNode having foreground color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetShowUnit005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and unit node with foreground color set
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    auto unitFrameNode = FrameNode::CreateFrameNode(
+        "UnitNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(unitFrameNode, nullptr);
+    auto renderContext = unitFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateForegroundColor(Color::RED);
+
+    TextFieldModelStatic::SetShowUnit(node, [&unitFrameNode]() -> RefPtr<UINode> { return unitFrameNode; });
+
+    /**
+     * @tc.expected: step1. Should not override foreground color strategy when foreground color is set
+     */
+    EXPECT_TRUE(renderContext->HasForegroundColor());
+}
+
+/**
+ * @tc.name: SetAutoCapitalizationMode001
+ * @tc.desc: Test TextFieldModelStatic SetAutoCapitalizationMode with valid frameNode and NONE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetAutoCapitalizationMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set AutoCapitalizationMode to NONE
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::NONE);
+
+    /**
+     * @tc.expected: step1. Should set AutoCapitalizationMode to NONE successfully
+     */
+    EXPECT_TRUE(pattern->HasAutoCapitalizationMode());
+    EXPECT_EQ(pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::WORDS), AutoCapitalizationMode::NONE);
+}
+
+/**
+ * @tc.name: SetAutoCapitalizationMode002
+ * @tc.desc: Test TextFieldModelStatic SetAutoCapitalizationMode with valid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetAutoCapitalizationMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set AutoCapitalizationMode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::SENTENCES);
+
+    /**
+     * @tc.expected: step1. Should set AutoCapitalizationMode successfully
+     */
+    EXPECT_TRUE(pattern->HasAutoCapitalizationMode());
+    EXPECT_EQ(pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE), AutoCapitalizationMode::SENTENCES);
+}
+
+/**
+ * @tc.name: SetAutoCapitalizationMode003
+ * @tc.desc: Test TextFieldModelStatic SetAutoCapitalizationMode with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetAutoCapitalizationMode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set AutoCapitalizationMode to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::ALL_CHARACTERS);
+    EXPECT_TRUE(pattern->HasAutoCapitalizationMode());
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset AutoCapitalizationMode successfully
+     */
+    EXPECT_FALSE(pattern->HasAutoCapitalizationMode());
+}
+
+/**
+ * @tc.name: SetAutoCapitalizationMode004
+ * @tc.desc: Test TextFieldModelStatic SetAutoCapitalizationMode with different mode values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetAutoCapitalizationMode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different AutoCapitalizationMode values
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::NONE);
+    EXPECT_EQ(pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::WORDS), AutoCapitalizationMode::NONE);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::WORDS);
+    EXPECT_EQ(pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE), AutoCapitalizationMode::WORDS);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::SENTENCES);
+    EXPECT_EQ(pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE), AutoCapitalizationMode::SENTENCES);
+
+    TextFieldModelStatic::SetAutoCapitalizationMode(node, AutoCapitalizationMode::ALL_CHARACTERS);
+    EXPECT_EQ(
+        pattern->GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE), AutoCapitalizationMode::ALL_CHARACTERS);
+
+    /**
+     * @tc.expected: step1. Should handle all AutoCapitalizationMode values correctly
+     */
+    EXPECT_TRUE(pattern->HasAutoCapitalizationMode());
+}
+
+/**
+ * @tc.name: SetTextDirection001
+ * @tc.desc: Test TextFieldModelStatic SetTextDirection with valid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetTextDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set TextDirection
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::RTL);
+
+    /**
+     * @tc.expected: step1. Should set TextDirection successfully
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextDirection());
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDirectionValue(TextDirection::LTR), TextDirection::RTL);
+}
+
+/**
+ * @tc.name: SetTextDirection002
+ * @tc.desc: Test TextFieldModelStatic SetTextDirection with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetTextDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set TextDirection to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::RTL);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextDirection());
+    TextFieldModelStatic::SetTextDirection(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset TextDirection successfully
+     */
+    EXPECT_FALSE(textFieldLayoutProperty->HasTextDirection());
+}
+
+/**
+ * @tc.name: SetTextDirection003
+ * @tc.desc: Test TextFieldModelStatic SetTextDirection with different direction values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetTextDirection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different TextDirection values
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::LTR);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDirectionValue(TextDirection::RTL), TextDirection::LTR);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::RTL);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDirectionValue(TextDirection::LTR), TextDirection::RTL);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::AUTO);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDirectionValue(TextDirection::LTR), TextDirection::AUTO);
+
+    /**
+     * @tc.expected: step1. Should handle all TextDirection values correctly
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextDirection());
+}
+
+/**
+ * @tc.name: SetTextDirection004
+ * @tc.desc: Test TextFieldModelStatic SetTextDirection with INHERIT value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetTextDirection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set TextDirection to INHERIT
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetTextDirection(node, TextDirection::INHERIT);
+
+    /**
+     * @tc.expected: step1. Should set TextDirection to INHERIT successfully
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextDirection());
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDirectionValue(TextDirection::LTR), TextDirection::INHERIT);
+}
+
+/**
+ * @tc.name: SetCaretWidth001
+ * @tc.desc: Test TextFieldModelStatic SetCaretWidth with valid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCaretWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set CaretWidth
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension caretWidth(2.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetCaretWidth(node, caretWidth);
+
+    /**
+     * @tc.expected: step1. Should set CaretWidth successfully
+     */
+    EXPECT_TRUE(paintProperty->HasCursorWidth());
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension()).Value(), 2.0);
+}
+
+/**
+ * @tc.name: SetCaretWidth002
+ * @tc.desc: Test TextFieldModelStatic SetCaretWidth with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCaretWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set CaretWidth to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension caretWidth(3.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetCaretWidth(node, caretWidth);
+    EXPECT_TRUE(paintProperty->HasCursorWidth());
+
+    TextFieldModelStatic::SetCaretWidth(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset CaretWidth successfully
+     */
+    EXPECT_FALSE(paintProperty->HasCursorWidth());
+}
+
+/**
+ * @tc.name: SetCaretWidth003
+ * @tc.desc: Test TextFieldModelStatic SetCaretWidth with different dimension values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCaretWidth003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different CaretWidth values
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension caretWidth1(1.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetCaretWidth(node, caretWidth1);
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension()).Value(), 1.0);
+
+    Dimension caretWidth2(5.0, DimensionUnit::PX);
+    TextFieldModelStatic::SetCaretWidth(node, caretWidth2);
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension()).Value(), 5.0);
+
+    Dimension caretWidth3(2.5, DimensionUnit::FP);
+    TextFieldModelStatic::SetCaretWidth(node, caretWidth3);
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension()).Value(), 2.5);
+
+    /**
+     * @tc.expected: step1. Should handle different dimension values correctly
+     */
+    EXPECT_TRUE(paintProperty->HasCursorWidth());
+}
+
+/**
+ * @tc.name: SetCustomKeyboard001
+ * @tc.desc: Test TextFieldModelStatic SetCustomKeyboard with valid buildFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCustomKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set custom keyboard
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    bool buildFuncCalled = false;
+    TextFieldModelStatic::SetCustomKeyboard(
+        node, [&buildFuncCalled]() { buildFuncCalled = true; }, true);
+
+    /**
+     * @tc.expected: step1. Should set custom keyboard and option successfully
+     */
+    EXPECT_TRUE(pattern->HasCustomKeyboard());
+    EXPECT_TRUE(pattern->GetCustomKeyboardOption());
+}
+
+/**
+ * @tc.name: SetCustomKeyboard002
+ * @tc.desc: Test TextFieldModelStatic SetCustomKeyboard with null buildFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCustomKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set null custom keyboard
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetCustomKeyboard(node, nullptr, false);
+
+    /**
+     * @tc.expected: step1. Should handle null buildFunc without crash
+     */
+    EXPECT_FALSE(pattern->GetCustomKeyboardOption());
+}
+
+/**
+ * @tc.name: SetCustomKeyboard003
+ * @tc.desc: Test TextFieldModelStatic SetCustomKeyboard with supportAvoidance false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetCustomKeyboard003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set custom keyboard with supportAvoidance false
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetCustomKeyboard(
+        node, []() {}, false);
+
+    /**
+     * @tc.expected: step1. Should set custom keyboard option to false
+     */
+    EXPECT_TRUE(pattern->HasCustomKeyboard());
+    EXPECT_FALSE(pattern->GetCustomKeyboardOption());
+}
+
+/**
+ * @tc.name: SetSelectedDragPreviewStyle001
+ * @tc.desc: Test TextFieldModelStatic SetSelectedDragPreviewStyle with valid color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetSelectedDragPreviewStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set selected drag preview style
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Color dragPreviewColor = Color::RED;
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(node, dragPreviewColor);
+
+    /**
+     * @tc.expected: step1. Should set selected drag preview style color successfully
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasSelectedDragPreviewStyle());
+    EXPECT_EQ(textFieldLayoutProperty->GetSelectedDragPreviewStyleValue(Color::BLACK), dragPreviewColor);
+}
+
+/**
+ * @tc.name: SetSelectedDragPreviewStyle002
+ * @tc.desc: Test TextFieldModelStatic SetSelectedDragPreviewStyle with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetSelectedDragPreviewStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set selected drag preview style to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(node, Color::BLUE);
+    EXPECT_TRUE(textFieldLayoutProperty->HasSelectedDragPreviewStyle());
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset selected drag preview style successfully
+     */
+    EXPECT_FALSE(textFieldLayoutProperty->HasSelectedDragPreviewStyle());
+}
+
+/**
+ * @tc.name: SetSelectedDragPreviewStyle003
+ * @tc.desc: Test TextFieldModelStatic SetSelectedDragPreviewStyle with different colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetSelectedDragPreviewStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different colors
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(node, Color::GREEN);
+    EXPECT_EQ(textFieldLayoutProperty->GetSelectedDragPreviewStyleValue(Color::BLACK), Color::GREEN);
+
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(node, Color(0xFF00FF00));
+    EXPECT_EQ(textFieldLayoutProperty->GetSelectedDragPreviewStyleValue(Color::BLACK), Color(0xFF00FF00));
+
+    /**
+     * @tc.expected: step1. Should handle different colors correctly
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasSelectedDragPreviewStyle());
+}
+
+/**
+ * @tc.name: SetStrokeColor001
+ * @tc.desc: Test TextFieldModelStatic SetStrokeColor with valid color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set stroke color
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Color strokeColor = Color::BLUE;
+    TextFieldModelStatic::SetStrokeColor(node, strokeColor);
+
+    /**
+     * @tc.expected: step1. Should set stroke color successfully
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeColor());
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeColorValue(Color::BLACK), strokeColor);
+}
+
+/**
+ * @tc.name: SetStrokeColor002
+ * @tc.desc: Test TextFieldModelStatic SetStrokeColor with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set stroke color to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetStrokeColor(node, Color::RED);
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeColor());
+    TextFieldModelStatic::SetStrokeColor(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset stroke color successfully
+     */
+    EXPECT_FALSE(textFieldLayoutProperty->HasStrokeColor());
+}
+
+/**
+ * @tc.name: SetStrokeColor003
+ * @tc.desc: Test TextFieldModelStatic SetStrokeColor with different colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeColor003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different stroke colors
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetStrokeColor(node, Color::GREEN);
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeColorValue(Color::BLACK), Color::GREEN);
+
+    TextFieldModelStatic::SetStrokeColor(node, Color(0xFF123456));
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeColorValue(Color::BLACK), Color(0xFF123456));
+
+    /**
+     * @tc.expected: step1. Should handle different colors correctly
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeColor());
+}
+
+/**
+ * @tc.name: SetStrokeWidth001
+ * @tc.desc: Test TextFieldModelStatic SetStrokeWidth with valid dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set stroke width
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension strokeWidth(2.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetStrokeWidth(node, strokeWidth);
+
+    /**
+     * @tc.expected: step1. Should set stroke width successfully
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeWidth());
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeWidthValue(Dimension()).Value(), 2.0);
+}
+
+/**
+ * @tc.name: SetStrokeWidth002
+ * @tc.desc: Test TextFieldModelStatic SetStrokeWidth with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and set stroke width to nullopt
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension strokeWidth(3.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetStrokeWidth(node, strokeWidth);
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeWidth());
+    TextFieldModelStatic::SetStrokeWidth(node, std::nullopt);
+
+    /**
+     * @tc.expected: step1. Should reset stroke width successfully
+     */
+    EXPECT_FALSE(textFieldLayoutProperty->HasStrokeWidth());
+}
+
+/**
+ * @tc.name: SetStrokeWidth003
+ * @tc.desc: Test TextFieldModelStatic SetStrokeWidth with different dimension values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetStrokeWidth003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node and test different stroke width values
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    Dimension strokeWidth1(1.0, DimensionUnit::VP);
+    TextFieldModelStatic::SetStrokeWidth(node, strokeWidth1);
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeWidthValue(Dimension()).Value(), 1.0);
+
+    Dimension strokeWidth2(5.0, DimensionUnit::PX);
+    TextFieldModelStatic::SetStrokeWidth(node, strokeWidth2);
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeWidthValue(Dimension()).Value(), 5.0);
+
+    Dimension strokeWidth3(2.5, DimensionUnit::FP);
+    TextFieldModelStatic::SetStrokeWidth(node, strokeWidth3);
+    EXPECT_EQ(textFieldLayoutProperty->GetStrokeWidthValue(Dimension()).Value(), 2.5);
+
+    /**
+     * @tc.expected: step1. Should handle different dimension values correctly
+     */
+    EXPECT_TRUE(textFieldLayoutProperty->HasStrokeWidth());
 }
 } // namespace OHOS::Ace::NG

@@ -53,7 +53,7 @@ public:
  * @tc.desc: Test all the property of text.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(TextTestNg, TextFrameNodeCreator002, TestSize.Level0)
 {
     TestProperty testProperty;
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);

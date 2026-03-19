@@ -165,7 +165,7 @@ void ContentChangeManagerTestNg::TearDownTestCase()
  * @tc.desc: Test config.textContentRatio validity
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
