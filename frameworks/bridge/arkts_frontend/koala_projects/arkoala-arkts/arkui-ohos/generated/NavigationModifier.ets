@@ -68,7 +68,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     public _systemBarStyle_0_0value?: SystemBarStyle | undefined
     public _recoverable_0_0value?: boolean | undefined
     public _enableDragBar_0_0value?: boolean | undefined
-    public _divider_0_0value?: NavigationDividerStyle | null
+    public _divider_0_0value: NavigationDividerStyle | null = null
     public _enableModeChangeAnimation_0_0value?: boolean | undefined
     public _splitPlaceholder_0_0value?: ComponentContent<object>
     public _enableVisibilityLifecycleWithContentCover_0_0value?: boolean | undefined
@@ -431,7 +431,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setDividerAttribute((null as NavigationDividerStyle | null));
                 }
             }
         }
@@ -851,7 +850,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                     break;
                 }
                 default: {
-                    this.divider((null as NavigationDividerStyle | null));
                 }
             }
         }

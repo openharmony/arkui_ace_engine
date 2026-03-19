@@ -41,7 +41,7 @@ action("runner_gen_code") {
   ]
 }
 
-action("deploy_gen_code") {
+action("idlize_gen") {
   script = "deploy.py"
   args = [
     "--source",
@@ -56,12 +56,5 @@ action("deploy_gen_code") {
   ]
   outputs = [
     "$target_out_dir/deploy_gen_code",
-  ]
-}
-
-group("idlize_gen") {
-  deps = [
-    ":runner_gen_code",
-    ":deploy_gen_code",
   ]
 }

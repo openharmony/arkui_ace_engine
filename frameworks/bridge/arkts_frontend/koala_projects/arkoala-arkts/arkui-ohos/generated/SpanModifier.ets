@@ -67,6 +67,8 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     public _fontWeight_0_1value?: FontWeightConfigs | undefined
     public _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
     public _onClick_1_1value?: double | undefined
+    public _debugLine_0_0value?: string
+    public _debugLine_0_1value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkSpanPeer;
@@ -380,6 +382,22 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[18] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[18] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[18] = 0;
+                }
+            }
+        }
     }
     mergeModifier(modifier: SpanModifier): void {
         this._state = modifier._state;
@@ -603,6 +621,17 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.debugLine((modifier._debugLine_0_0value as string), (modifier._debugLine_0_1value as string | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     fontColor(value: ResourceColor | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -784,6 +813,17 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
             this._state.fireChange()
         } else {
             this._flagArray[17] = 3
+        }
+        return this
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[18]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+            this._flagArray[18] = 1
+            this._debugLine_0_0value = sourceLine
+            this._debugLine_0_1value = moduleName
+            this._state.fireChange()
+        } else {
+            this._flagArray[18] = 3
         }
         return this
     }
