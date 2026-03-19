@@ -981,6 +981,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest001, TestSize.Leve
      */
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1049,6 +1054,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest002, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1125,6 +1135,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest003, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1195,6 +1210,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest004, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(algorithm, nullptr);
 
@@ -1260,6 +1280,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest005, TestSize.Leve
      */
     auto pattern = sheet->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(algorithm, nullptr);
 
