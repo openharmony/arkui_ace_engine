@@ -144,15 +144,12 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
 export function BlankImpl(
     @memo @memo_skip
     style: ((attributes: BlankAttribute) => void) | undefined,
-    @memo @memo_skip
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkBlankComponent>((): ArkBlankComponent => {
         return new ArkBlankComponent()
     })
     NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (_: ArkBlankPeer): void => {
         style?.(receiver)
-        content_?.()
     })
 }
 
