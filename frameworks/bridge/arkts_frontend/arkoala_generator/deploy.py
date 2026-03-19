@@ -22,11 +22,11 @@ Usage:
 Arguments:
     --source       Source directory containing *Modifier.ets files
     --destination  Destination directory to copy files to
-    --config       JSON configuration file containing blacklist of files to skip
+    --config       JSON configuration file containing ignore list of files to skip
 
-Blacklist format (relative paths from source directory):
+Ignore format (relative paths from source directory):
     {
-        "blacklist": ["CommonMethodModifier.ets", "subdir/SomeModifier.ets"]
+        "ignore": ["CommonMethodModifier.ets", "subdir/SomeModifier.ets"]
     }
 """
 
@@ -37,53 +37,53 @@ import glob
 from pathlib import Path
 
 
-def load_blacklist(config_path):
+def load_ignore_list(config_path):
     """
-    Load blacklist from configuration file.
+    Load ignore list from configuration file.
 
     The config file should be a JSON file with relative paths from source dir:
     {
-        "blacklist": ["File1Modifier.ets", "subdir/File2Modifier.ets"]
+        "ignore": ["File1Modifier.ets", "subdir/File2Modifier.ets"]
     }
 
     Returns an empty set if file doesn't exist or is invalid.
     """
-    blacklist = set()
+    ignore_list = set()
 
     if not config_path:
-        return blacklist
+        return ignore_list
 
     config_file = Path(config_path)
     if not config_file.exists():
         print(f"Warning: Config file not found: {config_path}")
-        return blacklist
+        return ignore_list
 
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
 
-        if isinstance(config.get('blacklist'), list):
+        if isinstance(config.get('ignore'), list):
             # Normalize paths to use forward slashes
-            for item in config['blacklist']:
+            for item in config['ignore']:
                 normalized = str(item).replace('\\', '/')
-                blacklist.add(normalized)
-            print(f"Loaded {len(blacklist)} files from blacklist")
+                ignore_list.add(normalized)
+            print(f"Loaded {len(ignore_list)} files from ignore list")
     except json.JSONDecodeError as e:
         print(f"Warning: Failed to parse config file: {e}")
     except Exception as e:
         print(f"Warning: Error reading config file: {e}")
 
-    return blacklist
+    return ignore_list
 
 
-def copy_modifier_files(src_dir, dst_dir, blacklist):
+def copy_modifier_files(src_dir, dst_dir, ignore_list):
     """
     Copy all *Modifier.ets files from source to destination,
-    excluding files in the blacklist.
+    excluding files in the ignore list.
 
-    Blacklist uses relative paths from src_dir.
+    Ignore list uses relative paths from src_dir.
 
-    Returns True if all non-blacklisted files were copied successfully.
+    Returns True if all non-ignored files were copied successfully.
     """
     src_path = Path(src_dir)
     dst_path = Path(dst_dir)
@@ -118,9 +118,9 @@ def copy_modifier_files(src_dir, dst_dir, blacklist):
         rel_path = src_file_path.relative_to(src_path)
         rel_path_str = str(rel_path).replace('\\', '/')
 
-        # Skip blacklisted files (using relative path)
-        if rel_path_str in blacklist:
-            print(f"  Skipped (blacklisted): {rel_path_str}")
+        # Skip ignored files (using relative path)
+        if rel_path_str in ignore_list:
+            print(f"  Skipped (ignored): {rel_path_str}")
             skipped_count += 1
             continue
 
@@ -137,7 +137,7 @@ def copy_modifier_files(src_dir, dst_dir, blacklist):
             print(f"  Error copying {rel_path_str}: {e}")
 
     print()
-    print(f"Summary: {copied_count} copied, {skipped_count} skipped (blacklisted)")
+    print(f"Summary: {copied_count} copied, {skipped_count} skipped (ignored)")
 
     return True
 
@@ -161,7 +161,7 @@ def main():
     parser.add_argument(
         '--config', '-c',
         required=False,
-        help='JSON configuration file containing blacklist of files to skip'
+        help='JSON configuration file containing ignore list of files to skip'
     )
 
     args = parser.parse_args()
@@ -171,14 +171,14 @@ def main():
     print("=" * 60)
     print()
 
-    # Load blacklist from config
-    blacklist = load_blacklist(args.config)
-    if blacklist:
-        print(f"Blacklist: {sorted(blacklist)}")
+    # Load ignore list from config
+    ignore_list = load_ignore_list(args.config)
+    if ignore_list:
+        print(f"Ignore list: {sorted(ignore_list)}")
         print()
 
     # Copy files
-    success = copy_modifier_files(args.source, args.destination, blacklist)
+    success = copy_modifier_files(args.source, args.destination, ignore_list)
 
     if success:
         print("\nDeployment completed successfully!")
