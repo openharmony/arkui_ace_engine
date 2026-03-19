@@ -19,18 +19,41 @@
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 
 namespace OHOS::Ace::NG {
+
+WaterFlowPattern::~WaterFlowPattern() = default;
+
+RefPtr<LayoutProperty> WaterFlowPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<WaterFlowLayoutProperty>();
+}
+
+RefPtr<EventHub> WaterFlowPattern::CreateEventHub()
+{
+    return MakeRefPtr<WaterFlowEventHub>();
+}
+
+RefPtr<AccessibilityProperty> WaterFlowPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<WaterFlowAccessibilityProperty>();
+}
 
 SizeF WaterFlowPattern::GetContentSize() const
 {

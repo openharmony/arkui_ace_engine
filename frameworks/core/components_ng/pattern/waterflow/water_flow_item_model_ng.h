@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_ITEM_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_ITEM_MODEL_NG_H
 
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+
 class ACE_EXPORT WaterFlowItemModelNG : public OHOS::Ace::WaterFlowItemModel {
 public:
     void Create() override;
