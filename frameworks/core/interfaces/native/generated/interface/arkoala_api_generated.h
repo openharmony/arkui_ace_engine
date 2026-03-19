@@ -2189,6 +2189,8 @@ typedef struct Ark_ButtonOptions Ark_ButtonOptions;
 typedef struct Opt_ButtonOptions Opt_ButtonOptions;
 typedef struct Ark_CacheCountInfo Ark_CacheCountInfo;
 typedef struct Opt_CacheCountInfo Opt_CacheCountInfo;
+typedef struct Ark_CachedCountOptions Ark_CachedCountOptions;
+typedef struct Opt_CachedCountOptions Opt_CachedCountOptions;
 typedef struct Ark_cacheDownload_NetworkInfo Ark_cacheDownload_NetworkInfo;
 typedef struct Opt_cacheDownload_NetworkInfo Opt_cacheDownload_NetworkInfo;
 typedef struct Ark_cacheDownload_PerformanceInfo Ark_cacheDownload_PerformanceInfo;
@@ -15019,6 +15021,15 @@ typedef struct Opt_CacheCountInfo {
     Ark_Tag tag;
     Ark_CacheCountInfo value;
 } Opt_CacheCountInfo;
+typedef struct Ark_CachedCountOptions {
+    /* kind: Interface */
+    Opt_Boolean isShown;
+    Opt_Boolean independent;
+} Ark_CachedCountOptions;
+typedef struct Opt_CachedCountOptions {
+    Ark_Tag tag;
+    Ark_CachedCountOptions value;
+} Opt_CachedCountOptions;
 typedef struct Ark_cacheDownload_NetworkInfo {
     /* kind: Interface */
     Array_String dnsServers;
@@ -26229,6 +26240,9 @@ typedef struct GENERATED_ArkUISwiperModifier {
     void (*setCachedCount1)(Ark_NativePointer node,
                             const Opt_Int32* count,
                             const Opt_Boolean* isShown);
+    void (*setCachedCount2)(Ark_NativePointer node,
+                            const Opt_Int32* count,
+                            const Opt_CachedCountOptions* options);
     void (*setDisplayCount)(Ark_NativePointer node,
                             const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                             const Opt_Boolean* swipeByGroup);

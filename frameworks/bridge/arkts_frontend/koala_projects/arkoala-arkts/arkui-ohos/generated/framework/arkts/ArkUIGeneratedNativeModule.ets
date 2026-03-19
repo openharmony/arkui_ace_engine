@@ -2247,6 +2247,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperAttribute_setCachedCount1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SwiperAttribute_setCachedCount2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SwiperAttribute_setDisplayCount(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setPrevMargin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

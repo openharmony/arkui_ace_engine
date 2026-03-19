@@ -19306,6 +19306,26 @@ void impl_SwiperAttribute_setCachedCount1(Ark_NativePointer thisPtr, KSerializer
         GetNodeModifiers()->getSwiperModifier()->setCachedCount1(self, static_cast<Opt_Int32*>(&countValueTemp), static_cast<Opt_Boolean*>(&isShownValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setCachedCount1, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SwiperAttribute_setCachedCount2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto countValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Int32 countValueTempTmpBuf = {};
+        countValueTempTmpBuf.tag = countValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((countValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            countValueTempTmpBuf.value = thisDeserializer.readInt32();
+        }
+        Opt_Int32 countValueTemp = countValueTempTmpBuf;;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CachedCountOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = CachedCountOptions_serializer::read(thisDeserializer);
+        }
+        Opt_CachedCountOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getSwiperModifier()->setCachedCount2(self, static_cast<Opt_Int32*>(&countValueTemp), static_cast<Opt_CachedCountOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setCachedCount2, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setDisplayCount(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
