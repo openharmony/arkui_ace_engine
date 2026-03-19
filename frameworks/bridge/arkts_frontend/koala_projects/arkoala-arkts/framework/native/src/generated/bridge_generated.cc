@@ -38950,12 +38950,12 @@ void impl_RenderNodeExtender_setTranslation(Ark_NativePointer peer, KSerializerB
         GetAccessors()->getRenderNodeExtenderAccessor()->setTranslation(static_cast<Ark_RenderNode>(peer), static_cast<Ark_Vector2*>(&translationValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RenderNodeExtender_setTranslation, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RenderNodeExtender_setRotation(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 unitValue) {
+void impl_RenderNodeExtender_setRotation(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Vector3 rotationValueTemp = Vector3_serializer::read(thisDeserializer);;
-        GetAccessors()->getRenderNodeExtenderAccessor()->setRotation(static_cast<Ark_RenderNode>(peer), static_cast<Ark_Vector3*>(&rotationValueTemp), unitValue);
+        GetAccessors()->getRenderNodeExtenderAccessor()->setRotation(static_cast<Ark_RenderNode>(peer), static_cast<Ark_Vector3*>(&rotationValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(RenderNodeExtender_setRotation, Ark_NativePointer, KSerializerBuffer, int32_t, Ark_Int32)
+KOALA_INTEROP_DIRECT_V3(RenderNodeExtender_setRotation, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RenderNodeExtender_setTransform(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Matrix4 transformValueTempTmpBuf = {};

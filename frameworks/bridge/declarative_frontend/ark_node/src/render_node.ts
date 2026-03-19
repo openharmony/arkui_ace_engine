@@ -559,7 +559,7 @@ class RenderNode {
       this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
       this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
     }
-    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
+    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
   }
   set scale(scale: Vector2) {
     if (scale === undefined || scale === null) {

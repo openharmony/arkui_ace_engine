@@ -18000,8 +18000,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRotationImpl(Ark_RenderNode peer,
-                         const Ark_Vector3* rotation,
-                         Ark_Int32 unitValue)
+                         const Ark_Vector3* rotation)
     {
     }
     void SetTransformImpl(Ark_RenderNode peer,

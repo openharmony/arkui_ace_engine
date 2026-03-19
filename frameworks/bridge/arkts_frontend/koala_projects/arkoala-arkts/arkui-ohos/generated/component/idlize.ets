@@ -4525,11 +4525,10 @@ export class RenderNodeExtender {
         RenderNodeExtender.setTranslation_serialize(peer_casted, translation_casted)
         return
     }
-    public static setRotation(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+    public static setRotation(peer: RenderNode, rotation: Vector3): void {
         const peer_casted = peer as (RenderNode)
         const rotation_casted = rotation as (Vector3)
-        const unitValue_casted = unitValue as (int32)
-        RenderNodeExtender.setRotation_serialize(peer_casted, rotation_casted, unitValue_casted)
+        RenderNodeExtender.setRotation_serialize(peer_casted, rotation_casted)
         return
     }
     public static setTransform(peer: RenderNode, transform: Matrix4): void {
@@ -4764,10 +4763,10 @@ export class RenderNodeExtender {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setTranslation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static setRotation_serialize(peer: RenderNode, rotation: Vector3, unitValue: int32): void {
+    private static setRotation_serialize(peer: RenderNode, rotation: Vector3): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         Vector3_serializer.write(thisSerializer, rotation)
-        ArkUIGeneratedNativeModule._RenderNodeExtender_setRotation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setRotation(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static setTransform_serialize(peer: RenderNode, transform: Matrix4): void {

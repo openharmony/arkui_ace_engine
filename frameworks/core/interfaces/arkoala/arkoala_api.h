@@ -8513,8 +8513,8 @@ struct ArkUIRenderNodeModifier {
     void (*clearBuilderNode)(ArkUINodeHandle node);
     void (*clearChildren)(ArkUINodeHandle node);
     void (*setClipToFrame)(ArkUINodeHandle node, ArkUI_Bool useClip);
-    void (*setRotation)(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ,
-        ArkUI_Int32 unitValue);
+    void (*setRotation)(
+        ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ);
     void (*setShadowColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setShadowOffset)(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY, ArkUI_Int32 unitValue);
     void (*setLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
