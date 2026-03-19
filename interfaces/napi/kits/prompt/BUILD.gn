@@ -31,7 +31,10 @@ template("napi_prompt_static") {
         "js_prompt.cpp",
       ]
     }
-    deps = [ "$ace_root/frameworks/core:ace_container_scope" ]
+    deps = []
+    if (!is_arkui_x) {
+      deps = [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
     external_deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
