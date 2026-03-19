@@ -114,4 +114,9 @@ interface FrameNodeExtender {
   static sequence<f64> convertPositionToWindow(FrameNode peer, NodePosition positionByLocal);
   static sequence<f64> convertPositionFromWindow(FrameNode peer, NodePosition positionByWindow);
   static void applyAttributesFinish(FrameNode peer);
+  static sequence<pointer> createFrameNodes(i32 count);
+  static sequence<pointer> getRenderNodeByFrameNodes(sequence<pointer> ptrs);
+  static sequence<i32> getIdByFrameNodes(sequence<pointer> ptrs);
+  static pointer getFrameNodeById(FrameNode peer, String id);
+  static pointer getFrameNodeByUniqueId(FrameNode peer, i32 id);
 };

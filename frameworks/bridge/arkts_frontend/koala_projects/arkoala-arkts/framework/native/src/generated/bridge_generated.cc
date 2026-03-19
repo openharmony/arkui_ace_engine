@@ -33422,6 +33422,65 @@ void impl_FrameNodeExtender_applyAttributesFinish(Ark_NativePointer peer) {
         GetAccessors()->getFrameNodeExtenderAccessor()->applyAttributesFinish(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_applyAttributesFinish, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_createFrameNodes(Ark_Int32 count) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->createFrameNodes(count);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_NativePointer retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writePointer(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_createFrameNodes, KInteropReturnBuffer, Ark_Int32)
+KInteropReturnBuffer impl_FrameNodeExtender_getRenderNodesByFrameNodes(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 ptrsValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_Pointer ptrsValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(ptrsValueTempTmpBuf)>::type,
+        std::decay<decltype(*ptrsValueTempTmpBuf.array)>::type>(&ptrsValueTempTmpBuf, ptrsValueTempTmpBufLength);
+        for (int ptrsValueTempTmpBufBufCounterI = 0; ptrsValueTempTmpBufBufCounterI < ptrsValueTempTmpBufLength; ptrsValueTempTmpBufBufCounterI++) {
+            ptrsValueTempTmpBuf.array[ptrsValueTempTmpBufBufCounterI] = thisDeserializer.readPointer();
+        }
+        Array_Pointer ptrsValueTemp = ptrsValueTempTmpBuf;;
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getRenderNodesByFrameNodes(static_cast<Array_Pointer*>(&ptrsValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_NativePointer retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writePointer(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(FrameNodeExtender_getRenderNodesByFrameNodes, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_FrameNodeExtender_getIdsByFrameNodes(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 ptrsValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_Pointer ptrsValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(ptrsValueTempTmpBuf)>::type,
+        std::decay<decltype(*ptrsValueTempTmpBuf.array)>::type>(&ptrsValueTempTmpBuf, ptrsValueTempTmpBufLength);
+        for (int ptrsValueTempTmpBufBufCounterI = 0; ptrsValueTempTmpBufBufCounterI < ptrsValueTempTmpBufLength; ptrsValueTempTmpBufBufCounterI++) {
+            ptrsValueTempTmpBuf.array[ptrsValueTempTmpBufBufCounterI] = thisDeserializer.readPointer();
+        }
+        Array_Pointer ptrsValueTemp = ptrsValueTempTmpBuf;;
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getIdsByFrameNodes(static_cast<Array_Pointer*>(&ptrsValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Int32 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeInt32(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(FrameNodeExtender_getIdsByFrameNodes, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_FrameNodeExtender_getFrameNodeById1(Ark_NativePointer peer, const KStringPtr& id) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeById1(static_cast<Ark_FrameNode>(peer), (const Ark_String*) (&id));
+}
+KOALA_INTEROP_2(FrameNodeExtender_getFrameNodeById1, Ark_NativePointer, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByUniqueId1(Ark_NativePointer peer, Ark_Int32 id) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByUniqueId1(static_cast<Ark_FrameNode>(peer), id);
+}
+KOALA_INTEROP_DIRECT_2(FrameNodeExtender_getFrameNodeByUniqueId1, Ark_NativePointer, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_FullScreenExitHandler_construct() {
         return GetAccessors()->getFullScreenExitHandlerAccessor()->construct();
 }

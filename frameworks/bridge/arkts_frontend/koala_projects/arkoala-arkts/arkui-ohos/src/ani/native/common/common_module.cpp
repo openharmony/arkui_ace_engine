@@ -46,6 +46,7 @@ const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
+constexpr char ARRAY_GET[] = "i:Y";
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -715,6 +716,28 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     fnLayoutFun = &fnObjLayoutFun;
     modifier->getCommonAniModifier()->setCustomCallback(ptr, fnMeasureFun, fnLayoutFun);
     return;
+}
+
+void SetCustomCallbackWithCheckForFrameNodes(ani_env* env, ani_object obj, ani_array ptrArray, ani_array nodeArray)
+{
+    ani_size size;
+    ANI_CALL(env, Array_GetLength(ptrArray, &size), return);
+    ani_class arrayClass;
+    ANI_CALL(env, FindClass("std.core.Array", &arrayClass), return);
+    ani_method getDataMethod;
+    ANI_CALL(env, Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod), return);
+    for (size_t index = 0; index < size; index++) {
+        ani_ref ptr;
+        ani_ref node;
+        ANI_CALL(env, Object_CallMethod_Ref(ptrArray, getDataMethod, &ptr, index), return);
+        ani_long nodePtr;
+        if (!AniUtils::GetBigIntValue(env, static_cast<ani_object>(ptr), nodePtr)) {
+            HILOGE("Get frameNode value from array failed.");
+            return;
+        }
+        ANI_CALL(env, Object_CallMethod_Ref(nodeArray, getDataMethod, &node, index), return);
+        SetCustomCallbackWithCheck(env, obj, nodePtr, static_cast<ani_object>(node));
+    }
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)

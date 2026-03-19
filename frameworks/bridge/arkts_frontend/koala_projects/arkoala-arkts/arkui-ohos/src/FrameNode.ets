@@ -258,6 +258,15 @@ export class FrameNode implements MaterializedBase {
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
             this._supportMultiThread = options?.supportMultiThread ?? false;
+            if (type === 'InternalBatchFrameNode') {
+                this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this))
+                if (ptr) {
+                    this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
+                    this.nodePtr_ = this.peer?.ptr
+                }
+                return;
+            }
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
@@ -649,6 +658,56 @@ export class FrameNode implements MaterializedBase {
         this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
     };
+    public static createFrameNodes(uiContext: UIContext, count: int32): Array<FrameNode> {
+        const frameNodes: FrameNode[] = [];
+        if (count <= 0) {
+            return frameNodes;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
+        const ptrs = FrameNodeExtender.createFrameNodes(count);
+        ptrs.forEach((ptr: KPointer) => {
+            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', ptr);
+            frameNodes.push(frameNode);
+        })
+        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(ptrs, frameNodes);
+        const renderNodePtrs = FrameNodeExtender.getRenderNodesByFrameNodes(ptrs);
+        const ids = FrameNodeExtender.getIdsByFrameNodes(ptrs);
+        for (let i = 0; i < frameNodes.length; i++) {
+            frameNodes[i].renderNode_!.peer = new Finalizable(renderNodePtrs[i], RenderNode.getFinalizer());
+            frameNodes[i]._nodeId = ids[i];
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNodes[i]._nodeId, frameNodes[i]);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return frameNodes;
+    }
+    public getFrameNodeById(id: string): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_!.toInt());
+        const retval = FrameNodeExtender.getFrameNodeById(this, id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this.uiContext!, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+    public getFrameNodeByUniqueId(id: int32): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_!.toInt());
+        const retval = FrameNodeExtender.getFrameNodeByUniqueId(this, id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this.uiContext!, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
     public addSupportedUIStates(uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean | undefined): void {
         let exclude_casted: boolean = false;
         if (excludeInner !== undefined && excludeInner !== null) {

@@ -28782,6 +28782,13 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Array_F64 (*convertPositionFromWindow)(Ark_FrameNode peer,
                                            const Ark_Vector2* positionByWindow);
     void (*applyAttributesFinish)(Ark_FrameNode peer);
+    Array_Pointer (*createFrameNodes)(Ark_Int32 count);
+    Array_Pointer (*getRenderNodesByFrameNodes)(const Array_Pointer* ptrs);
+    Array_I32 (*getIdsByFrameNodes)(const Array_Pointer* ptrs);
+    Ark_NativePointer (*getFrameNodeById1)(Ark_FrameNode peer,
+                                           const Ark_String* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId1)(Ark_FrameNode peer,
+                                                 Ark_Int32 id);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {

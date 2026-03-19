@@ -275,7 +275,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId); // FrameNode
     node->SetExclusiveEventForChild(true);
     node->SetIsArkTsFrameNode(true);
     auto renderContext = node->GetRenderContext();
