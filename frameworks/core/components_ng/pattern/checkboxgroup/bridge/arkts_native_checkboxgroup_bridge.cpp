@@ -311,7 +311,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectAll(ArkUIRunti
         bool selectAll = selectAllArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectAll(nativeNode, selectAll);
     }
-    if (isJsView && changeEventVal->IsFunction(vm)) {
+    if (isJsView && !changeEventVal.IsEmpty() && changeEventVal->IsFunction(vm)) {
         ParseSelectAllObject(vm, changeEventVal);
     }
     return panda::JSValueRef::Undefined(vm);
