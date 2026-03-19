@@ -2927,6 +2927,15 @@ struct ArkUISelectDividerArgs {
     ArkUI_Bool hasEndMargin;
 };
 
+struct ArkUISelectOutlineArgs {
+    const ArkUI_Float32* width;
+    ArkUI_Int32 widthSize;
+    const ArkUI_Uint32* color;
+    ArkUI_Int32 colorSize;
+    void** resObjs;
+    size_t unitSize;
+};
+
 struct ArkUISelectDividerStyleArgs {
     ArkUIMenuDividerOptions* dividerInfo;
     void* strokeWidthRawPtr;
@@ -7823,8 +7832,7 @@ struct ArkUISelectModifier {
     void (*resetAvoidance)(ArkUINodeHandle node);
     void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
         int32_t index, ArkUI_CharPtr text));
-    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
-        const ArkUI_Uint32* color, ArkUI_Int32 colorSize,  void** resObjs, size_t unitSize);
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUISelectOutlineArgs* args);
     void (*resetMenuOutline)(ArkUINodeHandle node);
     void (*setSelectSymbolValue)(ArkUINodeHandle node, ArkUI_CharPtr* values,
         void** symbolFunction, ArkUI_Uint32 length);

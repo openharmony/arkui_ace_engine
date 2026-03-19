@@ -3235,8 +3235,7 @@ struct CJUISelectModifier {
     void (*resetSelectDirection)(ArkUINodeHandle node);
     void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
     void (*resetAvoidance)(ArkUINodeHandle node);
-    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
-        const ArkUI_Uint32* color, ArkUI_Int32 colorSize,  void** resObjs, size_t unitSize);
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUISelectOutlineArgs* args);
     void (*resetMenuOutline)(ArkUINodeHandle node);
 };
 
