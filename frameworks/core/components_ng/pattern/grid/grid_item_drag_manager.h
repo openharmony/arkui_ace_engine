@@ -74,52 +74,58 @@ private:
     bool HasIrregularItemInRange(int32_t from, int32_t to) const;
     void PrepareIrregularDragState(int32_t from, int32_t to, GridLayoutInfo& info);
 
-    int32_t FindSwapTarget(int32_t currentIndex, const OffsetF& delta);
-
-
-    struct TargetPosition {
-        int32_t row = 0;
-        int32_t col = 0;
-        bool isValid = false;
-        int32_t rowSpan = 1;
-        int32_t colSpan = 1;
-    };
-    TargetPosition CalculateTargetPosition(int32_t currentRow, int32_t currentCol,
-        const OffsetF& delta, const GridLayoutInfo& info) const;
-    void ComputeTargetRowCol(TargetPosition& targetPos, int32_t currentRow, int32_t currentCol,
-        float mainDelta, float crossDelta, float singleRowHeight, float singleColWidth,
-        int32_t crossCount) const;
-    void ClampTargetPosition(TargetPosition& targetPos, int32_t crossCount, int32_t rowCount) const;
-    bool CheckTargetCellsExist(const TargetPosition& targetPos, int32_t rowCount,
-        const GridLayoutInfo& info) const;
-    int32_t GetTargetItemAtPosition(int32_t currentIndex, const TargetPosition& targetPos,
-        const GridLayoutInfo& info, const OffsetF& delta) const;
-    float GetItemMainSize(int32_t currentIndex, const GridLayoutInfo& info) const;
-    float GetItemCrossSize(int32_t currentIndex, const GridLayoutInfo& info) const;
-    bool ValidateMoveBySimulation(int32_t from, int32_t to, const GridLayoutInfo& info) const;
-
     struct SimSpanInfo {
         int32_t rowSpan = 1;
         int32_t colSpan = 1;
     };
     using SimMatrix = std::map<int32_t, std::map<int32_t, int32_t>>;
-    std::vector<SimSpanInfo> CollectSpanInfo(int32_t totalItems) const;
+    void CalculateGaps(float& mainGap, float& crossGap, const GridLayoutInfo& info) const;
+    float CalculateMainPosition(int32_t targetRow, float mainGap, const GridLayoutInfo& info) const;
+    float CalculateCrossPosition(int32_t col, int32_t colSpan, const RefPtr<FrameNode>& node,
+        float crossGap, const GridLayoutInfo& info) const;
+    std::optional<OffsetF> CreatePositionFromCoords(float mainPos, float crossPos) const;
+    std::optional<OffsetF> SearchRowForTarget(const std::map<int32_t, int32_t>& cols, int32_t targetIdx,
+        int32_t row, const RefPtr<FrameNode>& node, int32_t colSpan, float mainGap,
+        float crossGap, const GridLayoutInfo& info) const;
+    std::optional<OffsetF> FindItemPositionInMatrix(const SimMatrix& simMatrix, int32_t targetIdx,
+        const RefPtr<FrameNode>& node, int32_t colSpan, float mainGap, float crossGap,
+        const GridLayoutInfo& info) const;
+    std::optional<OffsetF> CalculateFromNewPosition(int32_t from, int32_t to, const GridLayoutInfo& info) const;
+
+    float CalculateDistance(const OffsetF& pos1, const OffsetF& pos2) const;
+    int32_t SelectBestCandidate(int32_t currentIndex, bool movingDown,
+        int32_t currentBest, int32_t candidate, float candidateDistance, float bestDistance) const;
+
+    int32_t FindSwapTarget(int32_t currentIndex, const OffsetF& delta);
+    float GetItemMainSize(int32_t currentIndex, const GridLayoutInfo& info) const;
+    float GetItemCrossSize(int32_t currentIndex, const GridLayoutInfo& info) const;
+    std::vector<SimSpanInfo> CollectSpanInfo(const GridLayoutInfo& info) const;
     static void ApplyMoveToArray(std::vector<int32_t>& order, int32_t from, int32_t to);
     int32_t FindAvailableColumn(const SimMatrix& matrix, int32_t row,
         int32_t colSpan, int32_t crossCount) const;
-    std::pair<int32_t, int32_t> PlaceItemInMatrix(SimMatrix& matrix, int32_t itemIdx,
-        const SimSpanInfo& span, int32_t crossCount, int32_t totalItems) const;
-    bool CopyLayoutToMatrix(SimMatrix& matrix, const std::vector<SimSpanInfo>& spans,
+    std::pair<int32_t, int32_t> PlaceItemInMatrix(const GridLayoutInfo& info, SimMatrix& matrix,
+        int32_t itemIdx, const SimSpanInfo& span, int32_t crossCount) const;
+    bool CopyLayoutToMatrix(SimMatrix& matrix, std::vector<SimSpanInfo>& spans,
         const GridLayoutInfo& info, int32_t count) const;
-    bool SimulateLayout(SimMatrix& matrix, const std::vector<int32_t>& order,
+    int32_t CalculateColSpan(const std::map<int32_t, int32_t>& rowCols,
+        int32_t col, int32_t itemIdx, int32_t crossCount) const;
+    int32_t CalculateRowSpan(const GridLayoutInfo& info, int32_t row, int32_t col, int32_t itemIdx) const;
+    void CalculateSpanInfo(const GridLayoutInfo& info, int32_t itemIdx,
+        int32_t row, int32_t col, std::vector<SimSpanInfo>& spans) const;
+    void FillMatrixWithItem(SimMatrix& matrix, int32_t itemIdx,
+        int32_t row, int32_t col, const std::vector<SimSpanInfo>& spans) const;
+    std::vector<int32_t> CollectSwapCandidates(int32_t currentIndex, const OffsetF& delta,
+        const GridLayoutInfo& info) const;
+    bool SimulateLayoutInRange(SimMatrix& matrix, const std::vector<int32_t>& order,
         const std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info,
-        int32_t startRebuild, int32_t totalItems, int32_t from, int32_t to) const;
+        int32_t startRebuild, int32_t endRebuild, int32_t from, int32_t to) const;
 
     struct ItemSpanInfo {
         int32_t rowSpan = 1;
         int32_t colSpan = 1;
         bool isIrregular = false;
     };
+    int32_t GetColSpanForIrregularItem(int32_t crossSpan) const;
     ItemSpanInfo GetIrregularItemInfoAndSpan(int32_t index) const;
     void HandleAutoScroll(int32_t index, const PointF& point, const RectF& frameRect);
     void HandleScrollCallback();
@@ -128,12 +134,10 @@ private:
     int32_t GetIndex() const;
     RefPtr<FrameNode> GetGridFrameNode() const;
     OffsetF GetParentPaddingOffset() const;
-    bool GetDummyItemRect(int32_t index, RectF& rect) const;
 
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
     WeakPtr<FrameNode> gridNode_;
-    GridLayoutInfo info_;
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     bool scrolling_ = false;
@@ -142,6 +146,7 @@ private:
 
     int32_t currentIndex_ = -1;
     int32_t fromIndex_ = -1;
+    int32_t forEachStartIndex_ = 0;  // Cached ForEach start index in parent Grid
     VectorF prevScale_{1.0f, 1.0f};
     Shadow prevShadow_;
     int32_t prevZIndex_ = 0;
