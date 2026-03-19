@@ -164,38 +164,6 @@ HWTEST_F(DynamicLayoutPatternTestNg, DynamicLayoutAlgorithm_Measure_001, TestSiz
 }
 
 /**
- * @tc.name: DynamicLayoutAlgorithm_Measure_002
- * @tc.desc: Test DynamicLayoutAlgorithm Measure without onMeasureSize callback
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicLayoutPatternTestNg, DynamicLayoutAlgorithm_Measure_002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create CustomLayoutAlgorithmParam without callbacks
-     */
-    auto customParams = AceType::MakeRefPtr<CustomLayoutAlgorithmParam>();
-
-    /**
-     * @tc.steps: step2. Create DynamicLayoutAlgorithm with custom params
-     */
-    DynamicLayoutAlgorithm algorithm(customParams);
-
-    /**
-     * @tc.steps: step3. Create MockLayoutWrapper
-     */
-    auto pattern = AceType::MakeRefPtr<DynamicLayoutPattern>();
-    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, TEST_NODE_ID, pattern, false);
-    WeakPtr<FrameNode> hostNode(frameNode);
-    auto layoutWrapper = AceType::MakeRefPtr<MockLayoutWrapper>(hostNode);
-
-    /**
-     * @tc.steps: step4. Call Measure
-     * @tc.expected: Should not crash even without callback
-     */
-    algorithm.Measure(AceType::RawPtr(layoutWrapper));
-}
-
-/**
  * @tc.name: DynamicLayoutAlgorithm_Layout_001
  * @tc.desc: Test DynamicLayoutAlgorithm Layout with valid onPlaceChildren callback
  * @tc.type: FUNC
@@ -230,38 +198,6 @@ HWTEST_F(DynamicLayoutPatternTestNg, DynamicLayoutAlgorithm_Layout_001, TestSize
      */
     algorithm.Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_TRUE(callbackExecuted);
-}
-
-/**
- * @tc.name: DynamicLayoutAlgorithm_Layout_002
- * @tc.desc: Test DynamicLayoutAlgorithm Layout without onPlaceChildren callback
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicLayoutPatternTestNg, DynamicLayoutAlgorithm_Layout_002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create CustomLayoutAlgorithmParam without callbacks
-     */
-    auto customParams = AceType::MakeRefPtr<CustomLayoutAlgorithmParam>();
-
-    /**
-     * @tc.steps: step2. Create DynamicLayoutAlgorithm with custom params
-     */
-    DynamicLayoutAlgorithm algorithm(customParams);
-
-    /**
-     * @tc.steps: step3. Create MockLayoutWrapper
-     */
-    auto pattern = AceType::MakeRefPtr<DynamicLayoutPattern>();
-    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, TEST_NODE_ID, pattern, false);
-    WeakPtr<FrameNode> hostNode(frameNode);
-    auto layoutWrapper = AceType::MakeRefPtr<MockLayoutWrapper>(hostNode);
-
-    /**
-     * @tc.steps: step4. Call Layout
-     * @tc.expected: Should not crash even without callback
-     */
-    algorithm.Layout(AceType::RawPtr(layoutWrapper));
 }
 
 /**

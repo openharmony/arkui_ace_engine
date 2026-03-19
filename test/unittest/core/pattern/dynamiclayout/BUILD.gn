@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("dynamiclayout_test_ng") {
-  module_name = "DynamicLayout"
+  module_name = "Layout-Flex"
   type = "new"
   sources = [
     "algorithm_param_base_test.cpp",

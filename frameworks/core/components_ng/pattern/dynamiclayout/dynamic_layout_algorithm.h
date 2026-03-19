@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class CustomLayoutAlgorithmParam;
-class ACE_EXPORT DynamicLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(DynamicLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT DynamicLayoutAlgorithm : public StackLayoutAlgorithm {
+    DECLARE_ACE_TYPE(DynamicLayoutAlgorithm, StackLayoutAlgorithm);
 
 public:
     DynamicLayoutAlgorithm() {}
