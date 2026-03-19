@@ -614,6 +614,19 @@ class ArkRegisterNativeEmbedRule {
   }
 }
 
+class ArkEnableScrollDirectionalLock {
+  value: boolean | undefined;
+  type: ScrollDirectionalLockType | undefined;
+
+  constructor(value: boolean, type: ScrollDirectionalLockType) {
+    this.value = value;
+    this.type = type;
+  }
+  isEqual(another: ArkEnableScrollDirectionalLock): boolean {
+    return (this.value === another.value && this.type === another.type);
+  }
+}
+
 class ArkBackground {
   content: ResourceColor | undefined;
   align?: Alignment | undefined;

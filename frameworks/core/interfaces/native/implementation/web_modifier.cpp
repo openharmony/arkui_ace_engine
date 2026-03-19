@@ -2642,6 +2642,19 @@ void SetRotateRenderEffectImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value,
+                                        const Opt_ScrollDirectionalLockType* type)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    auto typeValue = Converter::OptConvert<ScrollDirectionalLockType>(*type); // for enums
+    WebModelStatic::SetEnableScrollDirectionalLock(frameNode, convValue, typeValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
                                 const Opt_OnOverrideErrorPageCallback* value)
 {
@@ -3222,6 +3235,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
+        WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
     };
     return &ArkUIWebModifierImpl;
 }

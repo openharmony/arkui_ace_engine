@@ -2498,6 +2498,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
+    JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -7789,6 +7790,23 @@ void JSWeb::EnableDefaultContextMenu(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableDefaultContextMenu(isEnabled);
+}
+
+void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
+{
+    if (args.Length() < PARAM_TWO) {
+        return;
+    }
+
+    JSRef<JSVal> objFirst = args[0];
+    JSRef<JSVal> objSecond = args[1];
+    if (!objFirst->IsBoolean() || !objSecond->IsNumber()) {
+        return;
+    }
+
+    bool isEnabled = objFirst->ToBoolean();
+    int32_t type = objSecond->ToNumber<int32_t>();
+    WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

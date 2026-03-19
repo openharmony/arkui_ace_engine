@@ -3300,6 +3300,25 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableScrollDirectionalLockAttribute(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue = (type as ScrollDirectionalLockType)
+            thisSerializer.writeInt32(typeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableScrollDirectionalLock(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type WebviewController = webview.WebviewController;
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
@@ -3382,6 +3401,10 @@ export enum MixedMode {
     ALL = 0,
     COMPATIBLE = 1,
     NONE = 2
+}
+export enum ScrollDirectionalLockType {
+    ALL = 0,
+    NESTED_SCROLL = 1
 }
 export type OnSafeBrowsingCheckResultCallback = (threatType: ThreatType) => void;
 export enum CacheMode {
@@ -4301,6 +4324,9 @@ export interface WebAttribute extends CommonMethod {
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         throw new Error('Unimplemented method bindSelectionMenu')
     }
+    enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        throw new Error('Unimplemented method enableScrollDirectionalLock')
+    }
     attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -5142,6 +5168,12 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         const responseType_casted = responseType as (WebResponseType | undefined)
         const options_casted = options as (SelectionMenuOptionsExt | undefined)
         this.getPeer()?.setBindSelectionMenuAttribute(elementType_casted, content_casted, responseType_casted, options_casted)
+        return this
+    }
+    public enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        const type_casted = type as (ScrollDirectionalLockType | undefined)
+        this.getPeer()?.setEnableScrollDirectionalLockAttribute(value_casted, type_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {

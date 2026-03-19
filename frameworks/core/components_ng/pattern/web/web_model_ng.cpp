@@ -2872,4 +2872,19 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
+
+void WebModelNG::SetEnableScrollDirectionalLock(bool enabled, int32_t type)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
+}
+
+void WebModelNG::SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
+}
 } // namespace OHOS::Ace::NG

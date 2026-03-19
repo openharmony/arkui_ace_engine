@@ -28035,6 +28035,26 @@ void impl_WebAttribute_setBindSelectionMenu(Ark_NativePointer thisPtr, KSerializ
         GetNodeModifiers()->getWebModifier()->setBindSelectionMenu(self, static_cast<Opt_WebElementType*>(&elementTypeValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_WebResponseType*>(&responseTypeValueTemp), static_cast<Opt_SelectionMenuOptionsExt*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setBindSelectionMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_setEnableScrollDirectionalLock(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        const auto typeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ScrollDirectionalLockType typeValueTempTmpBuf = {};
+        typeValueTempTmpBuf.tag = typeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((typeValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            typeValueTempTmpBuf.value = static_cast<Ark_ScrollDirectionalLockType>(thisDeserializer.readInt32());
+        }
+        Opt_ScrollDirectionalLockType typeValueTemp = typeValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setEnableScrollDirectionalLock(self, static_cast<Opt_Boolean*>(&valueValueTemp), static_cast<Opt_ScrollDirectionalLockType*>(&typeValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableScrollDirectionalLock, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WindowScene_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getWindowSceneModifier()->construct(id, flags);
 }

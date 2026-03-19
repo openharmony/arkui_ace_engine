@@ -3351,6 +3351,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setBindSelectionMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setEnableScrollDirectionalLock(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WindowScene_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _WindowSceneInterface_setWindowSceneOptions(ptr: KPointer, persistentId: KInt): void

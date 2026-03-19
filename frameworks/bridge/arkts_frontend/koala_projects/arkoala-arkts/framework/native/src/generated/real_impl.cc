@@ -8675,6 +8675,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_SelectionMenuOptionsExt* options)
     {
     }
+    void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
+                                            const Opt_Boolean* value,
+                                            const Opt_ScrollDirectionalLockType* type)
+    {
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -11175,6 +11180,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
+            WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
         };
         return &ArkUIWebModifierImpl;
     }

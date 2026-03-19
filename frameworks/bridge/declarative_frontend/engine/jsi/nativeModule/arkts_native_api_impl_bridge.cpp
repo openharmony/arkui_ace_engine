@@ -4601,6 +4601,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDefaultContextMenu));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDefaultContextMenu"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableDefaultContextMenu));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableScrollDirectionalLock"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableScrollDirectionalLock));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScrollDirectionalLock"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableScrollDirectionalLock));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

@@ -1604,6 +1604,12 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RETURN_TO_UICONTEXT = 3] = 'RETURN_TO_UICONTEXT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
+let ScrollDirectionalLockType;
+(function (ScrollDirectionalLockType) {
+  ScrollDirectionalLockType[ScrollDirectionalLockType.ALL = 0] = 'ALL';
+  ScrollDirectionalLockType[ScrollDirectionalLockType.NESTED_SCROLL = 1] = 'NESTED_SCROLL';
+})(ScrollDirectionalLockType || (ScrollDirectionalLockType = {}));
+
 let KeyboardAppearance;
 (function (KeyboardAppearance) {
   KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';

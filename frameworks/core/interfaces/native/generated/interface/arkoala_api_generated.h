@@ -6525,6 +6525,14 @@ typedef struct Opt_ScrollDirection {
     Ark_Tag tag;
     Ark_ScrollDirection value;
 } Opt_ScrollDirection;
+typedef enum Ark_ScrollDirectionalLockType {
+    ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_ALL = 0,
+    ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_NESTED_SCROLL = 1,
+} Ark_ScrollDirectionalLockType;
+typedef struct Opt_ScrollDirectionalLockType {
+    Ark_Tag tag;
+    Ark_ScrollDirectionalLockType value;
+} Opt_ScrollDirectionalLockType;
 typedef enum Ark_ScrollSizeMode {
     ARK_SCROLL_SIZE_MODE_FOLLOW_DETENT = 0,
     ARK_SCROLL_SIZE_MODE_CONTINUOUS = 1,
@@ -27420,6 +27428,9 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_WebResponseType* responseType,
                                  const Opt_SelectionMenuOptionsExt* options);
+    void (*setEnableScrollDirectionalLock)(Ark_NativePointer node,
+                                           const Opt_Boolean* value,
+                                           const Opt_ScrollDirectionalLockType* type);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

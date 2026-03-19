@@ -25464,6 +25464,11 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
+  enableScrollDirectionalLock(enabled, type) {
+    const config = { enabled: enabled, type: type };
+    modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, config);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -27189,6 +27194,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   }
 }
 WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
+
+class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableScrollDirectionalLock(node);
+    } else {
+      getUINativeModule().web.setEnableScrollDirectionalLock(node, this.value.value, this.value.type);
+    }
+  }
+}
+WebEnableScrollDirectionalLockModifier.identity = Symbol('webEnableScrollDirectionalLockModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

@@ -255,6 +255,8 @@ public:
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
     static void SetAISessionOptions(FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
         const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
+    static void SetEnableScrollDirectionalLock(FrameNode* frameNode, const std::optional<bool>& isEnable,
+        const std::optional<ScrollDirectionalLockType>& type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

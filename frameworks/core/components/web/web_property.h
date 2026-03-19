@@ -122,6 +122,11 @@ enum class WebRotateEffect : int32_t {
     RESIZE_COVER_EFFECT = 1
 };
 
+enum class ScrollDirectionalLockType : int32_t {
+    ALL = 0,
+    NESTED_SCROLL = 1
+};
+
 struct WebPreviewSelectionMenuParam {
     WebElementType type = WebElementType::NONE;
     ResponseType responseType = ResponseType::LONG_PRESS;
