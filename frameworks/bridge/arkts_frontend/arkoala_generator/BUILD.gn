@@ -18,7 +18,8 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
-action("idlize_gen") {
+
+action("runner_gen_code") {
   script = "generation.py"
   args = [
     rebase_path("${ohos_ets_api_path}"),
@@ -37,5 +38,30 @@ action("idlize_gen") {
   ]
   outputs = [
     "$target_out_dir/idlize_gen",
+  ]
+}
+
+action("deploy_gen_code") {
+  script = "deploy.py"
+  args = [
+    "--source",
+    rebase_path("./out/sig/arkoala-arkts/arkui/generated"),
+    "--destination",
+    rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
+    "--config",
+    rebase_path("./generation_config/instructive-config.json"),
+  ]
+  deps = [
+    ":runner_gen_code",
+  ]
+  outputs = [
+    "$target_out_dir/deploy_gen_code",
+  ]
+}
+
+group("idlize_gen") {
+  deps = [
+    ":runner_gen_code",
+    ":deploy_gen_code",
   ]
 }

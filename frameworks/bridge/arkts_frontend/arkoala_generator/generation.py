@@ -74,6 +74,7 @@ def main():
         "--arkgen", f"{npx} @idlizer/arkgen",
         "--etsgen", f"{npx} @idlizer/etsgen",
         "--target", "all",
+        "--no-arkgen-dummy-impl",
         "--output", output_dir
     ]
 
