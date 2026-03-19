@@ -9265,6 +9265,7 @@ void TextFieldPattern::DumpInfo()
 void TextFieldPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("content", IsInPasswordMode() ? "" : GetTextValue().c_str());
+    json->Put("placeholder", UtfUtils::Str16DebugToStr8(GetPlaceHolder()).c_str());
 }
 
 void TextFieldPattern::DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)
