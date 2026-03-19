@@ -55,12 +55,6 @@ const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAUL
 const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
     DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
 
-std::string GetDelegateErrorMessage()
-{
-    auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
-    return AceEngine::GetEnhancedContextBNotFoundMessage(currentIdAndReason.second, Container::CurrentIdSafely());
-}
-
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
 {
@@ -487,9 +481,13 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
-            NapiThrow(env, "Can not get delegate." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
+            std::string errorMessage =
+                "Can not get delegate." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+            NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
@@ -499,9 +497,13 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
         SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return false;
     }
     if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
@@ -597,19 +599,27 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             delegate->CloseToast(toastId, std::move(toastCloseCallback));
         } else {
-            NapiThrow(env, "Can not get delegate." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
+            std::string errorMessage =
+                "Can not get delegate." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+            NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
     }
     if (showMode == NG::ToastShowMode::DEFAULT) {
         delegate->CloseToast(toastId, std::move(toastCloseCallback));
@@ -1946,6 +1956,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
@@ -1955,8 +1967,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg =
-                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." +
+                                 AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -1976,6 +1988,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
@@ -1985,8 +1999,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg =
-            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." +
+                             AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -2283,6 +2297,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
@@ -2291,8 +2307,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg =
-                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." +
+                                 AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -2312,6 +2328,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             asyncContext->titleString, asyncContext->buttons, std::move(callBack));
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
@@ -2320,8 +2338,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg =
-            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." +
+                             AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -2773,26 +2791,30 @@ void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncCo
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
         } else {
             // throw internal error
-            std::string strMsg =
-                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." +
+                                 AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
     } else {
         // throw internal error
-        std::string strMsg =
-            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." +
+                             AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
@@ -3066,6 +3088,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             if (useDialogId) {
@@ -3076,8 +3100,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
         } else {
             // throw internal error
             napi_create_promise(env, &asyncContext->deferred, nullptr);
-            std::string strMsg =
-                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." +
+                                 AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -3088,6 +3112,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
         }
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         if (useDialogId) {
@@ -3098,8 +3124,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
     } else {
         // throw internal error
         napi_create_promise(env, &asyncContext->deferred, nullptr);
-        std::string strMsg =
-            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." +
+                             AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
@@ -3167,28 +3193,32 @@ void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& async
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto reason = ContainerScope::CurrentIdWithReason().second;
+        auto instanceId = Container::CurrentIdSafely();
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
             delegate->UpdateCustomDialog(nodeWk, promptDialogAttr, std::move(contentCallback));
         } else {
             // throw internal error
             napi_create_promise(env, &asyncContext->deferred, nullptr);
-            std::string strMsg =
-                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." +
+                                 AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->UpdateCustomDialogNG(nodeWk, promptDialogAttr, std::move(contentCallback));
     }
 #else
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         delegate->UpdateCustomDialog(nodeWk, promptDialogAttr, std::move(contentCallback));
     } else {
         // throw internal error
         napi_create_promise(env, &asyncContext->deferred, nullptr);
-        std::string strMsg =
-            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." +
+                             AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
