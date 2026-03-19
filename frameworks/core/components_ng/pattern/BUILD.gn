@@ -136,6 +136,7 @@ build_component_ng("pattern_ng") {
     "gesture/gesture_model_ng.cpp",
     "gesture/gesture_model_ng_static.cpp",
     "grid/grid_accessibility_property.cpp",
+    "grid/grid_item_drag_manager.cpp",
     "grid/grid_adaptive/grid_adaptive_layout_algorithm.cpp",
     "grid/grid_content_modifier.cpp",
     "grid/grid_custom/grid_custom_layout_algorithm.cpp",

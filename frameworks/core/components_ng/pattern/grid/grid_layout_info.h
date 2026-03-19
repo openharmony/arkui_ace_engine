@@ -443,6 +443,13 @@ struct GridLayoutInfo {
 
     int32_t times_ = 0;
 
+    std::map<int32_t, int32_t> dragOriginalIndexMap_;
+    bool isOnMoveDragUpdate_ = false;
+
+    void UpdateDragOriginalIndex(int32_t from, int32_t to);
+    int32_t GetOriginalIndex(int32_t currentIndex) const;
+    void ClearOnMoveDragState();
+
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     float GetContentHeightOfRegularGrid(float mainGap) const;

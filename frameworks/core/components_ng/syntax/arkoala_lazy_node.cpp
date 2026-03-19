@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -329,7 +330,7 @@ void ArkoalaLazyNode::SetItemDragEvent(std::function<void(int32_t)>&& onLongPres
     }
 }
 
-void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
+void ArkoalaLazyNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     if (from == to) {
         return;
@@ -363,6 +364,11 @@ void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
     onMoveFromTo_(from, to);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 int32_t ArkoalaLazyNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /*isExpanded*/)
@@ -477,19 +483,25 @@ void ArkoalaLazyNode::InitDragManager(const RefPtr<FrameNode>& child)
     CHECK_NULL_VOID(child);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = child->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = child->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = child->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
     for (const auto& [index, child] : node4Index_) {
@@ -497,19 +509,31 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
             continue;
         }
         auto childNode = child->GetFrameChildByIndex(0, false);
-        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
-        if (!listItem) {
+        auto item = AceType::DynamicCast<FrameNode>(childNode);
+        if (!item) {
             continue;
         }
 
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = item->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = item->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }
