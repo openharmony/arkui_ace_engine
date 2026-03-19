@@ -974,6 +974,10 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
+
+    void SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId);
+    void ResetDetachedFreeRootProxy(int32_t targetId);
+
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
@@ -1058,6 +1062,7 @@ private:
     std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 
     RefPtr<AceType> menuManager_ = nullptr;
+    std::unordered_map<int32_t, RefPtr<UINode>> detachedProxyMap_;
 };
 } // namespace OHOS::Ace::NG
 
