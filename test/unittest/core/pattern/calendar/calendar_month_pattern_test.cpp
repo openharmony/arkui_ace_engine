@@ -36,6 +36,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
@@ -1402,5 +1403,255 @@ HWTEST_F(CalendarMonthTestNg, JudgeAreaTest003, TestSize.Level1)
     auto localLocation2 = Offset(30.0f, 50.0f);
     auto ret2 = calendarMonthPattern->JudgeArea(localLocation2);
     EXPECT_TRUE(ret2 >= 0);
+}
+
+/**
+ * @tc.name: SetCalendarDayTest001
+ * @tc.desc: Test SetCalendarDay with IsDateInRange check
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, SetCalendarDayTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    calendarMonthPattern->obtainedMonth_.month = 1;
+    calendarMonthPattern->obtainedMonth_.year = 2024;
+
+    CalendarDay day1;
+    day1.day = 15;
+    day1.month.month = 1;
+    day1.month.year = 2024;
+    day1.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day1);
+
+    CalendarDay day2;
+    day2.day = 16;
+    day2.month.month = 1;
+    day2.month.year = 2024;
+    day2.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day2);
+
+    calendarMonthPattern->SetCalendarDay(day1);
+    EXPECT_TRUE(calendarMonthPattern->obtainedMonth_.days[0].focused);
+}
+
+/**
+ * @tc.name: SetCalendarDayTest002
+ * @tc.desc: Test SetCalendarDay with disabled date range
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, SetCalendarDayTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    calendarMonthPattern->obtainedMonth_.month = 1;
+    calendarMonthPattern->obtainedMonth_.year = 2024;
+
+    PickerDate startDate;
+    startDate.SetYear(2024);
+    startDate.SetMonth(1);
+    startDate.SetDay(1);
+    calendarMonthPattern->SetStartDate(startDate);
+
+    PickerDate endDate;
+    endDate.SetYear(2024);
+    endDate.SetMonth(1);
+    endDate.SetDay(10);
+    calendarMonthPattern->SetEndDate(endDate);
+
+    CalendarDay day1;
+    day1.day = 5;
+    day1.month.month = 1;
+    day1.month.year = 2024;
+    day1.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day1);
+
+    CalendarDay day2;
+    day2.day = 15;
+    day2.month.month = 1;
+    day2.month.year = 2024;
+    day2.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day2);
+
+    calendarMonthPattern->SetCalendarDay(day1);
+    EXPECT_TRUE(calendarMonthPattern->obtainedMonth_.days[0].focused);
+
+    calendarMonthPattern->obtainedMonth_.days[0].focused = false;
+    calendarMonthPattern->SetCalendarDay(day2);
+    EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[1].focused);
+}
+
+/**
+ * @tc.name: SetVirtualNodeUserSelectedTest006
+ * @tc.desc: Test SetVirtualNodeUserSelected with disabled date range
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, SetVirtualNodeUserSelectedTest006, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    calendarMonthPattern->obtainedMonth_.month = 1;
+    calendarMonthPattern->obtainedMonth_.year = 2024;
+
+    PickerDate startDate;
+    startDate.SetYear(2024);
+    startDate.SetMonth(1);
+    startDate.SetDay(1);
+    calendarMonthPattern->SetStartDate(startDate);
+
+    PickerDate endDate;
+    endDate.SetYear(2024);
+    endDate.SetMonth(1);
+    endDate.SetDay(10);
+    calendarMonthPattern->SetEndDate(endDate);
+
+    auto accessibilityProperty1 = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty1, nullptr);
+    auto accessibilityProperty2 = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty2, nullptr);
+
+    calendarMonthPattern->accessibilityPropertyVec_.push_back(accessibilityProperty1);
+    calendarMonthPattern->accessibilityPropertyVec_.push_back(accessibilityProperty2);
+
+    CalendarDay day1;
+    day1.day = 5;
+    day1.month.month = 1;
+    day1.month.year = 2024;
+    day1.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day1);
+
+    CalendarDay day2;
+    day2.day = 15;
+    day2.month.month = 1;
+    day2.month.year = 2024;
+    day2.focused = false;
+    calendarMonthPattern->obtainedMonth_.days.push_back(day2);
+
+    int32_t index = 0;
+    calendarMonthPattern->SetVirtualNodeUserSelected(index);
+    EXPECT_TRUE(calendarMonthPattern->obtainedMonth_.days[0].focused);
+
+    calendarMonthPattern->obtainedMonth_.days[0].focused = false;
+    index = 1;
+    calendarMonthPattern->SetVirtualNodeUserSelected(index);
+    EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[1].focused);
+}
+
+/**
+ * @tc.name: ChangeVirtualNodeContentTest001
+ * @tc.desc: Test ChangeVirtualNodeContent with disabled date range
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, ChangeVirtualNodeContentTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    calendarMonthPattern->obtainedMonth_.month = 1;
+    calendarMonthPattern->obtainedMonth_.year = 2024;
+
+    PickerDate startDate;
+    startDate.SetYear(2024);
+    startDate.SetMonth(1);
+    startDate.SetDay(1);
+    calendarMonthPattern->SetStartDate(startDate);
+
+    PickerDate endDate;
+    endDate.SetYear(2024);
+    endDate.SetMonth(1);
+    endDate.SetDay(10);
+    calendarMonthPattern->SetEndDate(endDate);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    calendarMonthPattern->buttonAccessibilityNodeVec_.push_back(buttonNode);
+
+    CalendarDay day1;
+    day1.day = 5;
+    day1.month.month = 1;
+    day1.month.year = 2024;
+    day1.index = 0;
+    calendarMonthPattern->ChangeVirtualNodeContent(day1);
+
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+}
+
+/**
+ * @tc.name: ChangeVirtualNodeContentTest002
+ * @tc.desc: Test ChangeVirtualNodeContent with date out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, ChangeVirtualNodeContentTest002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    calendarMonthPattern->obtainedMonth_.month = 1;
+    calendarMonthPattern->obtainedMonth_.year = 2024;
+
+    PickerDate startDate;
+    startDate.SetYear(2024);
+    startDate.SetMonth(1);
+    startDate.SetDay(1);
+    calendarMonthPattern->SetStartDate(startDate);
+
+    PickerDate endDate;
+    endDate.SetYear(2024);
+    endDate.SetMonth(1);
+    endDate.SetDay(10);
+    calendarMonthPattern->SetEndDate(endDate);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    calendarMonthPattern->buttonAccessibilityNodeVec_.push_back(buttonNode);
+
+    CalendarDay day1;
+    day1.day = 15;
+    day1.month.month = 1;
+    day1.month.year = 2024;
+    day1.index = 0;
+    calendarMonthPattern->ChangeVirtualNodeContent(day1);
+
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
 }
 } // namespace OHOS::Ace::NG
