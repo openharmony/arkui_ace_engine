@@ -90,14 +90,6 @@ export class InteropExtendableComponent extends ExtendableComponent {
             const setSource = ((newVal: T): void => {
                 provideVar.set(newVal);
             });
-            const fireChange = (): void => {
-                provideVar.fireChange();
-            }
-            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
-            const notifyProxy = (): void => {
-                value.invokeMethod('syncPeerHasChanged');
-            };
-            provideVar.addWatch(notifyProxy);
             global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
             return provideVar;
         }
