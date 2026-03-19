@@ -1651,4 +1651,181 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
     SheetPresentationTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: ParseCommand001
+ * @tc.desc: Test Parse Command Ok.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, ParseCommand001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test ParseCommand
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    std::string command = R"({"cmd":"CloseSheet"})";
+    SheetPresentationPattern::SheetCmdType cmdType = SheetPresentationPattern::SheetCmdType::CMD_UNKNOWN;
+    int32_t ret = sheetPattern->ParseCommand(command, cmdType);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ParseCommand002
+ * @tc.desc: Test Parse Command failed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, ParseCommand002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test ParseCommand.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    std::string command = R"({"cmd":"SheetClose")";
+    SheetPresentationPattern::SheetCmdType cmdType = SheetPresentationPattern::SheetCmdType::CMD_UNKNOWN;
+    int32_t ret = sheetPattern->ParseCommand(command, cmdType);
+    EXPECT_EQ(ret, RET_FAILED);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent Ok.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnInjectionEvent.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    std::string command = R"({"cmd":"CloseSheet"})";
+    int32_t ret = sheetPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnInjectionEvent002
+ * @tc.desc: Test OnInjectionEvent Ok.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnInjectionEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnInjectionEvent.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    std::string command = R"({"cmd":"SheetClose"})";
+    int32_t ret = sheetPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnInjectionEvent003
+ * @tc.desc: Test OnInjectionEvent Failed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnInjectionEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnInjectionEvent.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    std::string command = R"({"cmd":"Close"})";
+    int32_t ret = sheetPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    SheetPresentationTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

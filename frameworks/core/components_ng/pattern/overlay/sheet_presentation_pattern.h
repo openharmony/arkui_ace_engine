@@ -1143,10 +1143,16 @@ public:
         return enableDragControl_;
     }
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    enum class SheetCmdType { CMD_UNKNOWN, CMD_SLIDE, CMD_CLOSE };
+    int32_t ParseCommand(const std::string& command, SheetCmdType& cmdType);
+    void HandleBindSheetEvent(SheetCmdType& cmdType);
+    void ReportCloseSheetResult(std::string result, std::string reason, std::string event);
     void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
