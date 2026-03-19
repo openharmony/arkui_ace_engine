@@ -1432,4 +1432,100 @@ HWTEST_F(UINodeTestNgTwo, UpdateBuilderNodeColorMode001, TestSize.Level1)
      */
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: UINodeTestNgTwo074
+ * @tc.desc: Test ui node method BfsFindUINode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo074, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. verify null root branch
+     * @tc.expected: return nullptr
+     */
+    auto nullResult = UINode::BfsFindUINode(nullptr, [](const RefPtr<UINode>&) { return true; });
+    EXPECT_EQ(nullResult, nullptr);
+
+    /**
+     * @tc.steps: step2. build a tree where DFS and BFS return different target nodes
+     * @tc.expected: BFS should return the same-level target first
+     */
+    auto root = FrameNode::CreateFrameNode("root", 1000, AceType::MakeRefPtr<Pattern>(), true);
+    auto child1 = FrameNode::CreateFrameNode("child1", 1001, AceType::MakeRefPtr<Pattern>(), true);
+    auto child2 = FrameNode::CreateFrameNode("target", 1002, AceType::MakeRefPtr<Pattern>(), true);
+    auto deepTarget = FrameNode::CreateFrameNode("target", 1003, AceType::MakeRefPtr<Pattern>(), true);
+    root->AddChild(child1);
+    root->AddChild(child2);
+    child1->AddChild(deepTarget);
+
+    auto result = UINode::BfsFindUINode(root, [](const RefPtr<UINode>& node) {
+        return node && node->GetTag() == "target";
+    });
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), child2->GetId());
+}
+
+/**
+ * @tc.name: UINodeTestNgTwo075
+ * @tc.desc: Test ui node method GetFrameNodeByIdInSubTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo075, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build subtree with non-FrameNode and FrameNode sharing same inspector id
+     * @tc.expected: method should skip non-FrameNode and return FrameNode
+     */
+    auto root = FrameNode::CreateFrameNode("root", 1100, AceType::MakeRefPtr<Pattern>(), true);
+    auto nonFrameNode = TestNode::CreateTestNode(1101);
+    auto targetFrameNode = FrameNode::CreateFrameNode("target", 1102, AceType::MakeRefPtr<Pattern>(), true);
+    root->AddChild(nonFrameNode);
+    nonFrameNode->AddChild(targetFrameNode);
+    nonFrameNode->UpdateInspectorId("same-inspector-id");
+    targetFrameNode->UpdateInspectorId("same-inspector-id");
+
+    auto byInspector = root->GetFrameNodeByIdInSubTree("same-inspector-id");
+    ASSERT_NE(byInspector, nullptr);
+    EXPECT_EQ(byInspector->GetId(), targetFrameNode->GetId());
+
+    /**
+     * @tc.steps: step2. verify nodeId string matching and invalid input branch
+     * @tc.expected: node id string finds target frame node; empty id returns nullptr
+     */
+    auto byNodeId = root->GetFrameNodeByIdInSubTree(std::to_string(targetFrameNode->GetId()));
+    ASSERT_NE(byNodeId, nullptr);
+    EXPECT_EQ(byNodeId->GetId(), targetFrameNode->GetId());
+    EXPECT_EQ(root->GetFrameNodeByIdInSubTree(""), nullptr);
+}
+
+/**
+ * @tc.name: UINodeTestNgTwo076
+ * @tc.desc: Test ui node method GetFrameNodeByUniqueIdInSubTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo076, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build subtree where non-FrameNode and FrameNode have same unique id
+     * @tc.expected: method should return FrameNode and skip non-FrameNode
+     */
+    constexpr int32_t targetId = 1200;
+    auto root = FrameNode::CreateFrameNode("root", 1201, AceType::MakeRefPtr<Pattern>(), true);
+    auto nonFrameNode = TestNode::CreateTestNode(targetId);
+    auto targetFrameNode = FrameNode::CreateFrameNode("target", targetId, AceType::MakeRefPtr<Pattern>(), true);
+    root->AddChild(nonFrameNode);
+    nonFrameNode->AddChild(targetFrameNode);
+
+    auto target = root->GetFrameNodeByUniqueIdInSubTree(targetId);
+    ASSERT_NE(target, nullptr);
+    EXPECT_EQ(target->GetId(), targetFrameNode->GetId());
+
+    /**
+     * @tc.steps: step2. verify boundary and missing branches
+     * @tc.expected: negative and non-existing id return nullptr
+     */
+    EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(-1), nullptr);
+    EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(999999), nullptr);
+}
 } // namespace OHOS::Ace::NG

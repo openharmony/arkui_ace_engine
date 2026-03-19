@@ -807,6 +807,10 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static RefPtr<UINode> BfsFindUINode(
+        const RefPtr<UINode>& root, const std::function<bool(const RefPtr<UINode>&)>& matcher);
+    RefPtr<FrameNode> GetFrameNodeByIdInSubTree(const std::string& id);
+    RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     virtual bool HasVirtualNodeAccessibilityProperty()

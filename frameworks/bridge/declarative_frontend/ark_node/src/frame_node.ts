@@ -117,7 +117,7 @@ class FrameNode {
         return;
       }
     }
-    if (type === 'ProxyFrameNode') {
+    if (type === 'ProxyFrameNode' || type === 'InternalBatchFrameNode') {
       return;
     }
     let result;
@@ -257,6 +257,67 @@ class FrameNode {
       parent?.removeChild(this);
     }
     FrameNode.disposeTreeRecursively(this);
+  }
+
+  static createFrameNodes(uiContext: UIContext, count: number): FrameNode[] {
+    if (uiContext === undefined) {
+      throw new BusinessError(401, 'Node constructor error, param uiContext error');
+    }
+    if (!(typeof uiContext === 'object') || !("instanceId_" in uiContext)) {
+      throw new BusinessError(401, 'Node constructor error, param uiContext is invalid');
+    }
+    if (!Number.isInteger(count)) {
+      throw new BusinessError(401, "The parameter 'count' is invalid.");
+    }
+    if (count === 0 || count < 0) {
+      return [];
+    }
+    __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
+    const result = getUINativeModule().frameNode.createFrameNodes(count);
+    __JSScopeUtil__.restoreInstanceId();
+    if (!Array.isArray(result) || result.length === 0) {
+      return [];
+    }
+
+    const frameNodes: FrameNode[] = [];
+    result.forEach((item: any) => {
+      if (item === undefined || item === null || item.nodeId === undefined || item.nativeStrongRef === undefined) {
+        return;
+      }
+      const frameNode = new FrameNode(uiContext, 'InternalBatchFrameNode');
+      frameNode.type_ = undefined;
+      frameNode.rawPtr_ = item.rawPtr_;
+      frameNode._nativeRef = item.nativeStrongRef;
+      frameNode._nodeId = item.nodeId;
+      frameNode.nodePtr_ = frameNode._nativeRef?.getNativeHandle();
+      frameNode.renderNode_ = new RenderNode('CustomFrameNode');
+      frameNode.renderNode_?.setNodePtr(item.nativeStrongRef);
+      frameNode.renderNode_?.setFrameNode(new WeakRef(frameNode));
+      if (frameNode._nodeId !== -1) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
+        FrameNodeFinalizationRegisterProxy.register(frameNode, frameNode._nodeId);
+      }
+      frameNodes.push(frameNode);
+    });
+    return frameNodes;
+  }
+
+  getFrameNodeById(id: string): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFrameNodeById(this.getNodePtr(), id);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFrameNodeByUniqueId(id: number): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFrameNodeByUniqueId(this.getNodePtr(), id);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
   checkType(): void {

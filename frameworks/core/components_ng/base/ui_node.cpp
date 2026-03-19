@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/base/ui_node.h"
 
+#include <queue>
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/utils/feature_param.h"
@@ -1735,6 +1736,49 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     return hitTestResult;
 }
 
+RefPtr<UINode> UINode::BfsFindUINode(
+    const RefPtr<UINode>& root, const std::function<bool(const RefPtr<UINode>&)>& matcher)
+{
+    CHECK_NULL_RETURN(root, nullptr);
+    std::queue<RefPtr<UINode>> queue;
+    queue.push(root);
+    while (!queue.empty()) {
+        auto current = queue.front();
+        queue.pop();
+        CHECK_NULL_CONTINUE(current);
+        if (matcher(current)) {
+            return current;
+        }
+        for (const auto& child : current->GetChildren()) {
+            queue.push(child);
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> UINode::GetFrameNodeByIdInSubTree(const std::string& id)
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    auto targetNode = AceType::DynamicCast<FrameNode>(BfsFindUINode(Claim(this), [&id](const RefPtr<UINode>& uiNode) {
+        return AceType::InstanceOf<FrameNode>(uiNode) &&
+               (id == uiNode->propInspectorId_.value_or("") || id == std::to_string(uiNode->nodeId_));
+    }));
+    return targetNode;
+}
+
+RefPtr<FrameNode> UINode::GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId)
+{
+    if (uniqueId < 0) {
+        return nullptr;
+    }
+    auto targetNode = AceType::DynamicCast<FrameNode>(
+        BfsFindUINode(Claim(this), [uniqueId](const RefPtr<UINode>& uiNode) {
+            return AceType::InstanceOf<FrameNode>(uiNode) && uiNode->GetId() == uniqueId;
+        }));
+    return targetNode;
+}
 
 int32_t UINode::FrameCount() const
 {

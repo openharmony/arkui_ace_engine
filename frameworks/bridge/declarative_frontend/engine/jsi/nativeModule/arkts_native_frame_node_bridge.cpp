@@ -17,6 +17,8 @@
 
 #include "jsnapi_expo.h"
 
+#include <string>
+#include <cmath>
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -672,6 +674,81 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
     Framework::ArrayRef::SetValueAt(
         vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
     return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateFrameNodes(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!countArg->IsNumber()) {
+        return panda::ArrayRef::New(vm, 0);
+    }
+    int32_t count = static_cast<int32_t>(countArg->ToNumber(vm)->Value());
+    if (count <= 0) {
+        return panda::ArrayRef::New(vm, 0);
+    }
+    auto resultArray = panda::ArrayRef::New(vm, static_cast<uint32_t>(count));
+    for (int32_t i = 0; i < count; i++) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+        node->SetExclusiveEventForChild(true);
+        node->SetIsArkTsFrameNode(true);
+        auto renderContext = node->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetNeedDebugBoundary(true);
+        }
+        FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
+        FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
+        const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
+        int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
+            panda::NumberRef::New(vm, rawPtr) };
+        auto resultObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::ArrayRef::SetValueAt(vm, resultArray, static_cast<uint32_t>(i), resultObj);
+    }
+    return resultArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsString(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto id = secondArg->ToString(vm)->ToString(vm);
+    auto targetNode = frameNode->GetFrameNodeByIdInSubTree(id);
+    CHECK_NULL_RETURN(targetNode, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(
+        vm, reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(targetNode)));
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (std::isinf(secondArg->ToNumber(vm)->Value()) == true || std::isnan(secondArg->ToNumber(vm)->Value()) == true) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto uniqueId = static_cast<int32_t>(secondArg->ToNumber(vm)->Value());
+    auto targetNode = frameNode->GetFrameNodeByUniqueIdInSubTree(uniqueId);
+    CHECK_NULL_RETURN(targetNode, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(
+        vm, reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(targetNode)));
 }
 
 ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
