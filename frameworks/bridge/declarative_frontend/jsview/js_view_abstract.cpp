@@ -136,6 +136,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -1894,17 +1895,20 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(
             context, propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
-        // The maximum of the form-animation-playback duration value is 1000 ms.
+        // The maximum of the form-animation-playback duration value is 2000 ms.
         if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
-            // If the duration exceeds 1000ms, init it to 0 ms.
-            if (formAnimationTimeInterval > DEFAULT_DURATION) {
+            auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                                       ? FORM_MAX_DURATION
+                                       : DEFAULT_DURATION;
+            // If the duration exceeds max, init it to 0 ms.
+            if (formAnimationTimeInterval > formMaxDuration) {
                 animationOptionResult->SetDuration(0);
-            } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
-                // If remaining time is less than 1000ms, check for update duration.
-                animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
+            } else if (animationOptionResult->GetDuration() > (formMaxDuration - formAnimationTimeInterval)) {
+                // If remaining time is less than max, check for update duration.
+                animationOptionResult->SetDuration(formMaxDuration - formAnimationTimeInterval);
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation]  Form Transition SetDuration: %{public}lld ms",
-                    static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
+                    static_cast<long long>(formMaxDuration - formAnimationTimeInterval));
             }
         }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
