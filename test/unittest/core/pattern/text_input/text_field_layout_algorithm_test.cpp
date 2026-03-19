@@ -46,6 +46,12 @@ public:
         auto* helper = reinterpret_cast<TextFieldLayoutAlgorithmTestHelper*>(algorithm);
         helper->autoWidth_ = autoWidth;
     }
+
+    static void SetInlineFocus(TextFieldLayoutAlgorithm* algorithm, bool isInlineFocus)
+    {
+        auto* helper = reinterpret_cast<TextFieldLayoutAlgorithmTestHelper*>(algorithm);
+        helper->isInlineFocus_ = isInlineFocus;
+    }
 };
 
 class TextFieldLayoutAlgorithmTest : public TextInputBases {
@@ -84,6 +90,11 @@ protected:
         TextFieldLayoutAlgorithmTestHelper::SetAutoWidth(algorithm, autoWidth);
     }
 
+    void SetInlineFocusForTest(TextFieldLayoutAlgorithm* algorithm, bool isInlineFocus)
+    {
+        TextFieldLayoutAlgorithmTestHelper::SetInlineFocus(algorithm, isInlineFocus);
+    }
+
 private:
     void UpdateLayoutAlgorithmFromWrapper()
     {
@@ -100,435 +111,6 @@ private:
     RefPtr<LayoutWrapper> layoutWrapper_;
     RefPtr<TextFieldLayoutAlgorithm> layoutAlgorithm_;
 };
-
-/**
- * @tc.name: ConstraintWithMinWidth001
- * @tc.desc: Test ConstraintWithMinWidth when paragraph is null
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint and wrapper
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create paragraph as null
-     */
-    RefPtr<Paragraph> paragraph = nullptr;
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with null paragraph
-     * @tc.expected: Should return 0.0f when paragraph is null (CHECK_NULL_RETURN branch)
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_EQ(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth002
- * @tc.desc: Test ConstraintWithMinWidth when layoutWrapper is null
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with null layoutWrapper
-     * @tc.expected: Should return 0.0f when layoutWrapper is null (CHECK_NULL_RETURN branch)
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    LayoutWrapper* nullWrapper = nullptr;
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, nullWrapper, paragraph, 0.0f);
-    EXPECT_EQ(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth003
- * @tc.desc: Test ConstraintWithMinWidth with valid parameters and default path
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(460.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with valid parameters
-     * @tc.expected: Should return paragraph maxWidth when using default path
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth004
- * @tc.desc: Test ConstraintWithMinWidth with removeValue parameter
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(200.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with removeValue
-     * @tc.expected: Should subtract removeValue from width calculation
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float removeValue = 10.0f;
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, removeValue);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth005
- * @tc.desc: Test ConstraintWithMinWidth with calcLayoutConstraint minSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint without selfIdealSize
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(150.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-    // Do not set selfIdealSize to test the path when it's not has_value
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Set calcLayoutConstraint with minSize
-     */
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    CalcSize calcMinSize(CalcLength(200.0f), CalcLength(100.0f));
-    layoutProperty->UpdateCalcMinSize(calcMinSize);
-
-    /**
-     * @tc.steps: step4. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step5. Call ConstraintWithMinWidth with calcLayoutConstraint
-     * @tc.expected: Should handle calcLayoutConstraint path for API 11+
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth006
- * @tc.desc: Test ConstraintWithMinWidth with selfIdealSize width has value
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint with selfIdealSize
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-    contentConstraint.selfIdealSize.SetWidth(250.0f);
-    contentConstraint.selfIdealSize.SetHeight(150.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Set calcLayoutConstraint with minSize
-     */
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    CalcSize calcMinSize(CalcLength(200.0f), CalcLength(100.0f));
-    layoutProperty->UpdateCalcMinSize(calcMinSize);
-
-    /**
-     * @tc.steps: step4. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step5. Call ConstraintWithMinWidth with selfIdealSize
-     * @tc.expected: Should handle path when selfIdealSize width has value
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth007
- * @tc.desc: Test ConstraintWithMinWidth with large minSize to trigger layout
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint with large minSize
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(500.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(600.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with large minSize
-     * @tc.expected: Should use minSize when it's larger than longestLine
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth008
- * @tc.desc: Test ConstraintWithMinWidth with zero removeValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with zero removeValue
-     * @tc.expected: Should handle zero removeValue correctly
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth009
- * @tc.desc: Test ConstraintWithMinWidth with negative removeValue
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(100.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step4. Call ConstraintWithMinWidth with negative removeValue
-     * @tc.expected: Should handle negative removeValue correctly (adds to width)
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float removeValue = -10.0f;
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, removeValue);
-    EXPECT_GE(result, 0.0f);
-}
-
-/**
- * @tc.name: ConstraintWithMinWidth010
- * @tc.desc: Test ConstraintWithMinWidth with calcMinSize and null selfIdealSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern
-     */
-    CreateTextField(DEFAULT_TEXT);
-    ASSERT_NE(pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. Create layout constraint with null selfIdealSize
-     */
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(150.0f, 100.0f);
-    contentConstraint.maxSize = SizeF(300.0f, 300.0f);
-
-    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    /**
-     * @tc.steps: step3. Set calcLayoutConstraint with minSize
-     */
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    CalcSize calcMinSize(CalcLength(200.0f), CalcLength(100.0f));
-    layoutProperty->UpdateCalcMinSize(calcMinSize);
-
-    /**
-     * @tc.steps: step4. Create valid paragraph
-     */
-    RefPtr<Paragraph> paragraph = CreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    /**
-     * @tc.steps: step5. Call ConstraintWithMinWidth to test API 11+ path
-     * @tc.expected: Should handle API 11+ calcLayoutConstraint branch
-     */
-    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
-    ASSERT_NE(algorithm, nullptr);
-
-    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
-    EXPECT_GE(result, 0.0f);
-}
 
 /**
  * @tc.name: InlineMeasureContent001
@@ -1606,6 +1188,644 @@ HWTEST_F(TextFieldLayoutAlgorithmTest, IsNeedUpdateCounterWidth003, TestSize.Lev
     float result = algorithm->CalculateContentWidth(contentConstraint, layoutWrapper, imageWidth);
     EXPECT_GT(result, 0.0f);
     EXPECT_LE(result, contentConstraint.maxSize.Width());
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth001
+ * @tc.desc: Test ConstraintWithMinWidth when paragraph is null
+ *           Branch: CHECK_NULL_RETURN(paragraph, 0.0f) returns 0.0f
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(300.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    RefPtr<Paragraph> paragraph = nullptr;
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth002
+ * @tc.desc: Test ConstraintWithMinWidth when layoutWrapper is null
+ *           Branch: CHECK_NULL_RETURN(layoutWrapper, 0.0f) returns 0.0f
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(300.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    RefPtr<Paragraph> paragraph = CreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    LayoutWrapper* nullWrapper = nullptr;
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, nullWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth003
+ * @tc.desc: Test ConstraintWithMinWidth with FIX_AT_IDEAL_SIZE policy and width > longestLine
+ *           Branch: isInlineFocus_=false, widthPolicy=FIX_AT_IDEAL_SIZE, width != longestLine
+ *           This triggers paragraph->Layout(width) and returns max(paragraph->GetMaxWidth(), 0.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(500.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(500.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+    RefPtr<Paragraph> paragraph = mockParagraph;
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GE(result, 500.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth004
+ * @tc.desc: Test ConstraintWithMinWidth with WRAP_CONTENT policy and width == longestLine
+ *           Branch: isInlineFocus_=false, widthPolicy=WRAP_CONTENT, width == longestLine,
+ *                   LessNotEqual(longestLine, maxWidth) is true
+ *           This triggers paragraph->Layout(ceil(longestLine)) and returns GetVisualTextWidth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(50.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(200.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(400.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+    RefPtr<Paragraph> paragraph = mockParagraph;
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+    SetParagraphForTest(algorithm, paragraph);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth005
+ * @tc.desc: Test ConstraintWithMinWidth with WRAP_CONTENT policy and longestLine >= maxWidth
+ *           Branch: isInlineFocus_=false, widthPolicy=WRAP_CONTENT, width == longestLine,
+ *                   LessNotEqual(longestLine, maxWidth) is false
+ *           This skips paragraph->Layout and returns GetVisualTextWidth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(50.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(400.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(200.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+    SetParagraphForTest(algorithm, paragraph);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth006
+ * @tc.desc: Test ConstraintWithMinWidth with isInlineFocus_ = true, API 11+ path with all conditions met
+ *           and width > longestLine
+ *           Branch: isInlineFocus_=true, API>=11, calcLayoutConstraint has minSize with width,
+ *                   selfIdealSize has no width, width != longestLine
+ *           This triggers paragraph->Layout(width) in API 11 path
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth006, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(500.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    CalcSize calcMinSize(CalcLength(500.0f), CalcLength(50.0f));
+    layoutProperty->UpdateCalcMinSize(calcMinSize);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLine()).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(500.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GE(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth007
+ * @tc.desc: Test ConstraintWithMinWidth with isInlineFocus_ = true, API 11+ path,
+ *           width == longestLine and longestLine < maxWidth
+ *           Branch: isInlineFocus_=true, API>=11, calcLayoutConstraint has minSize with width,
+ *                   selfIdealSize has no width, width == longestLine, LessNotEqual(longestLine, maxWidth) true
+ *           This triggers paragraph->Layout(ceil(longestLine)) and returns GetVisualTextWidth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth007, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(50.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    CalcSize calcMinSize(CalcLength(50.0f), CalcLength(50.0f));
+    layoutProperty->UpdateCalcMinSize(calcMinSize);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLine()).WillRepeatedly(Return(200.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(400.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+    SetParagraphForTest(algorithm, paragraph);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth008
+ * @tc.desc: Test ConstraintWithMinWidth with isInlineFocus_ = true, API 11+ path,
+ *           width == longestLine and longestLine >= maxWidth
+ *           Branch: isInlineFocus_=true, API>=11, width == longestLine,
+ *                   LessNotEqual(longestLine, maxWidth) false
+ *           This skips paragraph->Layout and returns GetVisualTextWidth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth008, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(50.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    CalcSize calcMinSize(CalcLength(50.0f), CalcLength(50.0f));
+    layoutProperty->UpdateCalcMinSize(calcMinSize);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLine()).WillRepeatedly(Return(400.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(200.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+    SetParagraphForTest(algorithm, paragraph);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth009
+ * @tc.desc: Test ConstraintWithMinWidth with isInlineFocus_ = true, API 11+ path,
+ *           but selfIdealSize.Width has value - conditions not met
+ *           Branch: isInlineFocus_=true, API>=11, but selfIdealSize.Width().has_value() is true
+ *           This falls through to return max(paragraph->GetMaxWidth(), 0.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth009, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+    contentConstraint.selfIdealSize.SetWidth(300.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    CalcSize calcMinSize(CalcLength(100.0f), CalcLength(50.0f));
+    layoutProperty->UpdateCalcMinSize(calcMinSize);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(300.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 300.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth010
+ * @tc.desc: Test ConstraintWithMinWidth with isInlineFocus_ = true, API 11+ path,
+ *           but calcLayoutConstraint minSize has no value - conditions not met
+ *           Branch: isInlineFocus_=true, API>=11, but calcLayoutConstraint->minSize has no value
+ *           This falls through to return max(paragraph->GetMaxWidth(), 0.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth010, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(300.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 300.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth011
+ * @tc.desc: Test ConstraintWithMinWidth with FIX_AT_IDEAL_SIZE policy and removeValue parameter
+ *           Branch: isInlineFocus_=false, widthPolicy=FIX_AT_IDEAL_SIZE, width != longestLine
+ *           with non-zero removeValue
+ *           This tests the removeValue subtraction from minSize.Width()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth011, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(300.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(280.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float removeValue = 20.0f;
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, removeValue);
+    EXPECT_GE(result, 280.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth012
+ * @tc.desc: Test ConstraintWithMinWidth with MATCH_PARENT policy (falls through to API 11 path)
+ *           Branch: isInlineFocus_=false, widthPolicy=MATCH_PARENT (not FIX_AT_IDEAL_SIZE or WRAP_CONTENT)
+ *           Falls through to API 11 path and returns max(paragraph->GetMaxWidth(), 0.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth012, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(500.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 500.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth013
+ * @tc.desc: Test ConstraintWithMinWidth with NO_MATCH policy (falls through to API 11 path)
+ *           Branch: isInlineFocus_=false, widthPolicy=NO_MATCH
+ *           Falls through to API 11 path
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth013, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(400.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 400.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth014
+ * @tc.desc: Test ConstraintWithMinWidth with negative removeValue
+ *           Branch: removeValue is negative, effectively adds to minSize.Width()
+ *           Tests that negative removeValue is handled correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth014, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(50.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(120.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float removeValue = -20.0f;
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, removeValue);
+    EXPECT_GE(result, 120.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth015
+ * @tc.desc: Test ConstraintWithMinWidth with API 11 path and calcMinSize.Width only
+ *           Branch: calcLayoutConstraint->minSize->Width().has_value() is true
+ *           Tests that having only width in calcMinSize works correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth015, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(500.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    CalcSize calcMinSize(CalcLength(500.0f), std::nullopt);
+    layoutProperty->UpdateCalcMinSize(calcMinSize);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetLongestLine()).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(500.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, true);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_GE(result, 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth016
+ * @tc.desc: Test ConstraintWithMinWidth default path when no conditions are met
+ *           Branch: Neither FIX_AT_IDEAL_SIZE/WRAP_CONTENT path nor API 11 conditions met
+ *           Returns max(paragraph->GetMaxWidth(), 0.0f) as default
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth016, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+    contentConstraint.selfIdealSize.SetWidth(300.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(350.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 350.0f);
+}
+
+/**
+ * @tc.name: ConstraintWithMinWidth017
+ * @tc.desc: Test ConstraintWithMinWidth with zero maxWidth from paragraph
+ *           Branch: paragraph->GetMaxWidth() returns 0.0f
+ *           Tests that std::max(paragraph->GetMaxWidth(), 0.0f) returns 0.0f
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTest, ConstraintWithMinWidth017, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.minSize = SizeF(100.0f, 50.0f);
+    contentConstraint.maxSize = SizeF(600.0f, 100.0f);
+    contentConstraint.selfIdealSize.SetWidth(300.0f);
+
+    auto layoutWrapper = CreateLayoutWrapper(frameNode_);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    RefPtr<Paragraph> paragraph = mockParagraph;
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(0.0f));
+
+    TextFieldLayoutAlgorithm* algorithm = GetTextFieldLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    SetInlineFocusForTest(algorithm, false);
+
+    float result = algorithm->ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph, 0.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 } // namespace OHOS::Ace::NG

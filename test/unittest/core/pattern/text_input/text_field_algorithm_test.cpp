@@ -1594,4 +1594,537 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize_False_001, TestSize
         textStyle, u"test", Dimension(1.0f), contentConstraint, &layoutWrapper);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak007
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak with isTextFadeout=true
+ *           Branch: else branch with isTextFadeout=true → CLIP
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak007, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, true);
+    EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak008
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak WordBreak default value
+ *           Branch: WordBreak not set, use default BREAK_WORD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak008, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, false, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak009
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak WordBreak not set for !isTextArea && !isInlineStyle
+ *           Branch: isTextArea || isInlineStyle = false, WordBreak not updated
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak009, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    textStyle.SetWordBreak(WordBreak::BREAK_ALL);
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    layoutProperty_->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, false, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak010
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak with EllipsisMode and ELLIPSIS overflow
+ *           Branch: HasEllipsisMode() && ELLIPSIS = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak010, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::HEAD);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak011
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak with EllipsisMode default value
+ *           Branch: EllipsisMode not set, use default TAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak011, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::TAIL);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak012
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak with TextOverflow NONE
+ *           Branch: TextOverflow NONE from property (not DEFAULT)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak012, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::NONE);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::NONE);
+}
+
+/**
+ * @tc.name: UpdateTextStyleTextOverflowAndWordBreak013
+ * @tc.desc: Test UpdateTextStyleTextOverflowAndWordBreak with MARQUEE overflow, isTextArea=false, isInlineStyle=false
+ *           Branch: MARQUEE with isTextArea=false, isInlineStyle=false → CLIP
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak013, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    layoutProperty_->UpdateTextOverflow(TextOverflow::MARQUEE);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, false, layoutProperty_, false);
+    EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure001
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with no adapt font size properties
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, but HasAdaptMinFontSize and
+ *                   HasAdaptMaxFontSize are both false
+ *           The adapt font size logic should not be triggered
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text and styled placeholder
+     */
+    CreateTextField("", "placeholder");
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Create layout algorithm and measure content to trigger StylePlaceHolderMeasure
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure002
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with AdaptMinFontSize only
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, HasAdaptMinFontSize is true,
+ *                   but HasAdaptMaxFontSize is false
+ *           GetAdaptTextSize() returns false because both min and max are required
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder, and AdaptMinFontSize only
+     */
+    CreateTextField("", "placeholder",
+        [](TextFieldModelNG& model) { model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP)); });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify that AdaptMinFontSize is set but AdaptMaxFontSize is not
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMinFontSize());
+    EXPECT_FALSE(textFieldLayoutProperty->HasAdaptMaxFontSize());
+
+    /**
+     * @tc.steps: step4. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure003
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with AdaptMaxFontSize only
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, HasAdaptMaxFontSize is true,
+ *                   but HasAdaptMinFontSize is false
+ *           GetAdaptTextSize() returns false because both min and max are required
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder, and AdaptMaxFontSize only
+     */
+    CreateTextField("", "placeholder",
+        [](TextFieldModelNG& model) { model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP)); });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify that AdaptMaxFontSize is set but AdaptMinFontSize is not
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_FALSE(textFieldLayoutProperty->HasAdaptMinFontSize());
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMaxFontSize());
+
+    /**
+     * @tc.steps: step4. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure004
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with both adapt font sizes set
+ *           but minFontSize >= maxFontSize, causing IsNeedAdaptFontSize to return false
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, both HasAdaptMinFontSize and
+ *                   HasAdaptMaxFontSize are true, but minFontSize >= maxFontSize
+ *           GetAdaptTextSize() returns true, but IsNeedAdaptFontSize() returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder,
+     *             and minFontSize >= maxFontSize to make IsNeedAdaptFontSize return false
+     */
+    CreateTextField("", "placeholder", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(30.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(10.0f, DimensionUnit::FP));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify both adapt font size properties are set
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMinFontSize());
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMaxFontSize());
+
+    /**
+     * @tc.steps: step4. Verify minFontSize >= maxFontSize condition
+     */
+    auto minFontSize = textFieldLayoutProperty->GetAdaptMinFontSize();
+    auto maxFontSize = textFieldLayoutProperty->GetAdaptMaxFontSize();
+    EXPECT_TRUE(minFontSize.has_value());
+    EXPECT_TRUE(maxFontSize.has_value());
+    EXPECT_GE(minFontSize->Value(), maxFontSize->Value());
+
+    /**
+     * @tc.steps: step5. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure005
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with both adapt font sizes set
+ *           but minFontSize <= 0, causing IsNeedAdaptFontSize to return false
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, both HasAdaptMinFontSize and
+ *                   HasAdaptMaxFontSize are true, but minFontSize <= 0
+ *           GetAdaptTextSize() returns true, but IsNeedAdaptFontSize() returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder,
+     *             and minFontSize <= 0 to make IsNeedAdaptFontSize return false
+     */
+    CreateTextField("", "placeholder", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(0.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify both adapt font size properties are set
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMinFontSize());
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMaxFontSize());
+
+    /**
+     * @tc.steps: step4. Verify minFontSize <= 0 condition
+     */
+    auto minFontSize = textFieldLayoutProperty->GetAdaptMinFontSize();
+    EXPECT_TRUE(minFontSize.has_value());
+    EXPECT_LE(minFontSize->Value(), 0.0f);
+
+    /**
+     * @tc.steps: step5. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure006
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() > 0 (normal case)
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is false
+ *           The adapt font size logic should be skipped entirely
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder, and valid adapt font sizes
+     */
+    CreateTextField("", "placeholder", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Create layout algorithm and measure content with height > 0
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+    EXPECT_GT(result->Height(), 0.0f);
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure007
+ * @tc.desc: Test StylePlaceHolderMeasure when textRect_.Height() <= 0 with valid adapt font sizes
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, both adapt font sizes are valid,
+ *                   maxFontSize > minFontSize > 0, should trigger adapt font size logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder, and valid adapt font sizes
+     *             minFontSize = 10fp, maxFontSize = 30fp (maxFontSize > minFontSize > 0)
+     */
+    CreateTextField("", "placeholder", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify both adapt font size properties are set correctly
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMinFontSize());
+    EXPECT_TRUE(textFieldLayoutProperty->HasAdaptMaxFontSize());
+
+    /**
+     * @tc.steps: step4. Verify valid font size condition (maxFontSize > minFontSize > 0)
+     */
+    auto minFontSize = textFieldLayoutProperty->GetAdaptMinFontSize();
+    auto maxFontSize = textFieldLayoutProperty->GetAdaptMaxFontSize();
+    EXPECT_TRUE(minFontSize.has_value());
+    EXPECT_TRUE(maxFontSize.has_value());
+    EXPECT_GT(maxFontSize->Value(), minFontSize->Value());
+    EXPECT_GT(minFontSize->Value(), 0.0f);
+
+    /**
+     * @tc.steps: step5. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: StylePlaceHolderMeasure008
+ * @tc.desc: Test StylePlaceHolderMeasure with HeightAdaptivePolicy set
+ *           Branch: LessOrEqual(textRect_.Height(), 0.0) is true, adapt font sizes are valid,
+ *                   with HeightAdaptivePolicy set to MIN_FONT_SIZE_FIRST
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, StylePlaceHolderMeasure008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with empty text, styled placeholder, valid adapt font sizes,
+     *             and HeightAdaptivePolicy set
+     */
+    CreateTextField("", "placeholder", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up styled placeholder
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"styled placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+
+    /**
+     * @tc.steps: step3. Verify HeightAdaptivePolicy is set
+     */
+    auto textFieldLayoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto adaptivePolicy =
+        textFieldLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(adaptivePolicy, TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+
+    /**
+     * @tc.steps: step4. Create layout algorithm and measure content
+     */
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(textInputLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(100.0f);
+    contentConstraint.maxSize.SetHeight(50.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
+
+    auto result = textInputLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(result.has_value());
+}
+
 } // namespace OHOS::Ace::NG
