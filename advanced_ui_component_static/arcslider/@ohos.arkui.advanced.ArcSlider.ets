@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import { ColorMetrics } from '@ohos.arkui.node';
 import hilog from '@ohos.hilog';
 import display from '@ohos.display';
 import { systemDateTime } from '@kit.BasicServicesKit';
+import { Resource } from 'global.resource';
 import {
   Entry,
   Component,
@@ -42,44 +43,44 @@ import {
 import { PathShape } from '@ohos.arkui.shape';
 import { State, ObservedV2, Trace, Param, Local, Monitor, IMonitor } from '@ohos.arkui.stateManagement'
 
-const ANGLE_TO_RADIAN = Math.PI / 180; // Common or specific numerical values
-const RADIAN_TO_ANGLE = 180 / Math.PI;
-const PI_ANGLE = 180;
-const TWO_PI_RADIAN = 2 * Math.PI;
-const APPROXIMATE_NUMBER = Math.pow(10, -7);
-const ANGLE_OVER_MIN = 10 * ANGLE_TO_RADIAN;
-const LENGTH_OVER_MIN = 0.15;
-const INVALID_TIMEOUT_ID = -1;
-const RESTORE_TIMEOUT = 3000;
+const ANGLE_TO_RADIAN: double = Math.PI / 180; // Common or specific numerical values
+const RADIAN_TO_ANGLE: double = 180 / Math.PI;
+const PI_ANGLE: double = 180;
+const TWO_PI_RADIAN: double = 2 * Math.PI;
+const APPROXIMATE_NUMBER: double = Math.pow(10, -7);
+const ANGLE_OVER_MIN: double = 10 * ANGLE_TO_RADIAN;
+const LENGTH_OVER_MIN: double = 0.15;
+const INVALID_TIMEOUT_ID: double = -1;
+const RESTORE_TIMEOUT: Int = 3000;
 
-const PROGRESS_DEFAULT = 0; // Default value
-const MIN_DEFAULT = 0;
-const MAX_DEFAULT = 100;
-const PADDING_DEFAULT = 5.5;
-const START_ANGLE_DEFAULT = 15;
-const END_ANGLE_DEFAULT = 45;
-const ACTIVE_START_ANGLE_DEFAULT = -60;
-const ACTIVE_END_ANGLE_DEFAULT = 60;
-const REVERSE_DEFAULT = true;
-const TRACK_THICKNESS_DEFAULT = 5;
-const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
-const TRACK_THICKNESS_MAX = 16;
-const ACTIVE_TRACK_THICKNESS_MAX = 36;
-const TRACK_BLUR_DEFAULT = 20;
-const TRACK_COLOR_DEFAULT = '#33FFFFFF';
-const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
-const BLUR_COLOR_DEFAULT = $r('sys.color.ohos_id_color_subtab_bg');
-const TOUCH_ANIMATION_DURATION = 200;
-const LIMIT_RESTORE_ANIMATION_DURATION = 333;
-const RESTORE_ANIMATION_DURATION = 167;
-const DIAMETER_DEFAULT = 233;
+const PROGRESS_DEFAULT: double = 0; // Default value
+const MIN_DEFAULT: double = 0;
+const MAX_DEFAULT: double = 100;
+const PADDING_DEFAULT: double = 5.5;
+const START_ANGLE_DEFAULT: double = 15;
+const END_ANGLE_DEFAULT: double = 45;
+const ACTIVE_START_ANGLE_DEFAULT: double = -60;
+const ACTIVE_END_ANGLE_DEFAULT: double = 60;
+const REVERSE_DEFAULT: boolean = true;
+const TRACK_THICKNESS_DEFAULT: double = 5;
+const ACTIVE_TRACK_THICKNESS_DEFAULT: double = 24;
+const TRACK_THICKNESS_MAX: double = 16;
+const ACTIVE_TRACK_THICKNESS_MAX: double = 36;
+const TRACK_BLUR_DEFAULT: double = 20;
+const TRACK_COLOR_DEFAULT: string = '#33FFFFFF';
+const SELECTED_COLOR_DEFAULT: string = '#FF5EA1FF';
+const BLUR_COLOR_DEFAULT: Resource = $r('sys.color.ohos_id_color_subtab_bg');
+const TOUCH_ANIMATION_DURATION: int = 200;
+const LIMIT_RESTORE_ANIMATION_DURATION: int = 333;
+const RESTORE_ANIMATION_DURATION: int = 167;
+const DIAMETER_DEFAULT: double = 233;
 
-const VIBRATOR_TYPE_TWO = 'watchhaptic.feedback.crown.strength2'; // About crown
-const CROWN_TIME_FLAG = 30;
-const CROWN_CONTROL_RATIO = 2.10;
-const CROWN_SENSITIVITY_LOW = 0.5;
-const CROWN_SENSITIVITY_MEDIUM = 1;
-const CROWN_SENSITIVITY_HIGH = 2;
+const VIBRATOR_TYPE_TWO: string = 'watchhaptic.feedback.crown.strength2'; // About crown
+const CROWN_TIME_FLAG: double = 30;
+const CROWN_CONTROL_RATIO: double = 2.10;
+const CROWN_SENSITIVITY_LOW: double = 0.5;
+const CROWN_SENSITIVITY_MEDIUM: double = 1;
+const CROWN_SENSITIVITY_HIGH: double = 2;
 
 export enum AnimatorStatus {
   MIN,
