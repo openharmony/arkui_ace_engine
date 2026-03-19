@@ -140,14 +140,10 @@ void XComponentModelStatic::SetScreenId(FrameNode* frameNode, uint64_t screenId)
 void XComponentModelStatic::SetXComponentType(FrameNode* frameNode, XComponentType type)
 {
     CHECK_NULL_VOID(frameNode);
-    auto xcPattern = AceType::DynamicCast<XComponentStaticPattern>(frameNode->GetPattern());
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
-    bool shouldUpdateType = xcPattern->UpdateType(type);
-    if (shouldUpdateType) {
-        auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateXComponentType(type);
-    }
+    xcPattern->SetType(type);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type, frameNode);
 }
 
 XComponentStaticPattern::XComponentStaticPattern(bool isTypedNode)
