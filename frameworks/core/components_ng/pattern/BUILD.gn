@@ -669,7 +669,7 @@ build_component_ng("pattern_ng") {
       external_deps += [
         "window_manager:scene_session",
         "accessibility:accessibility_common",
-        ]
+      ]
     }
     if (!build_ohos_sdk) {
       sources += [
