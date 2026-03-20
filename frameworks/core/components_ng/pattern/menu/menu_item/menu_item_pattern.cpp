@@ -1216,6 +1216,7 @@ void MenuItemPattern::DoCloseSubMenu()
     embeddedMenu_ = nullptr;
     isExpanded_ = false;
     detachedProxy_ = nullptr;
+    CHECK_NULL_VOID(host);
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(rightRow);
     auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
