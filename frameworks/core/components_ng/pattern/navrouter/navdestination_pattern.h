@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_accessibility_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
@@ -62,6 +63,12 @@ public:
     {
         ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavDestinationEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        ACE_UINODE_TRACE(GetHost());
+        return MakeRefPtr<NavDestinationAccessibilityProperty>();
     }
 
     void OnActive() override;

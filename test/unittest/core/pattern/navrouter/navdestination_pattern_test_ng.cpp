@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_accessibility_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/base/mock_system_bar_style.h"
@@ -165,6 +166,21 @@ HWTEST_F(NavDestinationPatternTestNg, NeedIgnoreKeyboard004, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     bool ret = navDestinationPattern->NeedIgnoreKeyboard();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CreateAccessibilityProperty001
+ * @tc.desc: Verify NavDestination creates a dedicated accessibility property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, CreateAccessibilityProperty001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+
+    auto accessibilityProperty = navDestinationNode->GetAccessibilityProperty<NavDestinationAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
 }
 
 /**
