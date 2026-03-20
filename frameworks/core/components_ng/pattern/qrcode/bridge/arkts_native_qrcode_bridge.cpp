@@ -95,9 +95,6 @@ ArkUINativeModuleValue QRCodeBridge::SetQRColor(ArkUIRuntimeCallInfo* runtimeCal
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-
-    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
-
     if (!ArkTSUtils::ParseJsColorAlpha(vm, qrColorArg, color, colorResObj, nodeInfo) &&
         (IsJsView(firstArg, vm) || !Framework::JSQRCodeTheme::ObtainQRCodeColor(color))) {
         GetArkUINodeModifiers()->getQRCodeModifier()->resetQRColor(nativeNode);

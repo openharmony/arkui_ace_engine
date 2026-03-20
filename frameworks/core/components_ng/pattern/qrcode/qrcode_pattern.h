@@ -65,6 +65,7 @@ public:
     void UpdateColor(const Color& color, bool isFristLoad = false);
     void UpdateBackgroundColor(const Color& color, bool isFristLoad = false);
     void UpdateContentOpacity(double opacity, bool isFristLoad = false);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;

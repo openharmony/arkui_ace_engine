@@ -29,7 +29,7 @@ public:
     static void ApplyTheme()
     {
         auto themeColors = JSThemeUtils::GetThemeColors();
-        if (!themeColors) {
+        if (!themeColors || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
 
@@ -42,16 +42,13 @@ public:
         NG::QRCodeModelNG::SetQRCodeColor(frameNode, themeColors->CompForegroundPrimary());
         NG::QRCodeModelNG::SetQRBackgroundColor(frameNode, themeColors->BackgroundPrimary());
 
-        // focused
-        ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
-        ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
-
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();
     }
 
     static bool ObtainQRCodeColor(Color &qrcodeColor)
     {
+        CHECK_NULL_RETURN(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             return false;
@@ -62,6 +59,7 @@ public:
 
     static bool ObtainBackgroundColor(Color &bgColor)
     {
+        CHECK_NULL_RETURN(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             return false;
