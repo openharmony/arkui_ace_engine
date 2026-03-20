@@ -572,8 +572,10 @@ void Scrollable::HandleTouchCancel()
     }
     isTouching_ = false;
     ACE_SCOPED_TRACE("HandleTouchCancel, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
-    if (state_ != AnimationState::SPRING && scrollOverCallback_) {
-        ProcessScrollOverCallback(0.0);
+    if (outBoundaryCallback_ && outBoundaryCallback_(false)) {
+        if (state_ != AnimationState::SPRING && scrollOverCallback_) {
+            ProcessScrollOverCallback(0.0);
+        }
     }
 }
 
