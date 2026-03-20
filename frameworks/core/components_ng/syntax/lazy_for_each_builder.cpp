@@ -782,6 +782,7 @@ namespace OHOS::Ace::NG {
         result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
         if (!result) {
             expiringItem_.swap(cache);
+            ProcessOffscreenNodesNotInExpiring(cache);
             return result;
         }
 
@@ -792,7 +793,18 @@ namespace OHOS::Ace::NG {
             }
         }
         expiringItem_.swap(cache);
+        ProcessOffscreenNodesNotInExpiring(cache);
         return result;
+    }
+
+    void LazyForEachBuilder::ProcessOffscreenNodesNotInExpiring(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) == expiringItem_.end()) {
+                ProcessOffscreenNode(node.second, true);
+            }
+        }
     }
 
     void LazyForEachBuilder::RecordOutOfBoundaryNodes(int32_t index)

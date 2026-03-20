@@ -238,6 +238,8 @@ public:
 
     void ReorganizeOffscreenNode();
 
+    void ProcessOffscreenNodesNotInExpiring(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+
     void ClearAllOffscreenNode()
     {
         for (auto& [key, node] : expiringItem_) {
