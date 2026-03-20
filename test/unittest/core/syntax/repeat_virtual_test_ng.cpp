@@ -180,6 +180,12 @@ const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = 
     {"elmt2", { true, 2 } }
 };
 
+/**
+ * Helper function to create RepeatVirtualScrollNode with or without items in cache depending on the parameter passed
+ * createItems==true will create RepeatVirtualScrollNode with 3 items in cache while createItems==false will create
+ * This function is used in multiple test cases to create RepeatVirtualScrollNode with different cache states
+ * createItems parameter is used to test the behavior of RepeatVirtualScrollNode when there are different number
+ */
 RefPtr<RepeatVirtualScrollNode> RepeatVirtualTestNg::GetOrCreateRepeatNode(bool createItems)
 {
     RefPtr<RepeatVirtualScrollNode> node;
