@@ -1044,6 +1044,14 @@ void RichEditorModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isO
     pattern->SetOrphanCharOptimization(isOrphanCharOptimization);
 }
 
+bool RichEditorModelNG::IsOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsOrphanCharOptimization();
+}
+
 void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);

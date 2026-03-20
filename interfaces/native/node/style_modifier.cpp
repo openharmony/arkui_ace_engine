@@ -4796,6 +4796,10 @@ int32_t SetOrphanCharOptimization(ArkUI_NodeHandle node, const ArkUI_AttributeIt
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputOrphanCharOptimization(
                 node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
             break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorOrphanCharOptimization(
+                node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
+            break;
         default:
             break;
     }
@@ -4820,6 +4824,11 @@ const ArkUI_AttributeItem* GetOrphanCharOptimization(ArkUI_NodeHandle node)
                 GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputOrphanCharOptimization(
                     node->uiNodeHandle);
             break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            g_numberValues[NUM_0].i32 =
+                GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorOrphanCharOptimization(
+                    node->uiNodeHandle);
+            break;
         default:
             break;
     }
@@ -4840,6 +4849,10 @@ void ResetOrphanCharOptimization(ArkUI_NodeHandle node)
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputOrphanCharOptimization(
+                node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(
                 node->uiNodeHandle);
             break;
         default:
@@ -5532,7 +5545,7 @@ void ResetRichEditorSingleLine(ArkUI_NodeHandle node)
 {
     GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSingleLine(node->uiNodeHandle);
 }
- 
+
 int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);

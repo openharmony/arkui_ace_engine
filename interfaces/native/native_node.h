@@ -6547,6 +6547,20 @@ typedef enum {
     NODE_TEXT_EDITOR_SINGLE_LINE,
 
     /**
+     * @brief Whether to avoid an orphan word on the last line of the paragraph.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The current state of this feature.\n
+     *
+     * @since 26
+     */
+    NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *

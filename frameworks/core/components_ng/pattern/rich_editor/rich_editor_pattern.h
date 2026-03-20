@@ -634,6 +634,11 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetOrphanCharOptimization: [%{public}d]", isOrphanCharOptimization_);
     }
 
+    bool IsOrphanCharOptimization()
+    {
+        return isOrphanCharOptimization_;
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);

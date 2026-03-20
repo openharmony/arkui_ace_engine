@@ -1347,6 +1347,13 @@ void ResetRichEditorOrphanCharOptimization(ArkUINodeHandle node)
     RichEditorModelNG::SetOrphanCharOptimization(frameNode, false);
 }
 
+ArkUI_Bool GetRichEditorOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::IsOrphanCharOptimization(frameNode);
+}
+
 void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2176,6 +2183,7 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setStyledPlaceholder = SetStyledPlaceholder,
         .setRichEditorOrphanCharOptimization = SetRichEditorOrphanCharOptimization,
         .resetRichEditorOrphanCharOptimization = ResetRichEditorOrphanCharOptimization,
+        .getRichEditorOrphanCharOptimization = GetRichEditorOrphanCharOptimization,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

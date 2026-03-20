@@ -171,6 +171,7 @@ public:
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static int32_t GetMaxLines(FrameNode* frameNode);
     static void SetOrphanCharOptimization(FrameNode* frameNode, bool enabled);
+    static bool IsOrphanCharOptimization(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool IsEnableAutoSpacing(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
