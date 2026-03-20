@@ -655,13 +655,13 @@ std::optional<std::string> GetWindowName(ani_int instanceId)
     return windowName;
 }
 
-std::optional<uint32_t> GetWindowId(ani_int instanceId)
+ani_int GetWindowId(ani_int instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, std::nullopt);
+    CHECK_NULL_RETURN(container, -1);
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN(context, std::nullopt);
+    CHECK_NULL_RETURN(context, -1);
     return context->GetFocusWindowId();
 }
 
