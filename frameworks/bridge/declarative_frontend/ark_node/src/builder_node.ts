@@ -82,12 +82,23 @@ class BuilderNodeCommonBase {
     this._JSBuilderNode.inheritFreezeOptions(enable);
   }
 }
+class ParamBox {
+  public contents: Object | undefined | null;
+  constructor(params: Object | undefined | null) {
+    this.contents = params;
+  }
+  public updateContent(params: Object | undefined | null): void {
+    this.contents = params;
+  }
+}
 class BuilderNode extends BuilderNodeCommonBase {
   public engineParams_: Object | undefined | null;
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
+  public paramBox: ParamBox | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions, nodePtr?: number, frameNodePtr?: number) {
     super();
+    this.paramBox = undefined;
     this.updateEngineParams_ = null;
     const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this), nodePtr, frameNodePtr);
     this._JSBuilderNode = jsBuilderNode;
@@ -104,6 +115,7 @@ class BuilderNode extends BuilderNodeCommonBase {
   }
   public setEngineParams(params: Object | undefined | null): void {
     this.engineParams_ = params;
+    this.paramBox?.updateContent(params);
   }
   public getProxyObjectEngineParam(): Object | undefined | null {
     return this._proxyObjectEngineParam;
@@ -249,11 +261,15 @@ class JSBuilderNode extends BaseNode {
     const host = this.host_?.deref();
     const hostParams = host?.getEngineParams();
     if (this._supportNestingBuilder && this.isObject(hostParams)) {
+      let paramBox = new ParamBox(hostParams);
+      if (host) {
+        host.paramBox = paramBox;
+      }
       host?.setProxyObjectEngineParam(new Proxy(hostParams, {
         set(target, property, val): boolean {
           throw new BusinessError(140109, `@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
-        get: (target, property, receiver): Object => { return this.host_?.deref()?.getEngineParams()?.[property] }
+        get: (target, property, receiver): Object => { return paramBox?.contents?.[property] }
       }));
       this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this),
         host?.getProxyObjectEngineParam(), this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
@@ -615,8 +631,10 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
   public engineParams_: Object | undefined | null;
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
+  public paramBox: ParamBox | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions) {
     super();
+    this.paramBox = undefined;
     this.updateEngineParams_ = null;
     const jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options, new WeakRef(this));
     this._JSBuilderNode = jsBuilderNode;
@@ -639,6 +657,7 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
   }
   public setEngineParams(params: Object | undefined | null): void {
     this.engineParams_ = params;
+    this.paramBox?.updateContent(params);
   }
   public getProxyObjectEngineParam(): Object | undefined | null {
     return this._proxyObjectEngineParam;
