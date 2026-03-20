@@ -575,6 +575,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupOnChange(ArkUIRuntim
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        CHECK_NULL_VOID(eventInfo);
         panda::Local<panda::NumberRef> statusParam = panda::NumberRef::New(vm, eventInfo->GetStatus());
         int32_t i = 0;
         auto valueArray = panda::ArrayRef::New(vm);
