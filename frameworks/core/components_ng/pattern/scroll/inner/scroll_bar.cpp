@@ -1169,10 +1169,12 @@ void ScrollBar::PlayScrollBarAppearAnimation()
     }
 }
 
-void ScrollBar::PlayScrollBarGrowAnimation()
+void ScrollBar::PlayScrollBarGrowAnimation(bool needVibration)
 {
 #ifdef ARKUI_WEARABLE
-    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+    if (needVibration) {
+        VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+    }
 #endif
     PlayScrollBarAppearAnimation();
     normalWidth_ = activeWidth_;
@@ -1181,10 +1183,12 @@ void ScrollBar::PlayScrollBarGrowAnimation()
     MarkNeedRender();
 }
 
-void ScrollBar::PlayScrollBarShrinkAnimation()
+void ScrollBar::PlayScrollBarShrinkAnimation(bool needVibration)
 {
 #ifdef ARKUI_WEARABLE
-    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+    if (needVibration) {
+        VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+    }
 #endif
     normalWidth_ = inactiveWidth_;
     FlushBarWidth();
