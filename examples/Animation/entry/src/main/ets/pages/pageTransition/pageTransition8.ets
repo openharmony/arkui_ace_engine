@@ -13,13 +13,23 @@
  * limitations under the License.
  */
 
-{
-  "app": {
-    "bundleName": "com.example.virualBlur",
-    "vendor": "example",
-    "versionCode": 1000000,
-    "versionName": "1.0.0",
-    "icon": "$media:app_icon",
-    "label": "$string:app_name"
+// page1.ets
+import { router } from '@kit.ArkUI'
+
+@Entry
+@Component
+struct PageTransitionExample8 {
+  @State scale1: number = 1
+  @State opacity1: number = 1
+
+  build() {
+    Column() {
+      Button("页面2").onClick(()=>{
+        router.back()
+      })
+        .width(200)
+        .height(60)
+        .fontSize(36)
+    }.scale({ x: this.scale1 }).opacity(this.opacity1).height("100%").width("100%").justifyContent(FlexAlign.Center)
   }
 }

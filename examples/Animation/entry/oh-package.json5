@@ -14,12 +14,12 @@
  */
 
 {
-  "app": {
-    "bundleName": "com.example.virualBlur",
-    "vendor": "example",
-    "versionCode": 1000000,
-    "versionName": "1.0.0",
-    "icon": "$media:app_icon",
-    "label": "$string:app_name"
-  }
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {}
 }
+

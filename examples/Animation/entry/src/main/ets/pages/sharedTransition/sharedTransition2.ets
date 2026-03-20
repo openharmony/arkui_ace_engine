@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-{
-  "app": {
-    "bundleName": "com.example.virualBlur",
-    "vendor": "example",
-    "versionCode": 1000000,
-    "versionName": "1.0.0",
-    "icon": "$media:app_icon",
-    "label": "$string:app_name"
+// PageB.ets
+@Entry
+@Component
+struct SharedTransitionExample2 {
+  build() {
+    Stack() {
+      Image($r('app.media.startIcon')).width(150).height(150)
+        .sharedTransition('sharedImage', { duration: 800, curve: Curve.Linear, delay: 100 })
+    }.width('100%').height('100%')
   }
 }
