@@ -25,6 +25,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -172,7 +173,20 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(fontWeight, variableFontWeight);
+    if (fontWeight->IsNumber()) {
+        variableFontWeight = fontWeight->ToNumber<int32_t>();
+    } else {
+        std::string weight;
+        JSContainerBase::ParseJsString(fontWeight, weight);
+        auto parseResult = ParseFontWeight(weight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::StringToInt(weight,
+                DEFAULT_VARIABLE_FONT_WEIGHT);
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 }
 
@@ -279,7 +293,18 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(args, variableFontWeight);
+    if (args->IsNumber()) {
+        variableFontWeight = args->ToNumber<int32_t>();
+    } else {
+        auto parseResult = ParseFontWeight(fontWeight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::StringToInt(fontWeight,
+                DEFAULT_VARIABLE_FONT_WEIGHT);
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     ProcessFontWeightConfigObject(paramObject);

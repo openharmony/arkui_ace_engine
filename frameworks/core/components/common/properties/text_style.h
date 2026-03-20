@@ -70,6 +70,11 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,       // FontWeight::MEDIUM
     FontWeight::W400,       // FontWeight::REGULAR
 };
+// The fontWeight default value, W400 corresponds to 400
+constexpr int32_t DEFAULT_FONT_WEIGHT_INT32 = 400;
+// Default multiple, which is used to calculate the fontWeight
+constexpr int32_t DEFAULT_MULTIPLE = 100;
+
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
     int index = static_cast<int>(fontWeight);
@@ -1451,6 +1456,17 @@ inline std::string FontWeightToString(const FontWeight& fontWeight)
 inline std::string ToString(const FontWeight& fontWeight)
 {
     return FontWeightToString(fontWeight);
+}
+
+inline int32_t GetFontWeightNumericValue(FontWeight fontWeight)
+{
+    FontWeight converted = ConvertFontWeight(fontWeight);
+    int32_t index = static_cast<int32_t>(converted);
+    int32_t result = DEFAULT_FONT_WEIGHT_INT32;
+    if (index >= 0 && index <= static_cast<int32_t>(FontWeight::W900)) {
+        result = (index + 1) * DEFAULT_MULTIPLE;
+    }
+    return result;
 }
 
 inline std::string SymbolColorListToString(const std::vector<Color>& colorList)
