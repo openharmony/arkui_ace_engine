@@ -68,6 +68,9 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        node->RegisterBuilderListener();
+    }
     return node;
 }
 

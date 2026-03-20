@@ -40,11 +40,13 @@ public:
 
     void UnregisterDataChangeListener(V2::DataChangeListener* listener) override;
 
+    void RegisterDataChangeListenerHandler() override;
+
     void SetNodeTotalCount(ArkUI_Uint32 nodeCount)
     {
         totalCount_ = nodeCount;
     }
-
+   
     ArkUI_Uint32 GetNodeTotalCount() const
     {
         return totalCount_;
