@@ -18,6 +18,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <unordered_map>
 
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
@@ -33,7 +35,8 @@ public:
      */
     int32_t SetExtraElementInfo(const std::string& keyStr, const std::string& valueStr)
     {
-        return -1;
+        extraElementValueStr_[keyStr] = valueStr;
+        return 0;
     }
 
     /**
@@ -43,8 +46,23 @@ public:
      */
     int32_t SetExtraElementInfo(const std::string& keyStr, const int32_t valueInt)
     {
-        return -1;
+        extraElementValueInt_[keyStr] = valueInt;
+        return 0;
     }
+
+    const std::unordered_map<std::string, std::string>& GetExtraElementInfoValueStr() const
+    {
+        return extraElementValueStr_;
+    }
+
+    const std::unordered_map<std::string, int32_t>& GetExtraElementInfoValueInt() const
+    {
+        return extraElementValueInt_;
+    }
+
+private:
+    std::unordered_map<std::string, std::string> extraElementValueStr_;
+    std::unordered_map<std::string, int32_t> extraElementValueInt_;
 };
 }
 #endif

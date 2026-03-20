@@ -170,7 +170,7 @@ HWTEST_F(NavDestinationPatternTestNg, NeedIgnoreKeyboard004, TestSize.Level1)
 
 /**
  * @tc.name: CreateAccessibilityProperty001
- * @tc.desc: Verify NavDestination creates a dedicated accessibility property.
+ * @tc.desc: Verify NavDestination writes name info to extra accessibility element info.
  * @tc.type: FUNC
  */
 HWTEST_F(NavDestinationPatternTestNg, CreateAccessibilityProperty001, TestSize.Level1)
@@ -180,7 +180,19 @@ HWTEST_F(NavDestinationPatternTestNg, CreateAccessibilityProperty001, TestSize.L
     ASSERT_NE(navDestinationNode, nullptr);
 
     auto accessibilityProperty = navDestinationNode->GetAccessibilityProperty<NavDestinationAccessibilityProperty>();
-    EXPECT_NE(accessibilityProperty, nullptr);
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    const std::string navDestinationName = "NavDestinationName";
+    navDestinationPattern->SetName(navDestinationName);
+
+    Accessibility::ExtraElementInfo extraElementInfo;
+    accessibilityProperty->GetExtraElementInfo(extraElementInfo);
+    auto extraElementInfoValueStr = extraElementInfo.GetExtraElementInfoValueStr();
+    auto nameIter = extraElementInfoValueStr.find("name");
+    ASSERT_NE(nameIter, extraElementInfoValueStr.end());
+    EXPECT_EQ(nameIter->second, navDestinationName);
 }
 
 /**
