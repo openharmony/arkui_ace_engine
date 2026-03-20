@@ -40,7 +40,10 @@ es2abc_gen_abc("gen_stateMgmt_abc") {
 }
 
 es2abc_gen_abc("gen_jsEnumStyle_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  extra_visibility = [
+    ":*",
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*"
+  ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js")
   dst_file = rebase_path(base_output_path + "/jsEnumStyle.abc")
@@ -90,7 +93,10 @@ es2abc_gen_abc("gen_arkDynamicComponent_abc") {
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  extra_visibility = [
+    ":*",
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*"
+  ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js")
   dst_file = rebase_path(base_output_path + "/arkComponent.abc")
@@ -190,7 +196,11 @@ if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
 }
 
 if (!is_arkui_x) {
-  abc_sources = [ "stateMgmt" ]
+  abc_sources = [
+    "stateMgmt",
+    "jsEnumStyle",
+    "arkComponent"
+  ]
 } else {
   abc_sources = []
 }

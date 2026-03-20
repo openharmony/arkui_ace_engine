@@ -112,6 +112,8 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_node:x_node",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_theme",
+      "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi:gen_jsEnumStyle_abc",
+      "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi:gen_arkComponent_abc",
       ":copy_component_model_abc_library",
     ]
     out_path = get_label_info(
@@ -126,6 +128,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/theme.abc",
       "${out_path}/arkui/ace_engine/uicontext.abc",
       "${out_path}/arkui/ace_engine/arktheme.abc",
+      "$root_out_dir/obj/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsi/jsEnumStyle.abc",
+      "$root_out_dir/obj/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsi/arkComponent.abc",
     ]
 
     outputs = [ target_out_dir +
