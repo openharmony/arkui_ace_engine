@@ -968,6 +968,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
+    ProcessPendingSubmitAction();
     UpdateCancelNode();
     UpdateSelectController();
     AdjustTextInReasonableArea();
@@ -4693,7 +4694,6 @@ void TextFieldPattern::AddTextFireOnChange()
         TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
         UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
         eventHub->FireOnChange(changeValueInfo);
-
         pattern->RecordTextInputEvent();
         auto callback = [weakPattern = weak](const std::string& type, const std::string& content) {
             auto strongPattern = weakPattern.Upgrade();
@@ -7200,11 +7200,33 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    if (IsTextArea() && action == TextInputAction::NEW_LINE) {
+        if (!textAreaBlurOnSubmit_) {
+            if (GetInputFilter() != "\n") {
+                InsertValue(u"\n", true);
+            }
+        } else {
+            CloseKeyboard(forceCloseKeyboard, false);
+            TextFieldLostFocusToViewRoot();
+        }
+        return;
+    }
+    if (TryDelaySubmitAction(action, forceCloseKeyboard)) {
+        return;
+    }
+    FireSubmitAction(action, forceCloseKeyboard);
+}
+
+void TextFieldPattern::FireSubmitAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasFocus() || !ProcessFocusIndexAction()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger SubmitAction");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextFieldCommonEvent event;
@@ -7215,17 +7237,6 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         OnReportSubmitEvent(host);
         CHECK_NULL_VOID(!event.IsKeepEditable());
         TextFieldLostFocusToViewRoot();
-        return;
-    }
-    if (IsTextArea() && action == TextInputAction::NEW_LINE) {
-        if (!textAreaBlurOnSubmit_) {
-            if (GetInputFilter() != "\n") {
-                InsertValue(u"\n", true);
-            }
-        } else {
-            CloseKeyboard(forceCloseKeyboard, false);
-            TextFieldLostFocusToViewRoot();
-        }
         return;
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
@@ -10442,6 +10453,48 @@ void TextFieldPattern::UpdateCancelNode()
 bool TextFieldPattern::HasInputOperation()
 {
     return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertCommands_.empty();
+}
+
+bool TextFieldPattern::TryDelaySubmitAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasPendingTextMutationForSubmit()) {
+        return false;
+    }
+    if (pendingSubmitActionInfo_.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Overwriting pending submit action %{public}d with %{public}d",
+            static_cast<int32_t>(pendingSubmitActionInfo_->action), static_cast<int32_t>(action));
+    }
+    pendingSubmitActionInfo_ = PendingSubmitActionInfo { action, forceCloseKeyboard };
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Delay submit action %{public}d until onChange completes",
+        static_cast<int32_t>(action));
+    return true;
+}
+
+void TextFieldPattern::ProcessPendingSubmitAction()
+{
+    if (!pendingSubmitActionInfo_.has_value()) {
+        return;
+    }
+    auto pendingActionInfo = pendingSubmitActionInfo_.value();
+    pendingSubmitActionInfo_.reset();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask(
+        [weak = WeakClaim(this), pendingActionInfo] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireSubmitAction(pendingActionInfo.action, pendingActionInfo.forceCloseKeyboard);
+        });
+}
+
+bool TextFieldPattern::HasPendingTextMutationForSubmit() const
+{
+    // Submit delay should only depend on operations that can still change the text value,
+    // and it needs to cover both insert/delete queues and InputCommand-based mutations.
+    return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertCommands_.empty() ||
+           !inputCommands_.empty();
 }
 
 void TextFieldPattern::FocusForwardStopTwinkling()

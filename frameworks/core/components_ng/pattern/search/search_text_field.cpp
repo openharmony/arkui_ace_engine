@@ -40,9 +40,22 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur");
         return;
     }
+    if (TryDelaySubmitAction(action, forceCloseKeyboard)) {
+        return;
+    }
+    FireSubmitAction(action, forceCloseKeyboard);
+}
+
+void SearchTextFieldPattern::FireSubmitAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasFocus()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger FireSubmitAction because field blur");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(parentFrameNode);
     auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     // Enter key type callback
