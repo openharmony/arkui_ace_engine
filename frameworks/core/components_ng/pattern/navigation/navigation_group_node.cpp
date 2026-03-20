@@ -65,6 +65,20 @@ int32_t TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& n
 } // namespace
 class InspectorFilter;
 
+void NavigationGroupNode::SetUseHomeDestinatoin(bool use)
+{
+    useHomeDestination_ = use;
+    if (!use) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto reporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(reporter);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Send homeDestination statistic event");
+    reporter->SendEvent(StatisticEventType::NAVIGATION_HOME_DESTINATION);
+}
+
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
