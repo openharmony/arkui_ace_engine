@@ -68,6 +68,8 @@ enum ComponentEventType : uint32_t {
     COMPONENT_EVENT_SWIPER = 1 << 10,          // swiper event, including Swiper and Tabs
     COMPONENT_EVENT_WEB = 1 << 11,             // web event
     COMPONENT_EVENT_MENU = 1 << 12,             // menu  event
+    COMPONENT_EVENT_SHEET_PRESENTATION = 1 << 13, // sheet presentation event
+    COMPONENT_EVENT_MODAL_PRESENTATION = 1 << 14, // modal presentation event
 
     COMPONENT_EVENT_ALL = static_cast<uint32_t>(-1),  // all events
 };
