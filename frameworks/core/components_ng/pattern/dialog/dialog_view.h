@@ -29,6 +29,7 @@ public:
     static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
     static RefPtr<FrameNode> CreateDialogNode(
         const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode);
+    static bool IsSupportBlurStyle(const RefPtr<FrameNode>& node, bool isShowInSubwindow);
 private:
     static void SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog);
     static std::string GetDialogTag(const DialogProperties& param);

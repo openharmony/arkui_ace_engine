@@ -518,6 +518,11 @@ public:
     {
         return isEnableHaptic_;
     }
+    
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
 
     void ColumnPatternInitHapticController();
     void UpdateUserSetSelectColor();
@@ -618,6 +623,7 @@ private:
     Color backgroundColor_ = Color::WHITE;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool canloop_ = true;
 
     // inner focus switch

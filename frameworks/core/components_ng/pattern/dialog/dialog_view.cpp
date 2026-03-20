@@ -165,4 +165,17 @@ void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dia
         });
 }
 
+bool DialogView::IsSupportBlurStyle(const RefPtr<FrameNode>& node, bool isShowInSubwindow)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    if (isShowInSubwindow) {
+        return renderContext->IsUniRenderEnabled();
+    }
+    return true;
+#endif
+    return renderContext->IsUniRenderEnabled();
+}
 } // namespace OHOS::Ace::NG
