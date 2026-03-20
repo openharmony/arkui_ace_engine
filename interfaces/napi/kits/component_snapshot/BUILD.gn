@@ -23,10 +23,10 @@ template("napi_componentsnapshot_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_component_snapshot.cpp" ]
-    deps = [
-      "../utils:napi_utils_static_${platform}",
-      "$ace_root/frameworks/core:ace_container_scope"
-    ]
+    deps = [ "../utils:napi_utils_static_${platform}" ]
+    if (!is_arkui_x) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
     external_deps = []
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
