@@ -1322,6 +1322,7 @@ declare class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribu
     onStart(event: () => void): this;
     onBounce(event: () => void): this;
     onFinish(event: () => void): this;
+    onStop(event: () => void): this;
 }
 declare class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

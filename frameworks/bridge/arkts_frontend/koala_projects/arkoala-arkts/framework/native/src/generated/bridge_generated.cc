@@ -10329,6 +10329,19 @@ void impl_MarqueeAttribute_setOnFinish(Ark_NativePointer thisPtr, KSerializerBuf
         GetNodeModifiers()->getMarqueeModifier()->setOnFinish(self, static_cast<Opt_synthetic_Callback_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(MarqueeAttribute_setOnFinish, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_MarqueeAttribute_setOnStop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_VoidCallback valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_VOIDCALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_VOIDCALLBACK))))};
+        }
+        Opt_VoidCallback valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getMarqueeModifier()->setOnStop(self, static_cast<Opt_VoidCallback*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MarqueeAttribute_setOnStop, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MediaCachedImage_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getMediaCachedImageModifier()->construct(id, flags);
 }

@@ -53,27 +53,27 @@ void InteropLogFatal(const char* format, ...);
 
 typedef enum InteropTag
 {
-  INTEROP_TAG_UNDEFINED = 101,
-  INTEROP_TAG_INT32 = 102,
-  INTEROP_TAG_FLOAT32 = 103,
-  INTEROP_TAG_STRING = 104,
-  INTEROP_TAG_LENGTH = 105,
-  INTEROP_TAG_RESOURCE = 106,
-  INTEROP_TAG_OBJECT = 107,
+    INTEROP_TAG_UNDEFINED = 101,
+    INTEROP_TAG_INT32 = 102,
+    INTEROP_TAG_FLOAT32 = 103,
+    INTEROP_TAG_STRING = 104,
+    INTEROP_TAG_LENGTH = 105,
+    INTEROP_TAG_RESOURCE = 106,
+    INTEROP_TAG_OBJECT = 107,
 } InteropTag;
 
 typedef enum InteropRuntimeType
 {
-  INTEROP_RUNTIME_UNEXPECTED = -1,
-  INTEROP_RUNTIME_NUMBER = 1,
-  INTEROP_RUNTIME_STRING = 2,
-  INTEROP_RUNTIME_OBJECT = 3,
-  INTEROP_RUNTIME_BOOLEAN = 4,
-  INTEROP_RUNTIME_UNDEFINED = 5,
-  INTEROP_RUNTIME_BIGINT = 6,
-  INTEROP_RUNTIME_FUNCTION = 7,
-  INTEROP_RUNTIME_SYMBOL = 8,
-  INTEROP_RUNTIME_MATERIALIZED = 9,
+    INTEROP_RUNTIME_UNEXPECTED = -1,
+    INTEROP_RUNTIME_NUMBER = 1,
+    INTEROP_RUNTIME_STRING = 2,
+    INTEROP_RUNTIME_OBJECT = 3,
+    INTEROP_RUNTIME_BOOLEAN = 4,
+    INTEROP_RUNTIME_UNDEFINED = 5,
+    INTEROP_RUNTIME_BIGINT = 6,
+    INTEROP_RUNTIME_FUNCTION = 7,
+    INTEROP_RUNTIME_SYMBOL = 8,
+    INTEROP_RUNTIME_MATERIALIZED = 9,
 } InteropRuntimeType;
 
 typedef float InteropFloat32;
@@ -106,82 +106,82 @@ typedef struct InteropDeferred {
 
 // Binary layout of InteropString must match that of KStringPtrImpl.
 typedef struct InteropString {
-  const char* chars;
-  InteropInt32 length;
+    const char* chars;
+    InteropInt32 length;
 } InteropString;
 
 typedef struct InteropEmpty {
-  InteropInt32 dummy; // Empty structs are forbidden in C.
+    InteropInt32 dummy; // Empty structs are forbidden in C.
 } InteropEmpty;
 
 typedef struct InteropNumber {
-  InteropInt8 tag;
-  union {
-    InteropFloat32 f32;
-    InteropInt32 i32;
-  };
+    InteropInt8 tag;
+    union {
+        InteropFloat32 f32;
+        InteropInt32 i32;
+    };
 } InteropNumber;
 
 typedef struct InteropCustomObject {
-  char kind[20];
-  InteropInt32 id;
-  // Data of custom object.
-  union {
-    InteropInt32 ints[4];
-    InteropFloat32 floats[4];
-    void* pointers[4];
-    InteropString string;
-  };
+    char kind[20];
+    InteropInt32 id;
+    // Data of custom object.
+    union {
+        InteropInt32 ints[4];
+        InteropFloat32 floats[4];
+        void* pointers[4];
+        InteropString string;
+    };
 } InteropCustomObject;
 
 typedef struct InteropUndefined {
-  InteropInt32 dummy; // Empty structs are forbidden in C.
+    InteropInt32 dummy; // Empty structs are forbidden in C.
 } InteropUndefined;
 
 typedef struct InteropVoid {
-  InteropInt32 dummy; // Empty structs are forbidden in C.
+    InteropInt32 dummy; // Empty structs are forbidden in C.
 } InteropVoid;
 
 typedef struct InteropFunction {
-  InteropInt32 id;
+    InteropInt32 id;
 } InteropFunction;
 typedef InteropFunction InteropCallback;
 typedef InteropFunction InteropErrorCallback;
 
 typedef struct InteropMaterialized {
-  InteropNativePointer ptr;
+    InteropNativePointer ptr;
 } InteropMaterialized;
 
 typedef struct InteropCallbackResource {
-  InteropInt32 resourceId;
-  void (*hold)(InteropInt32 resourceId);
-  void (*release)(InteropInt32 resourceId);
+    InteropInt32 resourceId;
+    void (*hold)(InteropInt32 resourceId);
+    void (*release)(InteropInt32 resourceId);
 } InteropCallbackResource;
 
 typedef struct InteropBuffer {
-  InteropCallbackResource resource;
-  InteropNativePointer data;
-  InteropInt64 length;
+    InteropCallbackResource resource;
+    InteropNativePointer data;
+    InteropInt64 length;
 } InteropBuffer;
 
 typedef struct InteropAsyncWork {
-  InteropNativePointer workId;
-  void (*queue)(InteropNativePointer workId);
-  void (*cancel)(InteropNativePointer workId);
+    InteropNativePointer workId;
+    void (*queue)(InteropNativePointer workId);
+    void (*cancel)(InteropNativePointer workId);
 } InteropAsyncWork;
 
 typedef struct InteropAsyncWorker {
-  InteropAsyncWork (*createWork)(
-    InteropVMContext context,
-    InteropNativePointer handle,
-    void (*execute)(InteropNativePointer handle),
-    void (*complete)(InteropNativePointer handle)
-  );
+    InteropAsyncWork (*createWork)(
+        InteropVMContext context,
+        InteropNativePointer handle,
+        void (*execute)(InteropNativePointer handle),
+        void (*complete)(InteropNativePointer handle)
+    );
 } InteropAsyncWorker;
 typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 
 typedef struct InteropObject {
-  InteropCallbackResource resource;
+    InteropCallbackResource resource;
 } InteropObject;
 
 #endif // _INTEROP_TYPES_H_
@@ -5592,6 +5592,7 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
+    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
@@ -24858,6 +24859,8 @@ typedef struct GENERATED_ArkUIMarqueeModifier {
                         const Opt_synthetic_Callback_Void* value);
     void (*setOnFinish)(Ark_NativePointer node,
                         const Opt_synthetic_Callback_Void* value);
+    void (*setOnStop)(Ark_NativePointer node,
+                      const Opt_VoidCallback* value);
 } GENERATED_ArkUIMarqueeModifier;
 
 typedef struct GENERATED_ArkUIMediaCachedImageModifier {

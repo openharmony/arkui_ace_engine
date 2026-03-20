@@ -187,7 +187,8 @@ void MarqueeBridge::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, Ec
         "resetFontColor", "setFontSize", "resetFontSize", "setFontWeight", "resetFontWeight",
         "setFontFamily", "resetFontFamily", "setMarqueeUpdateStrategy", "resetMarqueeUpdateStrategy",
         "setMarqueeOnStart", "resetMarqueeOnStart", "setMarqueeOnBounce", "resetMarqueeOnBounce",
-        "setMarqueeOnFinish", "resetMarqueeOnFinish", "setInitialize" };
+        "setMarqueeOnFinish", "resetMarqueeOnFinish", "setMarqueeOnStop", "resetMarqueeOnStop",
+        "setInitialize" };
 
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::CreateMarquee),
@@ -209,6 +210,8 @@ void MarqueeBridge::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnBounce),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnFinish),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnFinish),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnStop),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnStop),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetInitialize),
 
     };
@@ -588,6 +591,49 @@ ArkUINativeModuleValue MarqueeBridge::ResetMarqueeOnFinish(ArkUIRuntimeCallInfo*
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnFinish(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnStop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool isJsView = IsJsView(firstArg, vm);
+    auto frameNode =
+        isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(void)> callback = [vm, frameNodeWeak = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func), isJsView]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(frameNodeWeak);
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+        }
+    };
+    
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeOnStop(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MarqueeBridge::ResetMarqueeOnStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnStop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

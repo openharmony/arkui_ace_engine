@@ -174,6 +174,15 @@ void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
     eventHub->SetOnFinish(std::move(onChange));
 }
 
+void MarqueeModelNG::SetOnStop(std::function<void()>&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onChange));
+}
+
 RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(MARQUEE_ETS_TAG, nodeId, AceType::MakeRefPtr<MarqueePattern>());
@@ -332,6 +341,22 @@ void MarqueeModelNG::ResetOnFinish(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(nullptr);
+}
+
+void MarqueeModelNG::SetOnStop(FrameNode* frameNode, std::function<void()>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onChange));
+}
+
+void MarqueeModelNG::ResetOnStop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(nullptr);
 }
 
 void MarqueeModelNG::SetMarqueeFrameRateRange(

@@ -541,6 +541,11 @@ public:
         return contChange_;
     }
 
+    bool GetHasStart() const
+    {
+        return hasStart_;
+    }
+
     bool GetShowSelect() const
     {
         return showSelect_;
@@ -1343,6 +1348,7 @@ private:
     bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
+    bool hasStart_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;

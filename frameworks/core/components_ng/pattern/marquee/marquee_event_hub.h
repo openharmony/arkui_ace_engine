@@ -44,6 +44,11 @@ public:
         finishEvent_ = std::move(changeEvent);
     }
 
+    void SetOnStop(ChangeEvent&& changeEvent)
+    {
+        stopEvent_ = std::move(changeEvent);
+    }
+
     void FireStartEvent() const
     {
         if (startEvent_) {
@@ -65,10 +70,18 @@ public:
         }
     }
 
+    void FireStopEvent()
+    {
+        if (stopEvent_) {
+            stopEvent_();
+        }
+    }
+
 private:
     ChangeEvent startEvent_;
     ChangeEvent bounceEvent_;
     ChangeEvent finishEvent_;
+    ChangeEvent stopEvent_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -221,6 +221,21 @@ void SetOnFinishImpl(Ark_NativePointer node,
     };
     MarqueeModelNG::SetOnFinish(frameNode, onFinish);
 }
+void SetOnStopImpl(Ark_NativePointer node,
+                   const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        MarqueeModelNG::ResetOnStop(frameNode);
+        return;
+    }
+    auto onStop = [arkCallback = CallbackHelper(*optValue)]() -> void {
+        arkCallback.InvokeSync();
+    };
+    MarqueeModelNG::SetOnStop(frameNode, onStop);
+}
 } // MarqueeAttributeModifier
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeStaticModifier()
 {
@@ -236,6 +251,7 @@ const GENERATED_ArkUIMarqueeModifier* GetMarqueeStaticModifier()
         MarqueeAttributeModifier::SetOnStartImpl,
         MarqueeAttributeModifier::SetOnBounceImpl,
         MarqueeAttributeModifier::SetOnFinishImpl,
+        MarqueeAttributeModifier::SetOnStopImpl,
     };
     return &ArkUIMarqueeModifierImpl;
 }

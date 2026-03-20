@@ -24,7 +24,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
 import { Color as arkui_component_enums_Color, FontWeight, MarqueeUpdateStrategy } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from '#handwritten'
@@ -220,6 +220,18 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MarqueeAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnStopAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MarqueeAttribute_setOnStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface MarqueeOptions {
     start: boolean | undefined;
@@ -260,6 +272,9 @@ export interface MarqueeAttribute extends CommonMethod {
     }
     onFinish(value: (() => void) | undefined): this {
         throw new Error('Unimplemented method onFinish')
+    }
+    onStop(value: VoidCallback | undefined): this {
+        throw new Error('Unimplemented method onStop')
     }
     attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -319,6 +334,11 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
     public onFinish(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)
         this.getPeer()?.setOnFinishAttribute(value_casted)
+        return this
+    }
+    public onStop(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnStopAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -62,6 +62,10 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
     modifierWithKey(this._modifiersWithKeys, MarqueeOnFinishModifier.identity, MarqueeOnFinishModifier, event);
     return this;
   }
+  onStop(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnStopModifier.identity, MarqueeOnStopModifier, event);
+    return this;
+  }
   marqueeUpdateStrategy(value: MarqueeUpdateStrategy): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
     return this;
@@ -219,6 +223,20 @@ class MarqueeOnFinishModifier extends ModifierWithKey<() => void> {
       getUINativeModule().marquee.resetMarqueeOnFinish(node);
     } else {
       getUINativeModule().marquee.setMarqueeOnFinish(node, this.value);
+    }
+  }
+}
+
+class MarqueeOnStopModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeOnStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnStop(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnStop(node, this.value);
     }
   }
 }
