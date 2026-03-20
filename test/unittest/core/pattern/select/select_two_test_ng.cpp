@@ -22,7 +22,9 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "ui/resource/resource_info.h"
@@ -50,10 +52,10 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1688,5 +1690,194 @@ HWTEST_F(SelectTwoTestNg, SetDividerByUser001, TestSize.Level1)
     auto props = select->GetPaintProperty<SelectPaintProperty>();
     auto res = props->GetDividerColorSetByUser().value();
     EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: CreateWithDividerResourceObj001
+ * @tc.desc: Test CreateWithDividerResourceObj with COLOR resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, CreateWithDividerResourceObj001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    selectModelNG.CreateWithDividerResourceObj(resObj, SelectDividerResourceType::STROKE_WIDTH);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    EXPECT_EQ(pattern->GetDivider().strokeWidth.Value(), 0.0f);
+
+    std::vector<ResourceObjectParams> resParams;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), resParams, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "2");
+    selectModelNG.CreateWithDividerResourceObj(resObjWithString, SelectDividerResourceType::STROKE_WIDTH);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    auto divider = pattern->GetDivider();
+    EXPECT_NE(divider.strokeWidth.Value(), 0.0f);
+
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: CreateWithDividerResourceObj002
+ * @tc.desc: Test CreateWithDividerResourceObj with COLOR resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, CreateWithDividerResourceObj002, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    selectModelNG.CreateWithDividerResourceObj(resObj, SelectDividerResourceType::COLOR);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+
+    std::vector<ResourceObjectParams> resParams;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), resParams, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "#FF0000");
+    selectModelNG.CreateWithDividerResourceObj(resObjWithString, SelectDividerResourceType::COLOR);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    auto divider = pattern->GetDivider();
+    EXPECT_EQ(divider.color, Color::RED);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    selectModelNG.CreateWithDividerResourceObj(resObjWithString, SelectDividerResourceType::COLOR);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: CreateWithDividerResourceObj003
+ * @tc.desc: Test CreateWithDividerResourceObj with START_MARGIN resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, CreateWithDividerResourceObj003, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    selectModelNG.CreateWithDividerResourceObj(resObj, SelectDividerResourceType::START_MARGIN);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    EXPECT_EQ(pattern->GetDivider().startMargin.Value(), 0.0f);
+
+    std::vector<ResourceObjectParams> resParams;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), resParams, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "10");
+    selectModelNG.CreateWithDividerResourceObj(resObjWithString, SelectDividerResourceType::START_MARGIN);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    auto divider = pattern->GetDivider();
+    EXPECT_NE(divider.startMargin.Value(), 0.0f);
+
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: CreateWithDividerResourceObj004
+ * @tc.desc: Test CreateWithDividerResourceObj with END_MARGIN resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, CreateWithDividerResourceObj004, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    selectModelNG.CreateWithDividerResourceObj(resObj, SelectDividerResourceType::END_MARGIN);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    EXPECT_EQ(pattern->GetDivider().endMargin.Value(), 0.0f);
+
+    std::vector<ResourceObjectParams> resParams;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), resParams, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "15");
+    selectModelNG.CreateWithDividerResourceObj(resObjWithString, SelectDividerResourceType::END_MARGIN);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    auto divider = pattern->GetDivider();
+    EXPECT_NE(divider.endMargin.Value(), 0.0f);
+
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: CreateWithDividerResourceObj005
+ * @tc.desc: Test CreateWithDividerResourceObj with null ResourceObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, CreateWithDividerResourceObj005, TestSize.Level1)
+{
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    selectModelNG.CreateWithDividerResourceObj(nullptr, SelectDividerResourceType::STROKE_WIDTH);
+    auto divider = pattern->GetDivider();
+    EXPECT_EQ(divider.strokeWidth.Value(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

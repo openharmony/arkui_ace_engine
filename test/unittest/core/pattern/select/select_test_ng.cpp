@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1465,5 +1466,165 @@ HWTEST_F(SelectTestNg, SelectMaterial001, TestSize.Level1)
     selectModelInstance.SetMenuSystemMaterial(material);
     ASSERT_NE(selectPattern->GetMenuSystemMaterial(), nullptr);
     EXPECT_EQ(selectPattern->GetMenuSystemMaterial()->GetType(), type);
+}
+
+/**
+ * @tc.name: SetSpinnerColorByUser001
+ * @tc.desc: Test SelectPattern::SetSpinnerColorByUser branch behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSpinnerColorByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and get pattern/theme.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare symbol spinner node and paint property.
+     * @tc.expected: spinner_ and props are valid.
+     */
+    auto spinner = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(spinner, nullptr);
+    selectPattern->spinner_ = spinner;
+
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(spinnerLayoutProperty, nullptr);
+    spinnerLayoutProperty->UpdateSymbolColorList({ Color::RED });
+
+    auto props = AceType::MakeRefPtr<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step3. ArrowModifierSetByUser = false, call SetSpinnerColorByUser.
+     * @tc.expected: Symbol color keeps original RED.
+     */
+    props->UpdateArrowModifierSetByUser(false);
+    selectPattern->SetSpinnerColorByUser(theme, props);
+    const auto& fontStyle = spinnerLayoutProperty->GetFontStyle();
+    ASSERT_NE(fontStyle, nullptr);
+    ASSERT_TRUE(fontStyle->GetSymbolColorList().has_value());
+    ASSERT_FALSE(fontStyle->GetSymbolColorList()->empty());
+    EXPECT_EQ(fontStyle->GetSymbolColorList()->front(), Color::RED);
+
+    /**
+     * @tc.steps: step4. ArrowModifierSetByUser = true, call SetSpinnerColorByUser.
+     * @tc.expected: Symbol color is updated to theme->GetSpinnerSymbolColor().
+     */
+    props->UpdateArrowModifierSetByUser(true);
+    selectPattern->SetSpinnerColorByUser(theme, props);
+    const auto& fontStyle1 = spinnerLayoutProperty->GetFontStyle();
+    ASSERT_NE(fontStyle1, nullptr);
+    ASSERT_TRUE(fontStyle1->GetSymbolColorList().has_value());
+    ASSERT_FALSE(fontStyle1->GetSymbolColorList()->empty());
+    EXPECT_EQ(fontStyle1->GetSymbolColorList()->front(), theme->GetSpinnerSymbolColor());
+}
+
+/**
+ * @tc.name: SetSpinnerColorByUser002
+ * @tc.desc: Test SelectPattern::SetSpinnerColorByUser when props is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSpinnerColorByUser002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select and get SelectPattern/SelectTheme.
+     * @tc.expected: Pattern and theme are not null.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelNG.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare spinner node and set initial symbol color.
+     * @tc.expected: Initial symbol color is RED.
+     */
+    auto spinner = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(spinner, nullptr);
+    pattern->spinner_ = spinner;
+
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(spinnerLayoutProperty, nullptr);
+    spinnerLayoutProperty->UpdateSymbolColorList({ Color::RED });
+
+    /**
+     * @tc.steps: step3. Call SetSpinnerColorByUser with nullptr props.
+     * @tc.expected: Function returns safely and symbol color remains unchanged.
+     */
+    pattern->SetSpinnerColorByUser(theme, nullptr);
+    const auto& fontStyle = spinnerLayoutProperty->GetFontStyle();
+    ASSERT_NE(fontStyle, nullptr);
+    ASSERT_TRUE(fontStyle->GetSymbolColorList().has_value());
+    ASSERT_FALSE(fontStyle->GetSymbolColorList()->empty());
+    EXPECT_EQ(fontStyle->GetSymbolColorList()->front(), Color::RED);
+}
+
+/**
+ * @tc.name: SetMenuOutlineReloadResources001
+ * @tc.desc: Test SelectModelNG::SetMenuOutline resource reload callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetMenuOutlineReloadResources001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and get frame node/pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModel;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModel.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set menu outline with outlineColor/outlineWidth.
+     * @tc.expected: SetMenuOutline runs normally.
+     */
+    MenuParam menuParam;
+    menuParam.outlineColor = BorderColorProperty();
+    menuParam.outlineWidth = BorderWidthProperty();
+    g_isConfigChangePerform = false;
+    EXPECT_NO_FATAL_FAILURE(selectModel.SetMenuOutline(frameNode, menuParam));
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_EQ(resMgr, nullptr);
+
+    /**
+     * @tc.steps: step3. Trigger resource reload callback.
+     * @tc.expected: Callback executes without crash.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_NO_FATAL_FAILURE(selectModel.SetMenuOutline(frameNode, menuParam));
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    EXPECT_NO_FATAL_FAILURE(resMgr->ReloadResources());
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
