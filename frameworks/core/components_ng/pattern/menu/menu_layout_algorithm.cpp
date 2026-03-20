@@ -2616,6 +2616,10 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     CHECK_NULL_VOID(pipelineContext);
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto layoutProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutProp);
+    CHECK_NULL_VOID(menuLayoutProps);
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxSpaceHeight_.value_or(maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR);
@@ -2625,13 +2629,13 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
-            auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value_or(0.0f);
             if (LessNotEqual(selectModifiedHeight, maxSpaceHeight)) {
                 maxSpaceHeight = selectModifiedHeight;
             }
         }
     }
+    UpdateMaxSpaceHeightByMenuMaxHeight(menuPattern, menuLayoutProps, maxAvailableHeight, maxSpaceHeight);
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 
@@ -2681,6 +2685,20 @@ void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrap
         }
     }
     constraint.maxSize.SetHeight(maxSpaceHeight);
+}
+
+void MenuLayoutAlgorithm::UpdateMaxSpaceHeightByMenuMaxHeight(const RefPtr<MenuPattern>& menuPattern,
+    const RefPtr<MenuLayoutProperty>& menuLayoutProps, float maxAvailableHeight, float& maxSpaceHeight)
+{
+    if (menuPattern->GetPreviewMode() == MenuPreviewMode::NONE && menuLayoutProps->HasMenuMaxHeight()) {
+        auto menuMaxHeight = menuLayoutProps->GetMenuMaxHeightValue();
+        auto menuMaxHeightPx = (menuMaxHeight.Unit() == DimensionUnit::PERCENT)
+            ? static_cast<float>(menuMaxHeight.Value() * maxAvailableHeight)
+            : static_cast<float>(menuMaxHeight.ConvertToPx());
+        if (GreatNotEqual(menuMaxHeightPx, 0.0f)) {
+            maxSpaceHeight = std::min(maxAvailableHeight, menuMaxHeightPx);
+        }
+    }
 }
 
 float MenuLayoutAlgorithm::GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern)

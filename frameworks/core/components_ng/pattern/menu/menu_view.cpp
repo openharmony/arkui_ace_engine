@@ -1605,6 +1605,9 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
         menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
     }
     menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+    if (menuParam.maxHeight.has_value()) {
+        menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+    }
     if (menuParam.anchorPosition.has_value()) {
         menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
         if (menuParam.previewMode != MenuPreviewMode::NONE) {
@@ -1641,6 +1644,9 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        if (menuParam.maxHeight.has_value()) {
+            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+        }
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
             if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {

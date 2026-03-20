@@ -1592,6 +1592,17 @@ void JSViewPopups::ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
+void JSViewPopups::ParseMenuMaxHeight(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto maxHeightProperty = menuOptions->GetProperty("maxHeight");
+    if (maxHeightProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(maxHeightProperty, value) && value.IsNonNegative()) {
+            menuParam.maxHeight = value;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1635,6 +1646,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
+    JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(
