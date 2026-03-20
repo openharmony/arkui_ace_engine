@@ -9166,15 +9166,28 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     if (!arg->IsFunction()) {
         return;
     }
-    RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(arg));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnKeyEventFunc = JSRef<JSFunc>::Cast(arg);
+    if (jsOnKeyEventFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnKeyFuncLocalHandle = jsOnKeyEventFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [vm, execCtx = args.GetExecutionContext(),
+                          func = panda::CopyableGlobal(vm, jsOnKeyFuncLocalHandle),
+                          node = frameNode](KeyEventInfo& info) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        auto ret = func->ExecuteWithValue(info);
-        return ret->IsBoolean() ? ret->ToBoolean() : false;
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -9945,11 +9958,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onAxisEvent", &JSViewAbstract::JsOnAxisEvent);
-    JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
-    JSClass<JSViewAbstract>::StaticMethod("onHoverMove", &JSViewAbstract::JsOnHoverMove);
+    JSClass<JSViewAbstract>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSViewAbstract>::StaticMethod("onHoverMove", &JSInteractableView::JsOnHoverMove);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
     JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
-    JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
     JSClass<JSViewAbstract>::StaticMethod(
@@ -11309,50 +11322,6 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
 }
 
-void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        ViewAbstractModel::GetInstance()->DisableOnHover();
-        return;
-    }
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc), node = frameNode](
-                       bool isHover, HoverInfo& hoverInfo) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onHover");
-        PipelineContext::SetCallBackNode(node);
-        func->HoverExecute(isHover, hoverInfo);
-    };
-    ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
-}
-
-void JSViewAbstract::JsOnHoverMove(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-        ViewAbstractModel::GetInstance()->DisableOnHoverMove();
-        return;
-    }
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    RefPtr<JsHoverFunction> jsOnHoverMoveFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHoverMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverMoveFunc), node = frameNode](
-                       HoverInfo& hoverInfo) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onHoverMove");
-        PipelineContext::SetCallBackNode(node);
-        func->HoverMoveExecute(hoverInfo);
-    };
-    ViewAbstractModel::GetInstance()->SetOnHoverMove(std::move(onHoverMove));
-}
-
 void JSViewAbstract::JsOnAccessibilityHover(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
@@ -11373,53 +11342,6 @@ void JSViewAbstract::JsOnAccessibilityHover(const JSCallbackInfo& info)
         func->AccessibilityHoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityHover(std::move(onAccessibilityHover));
-}
-
-void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
-{
-    auto arg = info[0];
-    if (arg->IsUndefined() && IsDisableEventVersion()) {
-        ViewAbstractModel::GetInstance()->DisableOnClick();
-        return;
-    }
-    if (!arg->IsFunction()) {
-        return;
-    }
-
-    auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(arg));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTap = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), node = targetNode](
-                     BaseEventInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto* tapInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-        ACE_SCORING_EVENT("onClick");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*tapInfo);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        JSInteractableView::ReportClickEvent(node);
-#endif
-    };
-    auto tmpOnTap = [func = std::move(onTap)](GestureEvent& info) { func(&info); };
-    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
-                       const ClickInfo* info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onClick");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(*info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        JSInteractableView::ReportClickEvent(node);
-#endif
-    };
-
-    Dimension distanceThreshold = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-    if (info.Length() > 1 && info[1]->IsNumber()) {
-        double jsDistanceThreshold = info[1]->ToNumber<double>();
-        if (jsDistanceThreshold < 0) {
-            distanceThreshold = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-        }
-        distanceThreshold = Dimension(jsDistanceThreshold, DimensionUnit::VP);
-    }
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
@@ -11868,10 +11790,14 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onFocusAxis");
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new NG::FocusAxisEventInfo(info);
+        auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
-        ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_end type:%d", info.GetAction());
+        ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_end type:%d", infoPtr->GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
 }

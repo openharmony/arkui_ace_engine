@@ -17,96 +17,35 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
-void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
+void JsHoverFunction::HoverExecute(EcmaVM* vm, bool isHover, HoverInfo& hoverInfo)
 {
     JSRef<JSVal> isHoverParam = JSRef<JSVal>::Make(ToJSValue(isHover));
 
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> hoverObj = objectTemplate->NewInstance();
-    hoverObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
-    hoverObj->SetPropertyObject(
-        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    hoverObj->SetProperty<double>(
-        "timestamp", static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count()));
-    hoverObj->SetProperty<double>("source", static_cast<int32_t>(hoverInfo.GetSourceDevice()));
-    auto target = CreateEventTargetObject(hoverInfo);
-    hoverObj->SetPropertyObject("target", target);
-    hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
-    hoverObj->SetProperty<double>("axisVertical", 0.0f);
-    hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
-    hoverObj->SetProperty<double>("axisPinch", 0.0f);
-    hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
-    hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
-    hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
-    hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
-    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
-    hoverObj->SetProperty<int32_t>("pressure", 0.0f);
-    const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
-    const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
-    const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
-    const OHOS::Ace::Offset& globalDisplayLocation = hoverInfo.GetGlobalDisplayLocation();
-    hoverObj->SetProperty<double>(
-        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
-    hoverObj->SetProperty<double>(
-        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
-    hoverObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
-    hoverObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
-    hoverObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
-    hoverObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
-    hoverObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
-    hoverObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
-    hoverObj->Wrap<HoverInfo>(&hoverInfo);
-    JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new HoverInfo(hoverInfo);
+    auto hoverObj = NG::CommonBridge::CreateHoverInfo(vm, infoPtr);
+    JSRef<JSVal> hoverVal = JSRef<JSVal>::Make(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };
     ACE_BENCH_MARK_TRACE("OnHoverEvent_end isHover:%d", isHover);
     JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
+    hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
 }
 
-void JsHoverFunction::HoverMoveExecute(HoverInfo& hoverInfo)
+void JsHoverFunction::HoverMoveExecute(EcmaVM* vm, HoverInfo& hoverInfo)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> hoverObj = objectTemplate->NewInstance();
-    hoverObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
-    hoverObj->SetPropertyObject(
-        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    hoverObj->SetProperty<double>(
-        "timestamp", static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count()));
-    hoverObj->SetProperty<double>("source", static_cast<int32_t>(hoverInfo.GetSourceDevice()));
-    auto target = CreateEventTargetObject(hoverInfo);
-    hoverObj->SetPropertyObject("target", target);
-    hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
-    hoverObj->SetProperty<double>("axisVertical", 0.0f);
-    hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
-    hoverObj->SetProperty<double>("axisPinch", 0.0f);
-    hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
-    hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
-    hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
-    hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
-    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
-    hoverObj->SetProperty<int32_t>("pressure", 0.0f);
-    const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
-    const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
-    const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
-    const OHOS::Ace::Offset& globalDisplayLocation = hoverInfo.GetGlobalDisplayLocation();
-    hoverObj->SetProperty<double>(
-        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
-    hoverObj->SetProperty<double>(
-        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
-    hoverObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
-    hoverObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
-    hoverObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
-    hoverObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
-    hoverObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
-    hoverObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
-    hoverObj->Wrap<HoverInfo>(&hoverInfo);
-    JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new HoverInfo(hoverInfo);
+    auto hoverObj = NG::CommonBridge::CreateHoverInfo(vm, infoPtr);
+    JSRef<JSVal> hoverVal = JSRef<JSVal>::Make(hoverObj);
     JSRef<JSVal> params[] = { hoverVal };
     JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
+    hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
 }
 
 void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHoverInfo& hoverInfo)

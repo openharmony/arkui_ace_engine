@@ -718,13 +718,15 @@ ArkUINativeModuleValue SpanBridge::SetOnHover(ArkUIRuntimeCallInfo *runtimeCallI
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
-            auto obj = FrameNodeBridge::CreateHoverInfo(vm, info);
-            obj->SetNativePointerFieldCount(vm, 1);
-            obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+            // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+            // It is not allowed to hold this address elsewhere.
+            auto infoPtr = new HoverInfo(info);
+            auto obj = FrameNodeBridge::CreateHoverInfo(vm, infoPtr);
 
             panda::Local<panda::JSValueRef> params[NUM_2] = {
                 panda::BooleanRef::New(vm, isHover), obj };
             func->Call(vm, func.ToLocal(), params, NUM_2);
+            info.SetStopPropagation(infoPtr->IsStopPropagation());
         };
         GetArkUINodeModifiers()->getSpanModifier()->setSpanOnHover(nativeNode, reinterpret_cast<void*>(&callback));
     } else {
