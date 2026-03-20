@@ -206,7 +206,7 @@ void ContentModifierCheckBoxGroupImpl(
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {
             auto elementRegister = ElementRegister::GetInstance();
-            CHECK_NULL_VOID(elementRegister);
+            CHECK_NULL_RETURN(elementRegister, nullptr);
             boxNode = CommonViewModelNG::CreateFrameNode(elementRegister->MakeUniqueId());
             GeneratedApiImpl::SetContentNode(node, boxNode);
         }
