@@ -13,13 +13,9 @@
  * limitations under the License.
  */
 
-{
-  "app": {
-    "bundleName": "com.example.virualBlur",
-    "vendor": "example",
-    "versionCode": 1000000,
-    "versionName": "1.0.0",
-    "icon": "$media:app_icon",
-    "label": "$string:app_name"
-  }
+import { hapTasks } from '@ohos/hvigor-ohos-plugin';
+
+export default {
+    system: hapTasks,  /* Built-in plugin of Hvigor. It cannot be modified. */
+    plugins:[]         /* Custom plugin to extend the functionality of Hvigor. */
 }
