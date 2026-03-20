@@ -49,6 +49,10 @@
       "value": "SideSheet通过宽度回调挤压页面"
     },
     {
+      "name": "simpleSheet",
+      "value": "半模态基础样例"
+    },
+    {
       "name": "MaxHeight1",
       "value": "半模态最大高度"
     },
@@ -103,6 +107,42 @@
     {
       "name": "AccessibilityModal",
       "value": "无障碍信息中携带模态状态信息"
-    }
+    },
+    {
+      "name": "Example1",
+      "value": "不同高度的半模态弹窗"
+    },
+    {
+      "name": "Example2",
+      "value": "设置三个不同高度的挡位"
+    },
+    {
+      "name": "Example3",
+      "value": "使用边框宽度和颜色"
+    },
+    {
+      "name": "Example4",
+      "value": "使用关闭回调函数"
+    },
+    {
+      "name": "Example5",
+      "value": "设置内容区刷新时机"
+    },
+    {
+      "name": "Example6",
+      "value": "设置压缩模态内容"
+    },
+    {
+      "name": "Example7",
+      "value": "镜像场景下如何设置圆角属性"
+    },
+    {
+      "name": "Example8",
+      "value": "半模态Side侧边样式"
+    },
+    {
+      "name": "Example9",
+      "value": "半模态ContentCover全屏样式"
+     }
   ]
 }

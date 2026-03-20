@@ -1,0 +1,44 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "bindContentCover",
+      "value": "全模态基础样例"
+    },
+    {
+      "name": "Example1",
+      "value": "使用全屏模态转场"
+    },
+    {
+      "name": "Example2",
+      "value": "自定义转场动画"
+    },
+    {
+      "name": "Example3",
+      "value": "上下切换转场"
+    },
+    {
+      "name": "Example4",
+      "value": "透明度渐变转场"
+    },
+    {
+      "name": "Example5",
+      "value": "设置不同效果的自定义转场"
+    },
+    {
+      "name": "Example6",
+      "value": "设置全模态适配安全区"
+    }
+  ]
+}

@@ -12,14 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { router } from '@kit.ArkUI';
 
-{
-  "app": {
-    "bundleName": "com.example.virualBlur",
-    "vendor": "example",
-    "versionCode": 1000000,
-    "versionName": "1.0.0",
-    "icon": "$media:app_icon",
-    "label": "$string:app_name"
+@Entry
+@Component
+struct Index {
+
+  build() {
+    Row(){
+      Column(){
+        Button($r('app.string.bindContentCover'))
+          .width('100%').fontSize('20vp')
+          .margin({ bottom: 15})
+          .onClick(()=>{ router.pushUrl({url: 'pages/simpleExample/Index'}) })
+      }
+      .width('100%')
+    }
+    .height('100%')
   }
 }
