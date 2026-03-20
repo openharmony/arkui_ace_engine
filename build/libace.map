@@ -1004,6 +1004,7 @@
       "OHOS::Ace::NG::DatePickerPattern::GetFormatString(OHOS::Ace::PickerDateF)";
       "OHOS::Ace::NG::DialogManager::GetMainPipelineContext(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::NG::DialogView::IsSupportBlurStyle(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::DividerPainter::DrawLine(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&) const";
       "OHOS::Ace::NG::DragAnimationHelper::ShowGatherAnimationWithMenu(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::DragAnimationHelper::UpdateGatherNodeToTop()";

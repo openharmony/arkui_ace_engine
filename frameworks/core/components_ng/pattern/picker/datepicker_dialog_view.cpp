@@ -119,6 +119,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         dateNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
     }
     pickerPattern->SetIsShowInDialog(true);
+    pickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
