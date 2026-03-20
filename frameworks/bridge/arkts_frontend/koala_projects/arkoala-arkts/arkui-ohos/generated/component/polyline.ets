@@ -36,7 +36,7 @@ import { PolylineModifier } from './../PolylineModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
-    attributeSet?: PolylineModifier;
+    polylineAttributeSet?: PolylineModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

@@ -345,7 +345,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
-    attributeSet?: RichEditorModifier;
+    richEditorAttributeSet?: RichEditorModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

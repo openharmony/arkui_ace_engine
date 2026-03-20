@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkUIExtensionComponentPeerBase } from "./uiExtensionComponent"
 import { ArkUIAniUiextensionModal, UiextensionType } from "arkui.ani"
 export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
-    attributeSet?: EmbeddedComponentModifier;
+    embeddedComponentAttributeSet?: EmbeddedComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

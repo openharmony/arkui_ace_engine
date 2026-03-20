@@ -35,7 +35,7 @@ import { FolderStackModifier } from './../FolderStackModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
-    attributeSet?: FolderStackModifier;
+    folderStackAttributeSet?: FolderStackModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

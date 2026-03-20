@@ -33,7 +33,7 @@ import { GridItemModifier } from './../GridItemModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkGridItemPeer extends ArkCommonMethodPeer {
-    attributeSet?: GridItemModifier;
+    gridItemAttributeSet?: GridItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

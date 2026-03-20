@@ -2677,7 +2677,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
     }
 }
 export class ArkCommonMethodPeer extends PeerNode {
-    attributeSet?: CommonMethodModifier;
+    commonMethodAttributeSet?: CommonMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6306,7 +6306,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     }
 }
 export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
-    attributeSet?: CommonShapeMethodModifier;
+    commonShapeMethodAttributeSet?: CommonShapeMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6554,7 +6554,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
-    attributeSet?: ScrollableCommonMethodModifier;
+    scrollableCommonMethodAttributeSet?: ScrollableCommonMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

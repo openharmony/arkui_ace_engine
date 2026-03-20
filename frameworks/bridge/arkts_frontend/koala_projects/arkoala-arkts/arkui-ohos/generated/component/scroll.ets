@@ -269,7 +269,7 @@ export class Scroller implements MaterializedBase {
     }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
-    attributeSet?: ScrollModifier;
+    scrollAttributeSet?: ScrollModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

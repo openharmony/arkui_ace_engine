@@ -37,7 +37,7 @@ import { CheckboxModifier } from './../CheckboxModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkCheckboxPeer extends ArkCommonMethodPeer {
-    attributeSet?: CheckboxModifier;
+    checkboxAttributeSet?: CheckboxModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

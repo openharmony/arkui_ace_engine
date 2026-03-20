@@ -204,7 +204,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     }
 }
 export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
-    attributeSet?: NavDestinationModifier;
+    navDestinationAttributeSet?: NavDestinationModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

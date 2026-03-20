@@ -39,7 +39,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ArkBadgePeer extends ArkCommonMethodPeer {
-    attributeSet?: BadgeModifier;
+    badgeAttributeSet?: BadgeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

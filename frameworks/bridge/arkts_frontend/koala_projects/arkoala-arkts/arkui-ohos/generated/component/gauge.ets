@@ -38,7 +38,7 @@ import { GaugeModifier } from './../GaugeModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkGaugePeer extends ArkCommonMethodPeer {
-    attributeSet?: GaugeModifier;
+    gaugeAttributeSet?: GaugeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

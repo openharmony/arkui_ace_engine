@@ -38,7 +38,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
-    attributeSet?: SideBarContainerModifier;
+    sideBarContainerAttributeSet?: SideBarContainerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

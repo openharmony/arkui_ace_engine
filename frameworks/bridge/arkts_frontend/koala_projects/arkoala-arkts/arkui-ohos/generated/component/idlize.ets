@@ -6621,7 +6621,7 @@ export class XComponentControllerExtender {
     }
 }
 export class ArkRootPeer extends PeerNode {
-    attributeSet?: RootModifier;
+    rootAttributeSet?: RootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6634,7 +6634,7 @@ export class ArkRootPeer extends PeerNode {
     }
 }
 export class ArkComponentRootPeer extends PeerNode {
-    attributeSet?: ComponentRootModifier;
+    componentRootAttributeSet?: ComponentRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6647,7 +6647,7 @@ export class ArkComponentRootPeer extends PeerNode {
     }
 }
 export class ArkCustomBuilderRootPeer extends PeerNode {
-    attributeSet?: CustomBuilderRootModifier;
+    customBuilderRootAttributeSet?: CustomBuilderRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6660,7 +6660,7 @@ export class ArkCustomBuilderRootPeer extends PeerNode {
     }
 }
 export class ArkCustomLayoutRootPeer extends PeerNode {
-    attributeSet?: CustomLayoutRootModifier;
+    customLayoutRootAttributeSet?: CustomLayoutRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

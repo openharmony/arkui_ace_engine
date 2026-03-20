@@ -186,7 +186,7 @@ export class TabsController implements MaterializedBase {
     }
 }
 export class ArkTabsPeer extends ArkCommonMethodPeer {
-    attributeSet?: TabsModifier;
+    tabsAttributeSet?: TabsModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
