@@ -564,7 +564,12 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;
-    return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
+    auto backEvent = navDestination->GetNavDestinationBackButtonEvent();
+    if (backEvent) {
+        return backEvent(gestureEvent);
+    }
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "backEvent is null");
+    return false;
 }
 
 bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
@@ -1671,7 +1676,8 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
 
 void NavigationGroupNode::RemoveDialogDestination(bool isReplace, bool isTriggerByInteractiveCancel)
 {
-    for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
+    auto tempNodes = hideNodes_;
+    for (auto iter = tempNodes.begin(); iter != tempNodes.end(); iter++) {
         auto navDestination = iter->first;
         if (!navDestination) {
             continue;
