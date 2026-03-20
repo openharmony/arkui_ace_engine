@@ -42,6 +42,8 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,7 +73,13 @@ constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
-constexpr uint32_t MIN_YEAR = 1;
+constexpr int32_t MIN_HOUR = 0;
+constexpr int32_t MAX_HOUR = 23;
+constexpr int32_t MIN_MINUTE = 0;
+constexpr int32_t MAX_MINUTE = 59;
+constexpr int32_t MIN_SECOND = 0;
+constexpr int32_t MAX_SECOND = 59;
+constexpr int32_t MIN_YEAR = 1;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -1230,23 +1238,52 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
     return true;
 }
 
+bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+
+    if (!dataJson->Contains("year") || !dataJson->Contains("month") || !dataJson->Contains("day") ||
+        !dataJson->Contains("hour") || !dataJson->Contains("minute")) {
+        return false;
+    }
+
+    auto params = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
+    params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1));
+    params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
+    params->Put("hour", static_cast<int32_t>(dataJson->GetUInt("hour")));
+    params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
+    params->Put("second", 0);
+
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
 bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-    if (GetIsShowInDialog()) {
-        return false;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+
+    if (GetIsShowInDialog()) {
+        return false;
+    } else  {
+        return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+    }
 }
 
 void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        ReportDateChangeEvent(host->GetId(), "DatePicker", "onDateChange", GetSelectedObject(true));
+        ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);
@@ -3401,6 +3438,72 @@ bool DatePickerPattern::IsNotSetStartEndDate()
 }
 int32_t DatePickerPattern::OnInjectionEvent(const std::string& command)
 {
+    if (GetIsShowInDialog()) {
+        return OnDialogDateInjection(command);
+    } else {
+        return OnDateInjection(command);
+    }
+}
+
+bool DatePickerPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
+}
+
+bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
+    const std::string& result, const std::string& reason)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    value->Put("result", result.c_str());
+    if (!reason.empty()) {
+        value->Put("reason", reason.c_str());
+    }
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
+bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>& paramJson,
+    int32_t& year, int32_t& month, int32_t& day)
+{
+    if (!paramJson->Contains("year") || !paramJson->Contains("month") ||
+        !paramJson->Contains("day")) {
+        return false;
+    }
+    auto yearValue = paramJson->GetValue("year");
+    auto monthValue = paramJson->GetValue("month");
+    auto dayValue = paramJson->GetValue("day");
+    if ((yearValue && monthValue && dayValue) &&
+        (yearValue->IsNumber() && monthValue->IsNumber() && dayValue->IsNumber())) {
+        year = yearValue->GetInt();
+        month = monthValue->GetInt();
+        day = dayValue->GetInt();
+        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
+            day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
+            return false;
+        }
+        PickerDate inputDate(year, month, day);
+        if (DatePickerPattern::SolarDateCompare(inputDate, startDateSolar_) < 0 ||
+            DatePickerPattern::SolarDateCompare(inputDate, endDateSolar_) > 0) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+int32_t DatePickerPattern::OnDateInjection(const std::string& command)
+{
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
 
@@ -3451,60 +3554,187 @@ int32_t DatePickerPattern::OnInjectionEvent(const std::string& command)
     return RET_SUCCESS;
 }
 
-bool DatePickerPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+int32_t DatePickerPattern::OnDialogDateInjection(const std::string& command)
 {
-    CHECK_NULL_RETURN(json, false);
-    return json->IsValid();
-}
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
 
-bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
-{
-    CHECK_NULL_RETURN(json, false);
-    return json->IsObject();
-}
-
-bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
-    const std::string& result, const std::string& reason)
-{
-    auto value = InspectorJsonUtil::Create();
-    CHECK_NULL_RETURN(value, false);
-    value->Put("event", event.c_str());
-    value->Put("result", result.c_str());
-    if (!reason.empty()) {
-        value->Put("reason", reason.c_str());
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    if (!pickerProperty) {
+        auto errorMsg = std::string("pickerProperty Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg);
+        return RET_FAILED;
     }
-    
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
-        ComponentEventType::COMPONENT_EVENT_PICKER);
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg1);
+        return RET_FAILED;
+    }
+
+    std::string cmd = json->GetString("cmd");
+    if (cmd != "setDatePickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg2);
+        return RET_FAILED;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!CheckDialogParamValue(paramJson, command) || !CheckDialogParamDataValid(paramJson, command)) {
+        auto errorMsg3 = std::string("invalidParams Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg3);
+        return RET_FAILED;
+    }
+
+    ReportCommandResult(host->GetId(), "datePickerDialog", "success", "");
+    int32_t year = paramJson->GetInt("year");
+    int32_t month = paramJson->GetInt("month");
+    int32_t day = paramJson->GetInt("day");
+    int32_t hour = paramJson->GetInt("hour");
+    int32_t minute = paramJson->GetInt("minute");
+    int32_t second = paramJson->GetInt("second");
+    SetDatePickerDialogTime(hour, minute, second);
+    SetDatePickerDialogDate(year, month, day);
+
+    PickerDate targetDate(year, month, day);
+    SetSelectDate(targetDate);
+    pickerProperty->UpdateSelectedDate(GetSelectDate());
+
+    if (showMonthDays_) {
+        FlushMonthDaysColumn();
+    } else {
+        FlushColumn();
+    }
+    ShowTitle(GetTitleId());
+    FireChangeEvent(true);
+    return RET_SUCCESS;
+}
+
+void DatePickerPattern::SetDatePickerDialogTime(int32_t hour, int32_t minute, int32_t second)
+{
+    if (!showTime_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RefPtr<UINode> pickerRow = nullptr;
+    if (showMonthDays_) {
+        pickerRow = host->GetParent();
+        CHECK_NULL_VOID(pickerRow);
+    } else {
+        auto pickerStack = host->GetParent();
+        CHECK_NULL_VOID(pickerStack);
+        pickerRow = pickerStack->GetLastChild();
+        CHECK_NULL_VOID(pickerRow);
+    }
+
+    if (pickerRow->GetChildren().size() <= 1) {
+        return;
+    }
+    RefPtr<FrameNode> timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
+
+    CHECK_NULL_VOID(timeNode);
+
+    auto* modifier = NG::NodeModifier::GetTimepickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+
+    PickerTime selectedTime;
+    selectedTime.SetHour(hour);
+    selectedTime.SetMinute(minute);
+    selectedTime.SetSecond(second);
+
+    modifier->setSelectedTime(timeNode, selectedTime);
+    timeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    timeNode->MarkModifyDone();
+}
+
+void DatePickerPattern::SetDatePickerDialogDate(int32_t year, int32_t month, int32_t day)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RefPtr<UINode> pickerRow = nullptr;
+    if (showMonthDays_) {
+        pickerRow = host->GetParent();
+        CHECK_NULL_VOID(pickerRow);
+    } else {
+        auto pickerStack = host->GetParent();
+        CHECK_NULL_VOID(pickerStack);
+        pickerRow = pickerStack->GetLastChild();
+        CHECK_NULL_VOID(pickerRow);
+    }
+
+    if (pickerRow->GetChildren().size() <= 0) {
+        return;
+    }
+    RefPtr<FrameNode> dateNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(0));
+
+    CHECK_NULL_VOID(dateNode);
+
+    PickerDate targetDate(year, month, day);
+    SetSelectDate(targetDate);
+    auto pickerProperty = dateNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateSelectedDate(GetSelectDate());
+    dateNode->MarkModifyDone();
+}
+
+bool DatePickerPattern::CheckDialogParamValue(const std::unique_ptr<JsonValue>& paramJson,
+    const std::string& command)
+{
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        return false;
+    }
+
+    if (!paramJson->Contains("year") || !paramJson->Contains("month") || !paramJson->Contains("day")
+        || !paramJson->Contains("hour") || !paramJson->Contains("minute") || !paramJson->Contains("second")) {
+        return false;
+    }
+
+    if (!paramJson->GetValue("year")->IsNumber() || !paramJson->GetValue("month")->IsNumber() ||
+        !paramJson->GetValue("day")->IsNumber() || !paramJson->GetValue("hour")->IsNumber() ||
+        !paramJson->GetValue("minute")->IsNumber() || !paramJson->GetValue("second")->IsNumber()) {
+        return false;
+    }
     return true;
 }
 
-bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>& paramJson,
-    int32_t& year, int32_t& month, int32_t& day)
+bool DatePickerPattern::CheckDialogParamDataValid(const std::unique_ptr<JsonValue>& paramJson,
+    const std::string& command)
 {
-    if (!paramJson->Contains("year") || !paramJson->Contains("month") ||
-        !paramJson->Contains("day")) {
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
         return false;
     }
-    auto yearValue = paramJson->GetValue("year");
-    auto monthValue = paramJson->GetValue("month");
-    auto dayValue = paramJson->GetValue("day");
-    if ((yearValue && monthValue && dayValue) &&
-        (yearValue->IsNumber() && monthValue->IsNumber() && dayValue->IsNumber())) {
-        year = yearValue->GetInt();
-        month = monthValue->GetInt();
-        day = dayValue->GetInt();
-        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
-            day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
-            return false;
-        }
-        PickerDate inputDate(year, month, day);
-        if (DatePickerPattern::SolarDateCompare(inputDate, startDateSolar_) < 0 ||
-            DatePickerPattern::SolarDateCompare(inputDate, endDateSolar_) > 0) {
-            return false;
-        }
-        return true;
+
+    int32_t year = paramJson->GetInt("year", -1);
+    int32_t month = paramJson->GetInt("month", -1);
+    int32_t day = paramJson->GetInt("day", -1);
+    int32_t hour = paramJson->GetInt("hour", -1);
+    int32_t minute = paramJson->GetInt("minute", -1);
+    int32_t second = paramJson->GetInt("second", -1);
+    if (year < MIN_YEAR || month < static_cast<int32_t>(MIN_MONTH) ||
+        month > static_cast<int32_t>(MAX_MONTH) || day < static_cast<int32_t>(MIN_DAY)) {
+        return false;
     }
-    return false;
+
+    uint32_t maxDay = PickerDate::GetMaxDay(year, month);
+    if (day > static_cast<int32_t>(maxDay)) {
+        return false;
+    }
+
+    if (hour < MIN_HOUR || hour > MAX_HOUR || minute < MIN_MINUTE || minute > MAX_MINUTE ||
+        second < MIN_SECOND || second > MAX_SECOND) {
+        return false;
+    }
+
+    PickerDate inputDate(year, month, day);
+    if (!(DatePickerPattern::SolarDateCompare(inputDate, startDateSolar_) >= 0 &&
+        DatePickerPattern::SolarDateCompare(inputDate, endDateSolar_) <= 0)) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

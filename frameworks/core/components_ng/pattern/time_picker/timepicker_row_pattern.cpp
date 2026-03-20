@@ -2545,27 +2545,29 @@ int32_t TimePickerRowPattern::OnInjectionEvent(const std::string& command)
     CHECK_NULL_RETURN(host, RET_FAILED);
 
     auto json = JsonUtil::ParseJsonString(command);
-    if (!IsJsonValid(json)) {
-        auto errorMsg = std::string("invalidCommand: ") + command;
-        ReportCommandResult(host->GetId(), "", "fail", errorMsg);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), "", "fail", errorMsg1);
         return RET_FAILED;
     }
-    if (!IsJsonObject(json)) {
-        auto errorMsg = std::string("invalidCommand: ") + command;
-        ReportCommandResult(host->GetId(), "", "fail", errorMsg);
+
+    auto cmd = json->GetString("cmd");
+    if (cmd != "setTimePickerTime" && cmd != "setTimePickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg2);
         return RET_FAILED;
     }
-    std::string cmd = json->GetString("cmd");
-    if (cmd != "setTimePickerTime") {
-        auto errorMsg = std::string("invalidCommand: ") + command;
-        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+    if ((cmd == "setTimePickerTime" && GetIsShowInDialog())
+     || (cmd == "setTimePickerDialogTime" && !GetIsShowInDialog())) {
+        auto errorMsg3 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg3);
         return RET_FAILED;
     }
 
     auto paramJson = json->GetValue("params");
     if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
-        auto errorMsg = std::string("invalidParams: ") + command;
-        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        auto errorMsg4 = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg4);
         return RET_FAILED;
     }
 
@@ -2648,7 +2650,15 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
     auto value = InspectorJsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
 
-    value->Put("TimePicker", "onTimeChange");
+    if (GetIsShowInDialog()) {
+        if (isInDatePickerDialog_) {
+            return false;
+        }
+
+        value->Put("TimePickerDialog", "onTimeChange");
+    } else {
+        value->Put("TimePicker", "onTimeChange");
+    }
     value->Put("params", params);
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
@@ -2666,7 +2676,7 @@ bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string
     if (!reason.empty()) {
         value->Put("reason", reason.c_str());
     }
-    
+
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
