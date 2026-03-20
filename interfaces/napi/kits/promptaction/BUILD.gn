@@ -70,7 +70,7 @@ template("napi_promptaction_static") {
     ]
 
     if (!is_arkui_x) {
-      deps = [ "$ace_root/frameworks/core:ace_container_scope" ]
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
     }
     external_deps = []
     if (platform != "" && is_arkui_x) {
