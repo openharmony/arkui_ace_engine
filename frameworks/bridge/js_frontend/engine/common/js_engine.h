@@ -572,17 +572,18 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
-        if (iter == drawChildrenEvents_.end() && iterWithParameter == drawChildrenWithParameterEvents_.end()) {
-            return false;
-        }
-        for (const auto& f : iter->second) {
-            if (f && f->HasCallback()) {
-                return true;
+        if (iter != drawChildrenEvents_.end()) {
+            for (const auto& f : iter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
             }
         }
-        for (const auto& f : iterWithParameter->second) {
-            if (f && f->HasCallback()) {
-                return true;
+        if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
+            for (const auto& f : iterWithParameter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
             }
         }
         return false;
