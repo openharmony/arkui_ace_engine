@@ -27,7 +27,6 @@
 #include "core/common/udmf/data_load_params.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
-#include "jsnapi.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #include "interaction_manager.h"
@@ -42,13 +41,10 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -56,6 +52,11 @@
 #include "frameworks/core/event/pointer_event.h"
 #include "drag_preview.h"
 #endif
+
+namespace OHOS::Ace {
+class AceEngine;
+}
+
 namespace OHOS::Ace::Napi {
 class DragAction;
 static constexpr uint32_t DRAG_STARTED = 0;
