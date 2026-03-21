@@ -22,7 +22,7 @@ import { int32, int64, float32 } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ArkCommonMethodPeer, CommonMethod, OnVisibleIndexesChangeCallback, ArkCommonMethodComponent } from './common'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { initializers, AttributeModifier, hookLazyGridLayoutAttributeAttributeModifier, AttributeUpdater, hookLazyVGridLayoutAttributeModifier } from '#handwritten'
@@ -76,6 +76,18 @@ export class ArkLazyGridLayoutAttributePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setColumnsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnVisibleIndexesChangeAttribute(callback_: OnVisibleIndexesChangeCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setOnVisibleIndexesChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class ArkLazyVGridLayoutPeer extends ArkLazyGridLayoutAttributePeer {
     attributeSet?: LazyVGridLayoutModifier;
@@ -112,6 +124,9 @@ export interface LazyGridLayoutAttribute extends CommonMethod {
     }
     columnsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
         throw new Error('Unimplemented method columnsGap')
+    }
+    onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
+        throw new Error('Unimplemented method onVisibleIndexesChange')
     }
     attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -169,6 +184,11 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
     public columnsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
         this.getPeer()?.setColumnsTemplateAttribute(value_casted)
+        return this
+    }
+    public onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
+        const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
+        this.getPeer()?.setOnVisibleIndexesChangeAttribute(callback__casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {

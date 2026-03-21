@@ -3610,6 +3610,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_String* value)
     {
     }
+    void SetOnVisibleIndexesChangeImpl(Ark_NativePointer node,
+                                       const OnVisibleIndexesChangeCallback* value)
+    {
+    }
     } // LazyVGridLayoutAttributeModifier
     namespace LineModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -9573,6 +9577,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LazyVGridLayoutModifier::ConstructImpl,
             LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
             LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
+            LazyVGridLayoutAttributeModifier::SetOnVisibleIndexesChangeImpl,
         };
         return &ArkUILazyVGridLayoutModifierImpl;
     }

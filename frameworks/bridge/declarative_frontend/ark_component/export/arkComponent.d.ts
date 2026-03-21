@@ -2183,6 +2183,7 @@ declare class ArkContainerSpanComponent extends ArkComponent implements Containe
 declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     columnsTemplate(value: string): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
     columnsGap(value: LengthMetrics): this;
     rowsGap(value: LengthMetrics): this;
 }

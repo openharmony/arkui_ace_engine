@@ -9044,6 +9044,30 @@ void CallManagedOnViewportFitChangedCallbackSync(Ark_VMContext vmContext, Ark_In
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void CallManagedOnVisibleIndexesChangeCallback(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_ONVISIBLEINDEXESCHANGECALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedOnVisibleIndexesChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_ONVISIBLEINDEXESCHANGECALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void CallManagedOnWaterFlowScrollIndexCallback(Ark_Int32 resourceId, Ark_Int32 first, Ark_Int32 last)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -11840,6 +11864,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnVerifyPinCallback);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnViewportFitChangedCallback);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedOnVisibleIndexesChangeCallback);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnWaterFlowScrollIndexCallback);
     case KIND_ONWILLSCROLLCALLBACK:
@@ -12570,6 +12596,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnVerifyPinCallbackSync);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnViewportFitChangedCallbackSync);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedOnVisibleIndexesChangeCallbackSync);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnWaterFlowScrollIndexCallbackSync);
     case KIND_ONWILLSCROLLCALLBACK:

@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod } from './component/common'
+import { CommonMethod, OnVisibleIndexesChangeCallback } from './component/common'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { LazyGridLayoutAttribute, ArkLazyVGridLayoutPeer, LazyVGridLayoutAttribute } from './component/lazyGridLayout'
 import { LazyGridLayoutModifier } from './LazyGridLayoutModifier'
@@ -47,6 +47,7 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
     public _columnsTemplate_0_0value?: string | undefined
     public _rowsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
     public _columnsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    public _onVisibleIndexesChange_0_0value?: OnVisibleIndexesChangeCallback | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -106,6 +107,23 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
                 }
             }
         }
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
+                    peer.setOnVisibleIndexesChangeAttribute((this._onVisibleIndexesChange_0_0value as OnVisibleIndexesChangeCallback | undefined));
+                    flagArray[3] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[3] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[3] = 0;
+                    peer.setOnVisibleIndexesChangeAttribute((undefined as OnVisibleIndexesChangeCallback | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: LazyVGridLayoutModifier): void {
         super.mergeModifier(modifier)
@@ -150,6 +168,18 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
                 }
             }
         }
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
+                    this.onVisibleIndexesChange((modifier._onVisibleIndexesChange_0_0value as OnVisibleIndexesChangeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleIndexesChange((undefined as OnVisibleIndexesChangeCallback | undefined));
+                }
+            }
+        }
     }
     columnsTemplate(value: string | undefined): this {
         if (((this._flagArray[0]) == (0)) || ((this._columnsTemplate_0_0value) !== (value))) {
@@ -178,6 +208,16 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
             this._state.fireChange()
         } else {
             this._flagArray[2] = 3
+        }
+        return this
+    }
+    onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
+            this._onVisibleIndexesChange_0_0value = callback_
+            this._state.fireChange()
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }

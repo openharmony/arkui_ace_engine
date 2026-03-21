@@ -9845,6 +9845,26 @@ void deserializeAndCallSyncOnViewportFitChangedCallback(Ark_VMContext vmContext,
     Ark_ViewportFit viewportFit = static_cast<Ark_ViewportFit>(thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, viewportFit);
 }
+void deserializeAndCallOnVisibleIndexesChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ONVISIBLEINDEXESCHANGECALLBACK))));
+    thisDeserializer.readPointer();
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    call(resourceId, start, end);
+}
+void deserializeAndCallSyncOnVisibleIndexesChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONVISIBLEINDEXESCHANGECALLBACK))));
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    callSyncMethod(vmContext, resourceId, start, end);
+}
 void deserializeAndCallOnWaterFlowScrollIndexCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -12922,6 +12942,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallOnVerifyPinCallback(thisArray, thisLength);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return deserializeAndCallOnViewportFitChangedCallback(thisArray, thisLength);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return deserializeAndCallOnVisibleIndexesChangeCallback(thisArray, thisLength);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return deserializeAndCallOnWaterFlowScrollIndexCallback(thisArray, thisLength);
     case KIND_ONWILLSCROLLCALLBACK:
@@ -13659,6 +13681,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncOnVerifyPinCallback(vmContext, thisArray, thisLength);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return deserializeAndCallSyncOnVisibleIndexesChangeCallback(vmContext, thisArray, thisLength);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return deserializeAndCallSyncOnWaterFlowScrollIndexCallback(vmContext, thisArray, thisLength);
     case KIND_ONWILLSCROLLCALLBACK:

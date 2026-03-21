@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 
+#include <functional>
+#include <utility>
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
@@ -55,6 +58,7 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     void OnAttachToMainTree() override;
+    void OnInActive() override;
 
     // 判断当前组件是否为 DynamicLayout
     bool IsDynamicLayout() const;
@@ -77,11 +81,19 @@ public:
         return ret;
     }
 
+    void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
+    {
+        onVisibleIndexesChange_ = std::move(onVisibleIndexesChange);
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void PostIdleTask();
     void ProcessIdleTask(int64_t deadline);
+    std::pair<int32_t, int32_t> GetVisibleIndexesRangeForCallback() const;
+    void FireOnVisibleIndexesChange();
+    void FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range);
 
     Axis axis_ = Axis::VERTICAL;
     int32_t itemTotalCount_ = 0;
@@ -90,6 +102,9 @@ private:
 
     // DynamicLayout 标识
     bool isDynamicLayout_ = false;
+    bool hasVisibleIndexesChangeFired_ = false;
+    std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;
+    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -1, -1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyGridLayoutPattern);
 };

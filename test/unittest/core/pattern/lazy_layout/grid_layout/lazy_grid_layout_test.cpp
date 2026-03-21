@@ -15,6 +15,8 @@
 
 #include "lazy_grid_layout_test.h"
 
+#include <vector>
+
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -27,6 +29,10 @@
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+using VisibleRange = std::pair<int32_t, int32_t>;
+}
 
 void LazyGridLayoutTest::SetUpTestSuite()
 {
@@ -1141,6 +1147,99 @@ HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
     EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: OnVisibleIndexesChangeTest001
+ * @tc.desc: Verify callback fires with initial visible range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, OnVisibleIndexesChangeTest001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    LazyVGridLayoutModel model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr 1fr");
+    frameNode_ = GetMainFrameNode();
+    pattern_ = frameNode_->GetPattern<LazyGridLayoutPattern>();
+    pattern_->axis_ = Axis::VERTICAL;
+    layoutProperty_ = frameNode_->GetLayoutProperty<LazyGridLayoutProperty>();
+
+    int32_t indexStart = 0;
+    int32_t indexEnd = 0;
+    auto onVisibleIndexesChangeCallback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+    model.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+
+    CreateContent(30);
+    CreateDone();
+
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 9);
+}
+
+/**
+ * @tc.name: OnVisibleIndexesChangeTest002
+ * @tc.desc: Verify callback returns -1,-1 when there are no child items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, OnVisibleIndexesChangeTest002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    LazyVGridLayoutModel model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr 1fr");
+
+    int indexStart = 0;
+    int indexEnd = 0;
+    auto onVisibleIndexesChangeCallback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+    model.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+    CreateDone();
+
+    EXPECT_EQ(indexStart, -1);
+    EXPECT_EQ(indexEnd, -1);
+}
+
+/**
+ * @tc.name: OnVisibleIndexesChangeTest003
+ * @tc.desc: Verify callback returns -1,-1 when LazyGrid becomes fully out of viewport above.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, OnVisibleIndexesChangeTest003, TestSize.Level1)
+{
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    LazyVGridLayoutModel model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr 1fr");
+
+    int indexStart = 0;
+    int indexEnd = 0;
+    auto onVisibleIndexesChangeCallback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+    model.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+
+    scrollablePattern_->UpdateCurrentOffset(-420, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+
+    EXPECT_EQ(indexStart, -1);
+    EXPECT_EQ(indexEnd, -1);
 }
 
 /**
