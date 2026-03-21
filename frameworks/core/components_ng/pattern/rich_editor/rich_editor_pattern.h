@@ -382,8 +382,9 @@ public:
             touchMoveOffset.reset();
         }
 
-        void UpdateOriginCaretColor(ColorMode colorMode)
+        void UpdateOriginCaretColor()
         {
+            auto colorMode = Container::CurrentColorMode();
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
@@ -757,6 +758,7 @@ public:
     std::u16string DeleteBackwardOperation(int32_t length, bool isIME = true);
     void DeleteForward(int32_t length = 1) override;
     void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    int32_t HandleOnDragDeleteForward(int32_t currentPosition);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
@@ -825,8 +827,6 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition(int32_t index = -1);
-    int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
-    int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
@@ -1111,8 +1111,6 @@ public:
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void OnColorConfigurationUpdate() override;
-    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    void OnCommonColorChange();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -1171,6 +1169,11 @@ public:
         return true;
     }
 
+    RefPtr<FrameNode> GetClientHost() const override
+    {
+        return GetHost();
+    }
+
     bool IsSelectAreaVisible();
 
     void ResetDragOption() override;
@@ -1226,6 +1229,13 @@ public:
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
+    void ResetCaretColor(const std::optional<Color>& caretColor)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetCaretColor=%{public}s", caretColor->ToString().c_str());
+        caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
+    }
+
     Color GetCaretColor() const;
 
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
@@ -1241,10 +1251,13 @@ public:
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
+
     void StopEditing();
     void ResetKeyboardIfNeed();
+
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     bool NeedCloseKeyboard() override;
+
     void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
 
     void HandleOnEnter() override
@@ -1514,30 +1527,9 @@ public:
         return *it;
     }
 
-    ColorMode GetColorMode()
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(!host, host->GetLocalColorMode());
-        auto context = GetContext();
-        CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
-        return context->GetLocalColorMode();
-    }
-
-    ColorMode GetDisplayColorMode()
-    {
-        auto colorMode = GetColorMode();
-        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? Container::CurrentColorMode() : colorMode;
-    }
-
     const std::map<int32_t, AISpan>& GetAISpanMap() override
     {
         return dataDetectorAdapter_->aiSpanMap_;
-    }
-
-    bool NeedClearAISpanMap(const std::u16string& textForAICache) override
-    {
-        bool isAppendContent = dataDetectorAdapter_->textForAI_.rfind(textForAICache, 0) == 0;
-        return !isAppendContent;
     }
 
     void SetTextDetectEnable(bool enable) override
@@ -1767,7 +1759,7 @@ private:
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     std::pair<int32_t, int32_t> CalcSpansRange(const std::vector<RefPtr<SpanNode>>& spanNodes) const;
-    void OnHover(bool isHover, HoverInfo& hoverInfo);
+    void OnHover(bool isHover);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
@@ -1868,6 +1860,7 @@ private:
         return true;
     }
     void ProcessInnerPadding();
+
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
@@ -1900,7 +1893,6 @@ private:
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
-    int32_t HandleOnDragDeleteForward(int32_t currentPosition);
     void HandleOnDragDropTextOperation(const std::u16string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
@@ -2077,11 +2069,12 @@ private:
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
+    AutoScrollParam currentScrollParam_;
+    bool isAutoScrollRunning_ = false;
     bool isShowMenu_ = true;
     bool isShowPlaceholder_ = false;
     RefPtr<SpanString> styledPlaceholder_;
     std::list<WeakPtr<FrameNode>> placeholderImageNodes_;
-    bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
     FloatingCaretState floatingCaretState_;
     std::shared_ptr<AnimationUtils::Animation> magnifierAnimation_;
@@ -2105,6 +2098,7 @@ private:
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
     bool isTextPreviewSupported_ = true;
+    bool isTouchCaret_ = false;
     OffsetF movingHandleOffset_;
     std::vector<TimeStamp> clickInfo_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };

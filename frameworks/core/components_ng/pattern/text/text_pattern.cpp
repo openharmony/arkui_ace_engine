@@ -4621,8 +4621,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         ParseOriText(textLayoutProperty->GetContent().value_or(u""));
         if (!dataDetectorAdapter_->aiDetectInitialized_) {
-            bool needClearAISpanMap = NeedClearAISpanMap(textForAICache);
-            dataDetectorAdapter_->StartAITask(needClearAISpanMap);
+            dataDetectorAdapter_->StartAITask();
         }
     }
 }

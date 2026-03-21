@@ -111,7 +111,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-
 namespace {
 #if defined(ENABLE_STANDARD_INPUT)
 // should be moved to theme
@@ -196,7 +195,7 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     }
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
-    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
+    floatingCaretState_.UpdateOriginCaretColor();
     undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
     styleManager_ = std::make_unique<StyleManager>(WeakClaim(this));
     if (!dataDetectorAdapter_) {
@@ -334,6 +333,8 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         HandleImageDrag(imageNode);
     }
     SetImageLayoutProperty(imageNode, options);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
     imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
 }
@@ -724,6 +725,8 @@ void RichEditorPattern::OnModifyDone()
     }
     Register2DragDropManager();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto contentHost = GetContentHost();
+    IF_PRESENT(contentHost, MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF));
     MarkContentNodeForRender();
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1568,13 +1571,13 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     spanNode->UpdateContent(options.value);
     if (options.style.has_value()) {
         const TextStyle& textStyle = options.style.value();
-        spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
+        spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
         spanNode->UpdateFontWeight(textStyle.GetFontWeight());
         spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
         spanNode->UpdateTextDecoration(std::vector<TextDecoration> { textStyle.GetTextDecorationFirst() });
-        spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
         spanNode->UpdateLineThicknessScale(textStyle.GetLineThicknessScale());
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
@@ -1811,7 +1814,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
     }
     start = std::max(0, start);
     end = std::min(length, end);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete spans range=[%{public}d, %{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete spans, range=[%{public}d,%{public}d]", start, end);
     if (start > length || end < 0 || start == end) {
         return;
     }
@@ -2514,7 +2517,7 @@ void RichEditorPattern::UpdateTextStyle(
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
-        spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
+        spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
         StyleManager::UpdateTextColorResource(spanNode, textStyle);
     }
@@ -2567,7 +2570,7 @@ void RichEditorPattern::UpdateDecoration(
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
-        spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
         StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     }
@@ -4049,6 +4052,7 @@ void RichEditorPattern::OnFocusNodeChange(FocusReason focusReason)
     blockKbInFloatingWindow_= false;
     CHECK_NULL_VOID(focusReason != FocusReason::WINDOW_FOCUS);
     CHECK_NULL_VOID(GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    CHECK_NULL_VOID(GetIsMidScene());
     CHECK_NULL_VOID(HasFocus() && isEditing_);
     bool clickAIMenu = dataDetectorAdapter_->hasClickedMenuOption_;
     bool bindKeyboard = !isLongPress_ && !clickAIMenu;
@@ -4759,7 +4763,7 @@ void RichEditorPattern::ClearDragDropEvent()
     SetIsTextDraggable(false);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragStart(nullptr);
+    eventHub->SetDefaultOnDragStart(nullptr);
     eventHub->SetOnDragEnter(nullptr);
     eventHub->SetOnDragMove(nullptr);
     eventHub->SetOnDragLeave(nullptr);
@@ -4769,6 +4773,7 @@ void RichEditorPattern::ClearDragDropEvent()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
+    showSelect_ = true;
     auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(event && theme);
     auto localOffset = OffsetF(event->GetX(), event->GetY() - theme->GetInsertCursorOffset().ConvertToPx());
@@ -4905,7 +4910,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
             fontFamilyValue += str;
             fontFamilyValue += ",";
         }
-        fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
+        fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() > 0 ? fontFamilyValue.size() - 1 : 0);
         textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
         textStyle.decorationType =
             static_cast<int32_t>(spanItem->fontStyle->GetTextDecorationFirst());
@@ -5235,7 +5240,7 @@ void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString,
     }
     ResetSelection();
     styledString_->InsertSpanString(changeStart, subSpanString);
-    IF_TRUE(updateCaret, SetCaretPosition(insertIndex + subSpanString->GetLength()));
+    IF_TRUE(updateCaret, SetCaretPosition(changeStart + subSpanString->GetLength()));
     AfterStyledStringChange(changeStart, changeLength, subSpanString->GetU16string());
 }
 
@@ -5360,6 +5365,7 @@ void RichEditorPattern::ResetDragSpanItems()
     std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [&nodeIds](RefPtr<SpanItem>& item) {
         CHECK_NULL_VOID(item);
         item->EndDrag();
+        item->MarkDirty();
         auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
         if (imageSpanItem) {
             nodeIds.emplace(imageSpanItem->nodeId_);
@@ -5492,11 +5498,11 @@ void RichEditorPattern::InitMouseEvent()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& hoverInfo) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "on hover event isHover=%{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->OnHover(isHover, hoverInfo);
+            pattern->OnHover(isHover);
         }
     };
     auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -5504,12 +5510,9 @@ void RichEditorPattern::InitMouseEvent()
     mouseEventInitialized_ = true;
 }
 
-void RichEditorPattern::OnHover(bool isHover, HoverInfo& hoverInfo)
+void RichEditorPattern::OnHover(bool isHover)
 {
-    auto sourceTool = hoverInfo.GetSourceTool();
-    auto mouseAction = hoverInfo.GetMouseAction();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d, sourceTool=%{public}d, mouseAction=%{public}d",
-        isHover, sourceTool, mouseAction);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
     if (!isHover && lastHoverSpanItem_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "spanItem hover false");
         lastHoverSpanItem_->onHover_(false, lastHoverInfo_);
@@ -5519,15 +5522,7 @@ void RichEditorPattern::OnHover(bool isHover, HoverInfo& hoverInfo)
     if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
         ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     } else {
-        auto host = GetHost();
-        auto pipeline = GetContext();
-        bool hideMouseByTouch = sourceTool == SourceTool::FINGER && mouseAction == MouseAction::WINDOW_LEAVE;
-        bool keepStyle = host && pipeline && hideMouseByTouch;
-        if (keepStyle) {
-            pipeline->FreeMouseStyleHoldNode(host->GetId());
-        } else {
-            ChangeMouseStyle(MouseFormat::DEFAULT, true);
-        }
+        ChangeMouseStyle(MouseFormat::DEFAULT, true);
         HandleUrlSpanForegroundClear();
     }
 }
@@ -5851,43 +5846,18 @@ void RichEditorPattern::UpdatePlaceholderFontColor(const Color& color)
 
 void RichEditorPattern::OnColorConfigurationUpdate()
 {
-    auto colorMode = GetColorMode();
-    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
-    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
-        OnCommonColorChange();
-    }
-}
-
-bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
-{
-    IF_PRESENT(magnifierController_, SetColorModeChange(true));
-    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
-    OnCommonColorChange();
-    return false;
-}
-
-void RichEditorPattern::OnCommonColorChange()
-{
     auto host = GetContentHost();
     auto theme = GetTheme<RichEditorTheme>();
     auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_VOID(host && theme && layoutProperty);
-
-    auto displayColorMode = GetDisplayColorMode();
-    COLOR_MODE_LOCK(displayColorMode);
-
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
-    auto themeTextDecColor = themeTextStyle.GetTextDecorationColor();
+    auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
     layoutProperty->UpdateTextColor(themeTextColor);
-    layoutProperty->UpdateTextDecorationColor(themeTextDecColor);
+    layoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
     auto themeUrlSpanColor = GetUrlSpanColor();
-    layoutProperty->UpdateUrlDefualtColor(themeUrlSpanColor);
-    layoutProperty->UpdateUrlHoverColor(GetUrlHoverColor());
-    layoutProperty->UpdateUrlPressedColor(GetUrlPressColor());
-
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, ColorMode=%{public}d, TextColor=%{public}s, DecorationColor=%{public}s",
-        displayColorMode, themeTextColor.ToString().c_str(), themeTextDecColor.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
+        themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
 
     const auto& spans = host->GetChildren();
     for (const auto& uiNode : spans) {
@@ -5902,10 +5872,10 @@ void RichEditorPattern::OnCommonColorChange()
         auto spanItem = spanNode->GetSpanItem();
         CHECK_NULL_CONTINUE(spanItem);
         auto& textColor = spanItem->urlOnRelease ? themeUrlSpanColor : themeTextColor;
-        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(textColor));
+        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(textColor));
         IF_TRUE(spanItem->useThemeFontColor && spanItem->strokeColorFollowFontColor,
             spanNode->UpdateStrokeColor(textColor));
-        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecColor));
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
         spanNode->ReloadResources();
     }
     paragraphCache_.Clear();
@@ -5913,6 +5883,7 @@ void RichEditorPattern::OnCommonColorChange()
     IF_PRESENT(typingStyle_, ReloadResources());
     IF_PRESENT(selectOverlay_, UpdateHandleColor());
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
+    floatingCaretState_.UpdateOriginCaretColor();
     UpdateScrollBarColor(GetScrollBarColor());
 }
 
@@ -6813,8 +6784,8 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
-    spanNode->UpdateTextColorWithoutCheck(textColor);
-    spanNode->UpdateTextDecorationColorWithoutCheck(textColor);
+    spanNode->UpdateTextColor(textColor);
+    spanNode->UpdateTextDecorationColor(textColor);
     if (auto& spanItem = spanNode->GetSpanItem(); spanItem && spanItem->urlOnRelease) {
         spanNode->UpdateTextColor(GetUrlSpanColor());
     }
@@ -8026,7 +7997,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         return eraseLength;
     }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
-    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().ConvertToFp());
+    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
     spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
     spanResult.SetFontWeight((int32_t)(spanItem->GetTextStyle()->GetFontWeight()));
     if (!spanItem->GetTextStyle()->GetFontFamilies().empty()) {
@@ -11483,10 +11454,10 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
         placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
     }
     if (layoutProperty->HasPlaceholderTextColor()) {
-        placeholderNode->UpdateTextColorWithoutCheck(layoutProperty->GetPlaceholderTextColor().value());
+        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
     } else {
         auto theme = GetTheme<RichEditorTheme>();
-        placeholderNode->UpdateTextColorWithoutCheck(theme ? theme->GetPlaceholderColor() : Color());
+        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
     }
 
     auto spanItem = placeholderNode->GetSpanItem();
@@ -11828,6 +11799,8 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     CHECK_NULL_VOID(host);
     // When the Enter key is triggered, perform a line feed operation.
     if (action == TextInputAction::NEW_LINE) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "action=%{public}d, forceCloseKeyboard=%{public}d", action,
+            forceCloseKeyboard);
         InsertValue(u"\n", true);
     }
     // Enter key type callback
@@ -11912,6 +11885,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
 std::tuple<int32_t, int32_t, RefPtr<SpanItem>> RichEditorPattern::GetTargetSpanInfo(
     const RichEditorChangeValue& changeValue, int32_t textIndex, bool isCreate,
     const std::unordered_set<SpanItem*>& allDelSpanSet) {
+    CHECK_NULL_RETURN(allDelSpanSet.size() != spans_.size(), std::make_tuple(0, 0, nullptr));
     TextInsertValueInfo info;
     CalcInsertValueObj(info, textIndex, isCreate);
     int32_t spanIndex = info.GetSpanIndex();
@@ -12784,68 +12758,6 @@ int32_t RichEditorPattern::CalcLineEndPosition(int32_t index)
     return position;
 }
 
-int32_t RichEditorPattern::CalcSingleLineBeginPosition(int32_t fixedPos)
-{
-    float caretHeightDown = 0.0f;
-    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(fixedPos, caretHeightDown, true, false);
-    float caretHeightUp = 0.0f;
-    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(fixedPos, caretHeightUp, false, false);
-    bool isCaretPosInLineEnd = !NearEqual(caretOffsetDown.GetX(), caretOffsetUp.GetX(), 0.5f);
-
-    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    CHECK_NULL_RETURN(overlayMod_, false);
-    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
-    bool cursorNotAtLineStart = NearEqual(caretOffsetOverlay.GetX(), caretOffsetUp.GetX(), 0.5f);
-
-    Offset textOffset;
-    if (!cursorNotAtLineStart && !lastClickOffset_.IsNegative()) {
-        return fixedPos;
-    } else if (isCaretPosInLineEnd && lastClickOffset_.IsNegative()) {
-        return lastSelectionRange_.start_;
-    } else {
-        float caretHeight = 0.0f;
-        OffsetF caretOffsetFixed = CalcCursorOffsetByPosition(fixedPos, caretHeight, false, false);
-        textOffset = { 0, caretOffsetFixed.GetY() };
-    }
-    auto position = paragraphs_.GetIndex(textOffset);
-    return position;
-}
-
-int32_t RichEditorPattern::CalcSingleLineEndPosition(int32_t fixedPos)
-{
-    auto rectLineInfo = CalcLineInfoByPosition();
-    float textWidth = richTextRect_.Width() + rectLineInfo.GetX();
-
-    float caretHeightDown = 0.0f;
-    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(fixedPos, caretHeightDown, true, false);
-    float caretHeightUp = 0.0f;
-    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(fixedPos, caretHeightUp, false, false);
-    bool isCaretPosInLineEnd = !NearEqual(caretOffsetDown.GetX(), caretOffsetUp.GetX(), 0.5f);
-
-    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    CHECK_NULL_RETURN(overlayMod_, false);
-    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
-    bool cursorNotAtLineStart = NearEqual(caretOffsetOverlay.GetX(), caretOffsetUp.GetX(), 0.5f);
-
-    Offset textOffset;
-    if (isCaretPosInLineEnd && lastClickOffset_.IsNegative() && lastSelectionRange_.end_ > fixedPos) {
-        return lastSelectionRange_.end_;
-    } else if (!cursorNotAtLineStart && isCaretPosInLineEnd && fixedPos == caretPosition_) {
-        textOffset = { textWidth, caretOffsetOverlay.GetY() };
-    } else if (isCaretPosInLineEnd && lastSelectionRange_.end_ <= fixedPos) {
-        CursorMoveLineEnd();
-        return fixedPos;
-    } else if (cursorNotAtLineStart && isCaretPosInLineEnd) {
-        return fixedPos;
-    } else {
-        float caretHeight = 0.0f;
-        OffsetF caretOffsetFixed = CalcCursorOffsetByPosition(fixedPos, caretHeight, false, false);
-        textOffset = { textWidth, caretOffsetFixed.GetY() };
-    }
-    auto position = paragraphs_.GetIndex(textOffset);
-    return position;
-}
-
 bool RichEditorPattern::CursorMoveLineBegin()
 {
     int32_t currentPositionIndex = 0;
@@ -13015,9 +12927,9 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
         case CaretMoveIntent::ParagraghEnd:
             return paragraphs_.GetParagraphInfo(index).end;
         case CaretMoveIntent::LineBegin:
-            return CalcSingleLineBeginPosition(fixedPos);
+            return CalcLineBeginPosition();
         case CaretMoveIntent::LineEnd:
-            return CalcSingleLineEndPosition(fixedPos);
+            return CalcLineEndPosition();
         default:
             return NONE_SELECT_TYPE;
     }
