@@ -357,7 +357,7 @@ void MarqueePattern::ChangeSecondChildVisibility(bool stopAndStart)
         CHECK_NULL_VOID(textLayoutProperty);
         auto preVisibility = textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
         textLayoutProperty->UpdateVisibility(IsRunMarquee() ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
-        if (!stopAndStart && preVisibility == VisibleType::INVISIBLE) {
+        if (!stopAndStart && (!animation_ || preVisibility == VisibleType::INVISIBLE)) {
             UpdateTextTranslateXY(GetSecondChildStart(), false, false);
         }
     }
