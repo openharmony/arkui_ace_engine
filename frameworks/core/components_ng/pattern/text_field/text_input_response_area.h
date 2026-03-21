@@ -288,6 +288,7 @@ public:
     void SetAccessibilityAction();
     void InitButtonMouseEvent();
     void UpdateVoiceButton(bool activate);
+    void UpdateVoiceButtonBackgroundStyle(bool activate);
     float GetVoiceVerticalPadding() const
     {
         return micPadding_ * 2.0f;

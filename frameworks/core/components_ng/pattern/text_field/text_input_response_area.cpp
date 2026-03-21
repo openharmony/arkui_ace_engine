@@ -1150,7 +1150,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     if (isShow) {
         auto host = textFieldPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContextRefPtr();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
@@ -1553,6 +1553,7 @@ void VoiceNodeResponseArea::UpdateVoiceButton(bool activate)
     CHECK_NULL_VOID(textFieldPattern);
     auto overlayModifier = textFieldPattern->GetTextFieldOverlayModifier();
     CHECK_NULL_VOID(overlayModifier);
+    overlayModifier->ClearHoverColorAndRects();
     if (activate) {
         RoundRect mouseRect;
         CreateIconRect(mouseRect, false);
@@ -1566,13 +1567,32 @@ void VoiceNodeResponseArea::UpdateVoiceButton(bool activate)
         auto textFieldTheme = textFieldPattern->GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
         symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
-        overlayModifier->ClearHoverColorAndRects();
     }
 
     symbolFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void VoiceNodeResponseArea::UpdateVoiceButtonBackgroundStyle(bool activate)
+{
+    auto cleanNode = GetFrameNode();
+    CHECK_NULL_VOID(cleanNode);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto overlayModifier = textFieldPattern->GetTextFieldOverlayModifier();
+    CHECK_NULL_VOID(overlayModifier);
+    overlayModifier->ClearHoverColorAndRects();
+    if (activate) {
+        RoundRect mouseRect;
+        CreateIconRect(mouseRect, false);
+        float cornerRadius = mouseRect.GetRect().Width() / 2;
+        mouseRect.SetCornerRadius(cornerRadius);
+        std::vector<RoundRect> roundRectVector;
+        roundRectVector.push_back(mouseRect);
+        overlayModifier->SetHoverColorAndRects(roundRectVector, micIconActiveBgColor_.GetValue());
+    }
 }
 
 void VoiceNodeResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
@@ -1610,6 +1630,7 @@ void VoiceNodeResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, 
         childWrapper->Layout();
         nodeWidth += childSize.Width();
     }
+    UpdateVoiceButtonBackgroundStyle(textFieldPattern->GetVoiceKBShown());
 }
 
 void VoiceNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
