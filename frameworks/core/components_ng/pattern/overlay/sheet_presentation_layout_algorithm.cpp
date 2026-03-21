@@ -191,6 +191,21 @@ void SheetPresentationLayoutAlgorithm::MeasureCloseIcon(LayoutWrapper* layoutWra
     sheetCloseIcon->Measure(constraint);
 }
 
+void SheetPresentationLayoutAlgorithm::CalcMaxHeightMinusDoubleStatusBarHeight(
+    LayoutWrapper* layoutWrapper, double& maxHeight, float sheetMaxHeight) const
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
+        if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
+            maxHeight = std::min(static_cast<float>(maxHeight), sheetMaxHeight - sheetTopSafeArea * DOUBLE_SIZE);
+        }
+    }
+}
+
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -246,6 +261,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(sheetTheme);
             auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * sheetTheme->GetSheetHeightPercentMax();
+            CalcMaxHeightMinusDoubleStatusBarHeight(layoutWrapper, maxHeight, sheetMaxHeight);
             maxHeight = SheetInSplitWindow()
                 ? maxHeight : std::max(maxHeight, bigWindowMinHeight.ConvertToPx());
             bool isExistMinHightRestriction =
@@ -702,6 +718,7 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, 0.0f);
     auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * sheetTheme->GetSheetHeightPercentMax();
+    CalcMaxHeightMinusDoubleStatusBarHeight(layoutWrapper, maxHeight, sheetMaxHeight);
     if (sheetPattern->GetWindowButtonRect(floatButtons)) {
         maxHeight = sheetMaxHeight - DOUBLE_SIZE *
             (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());

@@ -1161,6 +1161,11 @@ HWTEST_F(SheetPresentationTestNg, GetHeightBySheetStyle001, TestSize.Level1)
     EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     auto maxHeight = 1000;
     auto maxWidth = 1000;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     algorithm->GetHeightBySheetStyle(maxHeight, maxWidth, AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::MEDIUM;

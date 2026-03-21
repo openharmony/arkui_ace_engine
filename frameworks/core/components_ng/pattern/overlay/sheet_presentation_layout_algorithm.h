@@ -95,6 +95,8 @@ private:
     float GetHeightBySheetStyle(const float parentConstraintHeight, const float parentConstraintWidth,
         LayoutWrapper* layoutWrapper) const;
     bool SheetInSplitWindow() const;
+    void CalcMaxHeightMinusDoubleStatusBarHeight(
+        LayoutWrapper* layoutWrapper, double& maxHeight, float sheetMaxHeight) const;
     LayoutConstraintF CreateSheetChildConstraint(
         RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
     void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight, LayoutWrapper* layoutWrapper);
