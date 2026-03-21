@@ -10853,7 +10853,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
-void ParseTouchPoints(std::array<ArkUITouchPoint, MAX_POINTS> touchPoints,
+void ParseTouchPoints(std::array<ArkUITouchPoint, MAX_POINTS>& touchPoints,
     ArkUINodeEvent& event, TouchEventInfo& eventInfo, bool usePx)
 {
     if (!eventInfo.GetTouches().empty()) {
@@ -10873,8 +10873,8 @@ void ParseTouchPoints(std::array<ArkUITouchPoint, MAX_POINTS> touchPoints,
     }
 }
 
-void ParseHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents,
-    std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints,
+void ParseHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
+    std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT>& allHistoryPoints,
     ArkUINodeEvent& event, TouchEventInfo& eventInfo, bool usePx)
 {
     if (!eventInfo.GetHistoryPointerEvent().empty() &&

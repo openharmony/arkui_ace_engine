@@ -36,10 +36,10 @@ namespace {
 }
 namespace NodeModifier {
 ArkUINodeEvent CreateNodeEventFromTouchEvent(int32_t nodeId, void* extraParam, TouchEventInfo& eventInfo);
-void ParseTouchPoints(std::array<ArkUITouchPoint, NG::MAX_POINTS> touchPoints,
+void ParseTouchPoints(std::array<ArkUITouchPoint, NG::MAX_POINTS>& touchPoints,
     ArkUINodeEvent& event, TouchEventInfo& eventInfo, bool usePx);
-void ParseHistoryEvent(std::array<ArkUIHistoryTouchEvent, NG::MAX_HISTORY_EVENT_COUNT> allHistoryEvents,
-    std::array<std::array<ArkUITouchPoint, NG::MAX_POINTS>, NG::MAX_HISTORY_EVENT_COUNT> allHistoryPoints,
+void ParseHistoryEvent(std::array<ArkUIHistoryTouchEvent, NG::MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
+    std::array<std::array<ArkUITouchPoint, NG::MAX_POINTS>, NG::MAX_HISTORY_EVENT_COUNT>& allHistoryPoints,
     ArkUINodeEvent& event, TouchEventInfo& eventInfo, bool usePx);
 ArkUINodeEvent CreateNodeEventOnClick(void* extraParam, int32_t nodeId, bool usePx, GestureEvent& info);
 }
