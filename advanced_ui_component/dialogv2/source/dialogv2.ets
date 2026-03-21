@@ -106,6 +106,8 @@ export class AdvancedDialogV2Button {
   public defaultFocus?: boolean;
   @Trace
   public enabled?: boolean;
+  @Trace
+  public textAlign?: TextAlign;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -115,6 +117,7 @@ export class AdvancedDialogV2Button {
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
     this.enabled = options.enabled;
+    this.textAlign = options.textAlign;
   };
 }
 
@@ -127,6 +130,7 @@ export declare interface AdvancedDialogV2ButtonOptions {
   role?: ButtonRole;
   defaultFocus?: boolean;
   enabled?: boolean;
+  textAlign?: TextAlign;
 }
 
 @ComponentV2

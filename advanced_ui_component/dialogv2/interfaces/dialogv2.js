@@ -100,6 +100,7 @@ let AdvancedDialogV2Button = class AdvancedDialogV2Button {
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
     this.enabled = options.enabled;
+    this.textAlign = options.textAlign;
   }
   ;
 };
@@ -127,6 +128,9 @@ __decorate([
 __decorate([
   Trace
 ], AdvancedDialogV2Button.prototype, 'enabled', void 0);
+__decorate([
+  Trace
+], AdvancedDialogV2Button.prototype, 'textAlign', void 0);
 AdvancedDialogV2Button = __decorate([
   ObservedV2
 ], AdvancedDialogV2Button);
