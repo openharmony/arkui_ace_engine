@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -36,6 +37,17 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
     } else {
         contentConstraint.maxSize.SetWidth(LayoutInfinity<float>());
     }
+}
+
+AdjustOffset GetLazyChildAdjustOffset(const RefPtr<LayoutWrapper>& itemWrapper)
+{
+    AdjustOffset offset {};
+    CHECK_NULL_RETURN(itemWrapper, offset);
+    auto frameNode = itemWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, offset);
+    auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+    CHECK_NULL_RETURN(pattern, offset);
+    return pattern->GetAndResetAdjustOffset();
 }
 
 } // namespace
@@ -67,10 +79,18 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     auto childSize = SizeF(0.f, 0.f);
+    hasLazyLayoutChild_ = false;
     if (childWrapper) {
-        childWrapper->Measure(childLayoutConstraint);
+        auto childLayoutProperty = childWrapper->GetLayoutProperty();
+        hasLazyLayoutChild_ = childLayoutProperty && childLayoutProperty->GetNeedLazyLayout();
+        if (hasLazyLayoutChild_) {
+            childSize = MeasureLazyChild(layoutWrapper, childWrapper, childLayoutConstraint, axis,
+                idealSize.ConvertToSizeT());
+        } else {
+            childWrapper->Measure(childLayoutConstraint);
+            childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+        }
         // Use child size when self idea size of scroll is not setted.
-        childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
         if (!idealSize.Width()) {
             idealSize.SetWidth(childSize.Width());
         }
@@ -114,6 +134,69 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     UseInitialOffset(axis, selfSize, layoutWrapper);
+}
+
+OffsetF ScrollLayoutAlgorithm::GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
+    TextDirection layoutDirection, const SizeF& size, const SizeF& viewPortExtent)
+{
+    auto scrollAlignment = Alignment::CENTER;
+    if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
+        scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
+    }
+    if (layoutDirection == TextDirection::RTL) {
+        UpdateScrollAlignment(scrollAlignment);
+    }
+
+    OffsetF alignmentPosition;
+    if (axis != Axis::FREE && GetMainAxisSize(viewPortExtent, axis) < GetMainAxisSize(size, axis)) {
+        alignmentPosition = Alignment::GetAlignPosition(size,
+            SizeF(viewPortExtent.CrossSize(axis), viewPortExtent.MainSize(axis) + contentStartOffset_ +
+            contentEndOffset_, axis), scrollAlignment);
+    } else {
+        alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent, scrollAlignment);
+    }
+    if (GreatNotEqual(viewPortExtent.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
+        axis == Axis::VERTICAL) {
+        alignmentPosition.SetX(size.Width() - viewPortExtent.Width());
+    }
+    return alignmentPosition;
+}
+
+SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
+    LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize)
+{
+    auto layoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto currentReferencePos = static_cast<float>(currentOffset_ + contentStartOffset_);
+    auto viewPortLength = GetMainAxisSize(contentSize, axis);
+    SizeF childSize;
+    childLayoutConstraint.viewPosRef = ViewPosReference {
+        .viewPosStart = 0.0f,
+        .viewPosEnd = LessOrEqual(viewPortLength, 0.0f) ? LayoutInfinity<float>() : viewPortLength,
+        .referencePos = currentReferencePos,
+        .referenceEdge = ReferenceEdge::START,
+        .axis = axis,
+    };
+    childWrapper->Measure(childLayoutConstraint);
+    auto geometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, childSize);
+    childSize = geometryNode->GetMarginFrameSize();
+    auto alignmentPosition = GetAlignmentPosition(layoutProperty, axis, layoutDirection, contentSize, childSize);
+    auto alignedReferencePos = static_cast<float>(currentOffset_ + contentStartOffset_) +
+        (axis == Axis::HORIZONTAL ? alignmentPosition.GetX() : alignmentPosition.GetY());
+    if (!NearEqual(alignedReferencePos, currentReferencePos)) {
+        childLayoutConstraint.viewPosRef = ViewPosReference {
+            .viewPosStart = 0.0f,
+            .viewPosEnd = LessOrEqual(viewPortLength, 0.0f) ? LayoutInfinity<float>() : viewPortLength,
+            .referencePos = alignedReferencePos,
+            .referenceEdge = ReferenceEdge::START,
+            .axis = axis,
+        };
+        childWrapper->Measure(childLayoutConstraint);
+        childSize = geometryNode->GetMarginFrameSize();
+    }
+    return childSize;
 }
 
 void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
@@ -227,6 +310,10 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(scroll);
     float zoomScale = scroll->GetZoomScale();
     auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
+    if (hasLazyLayoutChild_) {
+        auto adjustOffset = GetLazyChildAdjustOffset(childWrapper);
+        currentOffset_ -= adjustOffset.start;
+    }
     float lastScrollableDistance = scrollableDistance_;
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
         scrollableDistance_ = childSize.Width() - viewPort_.Width();
@@ -262,27 +349,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         currentOffset =
             OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_ - contentStartOffset_, 0.0f);
     }
-    auto scrollAlignment = Alignment::CENTER;
-    if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
-        scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
-    }
-    if (layoutDirection == TextDirection::RTL) {
-        UpdateScrollAlignment(scrollAlignment);
-    }
-
-    OffsetF alignmentPosition;
-    if (axis != Axis::FREE && GetMainAxisSize(viewPortExtent_, axis) < GetMainAxisSize(viewPort_, axis)) {
-        alignmentPosition = Alignment::GetAlignPosition(size,
-            SizeF(viewPortExtent_.CrossSize(axis),
-                viewPortExtent_.MainSize(axis) + contentStartOffset_ + contentEndOffset_, axis),
-            scrollAlignment);
-    } else {
-        alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
-    }
-    if (GreatNotEqual(viewPortExtent_.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
-        axis == Axis::VERTICAL) {
-        alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
-    }
+    auto alignmentPosition = GetAlignmentPosition(layoutProperty, axis, layoutDirection, size, viewPortExtent_);
     if (zoomScale != 1.0) {
         auto allOffset = padding.Offset() + currentOffset + alignmentPosition;
         auto sizeDelta = childSize - childGeometryNode->GetMarginFrameSize();
