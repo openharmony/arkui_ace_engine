@@ -43,7 +43,8 @@ struct IndexPage {
     new TextList(9, 'NestedWeb', 'pages/scrollable/NestedWeb'),
     new TextList(10, 'ScrollEventObserver', 'pages/scrollable/ScrollEventObserver'),
     new TextList(11, 'FreeScroll', 'pages/scrollable/FreeScroll'),
-    new TextList(12, 'RefreshNestedScroll', 'pages/scrollable/RefreshNestedScroll')
+    new TextList(12, 'RefreshNestedScroll', 'pages/scrollable/RefreshNestedScroll'),
+    new TextList(13, 'ScrollSpeak', 'pages/scrollable/ScrollSpeak/Index')
   ]
   @State fontSize: Resource | undefined = undefined
 

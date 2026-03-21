@@ -199,6 +199,18 @@
     "pages/waterflow/bindController/WaterFlowDeclare",
     "pages/waterflow/bindController/WaterFlowCommand",
     "pages/waterflow/bindController/WaterFlowDestroyDeclare",
-    "pages/waterflow/bindController/WaterFlowDestroySubPage"
+    "pages/waterflow/bindController/WaterFlowDestroySubPage",
+    "pages/scrollable/ScrollSpeak/Index",
+    "pages/scrollable/ScrollSpeak/List/listIndex",
+    "pages/scrollable/ScrollSpeak/List/listNo",
+    "pages/scrollable/ScrollSpeak/Grid/gridIndex",
+    "pages/scrollable/ScrollSpeak/Grid/girdHori",
+    "pages/scrollable/ScrollSpeak/Grid/gridNo",
+    "pages/scrollable/ScrollSpeak/Scroll/scrollIndex",
+    "pages/scrollable/ScrollSpeak/Scroll/scrollHori",
+    "pages/scrollable/ScrollSpeak/Scroll/scrollNo",
+    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowIndex",
+    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowHori",
+    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowNo"
   ]
 }
