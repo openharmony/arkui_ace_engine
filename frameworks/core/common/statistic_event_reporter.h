@@ -85,6 +85,8 @@ enum class StatisticEventType {
     // Video events (10900-10999)
     VIDEO_INVALID_PROGRESS_RATE = 10901,
     VIDEO_EXCEED_PROGRESS_RATE = 10902,
+    // Navigation events (11100-11199)
+    NAVIGATION_HOME_DESTINATION = 11100,
 };
 
 struct StatisticAppInfo {
