@@ -113,7 +113,8 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     ACE_FORCE_EXPORT virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    ACE_FORCE_EXPORT void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    ACE_FORCE_EXPORT void MeasureChildren(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     void CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& contentConstraint);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
@@ -169,7 +170,8 @@ private:
     void InheritParentTextStyle(const TextStyle& textStyle);
     bool ImageSpanMeasure(const RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& layoutWrapper,
         const LayoutConstraintF& layoutConstrain, const TextStyle& textStyle);
-    bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
+    bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
     bool PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain);
     void UpdateFontFamilyWithSymbol(TextStyle& textStyle, std::vector<std::string>& fontFamilies, bool isSymbol);

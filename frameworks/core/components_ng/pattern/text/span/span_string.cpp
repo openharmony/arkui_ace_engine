@@ -220,7 +220,11 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
         auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
         if (customSpanItem->onMeasure.has_value()) {
             auto onMeasure = customSpanItem->onMeasure.value();
-            CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+            auto customSpanMeasureInfo = CustomSpanMeasureInfo { .fontSize = fontSize };
+            if (maxWidth.has_value()) {
+                customSpanMeasureInfo.maxWidth = static_cast<float>(maxWidth.value());
+            }
+            CustomSpanMetrics customSpanMetrics = onMeasure(customSpanMeasureInfo);
             run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
             run.height = static_cast<float>(
                 customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());

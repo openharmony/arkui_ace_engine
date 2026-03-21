@@ -1441,7 +1441,7 @@
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(OHOS::Ace::NG::LayoutConstraintT<float> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::Layout(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::Measure(OHOS::Ace::NG::LayoutWrapper*)";
-      "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::MeasureChildren(OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::TextStyle const&)";
+      "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::MeasureChildren(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::ParagraphReLayout(OHOS::Ace::NG::LayoutConstraintT<float> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(OHOS::Ace::TextStyle&, std::__h::optional<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetContentOffset(OHOS::Ace::NG::LayoutWrapper*)";
