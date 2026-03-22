@@ -15,10 +15,34 @@
 
 #include "scroll_test_ng.h"
 
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float LAZY_GRID_ITEM_HEIGHT = 50.0f;
+constexpr float LAZY_GRID_GAP = 5.0f;
+
+void CreateLazyVGridInScroll(float itemHeight, int32_t itemCount)
+{
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(LAZY_GRID_GAP));
+    gridModel.SetColumnGap(Dimension(LAZY_GRID_GAP));
+    for (int32_t index = 0; index < itemCount; index++) {
+        TextModelNG textModel;
+        textModel.Create(u"text");
+        ViewAbstract::SetHeight(CalcLength(itemHeight));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+}
+} // namespace
+
 class ScrollLayoutTestNg : public ScrollTestNg {
 public:
 };
@@ -492,6 +516,57 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
     FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
+}
+
+/**
+ * @tc.name: LazyVGridInScrollAlignment001
+ * @tc.desc: Test LazyVGrid direct child keeps centered alignment when content is smaller than viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollAlignment001, TestSize.Level1)
+{
+    CreateScroll();
+    layoutProperty_->UpdateAlignment(Alignment::CENTER);
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 4);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    const float expectedHeight = LAZY_GRID_ITEM_HEIGHT * 2 + LAZY_GRID_GAP;
+    EXPECT_TRUE(IsEqual(gridNode->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH, expectedHeight)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, (HEIGHT - expectedHeight) / 2.0f)));
+    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: LazyVGridInScrollScroll001
+ * @tc.desc: Test LazyVGrid direct child updates visible range after Scroll scrolls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollScroll001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 20);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_LT(gridPattern->layoutInfo_->endIndex_, 19);
+
+    ScrollBy(0.0, -200.0, false);
+
+    EXPECT_LT(pattern_->currentOffset_, 0.0);
+    EXPECT_GT(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_GE(gridPattern->layoutInfo_->endIndex_, gridPattern->layoutInfo_->startIndex_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, pattern_->currentOffset_)));
 }
 
 /**
