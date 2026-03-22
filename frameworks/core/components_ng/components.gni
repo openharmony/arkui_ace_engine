@@ -177,7 +177,9 @@ template("build_component_ng") {
       }
 
       if (!defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
-          (platform == "ohos" || platform == "ohos_ng")) {
+          (platform == "ohos" || platform == "ohos_ng") &&
+          (!defined(invoker.disable_ace_advance_dirs) ||
+           !invoker.disable_ace_advance_dirs)) {
         include_dirs += vendor_configs.ace_advance_dirs
       }
 
