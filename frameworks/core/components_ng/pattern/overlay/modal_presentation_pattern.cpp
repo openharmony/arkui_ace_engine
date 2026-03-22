@@ -130,6 +130,8 @@ void ModalPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onAppear",
+        ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
@@ -144,6 +146,8 @@ void ModalPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onDisappear",
+        ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();

@@ -3872,6 +3872,8 @@ void SheetPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onAppear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
@@ -3923,6 +3925,8 @@ void SheetPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onDisappear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     isDismissProcess_ = false;
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);

@@ -21,7 +21,9 @@
 #define private public
 #define protected public
 
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_window.h"
@@ -1831,6 +1833,90 @@ HWTEST_F(SheetPresentationTestNg, OnInjectionEvent003, TestSize.Level1)
     std::string command = R"({"cmd":"Close"})";
     int32_t ret = sheetPattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_FAILED);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnAppearTest001
+ * @tc.desc: Test SheetPresentationPattern OnAppear Event Report
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnAppearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SheetPresentationPattern and setup environment
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup Mock UiSessionManager
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step3. Test OnAppear event report
+     * @tc.expected: OnAppear should trigger ReportComponentChangeEvent
+     */
+    bool onAppearCalled = false;
+    sheetPattern->UpdateOnAppear([&onAppearCalled]() { onAppearCalled = true; });
+    sheetPattern->OnAppear();
+    EXPECT_TRUE(onAppearCalled);
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnDisappearTest001
+ * @tc.desc: Test SheetPresentationPattern OnDisappear Event Report
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SheetPresentationPattern and setup environment
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup Mock UiSessionManager
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step3. Test OnDisappear event report
+     * @tc.expected: OnDisappear should trigger ReportComponentChangeEvent
+     */
+    bool onDisappearCalled = false;
+    sheetPattern->UpdateOnDisappear([&onDisappearCalled]() { onDisappearCalled = true; });
+    sheetPattern->OnDisappear();
+    EXPECT_TRUE(onDisappearCalled);
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
     SheetPresentationTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
