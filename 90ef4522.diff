@@ -1,0 +1,1073 @@
+From 90ef4522025d2caad54704de23900cc821b30054 Mon Sep 17 00:00:00 2001
+Date: Sat, 21 Mar 2026 19:48:24 +0800
+Subject: [PATCH] zjz TicketNo:DTS00000000000000 Description:distortion
+
+Team:OTHERS
+Feature or Bugfix:Bugfix
+Binary Source:No
+PrivateCode(Yes/No):No
+
+Change-Id: I277dc6821904e97c6d3ed426bdc6110313415052
+---
+ .../declarative_frontend/jsview/js_popups.cpp |   7 +
+ .../jsview/js_view_abstract.cpp               | 121 ++++++++
+ .../jsview/js_view_abstract.h                 |   3 +
+ .../core/components_ng/base/view_abstract.cpp |  35 +++
+ .../core/components_ng/base/view_abstract.h   |   3 +
+ .../components_ng/base/view_abstract_model.h  |   3 +
+ .../base/view_abstract_model_ng.cpp           |   1 +
+ .../base/view_abstract_model_ng.h             |  15 +
+ .../pattern/menu/menu_manager.cpp             |   4 +-
+ .../pattern/menu/menu_pattern.cpp             | 286 ++++++++++++++++--
+ .../components_ng/pattern/menu/menu_pattern.h |   9 +
+ .../menu/wrapper/menu_wrapper_pattern.cpp     |   4 +
+ .../menu/wrapper/menu_wrapper_pattern.h       |  11 +
+ .../components_ng/property/distortion_param.h |  43 +++
+ .../components_ng/property/menu_property.h    |   1 +
+ .../render/adapter/rosen_render_context.cpp   | 140 +++++++++
+ .../render/adapter/rosen_render_context.h     |  11 +
+ .../components_ng/render/render_context.h     |  10 +
+ 18 files changed, 688 insertions(+), 19 deletions(-)
+ create mode 100644 frameworks/core/components_ng/property/distortion_param.h
+
+diff --git a/frameworks/bridge/declarative_frontend/jsview/js_popups.cpp b/frameworks/bridge/declarative_frontend/jsview/js_popups.cpp
+index 0769dc85d8ec..8fca7403cee6 100644
+--- a/frameworks/bridge/declarative_frontend/jsview/js_popups.cpp
++++ b/frameworks/bridge/declarative_frontend/jsview/js_popups.cpp
+@@ -1623,6 +1623,11 @@ void JSViewPopups::ParseMenuParam(
+     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
+     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
+     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
++    auto menuEffectValue = menuOptions->GetProperty("menuEffect");
++    if (menuEffectValue->IsNumber()) {
++        menuParam.menuAnimationType = menuEffectValue->ToNumber<int32_t>();
++        LOGI("hhy: menuEffect value is:%{public}d", menuParam.menuAnimationType);
++    }
+ }
+ 
+ void JSViewPopups::ParseMenuLifeCycleParam(
+@@ -2988,6 +2993,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
+                 }
+             } else {
+                 builderIndex = 0;
++                LOGI("hhy: ParseBindOptionParam in object else");
+                 JSViewPopups::ParseBindOptionParam(info, menuParam, builderIndex + 1);
+             }
+         }
+@@ -3013,6 +3019,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
+             auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+             func->Execute();
+         };
++        LOGI("hhy: ParseBindOptionParam call bind menu custom, effectType:%{public}d", menuParam.menuAnimationType);
+         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
+     }
+ }
+diff --git a/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp b/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp
+index 3c4dea385bda..e48a56fd2dab 100644
+--- a/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp
++++ b/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp
+@@ -95,6 +95,7 @@
+ #include "core/components_ng/base/view_stack_model.h"
+ #include "core/components_ng/base/inspector.h"
+ #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
++#include "core/components_ng/property/distortion_param.h"
+ #include "core/event/key_event.h"
+ 
+ #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
+@@ -1639,6 +1640,65 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
+         radius.RemoveResource("radius.bottomEnd");
+     }
+ }
++
++bool ParseObjParamWithName(const JSRef<JSObject>& jsObj, const char* name, float& result)
++{
++    auto property = jsObj->GetProperty(name);
++    double res = 0.0;
++    if (JSViewAbstract::ParseJsDouble(property, res)) {
++        result = res;
++        return true;
++    }
++    return false;
++}
++
++void ParseDistortionParam(const JSRef<JSObject>& jsObj, DistortionParam& param)
++{
++    auto shapeVal = jsObj->GetProperty("shape");
++    if (shapeVal->IsObject()) {
++        auto shapeObj = JSRef<JSObject>::Cast(shapeVal);
++        float x = 0.0f;
++        float y = 0.0f;
++        float width = 0.0f;
++        float height = 0.0f;
++        ParseObjParamWithName(shapeObj, "x", x);
++        ParseObjParamWithName(shapeObj, "y", y);
++        ParseObjParamWithName(shapeObj, "width", width);
++        ParseObjParamWithName(shapeObj, "height", height);
++        param.rect = RectF(x, y, width, height);
++    }
++    ParseObjParamWithName(jsObj, "radius", param.radius);
++    auto luCornerVal = jsObj->GetProperty("luCorner");
++    if (luCornerVal->IsObject()) {
++        auto luCornerObj = JSRef<JSObject>::Cast(luCornerVal);
++        ParseObjParamWithName(luCornerObj, "x", param.luCorner.x);
++        ParseObjParamWithName(luCornerObj, "y", param.luCorner.y);
++    }
++    auto ruCornerVal = jsObj->GetProperty("ruCorner");
++    if (ruCornerVal->IsObject()) {
++        auto ruCornerObj = JSRef<JSObject>::Cast(ruCornerVal);
++        ParseObjParamWithName(ruCornerObj, "x", param.ruCorner.x);
++        ParseObjParamWithName(ruCornerObj, "y", param.ruCorner.y);
++    }
++    auto lbCornerVal = jsObj->GetProperty("lbCorner");
++    if (lbCornerVal->IsObject()) {
++        auto lbCornerObj = JSRef<JSObject>::Cast(lbCornerVal);
++        ParseObjParamWithName(lbCornerObj, "x", param.lbCorner.x);
++        ParseObjParamWithName(lbCornerObj, "y", param.lbCorner.y);
++    }
++    auto rbCornerVal = jsObj->GetProperty("rbCorner");
++    if (rbCornerVal->IsObject()) {
++        auto rbCornerObj = JSRef<JSObject>::Cast(rbCornerVal);
++        ParseObjParamWithName(rbCornerObj, "x", param.rbCorner.x);
++        ParseObjParamWithName(rbCornerObj, "y", param.rbCorner.y);
++    }
++    auto distortionVal = jsObj->GetProperty("distortion");
++    if (distortionVal->IsObject()) {
++        auto distortionObj = JSRef<JSObject>::Cast(distortionVal);
++        ParseObjParamWithName(distortionObj, "x", param.barrelDistortion.x);
++        ParseObjParamWithName(distortionObj, "y", param.barrelDistortion.y);
++    }
++}
+ } // namespace
+ 
+ RefPtr<ResourceObject> JSViewAbstract::GetResourceObjectWithId(const JSRef<JSObject>& jsObj, bool hasGetterOnId)
+@@ -6140,6 +6200,64 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
+     info.SetReturnValue(info.This());
+ }
+ 
++void JSViewAbstract::JSDistortionParam(const JSCallbackInfo& info)
++{
++    auto jsVal = info[0];
++    if (!jsVal->IsObject()) {
++        return;
++    }
++    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
++    DistortionParam param{ .luCorner = NG::VectorF(0,0), .ruCorner = NG::VectorF(0,0), .lbCorner = NG::VectorF(0,0), .rbCorner = NG::VectorF(0,0), .barrelDistortion = NG::Vector4F(0,0,0,0)};
++    ParseDistortionParam(jsObj, param);
++    ViewAbstractModel::GetInstance()->SetDistortionParam(param);
++}
++
++void JSViewAbstract::JSForegroundDistortionParam(const JSCallbackInfo& info)
++{
++    auto jsVal = info[0];
++    if (!jsVal->IsObject()) {
++        return;
++    }
++    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
++    DistortionParam param{ .luCorner = NG::VectorF(0,0), .ruCorner = NG::VectorF(0,0), .lbCorner = NG::VectorF(0,0), .rbCorner = NG::VectorF(0,0), .barrelDistortion = NG::Vector4F(0,0,0,0)};
++    ParseDistortionParam(jsObj, param);
++    ViewAbstractModel::GetInstance()->SetForegroundFilterDistortionParam(param);
++}
++
++void JSViewAbstract::JSEdgeLightParam(const JSCallbackInfo& info)
++{
++    auto jsVal = info[0];
++    if (!jsVal->IsObject()) {
++        ViewAbstractModel::GetInstance()->SetSDFEdgeLightParam(std::nullopt);
++        return;
++    }
++    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
++    EdgeLightParam param {
++        .x = 0.0f,
++        .y = 0.0f,
++        .maskWidth = 2.0f,
++        .maskHeight = 0.3f,
++        .angle = -45.0f,
++    };
++    ParseObjParamWithName(jsObj, "x", param.x);
++    ParseObjParamWithName(jsObj, "y", param.y);
++    ParseObjParamWithName(jsObj, "maskWidth", param.maskWidth);
++    ParseObjParamWithName(jsObj, "maskHeight", param.maskHeight);
++    ParseObjParamWithName(jsObj, "angle", param.angle);
++    auto jsParams = jsObj->GetProperty("params");
++    if (jsParams->IsArray()) {
++        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsParams);
++        auto length = jsArray->Length();
++        for (int i = 0; i < length; i++) {
++            auto jsArrayElement = jsArray->GetValueAt(i);
++            double arrValue = 0.0;
++            JSViewAbstract::ParseJsDouble(jsArrayElement, arrValue);
++            param.lightParam.emplace_back(arrValue);
++        }
++    }
++    ViewAbstractModel::GetInstance()->SetSDFEdgeLightParam(param);
++}
++
+ bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
+     std::string& resName, bool isParseType)
+ {
+@@ -10494,6 +10612,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
+ 
+     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
+     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
++    JSClass<JSViewAbstract>::StaticMethod("distortionParam", &JSViewAbstract::JSDistortionParam);
++    JSClass<JSViewAbstract>::StaticMethod("foregroundDistortionParam", &JSViewAbstract::JSForegroundDistortionParam);
++    JSClass<JSViewAbstract>::StaticMethod("sdfEdgeLightParam", &JSViewAbstract::JSEdgeLightParam);
+ 
+     JSClass<JSViewAbstract>::Bind(globalObj);
+ }
+diff --git a/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h b/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
+index 67c78497c30e..fbf8cc97c1d2 100755
+--- a/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
++++ b/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
+@@ -928,6 +928,9 @@ public:
+         Color& color, bool state);
+     static void JSAllowForceDark(const JSCallbackInfo& info);
+     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
++    static void JSDistortionParam(const JSCallbackInfo& info);
++    static void JSForegroundDistortionParam(const JSCallbackInfo& info);
++    static void JSEdgeLightParam(const JSCallbackInfo& info);
+ 
+ private:
+     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
+diff --git a/frameworks/core/components_ng/base/view_abstract.cpp b/frameworks/core/components_ng/base/view_abstract.cpp
+index 9152b7cd56f8..b1f1d6e4474d 100644
+--- a/frameworks/core/components_ng/base/view_abstract.cpp
++++ b/frameworks/core/components_ng/base/view_abstract.cpp
+@@ -61,6 +61,7 @@
+ #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+ #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+ #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
++#include "core/components_ng/property/distortion_param.h"
+ #include "core/interfaces/native/node/menu_modifier.h"
+ #include "core/interfaces/native/node/menu_item_modifier.h"
+ #include "core/components_ng/pattern/pattern.h"
+@@ -4735,6 +4736,8 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
+     CHECK_NULL_VOID(menuWrapperPattern);
+     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
++    LOGI("hhy: show menu targetNode id:%{public}d tag:%{public}s menu id:%{public}d tag:%{public}s",
++        targetNode->GetId(), targetNode->GetTag().c_str(), menuNode->GetId(), menuNode->GetTag().c_str());
+     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
+ }
+ 
+@@ -5764,6 +5767,7 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
+     CHECK_NULL_VOID(frameNode);
+     auto renderContext = frameNode->GetRenderContext();
+     CHECK_NULL_VOID(renderContext);
++    // LOGI("hhy: SetSystemMaterial node id:%{public}d tag:%{public}s, material:%{public}d", frameNode->GetId(), frameNode->GetTag().c_str(), material!=nullptr);
+     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
+         ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+     }
+@@ -10769,4 +10773,35 @@ void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
+     CHECK_NULL_VOID(pattern);
+     pattern->ResetOnNeedSoftKeyboard();
+ }
++
++void ViewAbstract::SetDistortionParam(const DistortionParam& param)
++{
++    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
++        return;
++    }
++    ACE_UPDATE_RENDER_CONTEXT(DistortionParam, param);
++}
++
++void ViewAbstract::SetForegroundFilterDistortionParam(const DistortionParam& param)
++{
++    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
++        return;
++    }
++    ACE_UPDATE_RENDER_CONTEXT(ForegroundFilterDistortionParam, param);
++}
++
++void ViewAbstract::SetSDFEdgeLightParam(const std::optional<EdgeLightParam>& param)
++{
++    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
++        return;
++    }
++    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
++    CHECK_NULL_VOID(frameNode);
++    auto renderContext = frameNode->GetRenderContext();
++    if (param.has_value()) {
++        renderContext->UpdateContourDiagonalFlowLightLineStartParam(param.value());
++    } else {
++        renderContext->ResetContourDiagonalFlowLightParam();
++    }
++}
+ } // namespace OHOS::Ace::NG
+diff --git a/frameworks/core/components_ng/base/view_abstract.h b/frameworks/core/components_ng/base/view_abstract.h
+index 2e84e6155648..9200d4477570 100755
+--- a/frameworks/core/components_ng/base/view_abstract.h
++++ b/frameworks/core/components_ng/base/view_abstract.h
+@@ -572,6 +572,9 @@ public:
+     static void SetMotionPath(const MotionPathOption& motionPath);
+     // progress mask
+     static void SetProgressMask(const RefPtr<ProgressMaskProperty>& progress);
++    static void SetDistortionParam(const DistortionParam& param);
++    static void SetForegroundFilterDistortionParam(const DistortionParam& param);
++    static void SetSDFEdgeLightParam(const std::optional<EdgeLightParam>& param);
+ 
+     static void Pop();
+ 
+diff --git a/frameworks/core/components_ng/base/view_abstract_model.h b/frameworks/core/components_ng/base/view_abstract_model.h
+index bed435f4187c..402df3a94478 100755
+--- a/frameworks/core/components_ng/base/view_abstract_model.h
++++ b/frameworks/core/components_ng/base/view_abstract_model.h
+@@ -574,6 +574,9 @@ public:
+     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
+     virtual void RemoveResObj(const std::string& key) {};
+     virtual void AllowForceDark(bool forceDarkAllowed) {};
++    virtual void SetDistortionParam(const DistortionParam& param) {}
++    virtual void SetForegroundFilterDistortionParam(const DistortionParam& param) {}
++    virtual void SetSDFEdgeLightParam(const std::optional<EdgeLightParam>& param) {}
+ };
+ } // namespace OHOS::Ace
+ #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H
+diff --git a/frameworks/core/components_ng/base/view_abstract_model_ng.cpp b/frameworks/core/components_ng/base/view_abstract_model_ng.cpp
+index 4ee847182ce8..d63b69cd2fe7 100644
+--- a/frameworks/core/components_ng/base/view_abstract_model_ng.cpp
++++ b/frameworks/core/components_ng/base/view_abstract_model_ng.cpp
+@@ -120,6 +120,7 @@ void ViewAbstractModelNG::BindMenuGesture(
+                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+             StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+             std::function<void()> previewBuildFunc;
++            LOGI("hhy: BindMenuWithCustomNode in gesture callback");
+             NG::ViewAbstract::BindMenuWithCustomNode(std::move(builderFunc), targetNode,
+                 UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
+         };
+diff --git a/frameworks/core/components_ng/base/view_abstract_model_ng.h b/frameworks/core/components_ng/base/view_abstract_model_ng.h
+index cee22aade1c7..69302515fc2a 100755
+--- a/frameworks/core/components_ng/base/view_abstract_model_ng.h
++++ b/frameworks/core/components_ng/base/view_abstract_model_ng.h
+@@ -1981,6 +1981,21 @@ public:
+         ViewAbstract::AllowForceDark(forceDarkAllowed);
+     }
+ 
++    void SetDistortionParam(const DistortionParam& param) override
++    {
++        ViewAbstract::SetDistortionParam(param);
++    }
++
++    void SetForegroundFilterDistortionParam(const DistortionParam& param) override
++    {
++        ViewAbstract::SetForegroundFilterDistortionParam(param);
++    }
++
++    void SetSDFEdgeLightParam(const std::optional<EdgeLightParam>& param) override
++    {
++        ViewAbstract::SetSDFEdgeLightParam(param);
++    }
++
+     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
+     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+     {
+diff --git a/frameworks/core/components_ng/pattern/menu/menu_manager.cpp b/frameworks/core/components_ng/pattern/menu/menu_manager.cpp
+index 26c7594185be..8900d249c31d 100644
+--- a/frameworks/core/components_ng/pattern/menu/menu_manager.cpp
++++ b/frameworks/core/components_ng/pattern/menu/menu_manager.cpp
+@@ -48,6 +48,7 @@
+ #include "core/components_ng/pattern/overlay/level_order.h"
+ #include "core/components_ng/pattern/overlay/overlay_manager.h"
+ #include "core/components_ng/pattern/menu/menu_tag_constants.h"
++#include "core/components_ng/property/distortion_param.h"
+ #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+ #include "transaction/rs_transaction_proxy.h"
+ #endif
+@@ -1222,7 +1223,7 @@ bool MenuManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, cons
+ void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
+     int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
+ {
+-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu enter");
++    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hhy show menu enter");
+     if (!ShowMenuHelper(menu, targetId, offset)) {
+         TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
+         return;
+@@ -1253,6 +1254,7 @@ void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
+         }
+         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
++        LOGI("hhy MenuManager::ShowMenu call ShowMenuAnimation");
+         ShowMenuAnimation(menu, overlayManager);
+         menu->MarkModifyDone();
+     }
+diff --git a/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp b/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp
+index 9c4bf7d572f4..33eb70b80b95 100644
+--- a/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp
++++ b/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp
+@@ -43,6 +43,7 @@
+ #include "core/event/touch_event.h"
+ #include "core/pipeline/pipeline_base.h"
+ #include "core/pipeline_ng/pipeline_context.h"
++#include "core/components_ng/property/distortion_param.h"
+ 
+ namespace OHOS::Ace::NG {
+ namespace {
+@@ -173,6 +174,34 @@ void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<F
+         }
+     }, nullptr, nullptr, host->GetContextRefPtr());
+ }
++
++// // 产生从[startAngle, endAngle)之间产生num个点
++// void FillPointByAngle(float centerX, float centerY, float radius, float startAngle, float endAngle, float width, float height, int num, std::vector<VectorF>& result)
++// {
++//     float angleDiff = (endAngle - startAngle) / num;
++//     float angle = startAngle;
++//     for (int i = 0; i < num; i++, angle += angleDiff) {
++//         result.emplace_back((centerX + radius * cosf(angle)) / width , (centerY - radius * sinf(angle)) / height);
++//     }
++// }
++ 
++// void GetShapeCorner(const RectF& rect, float radius, std::vector<VectorF>& result)
++// {
++//     // 暂时从右下角开始。
++//     // 后续设计要考虑图形的start怎么和arkui想要的坐标映射，貌似也需要arkui算出对应哪个位置，能否更方便
++//     constexpr int cornerPoint = 10;//映射10个点
++//     constexpr double PI = 3.1415926535;
++//     FillPointByAngle(rect.Width() - radius, rect.Height() - radius, radius, -PI/4, -PI/2, rect.Width(), rect.Height(), cornerPoint/2, result);
++//     result.emplace_back((rect.Width() - radius) / rect.Width(), 1);
++//     FillPointByAngle(radius, rect.Height() - radius, radius, -PI/2, -PI, rect.Width(), rect.Height(), cornerPoint, result);
++//     result.emplace_back(0, (rect.Height() - radius) / rect.Height());
++//     FillPointByAngle(radius, radius, radius, -PI, -3.0/2.0*PI, rect.Width(), rect.Height(), cornerPoint, result);
++//     result.emplace_back(radius / rect.Width(), 0);
++//     FillPointByAngle(rect.Width() - radius, radius, radius, -3.0/2.0*PI, -2*PI, rect.Width(), rect.Height(), cornerPoint, result);
++//     result.emplace_back(1, radius/rect.Height());
++//     FillPointByAngle(rect.Width() - radius, rect.Height() - radius, radius, 0, -PI/4, rect.Width(), rect.Height(), cornerPoint/2, result);
++//     // result.emplace_back(result[0]);
++// }
+ } // namespace
+ 
+ void MenuPattern::OnAttachToFrameNode()
+@@ -1680,6 +1709,203 @@ void MenuPattern::ShowPreviewMenuAnimation()
+     isFirstShow_ = false;
+ }
+ 
++void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int direction)
++{
++    auto host = GetHost();
++    CHECK_NULL_VOID(host);
++    auto renderContext = host->GetRenderContext();
++    CHECK_NULL_VOID(renderContext);
++    // Shadow shadow;
++    // renderContext->UpdateBackShadow(shadow);//reset shadow
++    if (IsSelectOverlayExtensionMenu()) {
++        renderContext->UpdatePosition(
++            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
++    }
++    auto menuRect = renderContext->GetPaintRectWithoutTransform();
++    auto borderRadiusOpt = renderContext->GetBorderRadius();
++    float borderRadiusTopLeft =
++        borderRadiusOpt ? (borderRadiusOpt->radiusTopLeft ? borderRadiusOpt->radiusTopLeft.value().ConvertToPx() : 0)
++                        : 0;
++    LOGI("hhy: menu id:%{public}d tag:%{public}s paintRect:%{public}s borderRadius:%{public}f", host->GetId(),
++        host->GetTag().c_str(), menuRect.ToString().c_str(), borderRadiusTopLeft);
++    auto menuChild = host->GetFirstChild();
++    auto menuFrameChild = AceType::DynamicCast<FrameNode>(menuChild);
++    RefPtr<RenderContext> menuChildRenderContext = menuFrameChild ? menuFrameChild->GetRenderContext() : nullptr;
++    if (menuChild) {
++        LOGI("hhy: menu child id:%{public}d tag:%{public}s menuChildRenderContext!=null:%{public}d", menuChild->GetId(),
++            menuChild->GetTag().c_str(), menuChildRenderContext != nullptr);
++    }
++    DistortionParam param {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0.8, 0.8 },
++        .ruCorner = { 1, 0.8 },
++        .lbCorner = { 0.8, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0, 0, 0, 0 },
++    };
++    DistortionParam param1 {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0, 0 },
++        .ruCorner = { 1, 0.8 },
++        .lbCorner = { 0.8, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0, 0, 0, 0 },
++    };
++    DistortionParam param2 {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0, 0 },
++        .ruCorner = { 1, 0 },
++        .lbCorner = { 0.8, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0, 0, 0, 0 },
++    };
++    DistortionParam param3 {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0, 0 },
++        .ruCorner = { 1, 0 },
++        .lbCorner = { 0, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0, 0, 0, 0 },
++    };
++    DistortionParam param4 {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0, 0 },
++        .ruCorner = { 1, 0 },
++        .lbCorner = { 0, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0.5, 0.5, 0.5, 0.5 },
++    };
++    DistortionParam param5 {
++        .rect = Ace::RectF(0, 0, menuRect.Width(), menuRect.Height()),
++        .radius = borderRadiusTopLeft,
++        .luCorner = { 0, 0 },
++        .ruCorner = { 1, 0 },
++        .lbCorner = { 0, 1 },
++        .rbCorner = { 1, 1 },
++        .barrelDistortion = { 0, 0, 0, 0 },
++    };
++    if (direction == 1) {
++        param.luCorner = { 0.8, 0.0 };//右上
++        param.ruCorner = { 1.0, 0.0 };
++        param.lbCorner = { 0.8, 0.2 };
++        param.rbCorner = { 1.0, 0.2 };
++
++        param1.luCorner = { 0.8, 0.0 };//右上 step1
++        param1.ruCorner = { 1.0, 0.0 };
++        param1.lbCorner = { 0.0, 1.0 };
++        param1.rbCorner = { 1.0, 0.2 };
++
++        param2.luCorner = { 0.0, 0.0 };//右上 step2
++        param2.ruCorner = { 1.0, 0.0 };
++        param2.lbCorner = { 0.0, 1.0 };
++        param2.rbCorner = { 1.0, 0.2 };
++
++        param3.luCorner = { 0.0, 0.0 };//右上 step3
++        param3.ruCorner = { 1.0, 0.0 };
++        param3.lbCorner = { 0.0, 1.0 };
++        param3.rbCorner = { 1.0, 1.0 };
++    }
++    renderContext->UpdateDistortionParam(param);
++    if (menuChildRenderContext) {
++        menuChildRenderContext->UpdateForegroundFilterDistortionParam(param);
++    }
++    AnimationOption option;
++    option.SetDuration(1000);
++    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 200, 20));
++    AnimationUtils::Animate(option, [renderContext, param1, menuChildRenderContext]() {
++        renderContext->UpdateDistortionParam(param1);
++        if (menuChildRenderContext) {
++            menuChildRenderContext->UpdateForegroundFilterDistortionParam(param1);
++        }
++    });
++    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 20));
++    AnimationUtils::Animate(option, [renderContext, param2, menuChildRenderContext]() {
++        renderContext->UpdateDistortionParam(param2);
++        if (menuChildRenderContext) {
++            menuChildRenderContext->UpdateForegroundFilterDistortionParam(param2);
++        }
++    });
++    AnimationUtils::Animate(option, [renderContext, param3, menuChildRenderContext]() {
++        renderContext->UpdateDistortionParam(param3);
++        if (menuChildRenderContext) {
++            menuChildRenderContext->UpdateForegroundFilterDistortionParam(param3);
++        }
++    });
++    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
++    AnimationUtils::Animate(option, [renderContext, param4, menuChildRenderContext]() {
++        renderContext->UpdateDistortionParam(param4);
++        if (menuChildRenderContext) {
++            menuChildRenderContext->UpdateForegroundFilterDistortionParam(param4);
++        }
++    });
++    option.SetDelay(120);
++    AnimationUtils::Animate(option, [renderContext, param5, menuChildRenderContext]() {
++        renderContext->UpdateDistortionParam(param5);
++        if (menuChildRenderContext) {
++            menuChildRenderContext->UpdateForegroundFilterDistortionParam(param5);
++        }
++    });
++}
++ 
++void MenuPattern::PlayLightAnimation(int direction)
++{
++    auto host = GetHost();
++    CHECK_NULL_VOID(host);
++    auto renderContext = host->GetRenderContext();
++    CHECK_NULL_VOID(renderContext);
++    // auto menuRect = renderContext->GetPaintRectWithoutTransform();
++    // auto borderRadiusOpt = renderContext->GetBorderRadius();
++    // float borderRadiusTopLeft =
++    //     borderRadiusOpt ? (borderRadiusOpt->radiusTopLeft ? borderRadiusOpt->radiusTopLeft.value().ConvertToPx() : 0)
++    //                     : 0;
++    // LOGI("hhy: menu id:%{public}d tag:%{public}s paintRect:%{public}s borderRadius:%{public}f", host->GetId(),
++    //     host->GetTag().c_str(), menuRect.ToString().c_str(), borderRadiusTopLeft);
++    // std::vector<VectorF> points;
++    // GetShapeCorner(menuRect, borderRadiusTopLeft, points);
++    // renderContext->UpdateContourDiagonalFlowLightContour(points);
++    EdgeLightParam param1 {
++        .x = 0.0f,
++        .y = 3.5f,
++        .maskWidth = 2.0f,
++        .maskHeight = 0.3f,
++        .angle = -45.0f,
++    };
++    EdgeLightParam param2 {
++        .x = 0.0f,
++        .y = -2.5f,
++        .maskWidth = 2.0f,
++        .maskHeight = 0.3f,
++        .angle = -45.0f,
++    };
++    if (direction == 1) {
++        param1.angle = 45.0f;
++        param1.y = -2.5f;
++        param2.angle = 45.0f;
++        param2.y = 3.5f;
++    }
++    renderContext->UpdateContourDiagonalFlowLightLineStartParam(param1);
++    AnimationOption option;
++    option.SetDuration(1000);
++    option.SetCurve(Curves::FRICTION);
++    option.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
++        auto renderContext = weakRender.Upgrade();
++        CHECK_NULL_VOID(renderContext);
++        LOGI("hhy: onFinish, reset contour param");
++        renderContext->ResetContourDiagonalFlowLightParam();
++    });
++    AnimationUtils::Animate(
++        option,
++        [renderContext, param2]() {
++            renderContext->UpdateContourDiagonalFlowLightLineStartParam(param2);
++        },
++        option.GetOnFinishEvent());
++}
++
+ void MenuPattern::ShowMenuAppearAnimation()
+ {
+     auto host = GetHost();
+@@ -1699,25 +1925,49 @@ void MenuPattern::ShowMenuAppearAnimation()
+         if (IsSelectOverlayExtensionMenu()) {
+             SetEndOffset(menuPosition);
+         }
+-        renderContext->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
+-        renderContext->UpdateOpacity(0.0f);
+-        AnimationOption option = AnimationOption();
+-        if (theme->GetMenuAnimationDuration()) {
+-            option.SetDuration(theme->GetMenuAnimationDuration());
+-            option.SetCurve(theme->GetMenuAnimationCurve());
+-        } else {
+-            option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
+-        }
+-        renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+-        AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
+-            CHECK_NULL_VOID(renderContext);
+-            if (IsSelectOverlayExtensionMenu()) {
+-                renderContext->UpdatePosition(
+-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
++        LOGI("hhy: ShowMenuAppearAnimation host id:%{public}d tag:%{public}s", host->GetId(), host->GetTag().c_str());
++        auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
++        int animationType = 0;
++        if (parent) {
++            auto menuWrapperPattern = parent->GetPattern<MenuWrapperPattern>();
++            if (menuWrapperPattern) {
++                animationType = menuWrapperPattern->GetMenuAnimationType();
++                SetMenuAnimationType(animationType);
+             }
+-            renderContext->UpdateOpacity(1.0f);
+-            renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+-        }, nullptr, nullptr, host->GetContextRefPtr());
++            LOGI("hhy: ShowMenuAppearAnimation parent id:%{public}d tag:%{public}s animationType:%{public}d",
++                parent->GetId(), parent->GetTag().c_str(), animationType);
++        }
++        if (animationType == 0) { // default
++            renderContext->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
++            renderContext->UpdateOpacity(0.0f);
++            AnimationOption option = AnimationOption();
++            if (theme->GetMenuAnimationDuration()) {
++                option.SetDuration(theme->GetMenuAnimationDuration());
++                option.SetCurve(theme->GetMenuAnimationCurve());
++            } else {
++                option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
++            }
++            renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
++            AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
++                CHECK_NULL_VOID(renderContext);
++                if (IsSelectOverlayExtensionMenu()) {
++                    renderContext->UpdatePosition(
++                        OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
++                }
++                renderContext->UpdateOpacity(1.0f);
++                renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
++            }, nullptr, nullptr, host->GetContextRefPtr());
++        } else if (animationType == 1) {// non-linear distortion
++            PlayDistortAnimation(menuPosition, 0);
++        } else if (animationType == 2) { // edge light direction rb->lu
++            PlayLightAnimation(0);
++        } else if (animationType == 3) { // non-linear distortion + edge light;
++            PlayDistortAnimation(menuPosition, 0);
++            PlayLightAnimation(0);
++        } else if (animationType == 4) { // non-linear distortion + edge light direction ru->lb
++            PlayDistortAnimation(menuPosition, 1);
++            PlayLightAnimation(1);
++        }
+         isExtensionMenuShow_ = false;
+     }
+     isMenuShow_ = false;
+diff --git a/frameworks/core/components_ng/pattern/menu/menu_pattern.h b/frameworks/core/components_ng/pattern/menu/menu_pattern.h
+index 244384fa5c2c..f0e2d5474f20 100644
+--- a/frameworks/core/components_ng/pattern/menu/menu_pattern.h
++++ b/frameworks/core/components_ng/pattern/menu/menu_pattern.h
+@@ -739,6 +739,14 @@ public:
+         return subMenuOriginOffset_;
+     }
+ 
++    void SetMenuAnimationType(int32_t type)
++    {
++        menuAnimationType_ = type;
++    }
++
++    void PlayDistortAnimation(const OffsetF& offset, int direction);
++    void PlayLightAnimation(int direction);
++
+ protected:
+     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
+     void SetMenuAttribute(RefPtr<FrameNode>& host);
+@@ -888,6 +896,7 @@ private:
+     bool isDisableMenuBgColorByUser_ = false;
+     bool buildDividerTaskAdded_ = false;
+     OffsetF subMenuOriginOffset_ = OffsetF();
++    int32_t menuAnimationType_ = 0;
+ 
+     // only used for Side sub menu
+     int32_t subMenuDepth_ = 0;
+diff --git a/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp b/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp
+index 69c7f6fafa86..ece4da414af4 100644
+--- a/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp
++++ b/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp
+@@ -1211,6 +1211,10 @@ void MenuWrapperPattern::SetMenuTransitionEffectImpl(
+         CHECK_NULL_VOID(menuParam.previewTransition);
+         renderContext->UpdateChainedTransition(menuParam.previewTransition);
+     }
++    if (menuParam.menuAnimationType != 0) {
++        LOGI("hhy: setMenu animationType:%{public}d node:%{public}d", menuParam.menuAnimationType, menuWrapperNode->GetId());
++        pattern->SetMenuAnimationType(menuParam.menuAnimationType);
++    }
+ }
+ 
+ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
+diff --git a/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h b/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h
+index 6b395f056a80..fd59f74db2a7 100644
+--- a/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h
++++ b/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h
+@@ -626,6 +626,16 @@ public:
+         return menuWindowRect_;
+     }
+ 
++    void SetMenuAnimationType(int32_t type)
++    {
++        menuAnimationType_ = type;
++    }
++
++    int32_t GetMenuAnimationType() const
++    {
++        return menuAnimationType_;
++    }
++
+     bool previewImageLayoutFinished_ = false;
+ 
+ protected:
+@@ -742,6 +752,7 @@ private:
+     bool hasCustomOutlineColor_ = false;
+     bool isClearLastMenuItem_ = true;
+     bool dragMenuLiftAnimationFinish_ = true;
++    int32_t menuAnimationType_ = 0;
+     Rect menuWindowRect_;
+     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
+ };
+diff --git a/frameworks/core/components_ng/property/distortion_param.h b/frameworks/core/components_ng/property/distortion_param.h
+new file mode 100644
+index 000000000000..14912e4d5d42
+--- /dev/null
++++ b/frameworks/core/components_ng/property/distortion_param.h
+@@ -0,0 +1,43 @@
++/*
++ * Copyright (c) 2026 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++ 
++#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_DISTORTION_PARAM_H
++#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_DISTORTION_PARAM_H
++
++#include "interfaces/inner_api/ace/arkui_rect.h"
++#include "base/geometry/ng/vector.h"
++
++namespace OHOS::Ace {
++struct DistortionParam {
++RectF rect;
++float radius;
++NG::VectorF luCorner;
++NG::VectorF ruCorner;
++NG::VectorF rbCorner;
++NG::VectorF lbCorner;
++NG::Vector4F barrelDistortion;
++};
++
++struct EdgeLightParam {
++float x;
++float y;
++float maskWidth;
++float maskHeight;
++float angle;
++std::vector<float> lightParam; 
++};
++}
++
++#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_DISTORTION_PARAM_H
+\ No newline at end of file
+diff --git a/frameworks/core/components_ng/property/menu_property.h b/frameworks/core/components_ng/property/menu_property.h
+index 542c1d51af6d..f22b738bedc5 100644
+--- a/frameworks/core/components_ng/property/menu_property.h
++++ b/frameworks/core/components_ng/property/menu_property.h
+@@ -87,6 +87,7 @@ struct ACE_FORCE_EXPORT MenuParam {
+     OffsetF positionOffset;
+     bool setShow = false;
+     bool isShow = false;
++    int menuAnimationType = 0;
+     MenuBindingType menuBindType = MenuBindingType::LONG_PRESS;
+     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
+     std::function<void(const std::string&)> onStateChange;
+diff --git a/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp b/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp
+index eb9434a4588e..14d4ab01d8f9 100755
+--- a/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp
++++ b/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp
+@@ -33,6 +33,7 @@
+ #include "render_service_client/core/ui/rs_surface_node.h"
+ #include "render_service_client/core/ui/rs_ui_context.h"
+ #include "render_service_client/core/ui/rs_union_node.h"
++#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+ #include "rosen_render_context.h"
+ #include "base/geometry/calc_dimension.h"
+ #include "base/geometry/dimension.h"
+@@ -70,6 +71,7 @@
+ #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
+ #include "core/components_ng/render/adapter/drawing_image.h"
+ #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
++#include "core/components_ng/property/distortion_param.h"
+ #include "core/components_ng/render/animation_utils.h"
+ #include "core/components_ng/render/border_image_painter.h"
+ #include "core/components_ng/render/debug_boundary_painter.h"
+@@ -8552,4 +8554,142 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
+     CHECK_NULL_VOID(unionNode);
+     unionNode->SetUnionSpacing(spacing);
+ }
++
++// sdf背板效果扭曲
++void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
++{
++    CHECK_NULL_VOID(rsNode_);
++    auto sdfShape = std::make_shared<Rosen::RSNGSDFRRectShape>();
++    Rosen::RRect rrect{{param.rect.GetX()+80, param.rect.GetY()+80, param.rect.Width()-160, param.rect.Height()-160}, param.radius, param.radius};
++
++    //Rosen::RRect rrect{{param.rect.GetX(), param.rect.GetY(), param.rect.Width(), param.rect.Height()}, param.radius, param.radius};
++    sdfShape->Setter<Rosen::SDFRRectShapeRRectTag>(rrect);
++    auto rootShape = std::make_shared<Rosen::RSNGSDFDistortOpShape>();
++    auto convertFunc2 = [](VectorF vec)->Rosen::Vector2f {
++        return Rosen::Vector2f(vec.x, vec.y);
++    };
++    auto convertFunc4 = [](Vector4F vec)->Rosen::Vector4f {
++        return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w);
++    };
++    rootShape->Setter<Rosen::SDFDistortOpShapeLUCornerTag>(convertFunc2(param.luCorner));
++    rootShape->Setter<Rosen::SDFDistortOpShapeRUCornerTag>(convertFunc2(param.ruCorner));
++    rootShape->Setter<Rosen::SDFDistortOpShapeRBCornerTag>(convertFunc2(param.rbCorner));
++    rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
++    rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
++    auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
++    // rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(sdfShape);
++    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
++    auto host = GetHost();
++    if (!host) {
++        LOGI("hhy: !!! no host");
++    }
++    CHECK_NULL_VOID(host);
++    LOGI("hhy: node setDistortionParam id:%{public}d tag:%{public}s rect:(%{public}f,%{public}f,%{public}f,%{public}f), radius:%{public}f luCorner:(%{public}f,%{public}f)"
++        " ruCorner:(%{public}f,%{public}f) lbCorner:(%{public}f,%{public}f) rbCorner:(%{public}f,%{public}f) distortion:(%{public}f,%{public}f)",
++        host->GetId(), host->GetTag().c_str(), param.rect.GetX(), param.rect.GetY(), param.rect.Width(), param.rect.Height(),
++        param.radius, param.luCorner.x, param.luCorner.y,
++        param.ruCorner.x, param.ruCorner.y, param.lbCorner.x, param.lbCorner.y, param.rbCorner.x, param.rbCorner.y,
++        param.barrelDistortion.x, param.barrelDistortion.y);
++    rsNode_->SetSDFShape(rootShape);
++}
++
++// 前景filter效果扭曲，相同的参数
++void RosenRenderContext::UpdateForegroundFilterDistortionParam(const DistortionParam& param)
++{
++    CHECK_NULL_VOID(rsNode_);
++    auto distortionFilter = std::make_shared<RSNGDistortionCollapseFilter>();
++    auto convertFunc2 = [](VectorF vec)->Rosen::Vector2f {
++        return Rosen::Vector2f(vec.x, vec.y);
++    };
++    auto convertFunc4 = [](Vector4F vec)->Rosen::Vector4f {
++        return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w);
++    };
++    distortionFilter->Setter<Rosen::DistortionCollapseLUCornerTag>(convertFunc2(param.luCorner));
++    distortionFilter->Setter<Rosen::DistortionCollapseRUCornerTag>(convertFunc2(param.ruCorner));
++    distortionFilter->Setter<Rosen::DistortionCollapseLBCornerTag>(convertFunc2(param.lbCorner));
++    distortionFilter->Setter<Rosen::DistortionCollapseRBCornerTag>(convertFunc2(param.rbCorner));
++    distortionFilter->Setter<Rosen::DistortionCollapseBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
++    auto host = GetHost();
++    CHECK_NULL_VOID(host);
++    LOGI("hhy: node setForegroundFilterDistortionParam id:%{public}d tag:%{public}s luCorner:(%{public}f,%{public}f)"
++        " ruCorner:(%{public}f,%{public}f) lbCorner:(%{public}f,%{public}f) rbCorner:(%{public}f,%{public}f) distortion:(%{public}f,%{public}f)",
++        host->GetId(), host->GetTag().c_str(), param.luCorner.x, param.luCorner.y,
++        param.ruCorner.x, param.ruCorner.y, param.lbCorner.x, param.lbCorner.y, param.rbCorner.x, param.rbCorner.y,
++        param.barrelDistortion.x, param.barrelDistortion.y);
++    rsNode_->SetForegroundNGFilter(distortionFilter);
++    // rsNode_->SetBackgroundNGFilter(distortionFilter);
++}
++
++void RosenRenderContext::UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param)
++{
++    CHECK_NULL_VOID(rsNode_);
++    if (!contourLight_) {
++        contourLight_ = std::make_shared<Rosen::RSNGSDFEdgeLightFilter>();
++    }
++
++    if (param.lightParam.size() == 9) {
++        contourLight_->Setter<Rosen::SDFEdgeLightSpreadFactorTag>(param.lightParam[0]);
++        contourLight_->Setter<Rosen::SDFEdgeLightBloomIntensityCutoffTag>(param.lightParam[1]);
++        contourLight_->Setter<Rosen::SDFEdgeLightLightMaxIntensityTag>(param.lightParam[2]);
++        contourLight_->Setter<Rosen::SDFEdgeLightMaxBloomIntensityTag>(param.lightParam[3]);
++        contourLight_->Setter<Rosen::SDFEdgeLightBloomFalloffPowTag>(param.lightParam[4]);
++        contourLight_->Setter<Rosen::SDFEdgeLightMinBorderWidthTag>(param.lightParam[5]);
++        contourLight_->Setter<Rosen::SDFEdgeLightMaxBorderWidthTag>(param.lightParam[6]);
++        contourLight_->Setter<Rosen::SDFEdgeLightInnerBorderBloomWidthTag>(param.lightParam[7]);
++        contourLight_->Setter<Rosen::SDFEdgeLightOuterBorderBloomWidthTag>(param.lightParam[8]);
++        std::stringstream ss;
++        for (auto value:param.lightParam) {
++            ss << value << ",";
++        }
++        LOGI("hhy light param is:{%{public}s}", ss.str().c_str());
++    } else {
++        contourLight_->Setter<Rosen::SDFEdgeLightSpreadFactorTag>(64.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightBloomIntensityCutoffTag>(0.1f);
++        contourLight_->Setter<Rosen::SDFEdgeLightLightMaxIntensityTag>(1.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightMaxBloomIntensityTag>(2.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightBloomFalloffPowTag>(1.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightMinBorderWidthTag>(2.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightMaxBorderWidthTag>(5.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightInnerBorderBloomWidthTag>(30.0f);
++        contourLight_->Setter<Rosen::SDFEdgeLightOuterBorderBloomWidthTag>(30.0f);
++        LOGI("hhy light param is default");
++    }
++
++    auto rippleMask = std::make_shared<Rosen::RSNGFrameGradientMask>();
++    rippleMask->Setter<Rosen::FrameGradientMaskInnerBezierTag>(Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f));
++    rippleMask->Setter<Rosen::FrameGradientMaskOuterBezierTag>(Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f));
++    rippleMask->Setter<Rosen::FrameGradientMaskCornerRadiusTag>(0.0f);
++    rippleMask->Setter<Rosen::FrameGradientMaskInnerFrameWidthTag>(1000.0f);
++    rippleMask->Setter<Rosen::FrameGradientMaskOuterFrameWidthTag>(0.1f);
++    rippleMask->Setter<Rosen::FrameGradientMaskOuterFrameWidthTag>(0.1f);
++    rippleMask->Setter<Rosen::FrameGradientMaskRectWHTag>(Rosen::Vector2f(param.maskWidth, param.maskHeight));
++    rippleMask->Setter<Rosen::FrameGradientMaskRectPosTag>(Rosen::Vector2f(param.x, param.y));
++    rippleMask->Setter<Rosen::FrameGradientMaskAxialFeatherStrengthTag>(1.0f);
++    rippleMask->Setter<Rosen::FrameGradientMaskAxialCenterTag>(0.5f);
++    rippleMask->Setter<Rosen::FrameGradientMaskAxialCoreWidthTag>(0.3f);
++    rippleMask->Setter<Rosen::FrameGradientMaskAxialDirectionTag>(Rosen::Vector2f(0.0f, 1.0f));
++    rippleMask->Setter<Rosen::FrameGradientMaskBoxAngleDegTag>(param.angle);
++
++    auto host = GetHost();
++    CHECK_NULL_VOID(host);
++    LOGI("hhy: line x:%{public}f y:%{public}f maskWidth:%{public}f maskHeight:%{public}f angle:%{public}f,"
++        " host id:%{public}d tag:%{public}s", param.x, param.y, param.maskWidth, param.maskHeight,
++        param.angle, host->GetId(), host->GetTag().c_str());
++    contourLight_->Setter<Rosen::SDFEdgeLightLightMaskTag>(std::static_pointer_cast<Rosen::RSNGMaskBase>(rippleMask));
++    rsNode_->SetForegroundNGFilter(contourLight_);
++}
++
++void RosenRenderContext::ResetContourDiagonalFlowLightParam()
++{
++    CHECK_NULL_VOID(rsNode_);
++    if (!contourLight_) {
++        return;
++    }
++    auto host = GetHost();
++    CHECK_NULL_VOID(host);
++    LOGI("hhy: ResetContourDiagonalFlowLightParam, host id:%{public}d tag:%{public}s", host->GetId(), host->GetTag().c_str());
++    rsNode_->SetForegroundNGFilter(nullptr);
++    contourLight_ = nullptr;
++}
++
+ } // namespace OHOS::Ace::NG
+diff --git a/frameworks/core/components_ng/render/adapter/rosen_render_context.h b/frameworks/core/components_ng/render/adapter/rosen_render_context.h
+index 902635f8d9fa..c19bcc1d9961 100755
+--- a/frameworks/core/components_ng/render/adapter/rosen_render_context.h
++++ b/frameworks/core/components_ng/render/adapter/rosen_render_context.h
+@@ -36,6 +36,8 @@
+ #include "render_service_client/core/ui/rs_node.h"
+ #include "render_service_client/core/ui/rs_texture_export.h"
+ #include "render_service_client/core/ui/rs_ui_context.h"
++#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
++#include "render_service_client/core/ui_effect/property/include/rs_ui_mask_base.h"
+ 
+ #include "base/geometry/dimension_offset.h"
+ #include "base/geometry/ng/offset_t.h"
+@@ -572,6 +574,14 @@ public:
+ 
+     void UpdateOverlayText() override;
+ 
++    void UpdateDistortionParam(const DistortionParam& param) override;
++
++    void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
++
++    void UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param) override;
++
++    void ResetContourDiagonalFlowLightParam() override;
++
+ protected:
+     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
+     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
+@@ -939,6 +949,7 @@ private:
+     static std::timed_mutex taskMtx_;
+     CancelableCallback<void()> pendingDecodeTask_;
+     CancelableCallback<void()> pendingUITask_;
++    std::shared_ptr<Rosen::RSNGSDFEdgeLightFilter> contourLight_;
+ };
+ } // namespace OHOS::Ace::NG
+ 
+diff --git a/frameworks/core/components_ng/render/render_context.h b/frameworks/core/components_ng/render/render_context.h
+index 2db9222cc2dc..2840b4f3c150 100644
+--- a/frameworks/core/components_ng/render/render_context.h
++++ b/frameworks/core/components_ng/render/render_context.h
+@@ -57,6 +57,8 @@ class Blender;
+ namespace OHOS::Ace {
+ struct SharedTransitionOption;
+ class UiMaterial;
++struct DistortionParam;
++struct EdgeLightParam;
+ }
+ 
+ namespace OHOS::Ace::Kit {
+@@ -874,6 +876,14 @@ public:
+ 
+     virtual void UpdateOverlayText() {}
+ 
++    virtual void UpdateDistortionParam(const DistortionParam& param) {}
++
++    virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
++
++    virtual void UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param) {}
++
++    virtual void ResetContourDiagonalFlowLightParam() {}
++
+     void SetIsFree(bool isFree)
+     {
+         isFree_ = isFree;
+-- 
+2.45.2.huawei.10
+

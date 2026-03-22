@@ -36,6 +36,8 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_texture_export.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_mask_base.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -570,6 +572,14 @@ public:
 
     void UpdateOverlayText() override;
 
+    void UpdateDistortionParam(const DistortionParam& param) override;
+
+    void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
+
+    void UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param) override;
+
+    void ResetContourDiagonalFlowLightParam() override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -938,6 +948,7 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    std::shared_ptr<Rosen::RSNGSDFEdgeLightFilter> contourLight_;
 };
 } // namespace OHOS::Ace::NG
 

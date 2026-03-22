@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArkUI 框架逻辑总结</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #fff;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+        h3 {
+            color: #ffd700;
+            margin: 20px 0 10px;
+        }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .layer-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        .layer {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: transform 0.3s;
+        }
+        .layer:hover {
+            transform: scale(1.02);
+        }
+        .layer-app {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .layer-bridge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+        .layer-core {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+        }
+        .layer-adapter {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: #333;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 1.5em;
+            color: rgba(255,255,255,0.7);
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-comment { color: #6a9955; }
+        .code-function { color: #dcdcaa; }
+        .code-decorator { color: #c586c0; }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .step-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #667eea;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .flow-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .flow-step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            min-width: 180px;
+            text-align: center;
+            flex: 1;
+            max-width: 200px;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-size: 1.5em;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .table th {
+            background: #667eea;
+            color: #fff;
+        }
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        .file-path {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+            color: #666;
+        }
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            .flow-diagram {
+                flex-direction: column;
+                align-items: center;
+            }
+            .flow-step {
+                max-width: 100%;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 ArkUI 框架逻辑总结</h1>
+        
+        <div class="card">
+            <h2>一、整体架构（四层）</h2>
+            <div class="layer-diagram">
+                <div class="layer layer-app">📱 应用层 - ArkTS/ArkJS 声明式 UI</div>
+                <div class="arrow">↓</div>
+                <div class="layer layer-bridge">🌉 前端桥接层 - 解析 ArkTS → 组件描述树</div>
+                <div class="arrow">↓</div>
+                <div class="layer layer-core">⚙️ 核心框架层 (NG) - FrameNode / Pattern / Layout / Render</div>
+                <div class="arrow">↓</div>
+                <div class="layer layer-adapter">🔌 平台适配层 - Rosen / Skia 图形引擎</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>二、简单示例演示 UI 显示流程</h2>
+            
+            <h3>1. 开发者写的 ArkTS 代码</h3>
+            <div class="code-block">
+<span class="code-decorator">@Entry</span>
+<span class="code-decorator">@Component</span>
+<span class="code-keyword">struct</span> <span class="code-function">MyButton</span> {
+  <span class="code-decorator">@State</span> message: <span class="code-keyword">string</span> = <span class="code-string">'Click Me'</span>;
+
+  <span class="code-function">build</span>() {
+    <span class="code-function">Column</span>() {
+      <span class="code-function">Text</span>(<span class="code-keyword">this</span>.message)
+        .<span class="code-function">fontSize</span>(<span class="code-string">30</span>)
+        .<span class="code-function">onClick</span>(() => {
+          <span class="code-keyword">this</span>.message = <span class="code-string">'Clicked!'</span>;
+        })
+    }
+  }
+}
+            </div>
+
+            <h3>2. 框架内部处理流程</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="step-num">1</div>
+                    <div>前端解析</div>
+                    <small>ArkTS → JSON/字节码</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-num">2</div>
+                    <div>组件树构建</div>
+                    <small>FrameNode 创建</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-num">3</div>
+                    <div>布局计算</div>
+                    <small>Measure + Layout</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-num">4</div>
+                    <div>渲染绘制</div>
+                    <small>RenderNode.Draw()</small>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-num">5</div>
+                    <div>上屏显示</div>
+                    <small>SurfaceFlinger</small>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-num">1</span>
+                <strong>前端解析</strong>
+                <p>ArkTS 编译器解析 .ets 文件 → 生成组件描述 JSON/字节码 → 包含 @Component struct MyButton 定义</p>
+            </div>
+
+            <div class="step">
+                <span class="step-num">2</span>
+                <strong>组件树构建 (FrameNode)</strong>
+                <p>FrameNode 创建：ColumnNode(id:1) → TextNode(id:2, content:"Click Me") → GestureNode(事件绑定)</p>
+            </div>
+
+            <div class="step">
+                <span class="step-num">3</span>
+                <strong>布局计算 (Layout)</strong>
+                <p>LayoutAlgorithm.Measure() - 计算 Column/Text 尺寸<br>LayoutAlgorithm.Layout() - 计算位置坐标</p>
+            </div>
+
+            <div class="step">
+                <span class="step-num">4</span>
+                <strong>渲染绘制 (Render)</strong>
+                <p>RenderNode.Draw() - 创建 Skia Canvas → 绘制背景/边框/文字 → 生成 DisplayList</p>
+            </div>
+
+            <div class="step">
+                <span class="step-num">5</span>
+                <strong>上屏显示</strong>
+                <p>SurfaceFlinger / HDI 提交到屏幕 → 屏幕显示 "Click Me" 文字</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>三、状态变化时的更新流程</h2>
+            <div class="code-block">
+<span class="code-comment">// 用户点击 → 状态变化</span>
+.<span class="code-function">onClick</span>(() => {
+  <span class="code-keyword">this</span>.message = <span class="code-string">'Clicked!'</span>;  <span class="code-comment">// @State 变化</span>
+})
+            </div>
+            <div class="step">
+                <span class="step-num">1</span>
+                <strong>@State setter 被调用</strong>
+                <p>TextPattern.SetContent("Clicked!")</p>
+            </div>
+            <div class="step">
+                <span class="step-num">2</span>
+                <strong>标记脏节点</strong>
+                <p>MarkDirtyNode(PROPERTY_UPDATE_TEXT)</p>
+            </div>
+            <div class="step">
+                <span class="step-num">3</span>
+                <strong>重新布局</strong>
+                <p>OnDirtyLayoutWrapperSwap() → 重新计算 Text 尺寸</p>
+            </div>
+            <div class="step">
+                <span class="step-num">4</span>
+                <strong>重新渲染</strong>
+                <p>RenderNode.ReDraw() → 更新 DisplayList</p>
+            </div>
+            <div class="step">
+                <span class="step-num">5</span>
+                <strong>上屏</strong>
+                <p>SurfaceFlinger 合成显示</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>四、核心类说明</h2>
+            <table class="table">
+                <tr>
+                    <th>层级</th>
+                    <th>类名</th>
+                    <th>作用</th>
+                </tr>
+                <tr>
+                    <td>前端</td>
+                    <td><code>@Component</code></td>
+                    <td>标记组件类</td>
+                </tr>
+                <tr>
+                    <td>前端</td>
+                    <td><code>@State</code></td>
+                    <td>标记响应式状态</td>
+                </tr>
+                <tr>
+                    <td>Core</td>
+                    <td><code>FrameNode</code></td>
+                    <td>组件节点实体</td>
+                </tr>
+                <tr>
+                    <td>Core</td>
+                    <td><code>Pattern</code></td>
+                    <td>组件业务逻辑</td>
+                </tr>
+                <tr>
+                    <td>Core</td>
+                    <td><code>LayoutAlgorithm</code></td>
+                    <td>布局测量计算</td>
+                </tr>
+                <tr>
+                    <td>Core</td>
+                    <td><code>RenderNode</code></td>
+                    <td>渲染绘制</td>
+                </tr>
+                <tr>
+                    <td>Core</td>
+                    <td><code>ViewAbstract</code></td>
+                    <td>视图抽象基类</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>五、关键文件位置</h2>
+            <div class="two-column">
+                <div>
+                    <table class="table">
+                        <tr>
+                            <th>层级</th>
+                            <th>路径</th>
+                        </tr>
+                        <tr>
+                            <td>Pattern层</td>
+                            <td><span class="file-path">frameworks/core/components_ng/pattern/</span></td>
+                        </tr>
+                        <tr>
+                            <td>Layout层</td>
+                            <td><span class="file-path">frameworks/core/components_ng/layout/</span></td>
+                        </tr>
+                        <tr>
+                            <td>Render层</td>
+                            <td><span class="file-path">frameworks/core/components_ng/render/</span></td>
+                        </tr>
+                        <tr>
+                            <td>Bridge层</td>
+                            <td><span class="file-path">frameworks/bridge/declarative_frontend/</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #fff; padding: 20px;">
+            <p>Generated by OpenCode | ArkUI Engine Analysis</p>
+        </div>
+    </div>
+</body>
+</html>

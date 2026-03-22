@@ -57,7 +57,9 @@ class Blender;
 namespace OHOS::Ace {
 struct SharedTransitionOption;
 class UiMaterial;
-}
+struct DistortionParam;
+struct EdgeLightParam;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Kit {
 class Modifier;
@@ -209,11 +211,11 @@ public:
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, FrameNode* host = nullptr) {}
 
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
-        FrameNode* host = nullptr) {}
+    virtual void InitContext(
+        bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode, FrameNode* host = nullptr)
+    {}
 
-    virtual void SetSurfaceChangedCallBack(
-        const std::function<void(float, float, float, float)>& callback) {}
+    virtual void SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
 
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
@@ -252,7 +254,10 @@ public:
     virtual void ClearFocusState() {}
 
     virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
-    virtual uint32_t GetCurrentBackgroundTaskId() const { return 0; }
+    virtual uint32_t GetCurrentBackgroundTaskId() const
+    {
+        return 0;
+    }
 
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
@@ -403,7 +408,10 @@ public:
     {
         return {};
     }
-    virtual int32_t GetRotateDegree() { return 0; }
+    virtual int32_t GetRotateDegree()
+    {
+        return 0;
+    }
     virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
@@ -792,7 +800,8 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
-    void SetHandleChildBounds(bool value) {
+    void SetHandleChildBounds(bool value)
+    {
         handleChildBounds_ = value;
     }
 
@@ -827,7 +836,7 @@ public:
 
     virtual OffsetF GetBaseTransalteInXY() const
     {
-        return OffsetF{0.0f, 0.0f};
+        return OffsetF { 0.0f, 0.0f };
     }
     virtual void SetBaseTranslateInXY(const OffsetF& offset) {}
     virtual float GetBaseRotateInZ() const
@@ -867,13 +876,24 @@ public:
 
     virtual void RemoveFromTree() {}
 
-    virtual bool IsOnRenderTree() {return false;}
+    virtual bool IsOnRenderTree()
+    {
+        return false;
+    }
 
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
     virtual void UpdateCustomBackground() {}
 
     virtual void UpdateOverlayText() {}
+
+    virtual void UpdateDistortionParam(const DistortionParam& param) {}
+
+    virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
+
+    virtual void UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param) {}
+
+    virtual void ResetContourDiagonalFlowLightParam() {}
 
     void SetIsFree(bool isFree)
     {
@@ -981,7 +1001,10 @@ protected:
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
     virtual void OnUseUnionEffectUpdate(bool useUnion) {}
-    virtual bool GetStatusByEffectTypeAndWindow() { return false; }
+    virtual bool GetStatusByEffectTypeAndWindow()
+    {
+        return false;
+    }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}

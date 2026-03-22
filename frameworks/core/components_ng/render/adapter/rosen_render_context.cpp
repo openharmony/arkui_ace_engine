@@ -33,6 +33,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_union_node.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "rosen_render_context.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -53,6 +54,7 @@
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/distortion_param.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
@@ -500,8 +502,8 @@ void RosenRenderContext::AddFrameNodeInfoToRsNode()
         auto frameNodePtr = GetHost();
         CHECK_NULL_VOID(frameNodePtr);
         if (LayoutInspector::GetEnableNodeTrace()) {
-            ACE_SCOPED_TRACE("FrameNode[%d], tag: %s, RsNode: [%s]",
-                frameNodePtr->GetId(), frameNodePtr->GetTag().c_str(), std::to_string(rsNode_->GetId()).c_str());
+            ACE_SCOPED_TRACE("FrameNode[%d], tag: %s, RsNode: [%s]", frameNodePtr->GetId(),
+                frameNodePtr->GetTag().c_str(), std::to_string(rsNode_->GetId()).c_str());
         }
         rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
     }
@@ -1774,7 +1776,7 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     // for the startAngle is 0, for the endAngle is 360.
     std::shared_ptr<Rosen::AnnulusRegion> rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(
         OHOS::Rosen::Vector2f(DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Width()),
-        DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Height())),
+            DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Height())),
         DEFAULT_RADIUS_VALUE, DEFAULT_RADIUS_VALUE, DEFAULT_START_ANGLE_VALUE, DEFAULT_END_ANGLE_VALUE);
     auto annulusRegionOpt = emitterOption.GetAnnulusRegion();
     if (annulusRegionOpt.has_value() && shapeInt == static_cast<int32_t>(ParticleEmitterShape::ANNULUS)) {
@@ -1785,13 +1787,13 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         auto innerRadius = annulusRegion.GetInnerRadius();
         auto rsInnerRadius =
             (LessOrEqual(innerRadius.ConvertToPx(), 0.0) || innerRadius.Unit() == DimensionUnit::PERCENT)
-            ? 0.0
-            : innerRadius.ConvertToPx();
+                ? 0.0
+                : innerRadius.ConvertToPx();
         auto outerRadius = annulusRegion.GetOuterRadius();
         auto rsOuterRadius =
             (LessOrEqual(outerRadius.ConvertToPx(), 0.0) || outerRadius.Unit() == DimensionUnit::PERCENT)
-            ? 0.0
-            : outerRadius.ConvertToPx();
+                ? 0.0
+                : outerRadius.ConvertToPx();
         rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(rsCenter, rsInnerRadius,
             rsOuterRadius, annulusRegion.GetStartAngle(), annulusRegion.GetEndAngle());
     }
@@ -3853,12 +3855,12 @@ OffsetF RosenRenderContext::GetRectOffsetWithOffsetEdges(
     if (!offsetEdges.top.has_value() && offsetEdges.bottom.has_value()) {
         rectOffset.SetY(
             -ConvertToPx(offsetEdges.bottom.value(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
-                 .value_or(0));
+                .value_or(0));
     }
     if (!offsetEdges.left.has_value() && offsetEdges.right.has_value()) {
         rectOffset.SetX(
             -ConvertToPx(offsetEdges.right.value(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
-                 .value_or(0));
+                .value_or(0));
     }
     return rectOffset;
 }
@@ -6400,9 +6402,9 @@ void RosenRenderContext::DumpInfo()
         auto center = rsNode_->GetStagingProperties().GetPivot();
         if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
             DumpLog::GetInstance().AddDesc(std::string("Center: x:")
-                                               .append(std::to_string(center[0]))
-                                               .append(" y:")
-                                               .append(std::to_string(center[1])));
+                    .append(std::to_string(center[0]))
+                    .append(" y:")
+                    .append(std::to_string(center[1])));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
             DumpLog::GetInstance().AddDesc(
@@ -6557,16 +6559,16 @@ void RosenRenderContext::DumpInfo()
         if (HasPosition()) {
             auto position = GetPosition();
             DumpLog::GetInstance().AddDesc(std::string("PositionX :")
-                                               .append(position->GetX().ToString().c_str())
-                                               .append(std::string(",PositionY :"))
-                                               .append(position->GetY().ToString().c_str()));
+                    .append(position->GetX().ToString().c_str())
+                    .append(std::string(",PositionY :"))
+                    .append(position->GetY().ToString().c_str()));
         }
         if (HasOffset()) {
             auto offset = GetOffset();
             DumpLog::GetInstance().AddDesc(std::string("OffsetX :")
-                                               .append(offset->GetX().ToString().c_str())
-                                               .append(std::string(",OffsetY :"))
-                                               .append(offset->GetY().ToString().c_str()));
+                    .append(offset->GetX().ToString().c_str())
+                    .append(std::string(",OffsetY :"))
+                    .append(offset->GetY().ToString().c_str()));
         }
         if (HasPositionEdges()) {
             auto positionEdges = GetPositionEdges();
@@ -6579,9 +6581,9 @@ void RosenRenderContext::DumpInfo()
         if (HasAnchor()) {
             auto anchor = GetAnchor();
             DumpLog::GetInstance().AddDesc(std::string("anchorX :")
-                                               .append(anchor->GetX().ToString().c_str())
-                                               .append(std::string(",anchorY :"))
-                                               .append(anchor->GetY().ToString().c_str()));
+                    .append(anchor->GetX().ToString().c_str())
+                    .append(std::string(",anchorY :"))
+                    .append(anchor->GetY().ToString().c_str()));
         }
 
         auto rsBlendMode = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendMode());
@@ -6594,7 +6596,7 @@ void RosenRenderContext::DumpInfo()
                     std::string("blendMode has difference,arkui:") + std::to_string(blendMode));
             }
         }
-        
+
         auto rsBlendApplyType = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
         if (GetBackBlendApplyType().has_value() || rsBlendApplyType) {
             DumpLog::GetInstance().AddDesc(
@@ -6769,8 +6771,8 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     auto rsUIContext = rsNode_->GetRSUIContext();
     // transition effects should be initialized without animation.
     RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
-        // transitionIn effects should be initialized as active if currently not on the tree.
-        transitionEffect_->Attach(Claim(this), !isOnTheTree);
+            // transitionIn effects should be initialized as active if currently not on the tree.
+            transitionEffect_->Attach(Claim(this), !isOnTheTree);
         }, rsUIContext);
 }
 
@@ -8510,4 +8512,97 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
     CHECK_NULL_VOID(unionNode);
     unionNode->SetUnionSpacing(spacing);
 }
+
+void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto sdfShape = std::make_shared<Rosen::RSNGSDFRRectShape>();
+    Rosen::RRect rrect { { param.rect.GetX() + 80, param.rect.GetY() + 80, param.rect.Width() - 160,
+                             param.rect.Height() - 160 },
+        param.radius, param.radius };
+    sdfShape->Setter<Rosen::SDFRRectShapeRRectTag>(rrect);
+    auto rootShape = std::make_shared<Rosen::RSNGSDFDistortOpShape>();
+    auto convertFunc2 = [](VectorF vec) -> Rosen::Vector2f { return Rosen::Vector2f(vec.x, vec.y); };
+    auto convertFunc4 = [](Vector4F vec) -> Rosen::Vector4f { return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w); };
+    rootShape->Setter<Rosen::SDFDistortOpShapeLUCornerTag>(convertFunc2(param.luCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeRUCornerTag>(convertFunc2(param.ruCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeRBCornerTag>(convertFunc2(param.rbCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
+    auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
+    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
+    rsNode_->SetSDFShape(rootShape);
+}
+
+void RosenRenderContext::UpdateForegroundFilterDistortionParam(const DistortionParam& param)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto distortionFilter = std::make_shared<RSNGDistortionCollapseFilter>();
+    auto convertFunc2 = [](VectorF vec) -> Rosen::Vector2f { return Rosen::Vector2f(vec.x, vec.y); };
+    auto convertFunc4 = [](Vector4F vec) -> Rosen::Vector4f { return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w); };
+    distortionFilter->Setter<Rosen::DistortionCollapseLUCornerTag>(convertFunc2(param.luCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseRUCornerTag>(convertFunc2(param.ruCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseLBCornerTag>(convertFunc2(param.lbCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseRBCornerTag>(convertFunc2(param.rbCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
+    rsNode_->SetForegroundNGFilter(distortionFilter);
+}
+
+void RosenRenderContext::UpdateContourDiagonalFlowLightLineStartParam(const EdgeLightParam& param)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!contourLight_) {
+        contourLight_ = std::make_shared<Rosen::RSNGSDFEdgeLightFilter>();
+    }
+
+    if (param.lightParam.size() == 9) {
+        contourLight_->Setter<Rosen::SDFEdgeLightSpreadFactorTag>(param.lightParam[0]);
+        contourLight_->Setter<Rosen::SDFEdgeLightBloomIntensityCutoffTag>(param.lightParam[1]);
+        contourLight_->Setter<Rosen::SDFEdgeLightLightMaxIntensityTag>(param.lightParam[2]);
+        contourLight_->Setter<Rosen::SDFEdgeLightMaxBloomIntensityTag>(param.lightParam[3]);
+        contourLight_->Setter<Rosen::SDFEdgeLightBloomFalloffPowTag>(param.lightParam[4]);
+        contourLight_->Setter<Rosen::SDFEdgeLightMinBorderWidthTag>(param.lightParam[5]);
+        contourLight_->Setter<Rosen::SDFEdgeLightMaxBorderWidthTag>(param.lightParam[6]);
+        contourLight_->Setter<Rosen::SDFEdgeLightInnerBorderBloomWidthTag>(param.lightParam[7]);
+        contourLight_->Setter<Rosen::SDFEdgeLightOuterBorderBloomWidthTag>(param.lightParam[8]);
+    } else {
+        contourLight_->Setter<Rosen::SDFEdgeLightSpreadFactorTag>(64.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightBloomIntensityCutoffTag>(0.1f);
+        contourLight_->Setter<Rosen::SDFEdgeLightLightMaxIntensityTag>(1.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightMaxBloomIntensityTag>(2.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightBloomFalloffPowTag>(1.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightMinBorderWidthTag>(2.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightMaxBorderWidthTag>(5.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightInnerBorderBloomWidthTag>(30.0f);
+        contourLight_->Setter<Rosen::SDFEdgeLightOuterBorderBloomWidthTag>(30.0f);
+    }
+
+    auto rippleMask = std::make_shared<Rosen::RSNGFrameGradientMask>();
+    rippleMask->Setter<Rosen::FrameGradientMaskInnerBezierTag>(Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f));
+    rippleMask->Setter<Rosen::FrameGradientMaskOuterBezierTag>(Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f));
+    rippleMask->Setter<Rosen::FrameGradientMaskCornerRadiusTag>(0.0f);
+    rippleMask->Setter<Rosen::FrameGradientMaskInnerFrameWidthTag>(1000.0f);
+    rippleMask->Setter<Rosen::FrameGradientMaskOuterFrameWidthTag>(0.1f);
+    rippleMask->Setter<Rosen::FrameGradientMaskOuterFrameWidthTag>(0.1f);
+    rippleMask->Setter<Rosen::FrameGradientMaskRectWHTag>(Rosen::Vector2f(param.maskWidth, param.maskHeight));
+    rippleMask->Setter<Rosen::FrameGradientMaskRectPosTag>(Rosen::Vector2f(param.x, param.y));
+    rippleMask->Setter<Rosen::FrameGradientMaskAxialFeatherStrengthTag>(1.0f);
+    rippleMask->Setter<Rosen::FrameGradientMaskAxialCenterTag>(0.5f);
+    rippleMask->Setter<Rosen::FrameGradientMaskAxialCoreWidthTag>(0.3f);
+    rippleMask->Setter<Rosen::FrameGradientMaskAxialDirectionTag>(Rosen::Vector2f(0.0f, 1.0f));
+    rippleMask->Setter<Rosen::FrameGradientMaskBoxAngleDegTag>(param.angle);
+    contourLight_->Setter<Rosen::SDFEdgeLightLightMaskTag>(std::static_pointer_cast<Rosen::RSNGMaskBase>(rippleMask));
+    rsNode_->SetForegroundNGFilter(contourLight_);
+}
+
+void RosenRenderContext::ResetContourDiagonalFlowLightParam()
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!contourLight_) {
+        return;
+    }
+    rsNode_->SetForegroundNGFilter(nullptr);
+    contourLight_ = nullptr;
+}
+
 } // namespace OHOS::Ace::NG

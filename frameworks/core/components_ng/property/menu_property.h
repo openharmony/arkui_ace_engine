@@ -90,6 +90,7 @@ struct ACE_FORCE_EXPORT MenuParam {
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    int menuAnimationType = 0;
     MenuBindingType menuBindType = MenuBindingType::LONG_PRESS;
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;

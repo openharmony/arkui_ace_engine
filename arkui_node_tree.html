@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArkUI 框架节点树</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #00d9ff;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+        }
+        h3 {
+            color: #ffd700;
+            margin: 20px 0 10px;
+        }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .tree {
+            padding: 20px 0;
+        }
+        .tree-node {
+            position: relative;
+            padding-left: 30px;
+        }
+        .tree-node::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            border-left: 2px dashed #ccc;
+        }
+        .tree-node:last-child::before {
+            height: 20px;
+        }
+        .node {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .node:hover {
+            transform: translateX(5px);
+        }
+        .node::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            width: 15px;
+            height: 2px;
+            background: #ccc;
+        }
+        .node-ace-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .node-ui-node {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+        .node-frame-node {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+        }
+        .node-custom-node {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+        }
+        .node-layout-wrapper {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: #333;
+        }
+        .node-pattern {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+        .node-property {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            color: #333;
+        }
+        .node-event {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            color: #fff;
+        }
+        .node-render {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #333;
+        }
+        .node-geometry {
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            color: #333;
+        }
+        .node-other {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.75em;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+        .badge-core {
+            background: #667eea;
+            color: #fff;
+        }
+        .badge-layout {
+            background: #43e97b;
+            color: #333;
+        }
+        .badge-render {
+            background: #f5576c;
+            color: #fff;
+        }
+        .badge-event {
+            background: #4facfe;
+            color: #fff;
+        }
+        .inherit-line {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .inherit-arrow {
+            color: #667eea;
+            font-size: 1.5em;
+            margin: 0 15px;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-comment { color: #6a9955; }
+        .tree-structure {
+            margin: 20px 0;
+        }
+        .level {
+            margin-left: 20px;
+            padding: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+        .level-0 { margin-left: 0; }
+        .node-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: #f5f5f5;
+            transition: all 0.3s;
+        }
+        .node-row:hover {
+            background: #e8e8e8;
+            transform: translateX(5px);
+        }
+        .node-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #fff;
+            font-size: 0.8em;
+        }
+        .icon-ace { background: #667eea; }
+        .icon-ui { background: #f5576c; }
+        .icon-frame { background: #4facfe; }
+        .icon-layout { background: #43e97b; color: #333; }
+        .icon-render { background: #f5576c; }
+        .icon-event { background: #00d9ff; }
+        .icon-pattern { background: #a8edea; color: #333; }
+        .file-path {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8em;
+            color: #666;
+            margin-left: auto;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        .description {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌳 ArkUI 框架节点树</h1>
+        
+        <div class="card">
+            <h2>一、核心节点继承关系</h2>
+            
+            <div class="inherit-line">
+                <div class="node node-ace-type">AceType <span class="badge badge-core">基类</span></div>
+                <div class="inherit-arrow">↓</div>
+                <div class="node node-ui-node">UINode <span class="badge badge-core">节点基类</span></div>
+                <div class="inherit-arrow">↓</div>
+                <div class="node node-frame-node">FrameNode <span class="badge badge-core">组件节点</span></div>
+            </div>
+
+            <div class="description">
+                <strong>继承链说明：</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><code>AceType</code> - 基础类型系统，提供引用计数等基础能力</li>
+                    <li><code>UINode</code> - 所有UI节点的基类，管理父子节点关系</li>
+                    <li><code>FrameNode</code> - 组件节点实体，组合了Pattern、Layout、Render能力</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+<span class="code-keyword">class</span> <span class="code-keyword">AceType</span> { <span class="code-comment">// 基类</span>
+<span class="code-comment">    // 引用计数、智能指针等基础能力</span>
+};
+
+<span class="code-keyword">class</span> <span class="code-keyword">UINode</span> : <span class="code-keyword">public</span> <span class="code-keyword">AceType</span> {
+    <span class="code-comment">// 节点树管理: AddChild, RemoveChild, GetParent, GetChildren</span>
+};
+
+<span class="code-keyword">class</span> <span class="code-keyword">FrameNode</span> : <span class="code-keyword">public</span> <span class="code-keyword">UINode</span>, <span class="code-keyword">public</span> <span class="code-keyword">LayoutWrapper</span> {
+    <span class="code-comment">// 组件核心节点</span>
+    RefPtr&lt;Pattern&gt; pattern_;           <span class="code-comment">// 业务逻辑</span>
+    RefPtr&lt;RenderContext&gt; renderContext_; <span class="code-comment">// 渲染上下文</span>
+    RefPtr&lt;EventHub&gt; eventHub_;          <span class="code-comment">// 事件处理</span>
+};
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>二、FrameNode 完整结构</h2>
+            
+            <div class="tree-structure">
+                <div class="level level-0">
+                    <div class="node-row">
+                        <div class="node-icon icon-frame">FN</div>
+                        <strong>FrameNode</strong>
+                        <span class="badge badge-core">核心节点</span>
+                        <span class="file-path">base/frame_node.h</span>
+                    </div>
+                    <div class="level">
+                        <div class="node-row">
+                            <div class="node-icon icon-pattern">P</div>
+                            <strong>pattern_</strong> → Pattern
+                            <span class="badge badge-core">业务逻辑</span>
+                        </div>
+                        <div class="level">
+                            <div class="node-row" style="background: #fafafa; font-size: 0.9em;">
+                                Pattern子类: TextPattern, ButtonPattern, ImagePattern, ColumnPattern...
+                            </div>
+                        </div>
+                        
+                        <div class="node-row">
+                            <div class="node-icon icon-render">RC</div>
+                            <strong>renderContext_</strong> → RenderContext
+                            <span class="badge badge-render">渲染</span>
+                        </div>
+                        <div class="level">
+                            <div class="node-row" style="background: #fafafa; font-size: 0.9em;">
+                                背景/边框/阴影/透明度/变换/裁剪等渲染属性
+                            </div>
+                        </div>
+                        
+                        <div class="node-row">
+                            <div class="node-icon icon-event">EH</div>
+                            <strong>eventHub_</strong> → EventHub
+                            <span class="badge badge-event">事件</span>
+                        </div>
+                        <div class="level">
+                            <div class="node-row" style="background: #fafafa; font-size: 0.9em;">
+                                GestureEventHub, InputEventHub, AccessibilityEventHub
+                            </div>
+                        </div>
+                        
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">LP</div>
+                            <strong>layoutProperty_</strong> → LayoutProperty
+                            <span class="badge badge-layout">布局</span>
+                        </div>
+                        
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">GP</div>
+                            <strong>geometryNode_</strong> → GeometryNode
+                            <span class="badge badge-layout">几何</span>
+                        </div>
+                        <div class="level">
+                            <div class="node-row" style="background: #fafafa; font-size: 0.9em;">
+                                frameRect, margin, padding, layoutConstraint
+                            </div>
+                        </div>
+                        
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">PP</div>
+                            <strong>paintProperty_</strong> → PaintProperty
+                            <span class="badge badge-render">渲染属性</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>三、LayoutWrapper 结构</h2>
+            
+            <div class="tree-structure">
+                <div class="level level-0">
+                    <div class="node-row">
+                        <div class="node-icon icon-layout">LW</div>
+                        <strong>LayoutWrapper</strong>
+                        <span class="badge badge-layout">布局封装</span>
+                        <span class="file-path">layout/layout_wrapper.h</span>
+                    </div>
+                    <div class="level">
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">GN</div>
+                            <strong>geometryNode_</strong> → GeometryNode
+                        </div>
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">LPr</div>
+                            <strong>layoutProperty_</strong> → LayoutProperty
+                        </div>
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">LA</div>
+                            <strong>layoutAlgorithm_</strong> → LayoutAlgorithm
+                        </div>
+                        <div class="node-row">
+                            <div class="node-icon icon-layout">CW</div>
+                            <strong>children_</strong> → vector&lt;LayoutWrapper&gt;
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="description">
+                <strong>LayoutWrapper 职责：</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><code>Measure()</code> - 测量子节点尺寸</li>
+                    <li><code>Layout()</code> - 计算子节点位置</li>
+                    <li><code>GetGeometryNode()</code> - 获取几何信息</li>
+                    <li><code>GetLayoutProperty()</code> - 获取布局属性</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>四、节点树示例</h2>
+            
+            <h3>代码示例：</h3>
+            <div class="code-block">
+<span class="code-decorator">@Entry</span>
+<span class="code-decorator">@Component</span>
+<span class="code-keyword">struct</span> <span class="code-function">MyPage</span> {
+  <span class="code-function">build</span>() {
+    <span class="code-function">Column</span>() {
+      <span class="code-function">Text</span>(<span class="code-string">"Hello"</span>)
+      <span class="code-function">Button</span>(<span class="code-string">"Click"</span>)
+    }
+  }
+}
+            </div>
+
+            <h3>对应的节点树结构：</h3>
+            <div class="tree-structure">
+                <div class="level level-0">
+                    <div class="node-row" style="background: #e8f5e9;">
+                        <div class="node-icon icon-frame">R</div>
+                        <strong>RootFrameNode (Page)</strong>
+                    </div>
+                    <div class="level">
+                        <div class="node-row" style="background: #e3f2fd;">
+                            <div class="node-icon icon-frame">C</div>
+                            <strong>Column</strong>
+                            <span class="file-path">id: 1, tag: "Column"</span>
+                        </div>
+                        <div class="level">
+                            <div class="node-row" style="background: #fff3e0;">
+                                <div class="node-icon icon-frame">T</div>
+                                <strong>Text</strong>
+                                <span class="file-path">id: 2, tag: "Text", content: "Hello"</span>
+                            </div>
+                            <div class="node-row" style="background: #fce4ec;">
+                                <div class="node-icon icon-frame">B</div>
+                                <strong>Button</strong>
+                                <span class="file-path">id: 3, tag: "Button", content: "Click"</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>五、核心文件路径</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background: #667eea; color: #fff;">
+                    <th style="padding: 12px; text-align: left;">组件</th>
+                    <th style="padding: 12px; text-align: left;">头文件路径</th>
+                    <th style="padding: 12px; text-align: left;">说明</th>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>FrameNode</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">base/frame_node.h</code></td>
+                    <td style="padding: 12px;">组件节点实体</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>UINode</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">base/ui_node.h</code></td>
+                    <td style="padding: 12px;">节点基类</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>Pattern</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">pattern/*_pattern.h</code></td>
+                    <td style="padding: 12px;">组件业务逻辑</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>LayoutWrapper</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">layout/layout_wrapper.h</code></td>
+                    <td style="padding: 12px;">布局封装</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>RenderContext</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">render/render_context.h</code></td>
+                    <td style="padding: 12px;">渲染上下文</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>EventHub</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">event/event_hub.h</code></td>
+                    <td style="padding: 12px;">事件处理</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px;"><strong>GeometryNode</strong></td>
+                    <td style="padding: 12px;"><code class="file-path">base/geometry_node.h</code></td>
+                    <td style="padding: 12px;">几何信息</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align: center; color: #fff; padding: 20px;">
+            <p>Generated by OpenCode | ArkUI Node Tree Analysis</p>
+        </div>
+    </div>
+</body>
+</html>

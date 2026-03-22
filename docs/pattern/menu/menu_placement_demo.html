@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Placement 布局场景分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section h2 {
+            color: #00d2ff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .placement-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .placement-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d2ff;
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+        }
+        
+        .placement-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00d2ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .placement-badge {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+        }
+        
+        .demo-area {
+            width: 100%;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            position: relative;
+            margin: 15px 0;
+            overflow: hidden;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .target {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        .menu-box {
+            position: absolute;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #1a1a2e;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            transition: all 0.3s ease;
+            opacity: 0.9;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85em;
+            color: #a8ff78;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        
+        .direction-arrow {
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: #ffd700;
+            z-index: 1;
+        }
+        
+        .direction-arrow::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -4px;
+            border: 5px solid transparent;
+            border-left-color: #ffd700;
+        }
+        
+        .fallback-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .fallback-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        
+        .fallback-item:first-child {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .code-section {
+            background: #0d1117;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .code-section pre {
+            color: #c9d1d9;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .keyword { color: #ff7b72; }
+        .function { color: #d2a8ff; }
+        .comment { color: #8b949e; }
+        .string { color: #a5d6ff; }
+        .number { color: #79c0ff; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(0, 210, 255, 0.1);
+            color: #00d2ff;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(0, 210, 255, 0.2);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .highlight {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .tips {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #ffd700;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Menu Placement 布局场景分析</h1>
+        <p class="subtitle">ArkUI Menu 菜单在不同 Placement 下的布局结果</p>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('placement')">Placement 场景</button>
+            <button class="nav-tab" onclick="showTab('fallback')">避让机制</button>
+            <button class="nav-tab" onclick="showTab('code')">代码逻辑</button>
+            <button class="nav-tab" onclick="showTab('avoid')">避让规则</button>
+        </div>
+        
+        <div id="placement" class="tab-content active">
+            <div class="grid">
+                <!-- BOTTOM_LEFT -->
+                <div class="placement-card">
+                    <div class="placement-name">
+                        <span class="placement-badge">推荐</span>
+                        BOTTOM_LEFT
+                    </div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 130px; top: 125px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x<br>
+                        y = targetOffset.y + targetHeight + targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">下方左对齐</span>
+                    </p>
+                </div>
+                
+                <!-- BOTTOM -->
+                <div class="placement-card">
+                    <div class="placement-name">BOTTOM</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 120px; top: 125px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + (targetWidth - menuWidth) / 2<br>
+                        y = targetOffset.y + targetHeight + targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">下方居中</span>
+                    </p>
+                </div>
+                
+                <!-- BOTTOM_RIGHT -->
+                <div class="placement-card">
+                    <div class="placement-name">BOTTOM_RIGHT</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 110px; top: 125px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + targetWidth - menuWidth<br>
+                        y = targetOffset.y + targetHeight + targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">下方右对齐</span>
+                    </p>
+                </div>
+                
+                <!-- TOP_LEFT -->
+                <div class="placement-card">
+                    <div class="placement-name">TOP_LEFT</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 130px; top: 25px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x<br>
+                        y = targetOffset.y - menuHeight - targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">上方左对齐</span>
+                    </p>
+                </div>
+                
+                <!-- TOP -->
+                <div class="placement-card">
+                    <div class="placement-name">TOP</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 120px; top: 25px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + (targetWidth - menuWidth) / 2<br>
+                        y = targetOffset.y - menuHeight - targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">上方居中</span>
+                    </p>
+                </div>
+                
+                <!-- TOP_RIGHT -->
+                <div class="placement-card">
+                    <div class="placement-name">TOP_RIGHT</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 130px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 110px; top: 25px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + targetWidth - menuWidth<br>
+                        y = targetOffset.y - menuHeight - targetSpace
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">上方右对齐</span>
+                    </p>
+                </div>
+                
+                <!-- LEFT_BOTTOM -->
+                <div class="placement-card">
+                    <div class="placement-name">LEFT_BOTTOM</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 200px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 115px; top: 70px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x - menuWidth - targetSpace<br>
+                        y = targetOffset.y + targetHeight - menuHeight
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">左侧底部对齐</span>
+                    </p>
+                </div>
+                
+                <!-- LEFT -->
+                <div class="placement-card">
+                    <div class="placement-name">LEFT</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 200px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 115px; top: 75px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x - menuWidth - targetSpace<br>
+                        y = targetOffset.y + (targetHeight - menuHeight) / 2
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">左侧居中</span>
+                    </p>
+                </div>
+                
+                <!-- LEFT_TOP -->
+                <div class="placement-card">
+                    <div class="placement-name">LEFT_TOP</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 200px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 115px; top: 80px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x - menuWidth - targetSpace<br>
+                        y = targetOffset.y
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">左侧顶部对齐</span>
+                    </p>
+                </div>
+                
+                <!-- RIGHT_BOTTOM -->
+                <div class="placement-card">
+                    <div class="placement-name">RIGHT_BOTTOM</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 60px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 125px; top: 70px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + targetWidth + targetSpace<br>
+                        y = targetOffset.y + targetHeight - menuHeight
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">右侧底部对齐</span>
+                    </p>
+                </div>
+                
+                <!-- RIGHT -->
+                <div class="placement-card">
+                    <div class="placement-name">RIGHT</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 60px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 125px; top: 75px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + targetWidth + targetSpace<br>
+                        y = targetOffset.y + (targetHeight - menuHeight) / 2
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">右侧居中</span>
+                    </p>
+                </div>
+                
+                <!-- RIGHT_TOP -->
+                <div class="placement-card">
+                    <div class="placement-name">RIGHT_TOP</div>
+                    <div class="demo-area">
+                        <div class="target" style="left: 60px; top: 80px;">Target</div>
+                        <div class="menu-box" style="left: 125px; top: 80px; width: 80px; height: 50px;">Menu</div>
+                    </div>
+                    <div class="formula">
+                        x = targetOffset.x + targetWidth + targetSpace<br>
+                        y = targetOffset.y
+                    </div>
+                    <p style="color: #888; font-size: 0.9em; margin-top: 10px;">
+                        菜单显示在目标组件<span class="highlight">右侧顶部对齐</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fallback" class="tab-content">
+            <div class="section">
+                <h2>📋 Placement 避让顺序</h2>
+                <p style="color: #888; margin-bottom: 20px;">
+                    当指定的 Placement 放不下菜单时，系统会按以下顺序尝试其他 Placement。Menu 组件支持 <strong>12 种初始 Placement</strong>，每种都有完整的避让顺序：
+                </p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>初始 Placement</th>
+                            <th>避让顺序 (优先级从高到低)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">BOTTOM_LEFT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">BOTTOM</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">TOP</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">TOP</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">LEFT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">LEFT</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">BOTTOM_RIGHT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">TOP_LEFT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">TOP_RIGHT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">LEFT_TOP</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">LEFT_BOTTOM</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">RIGHT_TOP</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">RIGHT</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">RIGHT</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">TOP</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">RIGHT_BOTTOM</span></td>
+                            <td>
+                                <div class="fallback-list">
+                                    <span class="fallback-item">RIGHT_BOTTOM</span>
+                                    <span class="fallback-item">RIGHT_TOP</span>
+                                    <span class="fallback-item">LEFT_BOTTOM</span>
+                                    <span class="fallback-item">LEFT_TOP</span>
+                                    <span class="fallback-item">BOTTOM_RIGHT</span>
+                                    <span class="fallback-item">BOTTOM_LEFT</span>
+                                    <span class="fallback-item">TOP_RIGHT</span>
+                                    <span class="fallback-item">TOP_LEFT</span>
+                                    <span class="fallback-item">NONE</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="tips">
+                    <strong>💡 提示：</strong>避让机制的核心思想是"同方向优先，必要时反向"：
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>如果放下方不够，尝试放上方</li>
+                        <li>如果放左边不够，尝试放右边</li>
+                        <li><strong>如果空间还不够，会尝试对角位置</strong> - 见 <code>GetAdjustPosition()</code> (menu_layout_algorithm.cpp:3140)</li>
+                        <li><strong>最后如果都不行，会尝试填满屏幕</strong> - 见 <code>CalcVerticalPosition()</code> (menu_layout_algorithm.cpp:2830-2845)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="code" class="tab-content">
+            <div class="section">
+                <h2>💻 核心代码逻辑</h2>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">1. 位置计算入口</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:2084-2133</span>
+<span class="keyword">OffsetF</span> MenuLayoutAlgorithm::<span class="function">UpdateMenuPosition</span>(...)
+{
+    <span class="keyword">auto</span> avoidanceMode = menuProp->GetSelectAvoidanceMode()
+        .value_or(<span class="keyword">AvoidanceMode::COVER_TARGET</span>);
+    
+    <span class="keyword">if</span> (useLastPosition) {
+        <span class="comment">// 保持上次位置</span>
+        menuPosition = lastPosition_.value();
+    } <span class="keyword">else if</span> (menuPattern->IsSelectMenu() && 
+               avoidanceMode == <span class="keyword">AvoidanceMode::AVOID_AROUND_TARGET</span>) {
+        <span class="comment">// Select菜单避让模式</span>
+        menuPosition = <span class="function">SelectLayoutAvoidAlgorithm</span>(...);
+    } <span class="keyword">else</span> {
+        <span class="comment">// 普通菜单布局</span>
+        menuPosition = <span class="function">MenuLayoutAvoidAlgorithm</span>(...);
+    }
+}</pre>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">2. 垂直布局计算</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:2797-2845</span>
+<span class="keyword">float</span> MenuLayoutAlgorithm::<span class="function">VerticalLayout</span>(
+    <span class="keyword">const</span> SizeF& size, <span class="keyword">float</span> position, <span class="keyword">bool</span> isContextMenu)
+{
+    placement_ = <span class="keyword">Placement::BOTTOM</span>;
+    
+    <span class="comment">// 1. 优先放下面</span>
+    <span class="keyword">if</span> (GreatOrEqual(bottomSpace_, size.Height())) {
+        <span class="keyword">return</span> position + margin_;
+    }
+    
+    <span class="comment">// 2. 放下面不够，尝试放上面</span>
+    <span class="keyword">if</span> (GreatOrEqual(topSpace_, size.Height())) {
+        placement_ = <span class="keyword">Placement::TOP</span>;
+        <span class="keyword">return</span> topSpace_ - size.Height() + margin_;
+    }
+    
+    <span class="comment">// 3. 都放不下，填满屏幕底部</span>
+    <span class="keyword">if</span> (LessNotEqual(size.Height(), wrapperHeight)) {
+        <span class="keyword">return</span> wrapperHeight - size.Height();
+    }
+    
+    <span class="comment">// 4. 完全放不下，贴顶</span>
+    <span class="keyword">return</span> 0.0f;
+}</pre>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">3. Placement 位置映射</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:319-330</span>
+MenuLayoutAlgorithm::MenuLayoutAlgorithm(...)
+{
+    placementFuncMap_[<span class="keyword">Placement::TOP</span>] = 
+        &MenuLayoutAlgorithm::GetPositionWithPlacementTop;
+    placementFuncMap_[<span class="keyword">Placement::TOP_LEFT</span>] = 
+        &MenuLayoutAlgorithm::GetPositionWithPlacementTopLeft;
+    placementFuncMap_[<span class="keyword">Placement::BOTTOM</span>] = 
+        &MenuLayoutAlgorithm::GetPositionWithPlacementBottom;
+    placementFuncMap_[<span class="keyword">Placement::BOTTOM_LEFT</span>] = 
+        &MenuLayoutAlgorithm::GetPositionWithPlacementBottomLeft;
+    <span class="comment">// ... 其他placement类似</span>
+}</pre>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">4. 屏幕适配检查</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:3037-3055</span>
+<span class="keyword">OffsetF</span> MenuLayoutAlgorithm::<span class="function">FitToScreen</span>(
+    <span class="keyword">const</span> OffsetF& position, <span class="keyword">const</span> SizeF& childSize, <span class="keyword">bool</span> didNeedArrow)
+{
+    <span class="comment">// 添加用户偏移</span>
+    OffsetF afterOffsetPosition;
+    <span class="keyword">if</span> (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f))) {
+        afterOffsetPosition = <span class="function">AddTargetSpace</span>(originPosition);
+    } <span class="keyword">else</span> {
+        afterOffsetPosition = <span class="function">AddOffset</span>(originPosition);
+    }
+    
+    <span class="comment">// 检查是否在安全区域内</span>
+    <span class="keyword">if</span> (!<span class="function">CheckPosition</span>(afterOffsetPosition, childSize) || flag_) {
+        <span class="keyword">return</span> OffsetF(0.0f, 0.0f);  <span class="comment">// 返回0表示不可用</span>
+    }
+    
+    <span class="keyword">return</span> afterOffsetPosition;
+}</pre>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">5. 对角位置避让 (GetAdjustPosition)</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:3140-3162</span>
+<span class="comment">// 当所有主placement都失败后，尝试按step跳过对齐方式来尝试对角位置</span>
+<span class="keyword">OffsetF</span> MenuLayoutAlgorithm::<span class="function">GetAdjustPosition</span>(
+    std::vector&lt;Placement&gt;& currentPlacementStates, <span class="keyword">size_t</span> step,
+    <span class="keyword">const</span> SizeF& childSize, <span class="keyword">const</span> OffsetF& topPosition, <span class="keyword">const</span> OffsetF& bottomPosition)
+{
+    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = 0; i &lt; len;) {
+        placement_ = currentPlacementStates[i];
+        <span class="keyword">if</span> (placement_ == <span class="keyword">Placement::NONE</span>) {
+            <span class="keyword">break</span>;  <span class="comment">// 遇到NONE停止</span>
+        }
+        childPosition = <span class="function">GetPositionWithPlacement</span>(childSize, topPosition, bottomPosition);
+        position = <span class="function">AdjustPosition</span>(childPosition, ...);
+        <span class="keyword">if</span> (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            <span class="keyword">break</span>;  <span class="comment">// 找到可用位置</span>
+        }
+        i += step;  <span class="comment">// 跳过step个placement，尝试对角位置</span>
+    }
+    <span class="keyword">return</span> position;
+}</pre>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 20px 0 10px;">6. 填满屏幕 (CalcVerticalPosition)</h3>
+                <div class="code-section">
+                    <pre><span class="comment">// menu_layout_algorithm.cpp:2830-2845</span>
+<span class="keyword">float</span> MenuLayoutAlgorithm::<span class="function">CalcVerticalPosition</span>(<span class="keyword">const</span> SizeF& size)
+{
+    <span class="comment">// 1. 尝试放上面</span>
+    <span class="keyword">if</span> (GreatOrEqual(topSpace_, size.Height())) {
+        placement_ = <span class="keyword">Placement::TOP</span>;
+        <span class="keyword">return</span> topSpace_ - size.Height() + margin_;
+    }
+    
+    <span class="comment">// 2. 填满屏幕底部</span>
+    <span class="keyword">if</span> (LessNotEqual(size.Height(), wrapperHeight)) {
+        <span class="keyword">return</span> wrapperHeight - size.Height();
+    }
+    
+    <span class="comment">// 3. 完全放不下，贴顶</span>
+    <span class="keyword">return</span> 0.0f;
+}</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div id="avoid" class="tab-content">
+            <div class="section">
+                <h2>🛡️ 避让规则详解</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>作用</th>
+                            <th>来源</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">wrapperRect_</span></td>
+                            <td>考虑安全区域后的可用区域</td>
+                            <td>由 safeAreaInsets 计算</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">targetSecurity_</span></td>
+                            <td>目标组件周围的保留间距</td>
+                            <td>主题中获取 (默认8vp)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">paddingStart_/paddingEnd_</span></td>
+                            <td>菜单左右内边距</td>
+                            <td>主题配置</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">topSecurity/bottomSecurity</span></td>
+                            <td>上下安全区域边界</td>
+                            <td>由设备屏幕决定</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 style="color: #00d2ff; margin: 25px 0 15px;">避让模式对比</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模式</th>
+                            <th>枚举值</th>
+                            <th>行为描述</th>
+                            <th>代码位置</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">覆盖目标</span></td>
+                            <td>COVER_TARGET</td>
+                            <td>菜单直接显示在目标位置，可能覆盖目标组件</td>
+                            <td>menu_layout_algorithm.cpp:2098</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">环绕目标</span></td>
+                            <td>AVOID_AROUND_TARGET</td>
+                            <td>菜单尽量显示在目标周围，不覆盖目标</td>
+                            <td>menu_layout_algorithm.cpp:2106</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 style="color: #00d2ff; margin: 25px 0 15px;">接口参数对布局的影响</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>ArkTS API 调用方式</th>
+                            <th>影响说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">placement</span></td>
+                            <td>.bindMenu(menu, { placement: Placement.Bottom })<br>.bindContextMenu(menu, resp, { placement: Placement.Right })</td>
+                            <td>设置首选布局位置，系统会按避让顺序尝试其他位置</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">offset</span></td>
+                            <td>.bindMenu(menu, { offset: { x: 10, y: 20 } })<br>.bindContextMenu(menu, resp, { offset: { x: -50, y: 0 } })</td>
+                            <td>在计算出的位置上叠加偏移量 (menu_layout_algorithm.cpp:3043)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">avoidanceMode</span></td>
+                            <td>Select使用 .attributeModifier({ applyNormalAttribute: (ins) => ins.avoidance(AvoidanceMode.AVOID_AROUND_TARGET) })</td>
+                            <td>COVER_TARGET: 覆盖目标; AVOID_AROUND_TARGET: 环绕目标</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">showInSubWindow</span></td>
+                            <td>.bindMenu(menu, { showInSubWindow: true })<br>Select组件: .showInSubWindow(true)</td>
+                            <td>是否在子窗口中显示，影响安全区域计算</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 style="color: #00d2ff; margin: 25px 0 15px;">📐 布局不下触发避让示例</h3>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="placement-card" style="flex: 1; min-width: 300px;">
+                        <div class="placement-name">场景：菜单在屏幕底部放不下</div>
+                        <div class="demo-area" style="height: 200px;">
+                            <!-- 屏幕边界 -->
+                            <div style="position: absolute; left: 5px; right: 5px; bottom: 5px; top: 5px; border: 2px dashed #666; border-radius: 4px;">
+                                <span style="position: absolute; right: 10px; top: 5px; color: #666; font-size: 10px;">安全区域</span>
+                            </div>
+                            <!-- 状态栏 -->
+                            <div style="position: absolute; left: 5px; right: 5px; top: 5px; height: 20px; background: rgba(255,0,0,0.3);">
+                                <span style="color: #ff6b6b; font-size: 10px; padding: 2px;">状态栏</span>
+                            </div>
+                            <!-- 目标组件 -->
+                            <div class="target" style="left: 100px; top: 150px;">Target</div>
+                            <!-- 原本位置(超出屏幕) -->
+                            <div style="position: absolute; left: 100px; top: 195px; width: 80px; height: 80px; border: 2px dashed #ff6b6b; border-radius: 6px; opacity: 0.7;">
+                                <span style="color: #ff6b6b; font-size: 10px;">原位置(超屏)</span>
+                            </div>
+                            <!-- 实际位置(避让后) -->
+                            <div class="menu-box" style="left: 100px; top: 115px; width: 80px; height: 80px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);">Menu<br>(避让后)</div>
+                            <!-- 箭头 -->
+                            <div style="position: absolute; left: 135px; top: 190px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #00d2ff;"></div>
+                        </div>
+                        <div class="formula">
+                            1. 尝试 BOTTOM_LEFT → 空间不足<br>
+                            2. 避让到 TOP_LEFT → 空间不足<br>
+                            3. 避让到 RIGHT_TOP → 空间不足<br>
+                            4. 最终: 菜单显示在目标上方，填满可用区域
+                        </div>
+                    </div>
+                    
+                    <div class="placement-card" style="flex: 1; min-width: 300px;">
+                        <div class="placement-name">场景：右侧空间不足，触发placement避让</div>
+                        <div class="demo-area" style="height: 200px;">
+                            <!-- 屏幕边界 -->
+                            <div style="position: absolute; left: 5px; right: 5px; bottom: 5px; top: 5px; border: 2px dashed #666; border-radius: 4px;"></div>
+                            <!-- 目标组件 -->
+                            <div class="target" style="left: 200px; top: 80px;">Target</div>
+                            <!-- 右侧空间不足 -->
+                            <div style="position: absolute; right: 5px; top: 80px; width: 30px; height: 40px; background: rgba(255,0,0,0.2);">
+                                <span style="color: #ff6b6b; font-size: 9px;">空间<br>不足</span>
+                            </div>
+                            <!-- 尝试RIGHT失败 -->
+                            <div style="position: absolute; left: 255px; top: 75px; width: 80px; height: 50px; border: 2px dashed #ff6b6b; border-radius: 6px; opacity: 0.5;">
+                                <span style="color: #ff6b6b; font-size: 10px;">RIGHT失败</span>
+                            </div>
+                            <!-- 避让到LEFT -->
+                            <div class="menu-box" style="left: 75px; top: 75px; width: 80px; height: 50px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);">LEFT<br>(避让后)</div>
+                        </div>
+                        <div class="formula">
+                            1. 首选 RIGHT → 右侧空间不足<br>
+                            2. 避让 RIGHT_TOP → 空间不足<br>
+                            3. 避让 RIGHT_BOTTOM → 空间不足<br>
+                            4. 避让 LEFT → 成功！
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #00d2ff; margin: 25px 0 15px;">布局流程图</h3>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; font-family: monospace;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #00d2ff; color: #000; padding: 8px 20px; border-radius: 20px;">开始布局</span>
+                    </div>
+                    <div style="text-align: center; margin: 10px 0;">↓</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #4facfe; padding: 8px 20px; border-radius: 20px;">获取 Placement 配置</span>
+                    </div>
+                    <div style="text-align: center; margin: 10px 0;">↓</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #4facfe; padding: 8px 20px; border-radius: 20px;">根据placement计算菜单位置</span>
+                    </div>
+                    <div style="text-align: center; margin: 10px 0;">↓</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #ffd700; color: #000; padding: 8px 20px; border-radius: 20px;">FitToScreen() 检查是否超出安全区域</span>
+                    </div>
+                    <div style="text-align: center; margin: 10px 0;">↓</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #f093fb; padding: 8px 20px; border-radius: 20px;">超出? → 尝试下一个 Placement</span>
+                    </div>
+                    <div style="text-align: center; margin: 10px 0;">↓</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="background: #00d2ff; color: #000; padding: 8px 20px; border-radius: 20px;">完成 ✓</span>
+                    </div>
+                </div>
+                
+                <div class="tips" style="margin-top: 20px;">
+                    <strong>📌 关键点：</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>系统会自动计算安全区域（状态栏、导航栏、挖孔屏等）</li>
+                        <li>在屏幕边缘时，菜单会自动调整位置避免超出屏幕</li>
+                        <li>设置了PositionOffset会叠加在计算结果上</li>
+                        <li>Preview菜单有特殊的布局逻辑处理动画</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

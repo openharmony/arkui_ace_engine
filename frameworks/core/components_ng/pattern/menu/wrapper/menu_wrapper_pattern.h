@@ -276,35 +276,35 @@ public:
         NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
     }
 
-   void CallMenuOnWillAppearCallback()
-   {
-       if (onWillAppearCallback_) {
-           onWillAppearCallback_();
-       }
+    void CallMenuOnWillAppearCallback()
+    {
+        if (onWillAppearCallback_) {
+            onWillAppearCallback_();
+        }
         NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_APPEAR);
     }
 
-   void CallMenuOnDidAppearCallback()
-   {
-       if (onDidAppearCallback_) {
-           onDidAppearCallback_();
-       }
+    void CallMenuOnDidAppearCallback()
+    {
+        if (onDidAppearCallback_) {
+            onDidAppearCallback_();
+        }
         NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_APPEAR);
     }
 
-   void CallMenuOnWillDisappearCallback()
-   {
-       if (onWillDisappearCallback_) {
-           onWillDisappearCallback_();
-       }
+    void CallMenuOnWillDisappearCallback()
+    {
+        if (onWillDisappearCallback_) {
+            onWillDisappearCallback_();
+        }
         NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
     }
 
-   void CallMenuOnDidDisappearCallback()
-   {
-       if (onDidDisappearCallback_) {
-           onDidDisappearCallback_();
-       }
+    void CallMenuOnDidDisappearCallback()
+    {
+        if (onDidDisappearCallback_) {
+            onDidDisappearCallback_();
+        }
         NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     }
 
@@ -605,7 +605,7 @@ public:
     Color GetMenuMaskColor() const;
     BlurStyle GetMenuMaskBlurStyle() const;
     void UpdateFilterMaskType();
-    
+
     bool IsDragMenuLiftAnimationFinish() const
     {
         return dragMenuLiftAnimationFinish_;
@@ -615,7 +615,7 @@ public:
     {
         dragMenuLiftAnimationFinish_ = state;
     }
-    
+
     void SetMenuWindowRect(const Rect& menuWindowRect)
     {
         menuWindowRect_ = menuWindowRect;
@@ -623,6 +623,16 @@ public:
     Rect GetMenuWindowRect() const
     {
         return menuWindowRect_;
+    }
+
+    void SetMenuAnimationType(int32_t type)
+    {
+        menuAnimationType_ = type;
+    }
+
+    int32_t GetMenuAnimationType() const
+    {
+        return menuAnimationType_;
     }
 
 protected:
@@ -724,7 +734,7 @@ private:
     bool hasFoldModeChangeTransition_ = false;
     OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
-    bool isFilterInSubWindow_ = false; 
+    bool isFilterInSubWindow_ = false;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
     PreviewMenuAnimationInfo animationInfo_;
@@ -739,6 +749,7 @@ private:
     bool hasCustomOutlineColor_ = false;
     bool isClearLastMenuItem_ = true;
     bool dragMenuLiftAnimationFinish_ = true;
+    int32_t menuAnimationType_ = 0;
     Rect menuWindowRect_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

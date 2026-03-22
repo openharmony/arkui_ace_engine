@@ -539,7 +539,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         }
         auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
-                                            node = targetNode](const std::string& param) {
+                                         node = targetNode](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popup.onStateChange");
             PipelineContext::SetCallBackNode(node);
@@ -1205,8 +1205,8 @@ void JSViewPopups::ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuO
             ParseResLayoutRegionMargin(menuParam.GetResource("layoutRegionMargin.right"), calcDimension.right);
             if (calcDimension.left.has_value() || calcDimension.right.has_value() ||
                 calcDimension.top.has_value() || calcDimension.bottom.has_value()) {
-                    menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
-                        calcDimension.top, calcDimension.bottom, calcDimension.left, calcDimension.right);
+                menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
+                    calcDimension.top, calcDimension.bottom, calcDimension.left, calcDimension.right);
             }
         };
         menuParam.AddResource("layoutRegionMargin", commonCalcDimensionResObj, std::move(updateFunc));
@@ -1597,7 +1597,7 @@ void JSViewPopups::ParseMenuParam(
             menuParam.placement = static_cast<Placement>(placement);
         }
     }
-    
+
     auto enableHoverModeValue = menuOptions->GetProperty("enableHoverMode");
     if (enableHoverModeValue->IsBoolean()) {
         menuParam.enableHoverMode = enableHoverModeValue->ToBoolean();
@@ -1623,6 +1623,10 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
+    auto menuEffectValue = menuOptions->GetProperty("menuEffect");
+    if (menuEffectValue->IsNumber()) {
+        menuParam.menuAnimationType = menuEffectValue->ToNumber<int32_t>();
+    }
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(
@@ -2300,7 +2304,7 @@ void JSViewAbstract::ParseSheetStyle(
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material->Copy();
     }
-    
+
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");
@@ -2636,7 +2640,7 @@ void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, N
     if (showInSubWindowValue->IsBoolean()) {
 #if defined(PREVIEW)
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-                "emulator or a real device instead.");
+             "emulator or a real device instead.");
 #else
         sheetStyle.showInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
@@ -3283,7 +3287,7 @@ void JSViewPopups::ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthV
     CalcDimension bottom;
     RefPtr<ResourceObject> bottomResObj;
     if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottom"), bottom, bottomResObj) &&
-            bottom.IsNonNegative()) {
+        bottom.IsNonNegative()) {
         if (bottom.Unit() == DimensionUnit::PERCENT) {
             bottom.Reset();
         }
@@ -3387,14 +3391,14 @@ void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorV
     outlineColor.SetColor(Color::TRANSPARENT);
     bool isSettingOutlineColor = false;
     if (JSViewAbstract::ParseJsColor(
-        object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftColorResObj)) {
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftColorResObj)) {
         isSettingOutlineColor = true;
         outlineColor.leftColor = left;
     }
     Color right;
     RefPtr<ResourceObject> rightColorResObj;
     if (JSViewAbstract::ParseJsColor(
-        object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightColorResObj)) {
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightColorResObj)) {
         isSettingOutlineColor = true;
         outlineColor.rightColor = right;
     }
@@ -3408,7 +3412,7 @@ void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorV
     Color bottom;
     RefPtr<ResourceObject> bottomColorResObj;
     if (JSViewAbstract::ParseJsColor(
-        object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomColorResObj)) {
+            object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomColorResObj)) {
         isSettingOutlineColor = true;
         outlineColor.bottomColor = bottom;
     }

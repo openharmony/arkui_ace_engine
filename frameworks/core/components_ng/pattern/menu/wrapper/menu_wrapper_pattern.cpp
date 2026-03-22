@@ -649,33 +649,33 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            auto pipeline = host->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [weak, subMenuWk]() {
-                    auto subMenuNode = subMenuWk.Upgrade();
-                    CHECK_NULL_VOID(subMenuNode);
-                    auto menuWrapper = weak.Upgrade();
-                    CHECK_NULL_VOID(menuWrapper);
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak, subMenuWk]() {
+                auto subMenuNode = subMenuWk.Upgrade();
+                CHECK_NULL_VOID(subMenuNode);
+                auto menuWrapper = weak.Upgrade();
+                CHECK_NULL_VOID(menuWrapper);
 
-                    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenuNode);
-                    CHECK_NULL_VOID(subMenuFrameNode);
-                    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
-                    CHECK_NULL_VOID(menuModifier);
-                    menuModifier->setAccessibilityIsShow(subMenuFrameNode, false);
+                auto subMenuFrameNode = DynamicCast<FrameNode>(subMenuNode);
+                CHECK_NULL_VOID(subMenuFrameNode);
+                const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+                CHECK_NULL_VOID(menuModifier);
+                menuModifier->setAccessibilityIsShow(subMenuFrameNode, false);
                     subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
                         WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-                    TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
-                        static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
+                TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
+                    static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
 
-                    menuWrapper->RemoveChild(subMenuNode);
-                    menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-                },
-                TaskExecutor::TaskType::UI, "HideStackExpandMenu");
+                menuWrapper->RemoveChild(subMenuNode);
+                menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            },
+            TaskExecutor::TaskType::UI, "HideStackExpandMenu");
     });
     auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
     CHECK_NULL_VOID(menuFrameNode);
@@ -1210,6 +1210,9 @@ void MenuWrapperPattern::SetMenuTransitionEffectImpl(
         CHECK_NULL_VOID(renderContext);
         CHECK_NULL_VOID(menuParam.previewTransition);
         renderContext->UpdateChainedTransition(menuParam.previewTransition);
+    }
+    if (menuParam.menuAnimationType != 0) {
+        pattern->SetMenuAnimationType(menuParam.menuAnimationType);
     }
 }
 
