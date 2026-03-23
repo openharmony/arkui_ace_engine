@@ -146,6 +146,7 @@ struct TextStyleResult {
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
     float lineThicknessScale = 1.0f;
+    bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
     double strokeWidth = 0.0;
     std::string strokeColor;

@@ -115,6 +115,12 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         textStyle.SetShaderStyle(property->GetShaderStyleValue(textTheme->GetTextStyle().GetShaderStyle()));
     }
 
+    UseSelfTextLineStyleWithTheme(textLineStyle, textStyle, textTheme);
+}
+
+void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme)
+{
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
@@ -130,6 +136,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
 }
 
@@ -193,6 +200,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, SetIsOnlyBetweenLines);
         UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
+        UPDATE_TEXT_STYLE(textLineStyle, OrphanCharOptimization, SetOrphanCharOptimization);
         UPDATE_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, SetCompressLeadingPunctuation);
     }
 }

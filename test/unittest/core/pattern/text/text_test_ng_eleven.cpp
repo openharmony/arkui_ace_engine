@@ -874,4 +874,27 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest039, TestSize.Level0)
     TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::nullopt);
     EXPECT_FALSE(layoutProperty->GetFallbackLineSpacing().value());
 }
+
+/**
+ * @tc.name: TextModelStaticTest040
+ * @tc.desc: test SetOrphanCharOptimization func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextModelStaticTest040, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetOrphanCharOptimization(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetOrphanCharOptimization().value(), false);
+
+    TextModelStatic::SetOrphanCharOptimization(frameNode.GetRawPtr(), true);
+    EXPECT_EQ(layoutProperty->GetOrphanCharOptimization().value(), true);
+    
+    TextModelStatic::SetOrphanCharOptimization(frameNode.GetRawPtr(), false);
+    EXPECT_EQ(layoutProperty->GetOrphanCharOptimization().value(), false);
+}
 } // namespace OHOS::Ace::NG

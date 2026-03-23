@@ -867,11 +867,18 @@ void SpanItem::UpdateReLayoutTextStyle(
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
 
+    UpdateReLayoutTextLineStyle(spanTextStyle, textStyle);
+    UpdateReLayoutGradient(spanTextStyle, textStyle);
+}
+
+void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextStyle& textStyle)
+{
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
 
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
@@ -885,7 +892,6 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    UpdateReLayoutGradient(spanTextStyle, textStyle);
 }
 
 void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)

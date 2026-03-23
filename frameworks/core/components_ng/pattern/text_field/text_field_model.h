@@ -458,6 +458,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};

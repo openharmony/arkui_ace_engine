@@ -162,6 +162,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
@@ -391,6 +392,8 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
+    static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);

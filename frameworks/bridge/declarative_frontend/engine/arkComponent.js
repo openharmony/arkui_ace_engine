@@ -11735,6 +11735,24 @@ class TextLineSpacingModifier extends ModifierWithKey {
 }
 TextLineSpacingModifier.identity = Symbol('textLineSpacing');
 
+class TextOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    }
+    else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOrphanCharOptimizationModifier.identity = Symbol('textOrphanCharOptimization');
+
 class TextCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12542,6 +12560,11 @@ class ArkTextComponent extends ArkComponent {
     arkLineSpacing.value = value;
     arkLineSpacing.onlyBetweenLines = options?.onlyBetweenLines;
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -14083,6 +14106,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextAreaEnableAutoSpacingModifier.identity = Symbol('textAreaEnableAutoSpacing');
 
+class TextAreaOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textArea.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaOrphanCharOptimizationModifier.identity = Symbol('textAreaOrphanCharOptimization');
+
 class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14629,6 +14669,11 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
+      TextAreaOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -16251,6 +16296,23 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextInputEnableAutoSpacingModifier.identity = Symbol('textInputEnableAutoSpacing');
 
+class TextInputOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textInput.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputOrphanCharOptimizationModifier.identity = Symbol('textInputOrphanCharOptimization');
+
 class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16825,6 +16887,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
+      TextInputOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {

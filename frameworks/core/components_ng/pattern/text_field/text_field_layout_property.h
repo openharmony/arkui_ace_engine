@@ -145,6 +145,8 @@ public:
     {
         json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
         json->PutExtAttr("scrollBarColor", GetScrollBarColorValue((Color(0x66182431))).ColorToString().c_str(), filter);
+        json->PutExtAttr("orphanCharOptimization",
+            GetOrphanCharOptimization().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("compressLeadingPunctuation", std::to_string(
             GetCompressLeadingPunctuation().value_or(false)).c_str(), filter);
         json->PutExtAttr("textDirection",
@@ -228,6 +230,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, NumberOfLines, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OrphanCharOptimization, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::u16string, PROPERTY_UPDATE_NORMAL);

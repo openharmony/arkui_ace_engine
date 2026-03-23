@@ -1987,6 +1987,27 @@ void ResetTextOptimizeTrailingSpace(ArkUINodeHandle node)
     TextModelNG::SetOptimizeTrailingSpace(frameNode, DEFAULT_TRIM_SPACE);
 }
 
+void SetTextOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+
+ArkUI_Int32 GetTextOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetOrphanCharOptimization(frameNode));
+}
+
+void ResetTextOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetTextCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3011,6 +3032,9 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextEditMenuOptions = ResetTextEditMenuOptions,
         .setTextBindSelectionMenu = SetTextBindSelectionMenu,
         .resetTextBindSelectionMenu = ResetTextBindSelectionMenu,
+        .setTextOrphanCharOptimization = SetTextOrphanCharOptimization,
+        .getTextOrphanCharOptimization = GetTextOrphanCharOptimization,
+        .resetTextOrphanCharOptimization = ResetTextOrphanCharOptimization,
         .setTextCompressLeadingPunctuation = SetTextCompressLeadingPunctuation,
         .getTextCompressLeadingPunctuation = GetTextCompressLeadingPunctuation,
         .resetTextCompressLeadingPunctuation = ResetTextCompressLeadingPunctuation,

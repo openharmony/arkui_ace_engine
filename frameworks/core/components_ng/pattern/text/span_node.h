@@ -315,6 +315,7 @@ public:
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
         TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
+    void UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextStyle& textStyle);
     void UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
@@ -824,6 +825,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);

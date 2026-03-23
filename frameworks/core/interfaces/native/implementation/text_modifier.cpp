@@ -837,6 +837,14 @@ void SetTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
 }
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetOrphanCharOptimization(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_arkui_component_units_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -1014,6 +1022,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
+        TextAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextModifierImpl;
 }

@@ -2150,6 +2150,33 @@ ArkUINativeModuleValue TextBridge::ResetOnMarqueeStateChange(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool isOrphanChar = false;
+    if (secondArg->IsBoolean()) {
+        isOrphanChar = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setTextOrphanCharOptimization(nativeNode, isOrphanChar);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextOrphanCharOptimization(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

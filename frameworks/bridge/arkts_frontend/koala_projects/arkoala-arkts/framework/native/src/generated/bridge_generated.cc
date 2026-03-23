@@ -21452,6 +21452,19 @@ void impl_TextAttribute_setTextDirection(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getTextModifier()->setTextDirection(self, static_cast<Opt_TextDirection*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextAttribute_setTextDirection, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextAttribute_setOrphanCharOptimization(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextModifier()->setOrphanCharOptimization(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextAttribute_setOrphanCharOptimization, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextAttribute_setFont(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -22724,6 +22737,19 @@ void impl_TextAreaAttribute_setTextDirection(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getTextAreaModifier()->setTextDirection(self, static_cast<Opt_TextDirection*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextAreaAttribute_setTextDirection, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextAreaAttribute_setOrphanCharOptimization(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextAreaModifier()->setOrphanCharOptimization(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextAreaAttribute_setOrphanCharOptimization, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextAreaAttribute_setVoiceButton(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -24563,6 +24589,19 @@ void impl_TextInputAttribute_setShowCounter(Ark_NativePointer thisPtr, KSerializ
         GetNodeModifiers()->getTextInputModifier()->setShowCounter(self, static_cast<Opt_Boolean*>(&valueValueTemp), static_cast<Opt_InputCounterOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextInputAttribute_setShowCounter, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextInputAttribute_setOrphanCharOptimization(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextInputModifier()->setOrphanCharOptimization(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextInputAttribute_setOrphanCharOptimization, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TextPicker_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getTextPickerModifier()->construct(id, flags);
 }

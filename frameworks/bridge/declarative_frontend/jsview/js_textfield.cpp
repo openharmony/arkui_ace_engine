@@ -2463,6 +2463,18 @@ void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSTextField::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
+}
+
 void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
 {
     bool enabled = false;

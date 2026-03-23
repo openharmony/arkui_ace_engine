@@ -174,6 +174,8 @@ public:
     static ArkUINativeModuleValue ResetStrokeColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);

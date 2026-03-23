@@ -785,6 +785,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     marqueeOptions(value: MarqueeOptions): TextAttribute;
     onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
+    orphanCharOptimization(enable: boolean): TextAttribute;
     shaderStyle(value: {
         center: Array<any>;
         radius: number | string;
@@ -827,6 +828,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
     strokeColor(value: ResourceColor): TextAreaAttribute;
+    orphanCharOptimization(enable: boolean): TextAreaAttribute;
     compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAreaAttribute;
 }
@@ -881,6 +883,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
     strokeWidth(value: LengthMetrics): TextInputAttribute;
     strokeColor(value: ResourceColor): TextInputAttribute;
+    orphanCharOptimization(enable: boolean): TextInputAttribute;
     compressLeadingPunctuation(enable: boolean): TextInputAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextInputAttribute;
 }
