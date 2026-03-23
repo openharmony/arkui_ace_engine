@@ -432,9 +432,7 @@ export class ArkParticleComponent extends ArkCommonMethodComponent implements Pa
 @memo
 export function ParticleImpl(
     @memo
-    style: ((attributes: ParticleAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
+    style: ((attributes: ParticleAttribute) => void) | undefined
 ) {
     const receiver = remember<ArkParticleComponent>((): ArkParticleComponent => {
         return new ArkParticleComponent()
@@ -443,6 +441,5 @@ export function ParticleImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
