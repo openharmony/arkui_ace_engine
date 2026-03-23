@@ -24,7 +24,7 @@ import { ArkMarqueePeer, MarqueeAttribute } from './component/marquee'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod } from './component/common'
-import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr } from './component/units'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, VoidCallback } from './component/units'
 import { Color as arkui_component_enums_Color, FontWeight, MarqueeUpdateStrategy } from './component/enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttribute,AttributeModifier<MarqueeAttribute> {
@@ -54,6 +54,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     public _onStart_0_0value?: (() => void) | undefined
     public _onBounce_0_0value?: (() => void) | undefined
     public _onFinish_0_0value?: (() => void) | undefined
+    public _onStop_0_0value?: VoidCallback | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -215,6 +216,23 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                 }
             }
         }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
+                    peer.setOnStopAttribute((this._onStop_0_0value as VoidCallback | undefined));
+                    flagArray[9] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[9] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[9] = 0;
+                    peer.setOnStopAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: MarqueeModifier): void {
         super.mergeModifier(modifier)
@@ -331,6 +349,18 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                 }
             }
         }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
+                    this.onStop((modifier._onStop_0_0value as VoidCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onStop((undefined as VoidCallback | undefined));
+                }
+            }
+        }
     }
     fontColor(value: ResourceColor | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -419,6 +449,16 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             this._state.fireChange()
         } else {
             this._flagArray[8] = 3
+        }
+        return this
+    }
+    onStop(value: VoidCallback | undefined): this {
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
+            this._onStop_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }

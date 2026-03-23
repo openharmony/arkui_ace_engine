@@ -63,6 +63,10 @@ function loadComponent() {
         modifierWithKey(this._modifiersWithKeys, MarqueeOnFinishModifier.identity, MarqueeOnFinishModifier, event);
         return this;
       }
+      onStop(event) {
+        modifierWithKey(this._modifiersWithKeys, MarqueeOnStopModifier.identity, MarqueeOnStopModifier, event);
+        return this;
+      }
       marqueeUpdateStrategy(value) {
         modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
         return this;
@@ -255,6 +259,19 @@ function loadComponent() {
       }
     }
     MarqueeOnFinishModifier.identity = Symbol('marqueeOnFinish');
+    class MarqueeOnStopModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().marquee.resetMarqueeOnStop(node);
+        } else {
+          getUINativeModule().marquee.setMarqueeOnStop(node, this.value);
+        }
+      }
+    }
+    MarqueeOnStopModifier.identity = Symbol('marqueeOnStop');
     loadComponent.componentObj = {'component' : ArkMarqueeComponent };
   }
  return loadComponent.componentObj;
@@ -290,6 +307,9 @@ class JSMarquee extends JSViewAbstract {
     }
     static onFinish(value) {
         getUINativeModule().marquee.setMarqueeOnFinish(true, value);
+    }
+    static onStop(value) {
+        getUINativeModule().marquee.setMarqueeOnStop(true, value);
     }
     static attributeModifier(modifier) {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {

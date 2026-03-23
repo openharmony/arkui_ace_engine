@@ -6207,14 +6207,19 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
+    if (TextMarqueeState::STOP != state || hasStart_) {
+        eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
+    }
 
     if (TextMarqueeState::START == state) {
         CloseSelectOverlay();
         ResetSelection();
         isMarqueeRunning_ = true;
+        hasStart_ = true;
     } else if (TextMarqueeState::FINISH == state) {
         isMarqueeRunning_ = false;
+    } else if (TextMarqueeState::STOP == state) {
+        hasStart_ = false;
     }
 
     RecoverCopyOption();

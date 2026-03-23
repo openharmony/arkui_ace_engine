@@ -7643,6 +7643,8 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnBounce)(ArkUINodeHandle node);
     void (*setMarqueeOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
+    void (*setMarqueeOnStop)(ArkUINodeHandle node, void* callback);
+    void (*resetMarqueeOnStop)(ArkUINodeHandle node);
     void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
     void (*setMarqueeSpacing)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr);

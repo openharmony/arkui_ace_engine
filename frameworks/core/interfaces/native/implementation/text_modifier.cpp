@@ -183,10 +183,12 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src, ConvContext *ctx)
     const int32_t START = 0;
     const int32_t BOUNCE = 1;
     const int32_t FINISH = 2;
+    const int32_t STOP = 3;
     switch (src) {
         case START: dst = ARK_MARQUEE_STATE_START; break;
         case BOUNCE: dst = ARK_MARQUEE_STATE_BOUNCE; break;
         case FINISH: dst = ARK_MARQUEE_STATE_FINISH; break;
+        case STOP: dst = ARK_MARQUEE_STATE_STOP; break;
         default:
             dst = static_cast<Ark_MarqueeState>(-1);
             LOGE("Unexpected enum value in Ark_MarqueeState: %{public}d", src);

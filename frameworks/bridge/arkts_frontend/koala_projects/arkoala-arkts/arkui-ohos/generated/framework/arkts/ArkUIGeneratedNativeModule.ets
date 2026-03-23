@@ -1235,6 +1235,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MarqueeAttribute_setOnFinish(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _MarqueeAttribute_setOnStop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _MediaCachedImage_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _MediaCachedImageInterface_setMediaCachedImageOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
