@@ -1555,7 +1555,9 @@ void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float s
 void SideBarContainerPattern::InitToolBarManager()
 {
     if (!toolbarManager_) {
-        auto pipeline = GetHost()->GetContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         toolbarManager_ = pipeline->GetToolbarManager();
         UpdateSideBarStatus();
