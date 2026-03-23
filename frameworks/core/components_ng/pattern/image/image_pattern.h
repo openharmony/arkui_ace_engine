@@ -22,33 +22,37 @@
 
 #include "base/geometry/offset.h"
 #include "base/image/image_defines.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
-#include "core/animation/picture_animation.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
-#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/pattern/image/image_properties.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/drawable/drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 
+// Forward declarations to reduce header dependencies
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
+class PixelMap;
 }
 
 namespace OHOS::Ace::NG {
+class ImageAnalyzer;
+class ImageLayoutAlgorithm;
+class ImageContentModifier;
+class ImageOverlayModifier;
+class ClickEvent;
+class LongPressEvent;
+class SelectOverlayProxy;
 class InspectorFilter;
 
 class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
@@ -66,26 +70,10 @@ public:
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
-
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<ImageLayoutProperty>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ImageRenderProperty>();
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<ImageLayoutAlgorithm>();
-    }
-
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<ImageEventHub>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    RefPtr<EventHub> CreateEventHub() override;
 
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

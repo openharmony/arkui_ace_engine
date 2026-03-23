@@ -1395,4 +1395,22 @@ HWTEST_F(ImagePatternBranchCoverageTestNg, ApplyAIModificationsChanged001, TestS
     EXPECT_EQ(isPixelMapChangedBefore, isPixelMapChangedAfter);
 }
 
+/**
+ * @tc.name: CreateNodePaintMethodLoadFailed001
+ * @tc.desc: Test CreateNodePaintMethod when loadFailed is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternBranchCoverageTestNg, CreateNodePaintMethodLoadFailed001, TestSize.Level1)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->loadFailed_ = true;
+    auto paintMethod = pattern->CreateNodePaintMethod();
+
+    EXPECT_NE(paintMethod, nullptr);
+}
 } // namespace OHOS::Ace::NG
