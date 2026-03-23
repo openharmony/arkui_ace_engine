@@ -144,6 +144,8 @@ public:
         return indicatorIconCanvasImage_;
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void OnModifyDone() override;
     void OnSensitiveStyleChange(bool isSensitive) override;
 
