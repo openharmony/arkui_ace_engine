@@ -482,7 +482,12 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       Object.keys(obj).forEach((objKey: any) => {
           copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
       });
-      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
+      if (!ObservedObject.IsObservedObject(obj)) {
+        return copy;
+      }
+      const observedPropObject = ObservedObject.createNew(copy, undefined);
+      observedPropObject[globalThis.__OBSERVED_OBJECT_NAME] = obj[globalThis.__OBSERVED_OBJECT_NAME];
+      return observedPropObject;
     }
   }
 }
