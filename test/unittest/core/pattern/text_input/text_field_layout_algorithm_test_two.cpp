@@ -78,14 +78,12 @@ protected:
     RefPtr<Paragraph> CreateMockParagraph(const ParagraphConfig& config)
     {
         auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+        testing::Mock::VerifyAndClear(mockParagraph.GetRawPtr());
         EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(config.maxWidth));
         EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(config.height));
         EXPECT_CALL(*mockParagraph, GetLineCount()).WillRepeatedly(Return(config.lineCount));
         EXPECT_CALL(*mockParagraph, GetLongestLine()).WillRepeatedly(Return(config.longestLine));
-        if (config.longestLineWithIndent > 0.0f) {
-            EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent())
-                .WillRepeatedly(Return(config.longestLineWithIndent));
-        }
+        EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent()).WillRepeatedly(Return(config.longestLineWithIndent));
         if (config.needLayout) {
             EXPECT_CALL(*mockParagraph, Layout(_)).Times(AtLeast(1));
         }
@@ -626,7 +624,8 @@ HWTEST_F(TextFieldLayoutAlgorithmTestTwo, TextAreaMeasureContent011, TestSize.Le
     auto algorithm = GetTextFieldLayoutAlgorithm();
     ASSERT_NE(algorithm, nullptr);
     SetPreferredHeightForTest(algorithm, 50.0f);
-    SetParagraphForTest(algorithm, CreateMockParagraph({ .maxWidth = 300.0f, .height = 20.0f, .needLayout = true }));
+    SetParagraphForTest(algorithm,
+        CreateMockParagraph({ .maxWidth = 300.0f, .height = 20.0f, .longestLine = 0.0f, .needLayout = true }));
 
     auto constraint = CreateContentConstraint({ .maxHeight = 300.0f });
     SizeF result = algorithm->TextAreaMeasureContent(constraint, AceType::RawPtr(layoutWrapper_));
@@ -1357,6 +1356,397 @@ HWTEST_F(TextFieldLayoutAlgorithmTestTwo, IsNeedAdaptFontSize011, TestSize.Level
 
     auto constraint = CreateContentConstraint({});
     EXPECT_FALSE(textInputLayoutAlgorithm->IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, constraint));
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore001
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with empty placeholder and HasAdaptMinFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore001, TestSize.Level1)
+{
+    SetupTextFieldTest(
+        "", [](TextFieldModelNG& model) { model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP)); });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMinFontSize(), Dimension(10.0f, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore002
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with empty placeholder and HasAdaptMaxFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore002, TestSize.Level1)
+{
+    SetupTextFieldTest(
+        "", [](TextFieldModelNG& model) { model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP)); });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMaxFontSize(), Dimension(30.0f, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore003
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with empty placeholder and both AdaptMinFontSize and AdaptMaxFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore003, TestSize.Level1)
+{
+    SetupTextFieldTest("", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMinFontSize(), Dimension(10.0f, DimensionUnit::FP));
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMaxFontSize(), Dimension(30.0f, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore004
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with non-empty placeholder, AdaptMinFontSize should not be set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore004, TestSize.Level1)
+{
+    SetupTextFieldTest(DEFAULT_TEXT, [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdatePlaceholder(u"test placeholder");
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_NE(placeholderTextStyle.GetAdaptMinFontSize(), Dimension(10.0f, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore005
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with password mode, should return early without setting line spacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore005, TestSize.Level1)
+{
+    SetupTextFieldTest("", [](TextFieldModelNG& model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineSpacingBefore = placeholderTextStyle.GetLineSpacing();
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetLineSpacing(), lineSpacingBefore);
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore006
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with HasLineHeight and percent unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore006, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineHeightPercent(150.0f, DimensionUnit::PERCENT);
+    layoutProperty->UpdateLineHeight(lineHeightPercent);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore007
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with HasLineHeight and non-percent unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore007, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineHeightPx(30.0f, DimensionUnit::PX);
+    layoutProperty->UpdateLineHeight(lineHeightPx);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore008
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with HasMaxFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore008, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    float maxFontScale = 2.0f;
+    layoutProperty->UpdateMaxFontScale(maxFontScale);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(layoutProperty->HasMaxFontScale());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore009
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with HasMinFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore009, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    float minFontScale = 0.5f;
+    layoutProperty->UpdateMinFontScale(minFontScale);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(layoutProperty->HasMinFontScale());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore010
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with both HasMaxFontScale and HasMinFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore010, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    float maxFontScale = 2.0f;
+    float minFontScale = 0.5f;
+    layoutProperty->UpdateMaxFontScale(maxFontScale);
+    layoutProperty->UpdateMinFontScale(minFontScale);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(layoutProperty->HasMaxFontScale());
+    EXPECT_TRUE(layoutProperty->HasMinFontScale());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore011
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore sets line spacing from theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore011, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetLineSpacing(), theme->GetPlaceholderLineSpacing());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore012
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with all properties set together.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore012, TestSize.Level1)
+{
+    SetupTextFieldTest("", [](TextFieldModelNG& model) {
+        model.SetAdaptMinFontSize(Dimension(10.0f, DimensionUnit::FP));
+        model.SetAdaptMaxFontSize(Dimension(30.0f, DimensionUnit::FP));
+    });
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineHeightPx(30.0f, DimensionUnit::PX);
+    layoutProperty->UpdateLineHeight(lineHeightPx);
+    layoutProperty->UpdateMaxFontScale(2.0f);
+    layoutProperty->UpdateMinFontScale(0.5f);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMinFontSize(), Dimension(10.0f, DimensionUnit::FP));
+    EXPECT_EQ(placeholderTextStyle.GetAdaptMaxFontSize(), Dimension(30.0f, DimensionUnit::FP));
+    EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
+    EXPECT_EQ(placeholderTextStyle.GetLineSpacing(), theme->GetPlaceholderLineSpacing());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore013
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with isDisabled parameter true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore013, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, true);
+
+    EXPECT_EQ(placeholderTextStyle.GetLineSpacing(), theme->GetPlaceholderLineSpacing());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore014
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with line height in VP unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore014, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineHeightVp(20.0f, DimensionUnit::VP);
+    layoutProperty->UpdateLineHeight(lineHeightVp);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
+}
+
+/**
+ * @tc.name: UpdatePlaceholderTextStyleMore015
+ * @tc.desc: Test UpdatePlaceholderTextStyleMore with line height in FP unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore015, TestSize.Level1)
+{
+    SetupTextFieldTest("");
+    auto pipeline = frameNode_->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    TextStyle placeholderTextStyle;
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension lineHeightFp(18.0f, DimensionUnit::FP);
+    layoutProperty->UpdateLineHeight(lineHeightFp);
+
+    TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(
+        frameNode_, layoutProperty, theme, placeholderTextStyle, false);
+
+    EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
 }
 
 } // namespace OHOS::Ace::NG
