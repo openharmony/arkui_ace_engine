@@ -571,8 +571,12 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.j
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_component/components/arktextclock.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkcounter.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkpatternlock.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkqrcode.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextclock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -599,8 +603,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkCommonShape.ts @arku
 frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent3D.ts @arkui_component3d
 frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts @arkui_architecture
 frameworks/bridge/declarative_frontend/ark_component/src/ArkContainerSpan.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkCounter.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkDataPanel.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkDatePicker.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkDivider.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkEffectComponent.ts
@@ -639,12 +641,10 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkNavRouter.ts @arkui_
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPanel.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkParticle.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPath.ts @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_component/src/ArkPatternLock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPluginComponent.ts @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPolygon.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPolyline.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkProgress.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkQRCode.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRadio.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRating.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRect.ts @arkuilayout1
@@ -673,7 +673,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolSpan.ts @huawe
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTabContent.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTabs.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextArea.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkTextClock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextInput.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextPicker.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextTimer.ts @huawei_g_five

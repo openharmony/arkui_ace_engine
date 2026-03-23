@@ -137,16 +137,11 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_component_model_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:dynamiclayout",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:datapanel",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:textclock",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:patternlock",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:qrcode",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
@@ -166,6 +161,11 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:symbolglyph",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:richeditor",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgauge",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkdatapanel",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextclock",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkpatternlock",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkcounter",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkqrcode",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
