@@ -1238,6 +1238,24 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testFieldModelNg014
+ * @tc.desc: test textInput ModelNg one time code number type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg014, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    TextFieldModelNG::SetType(frameNode, TextInputType::ONE_TIME_CODE_NUMBER);
+
+    auto type = TextFieldModelNG::GetJSInputType(frameNode);
+    EXPECT_EQ(type, static_cast<int32_t>(TextInputType::ONE_TIME_CODE_NUMBER));
+}
+
+/**
  * @tc.name: accessibilityProperty001
  * @tc.desc: test testInput accessibilityProperty
  * @tc.type: FUNC

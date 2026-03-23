@@ -1060,6 +1060,7 @@ public:
     void HandleBlurEvent();
     bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
     void HandleFocusEvent();
+    void CheckAndUpdateInputTypeForOTP();
     void SetFocusStyle();
     void ClearFocusStyle();
     void ProcessFocusStyle();
@@ -1397,6 +1398,7 @@ public:
     bool IsShowPasswordIcon() const;
     std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
+    bool IsOneTimeCodeType() const;
     bool IsShowCancelButtonMode() const;
     bool IsShowVoiceButtonMode() const;
     void CheckPasswordAreaState();
