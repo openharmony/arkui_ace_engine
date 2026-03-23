@@ -40,7 +40,8 @@ enum class InstanceIdGenReason : uint32_t {
 
 class ACE_EXPORT ContainerScope final {
 public:
-    template<typename T>
+   using ReportScopeErrorFun = void (*)();
+   template<typename T>
     explicit ContainerScope(T) = delete;
 
     explicit ContainerScope(int32_t id)
@@ -51,6 +52,9 @@ public:
     ContainerScope(int32_t id, bool enable)
     {
         if (enable) {
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+            CheckIdChange(id);
+#endif
             UpdateCurrent(id);
         }
     }
@@ -66,6 +70,7 @@ public:
     static int32_t SingletonId();
     static int32_t RecentActiveId();
     static int32_t RecentForegroundId();
+    static int32_t SafelyId();
     static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason();
 
     // Convert InstanceIdGenReason enum to human-readable description
@@ -83,9 +88,14 @@ public:
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);
+    static void CheckIdChange(int32_t id);
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+    static void* registerHandler_;
+    static ReportScopeErrorFun reportScopeError_;
+    static void ReportScopeError();
+#endif
 private:
     int32_t restoreId_ = CurrentId();
-
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };
 

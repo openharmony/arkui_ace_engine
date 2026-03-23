@@ -46,6 +46,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
     switch (eventType) {
         case StatisticEventType::FA_APP_START:
             return { "FRAMEWORK", "FA_APP_START" };
+        case StatisticEventType::NAPI_SCOPE_ERROR:
+            return { "FRAMEWORK", "NAPI_SCOPE_ERROR" };
         case StatisticEventType::XCOMPONENT_TYPE_USE_STRING:
             return { "XCOMPONENT", "TYPE_USE_STRING" };
         case StatisticEventType::XCOMPONENT_SET_SURFACE_SIZE:
