@@ -144,6 +144,10 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         CHECK_NULL_RETURN(monthDaysNode, nullptr);
         auto timeNode = CreateAndMountTimeNode(settingData, monthDaysNode, pickerRow);
         CHECK_NULL_RETURN(timeNode, nullptr);
+        auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_RETURN(timePickerPattern, nullptr);
+        timePickerPattern->SetIsInDatePickerDialog(true);
+
         timePickerNode = timeNode;
         isShowTime_ = true;
         pickerRow->MountToParent(pickerStack);
@@ -2290,7 +2294,8 @@ DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& fr
     dateChangeEvent = [weak = WeakPtr<FrameNode>(frameNode), dateChangeEvent](const std::string& info) -> void {
         auto uiNode = weak.Upgrade();
         if (uiNode != nullptr) {
-            DatePickerPattern::ReportDateChangeEvent(uiNode->GetId(), "DatePickerDialog", "onDateChange", info);
+            DatePickerPattern::ReportDialogDateChangeEvent(uiNode->GetId(),
+                "DatePickerDialog", "onDateChange", info);
         }
         CHECK_NULL_VOID(dateChangeEvent);
         dateChangeEvent(info);

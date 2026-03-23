@@ -462,7 +462,10 @@ bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
 
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
-    ReportChangeEvent("CalendarPicker", "onChange", info);
+    if (!IsDialogShow()) {
+        ReportChangeEvent("CalendarPicker", "onChange", info);
+    }
+
     auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);

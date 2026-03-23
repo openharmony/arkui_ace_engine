@@ -684,6 +684,10 @@ public:
         return isEnableCascade_;
     }
 
+    void SetIsInDatePickerDialog(bool isInDatePickerDialog) {
+        isInDatePickerDialog_ = isInDatePickerDialog;
+    }
+
     void ColumnPatternInitHapticController();
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
@@ -881,6 +885,7 @@ private:
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
     bool useButtonFocusArea_ = false;
+    bool isInDatePickerDialog_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
