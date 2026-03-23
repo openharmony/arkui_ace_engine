@@ -6,6 +6,9 @@
         "SliderModifier.ets",
         "SwiperModifier.ets",
         "SymbolGlyphModifier.ets",
-        "WebModifier.ets"
+        "WebModifier.ets",
+        "TextAreaModifier.ets",
+        "TextInputModifier.ets",
+        "TextModifier.ets"
     ]
 }
