@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_SWIPER_INDICATOR_H
 
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 
 namespace OHOS::Ace {
