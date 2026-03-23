@@ -205,7 +205,7 @@ void TextDragTestNg::SetMockParagraphExpectCallParas(MockParagraphExpectCallPara
  * @tc.desc: Test TextDragPattern::CreateDragNode.
  * @tc.type: FUNC
  */
-HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg001, TestSize.Level1)
+HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init Text with dragNode, EXPECT_CALL mockparagraph GetRectsForRange
