@@ -256,7 +256,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
+      "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
@@ -778,7 +778,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
+      "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
@@ -1230,15 +1230,6 @@ foreach(item, ace_platforms) {
 ohos_abc("statemanagement") {
   sources = [ "engine/jsStateManagement.js" ]
   output_name = "statemanagement"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("mock") {
-  sources = [ "engine/jsMock.js" ]
-  output_name = "mock"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
