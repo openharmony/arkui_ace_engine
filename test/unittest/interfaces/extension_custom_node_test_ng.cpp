@@ -40,7 +40,7 @@ public:
  * @tc.desc: test ExtensionCustomNode SetMeasureCallback, SetLayoutCallback, OnMeasure and OnLayout
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionCustomNodeTestNg, ExtensionCustomNodeTestNg001, TestSize.Level1)
+HWTEST_F(ExtensionCustomNodeTestNg, ExtensionCustomNodeTestNg001, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
