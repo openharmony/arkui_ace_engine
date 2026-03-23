@@ -190,6 +190,7 @@ export class SerializerBase implements Disposable {
     public release() {
         this.releaseResources()
         if (SerializerBase.isMultithread) {
+            this.dispose()
             return
         }
         this._position = this._buffer
