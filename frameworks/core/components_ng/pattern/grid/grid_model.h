@@ -16,21 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_MODEL_H
 
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <optional>
+#include <string>
 
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
-#include "core/common/resource/resource_object.h"
+#include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/pattern/grid/grid_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
-#include "core/components_v2/grid/grid_position_controller.h"
-#include "core/event/ace_events.h"
+
+namespace OHOS::Ace {
+class ResourceObject;
+class ScrollControllerBase;
+class ScrollProxy;
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
+struct EditModeOptions;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 
@@ -69,14 +77,13 @@ public:
     virtual void SetFriction(double friction) = 0;
     virtual void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) {}
     virtual void SetAlignItems(GridItemAlignment itemAlign) = 0;
-    virtual void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) = 0;
-    virtual void SetOnScrollBarUpdate(
-        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value) = 0;
+    virtual void SetOnScrollToIndex(OHOS::Ace::NG::ScrollToIndexFunc&& value) = 0;
+    virtual void SetOnScrollBarUpdate(OHOS::Ace::NG::ScrollBarUpdateFunc&& value) = 0;
     virtual void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) = 0;
-    virtual void SetOnItemDragEnter(std::function<void(const ItemDragInfo&)>&& value) = 0;
-    virtual void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) = 0;
-    virtual void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) = 0;
-    virtual void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) = 0;
+    virtual void SetOnItemDragEnter(OHOS::Ace::NG::ItemDragEnterFunc&& value) = 0;
+    virtual void SetOnItemDragMove(OHOS::Ace::NG::ItemDragMoveFunc&& value) = 0;
+    virtual void SetOnItemDragLeave(OHOS::Ace::NG::ItemDragLeaveFunc&& value) = 0;
+    virtual void SetOnItemDrop(OHOS::Ace::NG::ItemDropFunc&& value) = 0;
     virtual RefPtr<ScrollControllerBase> CreatePositionController();
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy();
     virtual void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) = 0;

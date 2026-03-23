@@ -20,6 +20,7 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/common/resource/resource_parse_utils.h"
 

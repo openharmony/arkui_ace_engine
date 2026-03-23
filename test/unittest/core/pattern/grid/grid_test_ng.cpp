@@ -24,6 +24,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"

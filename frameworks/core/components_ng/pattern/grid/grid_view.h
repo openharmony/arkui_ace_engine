@@ -21,8 +21,9 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_properties.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridView {

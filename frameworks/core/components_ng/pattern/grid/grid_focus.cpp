@@ -16,7 +16,11 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::pair<bool, bool> GridFocus::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)

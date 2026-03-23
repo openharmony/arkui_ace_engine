@@ -16,8 +16,13 @@
 #include "core/components_ng/pattern/grid/grid_item_model_static.h"
 
 #include "base/utils/multi_thread.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
+#include "core/components_ng/syntax/shallow_builder.h"
  
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> GridItemModelStatic::CreateFrameNode(int32_t nodeId)

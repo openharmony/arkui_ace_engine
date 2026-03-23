@@ -22,8 +22,15 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -40,6 +47,15 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
+
+GridPattern::GridPattern() = default;
+
+GridPattern::~GridPattern() = default;
+
+RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<GridLayoutProperty>();
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -111,6 +127,16 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     auto property = MakeRefPtr<GridPaintProperty>();
     property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
+}
+
+RefPtr<AccessibilityProperty> GridPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<GridAccessibilityProperty>();
+}
+
+RefPtr<EventHub> GridPattern::CreateEventHub()
+{
+    return MakeRefPtr<GridEventHub>();
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
