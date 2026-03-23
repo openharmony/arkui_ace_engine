@@ -1455,7 +1455,7 @@ HWTEST_F(AppBarTestNg, UpdateVisibilityOfMenuBarRow001, TestSize.Level1)
 
     EXPECT_CALL(*container, IsSubWindow()).Times(AnyNumber()).WillRepeatedly(Return(true));
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    AppBarView::UpdateVisibilityOfMenuBarRow(menubarRow, container);
+    appBar->UpdateVisibilityOfMenuBarRow(menubarRow, container);
     EXPECT_EQ(layoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 }
 } // namespace OHOS::Ace::NG
