@@ -3626,7 +3626,7 @@ struct CJUIFrameNodeModifier {
     ArkUINodeHandle (*getFrameNodeByUniqueId)(ArkUI_Int32 uniqueId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
-    void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32* size);
+    void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32 (*size)[2]);
     ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
 };
 
