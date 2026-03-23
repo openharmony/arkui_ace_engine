@@ -759,6 +759,8 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
     compensationValue_ =
         nanoTimestamp > static_cast<uint64_t>(recvTime_) ? (nanoTimestamp - static_cast<uint64_t>(recvTime_)) : 0;
 
+    FlushAsyncLoadTask();
+
     for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
     }
@@ -790,6 +792,9 @@ bool PipelineBase::ReachResponseDeadline() const
         return false;
     }
     if (currRecvTime_ >= 0) {
+        if (AnimationUtils::IsImplicitAnimationOpen()) {
+            return false;
+        }
         int64_t deadline = FeatureParam::GetSyncloadResponseDeadline();
         return currRecvTime_ + deadline < currTime;
     }

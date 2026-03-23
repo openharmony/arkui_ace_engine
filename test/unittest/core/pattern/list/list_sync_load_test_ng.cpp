@@ -217,19 +217,19 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush at same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 2);
     EXPECT_TRUE(pattern_->prevMeasureBreak_);
 
     /**
      * @tc.steps: step3. Flush at same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
-    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 2);
+    EXPECT_TRUE(pattern_->prevMeasureBreak_);
 }
 
 /**
@@ -318,17 +318,17 @@ HWTEST_F(ListSyncLoadTestNg, GroupSyncLoad003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 3);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 2);
     EXPECT_TRUE(pattern_->prevMeasureBreak_);
 
     /**
      * @tc.steps: step2. Flush next frame
-     * @tc.expected: List load 2 item in 2th frame
+     * @tc.expected: List load 3 item in 2th frame
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
     FlushUITasks(frameNode_);
     EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 5);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);

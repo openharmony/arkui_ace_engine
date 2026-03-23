@@ -93,6 +93,8 @@ public:
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
+    void PostAsyncLoadTask();
+
     DisplayMode GetDefaultScrollBarDisplayMode() const override;
 
     int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode) override;

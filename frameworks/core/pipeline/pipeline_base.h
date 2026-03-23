@@ -1399,6 +1399,7 @@ public:
     }
 
     virtual bool ReachResponseDeadline() const;
+    virtual void FlushAsyncLoadTask() {};
 
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 

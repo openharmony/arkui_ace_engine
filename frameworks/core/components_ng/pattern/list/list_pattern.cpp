@@ -317,9 +317,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         isInitialized_ = true;
     } else {
         ACE_SCOPED_TRACE("List MeasureInNextFrame");
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        PostAsyncLoadTask();
     }
     DrivenRender(dirty);
 
@@ -4660,5 +4658,20 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void ListPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->prevMeasureBreak_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG
