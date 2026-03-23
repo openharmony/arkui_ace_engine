@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -32,6 +33,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -791,4 +793,167 @@ HWTEST_F(NavigationPatternTestEightNg, OnThemeScopeUpdateTest002, TestSize.Level
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg001
+ * @tc.desc: Test GetNavDestinationJsViewName - null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    RefPtr<UINode> uiNode = nullptr;
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(uiNode);
+    EXPECT_TRUE(jsViewNames.empty());
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg002
+ * @tc.desc: Test GetNavDestinationJsViewName - NavDestination node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(navDestination);
+    EXPECT_TRUE(jsViewNames.empty());
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg003
+ * @tc.desc: Test GetNavDestinationJsViewName - CustomNode with empty name
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto customNode = CustomNode::CreateCustomNode(100, "testKey");
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode);
+    EXPECT_TRUE(jsViewNames.empty());
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg004
+ * @tc.desc: Test GetNavDestinationJsViewName - CustomNode with name
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg004, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto customNode = CustomNode::CreateCustomNode(100, "testKey");
+    customNode->SetJSViewName("MyCustomView");
+    
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode);
+    EXPECT_EQ(jsViewNames, "");
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg005
+ * @tc.desc: Test GetNavDestinationJsViewName - nested CustomNode to NavDestination
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg005, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto customNode = CustomNode::CreateCustomNode(101, "testKey");
+    customNode->SetJSViewName("MyCustomView");
+    customNode->AddChild(navDestination);
+    
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode);
+    EXPECT_EQ(jsViewNames, "MyCustomView");
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg006
+ * @tc.desc: Test GetNavDestinationJsViewName - multiple CustomNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg006, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto customNode1 = CustomNode::CreateCustomNode(101, "testKey1");
+    customNode1->SetJSViewName("CustomView1");
+    auto customNode2 = CustomNode::CreateCustomNode(102, "testKey2");
+    customNode2->SetJSViewName("CustomView2");
+    customNode1->AddChild(customNode2);
+    customNode2->AddChild(navDestination);
+    
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode1);
+    EXPECT_EQ(jsViewNames, "CustomView1_CustomView2");
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg007
+ * @tc.desc: Test GetNavDestinationJsViewName - CustomNode with empty name in chain
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg007, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto customNode1 = CustomNode::CreateCustomNode(101, "testKey1");
+    customNode1->SetJSViewName("CustomView1");
+    auto customNode2 = CustomNode::CreateCustomNode(102, "testKey2");
+    customNode2->SetJSViewName("");
+    customNode1->AddChild(customNode2);
+    customNode2->AddChild(navDestination);
+    
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode1);
+    EXPECT_EQ(jsViewNames, "CustomView1");
+}
+
+/**
+ * @tc.name: GetNavDestinationJsViewNameTestNg008
+ * @tc.desc: Test GetNavDestinationJsViewName - non-CustomNode UINode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg008, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, 100, AceType::MakeRefPtr<StackPattern>());
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    stackNode->AddChild(navDestination);
+    
+    auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(stackNode);
+    EXPECT_TRUE(jsViewNames.empty());
+}
 } // namespace OHOS::Ace::NG
