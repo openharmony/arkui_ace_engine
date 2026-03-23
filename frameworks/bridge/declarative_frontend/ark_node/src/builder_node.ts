@@ -95,10 +95,10 @@ class BuilderNode extends BuilderNodeCommonBase {
   public engineParams_: Object | undefined | null;
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
-  public paramBox: ParamBox | undefined | null;
+  public _paramBoxForJsXNode: ParamBox | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions, nodePtr?: number, frameNodePtr?: number) {
     super();
-    this.paramBox = undefined;
+    this._paramBoxForJsXNode = undefined;
     this.updateEngineParams_ = null;
     const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this), nodePtr, frameNodePtr);
     this._JSBuilderNode = jsBuilderNode;
@@ -115,7 +115,7 @@ class BuilderNode extends BuilderNodeCommonBase {
   }
   public setEngineParams(params: Object | undefined | null): void {
     this.engineParams_ = params;
-    this.paramBox?.updateContent(params);
+    this._paramBoxForJsXNode?.updateContent(params);
   }
   public getProxyObjectEngineParam(): Object | undefined | null {
     return this._proxyObjectEngineParam;
@@ -263,7 +263,7 @@ class JSBuilderNode extends BaseNode {
     if (this._supportNestingBuilder && this.isObject(hostParams)) {
       let paramBox = new ParamBox(hostParams);
       if (host) {
-        host.paramBox = paramBox;
+        host._paramBoxForJsXNode = paramBox;
       }
       host?.setProxyObjectEngineParam(new Proxy(hostParams, {
         set(target, property, val): boolean {
@@ -631,10 +631,10 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
   public engineParams_: Object | undefined | null;
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
-  public paramBox: ParamBox | undefined | null;
+  public _paramBoxForJsXNode: ParamBox | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions) {
     super();
-    this.paramBox = undefined;
+    this._paramBoxForJsXNode = undefined;
     this.updateEngineParams_ = null;
     const jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options, new WeakRef(this));
     this._JSBuilderNode = jsBuilderNode;
@@ -657,7 +657,7 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
   }
   public setEngineParams(params: Object | undefined | null): void {
     this.engineParams_ = params;
-    this.paramBox?.updateContent(params);
+    this._paramBoxForJsXNode?.updateContent(params);
   }
   public getProxyObjectEngineParam(): Object | undefined | null {
     return this._proxyObjectEngineParam;
