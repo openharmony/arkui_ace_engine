@@ -17,6 +17,49 @@ interface DataCollectionChangeListener {
   batchUpdate(operations: BatchOperation[]): void;
 }
 
+interface IndexPair {
+  start: number;
+  end: number;
+}
+
+interface IndexMove {
+  from: number;
+  to: number;
+}
+
+interface AddOperation {
+  type: 'add';
+  index: number;
+  count?: number;
+}
+
+interface DeleteOperation {
+  type: 'delete';
+  index: number;
+  count?: number;
+}
+
+interface ChangeOperation {
+  type: 'change';
+  index: number;
+}
+
+interface ReloadOperation {
+  type: 'reload';
+}
+
+interface ExchangeOperation {
+  type: 'exchange';
+  index: IndexPair;
+}
+
+interface MoveOperation {
+  type: 'move';
+  index: IndexMove;
+}
+
+type DataOperation = AddOperation | DeleteOperation | ChangeOperation | ReloadOperation | ExchangeOperation | MoveOperation;
+
 interface ItemsDeleted {
   kind: 'deleted';
   startIndex: number;
