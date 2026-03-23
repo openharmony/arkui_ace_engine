@@ -588,4 +588,24 @@ HWTEST_F(UtilsTest, fontWeightStringToNumericTest001, TestSize.Level1)
     EXPECT_EQ(GetFontWeightNumericValue(mediumEnum), 500);
 }
 
+/**
+ * @tc.name: fontWeightStringToNumericTest002
+ * @tc.desc: Test invalid variable font weight string fallback behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, fontWeightStringToNumericTest002, TestSize.Level1)
+{
+    const std::string invalidWeight = "100%";
+
+    EXPECT_FALSE(OHOS::Ace::StringUtils::IsNumber(invalidWeight));
+
+    auto parseResult = ParseFontWeight(invalidWeight);
+    EXPECT_FALSE(parseResult.first);
+    EXPECT_EQ(parseResult.second, FontWeight::NORMAL);
+
+    FontWeight defaultEnum = ConvertStrToFontWeight(invalidWeight);
+    EXPECT_EQ(defaultEnum, FontWeight::NORMAL);
+    EXPECT_EQ(GetFontWeightNumericValue(defaultEnum), 400);
+}
+
 } // namespace OHOS::Ace::Framework

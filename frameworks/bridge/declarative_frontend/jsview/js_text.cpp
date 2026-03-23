@@ -95,7 +95,8 @@ void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
         if (parseResult.first) {
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
 }
@@ -231,7 +232,8 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
         if (parseResult.first) {
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
