@@ -38,15 +38,12 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
-#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
-#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
 #endif
 
 

@@ -29,6 +29,12 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+
+bool BindMenuStatus::IsNotNeedShowPreview() const
+{
+    return (isBindCustomMenu && isShow) || isBindLongPressMenu;
+}
+
 constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
 constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
 constexpr const char* HIT_TEST_MODE[] = {
@@ -1586,6 +1592,21 @@ const GestureEvent GestureEventHub::GetGestureEventInfo()
     GestureEvent info;
     CHECK_NULL_RETURN(clickRecognizer, info);
     return clickRecognizer->GetGestureEventInfo();
+}
+
+void GestureEventHub::ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
+{
+    longPressEventActuator_ = longPressEventActuator;
+}
+
+RefPtr<LongPressEventActuator> GestureEventHub::GetLongPressEventActuator()
+{
+    return longPressEventActuator_;
+}
+
+bool GestureEventHub::IsGestureHierarchyEmpty() const
+{
+    return gestureHierarchy_.empty();
 }
 
 const ClickInfo GestureEventHub::GetClickInfo()

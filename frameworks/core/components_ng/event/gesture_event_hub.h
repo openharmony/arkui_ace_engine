@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 
+#include <functional>
 #include <list>
 #include <vector>
 #include "ui/base/referenced.h"
@@ -81,10 +82,7 @@ struct BindMenuStatus {
     bool isShow = false;
     MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
-    bool IsNotNeedShowPreview() const
-    {
-        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
-    }
+    bool IsNotNeedShowPreview() const;
 };
 
 struct PreparedInfoForDrag {
@@ -245,14 +243,8 @@ public:
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
-    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
-    {
-        longPressEventActuator_ = longPressEventActuator;
-    }
-    RefPtr<LongPressEventActuator> GetLongPressEventActuator()
-    {
-        return longPressEventActuator_;
-    }
+    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator);
+    RefPtr<LongPressEventActuator> GetLongPressEventActuator();
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(
@@ -412,10 +404,7 @@ public:
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
     bool IsGestureEmpty() const;
-    bool IsGestureHierarchyEmpty() const
-    {
-        return gestureHierarchy_.empty();
-    }
+    bool IsGestureHierarchyEmpty() const;
 
     bool IsPanEventEmpty() const;
 
