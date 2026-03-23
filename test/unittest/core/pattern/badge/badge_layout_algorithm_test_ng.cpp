@@ -47,6 +47,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string VALUE = "badge value";
+const std::string LONG_VALUE = "badge value badge value";
 const int COUNT = 10;
 constexpr Dimension BADGE_FONT_SIZE = 10.0_vp;
 constexpr Dimension BADGE_CIRCLE_SIZE = 30.0_vp;
@@ -735,5 +736,1042 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg013, TestSize.Lev
     FlushUITasks(frameNode_);
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::LTR);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg014
+ * @tc.desc: Test AdjustTextOffsetForBadge branch when auto avoidance is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg014, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT_TOP);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetY() - offsetWithoutAvoidance.GetY(), Dimension(2.0_vp).ConvertToPx());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg015
+ * @tc.desc: Test Layout frame size branch for platform version less than ten.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg015, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeBorderWidth = Dimension(3.0, DimensionUnit::VP);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto frameSizeV10 = badgeTextNode->GetGeometryNode()->GetFrameSize();
+
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIVE));
+    FlushUITasks(frameNode_);
+    auto frameSizeV5 = badgeTextNode->GetGeometryNode()->GetFrameSize();
+
+    auto borderWidthPx = Dimension(3.0, DimensionUnit::VP).ConvertToPx() * 2;
+    EXPECT_EQ(frameSizeV5.Width() - frameSizeV10.Width(), borderWidthPx);
+    EXPECT_EQ(frameSizeV5.Height() - frameSizeV10.Height(), borderWidthPx);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg016
+ * @tc.desc: Test PerformMeasureSelf with width match and height fix policies.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg016, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    firstChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    secondChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    LayoutConstraintF constraint;
+    constraint.parentIdealSize = OptionalSize<float>(200.0f, 160.0f);
+    constraint.maxSize = SizeF(500.0f, 500.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), 200.0f);
+    EXPECT_EQ(frameSize.Height(), FIRST_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg017
+ * @tc.desc: Test PerformMeasureSelf with width fix and height match policies.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg017, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    firstChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    secondChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    LayoutConstraintF constraint;
+    constraint.parentIdealSize = OptionalSize<float>(220.0f, 180.0f);
+    constraint.maxSize = SizeF(500.0f, 500.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), FIRST_ITEM_WIDTH);
+    EXPECT_EQ(frameSize.Height(), 180.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg018
+ * @tc.desc: Test Measure branch when badge font size is not explicitly set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg018, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto badgeLayoutAlgorithm = AceType::DynamicCast<BadgeLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(secondChildFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(u"1");
+    layoutProperty_->ResetBadgeFontSize();
+
+    badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_FALSE(badgeLayoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg019
+ * @tc.desc: Test Measure and Layout branches when badge circle size is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg019, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCircleSize = Dimension(0.0, DimensionUnit::VP);
+    badge.SetIsDefault(true, false);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIVE));
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto badgeTextGeometry = badgeTextNode->GetGeometryNode();
+    ASSERT_NE(badgeTextGeometry, nullptr);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Width(), 0.0f);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Height(), 0.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg020
+ * @tc.desc: Test GetTextDataOffset default branch for unsupported badge position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg020, TestSize.Level1)
+{
+    auto badgeCircleDiameter = BADGE_CIRCLE_SIZE.ConvertToPx();
+    OffsetF frameOffset(12.0f, 24.0f);
+    SizeF frameSize(200.0f, 80.0f);
+    OffsetF result =
+        GetTextDataOffset(BadgePosition(6), TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+    EXPECT_EQ(result.GetX(), frameOffset.GetX());
+    EXPECT_EQ(result.GetY(), frameOffset.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg021
+ * @tc.desc: Test AdjustTextOffsetForBadge branch for RIGHT position in LTR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg021, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = LONG_VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_LE(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg022
+ * @tc.desc: Test AdjustTextOffsetForBadge branch for empty badge value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg022, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "";
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT_TOP);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg023
+ * @tc.desc: Test PerformMeasureSelf constrain branch without layout policy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg023, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    firstChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(600.0f, 620.0f));
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    secondChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(300.0f, 280.0f);
+    constraint.minSize = SizeF(50.0f, 40.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), 300.0f);
+    EXPECT_EQ(frameSize.Height(), 280.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg024
+ * @tc.desc: Test AdjustTextOffsetForBadge branch for RIGHT position in LTR with short text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg024, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "1";
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_GE(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg025
+ * @tc.desc: Test AdjustTextOffsetForBadge branch for LEFT position in RTL with long text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg025, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = LONG_VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::LEFT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_LE(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg026
+ * @tc.desc: Test AdjustTextOffsetForBadge branch for LEFT position in RTL with short text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg026, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "1";
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::LEFT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_GE(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg027
+ * @tc.desc: Test AdjustTextOffsetForBadge keeps X offset unchanged for RIGHT position in RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg027, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg028
+ * @tc.desc: Test AdjustTextOffsetForBadge keeps X offset unchanged for LEFT position in LTR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg028, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::LEFT);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg029
+ * @tc.desc: Test AdjustTextOffsetForBadge keeps offsets unchanged for RIGHT_TOP position in RTL with empty text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg029, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "";
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT_TOP);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg030
+ * @tc.desc: Test AdjustTextOffsetForBadge for RIGHT_TOP position in RTL with non-empty text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg030, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT_TOP);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), -Dimension(2.0_vp).ConvertToPx());
+    EXPECT_EQ(offsetWithAvoidance.GetY() - offsetWithoutAvoidance.GetY(), Dimension(2.0_vp).ConvertToPx());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg031
+ * @tc.desc: Test AdjustTextOffsetForBadge for RIGHT_TOP position in LTR with empty text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg031, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "";
+    badgeParameters.badgePosition = static_cast<int>(BadgePosition::RIGHT_TOP);
+    badgeParameters.isPositionXy = false;
+    badgeParameters.isEnableAutoAvoidance = false;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetWithoutAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    layoutProperty_->UpdateIsEnableAutoAvoidance(true);
+    FlushUITasks(frameNode_);
+    auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg032
+ * @tc.desc: Test LayoutIsPositionXy branch uses badgePositionX and badgePositionY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg032, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "1";
+    badgeParameters.isPositionXy = true;
+    badgeParameters.badgePositionX = Dimension(10.0, DimensionUnit::VP);
+    badgeParameters.badgePositionY = Dimension(6.0, DimensionUnit::VP);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto badgeTextGeometry = badgeTextNode->GetGeometryNode();
+    ASSERT_NE(badgeTextGeometry, nullptr);
+
+    EXPECT_EQ(badgeTextGeometry->GetMarginFrameOffset().GetX(), Dimension(10.0, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(badgeTextGeometry->GetMarginFrameOffset().GetY(), Dimension(6.0, DimensionUnit::VP).ConvertToPx());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg033
+ * @tc.desc: Test child margin offset is adjusted in RTL layout direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg033, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "1";
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(contentNode, nullptr);
+    auto hostGeometry = frameNode_->GetGeometryNode();
+    ASSERT_NE(hostGeometry, nullptr);
+    auto contentGeometry = contentNode->GetGeometryNode();
+    ASSERT_NE(contentGeometry, nullptr);
+
+    auto expectedOffsetX = hostGeometry->GetFrameSize().Width() - contentGeometry->GetMarginFrameSize().Width();
+    EXPECT_EQ(contentGeometry->GetMarginFrameOffset().GetX(), expectedOffsetX);
+    EXPECT_EQ(contentGeometry->GetMarginFrameOffset().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg034
+ * @tc.desc: Test child margin offset remains zero in LTR layout direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg034, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "1";
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks(frameNode_);
+
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(contentNode, nullptr);
+    auto contentGeometry = contentNode->GetGeometryNode();
+    ASSERT_NE(contentGeometry, nullptr);
+
+    EXPECT_EQ(contentGeometry->GetMarginFrameOffset().GetX(), 0.0f);
+    EXPECT_EQ(contentGeometry->GetMarginFrameOffset().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg035
+ * @tc.desc: Test zero badge circle size keeps badge text frame zero on API version ten and above.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg035, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCircleSize = Dimension(0.0, DimensionUnit::VP);
+    badgeParameters.badgeBorderWidth = Dimension(3.0, DimensionUnit::VP);
+    badge.SetIsDefault(true, false);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto badgeTextGeometry = badgeTextNode->GetGeometryNode();
+    ASSERT_NE(badgeTextGeometry, nullptr);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Width(), 0.0f);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Height(), 0.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg036
+ * @tc.desc: Test zero badge circle size still applies border offset difference to badge text margin offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg036, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCircleSize = Dimension(0.0, DimensionUnit::VP);
+    badgeParameters.badgeBorderWidth = Dimension(3.0, DimensionUnit::VP);
+    badge.SetIsDefault(true, false);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto borderWidthPx = Dimension(3.0, DimensionUnit::VP).ConvertToPx();
+
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto offsetV10 = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIVE));
+    FlushUITasks(frameNode_);
+    auto offsetV5 = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+
+    EXPECT_EQ(offsetV10.GetX() - offsetV5.GetX(), borderWidthPx);
+    EXPECT_EQ(offsetV10.GetY() - offsetV5.GetY(), borderWidthPx);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg037
+ * @tc.desc: Test single-digit badge count keeps badge text frame width equal to height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg037, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeCount = 5;
+    badgeParameters.badgeMaxCount = 9;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto badgeTextGeometry = badgeTextNode->GetGeometryNode();
+    ASSERT_NE(badgeTextGeometry, nullptr);
+    auto textLayoutProperty = badgeTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), u"5");
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Width(), badgeCircleDiameter);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Height(), badgeCircleDiameter);
+    EXPECT_EQ(badgeTextGeometry->GetFrameSize().Width(), badgeTextGeometry->GetFrameSize().Height());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg038
+ * @tc.desc: Test badge count greater than max count uses expanded badge text frame width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg038, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeCount = 1000;
+    badgeParameters.badgeMaxCount = 99;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create(u"text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    FlushUITasks(frameNode_);
+
+    auto badgeTextNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    ASSERT_NE(badgeTextNode, nullptr);
+    auto badgeTextGeometry = badgeTextNode->GetGeometryNode();
+    ASSERT_NE(badgeTextGeometry, nullptr);
+    auto textLayoutProperty = badgeTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), u"99+");
+    EXPECT_GE(badgeTextGeometry->GetFrameSize().Width(), badgeCircleDiameter);
+    EXPECT_GE(badgeTextGeometry->GetFrameSize().Width(), badgeTextGeometry->GetFrameSize().Height());
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg039
+ * @tc.desc: Test PerformMeasureSelf returns early when selfIdealSize is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg039, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    firstChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(300.0f, 200.0f));
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    secondChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(120.0f, 80.0f));
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSize<float>(180.0f, 140.0f);
+    constraint.maxSize = SizeF(500.0f, 500.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), 180.0f);
+    EXPECT_EQ(frameSize.Height(), 140.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg040
+ * @tc.desc: Test PerformMeasureSelf constrains frame size to min size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg040, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode_);
+    firstChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 10.0f));
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto secondChild = CreateChild(childLayoutConstraint);
+    auto secondChildFrameNode = secondChild.first;
+    auto secondChildLayoutWrapper = secondChild.second;
+    secondChildFrameNode->MountToParent(frameNode_);
+    secondChildLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(10.0f, 8.0f));
+    layoutWrapper->AppendChild(secondChildLayoutWrapper);
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(500.0f, 500.0f);
+    constraint.minSize = SizeF(60.0f, 40.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), 60.0f);
+    EXPECT_EQ(frameSize.Height(), 40.0f);
 }
 } // namespace OHOS::Ace::NG
