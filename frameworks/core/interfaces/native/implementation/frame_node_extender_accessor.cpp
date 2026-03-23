@@ -25,6 +25,7 @@
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"

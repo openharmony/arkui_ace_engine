@@ -24,6 +24,11 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 using OptCacheItem = RepeatVirtualScroll2Caches::OptCacheItem;
 using GetFrameChildResult = RepeatVirtualScroll2Caches::GetFrameChildResult;
 
+/**
+ * @tc.name: CreateNode001
+ * @tc.desc: Test creation of FrameNode
+ * @tc.type: FUNC
+ */
 RefPtr<FrameNode> RepeatVirtual2TestNg::CreateNode(const std::string& tag)
 {
     auto pattern = AceType::MakeRefPtr<Pattern>();
@@ -71,6 +76,11 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
         onMoveFromTo_, onPurge_, onUpdateDirty_);
 }
 
+/**
+ * @tc.name: CreateListItemNode
+ * @tc.desc: Test creation of ListItemNode
+ * @tc.type: FUNC
+ */
 RefPtr<FrameNode> RepeatVirtual2TestNg::CreateListItemNode()
 {
     auto tag = "TEXT_ETS_TAG";
