@@ -411,6 +411,9 @@ class SubscribableMapSetHandler extends SubscribableHandler {
       if (key === SubscribableHandler.ENABLE_V2_COMPATIBLE) {
         return this.enableV2Compatible_;
       }
+      if (key === SubscribableHandler.OWNING_PROPERTIES) {
+        return this.getOwningProperties();
+      } 
       return target[key];
     }
 
@@ -690,6 +693,9 @@ class SubscribableArrayHandler extends SubscribableHandler {
       if (key === SubscribableHandler.ENABLE_V2_COMPATIBLE) {
         return this.enableV2Compatible_;
       }
+      if (key === SubscribableHandler.OWNING_PROPERTIES) {
+        return this.getOwningProperties();
+      } 
       return target[key];
     }
 

@@ -165,7 +165,7 @@ class ObservedUtil {
     if (!Utils.isNull(target)) {
       const symRefs = target[ObserveV2.SYMBOL_REFS];
       Object.getOwnPropertyNames(symRefs).forEach((name: string) => {
-        const owningName = target.constructor.name;
+        const owningName = this.getOwnerName(target, source);
         const eleIdSet = symRefs[name];
         if (!Utils.isNull(eleIdSet) && eleIdSet.size > 0) {
           const decoratorInfo: DecoratorInfo = {
@@ -180,6 +180,18 @@ class ObservedUtil {
       });
     }
     return decoratorInfos;
+  }
+
+  private static getOwnerName(target: any, source: any): string {
+    let owningName: string = target.constructor.name;
+    if (!owningName) {
+      const sourceProto = Object.getPrototypeOf(source);
+      if (!Utils.isNull(sourceProto)) {
+        const sourceTarget = Object.getPrototypeOf(sourceProto);
+        owningName = sourceTarget ? sourceTarget.constructor.name : '';
+      }
+    }
+    return owningName;
   }
 
   private static hasDependentElement(decorators: Array<DecoratorInfo>): boolean {
