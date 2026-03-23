@@ -570,7 +570,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js 
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arktextclock.js @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -608,7 +608,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkFlowItem.ts @arkuisc
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFolderStack.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFormComponent.ts @form_framework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFormLink.ts @form_framework
-frameworks/bridge/declarative_frontend/ark_component/src/ArkGauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGesture.ts @ArkUI_Event
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridCol.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridContainer.ts @arkuilayout1

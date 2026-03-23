@@ -52,7 +52,6 @@
         "src/ArkDatePicker.ts",
         "src/ArkEmbeddedComponent.ts",
         "src/ArkFormComponent.ts",
-        "src/ArkGauge.ts",
         "src/ArkGesture.ts",
         "src/ArkIsolatedComponent.ts",
         "src/ArkMarquee.ts",

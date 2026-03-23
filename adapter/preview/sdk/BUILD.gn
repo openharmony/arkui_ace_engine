@@ -145,7 +145,6 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:textclock",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
@@ -170,6 +169,7 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:alphabetindexer",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:symbolglyph",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:richeditor",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgauge",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [

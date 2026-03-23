@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,52 +13,54 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-function loadComponent() {
+/// <reference path='./../../ark_component/src/import.ts' />
+type ComponentObj = { component: any }
+
+function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkGaugeComponent extends globalThis.__ArkComponent__ {
-        constructor(nativePtr, classType) {
+        constructor(nativePtr: any, classType: any) {
             super(nativePtr, classType);
         }
-        value(value) {
-            modifierWithKey(this._modifiersWithKeys, GaugeVauleModifier.identity, GaugeVauleModifier, value);
+        value(value: number): this {
+            modifierWithKey(this._modifiersWithKeys, GaugeValueModifier.identity, GaugeValueModifier, value);
             return this;
         }
-        startAngle(angle) {
+        startAngle(angle: number): this {
             modifierWithKey(this._modifiersWithKeys, GaugeStartAngleModifier.identity, GaugeStartAngleModifier, angle);
             return this;
         }
-        endAngle(angle) {
+        endAngle(angle: number): this {
             modifierWithKey(this._modifiersWithKeys, GaugeEndAngleModifier.identity, GaugeEndAngleModifier, angle);
             return this;
         }
-        colors(colors) {
+        colors(colors: ResourceColor | LinearGradient | Array<[ResourceColor | LinearGradient, number]>): this {
             modifierWithKey(this._modifiersWithKeys, GaugeColorsModifier.identity, GaugeColorsModifier, colors);
             return this;
         }
-        strokeWidth(length) {
+        strokeWidth(length: any): this {
             modifierWithKey(this._modifiersWithKeys, GaugeStrokeWidthModifier.identity, GaugeStrokeWidthModifier, length);
             return this;
         }
-        description(value) {
+        description(value: CustomBuilder): this {
             throw new BusinessError(100201, 'description function not supported in attributeModifier scenario.');
         }
-        trackShadow(value) {
+        trackShadow(value: GaugeShadowOptions): this {
             modifierWithKey(this._modifiersWithKeys, GaugeTrackShadowModifier.identity, GaugeTrackShadowModifier, value);
             return this;
         }
-        indicator(value) {
+        indicator(value: GaugeIndicatorOptions): this {
             modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
             return this;
         }
-        contentModifier(value) {
+        contentModifier(value: ContentModifier<GaugeConfiguration>): this {
             modifierWithKey(this._modifiersWithKeys, GaugeContentModifier.identity, GaugeContentModifier, value);
             return this;
         }
-        setContentModifier(modifier) {
+        setContentModifier(modifier: any): this {
             if (modifier === undefined || modifier === null) {
                 getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
-                return;
+                return this;
             }
             this.needRebuild = false;
             if (this.builder !== modifier.applyContent()) {
@@ -67,8 +69,9 @@ function loadComponent() {
             this.builder = modifier.applyContent();
             this.modifier = modifier;
             getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, this);
+            return this;
         }
-        makeContentModifierNode(context, gaugeConfiguration) {
+        makeContentModifierNode(context: any, gaugeConfiguration: any): any {
             gaugeConfiguration.contentModifier = this.modifier;
             if (isUndefined(this.gaugeNode) || this.needRebuild) {
                 let xNode = globalThis.requireNapi('arkui.node');
@@ -80,14 +83,14 @@ function loadComponent() {
             }
             return this.gaugeNode.getFrameNode();
         }
-        privacySensitive(value) {
+        privacySensitive(value: boolean): this {
             modifierWithKey(this._modifiersWithKeys, GaugePrivacySensitiveModifier.identity, GaugePrivacySensitiveModifier, value);
             return this;
         }
     }
     
-    class GaugeIndicatorModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    class GaugeIndicatorModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeIndicator(node, this.value);
             }
@@ -95,24 +98,26 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue.icon, this.value.icon) ||
                 !isBaseOrResourceEqual(this.stageValue.space, this.value.space);
         }
     }
-    GaugeIndicatorModifier.identity = Symbol('gaugeIndicator');
-    class GaugeContentModifier extends ModifierWithKey {
-        constructor(value) {
+    (GaugeIndicatorModifier as any).identity = Symbol('gaugeIndicator');
+    
+    class GaugeContentModifier extends ModifierWithKey<any> {
+        constructor(value: any) {
             super(value);
         }
-        applyPeer(node, reset, component) {
+        applyPeer(node: any, reset: boolean, component: any): void {
             let gaugeComponent = component;
             gaugeComponent.setContentModifier(this.value);
         }
     }
-    GaugeContentModifier.identity = Symbol('gaugeContentModifier');
-    class GaugeColorsModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeContentModifier as any).identity = Symbol('gaugeContentModifier');
+    
+    class GaugeColorsModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeColors(node);
             }
@@ -120,13 +125,14 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeColors(node, this.value);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return true;
         }
     }
-    GaugeColorsModifier.identity = Symbol('gaugeColors');
-    class GaugeVauleModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeColorsModifier as any).identity = Symbol('gaugeColors');
+    
+    class GaugeValueModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeVaule(node);
             }
@@ -134,13 +140,14 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeVaule(node, this.value);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue, this.value);
         }
     }
-    GaugeVauleModifier.identity = Symbol('gaugeVaule');
-    class GaugeStartAngleModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeValueModifier as any).identity = Symbol('gaugeVaule');
+    
+    class GaugeStartAngleModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeStartAngle(node);
             }
@@ -148,13 +155,14 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeStartAngle(node, this.value);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue, this.value);
         }
     }
-    GaugeStartAngleModifier.identity = Symbol('gaugeStartAngle');
-    class GaugeEndAngleModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeStartAngleModifier as any).identity = Symbol('gaugeStartAngle');
+    
+    class GaugeEndAngleModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeEndAngle(node);
             }
@@ -162,13 +170,14 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeEndAngle(node, this.value);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue, this.value);
         }
     }
-    GaugeEndAngleModifier.identity = Symbol('gaugeEndAngle');
-    class GaugeStrokeWidthModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeEndAngleModifier as any).identity = Symbol('gaugeEndAngle');
+    
+    class GaugeStrokeWidthModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeStrokeWidth(node);
             }
@@ -176,13 +185,14 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue, this.value);
         }
     }
-    GaugeStrokeWidthModifier.identity = Symbol('gaugeStrokeWidth');
-    class GaugeTrackShadowModifier extends ModifierWithKey {
-        applyPeer(node, reset) {
+    (GaugeStrokeWidthModifier as any).identity = Symbol('gaugeStrokeWidth');
+    
+    class GaugeTrackShadowModifier extends ModifierWithKey<any> {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugeTrackShadow(node);
             }
@@ -190,16 +200,17 @@ function loadComponent() {
                 getUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
             }
         }
-        checkObjectDiff() {
+        checkObjectDiff(): boolean {
             return !isBaseOrResourceEqual(this.stageValue, this.value);
         }
     }
-    GaugeTrackShadowModifier.identity = Symbol('gaugeTrackShadow');
-    class GaugePrivacySensitiveModifier extends ModifierWithKey {
-        constructor(value) {
+    (GaugeTrackShadowModifier as any).identity = Symbol('gaugeTrackShadow');
+    
+    class GaugePrivacySensitiveModifier extends ModifierWithKey<any> {
+        constructor(value: any) {
             super(value);
         }
-        applyPeer(node, reset) {
+        applyPeer(node: any, reset: boolean): void {
             if (reset) {
                 getUINativeModule().gauge.resetGaugePrivacySensitive(node);
             } else {
@@ -207,49 +218,50 @@ function loadComponent() {
             }
         }
     }
-    GaugePrivacySensitiveModifier.identity = Symbol('gaugePrivacySensitive');
+    (GaugePrivacySensitiveModifier as any).identity = Symbol('gaugePrivacySensitive');
+    
     loadComponent.componentObj = {'component' : ArkGaugeComponent };
   }
   return loadComponent.componentObj;
 }
 
 class JSGauge extends JSViewAbstract {
-    static create(params) {
+    static create(params: any): void {
         getUINativeModule().gauge.create(params);
     }
 
-    static value(value) {
+    static value(value: any): void {
         getUINativeModule().gauge.setGaugeVaule(true, value);
     }
-    static startAngle(angle) {
+    static startAngle(angle: any): void {
         getUINativeModule().gauge.setGaugeStartAngle(true, angle);
     }
-    static endAngle(angle) {
+    static endAngle(angle: any): void {
         getUINativeModule().gauge.setGaugeEndAngle(true, angle);
     }
-    static colors(colors) {
+    static colors(colors: any): void {
         getUINativeModule().gauge.setGaugeColors(true, colors);
     }
-    static strokeWidth(length) {
+    static strokeWidth(length: any): void {
         getUINativeModule().gauge.setGaugeStrokeWidth(true, length);
     }
-    static description(value) {
+    static description(value: any): void {
         getUINativeModule().gauge.setDescription(value);
     }
-    static trackShadow(value) {
+    static trackShadow(value: any): void {
         getUINativeModule().gauge.setGaugeTrackShadow(true, value);
     }
-    static indicator(value) {
+    static indicator(value: any): void {
         getUINativeModule().gauge.setGaugeIndicator(true, value);
     }
-    static attributeModifier(modifier) {
-        attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    static attributeModifier(modifier: any): void {
+        attributeModifierFunc.call(this, modifier, (nativePtr: any) => {
             return createComponent(nativePtr);
-        }, (nativePtr, classType, modifierJS) => {
+        }, (nativePtr: any, classType: any, modifierJS: any) => {
             return new modifierJS.GaugeModifier(nativePtr, classType);
         });
     }
-    static contentModifier(modifier) {
+    static contentModifier(modifier: any): void {
         const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
         let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
         let component = this.createOrGetNode(elmtId, () => {
@@ -258,34 +270,34 @@ class JSGauge extends JSViewAbstract {
         component.setContentModifier(modifier);
     }
 
-    static onClick(value) {
+    static onClick(value: any): void {
         __Common__.onClick(value);
     }
-    static onKeyEvent(value) {
+    static onKeyEvent(value: any): void {
         __Common__.onKeyEvent(value);
     }
-    static onDeleteEvent(value) {
+    static onDeleteEvent(value: any): void {
         __Common__.onDeleteEvent(value);
     }
-    static onAttach(value) {
+    static onAttach(value: any): void {
         __Common__.onAttach(value);
     }
-    static onAppear(value) {
+    static onAppear(value: any): void {
         __Common__.onAppear(value);
     }
-    static onDetach(value) {
+    static onDetach(value: any): void {
         __Common__.onDetach(value);
     }
-    static onDisAppear(value) {
+    static onDisAppear(value: any): void {
         __Common__.onDisAppear(value);
     }
 
-    static onTouch(value) {
+    static onTouch(value: any): void {
         __Common__.onTouch(value);
     }
 }
 
-function createComponent(nativePtr, classType) {
+function createComponent(nativePtr: any, classType: any): any {
     loadComponent();
  	if (loadComponent.componentObj !== undefined) {
  	    return new loadComponent.componentObj.component(nativePtr, classType);
@@ -293,11 +305,11 @@ function createComponent(nativePtr, classType) {
     return undefined;
 }
 
-function exportComponent() {
-    globalThis.ArkGaugeComponent = ArkGaugeComponent;
+function exportComponent(): void {
+    globalThis.ArkGaugeComponent = (loadComponent as any).componentObj?.component;
 }
 
-function exportView() {
+function exportView(): void {
     globalThis.Gauge = JSGauge;
 }
 
