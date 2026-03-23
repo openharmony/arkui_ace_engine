@@ -35,6 +35,7 @@ constexpr char DELIMITER[] = "/";
 #endif
 
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
+constexpr uint32_t INVALID_RESOURCE_ID = UINT32_MAX;
 
 void CheckThemeId(int32_t& themeId)
 {
@@ -607,12 +608,13 @@ RefPtr<ResourceAdapter> ResourceAdapterImpl::GetOverrideResourceAdapter(
 
 uint32_t ResourceAdapterImpl::GetResId(const std::string &resTypeName) const
 {
-    uint32_t resId = -1;
-    CHECK_NULL_RETURN(resourceManager_, -1);
+    uint32_t resId = INVALID_RESOURCE_ID;
+    CHECK_NULL_RETURN(resourceManager_, INVALID_RESOURCE_ID);
     auto state = resourceManager_->GetResId(resTypeName, resId);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resId by name error, name=%s, errorCode=%{public}d",
             resTypeName.c_str(), state);
+        return INVALID_RESOURCE_ID;
     }
     return resId;
 }
