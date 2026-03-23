@@ -15,7 +15,9 @@
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 struct _ArkUINodeAdapter {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
