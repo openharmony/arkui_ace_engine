@@ -26,9 +26,12 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
-#include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
+
+namespace OHOS::Ace::V2 {
+class DataChangeListener;
+}
 
 namespace OHOS::Ace::NG {
 class NativeLazyForEachBuilder : public LazyForEachBuilder {
