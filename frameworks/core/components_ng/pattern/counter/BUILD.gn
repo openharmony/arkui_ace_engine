@@ -21,6 +21,7 @@ build_component_ng("counter_pattern_ng") {
     "counter_model_ng.cpp",
     "counter_model_static.cpp",
     "counter_node.cpp",
+    "counter_pattern.cpp",
   ]
 
   ark_sources = [
