@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
 
-#include "grid_custom_layout_algorithm.h"
-
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

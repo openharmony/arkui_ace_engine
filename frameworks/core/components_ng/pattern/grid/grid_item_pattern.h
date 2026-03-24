@@ -16,52 +16,46 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
-#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_model.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include <memory>
+#include <optional>
+
+#include "core/components_ng/pattern/grid/grid_item_constants.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
-#include "core/components_ng/syntax/shallow_builder.h"
+
+namespace OHOS::Ace {
+class Color;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class GridItemAccessibilityProperty;
+class GridItemEventHub;
+class GridItemLayoutAlgorithm;
+class GridItemLayoutProperty;
+class InspectorFilter;
+class InputEvent;
+class ShallowBuilder;
+class TouchEventImpl;
+
 class ACE_EXPORT GridItemPattern : public SelectableItemPattern {
     DECLARE_ACE_TYPE(GridItemPattern, SelectableItemPattern);
 
 public:
-    explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, GridItemStyle gridItemStyle)
-        : shallowBuilder_(shallowBuilder), gridItemStyle_(gridItemStyle)
-    {}
-    ~GridItemPattern() override = default;
+    explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, GridItemStyle gridItemStyle);
+    ~GridItemPattern() override;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<GridItemLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     bool IsAtomicNode() const override
     {
         return false;
     }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<GridItemLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<GridItemEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<GridItemAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
 
     void BeforeCreateLayoutWrapper() override;
@@ -88,32 +82,9 @@ public:
         return selectable_;
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, FocusPattern());
-        auto pipeline = host->GetContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto theme = pipeline->GetTheme<GridItemTheme>();
-        CHECK_NULL_RETURN(theme, FocusPattern());
-        auto focusColor = theme->GetGridItemFocusColor();
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(focusColor);
-        return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
-    }
+    FocusPattern GetFocusPattern() const override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        Pattern::ToJsonValue(json, filter);
-        if (filter.IsFastFilter()) {
-            json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
-            return;
-        }
-        json->PutExtAttr("style", gridItemStyle_ == GridItemStyle::NONE ? "NONE" : "PLAIN", filter);
-        json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
-        json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
-        json->PutExtAttr("selected", isSelected_ ? "true" : "false", filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void MarkIsSelected(bool isSelected);
 

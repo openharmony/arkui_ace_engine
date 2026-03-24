@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"

@@ -21,6 +21,7 @@
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_v2/grid/grid_event.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"

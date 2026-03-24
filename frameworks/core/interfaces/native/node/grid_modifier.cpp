@@ -17,6 +17,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"

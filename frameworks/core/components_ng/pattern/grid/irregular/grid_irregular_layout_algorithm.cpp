@@ -15,7 +15,11 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"

@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {

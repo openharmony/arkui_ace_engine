@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {

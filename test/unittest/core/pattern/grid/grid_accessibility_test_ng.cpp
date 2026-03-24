@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 namespace OHOS::Ace::NG {
