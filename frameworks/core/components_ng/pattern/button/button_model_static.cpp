@@ -552,8 +552,14 @@ void ButtonModelStatic::ResetButtonFontSize(FrameNode* frameNode)
 
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    Dimension buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) ?
-        buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
+    Dimension buttonFontSize;
+    if (buttonTheme->GetIsApplyTextFontSize()) {
+        buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL)
+                                        ? buttonTheme->GetTextButtonFontSize()
+                                        : buttonTheme->GetTextSize(controlSize);
+    } else {
+        buttonFontSize = buttonTheme->GetTextStyle().GetFontSize();
+    }
     layoutProperty->UpdateFontSize(buttonFontSize);
 }
 } // namespace OHOS::Ace::NG
