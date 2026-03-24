@@ -50,7 +50,6 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/inspector/inspector_node.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
