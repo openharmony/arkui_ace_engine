@@ -70,13 +70,22 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     if (filter.IsFastFilter()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT).c_str(), filter);
     json->PutExtAttr("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str(), filter);
-    json->PutExtAttr("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str(), filter);
-    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+    json->PutExtAttr(
+        "fontSize", GetFontSize().value_or(theme->GetTextStyle().GetFontSize()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "fontColor", GetTextColor().value_or(theme->GetTextStyle().GetTextColor()).ColorToString().c_str(), filter);
     json->PutExtAttr("fontWeight",
-        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(),
+        filter);
     json->PutExtAttr("fontStyle",
         V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str(), filter);
     json->PutExtAttr("fontFamily",

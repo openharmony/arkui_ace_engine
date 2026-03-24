@@ -157,6 +157,11 @@ public:
             GetFallbackLineSpacing().value_or(false)).c_str(), filter);
         json->PutExtAttr("selectedDragPreviewStyle",
             GetSelectedDragPreviewStyleValue(GetSelectedDragPreviewStyleColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectionMenuHidden", GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("lineBreakStrategy",
+            V2::ConvertWrapLineBreakStrategyToString(GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY))
+                .c_str(),
+            filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const

@@ -1892,6 +1892,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         textFieldLayoutProperty->GetIncludeFontPadding().value_or(false)).c_str(), filter);
     json->PutExtAttr("fallbackLineSpacing", std::to_string(
         textFieldLayoutProperty->GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
+    json->PutExtAttr("selectionMenuHidden",
+        textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2081,7 +2084,8 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
     json->PutExtAttr("caretStyle", cursorJson, filter);
-    auto selectedBackgroundColor = textFieldPaintProperty->GetSelectedBackgroundColor().value_or(Color());
+    auto selectedBackgroundColor =
+        textFieldPaintProperty->GetSelectedBackgroundColor().value_or(textFieldTheme->GetSelectedColor());
     json->PutExtAttr("selectedBackgroundColor", selectedBackgroundColor.ColorToString().c_str(), filter);
 }
 

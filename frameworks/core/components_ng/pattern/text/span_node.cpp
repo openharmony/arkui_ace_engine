@@ -121,8 +121,9 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
         } else {
+            Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
             json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-                .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+                .value_or(defaultFontColor)).ColorToString().c_str(), filter);
         }
         json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
         json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
@@ -141,8 +142,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     if (textLineStyle) {
         json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(dim).ToString().c_str(), filter);
         json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(dim).ToString().c_str(), filter);
-        json->PutExtAttr("baselineOffset",
-            textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
+        json->PutExtAttr("baselineOffset", textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }

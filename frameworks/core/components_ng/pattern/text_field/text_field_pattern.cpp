@@ -8893,6 +8893,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     json->PutExtAttr("autoCapitalizationMode", AutoCapTypeToString().c_str(), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
