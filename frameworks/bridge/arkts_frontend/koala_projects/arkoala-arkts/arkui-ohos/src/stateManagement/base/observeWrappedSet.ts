@@ -41,6 +41,8 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_ : boolean;
+    @JSONStringifyIgnore
+    public isStaticSetProxy_: boolean = true;
     /**
      * Constructs a Set from another Set
      * @param set another Set
