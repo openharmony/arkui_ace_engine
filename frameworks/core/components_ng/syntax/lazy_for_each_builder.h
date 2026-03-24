@@ -191,6 +191,8 @@ public:
 
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
+    virtual void RegisterDataChangeListenerHandler() {}
+
     virtual void UnregisterDataChangeListener(V2::DataChangeListener* listener) = 0;
 
     void SetCacheCount(int32_t cacheCount)
