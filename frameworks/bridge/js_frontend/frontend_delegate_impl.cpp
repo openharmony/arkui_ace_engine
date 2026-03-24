@@ -1991,23 +1991,37 @@ bool FrontendDelegateImpl::OnMonitorForCrownEvents(const std::string& callbackId
 
 void FrontendDelegateImpl::SetMonitorForCrownEvents(const std::string& callbackId)
 {
-    auto crownEventTask = ([callbackId, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
+    auto crownEventTask = [callbackId, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
         auto delegate = weak.Upgrade();
         if (delegate) {
             return delegate->OnMonitorForCrownEvents(callbackId, args);
         }
         return false;
-    });
+    };
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->RequestCrownEventMonitor(crownEventTask);
+    auto requestTask = [pipelineContext, crownEventTask = std::move(crownEventTask)]() mutable {
+        pipelineContext->RequestCrownEventMonitor(std::move(crownEventTask));
+    };
+    if (!taskExecutor_ || taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        requestTask();
+        return;
+    }
+    taskExecutor_->PostTask(std::move(requestTask), TaskExecutor::TaskType::UI,
+        "ArkUIRequestCrownEventMonitor", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::ClearMonitorForCrownEvents()
 {
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->RequestCrownEventMonitor({});
+    auto requestTask = [pipelineContext]() { pipelineContext->RequestCrownEventMonitor({}); };
+    if (!taskExecutor_ || taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        requestTask();
+        return;
+    }
+    taskExecutor_->PostTask(std::move(requestTask), TaskExecutor::TaskType::UI,
+        "ArkUIRequestCrownEventMonitor", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::FlushAnimationTasks()
