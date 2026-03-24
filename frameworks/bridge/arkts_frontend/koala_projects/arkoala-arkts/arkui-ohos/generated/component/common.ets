@@ -6712,6 +6712,7 @@ export interface TextDecorationOptions {
     type: TextDecorationType | undefined;
     color?: ResourceColor;
     style?: TextDecorationStyle;
+    thicknessScale?: double;
 }
 export interface DividerStyle {
     strokeWidth: Length | undefined;
@@ -17526,6 +17527,14 @@ export class TextDecorationOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForThicknessScale = value.thicknessScale
+        if (valueHolderForThicknessScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForThicknessScaleTmpValue = valueHolderForThicknessScale!
+            valueSerializer.writeFloat64(valueHolderForThicknessScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextDecorationOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -17560,7 +17569,13 @@ export class TextDecorationOptions_serializer {
             styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult: TextDecorationStyle | undefined = styleTmpBuf
-        let value: TextDecorationOptions = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as TextDecorationOptions)
+        const thicknessScaleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let thicknessScaleTmpBuf: double | undefined = undefined
+        if ((thicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            thicknessScaleTmpBuf = valueDeserializer.readFloat64()
+        }
+        const thicknessScaleTmpResult: double | undefined = thicknessScaleTmpBuf
+        let value: TextDecorationOptions = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult, thicknessScale: thicknessScaleTmpResult} as TextDecorationOptions)
         return value
     }
 }

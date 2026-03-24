@@ -116,6 +116,7 @@ constexpr float MAX_GRAYSCALE = 127.0f;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t DECORATION_THICKNESS_SCALE_INDEX = 3;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
 constexpr int32_t PROGRESS_TYPE_RING = 2;
 constexpr int32_t PROGRESS_TYPE_SCALE = 3;
@@ -13138,6 +13139,95 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+void ResetComponentDecoration(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaDecoration(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputDecoration(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+}
+
+int32_t SetComponentDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node && item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (!item->object) {
+        ResetComponentDecoration(node);
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    auto* decoration = reinterpret_cast<OH_ArkUI_DecorationStyleOptions*>(item->object);
+    if (!decoration) {
+        ResetComponentDecoration(node);
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto decorationType = decoration->type;
+    if (decorationType < 0 || decorationType > ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto decorationStyle = decoration->style;
+    if (decorationStyle < 0 || decorationStyle > ARKUI_TEXT_DECORATION_STYLE_WAVY) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto decorationColor = decoration->color;
+    auto thicknessScale = decoration->thicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : decoration->thicknessScale;
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaDecoration(
+                node->uiNodeHandle, decorationType, decorationColor, decorationStyle, thicknessScale, nullptr);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputDecoration(
+                node->uiNodeHandle, decorationType, decorationColor, decorationStyle, thicknessScale, nullptr);
+            break;
+        default:
+            break;
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetComponentDecoration(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    static thread_local OH_ArkUI_DecorationStyleOptions decorationOpts = {
+        ARKUI_TEXT_DECORATION_TYPE_NONE,
+        Color::BLACK.GetValue(),
+        ARKUI_TEXT_DECORATION_STYLE_SOLID,
+        DEFAULT_LINE_THICKNESS_SCALE
+    };
+
+    ArkUITextDecorationType textDecoration = { 0, Color::BLACK.GetValue()};
+    if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->
+            getTextAreaDecoration(node->uiNodeHandle, &textDecoration);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->
+            getTextInputDecoration(node->uiNodeHandle, &textDecoration);
+    }
+
+    if (node->type == ARKUI_NODE_TEXT_AREA || node->type == ARKUI_NODE_TEXT_INPUT) {
+        decorationOpts.type = static_cast<ArkUI_TextDecorationType>(textDecoration.decorationType);
+        decorationOpts.color = textDecoration.color;
+        decorationOpts.style = static_cast<ArkUI_TextDecorationStyle>(textDecoration.style);
+        decorationOpts.thicknessScale = textDecoration.lineThicknessScale;
+    } else {
+        decorationOpts.type = ARKUI_TEXT_DECORATION_TYPE_NONE;
+        decorationOpts.color = Color::BLACK.GetValue();
+        decorationOpts.style = ARKUI_TEXT_DECORATION_STYLE_SOLID;
+        decorationOpts.thicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    }
+    g_attributeItem.object = &decorationOpts;
+    return &g_attributeItem;
+}
+
 int32_t SetTextCase(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -20596,7 +20686,8 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputHalfLeading, SetKeyboardAppearance, SetTextInputEnableAutoFillAnimation,
         SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter,
         TextInputBaseControllerAttribute, SetTextInputEllipsisMode, SetOrphanCharOptimization, SetCompressLeadingPunctuation, SetIncludeFontPadding,
-        SetFallbackLineSpacing, SetTextInputDirection, SetSelectedDragPreviewStyle, SetTextInputTextOverflow };
+        SetFallbackLineSpacing, SetTextInputDirection, SetSelectedDragPreviewStyle, SetTextInputTextOverflow,
+        SetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20617,7 +20708,7 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputHalfLeading, GetKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight,
         GetSelectDetectorEnable, nullptr, GetTextInputShowCounter, nullptr, GetTextInputEllipsisMode, GetOrphanCharOptimization,
         GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, GetTextInputDirection, GetSelectedDragPreviewStyle,
-        GetTextInputTextOverflow };
+        GetTextInputTextOverflow, GetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -20638,7 +20729,8 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputHalfLeading, ResetKeyboardAppearance, ResetTextInputEnableAutoFillAnimation,
         ResetTextInputLineHeight, ResetSelectDetectorEnable, nullptr, ResetTextInputShowCounter, nullptr, ResetTextInputEllipsisMode,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
-        ResetTextInputDirection, ResetSelectedDragPreviewStyle, ResetTextInputTextOverflow };
+        ResetTextInputDirection, ResetSelectedDragPreviewStyle, ResetTextInputTextOverflow,
+        ResetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -20660,7 +20752,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetTextAreaLineHeight, SetTextAreaBarState, SetSelectDetectorEnable, nullptr,
         SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute, SetTextAreaEllipsisMode, SetOrphanCharOptimization,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextAreaHorizontalScrolling, SetTextAreaDirection,
-        SetSelectedDragPreviewStyle, SetTextAreaTextOverflow };
+        SetSelectedDragPreviewStyle, SetTextAreaTextOverflow, SetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20680,7 +20772,7 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState, GetSelectDetectorEnable,
         nullptr, GetTextAreaScrollBarColor, GetTextAreaCustomKeyboard, nullptr, GetTextAreaEllipsisMode, GetOrphanCharOptimization,
         GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, GetTextAreaHorizontalScrolling, GetTextAreaDirection,
-        GetSelectedDragPreviewStyle, GetTextAreaTextOverflow };
+        GetSelectedDragPreviewStyle, GetTextAreaTextOverflow, GetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -20703,7 +20795,7 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState,
         ResetSelectDetectorEnable, nullptr, ResetTextAreaScrollBarColor, ResetTextAreaCustomKeyboard, nullptr, ResetTextAreaEllipsisMode,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, ResetTextAreaHorizontalScrolling,
-        ResetTextAreaDirection, ResetSelectedDragPreviewStyle, ResetTextAreaTextOverflow };
+        ResetTextAreaDirection, ResetSelectedDragPreviewStyle, ResetTextAreaTextOverflow, ResetComponentDecoration };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
+} // namespace
+
 class TextFieldContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextFieldContentModifier, ContentModifier);
 
@@ -61,7 +65,8 @@ public:
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
     void SetTextOverflow(const TextOverflow value);
-    void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
+    void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style,
+        float lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE);
     void ContentChange();
     void SetTextFadeoutEnabled(bool enabled);
     void SetAutoFillTextScrollOffset(const float value);
@@ -117,6 +122,7 @@ private:
     std::optional<TextDecoration> textDecoration_;
     std::optional<TextDecorationStyle> textDecorationStyle_;
     std::optional<Color> textDecorationColor_;
+    std::optional<float> lineThicknessScale_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
     bool textDecorationAnimatable_ { false };
 

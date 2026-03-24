@@ -1246,6 +1246,7 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1); // 1: textInputDecoration value
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);  // 2: color value
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
@@ -1268,8 +1269,14 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
+    double lineThicknessScale = 1.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = 1.0;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0 : lineThicknessScale;
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputDecoration(
-        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
  

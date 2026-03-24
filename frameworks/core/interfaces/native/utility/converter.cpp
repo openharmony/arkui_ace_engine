@@ -1692,6 +1692,7 @@ ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& 
     options.textDecoration = OptConvert<TextDecoration>(src.type);
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+    options.lineThicknessScale = OptConvert<float>(src.thicknessScale);
     return options;
 }
 

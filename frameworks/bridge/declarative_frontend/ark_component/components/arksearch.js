@@ -347,11 +347,13 @@ class SearchDecorationModifier extends ModifierWithKey {
       getUINativeModule().search.resetDecoration(node);
     }
     else {
-      getUINativeModule().search.setDecoration(node, this.value.type, this.value.color, this.value.style);
+      getUINativeModule().search.setDecoration(node, this.value.type, this.value.color,
+        this.value.style, this.value.thicknessScale);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
+      this.stageValue.thicknessScale !== this.value.thicknessScale) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
@@ -1555,9 +1557,9 @@ class JSSearch extends JSViewAbstract {
   }
   static decoration(value) {
     if (value) {
-      getUINativeModule().search.setDecoration(true, value.type, value.color, value.style);
+      getUINativeModule().search.setDecoration(true, value.type, value.color, value.style, value.thicknessScale);
     } else {
-      getUINativeModule().search.setDecoration(true, null, null, null);
+      getUINativeModule().search.setDecoration(true, null, null, null, null);
     }
   }
   static minFontSize(value) {

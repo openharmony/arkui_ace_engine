@@ -20133,6 +20133,7 @@ typedef struct Ark_TextDecorationOptions {
     Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
+    Opt_Float64 thicknessScale;
 } Ark_TextDecorationOptions;
 typedef struct Opt_TextDecorationOptions {
     Ark_Tag tag;

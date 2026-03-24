@@ -256,6 +256,7 @@ void TextFieldContentModifier::SetDefaultTextDecoration(const TextStyle& textSty
     textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
+    lineThicknessScale_ = textStyle.GetLineThicknessScale();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
         textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
     AttachProperty(textDecorationColorAlpha_);
@@ -484,12 +485,14 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 }
 
 void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, const Color& color,
-    const TextDecorationStyle& style)
+    const TextDecorationStyle& style, float lineThicknessScale)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
     auto oldTextDecorationColor = textDecorationColor_.value_or(Color::BLACK);
     auto oldTextDecorationStyle = textDecorationStyle_.value_or(TextDecorationStyle::SOLID);
-    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)) {
+    auto oldLineThicknessScale = lineThicknessScale_.value_or(DEFAULT_LINE_THICKNESS_SCALE);
+    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)
+        && (oldLineThicknessScale == lineThicknessScale)) {
         return;
     }
 
@@ -499,6 +502,7 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, co
     textDecoration_ = value;
     textDecorationColor_ = color;
     textDecorationStyle_ = style;
+    lineThicknessScale_ = lineThicknessScale;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
     oldColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -528,6 +532,9 @@ void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
     }
     if (textDecorationStyle_.has_value()) {
         textStyle.SetTextDecorationStyle(textDecorationStyle_.value());
+    }
+    if (lineThicknessScale_.has_value()) {
+        textStyle.SetLineThicknessScale(lineThicknessScale_.value());
     }
 }
 

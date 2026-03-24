@@ -578,6 +578,24 @@ void SearchModelStatic::SetTextDecorationStyle(FrameNode* frameNode,
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelStatic::SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        auto lineThicknessScale = valueOpt.value() < 0 ? DEFAULT_LINE_THICKNESS_SCALE : valueOpt.value();
+        SearchModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto& children = frameNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, textFieldChild);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelStatic::SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt)
 {
     if (valueOpt.has_value()) {

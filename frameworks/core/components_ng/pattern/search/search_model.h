@@ -93,6 +93,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void SetLineThicknessScale(float value) {};
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetSearchEnterKeyType(TextInputAction value);

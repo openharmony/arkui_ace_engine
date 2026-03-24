@@ -1134,6 +1134,11 @@ void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
 }
 
+void TextFieldModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, value);
+}
+
 void TextFieldModelNG::SetCounterTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, value);
@@ -2137,6 +2142,43 @@ void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color&
 void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value, frameNode);
+}
+
+void TextFieldModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, value, frameNode);
+}
+
+TextDecoration TextFieldModelNG::GetDecoration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
+    return layoutProperty->GetTextDecorationFirst();
+}
+
+Color TextFieldModelNG::GetTextDecorationColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color::BLACK);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
+    return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextDecorationStyle TextFieldModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
+float TextFieldModelNG::GetLineThicknessScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_LINE_THICKNESS_SCALE);
+    return layoutProperty->GetLineThicknessScale().value_or(DEFAULT_LINE_THICKNESS_SCALE);
 }
 
 void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)

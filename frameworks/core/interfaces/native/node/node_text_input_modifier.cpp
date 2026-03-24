@@ -52,6 +52,7 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
@@ -1478,13 +1479,14 @@ void ResetTextInputFontFeature(ArkUINodeHandle node)
 }
 
 void SetTextInputDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
-    ArkUI_Int32 style, void* resRawPtr)
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE, void* resRawPtr = nullptr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    TextFieldModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1497,6 +1499,23 @@ void SetTextInputDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_
     }
 }
 
+void SetTextInputDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, void* resRawPtr)
+{
+    SetTextInputDecoration(node, decoration, color, style, DEFAULT_LINE_THICKNESS_SCALE, resRawPtr);
+}
+
+void GetTextInputDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    decoration->decorationType = static_cast<int32_t>(TextFieldModelNG::GetDecoration(frameNode));
+    decoration->color = TextFieldModelNG::GetTextDecorationColor(frameNode).GetValue();
+    decoration->style = static_cast<int32_t>(TextFieldModelNG::GetTextDecorationStyle(frameNode));
+    decoration->lineThicknessScale = TextFieldModelNG::GetLineThicknessScale(frameNode);
+}
+
 void ResetTextInputDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1504,6 +1523,7 @@ void ResetTextInputDecoration(ArkUINodeHandle node)
     TextFieldModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextFieldModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextFieldModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    TextFieldModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -2997,6 +3017,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputFontFeature = ResetTextInputFontFeature,
         .setTextInputDecoration = SetTextInputDecoration,
         .resetTextInputDecoration = ResetTextInputDecoration,
+        .getTextInputDecoration = GetTextInputDecoration,
         .setTextInputLetterSpacing = SetTextInputLetterSpacing,
         .resetTextInputLetterSpacing = ResetTextInputLetterSpacing,
         .setTextInputLineHeight = SetTextInputLineHeight,
@@ -3255,6 +3276,7 @@ const CJUITextInputModifier* GetCJUITextInputModifier()
         .resetTextInputFontFeature = ResetTextInputFontFeature,
         .setTextInputDecoration = SetTextInputDecoration,
         .resetTextInputDecoration = ResetTextInputDecoration,
+        .getTextInputDecoration = GetTextInputDecoration,
         .setTextInputLetterSpacing = SetTextInputLetterSpacing,
         .resetTextInputLetterSpacing = ResetTextInputLetterSpacing,
         .setTextInputLineHeight = SetTextInputLineHeight,

@@ -100,6 +100,7 @@ const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = {
     TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::MARQUEE, TextOverflow::DEFAULT};
 
@@ -2079,12 +2080,14 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
         TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
+        TextFieldModel::GetInstance()->SetLineThicknessScale(DEFAULT_LINE_THICKNESS_SCALE);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
@@ -2106,11 +2109,17 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     } else {
         textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
+    float lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
     TextFieldModel::GetInstance()->SetTextDecorationColor(result);
     if (textDecorationStyle) {
         TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
+    TextFieldModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
  
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)

@@ -57,6 +57,7 @@ struct TextDecorationOptions {
     std::optional<TextDecoration> textDecoration;
     std::optional<Color> color;
     std::optional<TextDecorationStyle> textDecorationStyle;
+    std::optional<float> lineThicknessScale;
 };
 
 struct AnimateParam {
