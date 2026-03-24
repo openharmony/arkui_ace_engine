@@ -30521,6 +30521,7 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
                               Ark_Float64 y);
     Ark_SizeResult (*contentSize)(Ark_VMContext vmContext,
                                   Ark_Scroller peer);
+    Opt_FrameNode (*getFrameNode)(Ark_Scroller peer);
 } GENERATED_ArkUIScrollerAccessor;
 
 typedef struct GENERATED_ArkUIScrollResultAccessor {

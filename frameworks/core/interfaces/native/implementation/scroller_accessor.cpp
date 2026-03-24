@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include "scroller_peer_impl.h"
 #include "arkoala_api_generated.h"
+#include "core/common/container_scope.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
@@ -127,6 +131,22 @@ Ark_SizeResult ContentSizeImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(peer, {}); // need to fix default value
     return peer->TriggerContentSize(vmContext);
 }
+Opt_FrameNode GetFrameNodeImpl(Ark_Scroller peer)
+{
+    auto invalid = Converter::ArkValue<Opt_FrameNode>();
+    CHECK_NULL_RETURN(peer, invalid);
+    auto scrollController = peer->GetController().Upgrade();
+    CHECK_NULL_RETURN(scrollController, invalid);
+
+    ContainerScope scope(peer->GetInstanceId());
+    auto nodeId = scrollController->GetBindingFrameNodeId();
+    CHECK_NULL_RETURN(nodeId >= 0, invalid);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_RETURN(frameNode, invalid);
+
+    auto arkFrameNode = static_cast<Ark_FrameNode>(FrameNodePeer::Create(frameNode));
+    return Converter::ArkValue<Opt_FrameNode>(arkFrameNode);
+}
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
@@ -146,6 +166,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
         ScrollerAccessor::GetItemRectImpl,
         ScrollerAccessor::GetItemIndexImpl,
         ScrollerAccessor::ContentSizeImpl,
+        ScrollerAccessor::GetFrameNodeImpl,
     };
     return &ScrollerAccessorImpl;
 }

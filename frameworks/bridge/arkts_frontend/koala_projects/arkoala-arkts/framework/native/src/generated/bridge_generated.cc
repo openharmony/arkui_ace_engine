@@ -40270,6 +40270,20 @@ KInteropReturnBuffer impl_Scroller_contentSize(KVMContext vmContext, Ark_NativeP
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_CTX_1(Scroller_contentSize, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_Scroller_getFrameNode(Ark_NativePointer thisPtr) {
+        Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
+        const auto &retValue = GetAccessors()->getScrollerAccessor()->getFrameNode(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            FrameNode_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(Scroller_getFrameNode, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_ScrollResult_construct() {
         return GetAccessors()->getScrollResultAccessor()->construct();
 }

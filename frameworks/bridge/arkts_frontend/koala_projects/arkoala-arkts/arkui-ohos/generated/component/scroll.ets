@@ -19,9 +19,11 @@
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { RectResult_serializer, SizeResult_serializer, RectResult, SizeResult, Bindable_F64_serializer, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, Bindable, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { FrameNode_serializer } from './../framework/FrameNode'
 import { Edge, ScrollSource, BarState, Color as arkui_component_enums_Color, EdgeEffect, Curve } from './enums'
 import { Length, Resource as arkui_component_units_Resource, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics, Dimension } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { FrameNode } from 'arkui.FrameNode'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -119,6 +121,9 @@ export class Scroller implements MaterializedBase {
     }
     public contentSize(): SizeResult {
         return this.contentSize_serialize()
+    }
+    public getFrameNode(): FrameNode | undefined {
+        return this.getFrameNode_serialize()
     }
     private scrollTo_serialize(options: ScrollOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -244,6 +249,17 @@ export class Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeResult = SizeResult_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private getFrameNode_serialize(): FrameNode | undefined {
+        const retval = ArkUIGeneratedNativeModule._Scroller_getFrameNode(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: FrameNode | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
+        }
+        const returnResult: FrameNode | undefined = buffer
         return returnResult
     }
 }
