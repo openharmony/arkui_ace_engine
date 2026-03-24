@@ -665,6 +665,7 @@ namespace Converter {
     template<> FontWeightInt Convert(const Ark_Int32& src);
     template<> FontWeightInt Convert(const Ark_String& src);
     template<> FontWeightInt Convert(const Ark_Resource& src);
+    template<> FontWeightInt Convert(const Ark_ResourceStr& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> Gradient Convert(const Ark_RadialGradientOptions& value);

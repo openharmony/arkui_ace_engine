@@ -9793,7 +9793,8 @@ void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option);
  * @param fontWeightConfigs font weight configs.
  * @since 24
  */
-void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs);
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
+    OH_ArkUI_FontWeightConfigs* fontWeightConfigs);
  
 /**
  * @brief Gets the font weight configs of an option object for font configuration of text.
