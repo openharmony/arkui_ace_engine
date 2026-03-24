@@ -21,6 +21,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_DOUBLE_50 = 50.0;
 constexpr double DEFAULT_DOUBLE_100 = 100.0;
+constexpr int32_t TEST_TOUCH_ID = 100;
+constexpr double TEST_X = 50.0;
+constexpr double TEST_Y = 60.0;
+constexpr int32_t TEST_COUNT = 3;
+constexpr int32_t TEST_FINGERS = 2;
+constexpr double TEST_THRESHOLD = 50.0;
 
 struct MockClickRecognizerCase {
     int32_t fingers;
@@ -2731,5 +2737,167 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest018, TestSize.Level1)
      */
     GestureEvent info = clickRecognizer->GetGestureEventInfo();
     clickRecognizer->HandleReports(info, GestureCallbackType::ACTION); // Should not crash
+}
+
+/**
+ * @tc.name: ForceCleanRecognizerTest001
+ * @tc.desc: Test ForceCleanRecognizer resets all internal state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ForceCleanRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with state set.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    clickRecognizer.tappedCount_ = 3;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.focusPoint_ = Offset(TEST_X, TEST_Y);
+    clickRecognizer.currentTouchPointsNum_ = 2;
+    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 100, 100));
+    TouchEvent touchEvent;
+    touchEvent.id = TEST_TOUCH_ID;
+    clickRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer.fingersId_.insert(TEST_TOUCH_ID);
+    /**
+     * @tc.steps: step2. Call ForceCleanRecognizer directly.
+     * @tc.expected: Should reset all state to initial values.
+     */
+    clickRecognizer.ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizer.tappedCount_, 0);
+    EXPECT_FALSE(clickRecognizer.equalsToFingers_);
+    EXPECT_EQ(clickRecognizer.focusPoint_.GetX(), 0);
+    EXPECT_EQ(clickRecognizer.focusPoint_.GetY(), 0);
+    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
+    EXPECT_TRUE(clickRecognizer.responseRegionBuffer_.empty());
+}
+
+/**
+ * @tc.name: CreateGestureFromRecognizerTest001
+ * @tc.desc: Test CreateGestureFromRecognizer returns TapGesture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, CreateGestureFromRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(TEST_FINGERS, TEST_COUNT, TEST_THRESHOLD);
+    /**
+     * @tc.steps: step2. Call CreateGestureFromRecognizer directly.
+     * @tc.expected: Should return a TapGesture with matching parameters.
+     */
+    auto gesture = clickRecognizer.CreateGestureFromRecognizer();
+    ASSERT_NE(gesture, nullptr);
+    auto tapGesture = AceType::DynamicCast<TapGesture>(gesture);
+    ASSERT_NE(tapGesture, nullptr);
+    EXPECT_EQ(tapGesture->GetFingers(), TEST_FINGERS);
+}
+
+/**
+ * @tc.name: OnAcceptedTest002
+ * @tc.desc: Test OnAccepted when backupTouchPointsForSucceedBlock has value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, OnAcceptedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer and set backupTouchPointsForSucceedBlock.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = TEST_TOUCH_ID;
+    touchEvent.x = TEST_X;
+    touchEvent.y = TEST_Y;
+    touchEvent.screenX = TEST_X;
+    touchEvent.screenY = TEST_Y;
+    std::map<int32_t, TouchEvent> backupPoints;
+    backupPoints[TEST_TOUCH_ID] = touchEvent;
+    clickRecognizer.backupTouchPointsForSucceedBlock_ = backupPoints;
+    clickRecognizer.touchPoints_.clear();
+    auto onClick = [](ClickInfo) {};
+    clickRecognizer.onClick_ = onClick;
+    /**
+     * @tc.steps: step2. Call OnAccepted directly.
+     * @tc.expected: Should restore touchPoints from backup.
+     */
+    clickRecognizer.OnAccepted();
+    EXPECT_TRUE(clickRecognizer.touchPoints_.find(TEST_TOUCH_ID) != clickRecognizer.touchPoints_.end());
+}
+
+/**
+ * @tc.name: OnAcceptedTest003
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, OnAcceptedTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with onAccessibilityEventFunc and no onClick.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    clickRecognizer.refereeState_ = RefereeState::DETECTING;
+    auto onAccessibility = [](AccessibilityEventType) {};
+    clickRecognizer.onAccessibilityEventFunc_ = onAccessibility;
+    clickRecognizer.onClick_ = nullptr;
+    TouchEvent touchEvent;
+    clickRecognizer.touchPoints_[0] = touchEvent;
+    /**
+     * @tc.steps: step2. Call OnAccepted directly.
+     */
+    clickRecognizer.OnAccepted();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEventTest003
+ * @tc.desc: Test HandleTouchMoveEvent when currentFingers is less than fingers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, HandleTouchMoveEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    /**
+     * @tc.steps: step2. Set currentFingers less than fingers.
+     */
+    clickRecognizer.currentFingers_ = 1;
+    clickRecognizer.fingers_ = FINGER_NUMBER;
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    /**
+     * @tc.steps: step3. Call HandleTouchMoveEvent directly.
+     * @tc.expected: Should return early when currentFingers < fingers.
+     */
+    clickRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: CleanRecognizerStateTest001
+ * @tc.desc: Test CleanRecognizerState with different refereeState and currentFingers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, CleanRecognizerStateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    /**
+     * @tc.steps: step2. Test CleanRecognizerState when refereeState is READY.
+     */
+    clickRecognizer.refereeState_ = RefereeState::READY;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::READY);
+    /**
+     * @tc.steps: step3. Test CleanRecognizerState when refereeState is PENDING.
+     */
+    clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::PENDING);
 }
 } // namespace OHOS::Ace::NG
