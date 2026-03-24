@@ -409,4 +409,47 @@ HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded002, TestSize.Leve
     // Verify that delayed flag remains null
     EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
 }
+
+/**
+ * @tc.name: IsTopFullScreenPage001
+ * @tc.desc: Branch: isRouter_ = true, early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsTopFullScreenPage001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // isRouter_ = true
+    manager->isRouter_ = true;
+
+    //expect false
+    EXPECT_FALSE(manager->IsTopFullScreenPage());
+}
+
+/**
+ * @tc.name: IsTopFullScreenPage002
+ * @tc.desc: Branch: isRouter_ = false, existForceSplitNav.first = false early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsTopFullScreenPage002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // isRouter_ = false
+    manager->isRouter_ = false;
+
+    auto navMgr = context->GetNavigationManager();
+    ASSERT_NE(navMgr, nullptr);
+    //existForceSplitNav.first = false
+    navMgr->SetExistForceSplitNav(false, 20);
+
+    //expect false
+    EXPECT_FALSE(manager->IsTopFullScreenPage());
+}
 } // namespace OHOS::Ace::NG
