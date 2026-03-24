@@ -18,6 +18,8 @@
 #include <numeric>
 
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
+#include "core/animation/curve_animation.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
 

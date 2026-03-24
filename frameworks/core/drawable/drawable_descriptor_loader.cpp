@@ -15,6 +15,7 @@
 
 #include "core/drawable/drawable_descriptor_loader.h"
 
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@
 
 #include "base/base64/base64_util.h"
 #include "base/image/file_uri_helper.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {

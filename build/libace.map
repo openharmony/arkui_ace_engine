@@ -202,6 +202,9 @@
       "OHOS::Ace::CheckboxComponent::checkboxGroups_";
       "OHOS::Ace::CheckboxComponent::ungroupedCheckboxs_";
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      "OHOS::Ace::TaskExecutor::GetPriorityTypeWithCheck(OHOS::Ace::PriorityType, OHOS::Ace::PriorityType)";
+      OHOS::Ace::TaskExecutor::PostDelayedTask*;
+      OHOS::Ace::TaskExecutor::PostSyncTask*;
       "OHOS::Ace::ClipboardProxy::GetInstance()";
       "OHOS::Ace::Color OHOS::Ace::NG::Converter::Convert<OHOS::Ace::Color, int>(int const&)";
       "OHOS::Ace::Color::BLACK";
@@ -3641,6 +3644,7 @@
       OHOS::Ace::TokenColors::*;
       OHOS::Ace::TouchEventInfo::*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      virtual?thunk?to?OHOS::Ace::TouchEventTarget::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::UIContentImpl::*;

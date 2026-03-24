@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "validators.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {

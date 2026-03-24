@@ -15,6 +15,8 @@
 
 #include "core/components/common/properties/clip_path.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 
 bool Inset::SetLength(const std::vector<Dimension>& lengths)

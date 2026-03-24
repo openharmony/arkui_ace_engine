@@ -24,8 +24,8 @@
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 #include "core/gestures/drag_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -51,41 +51,6 @@ public:
 
 private:
     std::string plainText_;
-};
-
-enum class DragDropInitiatingStatus : int32_t {
-    IDLE = 0,
-    READY,
-    PRESS,
-    LIFTING,
-    MOVING,
-};
-
-enum class DragSpringLoadingState {
-    BEGIN = 0,
-    UPDATE,
-    END,
-    CANCEL,
-};
-
-enum class DragRet {
-    DRAG_DEFAULT = -1,
-    DRAG_SUCCESS = 0,
-    DRAG_FAIL,
-    DRAG_CANCEL,
-    ENABLE_DROP,
-    DISABLE_DROP,
-};
-
-enum class DragStartRequestStatus : int32_t {
-    WAITING = 0,
-    READY
-};
-
-enum class DragBehavior {
-    UNKNOWN = -1,
-    COPY = 0,
-    MOVE = 1,
 };
 
 class ACE_FORCE_EXPORT DragEvent : public AceType {

@@ -15,6 +15,8 @@
 
 #include "core/gestures/swipe_recognizer.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 namespace {
 

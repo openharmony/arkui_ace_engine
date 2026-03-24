@@ -35,7 +35,7 @@ class ACE_EXPORT SharedTransitionEffect : public AceType {
 
 public:
     explicit SharedTransitionEffect(const ShareId& shareId, SharedTransitionEffectType type);
-    ~SharedTransitionEffect() override = default;
+    ~SharedTransitionEffect() override;
     SharedTransitionEffectType GetType() const
     {
         return type_;

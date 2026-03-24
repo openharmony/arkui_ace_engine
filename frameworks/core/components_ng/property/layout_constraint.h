@@ -69,7 +69,7 @@ struct ACE_FORCE_EXPORT LayoutConstraintT {
 
     void ApplyAspectRatioWithoutCalcSize(float ratio, bool greaterThanApiTen = false);
 
-    void Reset();
+    ACE_FORCE_EXPORT void Reset();
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom);
@@ -91,7 +91,7 @@ struct ACE_FORCE_EXPORT LayoutConstraintT {
     ACE_FORCE_EXPORT bool UpdateMaxSizeWithCheck(const SizeT<T>& size);
     bool UpdateMaxWidthWithCheck(const SizeT<T>& size);
     bool UpdateMaxHeightWithCheck(const SizeT<T>& size);
-    bool UpdateMinSizeWithCheck(const SizeT<T>& size);
+    ACE_FORCE_EXPORT bool UpdateMinSizeWithCheck(const SizeT<T>& size);
     bool UpdatePercentReference(const SizeT<T>& size);
 
     std::string ToString() const;

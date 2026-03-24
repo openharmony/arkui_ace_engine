@@ -18,6 +18,7 @@
 
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"

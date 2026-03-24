@@ -18,6 +18,7 @@
 #include "background_mode.h"
 #include "background_task_mgr_helper.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {

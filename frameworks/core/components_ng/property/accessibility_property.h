@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ACCESSIBILITY_PROPERTY_H
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_set>
 

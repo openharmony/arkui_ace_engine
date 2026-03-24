@@ -19,6 +19,7 @@
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #ifdef __cplusplus
 extern "C" {

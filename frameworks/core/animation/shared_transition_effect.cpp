@@ -15,6 +15,7 @@
 
 #include "core/animation/shared_transition_effect.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/positioned/positioned_component.h"
@@ -28,6 +29,8 @@ SharedTransitionEffect::SharedTransitionEffect(const ShareId& shareId, SharedTra
 {
     controller_ = CREATE_ANIMATOR();
 }
+
+SharedTransitionEffect::~SharedTransitionEffect() = default;
 
 bool SharedTransitionEffect::CheckIn(
     TransitionEvent event, WeakPtr<SharedTransitionElement>& sharedWeak, Offset& ticket)

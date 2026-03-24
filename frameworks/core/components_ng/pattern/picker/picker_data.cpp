@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/picker/picker_data.h"
 
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {

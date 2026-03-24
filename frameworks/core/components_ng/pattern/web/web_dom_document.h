@@ -16,14 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 
-#include <string>
-#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
+#include <string>
+#include <unordered_map>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
 class JsonValue;

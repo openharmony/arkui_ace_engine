@@ -15,6 +15,9 @@
 
 #include "core/components/common/properties/animatable_color.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_context.h"
 

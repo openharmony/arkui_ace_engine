@@ -16,9 +16,10 @@
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
-#include "base/utils/utils.h"
-#include "base/error/error_code.h"
 
+#include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.h"
 
 namespace OHOS::Ace::Napi {

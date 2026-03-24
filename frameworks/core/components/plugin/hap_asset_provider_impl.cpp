@@ -16,6 +16,7 @@
 #include "core/components/plugin/hap_asset_provider_impl.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Plugin {

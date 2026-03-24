@@ -18,6 +18,10 @@
 #include <regex>
 #include <unordered_set>
 
+#include "base/log/log_wrapper.h"
+
+#include "base/utils/system_properties.h"
+
 namespace OHOS::Ace {
 namespace {
 constexpr char COLOR_VALUE_PREFIX[] = "$color:";
