@@ -285,8 +285,27 @@ public:
 
     void SetCurrentVolume(float currentVolume);
     float GetCurrentVolume() const;
-    static bool ParseCommand(const std::string& command);
     int32_t OnInjectionEvent(const std::string& command) override;
+    PlaybackStatus GetCurrentPlaybackStatus() const
+    {
+        return currentPlaybackStatus_;
+    }
+    bool GetsIsProgressInjectCmd() const
+    {
+        return isProgressInjectCmd_;
+    }
+    double GetLastProgressRate() const
+    {
+        return lastProgressRate_;
+    }
+    void SetIsProgressInjectCmd(bool isProgressInjectCmd)
+    {
+        isProgressInjectCmd_ = isProgressInjectCmd;
+    }
+    void SetLastProgressRate(double lastProgressRate)
+    {
+        lastProgressRate_ = lastProgressRate;
+    }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -419,6 +438,11 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void SaveCurrentPlaybackStatus(PlaybackStatus status);
+    static int32_t ParseCommand(const std::string& command, PlaybackStatus& status, double& speed);
+    void ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
+    void ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason = "");
+
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -466,6 +490,11 @@ private:
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;
+
+    PlaybackStatus currentPlaybackStatus_ = PlaybackStatus::NONE;
+    std::string currentInjectedStatusCmd_ = "";
+    bool isProgressInjectCmd_ = false;
+    double lastProgressRate_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };

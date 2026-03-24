@@ -40,6 +40,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "frameworks/core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -683,6 +684,9 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     }
 
     ChangePlayerStatus(status);
+
+    SaveCurrentPlaybackStatus(status);
+    ReportChangeEvent(status, progressRate_, currentPos_);
 }
 
 void VideoPattern::OnError(const std::string& errorId)
@@ -851,6 +855,11 @@ void VideoPattern::HiddenChange(bool hidden)
     }
 }
 
+void VideoPattern::SaveCurrentPlaybackStatus(PlaybackStatus status)
+{
+    currentPlaybackStatus_ = status;
+}
+
 void VideoPattern::OnVisibleChange(bool isVisible)
 {
     if (hiddenChangeEvent_) {
@@ -890,16 +899,42 @@ void VideoPattern::UpdateSpeed()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
+
         auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), progress = progressRate_] {
+        bgTaskExecutor.PostTask(
+            [weak = WeakClaim(RawPtr(mediaPlayer_)),
+            weakThis = WeakClaim(this),
+            progress = progressRate_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
+            int32_t ret = mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
             if (GreatNotEqual(progress, SPEED_3_00_X) || LessNotEqual(progress, SPEED_0_125_X)) {
                 SendStatisticEvent(StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE);
             } else if (!IsValidProgressRate(progress)) {
                 SendStatisticEvent(StatisticEventType::VIDEO_INVALID_PROGRESS_RATE);
             }
+
+            auto pattern = weakThis.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            double lastSpeed = pattern->GetLastProgressRate();
+
+            if (pattern->GetsIsProgressInjectCmd()) {
+                pattern->SetIsProgressInjectCmd(false);
+                pattern->ReportCommandResult(
+                    "setVideoPlaybackSpeed",
+                    ret == 0 ? "success" : "fail",
+                    ret == 0 ? "" : "SetSpeed operation execution failed");
+            }
+
+            if (NearEqual(lastSpeed, progress)) {
+                return;
+            }
+            if (ret == 0) {
+                pattern->SetLastProgressRate(progress);
+            }
+            pattern->ReportChangeEvent(
+                pattern->GetCurrentPlaybackStatus(),
+                ret == 0 ? progress : lastSpeed, pattern->GetCurrentPos());
             }, "ArkUIVideoUpdateSpeed");
     }
 }
@@ -1853,11 +1888,25 @@ void VideoPattern::Start()
 
     auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     bgTaskExecutor.PostTask(
-        [weak = WeakClaim(RawPtr(mediaPlayer_)), hostId = hostId_] {
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer play", hostId);
-            mediaPlayer->Play();
+            int32_t ret = mediaPlayer->Play();
+
+            auto pattern = weakThis.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto currentStatus = pattern->GetCurrentPlaybackStatus();
+            if (pattern->currentInjectedStatusCmd_ == "play") {
+                pattern->currentInjectedStatusCmd_.clear();
+                pattern->ReportCommandResult(
+                    "setVideoPlayerStatusPlay",
+                    ret == 0 ? "success" : "fail",
+                    ret == 0 ? "" : "Play operation execution failed");
+            }
+            if (currentStatus != PlaybackStatus::STARTED && ret != 0) {
+                pattern->ReportChangeEvent(currentStatus, pattern->GetProgressRate(), pattern->GetCurrentPos());
+            }
         },
         "ArkUIVideoPlay");
 }
@@ -1869,6 +1918,20 @@ void VideoPattern::Pause()
     }
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer pause", hostId_);
     auto ret = mediaPlayer_->Pause();
+
+    auto currentStatus = GetCurrentPlaybackStatus();
+    if (currentInjectedStatusCmd_ == "pause") {
+        currentInjectedStatusCmd_.clear();
+        ReportCommandResult(
+            "setVideoPlayerStatusPaused",
+            ret == 0 ? "success" : "fail",
+            ret == 0 ? "" : "Pause operation execution failed");
+    }
+
+    if (currentStatus != PlaybackStatus::PAUSED && ret != 0) {
+        ReportChangeEvent(currentStatus, progressRate_, currentPos_);
+    }
+
     if (ret != -1 && !isPaused_) {
         isPaused_ = true;
         StartImageAnalyzer();
@@ -2413,14 +2476,57 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
 }
 
-bool VideoPattern::ParseCommand(const std::string& command)
+int32_t VideoPattern::ParseCommand(const std::string& command, PlaybackStatus& status, double& speed)
 {
     auto json = JsonUtil::ParseJsonString(command);
     if (!json || json->IsNull()) {
-        return false;
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: invalid JSON string");
+        return RET_FAILED;
     }
-    std::string value = json->GetString("cmd");
-    return value == "play";
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "setVideoPlayerStatus" && cmdType != "setVideoPlaybackSpeed") {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: unsupported cmdType=%{public}s", cmdType.c_str());
+        return RET_FAILED;
+    }
+
+    if (!json->Contains("value")) {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: missing value field");
+        return RET_FAILED;
+    }
+
+    auto valueObj = json->GetValue("value");
+    if (cmdType == "setVideoPlayerStatus") {
+        if (valueObj->IsString()) {
+            std::string valueStr = json->GetString("value", "");
+            if (valueStr == "play") {
+                status = PlaybackStatus::STARTED;
+                return RET_SUCCESS;
+            } else if (valueStr == "paused") {
+                status = PlaybackStatus::PAUSED;
+                return RET_SUCCESS;
+            } else {
+                TAG_LOGD(AceLogTag::ACE_VIDEO,
+                    "ParseCommand failed: invalid status value=%{public}s", valueStr.c_str());
+            }
+        } else {
+            TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: value is not string for setVideoPlayerStatus");
+        }
+    } else if (cmdType == "setVideoPlaybackSpeed") {
+        if (valueObj->IsNumber()) {
+            double newSpeed = json->GetDouble("value", 0.0);
+            if (IsValidProgressRate(newSpeed)) {
+                speed = newSpeed;
+                return RET_SUCCESS;
+            } else {
+                TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: invalid speed value=%{public}f", newSpeed);
+            }
+        } else {
+            TAG_LOGD(AceLogTag::ACE_VIDEO, "ParseCommand failed: value is not number for setVideoPlaybackSpeed");
+        }
+    }
+
+    return RET_FAILED;
 }
 
 int32_t VideoPattern::OnInjectionEvent(const std::string& command)
@@ -2430,11 +2536,105 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
     CHECK_NULL_RETURN(host, RET_FAILED);
     auto pattern = host->GetPattern<VideoPattern>();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
-    if (!ParseCommand(command)) {
+
+    PlaybackStatus status = PlaybackStatus::NONE;
+    double playbackSpeed = 0.0;
+    if (ParseCommand(command, status, playbackSpeed) != RET_SUCCESS) {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "OnInjectionEvent failed: Command parsing failed!");
         return RET_FAILED;
     }
-    pattern->Start();
+
+    if (status == PlaybackStatus::STARTED) {
+        pattern->currentInjectedStatusCmd_ = "play";
+        pattern->Start();
+        return RET_SUCCESS;
+    } else if (status == PlaybackStatus::PAUSED) {
+        pattern->currentInjectedStatusCmd_ = "pause";
+        pattern->Pause();
+        return RET_SUCCESS;
+    }
+
+    auto currentSpeed = pattern->GetProgressRate();
+    pattern->SetLastProgressRate(currentSpeed);
+    if (NearEqual(currentSpeed, playbackSpeed)) {
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "OnInjectionEvent: Speed unchanged (%{public}.3f), "
+            "skip injection, command=%{public}s", currentSpeed, command.c_str());
+        return RET_FAILED;
+    }
+    pattern->UpdateProgressRate(playbackSpeed);
+    pattern->SetIsProgressInjectCmd(true);
+    pattern->UpdateSpeed();
+
     return RET_SUCCESS;
+}
+
+void VideoPattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
+{
+    if (!UiSessionManager::GetInstance()) {
+        return;
+    }
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+
+    auto eventObj = JsonUtil::Create(true);
+    CHECK_NULL_VOID(eventObj);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    eventObj->Put("nodeId", id);
+    eventObj->Put("cmd", "videoPlayerChanged");
+
+    auto paramsObj = JsonUtil::Create(true);
+    CHECK_NULL_VOID(paramsObj);
+
+    std::string statusStr = "error";
+    if (status == PlaybackStatus::STARTED) {
+        statusStr = "play";
+    } else if (status == PlaybackStatus::ERROR) {
+        statusStr = "error";
+    } else {
+        statusStr = "others";
+    }
+    paramsObj->Put("videoPlayerStatus", statusStr.c_str());
+    paramsObj->Put("videoPlaybackSpeed", playbackSpeed);
+    std::string timeText = IntTimeToText(currentPos);
+    paramsObj->Put("videoCurrentPlaybackPosition", timeText.c_str());
+
+    eventObj->Put("params", paramsObj);
+    json->Put("event", eventObj);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
+        ComponentEventType::COMPONENT_EVENT_VIDEO);
+}
+
+void VideoPattern::ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason)
+{
+    if (!UiSessionManager::GetInstance()) {
+        return;
+    }
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto id = host->GetId();
+    params->Put("nodeId", id);
+    params->Put("event", event.c_str());
+    params->Put("result", result.c_str());
+
+    if (result == "fail" && !reason.empty()) {
+        params->Put("reason", reason.c_str());
+    }
+
+    auto videoResult = JsonUtil::Create();
+    CHECK_NULL_VOID(videoResult);
+    videoResult->Put("VideoResult", params);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", videoResult->ToString(),
+        ComponentEventType::COMPONENT_EVENT_VIDEO);
 }
 
 void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
