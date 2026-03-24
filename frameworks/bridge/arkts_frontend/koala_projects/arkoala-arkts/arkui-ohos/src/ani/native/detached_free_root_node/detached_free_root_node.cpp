@@ -15,8 +15,6 @@
 
 #include "detached_free_root_node.h"
 
-#include <memory>
-
 #include "load.h"
 
 namespace OHOS::Ace::Ani {

@@ -15,10 +15,6 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
-#include <cstdint>
-#include <functional>
-#include <utility>
-
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
