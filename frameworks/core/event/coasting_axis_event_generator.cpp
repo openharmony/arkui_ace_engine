@@ -18,7 +18,6 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/geometry/ng/point_t.h"
-#include "core/common/container.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

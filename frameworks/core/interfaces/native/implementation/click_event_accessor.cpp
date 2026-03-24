@@ -16,7 +16,6 @@
 #include <unordered_set>
 
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 

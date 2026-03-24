@@ -25,6 +25,7 @@
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"

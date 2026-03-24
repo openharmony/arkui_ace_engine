@@ -14,7 +14,6 @@
  */
 
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
