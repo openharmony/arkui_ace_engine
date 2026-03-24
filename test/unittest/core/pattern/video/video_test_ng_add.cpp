@@ -1722,4 +1722,40 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent010, TestSize.Level1)
     result = pattern->OnInjectionEvent(speedCommand);
     EXPECT_EQ(result, RET_SUCCESS);
 }
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent011
+ * @tc.desc: Test OnInjectionEvent with valid pause command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Setup mock media player and expect Pause to be called once
+     */
+    auto mockPlayer = AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_);
+    ASSERT_TRUE(mockPlayer);
+    EXPECT_CALL(*mockPlayer, Pause()).WillOnce(Return(0));
+
+    /**
+     * @tc.steps: step3. Send pause command
+     */
+    std::string pauseCommand = R"({"cmd":"setVideoPlayerStatus","value":"paused"})";
+    int32_t result = pattern->OnInjectionEvent(pauseCommand);
+
+    /**
+     * @tc.steps: step4. Verify result
+     * @tc.expected: Return success and Pause() called exactly once
+     */
+    EXPECT_EQ(result, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG
