@@ -1560,6 +1560,14 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest002, TestSize.Level1
     auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT_WEIGHT);
+    ASSERT_NE(attr, nullptr);
+    ASSERT_NE(attr->object, nullptr);
+    auto* retrievedConfigs = reinterpret_cast<OH_ArkUI_FontWeightConfigs*>(attr->object);
+    ASSERT_NE(retrievedConfigs, nullptr);
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(retrievedConfigs));
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(retrievedConfigs));
+
     EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT_WEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_FontWeightConfigs_Destroy(configs);
     nodeAPI->disposeNode(spanNode);
@@ -1612,6 +1620,10 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest004, TestSize.Level1
     auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
+    value[0].i32 = 99;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
     value[0].i32 = 100;
     ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
@@ -1621,6 +1633,14 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest004, TestSize.Level1
     if (attr) {
         EXPECT_EQ(attr->value[0].i32, 100);
     }
+
+    value[0].i32 = 900;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    value[0].i32 = 901;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     EXPECT_EQ(nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
 
@@ -1690,6 +1710,16 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest002, TestSize.Level1)
     auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT);
+    ASSERT_NE(attr, nullptr);
+    ASSERT_NE(attr->object, nullptr);
+    auto* retrievedFontConfigs = reinterpret_cast<OH_ArkUI_FontConfigs*>(attr->object);
+    ASSERT_NE(retrievedFontConfigs, nullptr);
+    auto* retrievedWeightConfigsFromAttr = OH_ArkUI_FontConfigs_GetFontWeightConfigs(retrievedFontConfigs);
+    ASSERT_NE(retrievedWeightConfigsFromAttr, nullptr);
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(retrievedWeightConfigsFromAttr));
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(retrievedWeightConfigsFromAttr));
+
     EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT), ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_FontConfigs_Destroy(fontConfigs);
     nodeAPI->disposeNode(spanNode);
@@ -1716,6 +1746,22 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest003, TestSize.Level1)
     value[0].f32 = 16.0f;
     value[1].i32 = -1;
     item.size = 2;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    value[1].i32 = 99;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    value[1].i32 = 100;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    value[1].i32 = 900;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    value[1].i32 = 901;
     ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 

@@ -3164,6 +3164,9 @@ struct CJUISpanModifier {
     ArkUI_Float32 (*getSpanFontSize)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getSpanFontStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanFontWeight)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSpanVariableFontWeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSpanEnableVariableFontWeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanLetterSpacing)(ArkUINodeHandle node);
