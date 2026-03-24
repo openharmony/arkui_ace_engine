@@ -7226,6 +7226,17 @@ export interface BorderImageOption {
     outset?: Length | EdgeWidths | LocalizedEdgeWidths;
     fill?: boolean;
 }
+export interface MouseHistoricalPoint {
+    x: double;
+    y: double;
+    displayX: double;
+    displayY: double;
+    windowX: double;
+    windowY: double;
+    globalDisplayX: double;
+    globalDisplayY: double;
+    timestamp: int64;
+}
 export interface TouchObject {
     type: TouchType;
     id: int32;
@@ -12241,6 +12252,43 @@ export class MouseEvent_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return MouseEventInternal.fromPtr(ptr)
+    }
+}
+export class MouseHistoricalPoint_serializer {
+    public static write(buffer: SerializerBase, value: MouseHistoricalPoint): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForX = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+        const valueHolderForDisplayX = value.displayX
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
+        const valueHolderForDisplayY = value.displayY
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
+        const valueHolderForWindowX = value.windowX
+        valueSerializer.writeFloat64(valueHolderForWindowX)
+        const valueHolderForWindowY = value.windowY
+        valueSerializer.writeFloat64(valueHolderForWindowY)
+        const valueHolderForGlobalDisplayX = value.globalDisplayX
+        valueSerializer.writeFloat64(valueHolderForGlobalDisplayX)
+        const valueHolderForGlobalDisplayY = value.globalDisplayY
+        valueSerializer.writeFloat64(valueHolderForGlobalDisplayY)
+        const valueHolderForTimestamp = value.timestamp
+        valueSerializer.writeInt64(valueHolderForTimestamp)
+    }
+    public static read(buffer: DeserializerBase): MouseHistoricalPoint {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        const displayXTmpResult: double = valueDeserializer.readFloat64()
+        const displayYTmpResult: double = valueDeserializer.readFloat64()
+        const windowXTmpResult: double = valueDeserializer.readFloat64()
+        const windowYTmpResult: double = valueDeserializer.readFloat64()
+        const globalDisplayXTmpResult: double = valueDeserializer.readFloat64()
+        const globalDisplayYTmpResult: double = valueDeserializer.readFloat64()
+        const timestampTmpResult: int64 = valueDeserializer.readInt64()
+        let value: MouseHistoricalPoint = ({x: xTmpResult, y: yTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult, timestamp: timestampTmpResult} as MouseHistoricalPoint)
+        return value
     }
 }
 export class NestedScrollOptions_serializer {
@@ -26401,6 +26449,7 @@ export interface MouseEvent extends BaseEvent {
     globalDisplayX?: double | undefined
     globalDisplayY?: double | undefined
     stopPropagation(): void
+    getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     public button: MouseButton
@@ -26461,6 +26510,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     public stopPropagation(): void {
         this.stopPropagation_serialize()
         return
+    }
+    public getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined {
+        return this.getHistoricalPoints_serialize()
     }
     private getButton(): MouseButton {
         return this.getButton_serialize()
@@ -26568,6 +26620,21 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     private stopPropagation_serialize(): void {
         ArkUIGeneratedNativeModule._MouseEvent_stopPropagation(this.peer!.ptr)
+    }
+    private getHistoricalPoints_serialize(): Array<MouseHistoricalPoint> | undefined {
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getHistoricalPoints(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<MouseHistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<MouseHistoricalPoint> = new Array<MouseHistoricalPoint>(bufferOptLength, (arg0: int32):MouseHistoricalPoint => {
+            return MouseHistoricalPoint_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<MouseHistoricalPoint> | undefined = buffer
+        return returnResult
     }
     private getButton_serialize(): MouseButton {
         const retval = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)

@@ -5301,6 +5301,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _MouseEvent_stopPropagation(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _MouseEvent_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MouseEvent_getButton(ptr: KPointer): KInt
     @ani.unsafe.Direct

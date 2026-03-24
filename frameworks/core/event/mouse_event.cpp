@@ -228,10 +228,25 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetPressedButtons(event.pressedButtonsArray);
     info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
     info.SetEventHandleId(event.eventHandleId);
+    for (const auto& historyEvent : event.history) {
+        info.AddHistoryLocationInfo(CreateMouseHistoricalPoint(historyEvent, needPostEvent));
+    }
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);
     return info.IsStopPropagation();
+}
+MouseHistoricalPoint MouseEventTarget::CreateMouseHistoricalPoint(const MouseEvent& event, bool needPostEvent) const
+{
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
+    return MouseHistoricalPoint {
+        .localLocation = Offset(static_cast<float>(localPoint.GetX()), static_cast<float>(localPoint.GetY())),
+        .screenLocation = event.GetScreenOffset(),
+        .globalLocation = event.GetOffset(),
+        .globalDisplayLocation = event.GetGlobalDisplayOffset(),
+        .time = event.time,
+    };
 }
 std::shared_ptr<MMI::PointerEvent> MouseEvent::GetMouseEventPointerEvent() const
 {

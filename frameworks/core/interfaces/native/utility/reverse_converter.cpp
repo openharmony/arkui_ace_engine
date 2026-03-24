@@ -772,6 +772,19 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
+void AssignArkValue(Ark_MouseHistoricalPoint& dst, const OHOS::Ace::MouseHistoricalPoint& src)
+{
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation.GetX()));
+    dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation.GetY()));
+    dst.globalDisplayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation.GetX()));
+    dst.globalDisplayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation.GetY()));
+    dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.time.time_since_epoch().count()));
+}
+
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
     dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());

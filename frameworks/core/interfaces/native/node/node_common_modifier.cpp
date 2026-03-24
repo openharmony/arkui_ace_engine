@@ -10525,6 +10525,41 @@ void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
     event.mouseEvent.stopPropagation = false;
 }
 
+void SetMouseHistoricalPoints(ArkUIMouseEvent& mouseEvent, MouseInfo& info, double density,
+    std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents)
+{
+    if (!info.GetHistory().empty()) {
+        auto historyLocationIterator = std::begin(info.GetHistory());
+        for (size_t i = 0; i < info.GetHistory().size() && i < MAX_HISTORY_EVENT_COUNT; i++) {
+            allHistoryEvents[i].nodeX =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).localLocation.GetX() / density;
+            allHistoryEvents[i].nodeY =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).localLocation.GetY() / density;
+            allHistoryEvents[i].screenX =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).screenLocation.GetX() / density;
+            allHistoryEvents[i].screenY =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).screenLocation.GetY() / density;
+            allHistoryEvents[i].windowX =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).globalLocation.GetX() / density;
+            allHistoryEvents[i].windowY =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).globalLocation.GetY() / density;
+            allHistoryEvents[i].globalDisplayX =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).globalDisplayLocation.GetX() / density;
+            allHistoryEvents[i].globalDisplayY =
+                NearEqual(density, 0.0) ? 0.0f : (*historyLocationIterator).globalDisplayLocation.GetY() / density;
+            allHistoryEvents[i].timeStamp =
+                static_cast<double>((*historyLocationIterator).time.time_since_epoch().count());
+            historyLocationIterator++;
+        }
+        mouseEvent.historyEvents = &allHistoryEvents[0];
+        mouseEvent.historySize =
+            info.GetHistory().size() < MAX_HISTORY_EVENT_COUNT ? info.GetHistory().size() : MAX_HISTORY_EVENT_COUNT;
+    } else {
+        mouseEvent.historyEvents = nullptr;
+        mouseEvent.historySize = 0;
+    }
+}
+
 void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
 {
     ViewAbstract::CheckMainThread();
@@ -10555,7 +10590,8 @@ void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
         event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
         event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
-
+        std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+        SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
         std::vector<int32_t> pressedButtonList;
         auto pressedButtons = info.GetPressedButtons();
         event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());
@@ -12882,7 +12918,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
         event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
-
+        std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+        SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
         std::vector<int32_t> pressedButtonList;
         auto pressedButtons = info.GetPressedButtons();
         event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());

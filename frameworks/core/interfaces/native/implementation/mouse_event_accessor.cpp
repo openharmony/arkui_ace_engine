@@ -75,6 +75,15 @@ void StopPropagationImpl(Ark_MouseEvent peer)
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(true);
 }
+Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    std::list<MouseHistoricalPoint> history;
+    history = info->GetHistory();
+    return Converter::ArkValue<Opt_Array_MouseHistoricalPoint>(history, Converter::FC);
+}
 Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_MouseButton>(MouseButton::NONE_BUTTON);
@@ -366,6 +375,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
         MouseEventAccessor::StopPropagationImpl,
+        MouseEventAccessor::GetHistoricalPointsImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
         MouseEventAccessor::GetActionImpl,

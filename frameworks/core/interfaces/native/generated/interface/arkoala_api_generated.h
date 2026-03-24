@@ -646,6 +646,8 @@ typedef struct Opt_MicrophoneCaptureStateChangeInfo Opt_MicrophoneCaptureStateCh
 typedef struct MouseEventPeer MouseEventPeer;
 typedef struct MouseEventPeer* Ark_MouseEvent;
 typedef struct Opt_MouseEvent Opt_MouseEvent;
+typedef struct Ark_MouseHistoricalPoint Ark_MouseHistoricalPoint;
+typedef struct Opt_MouseHistoricalPoint Opt_MouseHistoricalPoint;
 typedef struct MutableStyledStringPeer MutableStyledStringPeer;
 typedef struct MutableStyledStringPeer* Ark_MutableStyledString;
 typedef struct Opt_MutableStyledString Opt_MutableStyledString;
@@ -1259,6 +1261,8 @@ typedef struct Array_ModifierKey Array_ModifierKey;
 typedef struct Opt_Array_ModifierKey Opt_Array_ModifierKey;
 typedef struct Array_MouseButton Array_MouseButton;
 typedef struct Opt_Array_MouseButton Opt_Array_MouseButton;
+typedef struct Array_MouseHistoricalPoint Array_MouseHistoricalPoint;
+typedef struct Opt_Array_MouseHistoricalPoint Opt_Array_MouseHistoricalPoint;
 typedef struct Array_NativeEmbedParamItem Array_NativeEmbedParamItem;
 typedef struct Opt_Array_NativeEmbedParamItem Opt_Array_NativeEmbedParamItem;
 typedef struct Array_NavDestinationTransition Array_NavDestinationTransition;
@@ -8526,6 +8530,22 @@ typedef struct Opt_MouseEvent {
     Ark_Tag tag;
     Ark_MouseEvent value;
 } Opt_MouseEvent;
+typedef struct Ark_MouseHistoricalPoint {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 displayX;
+    Ark_Float64 displayY;
+    Ark_Float64 windowX;
+    Ark_Float64 windowY;
+    Ark_Float64 globalDisplayX;
+    Ark_Float64 globalDisplayY;
+    Ark_Int64 timestamp;
+} Ark_MouseHistoricalPoint;
+typedef struct Opt_MouseHistoricalPoint {
+    Ark_Tag tag;
+    Ark_MouseHistoricalPoint value;
+} Opt_MouseHistoricalPoint;
 typedef struct Opt_MutableStyledString {
     Ark_Tag tag;
     Ark_MutableStyledString value;
@@ -10472,6 +10492,15 @@ typedef struct Opt_Array_MouseButton {
     Ark_Tag tag;
     Array_MouseButton value;
 } Opt_Array_MouseButton;
+typedef struct Array_MouseHistoricalPoint {
+    /* kind: ContainerType */
+    Ark_MouseHistoricalPoint* array;
+    Ark_Int32 length;
+} Array_MouseHistoricalPoint;
+typedef struct Opt_Array_MouseHistoricalPoint {
+    Ark_Tag tag;
+    Array_MouseHistoricalPoint value;
+} Opt_Array_MouseHistoricalPoint;
 typedef struct Array_NativeEmbedParamItem {
     /* kind: ContainerType */
     Ark_NativeEmbedParamItem* array;
@@ -29487,6 +29516,7 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Ark_MouseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*stopPropagation)(Ark_MouseEvent peer);
+    Opt_Array_MouseHistoricalPoint (*getHistoricalPoints)(Ark_MouseEvent peer);
     Ark_MouseButton (*getButton)(Ark_MouseEvent peer);
     void (*setButton)(Ark_MouseEvent peer,
                       Ark_MouseButton button);
