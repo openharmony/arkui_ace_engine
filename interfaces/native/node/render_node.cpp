@@ -1198,6 +1198,16 @@ void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(
     }
 }
 
+void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue(
+    ArkUI_RectShapeOption* option, float x, float y, float width, float height)
+{
+    CHECK_NULL_VOID(option);
+    option->left = x;
+    option->top = y;
+    option->right = x + width;
+    option->bottom = y + height;
+}
+
 ArkUI_NodeBorderStyleOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption()
 {
     ArkUI_NodeBorderStyle* option = new ArkUI_NodeBorderStyle {
@@ -1440,6 +1450,16 @@ void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(
         default:
             return;
     }
+}
+
+void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue(
+    ArkUI_RoundRectShapeOption* option, float x, float y, float width, float height)
+{
+    CHECK_NULL_VOID(option);
+    option->left = x;
+    option->top = y;
+    option->right = x + width;
+    option->bottom = y + height;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY(
