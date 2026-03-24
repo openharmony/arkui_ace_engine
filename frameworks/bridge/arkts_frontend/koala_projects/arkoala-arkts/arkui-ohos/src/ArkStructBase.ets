@@ -140,7 +140,6 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 ? ObserveSingleton.RenderingComponentV2
                 : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                     this.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_BUILD);
@@ -158,6 +157,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                     this.__aboutToReuse_Internal(param)
                 }
             )
+            OBSERVE.renderingComponent = savedRenderingComponent;
         })
     }
 
