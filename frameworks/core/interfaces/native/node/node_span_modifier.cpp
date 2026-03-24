@@ -17,6 +17,7 @@
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "draw/canvas.h"
@@ -148,6 +149,33 @@ int32_t GetSpanFontWeight(ArkUINodeHandle node)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, defaultFontWeight);
     return static_cast<int32_t>(SpanModelNG::GetFontWeight(uiNode));
+}
+
+int32_t GetSpanVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, 0);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, 0);
+    return spanNode->GetVariableFontWeightValue(0);
+}
+
+ArkUI_Bool GetSpanEnableVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, false);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, false);
+    return spanNode->GetEnableVariableFontWeightValue(false);
+}
+
+ArkUI_Bool GetSpanEnableDeviceFontWeightCategory(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, true);
+    auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, true);
+    return spanNode->GetEnableDeviceFontWeightCategoryValue(true);
 }
 
 void ResetSpanFontWeight(ArkUINodeHandle node)
@@ -714,6 +742,9 @@ const ArkUISpanModifier* GetSpanModifier()
         .getSpanFontSize = GetSpanFontSize,
         .getSpanFontStyle = GetSpanFontStyle,
         .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanVariableFontWeight = GetSpanVariableFontWeight,
+        .getSpanEnableVariableFontWeight = GetSpanEnableVariableFontWeight,
+        .getSpanEnableDeviceFontWeightCategory = GetSpanEnableDeviceFontWeightCategory,
         .getSpanLineHeight = GetSpanLineHeight,
         .getSpanTextCase = GetSpanTextCase,
         .getSpanLetterSpacing = GetSpanLetterSpacing,
@@ -779,6 +810,9 @@ const CJUISpanModifier* GetCJUISpanModifier()
         .getSpanFontSize = GetSpanFontSize,
         .getSpanFontStyle = GetSpanFontStyle,
         .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanVariableFontWeight = GetSpanVariableFontWeight,
+        .getSpanEnableVariableFontWeight = GetSpanEnableVariableFontWeight,
+        .getSpanEnableDeviceFontWeightCategory = GetSpanEnableDeviceFontWeightCategory,
         .getSpanLineHeight = GetSpanLineHeight,
         .getSpanTextCase = GetSpanTextCase,
         .getSpanLetterSpacing = GetSpanLetterSpacing,
