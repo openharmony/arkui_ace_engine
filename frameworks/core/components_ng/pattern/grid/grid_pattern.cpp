@@ -594,9 +594,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ChangeCanStayOverScroll();
     info_.currentDelta_ = 0;
 
-    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+    prevMeasureBreak_ = gridLayoutAlgorithm->MeasureInNextFrame();
+    if (prevMeasureBreak_) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
-        MarkDirtyNodeSelf();
+        PostAsyncLoadTask();
     } else {
         isInitialized_ = true;
     }
@@ -1936,5 +1937,20 @@ std::string GridPattern::GetLayoutMode() const
 int32_t GridPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void GridPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->prevMeasureBreak_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

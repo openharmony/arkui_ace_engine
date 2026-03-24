@@ -26,8 +26,11 @@
 #include "test/mock/core/render/mock_render_surface.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 using namespace testing;
@@ -50,6 +53,7 @@ public:
     void TearDown() override {}
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(XComponentType type);
+    static RefPtr<FrameNode> CreateStaticXComponentNode(bool isTypedNode);
 };
 
 RefPtr<FrameNode> XComponentTestHdrBrightness::CreateXComponentNode(XComponentType type)
@@ -60,6 +64,13 @@ RefPtr<FrameNode> XComponentTestHdrBrightness::CreateXComponentNode(XComponentTy
     XComponentModelNG().Create(XCOMPONENT_ID, type, XCOMPONENT_LIBRARY_NAME, xcomponentController);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
+}
+
+RefPtr<FrameNode> XComponentTestHdrBrightness::CreateStaticXComponentNode(bool isTypedNode)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    return AceType::DynamicCast<FrameNode>(XComponentModelStatic::CreateFrameNode(nodeId, isTypedNode));
 }
 
 void XComponentTestHdrBrightness::SetUpTestSuite()
@@ -435,6 +446,138 @@ HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest010, TestSize.Level1)
 
     pattern->HdrBrightness(0.9f, HdrType::DEFAULT);
     EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.9f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::DEFAULT);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest011
+ * @tc.desc: Test XComponentModelStatic::SetXComponentType syncs pattern and layout property to SURFACE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create static xcomponent node.
+     * @tc.expected: frameNode and pattern created successfully with UNKNOWN type.
+     */
+    auto frameNode = CreateStaticXComponentNode(false);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->type_, XComponentType::UNKNOWN);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetXComponentType with SURFACE.
+     * @tc.expected: pattern type and layout property are both updated to SURFACE.
+     */
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_SURFACE_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_SURFACE_TYPE_VALUE);
+
+    /**
+     * @tc.steps: step3. Call HdrBrightness after static type becomes SURFACE.
+     * @tc.expected: hdrBrightness_ and hdrType_ are updated successfully.
+     */
+    pattern->renderContextForSurface_ = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->HdrBrightness(0.55f, HdrType::AIHDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.55f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::AIHDR);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest012
+ * @tc.desc: Test XComponentModelStatic::SetXComponentType updates all target enum values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create static xcomponent node and get layout property.
+     * @tc.expected: frameNode, pattern and layoutProperty created successfully.
+     */
+    auto frameNode = CreateStaticXComponentNode(false);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update type to COMPONENT/TEXTURE/NODE in sequence.
+     * @tc.expected: pattern type and layout property always keep the same latest value.
+     */
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_COMPONENT_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_COMPONENT_TYPE_VALUE);
+
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_TEXTURE_TYPE_VALUE);
+
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_NODE_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_NODE_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_NODE_TYPE_VALUE);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest013
+ * @tc.desc: Test XComponentModelStatic::SetXComponentType blocks HdrBrightness after switching away from SURFACE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create static xcomponent node and set type to SURFACE.
+     * @tc.expected: baseline HdrBrightness update succeeds.
+     */
+    auto frameNode = CreateStaticXComponentNode(false);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
+    pattern->renderContextForSurface_ = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->HdrBrightness(0.4f, HdrType::DEFAULT);
+    ASSERT_FLOAT_EQ(pattern->hdrBrightness_, 0.4f);
+    ASSERT_EQ(pattern->hdrType_, HdrType::DEFAULT);
+
+    /**
+     * @tc.steps: step2. Switch type to COMPONENT and call HdrBrightness again.
+     * @tc.expected: brightness state keeps the previous SURFACE result.
+     */
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_COMPONENT_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_COMPONENT_TYPE_VALUE);
+    pattern->HdrBrightness(0.8f, HdrType::AIHDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.4f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::DEFAULT);
+
+    /**
+     * @tc.steps: step3. Continue switching type to TEXTURE and NODE.
+     * @tc.expected: HdrBrightness still returns early for non-SURFACE types.
+     */
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_TEXTURE_TYPE_VALUE);
+    pattern->HdrBrightness(0.9f, HdrType::AIHDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.4f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::DEFAULT);
+
+    XComponentModelStatic::SetXComponentType(AceType::RawPtr(frameNode), XCOMPONENT_NODE_TYPE_VALUE);
+    EXPECT_EQ(pattern->type_, XCOMPONENT_NODE_TYPE_VALUE);
+    EXPECT_EQ(layoutProperty->GetXComponentType().value_or(XComponentType::UNKNOWN), XCOMPONENT_NODE_TYPE_VALUE);
+    pattern->HdrBrightness(1.0f, HdrType::AIHDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.4f);
     EXPECT_EQ(pattern->hdrType_, HdrType::DEFAULT);
 }
 

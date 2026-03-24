@@ -18,6 +18,8 @@
 #include <string>
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
+#include "base/utils/string_utils.h"
+#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -42,6 +44,36 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+
+void SetSpanFontWeightValue(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
+    const Local<JSValueRef>& secondArg, RefPtr<ResourceObject>& resObj)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    std::string weight = DEFAULT_FONT_WEIGHT;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
+
+    if (secondArg->IsNumber()) {
+        weight = std::to_string(secondArg->Int32Value(vm));
+        variableFontWeight = secondArg->Int32Value(vm);
+        fontWeightEnum = Framework::ConvertStrToFontWeight(weight);
+    } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm))) {
+        if (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj))) {
+            return;
+        }
+        auto parseResult = Framework::ParseFontWeight(weight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+        } else {
+            variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+        }
+    }
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
+        static_cast<ArkUI_Int32>(fontWeightEnum), AceType::RawPtr(resObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
+        variableFontWeight, AceType::RawPtr(resObj));
+}
 
 bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     std::vector<ArkUITextShadowStruct>& textShadowArray,
@@ -149,23 +181,9 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    std::string weight = DEFAULT_FONT_WEIGHT;
-    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     RefPtr<ResourceObject> resObj;
     if (!secondArg->IsNull() && !secondArg->IsUndefined()) {
-        if (secondArg->IsNumber()) {
-            weight = std::to_string(secondArg->Int32Value(vm));
-            variableFontWeight = secondArg->Int32Value(vm);
-        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm))) {
-            if (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj))) {
-                return panda::JSValueRef::Undefined(vm);
-            }
-            variableFontWeight = StringUtils::StringToInt(weight);
-        }
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
-            static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
-            variableFontWeight, AceType::RawPtr(resObj));
+        SetSpanFontWeightValue(runtimeCallInfo, nativeNode, secondArg, resObj);
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontWeight(nativeNode);
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanVariableFontWeight(nativeNode);
@@ -718,13 +736,15 @@ ArkUINativeModuleValue SpanBridge::SetOnHover(ArkUIRuntimeCallInfo *runtimeCallI
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
-            auto obj = FrameNodeBridge::CreateHoverInfo(vm, info);
-            obj->SetNativePointerFieldCount(vm, 1);
-            obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+            // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+            // It is not allowed to hold this address elsewhere.
+            auto infoPtr = new HoverInfo(info);
+            auto obj = FrameNodeBridge::CreateHoverInfo(vm, infoPtr);
 
             panda::Local<panda::JSValueRef> params[NUM_2] = {
                 panda::BooleanRef::New(vm, isHover), obj };
             func->Call(vm, func.ToLocal(), params, NUM_2);
+            info.SetStopPropagation(infoPtr->IsStopPropagation());
         };
         GetArkUINodeModifiers()->getSpanModifier()->setSpanOnHover(nativeNode, reinterpret_cast<void*>(&callback));
     } else {

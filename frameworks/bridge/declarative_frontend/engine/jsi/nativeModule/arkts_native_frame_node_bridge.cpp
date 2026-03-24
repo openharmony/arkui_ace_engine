@@ -1005,6 +1005,30 @@ void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* dat
             delete touchEventInfo;
             break;
         }
+        case NATIVE_PTR_TAG_GESTURE_EVENT: {
+            auto* gestureEvent = static_cast<GestureEvent*>(nativePtr);
+            CHECK_NULL_VOID(gestureEvent);
+            delete gestureEvent;
+            break;
+        }
+        case NATIVE_PTR_TAG_HOVER_INFO: {
+            auto* hoverInfo = static_cast<HoverInfo*>(nativePtr);
+            CHECK_NULL_VOID(hoverInfo);
+            delete hoverInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO: {
+            auto* focusAxisEventInfo = static_cast<FocusAxisEventInfo*>(nativePtr);
+            CHECK_NULL_VOID(focusAxisEventInfo);
+            delete focusAxisEventInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_KEY_EVENT_INFO: {
+            auto* keyEventInfo = static_cast<KeyEventInfo*>(nativePtr);
+            CHECK_NULL_VOID(keyEventInfo);
+            delete keyEventInfo;
+            break;
+        }
         default: {
             TAG_LOGW(AceLogTag::ACE_UIEVENT, "unknown nativePtr type");
             return;
@@ -1012,13 +1036,14 @@ void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* dat
     }
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, GestureEvent* infoPtr)
 {
-    const Offset& globalOffset = info.GetGlobalLocation();
-    const Offset& localOffset = info.GetLocalLocation();
-    const Offset& screenOffset = info.GetScreenLocation();
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
     double density = PipelineBase::GetCurrentDensity();
-    const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
     const char* keys[] = { "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y", "timestamp",
         "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, screenOffset.GetX() / density),
@@ -1029,37 +1054,36 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, globalOffset.GetY() / density),
         panda::NumberRef::New(vm, localOffset.GetX() / density),
         panda::NumberRef::New(vm, localOffset.GetY() / density),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
-        panda::NumberRef::New(vm, info.GetForce()),
-        panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, GetOperatingHand(info)),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        panda::NumberRef::New(vm, infoPtr->GetForce()), panda::NumberRef::New(vm, infoPtr->GetDeviceId()),
+        panda::NumberRef::New(vm, GetOperatingHand(*infoPtr)),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    obj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
-    obj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, *infoPtr));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
     return obj;
 }
 
@@ -1092,9 +1116,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateGestureEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new GestureEvent(info);
+        auto obj = CreateGestureEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnClick(frameNode, std::move(onClick));
     return panda::JSValueRef::Undefined(vm);
@@ -1116,11 +1144,11 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     panda::JsiFastNativeScope fastNativeScope(vm);
     auto eventObj = CreateTouchEventInfoObj(vm, *infoPtr);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
     auto touchArr = panda::ArrayRef::New(vm);
@@ -1274,25 +1302,30 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo* infoPtr)
 {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode",
         "timestamp", "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
         "isScrollLockOn" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-        panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
-        panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
-        panda::NumberRef::New(vm, info.GetUnicode()),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyType())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyCode())),
+        panda::StringRef::NewFromUtf8(vm, infoPtr->GetKeyText().c_str()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeySource())),
+        panda::NumberRef::New(vm, infoPtr->GetDeviceId()), panda::NumberRef::New(vm, infoPtr->GetMetaKey()),
+        panda::NumberRef::New(vm, infoPtr->GetUnicode()),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
         panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
-        panda::BooleanRef::New(vm, info.GetNumLock()),
-        panda::BooleanRef::New(vm, info.GetCapsLock()),
-        panda::BooleanRef::New(vm, info.GetScrollLock()) };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyIntention())),
+        panda::BooleanRef::New(vm, infoPtr->GetNumLock()),
+        panda::BooleanRef::New(vm, infoPtr->GetCapsLock()),
+        panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO);
+    return obj;
 }
 
 ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1323,11 +1356,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateKeyEventInfoObj(vm, info);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(info);
+        auto obj = CreateKeyEventInfoObj(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
 
     NG::ViewAbstract::SetJSFrameNodeOnKeyCallback(frameNode, std::move(onKeyEvent));
@@ -1402,21 +1437,22 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& hoverInfo)
+Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* infoPtr)
 {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
         "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY", };
     double density = PipelineBase::GetCurrentDensity();
-    const Offset& globalOffset = hoverInfo.GetGlobalLocation();
-    const Offset& localOffset = hoverInfo.GetLocalLocation();
-    const Offset& screenOffset = hoverInfo.GetScreenLocation();
-    const Offset& globalDisplayOffset = hoverInfo.GetGlobalDisplayLocation();
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
     Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
-        CreateEventTargetObject(vm, hoverInfo),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetDeviceId())),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        CreateEventTargetObject(vm, *infoPtr),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetDeviceId())),
         panda::NumberRef::New(vm, density != 0 ? screenOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? screenOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetX() / density : 0),
@@ -1427,7 +1463,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& 
         panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
     auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
+    eventObj->SetNativePointerFieldCount(vm, 1);
+    eventObj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return eventObj;
 }
 
@@ -1460,11 +1499,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto isHoverParam = panda::BooleanRef::New(vm, isHover);
-        auto obj = CreateHoverInfo(vm, hoverInfo);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto obj = CreateHoverInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnHover(frameNode, std::move(onHover));
     return panda::JSValueRef::Undefined(vm);
@@ -1498,11 +1539,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* run
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateHoverInfo(vm, hoverInfo);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto obj = CreateHoverInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnHoverMove(frameNode, std::move(onHoverMove));
     return panda::JSValueRef::Undefined(vm);
@@ -1547,11 +1590,11 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     auto obj = CreateMouseInfoObj(vm, *infoPtr);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(

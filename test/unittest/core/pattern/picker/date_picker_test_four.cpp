@@ -13,27 +13,48 @@
  * limitations under the License.
  */
 
+#include <mutex>
+#include <vector>
+
 #include "gtest/gtest.h"
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/pattern/mock_picker_haptic_impl.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
+#include "base/json/json_util.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #undef private
 #undef protected
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace OHOS::Ace {
+std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
+std::once_flag TimePickerModel::onceFlag_;
+
+TimePickerModel* TimePickerModel::GetInstance()
+{
+    std::call_once(onceFlag_, []() {
+        timePickerInstance_.reset(new NG::TimePickerModelNG());
+    });
+    return timePickerInstance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,6 +84,16 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+constexpr int32_t TEST_VALID_YEAR = 2024;
+constexpr int32_t TEST_VALID_MONTH = 6;
+constexpr int32_t TEST_VALID_DAY = 15;
+constexpr int32_t TEST_START_YEAR = 2020;
+constexpr int32_t TEST_START_MONTH = 1;
+constexpr int32_t TEST_START_DAY = 1;
+constexpr int32_t TEST_END_YEAR = 2030;
+constexpr int32_t TEST_END_MONTH = 12;
+constexpr int32_t TEST_END_DAY = 31;
+constexpr int32_t TEST_NODE_ID = 1;
 
 RefPtr<UINode> FindNodeByTag(const RefPtr<UINode>& uiNode, const std::string& tag)
 {
@@ -806,7 +837,7 @@ HWTEST_F(DatePickerTestFour, DataPickerDialogViewUpdateButtonStyles001, TestSize
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    
+
     auto renderContext = buttonNode->GetRenderContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -943,7 +974,6 @@ HWTEST_F(DatePickerTestFour, DatePickerDialogViewUpdateButtonDefaultFocus005, Te
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
-
 
 /**
  * @tc.name: DatePickerPatternTest001
@@ -1180,14 +1210,13 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
 HWTEST_F(DatePickerTestFour, GetDateChangeEvent001, TestSize.Level1)
 {
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>();});
     ASSERT_NE(datePickerNode, nullptr);
 
     std::map<std::string, NG::DialogEvent> dialogEvent;
     auto callback = DatePickerDialogView::GetDateChangeEvent(nullptr, dialogEvent);
     ASSERT_NE(callback, nullptr);
     callback("");
-
     callback = DatePickerDialogView::GetDateChangeEvent(datePickerNode, dialogEvent);
     ASSERT_NE(callback, nullptr);
     callback("");
@@ -1767,4 +1796,696 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
     datePickerPattern->OnModifyDone();
     EXPECT_FALSE(datePickerPattern->isHapticChanged_);
 }
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest001
+ * @tc.desc: Test ValidateDateParameters with valid date parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6,"day":15})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(year, TEST_VALID_YEAR);
+    EXPECT_EQ(month, TEST_VALID_MONTH);
+    EXPECT_EQ(day, TEST_VALID_DAY);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest002
+ * @tc.desc: Test ValidateDateParameters with invalid year.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":1899,"month":6,"day":15})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest003
+ * @tc.desc: Test ValidateDateParameters with invalid month.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2024,"month":13,"day":15})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest004
+ * @tc.desc: Test ValidateDateParameters with invalid day.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest004, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6,"day":32})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest005
+ * @tc.desc: Test ValidateDateParameters with missing required fields.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest006
+ * @tc.desc: Test ValidateDateParameters when input is not a JSON object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest006, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::ParseJsonString(R"([2024,6,15])");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnInjectionEventTest007
+ * @tc.desc: Test OnDateInjection with invalid JSON input.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnInjectionEventTest007, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string invalidCommand = "not valid json";
+    int32_t result = pattern->OnInjectionEvent(invalidCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest007
+ * @tc.desc: Test OnDateInjection with invalid JSON input.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest007, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string invalidCommand = "not valid json";
+    int32_t result = pattern->OnDateInjection(invalidCommand);
+
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest008
+ * @tc.desc: Test OnDateInjection when input is not a JSON object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest008, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string notObjectCommand = R"([1,2,3])";
+    int32_t result = pattern->OnDateInjection(notObjectCommand);
+
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest009
+ * @tc.desc: Test OnDateInjection with unknown command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest009, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string invalidCmd = R"({"cmd":"unknownCommand"})";
+    int32_t result = pattern->OnDateInjection(invalidCmd);
+
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest010
+ * @tc.desc: Test OnDateInjection with invalid params format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest010, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string invalidParams = R"({"cmd":"setDatePickerTime","params":"invalid"})";
+    int32_t result = pattern->OnDateInjection(invalidParams);
+
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest011
+ * @tc.desc: Test OnDateInjection with valid date parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest011, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string validCommand = R"({"cmd":"setDatePickerTime","params":{"year":2024,"month":6,"day":15}})";
+    int32_t result = pattern->OnDateInjection(validCommand);
+
+    EXPECT_EQ(result, RET_SUCCESS);
+    auto selectedDate = pattern->GetSelectedDate();
+    EXPECT_EQ(selectedDate.GetYear(), TEST_VALID_YEAR);
+    EXPECT_EQ(selectedDate.GetMonth(), TEST_VALID_MONTH);
+    EXPECT_EQ(selectedDate.GetDay(), TEST_VALID_DAY);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnDateInjectionTest012
+ * @tc.desc: Test OnDateInjection with date out of valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternOnDateInjectionTest012, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetStartDate(PickerDate(TEST_START_YEAR, TEST_START_MONTH, TEST_START_DAY));
+    pattern->SetEndDate(PickerDate(TEST_END_YEAR, TEST_END_MONTH, TEST_END_DAY));
+
+    std::string outOfRange = R"({"cmd":"setDatePickerTime","params":{"year":2019,"month":6,"day":15}})";
+    int32_t result = pattern->OnDateInjection(outOfRange);
+
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: DatePickerPatternReportDateChangeEventTest013
+ * @tc.desc: Test ReportDateChangeEvent with valid event data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternReportDateChangeEventTest013, TestSize.Level1)
+{
+    std::string eventData = R"({"year":2024,"month":5,"day":15,"hour":0,"minute":0,"status":-1})";
+    bool result = DatePickerPattern::ReportDateChangeEvent(TEST_NODE_ID, "DatePicker", "onDateChange", eventData);
+
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest014
+ * @tc.desc: Test ValidateDateParameters at start date boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest014, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetStartDate(PickerDate(TEST_START_YEAR, TEST_START_MONTH, TEST_START_DAY));
+    pattern->SetEndDate(PickerDate(TEST_END_YEAR, TEST_END_MONTH, TEST_END_DAY));
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2020,"month":1,"day":1})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(year, TEST_START_YEAR);
+    EXPECT_EQ(month, TEST_START_MONTH);
+    EXPECT_EQ(day, TEST_START_DAY);
+}
+
+/**
+ * @tc.name: DatePickerPatternValidateDateParametersTest015
+ * @tc.desc: Test ValidateDateParameters at end date boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest015, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetStartDate(PickerDate(TEST_START_YEAR, TEST_START_MONTH, TEST_START_DAY));
+    pattern->SetEndDate(PickerDate(TEST_END_YEAR, TEST_END_MONTH, TEST_END_DAY));
+
+    auto json = JsonUtil::ParseJsonString(R"({"year":2030,"month":12,"day":31})");
+    ASSERT_NE(json, nullptr);
+
+    int32_t year = 0;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool result = pattern->ValidateDateParameters(json, year, month, day);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(year, TEST_END_YEAR);
+    EXPECT_EQ(month, TEST_END_MONTH);
+    EXPECT_EQ(day, TEST_END_DAY);
+}
+
+/**
+ * @tc.name: OnDialogDateInjection001
+ * @tc.desc: Test OnDialogDateInjection Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, OnDialogDateInjection001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    std::string invalidCommand = "invalid json";
+    int32_t result = datePickerPattern->OnDialogDateInjection(invalidCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    std::string wrongCommand = "{\"cmd\":\"wrongCommand\",\"params\":{}}";
+    result = datePickerPattern->OnDialogDateInjection(wrongCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    std::string missingParamsCommand = "{\"cmd\":\"setDatePickerDialogTime\"}";
+    result = datePickerPattern->OnDialogDateInjection(missingParamsCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: SetDatePickerDialogTime001
+ * @tc.desc: Test SetDatePickerDialogTime Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, SetDatePickerDialogTime001, TestSize.Level1)
+{
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+
+    auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pickerRow, nullptr);
+
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    datePickerNode->MountToParent(pickerRow);
+
+    auto timePickerNode = FrameNode::CreateFrameNode(V2::TIME_PICKER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TimePickerRowPattern>());
+    ASSERT_NE(timePickerNode, nullptr);
+    timePickerNode->MountToParent(pickerRow);
+
+    pickerRow->MountToParent(pickerStack);
+
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->SetIsShowInDialog(true);
+    datePickerPattern->showTime_ = true;
+    datePickerPattern->showMonthDays_ = false;
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->SetDatePickerDialogTime(10, 30, 0);
+    datePickerPattern->SetDatePickerDialogTime(23, 59, 59);
+}
+
+/**
+ * @tc.name: SetDatePickerDialogTime002
+ * @tc.desc: Test SetDatePickerDialogTime Function with showMonthDays_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, SetDatePickerDialogTime002, TestSize.Level1)
+{
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+
+    auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pickerRow, nullptr);
+
+    auto monthDaysNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(monthDaysNode, nullptr);
+    monthDaysNode->MountToParent(pickerRow);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto timePickerNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(timePickerNode, nullptr);
+    timePickerNode->MountToParent(pickerRow);
+    pickerRow->MountToParent(pickerStack);
+
+    auto monthDaysPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+    monthDaysPattern->SetIsShowInDialog(true);
+    monthDaysPattern->showTime_ = true;
+    monthDaysPattern->showMonthDays_ = true;
+    monthDaysPattern->OnModifyDone();
+
+    monthDaysPattern->SetDatePickerDialogTime(10, 30, 0);
+    monthDaysPattern->SetDatePickerDialogTime(23, 59, 59);
+}
+
+/**
+ * @tc.name: SetDatePickerDialogDate001
+ * @tc.desc: Test SetDatePickerDialogDate Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, SetDatePickerDialogDate001, TestSize.Level1)
+{
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+
+    auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pickerRow, nullptr);
+
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    datePickerNode->MountToParent(pickerRow);
+
+    pickerRow->MountToParent(pickerStack);
+
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->SetIsShowInDialog(true);
+    datePickerPattern->showMonthDays_ = false;
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->SetDatePickerDialogDate(2026, 3, 19);
+    datePickerPattern->SetDatePickerDialogDate(2000, 12, 31);
+}
+
+/**
+ * @tc.name: SetDatePickerDialogDate002
+ * @tc.desc: Test SetDatePickerDialogDate Function with showMonthDays_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, SetDatePickerDialogDate002, TestSize.Level1)
+{
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+
+    auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pickerRow, nullptr);
+
+    auto monthDaysNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(monthDaysNode, nullptr);
+    monthDaysNode->MountToParent(pickerRow);
+
+    pickerRow->MountToParent(pickerStack);
+
+    auto monthDaysPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+    monthDaysPattern->SetIsShowInDialog(true);
+    monthDaysPattern->showMonthDays_ = true;
+    monthDaysPattern->OnModifyDone();
+
+    monthDaysPattern->SetDatePickerDialogDate(2026, 3, 19);
+    monthDaysPattern->SetDatePickerDialogDate(2000, 12, 31);
+}
+
+/**
+ * @tc.name: CheckDialogParamValue001
+ * @tc.desc: Test CheckDialogParamValue Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, CheckDialogParamValue001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    std::string validCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,") +
+        "\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    auto json = JsonUtil::ParseJsonString(validCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    bool result = datePickerPattern->CheckDialogParamValue(paramJson, validCommand);
+    EXPECT_TRUE(result);
+
+    std::string missingYearCommand = "{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"month\":3,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(missingYearCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamValue(paramJson, missingYearCommand);
+    EXPECT_FALSE(result);
+
+    std::string missingMonthCommand = "{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(missingMonthCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamValue(paramJson, missingMonthCommand);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckDialogParamDataValid001
+ * @tc.desc: Test CheckDialogParamDataValid Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, CheckDialogParamDataValid001, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    std::string validCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,") +
+        "\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    auto json = JsonUtil::ParseJsonString(validCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    bool result = datePickerPattern->CheckDialogParamDataValid(paramJson, validCommand);
+    EXPECT_TRUE(result);
+
+    std::string invalidYearCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":1800,") +
+        "\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(invalidYearCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamDataValid(paramJson, invalidYearCommand);
+    EXPECT_FALSE(result);
+
+    std::string invalidMonthCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,") +
+        "\"month\":13,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(invalidMonthCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamDataValid(paramJson, invalidMonthCommand);
+    EXPECT_FALSE(result);
+
+    std::string invalidDayCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,") +
+        "\"month\":3,\"day\":32,\"hour\":10,\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(invalidDayCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamDataValid(paramJson, invalidDayCommand);
+    EXPECT_FALSE(result);
+
+    std::string invalidHourCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",\"params\":{\"year\":2026,") +
+        "\"month\":3,\"day\":19,\"hour\":25,\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(invalidHourCommand);
+    ASSERT_NE(json, nullptr);
+    paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    result = datePickerPattern->CheckDialogParamDataValid(paramJson, invalidHourCommand);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ReportDialogDateChangeEvent001
+ * @tc.desc: Test ReportDialogDateChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDialogDateChangeEvent001, TestSize.Level1)
+{
+    DialogProperties dialogProperties;
+    DatePickerSettingData settingData;
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto datePickerNode = FindNodeByTag(dialogNode, V2::DATE_PICKER_ETS_TAG);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(datePickerNode);
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto ret = datePickerPattern->ReportDateChangeEvent("DatePickerDialog", "onDateChange", "");
+    EXPECT_FALSE(ret);
+}
+
 } // namespace OHOS::Ace::NG

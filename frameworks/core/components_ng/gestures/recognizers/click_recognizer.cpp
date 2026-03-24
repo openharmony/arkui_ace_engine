@@ -17,7 +17,6 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
-#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 
@@ -25,6 +24,7 @@
 #include "base/ressched/ressched_report.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
+#include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -585,13 +585,40 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         ACE_BENCH_MARK_TRACE("TapGesture_end");
         HandleReportClick(info);
         auto node = GetAttachedNode().Upgrade();
-        ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(node,
-            static_cast<int32_t>(info.GetScreenLocation().GetX()),
-            static_cast<int32_t>(info.GetScreenLocation().GetY()));
+        if (node && node->GetEnableClickSoundEffect()) {
+            PlayClickSoundEffect();
+        }
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+}
+
+void ClickRecognizer::PlayClickSoundEffect()
+{
+#ifdef ENABLE_DEFAULT_CLICK_SOUND
+    if (!interactiveSoundEffectsFunc_) {
+        void* funcPtr = nullptr;
+        ErrCode errCode =
+            ExtraModulesManager::GetInstance().GetCapability("click_sound_effect", "InteractiveSoundEffects", &funcPtr);
+        if (errCode == ErrCode::SUCCESS) {
+            interactiveSoundEffectsFunc_ =  reinterpret_cast<InteractiveSoundEffectsFunc>(funcPtr);
+        } else {
+            return;
+        }
+    }
+    auto container = Container::GetContainer(Container::CurrentId());
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [interactiveSoundEffectsFunc = interactiveSoundEffectsFunc_]() {
+            if (interactiveSoundEffectsFunc) {
+                interactiveSoundEffectsFunc(0, 0, INT_MIN, INT_MIN);
+            }
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
+#endif
 }
 
 void ClickRecognizer::HandleReportClick(const GestureEvent& info)

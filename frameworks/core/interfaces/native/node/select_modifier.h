@@ -17,11 +17,22 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+namespace OHOS::Ace::NG {
+#define ADD_RADIUS_RESOURCE(resObjPtr, borderColorProp, colorMember)                              \
+    auto colorMember##Update = [](const RefPtr<ResourceObject>& obj, BorderColorProperty& prop) { \
+        Color color;                                                                              \
+        ResourceParseUtils::ParseResColor(obj, color);                                            \
+        prop.colorMember = color;                                                                 \
+    };                                                                                            \
+    colorMember##ResObj->DecRefCount();                                                           \
+    const std::string resourceKey = std::string("outlineColor.") + #colorMember;                  \
+    (borderColorProp).AddResource(resourceKey, colorMember##ResObj, std::move(colorMember##Update))
 
-namespace OHOS::Ace::NG::NodeModifier {
+namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier();
 const CJUISelectModifier* GetCJUISelectModifier();
 void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam);
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H

@@ -262,6 +262,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest003, TestSize.Level1)
     bool isFinish = false;
     auto onChangeFinish = [&isFinish]() { isFinish = true; };
     marqueeModel.SetOnFinish(onChangeFinish);
+    bool isStop = false;
+    auto onChangeStop = [&isStop]() { isStop = true; };
+    marqueeModel.SetOnStop(onChangeStop);
 
     /**
      * @tc.steps: step2. get marquee frameNode and event.
@@ -1723,6 +1726,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest026, TestSize.Level1)
     bool isFinish = false;
     auto onChangeFinish = [&isFinish]() { isFinish = true; };
     marqueeModel.SetOnFinish(onChangeFinish);
+    bool isStop = false;
+    auto onChangeStop = [&isStop]() { isStop = true; };
+    marqueeModel.SetOnStop(onChangeStop);
 
     /**
      * @tc.steps: step2. get marquee frameNode and event.
@@ -2213,5 +2219,41 @@ HWTEST_F(MarqueeTestNg, HandleHeightConstraint, TestSize.Level1)
     calcContext.layoutConstraint.maxSize.SetHeight(1080);
     marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
     EXPECT_EQ(calcContext.optionalSize.Height(), std::nullopt);
+}
+
+/**
+ * @tc.name: MarqueeTest027
+ * @tc.desc: Test Stop event function of marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create marquee and set event.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    bool isStop = false;
+    auto onChangeStop = [&isStop]() { isStop = true; };
+    marqueeModel.SetOnStop(onChangeStop);
+
+    /**
+     * @tc.steps: step2. get marquee frameNode and event.
+     * @tc.expected: step2. function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    pattern->ExecuteStopMarquee();
+    EXPECT_FALSE(isStop);
+    pattern->hasStart_ = true;
+    pattern->ExecuteStopMarquee();
+    EXPECT_TRUE(isStop);
 }
 } // namespace OHOS::Ace::NG

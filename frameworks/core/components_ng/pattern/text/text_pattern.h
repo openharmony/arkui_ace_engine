@@ -541,6 +541,11 @@ public:
         return contChange_;
     }
 
+    bool GetHasStart() const
+    {
+        return hasStart_;
+    }
+
     bool GetShowSelect() const
     {
         return showSelect_;
@@ -1101,7 +1106,6 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
     virtual bool CanStartAITask() const;
-    virtual bool NeedClearAISpanMap(const std::u16string& textForAICache) { return true; };
     virtual bool GetDefaultClipValue() const;
 
     void MarkDirtySelf();
@@ -1343,6 +1347,7 @@ private:
     bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
+    bool hasStart_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;

@@ -35,6 +35,11 @@ link_abc_files("arkoala_abc") {
     "koala_projects/arkoala-arkts:components_abc",
   ]
 
+  deps = []
+  if (!ohos_indep_compiler_enable) {
+    deps += [ "arkoala_generator:idlize_gen" ]
+  }
+
   output_name = "arkoala"
 }
 
@@ -43,9 +48,6 @@ ohos_prebuilt_etc("arkoala_abc_prebuild") {
   deps = [
     ":arkoala_abc"
   ]
-  if (!ohos_indep_compiler_enable) {
-    deps += [ "arkoala_generator:idlize_gen" ]
-  }
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part

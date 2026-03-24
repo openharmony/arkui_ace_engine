@@ -132,6 +132,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetOrphanCharOptimization(textFieldLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
     textStyle.SetIncludeFontPadding(textFieldLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textFieldLayoutProperty->GetFallbackLineSpacingValue(false));
@@ -893,6 +894,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(IncludeFontPadding, IncludeFontPadding);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(FallbackLineSpacing, FallbackLineSpacing);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(OrphanCharOptimization, OrphanCharOptimization);
     textLayoutProperty->UpdateLayoutDirection(direction_);
     textLayoutProperty->UpdateTextDirection(textDirection_);
     if (!isInlineFocus_) {
@@ -1094,6 +1096,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .fontSize = fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
@@ -1142,6 +1145,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .fontSize = paragraphData.fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing() };

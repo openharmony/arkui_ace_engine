@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,7 @@ public:
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -187,6 +188,9 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     bool IsRatingImageReady(uint32_t imageStateCode);
     void ReportChangeEvent(const std::string& index);
+    bool ReportInjectionResult(bool isSuccess, const std::string& reason);
+    double AdjustedRatingScore(double value);
+    int32_t HandleRatingChangeInjection(const std::unique_ptr<JsonValue>& commandObj);
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

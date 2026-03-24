@@ -140,6 +140,7 @@ struct ACE_FORCE_EXPORT MenuParam {
     std::optional<Dimension> minKeyboardAvoidDistance;
     RefPtr<UiMaterial> systemMaterial;
     std::optional<DisplayMode> scrollBar;
+    std::optional<Dimension> maxHeight;
     bool isDarkMode = false;
     bool isWithTheme = false;
     bool reuse = true;

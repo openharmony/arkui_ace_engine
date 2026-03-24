@@ -21,6 +21,11 @@ struct Index {
   build() {
     Row(){
       Column(){
+        Button($r('app.string.SideSheet10'))
+          .width('100%').fontSize('20vp')
+          .margin({ bottom: 15})
+          .onClick(()=>{ router.pushUrl({url: 'pages/simpleBindSheet/Index'}) })
+
         Button($r('app.string.SideSheet6'))
           .width('100%').fontSize('20vp')
           .margin({ bottom: 15})

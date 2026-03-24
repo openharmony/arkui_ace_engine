@@ -983,6 +983,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1280,6 +1292,9 @@ export interface TextAttribute extends CommonMethod {
     textDirection(value: TextDirection | undefined): this {
         throw new Error('Unimplemented method textDirection')
     }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error("Unimplemented method orphanCharOptimization")
+    }
     font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
         throw new Error('Unimplemented method font')
     }
@@ -1314,7 +1329,8 @@ export enum TextResponseType {
 export enum MarqueeState {
     START = 0,
     BOUNCE = 1,
-    FINISH = 2
+    FINISH = 2,
+    STOP = 3
 }
 export enum MarqueeStartPolicy {
     DEFAULT = 0,
@@ -1618,6 +1634,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public textDirection(value: TextDirection | undefined): this {
         const value_casted = value as (TextDirection | undefined)
         this.getPeer()?.setTextDirectionAttribute(value_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {

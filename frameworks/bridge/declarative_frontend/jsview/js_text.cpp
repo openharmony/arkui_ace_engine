@@ -28,6 +28,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
@@ -79,6 +80,25 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
 const int32_t DEFAULT_LINE_HEIGHT = 28;
+
+void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
+    int32_t& variableFontWeight, FontWeight& fontWeightEnum)
+{
+    if (fontWeight->IsNumber()) {
+        JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
+        weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        fontWeightEnum = ConvertStrToFontWeight(weight);
+    } else {
+        JSContainerBase::ParseJsString(fontWeight, weight);
+        auto parseResult = ParseFontWeight(weight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+        }
+    }
+}
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -143,14 +163,10 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-        ParseJsInt32(fontWeight, variableFontWeight);
+        FontWeight fontWeightEnum = FontWeight::NORMAL;
+        ParseFontWeightInfo(fontWeight, weight, variableFontWeight, fontWeightEnum);
         TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSContainerBase::ParseJsString(fontWeight, weight);
-        }
-        font.fontWeight = ConvertStrToFontWeight(weight);
+        font.fontWeight = fontWeightEnum;
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     UnRegisterResource("FontFamily");
@@ -203,15 +219,23 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(args, variableFontWeight);
-    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
-
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
     if (args->IsNumber()) {
+        ParseJsInt32(args, variableFontWeight);
         fontWeight = args->ToString();
+        fontWeightEnum = ConvertStrToFontWeight(fontWeight);
     } else {
         ParseJsString(args, fontWeight);
+        auto parseResult = ParseFontWeight(fontWeight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT);
+        }
     }
-    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+    TextModel::GetInstance()->SetFontWeight(fontWeightEnum);
 
     if (info.Length() < 2) { // 2 : two args
         return;
@@ -861,7 +885,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
             auto frameNode = node.Upgrade();
@@ -1424,6 +1448,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
+    JSClass<JSText>::StaticMethod("orphanCharOptimization", &JSText::SetOrphanCharOptimization);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
@@ -1733,6 +1758,18 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     };
 
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
+void JSText::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
 }
 
 void JSText::EditMenuOptions(const JSCallbackInfo& info)

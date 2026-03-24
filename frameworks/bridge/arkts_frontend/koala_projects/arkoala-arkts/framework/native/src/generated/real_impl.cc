@@ -832,8 +832,8 @@ void ShowCrash(Ark_CharPtr message) {}
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CommonMethodModifier {
         void SetOnClick0Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event)
-    {
+            const Opt_Callback_ClickEvent_Void* event)
+        {
         RegisterOnClick(node, &event->value);
         if (!needGroupedLog(1)) {
             return;
@@ -844,8 +844,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnClick1Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event,
-                      const Opt_Float64* distanceThreshold)
+        const Opt_Callback_ClickEvent_Void* event,
+        const Opt_Float64* distanceThreshold)
     {
         RegisterOnClick(node, &event->value);
         if (!needGroupedLog(1)) {
@@ -874,7 +874,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetDrawModifierImpl(Ark_NativePointer node,
-                          const Opt_DrawModifier* value)
+        const Opt_DrawModifier* value)
     {
         if (value->value) {
             auto frameNode = AsNode(node);
@@ -949,7 +949,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     namespace EventEmulatorAccessor {
     void EmitClickEventImpl(Ark_NativePointer node,
-                            Ark_ClickEvent event)
+        Ark_ClickEvent event)
     {
         auto frameNode = AsNode(node);
         frameNode->callClickEvent(event);
@@ -1010,7 +1010,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             appendGroupedLog(1, out);
         }
         void SetDrawBehind_callbackImpl(Ark_DrawModifier peer,
-                                        const Callback_DrawContext_Void* drawBehind_callback)
+            const Callback_DrawContext_Void* drawBehind_callback)
         {
             RegisterDrawModifierCallback(peer, drawBehind_callback, DrawBehind);
             if (!needGroupedLog(1)) {
@@ -1022,7 +1022,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             appendGroupedLog(1, out);
         }
         void SetDrawContent_callbackImpl(Ark_DrawModifier peer,
-                                        const Callback_DrawContext_Void* drawContent_callback)
+            const Callback_DrawContext_Void* drawContent_callback)
         {
             RegisterDrawModifierCallback(peer, drawContent_callback, DrawContent);
             if (!needGroupedLog(1)) {
@@ -1034,7 +1034,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             appendGroupedLog(1, out);
         }
         void SetDrawFront_callbackImpl(Ark_DrawModifier peer,
-                                    const Callback_DrawContext_Void* drawFront_callback)
+            const Callback_DrawContext_Void* drawFront_callback)
         {
             RegisterDrawModifierCallback(peer, drawFront_callback, DrawFront);
             if (!needGroupedLog(1)) {
@@ -1054,7 +1054,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
         void RunFor(std::function<void(double)> func, unsigned int delay, unsigned int duration, unsigned int granularity) {
             std::thread([func, delay, duration, granularity]()
-            {
+        {
                 if (delay > 0) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
                 }
@@ -1144,7 +1144,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             exitAnimations.erase(node);
         }
         void SetPageTransitionImpl(Ark_NativePointer node,
-                                const Ark_TransitionParam* param)
+            const Ark_TransitionParam* param)
         {
             if (!needGroupedLog(1)) {
                 return;
@@ -1160,19 +1160,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                 auto delay = param->pageTransitionOptions.delay.tag != INTEROP_TAG_UNDEFINED ? param->pageTransitionOptions.delay.value.i32 : 0;
                 auto duration = param->pageTransitionOptions.duration.tag != INTEROP_TAG_UNDEFINED ? param->pageTransitionOptions.duration.value.i32 : 0;
                 if (duration > 0) {
-                    auto callback = param->onProgress.value;
+            auto callback = param->onProgress.value;
                     auto routeType = param->routeType.tag != INTEROP_TAG_UNDEFINED ? param->routeType.value : ARK_ROUTE_TYPE_NONE;
-                    callback.resource.hold(callback.resource.resourceId);
-                    auto onProgress = [callback, routeType](double progress) {
+            callback.resource.hold(callback.resource.resourceId);
+            auto onProgress = [callback, routeType](double progress) {
                         if (callback.call) {
                             Ark_Number ark_progress = { .tag = INTEROP_TAG_FLOAT32, .f32 = static_cast<InteropFloat32>(progress) };
                             callback.call(callback.resource.resourceId, routeType, ark_progress);
-                        }
-                    };
+                }
+            };
 
-                    if (param->pageTransitionType == ARK_PAGE_TRANSITION_TYPE_ENTER) {
+            if (param->pageTransitionType == ARK_PAGE_TRANSITION_TYPE_ENTER) {
                         enterAnimations[node] = std::bind(RunFor, onProgress, delay, duration, 10);
-                    } else {
+            } else {
                         exitAnimations[node] = std::bind(RunFor, onProgress, delay, duration, 10);
                     }
                 }
@@ -3895,6 +3895,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnFinishImpl(Ark_NativePointer node,
                          const Opt_synthetic_Callback_Void* value)
+    {
+    }
+    void SetOnStopImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
     {
     }
     } // MarqueeAttributeModifier
@@ -6839,6 +6843,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_TextDirection* value)
     {
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_arkui_component_units_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -7147,6 +7155,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTextDirectionImpl(Ark_NativePointer node,
                               const Opt_TextDirection* value)
+    {
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     void SetVoiceButtonImpl(Ark_NativePointer node,
@@ -7589,6 +7601,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetShowCounterImpl(Ark_NativePointer node,
                             const Opt_Boolean* value,
                             const Opt_InputCounterOptions* options)
+    {
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     } // TextInputAttributeModifier
@@ -9685,6 +9701,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MarqueeAttributeModifier::SetOnStartImpl,
             MarqueeAttributeModifier::SetOnBounceImpl,
             MarqueeAttributeModifier::SetOnFinishImpl,
+            MarqueeAttributeModifier::SetOnStopImpl,
         };
         return &ArkUIMarqueeModifierImpl;
     }
@@ -10661,6 +10678,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetLineSpacingImpl,
             TextAttributeModifier::SetSelectionImpl,
             TextAttributeModifier::SetBindSelectionMenuImpl,
+            TextAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextModifierImpl;
     }
@@ -10744,6 +10762,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetMaxLinesImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
             TextAreaAttributeModifier::SetLineSpacingImpl,
+            TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextAreaModifierImpl;
     }
@@ -10856,6 +10875,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
+            TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextInputModifierImpl;
     }

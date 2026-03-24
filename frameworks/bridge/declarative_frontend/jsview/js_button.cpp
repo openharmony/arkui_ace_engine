@@ -626,7 +626,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif

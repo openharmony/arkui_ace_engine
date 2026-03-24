@@ -189,6 +189,7 @@ void MarqueePattern::StartMarqueeAnimation()
     if (pipeline->IsFormRenderExceptDynamicComponent()) {
         repeatCount = 1;
     }
+    hasStart_ = true;
     FireStartEvent();
     bool needSecondPlay = repeatCount != 1;
 
@@ -268,6 +269,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                     return;
                 }
                 if (!needSecondPlay) {
+                    pattern->ExecuteStopMarquee();
                     pattern->OnAnimationFinish();
                     return;
                 }
@@ -340,6 +342,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
                 secondAnimation_.reset();
             }
         }
+        ExecuteStopMarquee();
     }
     if (stopAndStart) {
         StartMarqueeAnimation();
@@ -357,7 +360,7 @@ void MarqueePattern::ChangeSecondChildVisibility(bool stopAndStart)
         CHECK_NULL_VOID(textLayoutProperty);
         auto preVisibility = textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
         textLayoutProperty->UpdateVisibility(IsRunMarquee() ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
-        if (!stopAndStart && preVisibility == VisibleType::INVISIBLE) {
+        if (!stopAndStart && (!animation_ || preVisibility == VisibleType::INVISIBLE)) {
             UpdateTextTranslateXY(GetSecondChildStart(), false, false);
         }
     }
@@ -374,6 +377,15 @@ void MarqueePattern::StopAndResetAnimation()
     CHECK_NULL_VOID(secondAnimation_);
     AnimationUtils::StopAnimation(secondAnimation_);
     secondAnimation_.reset();
+}
+
+void MarqueePattern::ExecuteStopMarquee()
+{
+    if (!hasStart_) {
+        return;
+    }
+    hasStart_ = false;
+    FireStopEvent();
 }
 
 void MarqueePattern::PropertyCancelAnimationFinish()
@@ -410,6 +422,13 @@ void MarqueePattern::FireFinishEvent() const
     auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireFinishEvent();
+}
+
+void MarqueePattern::FireStopEvent() const
+{
+    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(marqueeEventHub);
+    marqueeEventHub->FireStopEvent();
 }
 
 void MarqueePattern::UpdateTextTranslateXY(float offsetX, bool cancel, bool isFirstTextNode)
@@ -805,6 +824,7 @@ void MarqueePattern::ProcessVisibleAreaCallback()
 
 void MarqueePattern::PauseAnimation()
 {
+    ExecuteStopMarquee();
     CHECK_NULL_VOID(animation_);
     playStatus_ = false;
     AnimationUtils::PauseAnimation(animation_);
@@ -1100,6 +1120,9 @@ void MarqueePattern::HandleAnimationFinish(int32_t animationId, bool isFirst, in
     auto newPlayCount = playCount > 0 ? playCount - 1 : playCount;
     if (newPlayCount == 0 || !needSecondPlay) {
         OnDoubleAnimationFinish(isFirst);
+        if (!isFirst) {
+            ExecuteStopMarquee();
+        }
         return;
     }
     PlayMarqueeDoubleAnimation(0.0f, 0.0f, newPlayCount, false,

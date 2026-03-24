@@ -23,6 +23,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {

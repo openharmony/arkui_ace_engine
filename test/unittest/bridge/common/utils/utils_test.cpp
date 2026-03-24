@@ -516,4 +516,76 @@ HWTEST_F(UtilsTest, moduleBufferReaderTest001, TestSize.Level1)
     EXPECT_EQ(result, true);
 }
 
+/**
+ * @tc.name: fontWeightNumericValueTest001
+ * @tc.desc: Test GetFontWeightNumericValue function with standard weights (W100-W900)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, fontWeightNumericValueTest001, TestSize.Level1)
+{
+    // Test standard weight values W100-W900
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W100), 100);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W200), 200);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W300), 300);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W400), 400);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W500), 500);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W600), 600);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W700), 700);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W800), 800);
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::W900), 900);
+}
+
+/**
+ * @tc.name: fontWeightNumericValueTest002
+ * @tc.desc: Test GetFontWeightNumericValue function with named weights (BOLD, NORMAL, etc.)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, fontWeightNumericValueTest002, TestSize.Level1)
+{
+    // Test named weight values that should be converted
+    // BOLD -> W700 -> 700
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::BOLD), 700);
+    // NORMAL -> W400 -> 400
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::NORMAL), 400);
+    // BOLDER -> W900 -> 900
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::BOLDER), 900);
+    // LIGHTER -> W100 -> 100
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::LIGHTER), 100);
+    // MEDIUM -> W500 -> 500
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::MEDIUM), 500);
+    // REGULAR -> W400 -> 400
+    EXPECT_EQ(GetFontWeightNumericValue(FontWeight::REGULAR), 400);
+}
+
+/**
+ * @tc.name: fontWeightStringToNumericTest001
+ * @tc.desc: Test complete flow from string weight to numeric value (e.g., "bold" -> 700)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, fontWeightStringToNumericTest001, TestSize.Level1)
+{
+    // Test complete flow: string -> FontWeight enum -> numeric value
+    // This verifies the integration between ConvertStrToFontWeight and GetFontWeightNumericValue
+
+    // Test "bold" -> FontWeight::BOLD -> 700
+    FontWeight boldEnum = ConvertStrToFontWeight("bold");
+    EXPECT_EQ(GetFontWeightNumericValue(boldEnum), 700);
+
+    // Test "normal" -> FontWeight::NORMAL -> 400
+    FontWeight normalEnum = ConvertStrToFontWeight("normal");
+    EXPECT_EQ(GetFontWeightNumericValue(normalEnum), 400);
+
+    // Test "700" -> FontWeight::W700 -> 700
+    FontWeight w700Enum = ConvertStrToFontWeight("700");
+    EXPECT_EQ(GetFontWeightNumericValue(w700Enum), 700);
+
+    // Test "400" -> FontWeight::W400 -> 400
+    FontWeight w400Enum = ConvertStrToFontWeight("400");
+    EXPECT_EQ(GetFontWeightNumericValue(w400Enum), 400);
+
+    // Test "medium" -> FontWeight::MEDIUM -> 500
+    FontWeight mediumEnum = ConvertStrToFontWeight("medium");
+    EXPECT_EQ(GetFontWeightNumericValue(mediumEnum), 500);
+}
+
 } // namespace OHOS::Ace::Framework

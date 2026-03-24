@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <string>
+
+#include "base/json/json_util.h"
+#include "base/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -124,6 +130,8 @@ void ModalPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onAppear",
+        ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
@@ -138,10 +146,86 @@ void ModalPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onDisappear",
+        ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnDialogChangeEnd(GetHost(), false);
+}
+
+int32_t ModalPresentationPattern::ParseCommand(const std::string& command, std::string& comValue)
+{
+    if (command.empty()) {
+        return RET_FAILED;
+    }
+    std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json, RET_FAILED);
+    if (json->IsNull()) {
+        return RET_FAILED;
+    }
+    if (!json->Contains("cmd") || !json->GetValue("cmd")->IsString()) {
+        return RET_FAILED;
+    }
+    std::string cmdTmpValue = json->GetString("cmd");
+    if (cmdTmpValue != "CloseContentCover") {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "command is not CloseContentCover, current: %s", cmdTmpValue.c_str());
+        return RET_FAILED;
+    }
+    comValue = cmdTmpValue;
+    return RET_SUCCESS;
+}
+
+int32_t ModalPresentationPattern::OnInjectionEvent(const std::string& command)
+{
+    std::string cmdValue;
+    if (command.empty()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "command is empty");
+        return RET_FAILED;
+    }
+    if (RET_FAILED == ParseCommand(command, cmdValue)) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "command json is error!");
+        return RET_FAILED;
+    }
+
+    if (cmdValue == "CloseContentCover") {
+        // Handle modal sheet close event
+        HandleModalSheetEvent(cmdValue);
+        ReportCloseContentCoverResult("success", "", "CloseContentCover");
+    } else {
+        ReportCloseContentCoverResult("failed", "command is error!", "CloseContentCover");
+    }
+    return RET_SUCCESS;
+}
+
+void ModalPresentationPattern::HandleModalSheetEvent(const std::string cmd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemoveModalInOverlay();
+}
+
+void ModalPresentationPattern::ReportCloseContentCoverResult(std::string result, std::string reason, std::string event)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", id);
+    params->Put("event", event.c_str());
+    params->Put("result", result.c_str());
+    params->Put("reason", reason.c_str());
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    std::string eventResult = event + "Result";
+    json->Put(eventResult.c_str(), params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
 }
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -49,11 +50,11 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
+const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
-const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 } // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -184,26 +185,38 @@ void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
 {
-    if (obj->HasProperty("fontWeight")) {
-        auto fontWeight = obj->GetProperty("fontWeight");
-        std::string weight = "";
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSViewAbstract::ParseJsString(fontWeight, weight);
+    if (!obj->HasProperty("fontWeight")) {
+        return;
+    }
+    auto fontWeight = obj->GetProperty("fontWeight");
+    std::string weight = "";
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
+    if (fontWeight->IsNumber()) {
+        weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        variableFontWeight = fontWeight->ToNumber<int32_t>();
+        fontWeightEnum = ConvertStrToFontWeight(weight);
+    } else {
+        JSViewAbstract::ParseJsString(fontWeight, weight);
+        if (!weight.empty()) {
+            auto parseResult = ParseFontWeight(weight);
+            fontWeightEnum = parseResult.second;
+            if (parseResult.first) {
+                variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+            } else {
+                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            }
         }
-        if (weight != "") {
-            font.fontWeight = ConvertStrToFontWeight(weight);
-            int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-            JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
-            font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
-        } else {
-            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_VOID(context);
-            auto theme = context->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            font.fontWeight = theme->GetTextStyle().GetFontWeight();
-        }
+    }
+    font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
+    if (weight != "") {
+        font.fontWeight = fontWeightEnum;
+    } else {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontWeight = theme->GetTextStyle().GetFontWeight();
     }
 }
 

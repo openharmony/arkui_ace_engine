@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include <cstdint>
+#include <ctime>
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,6 +70,12 @@ const std::string HOUR_STR_11 = "11";
 const std::string HOUR_STR_12 = "12";
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
+constexpr int32_t MIN_HOUR = 0;
+constexpr int32_t MAX_HOUR = 23;
+constexpr int32_t MIN_MINUTE = 0;
+constexpr int32_t MAX_MINUTE = 59;
+constexpr int32_t MIN_SECOND = 0;
+constexpr int32_t MAX_SECOND = 59;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -742,9 +750,12 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto str = GetSelectedObject(true);
+        ReportTimeChangeEvent(host->GetId(), str);
         auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
-        auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         timePickerEventHub->FireChangeEvent(info.get());
         timePickerEventHub->FireDialogChangeEvent(str);
@@ -2528,4 +2539,146 @@ void TimePickerRowPattern::BeforeCreateLayoutWrapper()
     }
 }
 
+int32_t TimePickerRowPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), "", "fail", errorMsg1);
+        return RET_FAILED;
+    }
+
+    auto cmd = json->GetString("cmd");
+    if (cmd != "setTimePickerTime" && cmd != "setTimePickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg2);
+        return RET_FAILED;
+    }
+    if ((cmd == "setTimePickerTime" && GetIsShowInDialog())
+     || (cmd == "setTimePickerDialogTime" && !GetIsShowInDialog())) {
+        auto errorMsg3 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg3);
+        return RET_FAILED;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        auto errorMsg4 = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg4);
+        return RET_FAILED;
+    }
+
+    int32_t hour;
+    int32_t minute;
+    int32_t second;
+    if (!ValidateTimeParameters(paramJson, hour, minute, second)) {
+        auto errorMsg = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        return RET_FAILED;
+    }
+    ReportCommandResult(host->GetId(), cmd, "success");
+    PickerTime targetTime(hour, minute, second);
+    SetSelectedTime(targetTime);
+    OnModifyDone();
+    FireChangeEvent(true);
+    return RET_SUCCESS;
+}
+
+bool TimePickerRowPattern::ValidateTimeParameters(const std::unique_ptr<JsonValue>& paramJson,
+    int32_t& hour, int32_t& minute, int32_t& second)
+{
+    if (!paramJson->Contains("hour") || !paramJson->Contains("minute")
+        || !paramJson->Contains("second")) {
+        return false;
+    }
+    auto hourValue = paramJson->GetValue("hour");
+    auto minuteValue = paramJson->GetValue("minute");
+    auto secondValue = paramJson->GetValue("second");
+    if ((hourValue && minuteValue && secondValue) &&
+        (hourValue->IsNumber() && minuteValue->IsNumber() && secondValue->IsNumber())) {
+        hour = paramJson->GetInt("hour");
+        minute = paramJson->GetInt("minute");
+        second = paramJson->GetInt("second");
+        if (hour < MIN_HOUR || hour > MAX_HOUR || minute < MIN_MINUTE ||
+            minute > MAX_MINUTE || second < MIN_SECOND || second > MAX_SECOND) {
+            return false;
+        }
+
+        auto TimeToSeconds = [](uint32_t h, uint32_t m, uint32_t s) {
+            return s + m * 60 + h * 3600;
+        };
+
+        uint32_t inputSeconds = TimeToSeconds(hour, minute, second);
+        uint32_t startSeconds = TimeToSeconds(startTime_.GetHour(), startTime_.GetMinute(), startTime_.GetSecond());
+        uint32_t endSeconds = TimeToSeconds(endTime_.GetHour(), endTime_.GetMinute(), endTime_.GetSecond());
+        if (inputSeconds < startSeconds || inputSeconds > endSeconds) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool TimePickerRowPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool TimePickerRowPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
+}
+bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::string& timeStr)
+{
+    auto dataJson = JsonUtil::ParseJsonString(timeStr);
+    CHECK_NULL_RETURN(dataJson, false);
+    int32_t hour = dataJson->GetInt("hour");
+    int32_t minute = dataJson->GetInt("minute");
+    int32_t second = dataJson->GetInt("second");
+
+    auto params = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("hour", hour);
+    params->Put("minute", minute);
+    params->Put("second", second);
+
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+
+    if (GetIsShowInDialog()) {
+        if (isInDatePickerDialog_) {
+            return false;
+        }
+
+        value->Put("TimePickerDialog", "onTimeChange");
+    } else {
+        value->Put("TimePicker", "onTimeChange");
+    }
+    value->Put("params", params);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
+bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
+    const std::string& result, const std::string& reason)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    value->Put("result", result.c_str());
+    if (!reason.empty()) {
+        value->Put("reason", reason.c_str());
+    }
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
 } // namespace OHOS::Ace::NG

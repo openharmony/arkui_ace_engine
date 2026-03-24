@@ -72,7 +72,7 @@ export const a1 = {
         fontWeight: FontWeight.Medium,
         f2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        responseRegion: 32
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -108,7 +108,7 @@ export const a1 = {
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         j2: '18vp',
         l2: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        responseRegion: 36
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_close_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
 };
 const b1 = () => {
@@ -669,7 +669,7 @@ export class d1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getBtnResponseRegion(actualWidth, actualHeight, minSizeVp) {
-        if (actualWidth === 0 || actualHeight === 0) {
+        if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
             return undefined;
         }
         
@@ -693,11 +693,13 @@ export class d1 extends ViewPU {
         };
     }
     getCloseBtnResponseRegion() {
+        let responseRegionValue = this.toVp(this.theme.i2.responseRegion);
         return this.getBtnResponseRegion(this.theme.i2.size.width,
-            this.theme.i2.size.height, this.theme.i2.responseRegion);
+            this.theme.i2.size.height, responseRegionValue);
     }
     getNormalBtnResponseRegion(height) {
-        return this.getBtnResponseRegion(-1, height, this.theme.button.responseRegion);
+        let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+        return this.getBtnResponseRegion(-1, height, responseRegionValue);
     }
     getWindowsPadding() {
         let top = this.theme.h2.padding.top;

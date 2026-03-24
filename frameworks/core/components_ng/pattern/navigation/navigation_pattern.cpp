@@ -5668,6 +5668,7 @@ void NavigationPattern::TryForceSplitIfNeeded()
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
     bool forceSplitSuccess = false;

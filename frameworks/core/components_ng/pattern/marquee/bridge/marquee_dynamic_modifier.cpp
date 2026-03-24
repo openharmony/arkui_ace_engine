@@ -243,6 +243,25 @@ void ResetMarqueeOnFinish(ArkUINodeHandle node)
     MarqueeModelNG::SetOnFinish(frameNode, nullptr);
 }
 
+void SetMarqueeOnStop(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStop = reinterpret_cast<std::function<void()>*>(callback);
+        MarqueeModelNG::SetOnStop(frameNode, std::move(*onStop));
+    } else {
+        MarqueeModelNG::SetOnStop(frameNode, nullptr);
+    }
+}
+
+void ResetMarqueeOnStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetOnStop(frameNode, nullptr);
+}
+
 void SetMarqueeSrcValue(ArkUINodeHandle node, ArkUI_CharPtr src)
 {
     auto* frameNode = GetFrameNode(node);
@@ -631,6 +650,8 @@ const ArkUIMarqueeModifier* GetMarqueeDynamicModifier()
             .resetMarqueeOnBounce = ResetMarqueeOnBounceImpl,
             .setMarqueeOnFinish = SetMarqueeOnFinishImpl,
             .resetMarqueeOnFinish = ResetMarqueeOnFinishImpl,
+            .setMarqueeOnStop = nullptr,
+            .resetMarqueeOnStop = nullptr,
             .setMarqueeSrcValue = SetMarqueeSrcValueImpl,
             .resetMarqueeSrcValue = ResetMarqueeSrcValueImpl,
             .setMarqueeSpacing = SetMarqueeSpacingImpl,
@@ -672,6 +693,8 @@ const ArkUIMarqueeModifier* GetMarqueeDynamicModifier()
             .resetMarqueeOnBounce = ResetMarqueeOnBounce,
             .setMarqueeOnFinish = SetMarqueeOnFinish,
             .resetMarqueeOnFinish = ResetMarqueeOnFinish,
+            .setMarqueeOnStop = SetMarqueeOnStop,
+            .resetMarqueeOnStop = ResetMarqueeOnStop,
             .setMarqueeSrcValue = SetMarqueeSrcValue,
             .resetMarqueeSrcValue = ResetMarqueeSrcValue,
             .setMarqueeSpacing = SetMarqueeSpacing,

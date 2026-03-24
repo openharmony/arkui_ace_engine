@@ -121,7 +121,6 @@ adapter/ohos/osal/app_bar_helper_impl.cpp @ArkUI_ability_group
 adapter/ohos/osal/background_task_helper_ohos.cpp @arkui_framework_xnode
 adapter/ohos/osal/background_task_helper_ohos.h @arkui_framework_xnode
 adapter/ohos/osal/BUILD.gn @arkui_architecture
-adapter/ohos/osal/click_sound_effect_manager.cpp @ArkUI_Event
 adapter/ohos/osal/clipboard_impl.cpp @huawei_g_five
 adapter/ohos/osal/input_compatible_manager.cpp @ArkUI_Event
 adapter/ohos/osal/text_translation_adapter.cpp @huawei_g_five
@@ -217,7 +216,6 @@ adapter/ohos/tools/raw_input_injector/ @ArkUI_Event
 adapter/preview/entrance/window_free_container.cpp @arkui_framework_xnode
 adapter/preview/ @arkuilayout1
 adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
-adapter/preview/osal/click_sound_effect_manager.cpp @ArkUI_Event
 adapter/preview/osal/screen_lock_manager_preview.cpp @huawei_g_five
 adapter/preview/osal/screen_lock_manager_preview.h @huawei_g_five
 
@@ -572,7 +570,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js 
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arktextclock.js @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -610,7 +608,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkFlowItem.ts @arkuisc
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFolderStack.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFormComponent.ts @form_framework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFormLink.ts @form_framework
-frameworks/bridge/declarative_frontend/ark_component/src/ArkGauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGesture.ts @ArkUI_Event
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridCol.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridContainer.ts @arkuilayout1
@@ -822,8 +819,6 @@ frameworks/bridge/declarative_frontend/engine/functions/js_event_function.cpp @A
 frameworks/bridge/declarative_frontend/engine/functions/js_event_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.h @ArkUI_ability_group
-frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.cpp @ArkUI_Event
-frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_judge_function.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.cpp @ArkUI_Event
@@ -1864,7 +1859,6 @@ frameworks/core/common/autofill/ @huawei_g_five
 frameworks/core/common/backend.h
 frameworks/core/common/card_scope.cpp @arondave
 frameworks/core/common/card_scope.h @arondave
-frameworks/core/common/click_effect/click_sound_effect_manager.h @ArkUI_Event
 frameworks/core/common/clipboard/ @huawei_g_five
 frameworks/core/common/connect_server_manager.cpp @arkui_framework_xnode
 frameworks/core/common/connect_server_manager.h @arkui_framework_xnode

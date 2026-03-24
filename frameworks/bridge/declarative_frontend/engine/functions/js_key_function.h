@@ -32,12 +32,9 @@ public:
     {
         ExecuteJS();
     }
-    void Execute(OHOS::Ace::KeyEventInfo& event);
+    void Execute(EcmaVM* vm, OHOS::Ace::KeyEventInfo& event);
 
-    JSRef<JSVal> ExecuteWithValue(OHOS::Ace::KeyEventInfo& event);
-
-private:
-    JSRef<JSObject> createKeyEvent(OHOS::Ace::KeyEventInfo& keyEvent);
+    JSRef<JSVal> ExecuteWithValue(EcmaVM* vm, OHOS::Ace::KeyEventInfo& event);
 };
 
 } // namespace OHOS::Ace::Framework

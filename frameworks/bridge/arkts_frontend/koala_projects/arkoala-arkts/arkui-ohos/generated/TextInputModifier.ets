@@ -138,6 +138,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     public _customKeyboard_0_1value?: KeyboardOptions | undefined
     public _showCounter_0_0value?: boolean | undefined
     public _showCounter_0_1value?: InputCounterOptions | undefined
+    public _orphanCharOptimization_0_0value?: boolean | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -1586,6 +1587,23 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
+                case 1: {
+                    peer.setOrphanCharOptimizationAttribute((this._orphanCharOptimization_0_0value as boolean | undefined));
+                    flagArray[84] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[84] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[84] = 0;
+                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextInputModifier): void {
         super.mergeModifier(modifier)
@@ -2614,6 +2632,18 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
+                case 1:
+                case 3: {
+                    this.orphanCharOptimization((modifier._orphanCharOptimization_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.orphanCharOptimization((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     type(value: InputType | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -3455,6 +3485,16 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
             this._state.fireChange()
         } else {
             this._flagArray[83] = 3
+        }
+        return this
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        if (((this._flagArray[84]) == (0)) || ((this._orphanCharOptimization_0_0value) !== (value))) {
+            this._flagArray[84] = 1
+            this._orphanCharOptimization_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[84] = 3
         }
         return this
     }

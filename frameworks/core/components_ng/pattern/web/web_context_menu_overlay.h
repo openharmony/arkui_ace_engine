@@ -64,10 +64,11 @@ public:
     std::vector<MenuOptionsParam> BuildMenuOptions(const std::vector<NG::MenuItemParam>& menuItemList);
     void SetElementType(const WebElementType& type) { elementType_ = type; }
     void SetResponseType(const ResponseType& type) { responseType_ = type; }
+    void CalculateMenuOffset(SelectOverlayInfo& menuInfo);
 
 private:
     bool hasText_ = false;
-    bool hasImage_ = false;
+    bool isImage_ = false;
     bool isEdit_ = false;
     WebElementType elementType_ = WebElementType::NONE;
     ResponseType responseType_ = ResponseType::RIGHT_CLICK;

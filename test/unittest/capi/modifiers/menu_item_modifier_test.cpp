@@ -186,6 +186,7 @@ const std::string LABEL_INFO_RES = "labelInfoRes";
 const std::string SELECTED_STR = "selected";
 const std::string SELECT_ICON_STR = "selectIcon";
 const std::string CONTENT_FONT_COLOR_STR = "contentFontColor";
+const std::string LABEL_FONT_COLOR_STR = "labelFontColor";
 
 class MenuItemModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuItemModifier,
     &GENERATED_ArkUINodeModifiers::getMenuItemModifier, GENERATED_ARKUI_MENU_ITEM> {
@@ -599,13 +600,13 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTestInvalid, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
-    auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+    auto checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
     EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
-        checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+        checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
         EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
@@ -618,13 +619,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTest, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
-    auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+    auto checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
     EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
-        checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+        checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
         EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
@@ -637,13 +638,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level
 HWTEST_F(MenuItemModifierTest, setLabelFontColorTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
-    auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+    auto checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
     EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1_INVALID) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
-        checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
+        checkVal = GetAttrValue<std::string>(node_, LABEL_FONT_COLOR_STR);
         EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }

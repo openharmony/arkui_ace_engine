@@ -263,6 +263,7 @@ private:
     void ReportOnItemWaterFlowEvent(const std::string& event);
     void ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void PostAsyncLoadTask();
 
     /**
      * @param step FocusStep

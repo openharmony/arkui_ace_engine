@@ -2764,6 +2764,27 @@ void TextInputDeleteBackward(ArkUINodeHandle node)
     TextFieldModelNG::DeleteBackward(frameNode);
 }
 
+void SetTextInputOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetOrphanCharOptimization(frameNode));
+}
+
+void ResetTextInputOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetTextInputCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3109,6 +3130,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
         .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME,
         .textInputDeleteBackward = TextInputDeleteBackward,
+        .setTextInputOrphanCharOptimization = SetTextInputOrphanCharOptimization,
+        .getTextInputOrphanCharOptimization = GetTextInputOrphanCharOptimization,
+        .resetTextInputOrphanCharOptimization = ResetTextInputOrphanCharOptimization,
         .setTextInputCompressLeadingPunctuation = SetTextInputCompressLeadingPunctuation,
         .getTextInputCompressLeadingPunctuation = GetTextInputCompressLeadingPunctuation,
         .resetTextInputCompressLeadingPunctuation = ResetTextInputCompressLeadingPunctuation,

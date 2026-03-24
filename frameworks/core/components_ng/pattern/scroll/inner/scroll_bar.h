@@ -407,8 +407,8 @@ public:
     void SetDisplayMode(DisplayMode displayMode);
     void PlayScrollBarDisappearAnimation();
     ACE_FORCE_EXPORT void PlayScrollBarAppearAnimation();
-    void PlayScrollBarGrowAnimation();
-    void PlayScrollBarShrinkAnimation();
+    void PlayScrollBarGrowAnimation(bool needVibration = true);
+    void PlayScrollBarShrinkAnimation(bool needVibration = true);
     void PlayScrollBarAdaptAnimation();
     void MarkNeedRender();
     void SetGestureEvent();

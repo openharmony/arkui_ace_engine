@@ -150,6 +150,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "CLICK_AI_MENU", "DATE_TIME" };
         case StatisticEventType::CLICK_AI_MENU_ASK_CELIA:
             return { "CLICK_AI_MENU", "ASK_CELIA" };
+        case StatisticEventType::NAVIGATION_HOME_DESTINATION:
+            return { "NAVIGATION", "HOME_DESTINATION" };
         default:
             return { "", "" };
     }

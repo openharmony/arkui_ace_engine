@@ -399,6 +399,11 @@ void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const 
     TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
 }
 
+void TextModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetOrphanCharOptimization(frameNode, valueOpt.value_or(false));
+}
+
 void TextModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     TextModelNG::SetIncludeFontPadding(frameNode, valueOpt.value_or(false));

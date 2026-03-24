@@ -419,4 +419,51 @@ HWTEST_F(WebPatternCursorTest, HandleMouseEventOnDrag_001, TestSize.Level1)
     EXPECT_FALSE(web_pattern_->isNeedMouseMoveOnDragEnd_);
 #endif
 }
+
+/**
+ * @tc.name: ProcessCustomCursor_001
+ * @tc.desc: ProcessCustomCursor when info is nullptr should return early without allocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, ProcessCustomCursor_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_CUSTOM;
+    web_pattern_->nweb_cursorInfo_ = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(web_pattern_->nweb_cursorInfo_, nullptr);
+
+    web_pattern_->custom_cursorImg_ = std::make_unique<uint8_t[]>(BUFFER_SIZE);
+    ASSERT_NE(web_pattern_->custom_cursorImg_.get(), nullptr);
+
+    std::shared_ptr<OHOS::NWeb::NWebCursorInfo> nullInfo = nullptr;
+    web_pattern_->ProcessCustomCursor(nullInfo);
+
+    EXPECT_NE(web_pattern_->custom_cursorImg_.get(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: ProcessCustomCursor_002
+ * @tc.desc: ProcessCustomCursor when info is not null should allocate memory and copy data
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, ProcessCustomCursor_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_CUSTOM;
+    web_pattern_->nweb_cursorInfo_ = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(web_pattern_->nweb_cursorInfo_, nullptr);
+
+    web_pattern_->custom_cursorImg_ = std::make_unique<uint8_t[]>(BUFFER_SIZE);
+    ASSERT_NE(web_pattern_->custom_cursorImg_.get(), nullptr);
+
+    std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info = web_pattern_->nweb_cursorInfo_;
+    ASSERT_NE(info, nullptr);
+
+    web_pattern_->ProcessCustomCursor(info);
+
+    EXPECT_NE(web_pattern_->custom_cursorImg_.get(), nullptr);
+    EXPECT_NE(info->GetBuff(), nullptr);
+#endif
+}
 } // namespace OHOS::Ace::NG

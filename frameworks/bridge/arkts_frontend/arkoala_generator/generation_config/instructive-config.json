@@ -1,0 +1,14 @@
+{
+    "ignore": [
+        "CommonMethodModifier.ets",
+        "ImageModifier.ets",
+        "MarqueeModifier.ets",
+        "SliderModifier.ets",
+        "SwiperModifier.ets",
+        "SymbolGlyphModifier.ets",
+        "WebModifier.ets",
+        "TextAreaModifier.ets",
+        "TextInputModifier.ets",
+        "TextModifier.ets"
+    ]
+}

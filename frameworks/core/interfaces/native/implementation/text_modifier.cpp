@@ -183,10 +183,12 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src, ConvContext *ctx)
     const int32_t START = 0;
     const int32_t BOUNCE = 1;
     const int32_t FINISH = 2;
+    const int32_t STOP = 3;
     switch (src) {
         case START: dst = ARK_MARQUEE_STATE_START; break;
         case BOUNCE: dst = ARK_MARQUEE_STATE_BOUNCE; break;
         case FINISH: dst = ARK_MARQUEE_STATE_FINISH; break;
+        case STOP: dst = ARK_MARQUEE_STATE_STOP; break;
         default:
             dst = static_cast<Ark_MarqueeState>(-1);
             LOGE("Unexpected enum value in Ark_MarqueeState: %{public}d", src);
@@ -835,6 +837,14 @@ void SetTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
 }
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetOrphanCharOptimization(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_arkui_component_units_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -1012,6 +1022,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
+        TextAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextModifierImpl;
 }

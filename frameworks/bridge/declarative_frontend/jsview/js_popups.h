@@ -75,6 +75,7 @@ private:
     static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseBackgroundParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuMaxHeight(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuLifeCycleParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAboutToAppearLifeCycleParam(

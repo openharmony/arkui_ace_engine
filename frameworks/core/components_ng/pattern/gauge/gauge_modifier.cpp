@@ -16,6 +16,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -925,7 +926,9 @@ void GaugeModifier::NewDrawIndicator(
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<GaugeTheme>();
+    auto frameNode = paintProperty->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<GaugeTheme> theme = frameNode->GetTheme<GaugeTheme>(true);
 
     Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
     if (GreatNotEqual(indicatorToTop.ConvertToPx(), data.radius)) {

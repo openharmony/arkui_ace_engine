@@ -15,16 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/verify_pin_handler_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VerifyPinHandlerAccessor {
 void DestroyPeerImpl(Ark_VerifyPinHandler peer)
 {
+    delete peer;
 }
 Ark_VerifyPinHandler ConstructImpl()
 {
-    return {};
+    return new VerifyPinHandlerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,6 +35,9 @@ Ark_NativePointer GetFinalizerImpl()
 void ConfirmImpl(Ark_VerifyPinHandler peer,
                  Ark_PinVerifyResult result)
 {
+    CHECK_NULL_VOID(peer);
+    int32_t pinVerifyResult = static_cast<int32_t>(result);
+    peer->verifyPinHandler->HandleConfirm(pinVerifyResult);
 }
 } // VerifyPinHandlerAccessor
 const GENERATED_ArkUIVerifyPinHandlerAccessor* GetVerifyPinHandlerAccessor()

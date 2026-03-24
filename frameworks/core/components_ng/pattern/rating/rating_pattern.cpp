@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,8 @@ constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t RATING_IMAGE_SUCCESS_FOCUS_CODE = 0b1111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
 constexpr int32_t HALF_DIVIDE = 2;
+const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
+const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
 
 void RatingPattern::OnAttachToFrameNode()
 {
@@ -1225,9 +1227,112 @@ void RatingPattern::ReportChangeEvent(const std::string& index)
     params->Put("value", StringUtils::StringToDouble(index));
     auto json = JsonUtil::Create();
     CHECK_NULL_VOID(json);
-    json->Put("event", "Rating.onChange");
+    json->Put("event", "onRatingChange");
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+}
+
+int32_t RatingPattern::OnInjectionEvent(const std::string& command)
+{
+    auto commandObj = JsonUtil::ParseJsonString(command);
+    if (!commandObj->IsValid() || !commandObj->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return RET_FAILED;
+    }
+
+    auto cmdObj = commandObj->GetValue("cmd");
+    if (!cmdObj->IsValid() || !cmdObj->IsString()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return RET_FAILED;
+    }
+
+    std::string cmd = cmdObj->GetString();
+    if (cmd == "onRatingChange") {
+        return HandleRatingChangeInjection(commandObj);
+    } else {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return RET_FAILED;
+    }
+}
+
+bool RatingPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    CHECK_NULL_RETURN(nodeId, false);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_RETURN(result, false);
+    result->Put("nodeId", nodeId);
+    result->Put("event", "onRatingChange");
+    result->Put("result", isSuccess ? "success" : "failed");
+    result->Put("reason", reason.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "RatingResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+    return true;
+}
+
+double RatingPattern::AdjustedRatingScore(double value)
+{
+    if (value < 0.0) {
+        value = 0.0;
+        return value;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, value);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto maxStars = layoutProperty->GetStarsValue(themeStarNum_);
+    if (value > static_cast<double>(maxStars)) {
+        value = static_cast<double>(maxStars);
+        return value;
+    }
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_RETURN(ratingRenderProperty, value);
+    auto stepSize = ratingRenderProperty->GetStepSizeValue(themeStepSize_);
+    if (stepSize > 0.0 && stepSize <= static_cast<double>(maxStars)) {
+        double adjustedValue = std::round(value / stepSize) * stepSize;
+        adjustedValue = std::max(0.0, std::min(adjustedValue, static_cast<double>(maxStars)));
+        if (value != adjustedValue) {
+            value = adjustedValue;
+        }
+    }
+    return value;
+}
+
+int32_t RatingPattern::HandleRatingChangeInjection(const std::unique_ptr<JsonValue>& commandObj)
+{
+    auto paramsObj = commandObj->GetValue("params");
+    if (!paramsObj->IsValid() || !paramsObj->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return RET_FAILED;
+    }
+
+    auto valueObj = paramsObj->GetValue("value");
+    if (!valueObj->IsValid() || !valueObj->IsNumber()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return RET_FAILED;
+    }
+
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, RET_FAILED);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, RET_FAILED);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        ReportInjectionResult(false, COMPONENT_IN_READONLY);
+        return RET_FAILED;
+    }
+
+    if (IsIndicator()) {
+        ReportInjectionResult(false, COMPONENT_IN_READONLY);
+        return RET_FAILED;
+    }
+
+    double value = valueObj->GetDouble();
+    SetRatingScore(AdjustedRatingScore(value));
+    ReportInjectionResult(true, "");
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

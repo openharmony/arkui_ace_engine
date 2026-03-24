@@ -3930,7 +3930,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(keyEventInfo);
+        func->Execute(execCtx.vm_, keyEventInfo);
     };
     WebModel::GetInstance()->SetOnKeyEvent(jsCallback);
 }
@@ -4919,7 +4919,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
     };
     WebModel::GetInstance()->SetOnMouseEvent(jsCallback);
 }
@@ -5738,7 +5738,7 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+        JSRef<JSVal> obj = func->ExecuteWithValue(execCtx.vm_, keyEventInfo);
         if (obj->IsBoolean()) {
             result = obj->ToBoolean();
         }

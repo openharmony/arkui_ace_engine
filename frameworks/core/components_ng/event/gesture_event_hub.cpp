@@ -18,7 +18,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
 #include "base/geometry/calc_dimension_rect.h"
-#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -30,6 +29,12 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+
+bool BindMenuStatus::IsNotNeedShowPreview() const
+{
+    return (isBindCustomMenu && isShow) || isBindLongPressMenu;
+}
+
 constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
 constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
 constexpr const char* HIT_TEST_MODE[] = {
@@ -972,9 +977,6 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     target.area.SetWidth(Dimension(size.Width()));
     target.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
     info.SetTarget(target);
-    ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(host,
-        static_cast<int32_t>(offset.GetX() + size.Width() / 2),
-        static_cast<int32_t>(offset.GetY() + size.Height() / 2));
     click(info);
     return true;
 }
@@ -1590,6 +1592,21 @@ const GestureEvent GestureEventHub::GetGestureEventInfo()
     GestureEvent info;
     CHECK_NULL_RETURN(clickRecognizer, info);
     return clickRecognizer->GetGestureEventInfo();
+}
+
+void GestureEventHub::ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
+{
+    longPressEventActuator_ = longPressEventActuator;
+}
+
+RefPtr<LongPressEventActuator> GestureEventHub::GetLongPressEventActuator()
+{
+    return longPressEventActuator_;
+}
+
+bool GestureEventHub::IsGestureHierarchyEmpty() const
+{
+    return gestureHierarchy_.empty();
 }
 
 const ClickInfo GestureEventHub::GetClickInfo()

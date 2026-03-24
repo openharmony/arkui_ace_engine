@@ -146,6 +146,8 @@ public:
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
+    void PostAsyncLoadTask();
+
     bool IsAtTop() const override
     {
         return info_.reachStart_;
@@ -354,6 +356,7 @@ private:
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
     bool userDefined_ = false; // true if onGetStartIndex
+    bool prevMeasureBreak_ = false;
 
     RefPtr<GridContentModifier> gridContentModifier_;
 

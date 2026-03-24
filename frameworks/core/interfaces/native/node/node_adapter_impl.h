@@ -29,6 +29,10 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 
+namespace OHOS::Ace::V2 {
+class DataChangeListener;
+}
+
 namespace OHOS::Ace::NG {
 class NativeLazyForEachBuilder : public LazyForEachBuilder {
     DECLARE_ACE_TYPE(NativeLazyForEachBuilder, LazyForEachBuilder);

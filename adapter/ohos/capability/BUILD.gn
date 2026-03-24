@@ -29,6 +29,7 @@ template("ace_capability_ohos_source_set") {
       "clipboard/clipboard_impl.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
+      "feature_config/extra_modules/extra_modules_manager_impl.cpp",
 
       # xml parser
       "feature_config/config_parser_base.cpp",

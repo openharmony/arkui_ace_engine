@@ -32,6 +32,7 @@ namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
 constexpr uint32_t RESOURCE_COLOR_TYPE = 10001; // ohos_theme
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
+constexpr uint32_t INVALID_RESOURCE_ID = UINT32_MAX;
 
 void CheckThemeId(int32_t& themeId)
 {
@@ -95,12 +96,13 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, int32_t& actualInstanceId)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
+    actualInstanceId = aceContainer->GetInstanceId();
     
     RefPtr<ResourceAdapter> newResourceAdapter = nullptr;
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
@@ -1227,13 +1229,14 @@ bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, 
 
 uint32_t ResourceAdapterImplV2::GetResId(const std::string &resTypeName) const
 {
-    uint32_t resId = -1;
+    uint32_t resId = INVALID_RESOURCE_ID;
     auto manager = GetResourceManager();
-    CHECK_NULL_RETURN(manager, -1);
+    CHECK_NULL_RETURN(manager, INVALID_RESOURCE_ID);
     auto state = manager->GetResId(resTypeName, resId);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resId by name error, name=%s, errorCode=%{public}d",
             resTypeName.c_str(), state);
+        return INVALID_RESOURCE_ID;
     }
     return resId;
 }

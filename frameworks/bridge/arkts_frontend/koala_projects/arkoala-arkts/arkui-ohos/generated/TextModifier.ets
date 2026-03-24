@@ -104,6 +104,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     public _compressLeadingPunctuation_0_0value?: boolean | undefined
     public _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     public _textDirection_0_0value?: TextDirection | undefined
+    public _orphanCharOptimization_0_0value?: boolean | undefined
     public _font_0_0value?: arkui_component_units_Font | undefined
     public _font_0_1value?: FontSettingOptions | undefined
     public _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
@@ -1133,6 +1134,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (flagArray[59] != 0)
+        {
+            switch (flagArray[59]) {
+                case 1: {
+                    peer.setOrphanCharOptimizationAttribute((this._orphanCharOptimization_0_0value as boolean | undefined));
+                    flagArray[59] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[59] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[59] = 0;
+                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextModifier): void {
         super.mergeModifier(modifier)
@@ -1855,6 +1874,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (flagArray[59] != 0)
+        {
+            switch (flagArray[59]) {
+                case 1:
+                case 3: {
+                    this.orphanCharOptimization(modifier._orphanCharOptimization_0_0value);
+                    break;
+                }
+                default: {
+                    this.orphanCharOptimization((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     fontColor(value: ResourceColor | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -2450,6 +2482,18 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._state.fireChange()
         } else {
             this._flagArray[58] = 3
+        }
+        return this
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        if (((this._flagArray[59]) == (0)) || ((this._orphanCharOptimization_0_0value) !== (value)))
+        {
+            this._flagArray[59] = 1
+            this._orphanCharOptimization_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[59] = 3
         }
         return this
     }

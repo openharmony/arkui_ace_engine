@@ -98,6 +98,7 @@ public:
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
+    static void SetOrphanCharOptimization(const JSCallbackInfo& info);
     static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);

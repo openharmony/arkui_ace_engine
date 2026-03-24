@@ -1756,6 +1756,26 @@ bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetOrphanCharOptimization(bool isOrphanChar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, OrphanCharOptimization, isOrphanChar);
+}
+
+void TextModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, OrphanCharOptimization, isOrphanChar, frameNode);
+}
+
+bool TextModelNG::GetOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OrphanCharOptimization,
+        value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetCompressLeadingPunctuation(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CompressLeadingPunctuation, enabled);

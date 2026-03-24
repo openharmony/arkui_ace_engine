@@ -78,6 +78,7 @@ void AddMockResourceData(uint32_t id, const std::string& data);
 void AddMockResourceData(uint32_t id, const std::vector<std::string>& data);
 void AddMockResourceData(uint32_t id, const double& data);
 void AddMockResourceData(uint32_t id, const int32_t& data);
+void SetMockResourceAdapterInstanceId(int32_t instanceId);
 
 } // namespace OHOS::Ace
 

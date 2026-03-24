@@ -402,7 +402,7 @@ export class ArkUIAniModule {
     native static _Common_lpx2px(value:double, instanceId: KInt): double
     native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
-    native static _Common_getWindowId(instanceId: KInt): int32 | undefined
+    native static _Common_getWindowId(instanceId: KInt): int32
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
 

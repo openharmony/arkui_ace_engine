@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,17 @@ const std::string TEST_RESULT_FIRST = "test_ok_1";
 const std::string TEST_RESULT_SECOND = "test_ok_2";
 const std::string TEST_RESULT_THIRD = "test_ok_3";
 const std::string TEST_RESULT_FORTH = "test_ok_4";
+const std::string ONRATINGCHANGE_VALID_COMMAND = R"({"cmd":"onRatingChange","params":{"value":4.0}})";
+const std::string ONRATINGCHANGE_INVALID_JSON_FORMAT_COMMAND = R"({"cmd":"onRatingChange","params":{"value":4.0)";
+const std::string ONRATINGCHANGE_NOT_OBJECT_JSON_COMMAND = R"("not_an_object")";
+const std::string ONRATINGCHANGE_MISSING_CMD_COMMAND = R"({"params":{"value":4.0}})";
+const std::string ONRATINGCHANGE_CMD_NOT_STRING_COMMAND = R"({"cmd":123,"params":{"value":40.0}})";
+const std::string ONRATINGCHANGE_UNSUPPORTED_CMD_COMMAND = R"({"cmd":"unsupportedCommand","params":{"value":4.0}})";
+const std::string ONRATINGCHANGE_MISSING_PARAMS_COMMAND = R"({"cmd":"onRatingChange"})";
+const std::string ONRATINGCHANGE_PARAMS_NOT_OBJECT_COMMAND = R"({"cmd":"onRatingChange","params":"not_an_object"})";
+const std::string ONRATINGCHANGE_MISSING_VALUE_COMMAND = R"({"cmd":"onRatingChange","params":{"other_field":4.0}})";
+const std::string ONRATINGCHANGE_VALUE_NOT_NUMBER_COMMAND =
+    R"({"cmd":"onRatingChange","params":{"value":"not_a_number"}})";
 const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
 const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
 const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
@@ -523,5 +534,357 @@ HWTEST_F(RatingThreeTestNg, RatingOnChangeEventStaticTest001, TestSize.Level1)
     ASSERT_NE(ratingEventHub, nullptr);
     ratingEventHub->SetOnChangeEvent(onChange);
     ratingEventHub->FireChangeEvent("1");
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test OnInjectionEvent with valid onRatingChange command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_VALID_COMMAND), RET_SUCCESS);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test OnInjectionEvent with invalid JSON format command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_INVALID_JSON_FORMAT_COMMAND), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: Test OnInjectionEvent with not object json command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_NOT_OBJECT_JSON_COMMAND), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest004
+ * @tc.desc: Test OnInjectionEvent with missing cmd field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest004, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_MISSING_CMD_COMMAND), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest005
+ * @tc.desc: Test OnInjectionEvent with cmd field is not a string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest005, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_CMD_NOT_STRING_COMMAND), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest006
+ * @tc.desc: Test OnInjectionEvent with cmd is not supported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, OnInjectionEventTest006, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->OnInjectionEvent(ONRATINGCHANGE_UNSUPPORTED_CMD_COMMAND), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest001
+ * @tc.desc: Test HandleRatingChangeInjection with valid command object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest001, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_VALID_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_SUCCESS);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest002
+ * @tc.desc: Test HandleRatingChangeInjection with missing params field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_MISSING_PARAMS_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest003
+ * @tc.desc: Test HandleRatingChangeInjection with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest003, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_PARAMS_NOT_OBJECT_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest004
+ * @tc.desc: Test HandleRatingChangeInjection with missing value field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest004, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_MISSING_VALUE_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest005
+ * @tc.desc: Test HandleRatingChangeInjection with invalid value type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest005, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_VALUE_NOT_NUMBER_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest006
+ * @tc.desc: Test HandleRatingChangeInjection with disable node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest006, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(false);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_VALID_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: HandleRatingChangeInjectionTest007
+ * @tc.desc: Test HandleRatingChangeInjection with indicator type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, HandleRatingChangeInjectionTest007, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicator(true);
+    auto commandObj = JsonUtil::ParseJsonString(ONRATINGCHANGE_VALID_COMMAND);
+    EXPECT_TRUE(commandObj && commandObj->IsValid());
+    EXPECT_EQ(pattern->HandleRatingChangeInjection(commandObj), RET_FAILED);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest001
+ * @tc.desc: Test AdjustedRatingScore with value is negative number.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest001, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(-1.0), 0.0);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest002
+ * @tc.desc: Test AdjustedRatingScore with value is within the valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(5);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(3.0), 3.0);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest003
+ * @tc.desc: Test AdjustedRatingScore with value exceeds the maximum number of stars.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest003, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(5);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(8.0), 5.0);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest004
+ * @tc.desc: Test AdjustedRatingScore with value needs to be adjusted according to the step size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest004, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(10);
+    rating.SetStepSize(0.5);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(3.2), 3.0);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest005
+ * @tc.desc: Test AdjustedRatingScore with value is exactly a multiple of the step size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest005, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(10);
+    rating.SetStepSize(0.5);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(2.5), 2.5);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest006
+ * @tc.desc: Test AdjustedRatingScore with the step size is greater than the total number of stars.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest006, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(3);
+    rating.SetStepSize(5.0);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(2.0), 2.0);
+}
+
+/**
+ * @tc.name: AdjustedRatingScoreTest007
+ * @tc.desc: Test AdjustedRatingScore with the step size is 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, AdjustedRatingScoreTest007, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(5);
+    rating.SetStepSize(0.0);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_DOUBLE_EQ(pattern->AdjustedRatingScore(3.7), 3.7);
 }
 } // namespace OHOS::Ace::NG

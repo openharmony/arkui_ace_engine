@@ -256,8 +256,8 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
-      ":prefetcher",
+      "ark_mock:mock",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -294,7 +294,6 @@ template("declarative_js_engine") {
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
-      "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
@@ -779,8 +778,8 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
-      ":prefetcher",
+      "ark_mock:mock",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -814,7 +813,6 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
-      "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
@@ -1238,15 +1236,6 @@ ohos_abc("statemanagement") {
   part_name = ace_engine_part
 }
 
-ohos_abc("mock") {
-  sources = [ "engine/jsMock.js" ]
-  output_name = "mock"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("windowsizelayoutbreakpoint") {
   sources = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
   output_name = "windowsizelayoutbreakpoint"
@@ -1255,15 +1244,6 @@ ohos_abc("windowsizelayoutbreakpoint") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [ ":run_ark_breakpoint_build" ]
-}
-
-ohos_abc("prefetcher") {
-  sources = [ "engine/jsPrefetcher.js" ]
-  output_name = "prefetcher"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 }
 
 action("gen_uicontext_ohos") {

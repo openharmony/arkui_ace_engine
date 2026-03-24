@@ -262,6 +262,9 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy003, TestSize.Lev
     bool isFinish = false;
     auto onChangeFinish = [&isFinish]() { isFinish = true; };
     marqueeModel.SetOnFinish(onChangeFinish);
+    bool isStop = false;
+    auto onChangeStop = [&isStop]() { isStop = true; };
+    marqueeModel.SetOnStop(onChangeStop);
     marqueeModel.SetMarqueeUpdateStrategy(std::make_optional(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION));
 
     /**
@@ -283,6 +286,8 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy003, TestSize.Lev
     EXPECT_TRUE(isBounce);
     eventHub->FireFinishEvent();
     EXPECT_TRUE(isFinish);
+    eventHub->FireStopEvent();
+    EXPECT_TRUE(isStop);
 }
 
 /**
@@ -1139,11 +1144,19 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy015, TestSize.Lev
     marqueeModel.SetFontSize(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
 
+    /**
+     * @tc.steps: step5. Call Set Function.
+     * @tc.expected: step5. All Set Successful.
+     */
     marqueeModel.SetTextColor(Color(2));
     EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
     marqueeModel.SetTextColor(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
 
+    /**
+     * @tc.steps: step6. Call Set Function.
+     * @tc.expected: step6. All Set Successful.
+     */
     marqueeModel.SetFontWeight(Ace::FontWeight::W200);
     EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
     marqueeModel.SetFontWeight(std::nullopt);

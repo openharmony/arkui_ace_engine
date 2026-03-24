@@ -468,6 +468,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorageV2.ets",
+  "arkui-preprocessed/arkui/stateManagement/remember.ets",
   "arkui-preprocessed/arkui/stateManagement/runtime/index.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/appStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/appStorageV2.ets",

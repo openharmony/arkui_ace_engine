@@ -468,7 +468,7 @@ HWTEST_F(WebPatternSelectTestNg, UpdateLocalCursorStyle_003, TestSize.Level1)
 
 /**
  * @tc.name: UpdateCustomCursor_001
- * @tc.desc: UpdateCustomCursor
+ * @tc.desc: UpdateCustomCursor with ProcessCustomCursor to prepare cursor image buffer
  * @tc.type: FUNC
  */
 HWTEST_F(WebPatternSelectTestNg, UpdateCustomCursor_001, TestSize.Level1)
@@ -486,6 +486,12 @@ HWTEST_F(WebPatternSelectTestNg, UpdateCustomCursor_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto info = std::make_shared<NWeb::NWebCursorInfoMock>();
     ASSERT_NE(info, nullptr);
+    webPattern->cursorType_ = OHOS::NWeb::CursorType::CT_CUSTOM;
+    webPattern->nweb_cursorInfo_ = info;
+
+    webPattern->ProcessCustomCursor(info);
+    EXPECT_NE(webPattern->custom_cursorImg_.get(), nullptr);
+
     int32_t windowId = 1;
     webPattern->UpdateCustomCursor(windowId, info);
 #endif
@@ -493,7 +499,7 @@ HWTEST_F(WebPatternSelectTestNg, UpdateCustomCursor_001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateCustomCursor_002
- * @tc.desc: UpdateCustomCursor
+ * @tc.desc: UpdateCustomCursor with valid cursor info after ProcessCustomCursor
  * @tc.type: FUNC
  */
 HWTEST_F(WebPatternSelectTestNg, UpdateCustomCursor_002, TestSize.Level1)
@@ -509,9 +515,17 @@ HWTEST_F(WebPatternSelectTestNg, UpdateCustomCursor_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebCursorInfoMock> info = nullptr;
-    ASSERT_EQ(info, nullptr);
+
+    auto info = std::make_shared<NWeb::NWebCursorInfoMock>();
+    ASSERT_NE(info, nullptr);
+    webPattern->cursorType_ = OHOS::NWeb::CursorType::CT_CUSTOM;
+    webPattern->nweb_cursorInfo_ = info;
+
     int32_t windowId = 1;
+    webPattern->ProcessCustomCursor(info);
+
+    EXPECT_NE(webPattern->custom_cursorImg_.get(), nullptr);
+
     webPattern->UpdateCustomCursor(windowId, info);
 #endif
 }

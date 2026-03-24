@@ -84,6 +84,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/web_agent_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_dom_document.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -6455,12 +6456,27 @@ CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
                 cursorType_ = type;
             }
             nweb_cursorInfo_.reset();
+            custom_cursorImg_.reset();
             if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
-                nweb_cursorInfo_ = info;
+                ProcessCustomCursor(info);
             }
             break;
     }
     return std::make_tuple(type, info);
+}
+
+void WebPattern::ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
+{
+    if (!info) {
+        return;
+    }
+    nweb_cursorInfo_ = info;
+    uint64_t len = nweb_cursorInfo_->GetWidth() * nweb_cursorInfo_->GetHeight() * 4;
+    custom_cursorImg_ = std::make_unique<uint8_t[]>(len);
+    auto res = memcpy_s(custom_cursorImg_.get(), len, nweb_cursorInfo_->GetBuff(), len);
+    if (res != EOK) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnCursorChange memcpy_s failed errorcode is %{public}d", res);
+    }
 }
 
 void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
@@ -6501,7 +6517,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     if (info) {
         x = info->GetX();
         y = info->GetY();
-        buff = info->GetBuff();
+        buff = custom_cursorImg_.get();
         width = info->GetWidth();
         height = info->GetHeight();
     }
@@ -10413,17 +10429,6 @@ void SnapshotTouchReporter::OnPan()
 }
 
 namespace {
-bool IsNumber(const std::string &str)
-{
-    // 检查字符串是否为空
-    if (str.empty()) {
-        return false;
-    }
-
-    // 使用all_of检查所有字符是否为数字
-    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
-}
-
 std::string EncodeURIComponent(const std::string &value)
 {
     std::ostringstream escaped;
@@ -10468,12 +10473,15 @@ void WebPattern::HighlightSpecifiedContent(
     agentManager->SetAgentNeedHighlight(parsedConfigs->GetBool("NeedHighlight", true));
 
     std::unique_ptr<JsonValue> jsonArray = JsonUtil::CreateArray(true);
+    std::vector<std::string> Xpaths = {};
     for (const std::string& nodeId : nodeIds) {
         std::unique_ptr<JsonValue> jsonNode = JsonUtil::Create(true);
-        if (IsNumber(nodeId)) {
+        if (WebAgentUtils::IsNumber(nodeId)) {
             std::string Xpath = webDomDocument_->GetXpathById(std::atoi(nodeId.c_str()));
+            Xpaths.push_back(Xpath);
             jsonNode->Put("value", Xpath.c_str());
         } else {
+            Xpaths.push_back(nodeId);
             jsonNode->Put("value", nodeId.c_str());
         }
         jsonArray->PutRef(std::move(jsonNode));
@@ -10481,8 +10489,9 @@ void WebPattern::HighlightSpecifiedContent(
     std::string jsonString = jsonArray->ToString();
     RunJavascriptAsync("window.AgentHighlightUtils.HighlightTargetContent(\"" + EncodeURIComponent(jsonString) +
                            "\",\"" + EncodeURIComponent(content) + "\")",
-        [](std::string result) {
-            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
+        [XpathList = std::move(Xpaths)](const std::string& result) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s", result.c_str());
+            WebAgentUtils::ParseHighlightResult(result, XpathList);
         });
 }
 

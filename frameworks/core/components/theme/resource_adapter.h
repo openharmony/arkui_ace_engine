@@ -244,7 +244,7 @@ public:
     }
 
     static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
-        const std::string& bundleName, const std::string& moduleName);
+        const std::string& bundleName, const std::string& moduleName, int32_t& actualInstanceId);
 
     virtual void UpdateColorMode(ColorMode colorMode) {}
 

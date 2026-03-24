@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "drag_drop_func_wrapper.h"
 
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
@@ -39,15 +38,12 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
-#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
-#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
 #endif
 
 
@@ -2662,7 +2658,10 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    DragDropGlobalController::GetInstance().SetStartDragVsyncTime(pipeline->GetVsyncTime());
+    auto vsyncPipeline = ShouldSkipDragMoveOutForSubwindow() ? PipelineContext::GetMainPipelineContext() : pipeline;
+    if (vsyncPipeline) {
+        DragDropGlobalController::GetInstance().SetStartDragVsyncTime(vsyncPipeline->GetVsyncTime());
+    }
     bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub, data)) ||
         (!IsNeedDisplayInSubwindow() && !data.isMenuShow && !isDragWithContextMenu_ && !isDragStartPending)) {

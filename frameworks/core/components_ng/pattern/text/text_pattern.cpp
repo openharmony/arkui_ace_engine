@@ -3686,6 +3686,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     }
     textStyle.optimizeTrailingSpace = node->GetOptimizeTrailingSpaceValue(false);
+    textStyle.orphanCharOptimization = node->GetOrphanCharOptimizationValue(false);
     textStyle.halfLeading = node->GetHalfLeadingValue(false);
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
@@ -4621,8 +4622,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         ParseOriText(textLayoutProperty->GetContent().value_or(u""));
         if (!dataDetectorAdapter_->aiDetectInitialized_) {
-            bool needClearAISpanMap = NeedClearAISpanMap(textForAICache);
-            dataDetectorAdapter_->StartAITask(needClearAISpanMap);
+            dataDetectorAdapter_->StartAITask();
         }
     }
 }
@@ -6208,14 +6208,19 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
+    if (TextMarqueeState::STOP != state || hasStart_) {
+        eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
+    }
 
     if (TextMarqueeState::START == state) {
         CloseSelectOverlay();
         ResetSelection();
         isMarqueeRunning_ = true;
+        hasStart_ = true;
     } else if (TextMarqueeState::FINISH == state) {
         isMarqueeRunning_ = false;
+    } else if (TextMarqueeState::STOP == state) {
+        hasStart_ = false;
     }
 
     RecoverCopyOption();

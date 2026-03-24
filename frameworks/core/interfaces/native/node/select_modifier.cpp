@@ -30,6 +30,10 @@ const int32_t DEFAULT_SELECT = 0;
 constexpr int32_t OFFSET_OF_VALUE = 1;
 constexpr int32_t OFFSET_OF_UNIT = 2;
 constexpr int32_t OFFSET_OF_NEXT = 3;
+constexpr int32_t BORDER_SIDE_LEFT_INDEX = 0;
+constexpr int32_t BORDER_SIDE_RIGHT_INDEX = 1;
+constexpr int32_t BORDER_SIDE_TOP_INDEX = 2;
+constexpr int32_t BORDER_SIDE_BOTTOM_INDEX = 3;
 constexpr int32_t SIZE_OF_COLOR_ARRAY = 8;
 constexpr int32_t SIZE_OF_WIDTH_ARRAY = 12;
 constexpr TextDirection DEFAULT_SELECT_DIRECTION = TextDirection::AUTO;
@@ -958,67 +962,57 @@ void SetOptionalBorderColor(
     offset = offset + OFFSET_OF_UNIT;
 }
 
-#define ADD_RADIUS_RESOURCE(resObjPtr, borderColorProp, colorMember) \
-    auto colorMember##Update = [](const RefPtr<ResourceObject>& obj, BorderColorProperty& prop) { \
-        Color color; \
-        ResourceParseUtils::ParseResColor(obj, color); \
-        prop.colorMember = color; \
-    }; \
-    colorMember##ResObj->DecRefCount(); \
-    const std::string resourceKey = std::string("outlineColor.") + #colorMember; \
-    (borderColorProp).AddResource(resourceKey, colorMember##ResObj, std::move(colorMember##Update))
-
 void AddRadiusResource(BorderColorProperty& borderColors, void** resObjs)
 {
-    auto* leftResPtr = reinterpret_cast<ResourceObject*>(resObjs[0]);
+    auto* leftResPtr = reinterpret_cast<ResourceObject*>(resObjs[BORDER_SIDE_LEFT_INDEX]);
     auto leftColorResObj = AceType::Claim(leftResPtr);
-    auto* rightResPtr = reinterpret_cast<ResourceObject*>(resObjs[1]);
+    auto* rightResPtr = reinterpret_cast<ResourceObject*>(resObjs[BORDER_SIDE_RIGHT_INDEX]);
     auto rightColorResObj = AceType::Claim(rightResPtr);
-    auto* topResPtr = reinterpret_cast<ResourceObject*>(resObjs[2]);
+    auto* topResPtr = reinterpret_cast<ResourceObject*>(resObjs[BORDER_SIDE_TOP_INDEX]);
     auto topColorResObj = AceType::Claim(topResPtr);
-    auto* bottomResPtr = reinterpret_cast<ResourceObject*>(resObjs[3]);
+    auto* bottomResPtr = reinterpret_cast<ResourceObject*>(resObjs[BORDER_SIDE_BOTTOM_INDEX]);
     auto bottomColorResObj = AceType::Claim(bottomResPtr);
     if (leftColorResObj) {
-        ADD_RADIUS_RESOURCE(resObjs[0], borderColors, leftColor);
+        ADD_RADIUS_RESOURCE(resObjs[BORDER_SIDE_LEFT_INDEX], borderColors, leftColor);
     }
     if (rightColorResObj) {
-        ADD_RADIUS_RESOURCE(resObjs[1], borderColors, rightColor);
+        ADD_RADIUS_RESOURCE(resObjs[BORDER_SIDE_RIGHT_INDEX], borderColors, rightColor);
     }
     if (topColorResObj) {
-        ADD_RADIUS_RESOURCE(resObjs[2], borderColors, topColor);
+        ADD_RADIUS_RESOURCE(resObjs[BORDER_SIDE_TOP_INDEX], borderColors, topColor);
     }
     if (bottomColorResObj) {
-        ADD_RADIUS_RESOURCE(resObjs[3], borderColors, bottomColor);
+        ADD_RADIUS_RESOURCE(resObjs[BORDER_SIDE_BOTTOM_INDEX], borderColors, bottomColor);
     }
 }
 
-void SetMenuOutline(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize, const ArkUI_Uint32* color,
-    ArkUI_Int32 colorSize, void** resObjs, size_t unitSize)
+void SetMenuOutline(ArkUINodeHandle node, const ArkUISelectOutlineArgs* args)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((width == nullptr) || (widthSize != SIZE_OF_WIDTH_ARRAY) || (color == nullptr) ||
-        colorSize != SIZE_OF_COLOR_ARRAY) {
+    CHECK_NULL_VOID(args);
+    if ((args->width == nullptr) || (args->widthSize != SIZE_OF_WIDTH_ARRAY) || (args->color == nullptr) ||
+        args->colorSize != SIZE_OF_COLOR_ARRAY) {
         return;
     }
     MenuParam menuParam;
     int32_t widthoffset = 0;
     NG::BorderWidthProperty borderWidth;
-    SetOptionalBorder(borderWidth.leftDimen, width, widthSize, widthoffset);
-    SetOptionalBorder(borderWidth.rightDimen, width, widthSize, widthoffset);
-    SetOptionalBorder(borderWidth.topDimen, width, widthSize, widthoffset);
-    SetOptionalBorder(borderWidth.bottomDimen, width, widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.leftDimen, args->width, args->widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.rightDimen, args->width, args->widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.topDimen, args->width, args->widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.bottomDimen, args->width, args->widthSize, widthoffset);
     menuParam.outlineWidth = borderWidth;
 
     int32_t colorOffset = 0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, color, colorSize, colorOffset);
-    SetOptionalBorderColor(borderColors.rightColor, color, colorSize, colorOffset);
-    SetOptionalBorderColor(borderColors.topColor, color, colorSize, colorOffset);
-    SetOptionalBorderColor(borderColors.bottomColor, color, colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.leftColor, args->color, args->colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, args->color, args->colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.topColor, args->color, args->colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, args->color, args->colorSize, colorOffset);
     if (SystemProperties::ConfigChangePerform()) {
-        CHECK_NULL_VOID(resObjs);
-        AddRadiusResource(borderColors, resObjs);
+        CHECK_NULL_VOID(args->resObjs);
+        AddRadiusResource(borderColors, args->resObjs);
     }
     menuParam.outlineColor = borderColors;
     SelectModelNG::SetMenuOutline(frameNode, menuParam);

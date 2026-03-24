@@ -2928,6 +2928,15 @@ struct ArkUISelectDividerArgs {
     ArkUI_Bool hasEndMargin;
 };
 
+struct ArkUISelectOutlineArgs {
+    const ArkUI_Float32* width;
+    ArkUI_Int32 widthSize;
+    const ArkUI_Uint32* color;
+    ArkUI_Int32 colorSize;
+    void** resObjs;
+    size_t unitSize;
+};
+
 struct ArkUISelectDividerStyleArgs {
     ArkUIMenuDividerOptions* dividerInfo;
     void* strokeWidthRawPtr;
@@ -3888,6 +3897,9 @@ struct ArkUITextModifier {
     void (*setTextOptimizeTrailingSpace)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextOptimizeTrailingSpace)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextOptimizeTrailingSpace)(ArkUINodeHandle node);
+    void (*setTextOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getTextOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextCompressLeadingPunctuation)(ArkUINodeHandle node);
@@ -5772,6 +5784,9 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getTextAreaOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextAreaOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
@@ -6043,6 +6058,9 @@ struct ArkUITextInputModifier {
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextInputOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool isOrphanChar);
+    ArkUI_Int32 (*getTextInputOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextInputOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextInputCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
@@ -7634,6 +7652,8 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnBounce)(ArkUINodeHandle node);
     void (*setMarqueeOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
+    void (*setMarqueeOnStop)(ArkUINodeHandle node, void* callback);
+    void (*resetMarqueeOnStop)(ArkUINodeHandle node);
     void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
     void (*setMarqueeSpacing)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr);
@@ -7836,8 +7856,7 @@ struct ArkUISelectModifier {
     void (*resetAvoidance)(ArkUINodeHandle node);
     void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
         int32_t index, ArkUI_CharPtr text));
-    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
-        const ArkUI_Uint32* color, ArkUI_Int32 colorSize,  void** resObjs, size_t unitSize);
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUISelectOutlineArgs* args);
     void (*resetMenuOutline)(ArkUINodeHandle node);
     void (*setSelectSymbolValue)(ArkUINodeHandle node, ArkUI_CharPtr* values,
         void** symbolFunction, ArkUI_Uint32 length);
@@ -8534,7 +8553,7 @@ struct ArkUIFrameNodeModifier {
     void (*propertyUpdate)(ArkUINodeHandle node);
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
-    void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32* size);
+    void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32 (*size)[2]);
     ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemColorModeChangeEvent)(ArkUINodeHandle node, void* userData, void* onColorModeChange);
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);

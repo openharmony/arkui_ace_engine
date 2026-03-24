@@ -34,6 +34,7 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator001, TestSize.Level0)
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
     EXPECT_EQ(flexLayoutProperty == nullptr, false);
+
     UpdateWrapProperties(flexLayoutProperty, wrapProperty);
     EXPECT_EQ(flexLayoutProperty->GetWrapDirectionValue(WrapDirection::HORIZONTAL) == wrapProperty.wrapDirection, true);
     EXPECT_EQ(flexLayoutProperty->GetAlignmentValue(WrapAlignment::START) == wrapProperty.wrapAlignment, true);
@@ -43,7 +44,6 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator001, TestSize.Level0)
         flexLayoutProperty->GetCrossAlignmentValue(WrapAlignment::START) == wrapProperty.wrapCrossAxisAlignment, true);
     EXPECT_EQ(flexLayoutProperty->GetSpaceValue({}).Value() == wrapProperty.mainSpace.Value(), true);
     EXPECT_EQ(flexLayoutProperty->GetCrossSpaceValue({}).Value() == wrapProperty.crossSpace.Value(), true);
-
     /**
      * @tc.steps: step1. Call CreateFlexRow.
      * @tc.expected: created successfully
@@ -70,8 +70,8 @@ HWTEST_F(FlexTestNg, FlexRowFrameNodeCreator001, TestSize.Level0)
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
     EXPECT_EQ(flexLayoutProperty == nullptr, false);
-    UpdateFlexProperties(flexLayoutProperty, flexProperty);
 
+    UpdateFlexProperties(flexLayoutProperty, flexProperty);
     /**
      * @tc.steps: step1. Call CreateFlexRow.
      * @tc.expected: created successfully
@@ -101,8 +101,8 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator003, TestSize.Level0)
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
     EXPECT_EQ(flexLayoutProperty == nullptr, false);
-    UpdateFlexProperties(flexLayoutProperty, flexProperty);
 
+    UpdateFlexProperties(flexLayoutProperty, flexProperty);
     /**
      * @tc.steps: step2. Call CreateWrap.
      * @tc.expected: exited successfully
@@ -133,8 +133,8 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator004, TestSize.Level0)
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
     EXPECT_EQ(flexLayoutProperty == nullptr, false);
-    UpdateWrapProperties(flexLayoutProperty, wrapProperty);
 
+    UpdateWrapProperties(flexLayoutProperty, wrapProperty);
     /**
      * @tc.steps: step2. Call CreateWrap.
      * @tc.expected: pushed successfully
@@ -173,6 +173,7 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator002, TestSize.Level0)
     EXPECT_EQ(flexLayoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START) == FlexAlign::FLEX_END, true);
     EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlignValue(FlexAlign::FLEX_START) == FlexAlign::SPACE_AROUND, true);
     ViewStackProcessor::GetInstance()->Finish();
+
     instance.CreateWrap();
     frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_FALSE(frameNode == nullptr);
@@ -200,7 +201,6 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeLayout001, TestSize.Level0)
     EXPECT_FALSE(flexNode == nullptr);
     RefPtr<LayoutProperty> layoutProperty = flexNode->GetLayoutProperty();
     EXPECT_FALSE(layoutProperty == nullptr);
-
     RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
     EXPECT_EQ(flexLayoutProperty == nullptr, false);
     UpdateWrapProperties(flexLayoutProperty, wrapProperty);
@@ -208,7 +208,6 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeLayout001, TestSize.Level0)
     EXPECT_FALSE(flexLayoutPattern == nullptr);
     auto flexLayoutAlgorithm = AccessibilityManager::MakeRefPtr<WrapLayoutAlgorithm>(false);
     layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(flexLayoutAlgorithm));
-
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     // create first item
@@ -226,6 +225,7 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeLayout001, TestSize.Level0)
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     auto firstItemLayoutAlgorithm = firstItemPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(firstItemLayoutAlgorithm == nullptr);
+
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(firstItemLayoutAlgorithm));
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(

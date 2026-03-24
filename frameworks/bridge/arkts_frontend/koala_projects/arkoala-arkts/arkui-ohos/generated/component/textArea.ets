@@ -1071,6 +1071,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setVoiceButtonAttribute(value: VoiceButtonOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1426,6 +1438,9 @@ export interface TextAreaAttribute extends CommonMethod {
     }
     textDirection(value: TextDirection | undefined): this {
         throw new Error('Unimplemented method textDirection')
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error("Unimplemented method orphanCharOptimization")
     }
     voiceButton(value: VoiceButtonOptions | undefined): this {
         throw new Error('Unimplemented method voiceButton')
@@ -1796,6 +1811,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     public textDirection(value: TextDirection | undefined): this {
         const value_casted = value as (TextDirection | undefined)
         this.getPeer()?.setTextDirectionAttribute(value_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public voiceButton(value: VoiceButtonOptions | undefined): this {

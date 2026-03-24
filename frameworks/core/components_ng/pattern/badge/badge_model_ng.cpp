@@ -406,10 +406,8 @@ void BadgeModelNG::ProcessFontSize(
         bool isDefaultFontSize = true;
         CalcDimension result;
         bool state = ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
-        if (state) {
-            if (result.IsNonNegative() && result.Unit() != DimensionUnit::PERCENT) {
-                isDefaultFontSize = false;
-            }
+        if (state && result.IsNonNegative() && result.Unit() != DimensionUnit::PERCENT) {
+            isDefaultFontSize = false;
         } else {
             auto pipeline = PipelineBase::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);

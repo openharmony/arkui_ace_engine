@@ -589,7 +589,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 void* createQRCodeNode(ArkUI_Int32 nodeId)
 {
     auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
-    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    CHECK_NULL_RETURN(arkUIQRCodeModifier && arkUIQRCodeModifier->createFrameNode, nullptr);
     auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
     CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);

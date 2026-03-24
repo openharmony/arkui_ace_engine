@@ -207,7 +207,12 @@ public:
         return true;
     }
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 private:
+    int32_t ParseCommand(const std::string& command, std::string& comValue);
+    void HandleModalSheetEvent(const std::string cmdType);
+    void ReportCloseContentCoverResult(std::string result, std::string reason, std::string event);
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
     bool prohibitedRemoveByRouter_ = false;

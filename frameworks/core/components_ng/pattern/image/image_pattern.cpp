@@ -17,6 +17,16 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+// Headers moved from image_pattern.h to reduce compilation dependencies
+#include "base/image/pixel_map.h"
+#include "core/animation/picture_animation.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
+#include "core/components_ng/pattern/image/image_layout_algorithm.h"
+#include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+
 #include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
 #include "base/network/download_manager.h"
@@ -24,7 +34,6 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -32,10 +41,6 @@
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
-#include "core/components_ng/pattern/image/image_content_modifier.h"
-#include "core/components_ng/pattern/image/image_dfx.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
@@ -123,6 +128,26 @@ ImagePattern::~ImagePattern()
     if (isEnableAnalyzer_) {
         ReleaseImageAnalyzer();
     }
+}
+
+RefPtr<LayoutProperty> ImagePattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<ImageLayoutProperty>();
+}
+
+RefPtr<PaintProperty> ImagePattern::CreatePaintProperty()
+{
+    return MakeRefPtr<ImageRenderProperty>();
+}
+
+RefPtr<LayoutAlgorithm> ImagePattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<ImageLayoutAlgorithm>();
+}
+
+RefPtr<EventHub> ImagePattern::CreateEventHub()
+{
+    return MakeRefPtr<ImageEventHub>();
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
@@ -1424,7 +1449,9 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         return;
     }
 
-    auto pipeline = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);

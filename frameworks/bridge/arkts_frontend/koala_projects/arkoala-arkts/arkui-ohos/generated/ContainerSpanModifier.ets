@@ -41,6 +41,8 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
     applyDisabledAttribute(instance: ContainerSpanAttribute): void { }
     applySelectedAttribute(instance: ContainerSpanAttribute): void { }
     public _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    public _debugLine_0_0value?: string
+    public _debugLine_0_1value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkContainerSpanPeer;
@@ -65,6 +67,22 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
                 }
             }
         }
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[1] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[1] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[1] = 0;
+                }
+            }
+        }
     }
     mergeModifier(modifier: ContainerSpanModifier): void {
         this._state = modifier._state;
@@ -84,6 +102,17 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
                 }
             }
         }
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.debugLine((modifier._debugLine_0_0value as string), (modifier._debugLine_0_1value as string | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -92,6 +121,17 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
             this._state.fireChange()
         } else {
             this._flagArray[0] = 3
+        }
+        return this
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[1]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+            this._flagArray[1] = 1
+            this._debugLine_0_0value = sourceLine
+            this._debugLine_0_1value = moduleName
+            this._state.fireChange()
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }

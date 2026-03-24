@@ -326,7 +326,8 @@ public:
     static Local<panda::ObjectRef> CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
-    static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, const HoverInfo& hoverInfo);
+    static Local<panda::ObjectRef> InnerCreateHoverInfoObj(EcmaVM* vm, HoverInfo& hoverInfo);
+    static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo* hoverInfo);
     static Local<panda::ObjectRef> CreateTouchTestInfo(EcmaVM* vm, const NG::TouchTestInfo& info);
     static Local<panda::ObjectRef> CreateRectangle(EcmaVM* vm, const NG::RectF& rect);
     static void GetGestureCommonValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& priority, int32_t& mask);
@@ -362,7 +363,7 @@ public:
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
         std::vector<ArkUI_Float32>& values, std::vector<RefPtr<ResourceObject>>& resObjs, bool needLocalized = false);
     static ArkUIGesture* GetGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber);
-    static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info);
+    static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent* info);
     static Local<panda::ArrayRef> CreateFingerInfosArray(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ObjectRef> CreateTapGestureInfo(EcmaVM* vm, GestureEvent& info);
@@ -478,7 +479,7 @@ public:
     static ArkUINativeModuleValue SetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetNextFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBindMenu(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static Local<panda::ObjectRef> CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info);
+    static Local<panda::ObjectRef> CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo* info);
     static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);

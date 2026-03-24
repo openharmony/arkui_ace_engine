@@ -233,6 +233,45 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarAnimationVibrationParam001
+ * @tc.desc: Test ScrollBar grow/shrink animation with vibration switch parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarAnimationVibrationParam001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Trigger grow animation with vibration disabled.
+     * @tc.expected: ScrollBar enters GROW state and width is active width.
+     */
+    scrollBar_->PlayScrollBarGrowAnimation(false);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
+
+    /**
+     * @tc.steps: step2. Trigger shrink animation with vibration disabled.
+     * @tc.expected: ScrollBar enters SHRINK state and width is inactive width.
+     */
+    scrollBar_->PlayScrollBarShrinkAnimation(false);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
+
+    /**
+     * @tc.steps: step3. Trigger grow/shrink animation with vibration enabled and default parameter.
+     * @tc.expected: ScrollBar states and widths are updated correctly.
+     */
+    scrollBar_->PlayScrollBarGrowAnimation(true);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
+    scrollBar_->PlayScrollBarShrinkAnimation();
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
+}
+
+/**
  * @tc.name: TouchEvent003
  * @tc.desc: Test touch event, touch down not on the activeBar, than move to activeBar
  * @tc.type: FUNC

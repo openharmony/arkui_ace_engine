@@ -77,7 +77,7 @@ public:
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level0)
 {
     ShapeModelNG().Create();
     auto width = Dimension(WIDTH);
@@ -118,7 +118,7 @@ HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -147,7 +147,7 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, ContainerPaintProperty002, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, ContainerPaintProperty002, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -175,7 +175,7 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty002, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level0)
 {
     auto shapeModel1 = ShapeModelNG();
     shapeModel1.Create();
@@ -251,7 +251,7 @@ HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -284,7 +284,7 @@ HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, MeasureContent002, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, MeasureContent002, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -320,7 +320,7 @@ HWTEST_F(ShapePatternTestNg, MeasureContent002, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -375,7 +375,7 @@ HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level1)
  * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when layoutPolicy is vaild/invaild
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, MeasureContent005, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, MeasureContent005, TestSize.Level0)
 {
     auto shapeModel = ShapeModelNG();
     shapeModel.Create();
@@ -442,7 +442,7 @@ HWTEST_F(ShapePatternTestNg, MeasureContent005, TestSize.Level1)
  * @tc.desc: check ShapeContainerLayoutAlgorithm GetChildrenSize
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, GetChildrenSize002, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, GetChildrenSize002, TestSize.Level0)
 {
     ShapeModelNG().Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
@@ -518,7 +518,7 @@ HWTEST_F(ShapePatternTestNg, GetChildrenSize002, TestSize.Level1)
  * @tc.desc: check ShapePattern IsEnableMatchParent
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, IsEnableMatchParentTest, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, IsEnableMatchParentTest, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -541,7 +541,7 @@ HWTEST_F(ShapePatternTestNg, IsEnableMatchParentTest, TestSize.Level1)
  * @tc.desc: check ShapeLayoutAlgorithm MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, MeasureContent004, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, MeasureContent004, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -593,7 +593,7 @@ HWTEST_F(ShapePatternTestNg, MeasureContent004, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetStroke001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetStroke001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -633,7 +633,7 @@ HWTEST_F(ShapePatternTestNg, SetStroke001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetFill001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetFill001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -673,7 +673,7 @@ HWTEST_F(ShapePatternTestNg, SetFill001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetForegroundColor001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetForegroundColor001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -713,7 +713,7 @@ HWTEST_F(ShapePatternTestNg, SetForegroundColor001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetStrokeOpacity001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetStrokeOpacity001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -753,7 +753,7 @@ HWTEST_F(ShapePatternTestNg, SetStrokeOpacity001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetFillOpacity001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetFillOpacity001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -793,7 +793,7 @@ HWTEST_F(ShapePatternTestNg, SetFillOpacity001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetStrokeWidth001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetStrokeWidth001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -833,7 +833,7 @@ HWTEST_F(ShapePatternTestNg, SetStrokeWidth001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetWidth001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetWidth001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -873,7 +873,7 @@ HWTEST_F(ShapePatternTestNg, SetWidth001, TestSize.Level1)
  * @tc.type: FUNC
  */
 
-HWTEST_F(ShapePatternTestNg, SetHeight001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, SetHeight001, TestSize.Level0)
 {
     auto shapeAbstractModelNG = ShapeAbstractModelNG();
     CircleModelNG().Create();
@@ -912,7 +912,7 @@ HWTEST_F(ShapePatternTestNg, SetHeight001, TestSize.Level1)
  * @tc.desc: Verify ACE_UINODE_TRACE is called in ShapePattern::CreateLayoutAlgorithm
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create Shape node.
@@ -940,7 +940,7 @@ HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest001, TestSize.Level1)
  * @tc.desc: Verify ACE_UINODE_TRACE is called in ShapePattern::CreatePaintProperty
  * @tc.type: FUNC
  */
-HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest002, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create Shape node.

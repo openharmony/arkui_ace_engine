@@ -50,6 +50,8 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
     public _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
     public _key_0_0value?: string | undefined
     public _id_0_0value?: string | undefined
+    public _debugLine_0_0value?: string
+    public _debugLine_0_1value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkSymbolSpanPeer;
@@ -176,6 +178,22 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
                 }
             }
         }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[7] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[7] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[7] = 0;
+                }
+            }
+        }
     }
     mergeModifier(modifier: SymbolSpanModifier): void {
         this._state = modifier._state;
@@ -267,6 +285,17 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
                 }
             }
         }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
+                    this.debugLine((modifier._debugLine_0_0value as string), (modifier._debugLine_0_1value as string | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     fontSize(value: double | string | global_resource_Resource | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -335,6 +364,17 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
             this._state.fireChange()
         } else {
             this._flagArray[6] = 3
+        }
+        return this
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[7]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+            this._flagArray[7] = 1
+            this._debugLine_0_0value = sourceLine
+            this._debugLine_0_1value = moduleName
+            this._state.fireChange()
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }

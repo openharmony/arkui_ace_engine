@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, 
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from '#handwritten'
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookconfirm, hookWebAttributeModifier, AttributeUpdater } from '#handwritten'
 import { default as webview } from '@ohos.web.webview'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -67,17 +67,20 @@ export class ClientAuthenticationHandler implements MaterializedBase {
         return ArkUIGeneratedNativeModule._ClientAuthenticationHandler_getFinalizer()
     }
     public confirm(priKeyFile: string, certChainFile: string): void {
+        hookconfirm(this, priKeyFile, certChainFile)
         const priKeyFile_casted = priKeyFile as (string)
         const certChainFile_casted = certChainFile as (string)
         this.confirm0_serialize(priKeyFile_casted, certChainFile_casted)
         return
     }
     public confirm(authUri: string): void {
+        hookconfirm(this, authUri)
         const authUri_casted = authUri as (string)
         this.confirm1_serialize(authUri_casted)
         return
     }
     public confirm(identity: string, credentialTypeOrCertChainFile: CredentialType | string): void {
+        hookconfirm(this, identity, credentialTypeOrCertChainFile)
         const identity_casted = identity as (string)
         const credentialTypeOrCertChainFile_casted = credentialTypeOrCertChainFile as (CredentialType | string)
         this.confirm2_serialize(identity_casted, credentialTypeOrCertChainFile_casted)

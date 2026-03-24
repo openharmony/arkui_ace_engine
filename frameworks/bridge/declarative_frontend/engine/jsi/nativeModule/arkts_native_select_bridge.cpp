@@ -38,38 +38,45 @@ const std::string DEFAULT_STR = "-1";
 const char* SELECT_NODEPTR_OF_UINODE = "nodePtr_";
 const Dimension invalidDimension = Dimension(0.0, DimensionUnit::INVALID);
 
+struct SelectDividerStyleParseResult {
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
+    bool hasStrokeWidth = false;
+    bool hasStartMargin = false;
+    bool hasEndMargin = false;
+};
+
 ArkUIMenuDividerOptions BuildSelectDividerStyleOptions(EcmaVM* vm, Local<JSValueRef> strokeWidthArg,
-    Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg, RefPtr<ResourceObject>& strokeWidthResObj,
-    RefPtr<ResourceObject>& startMarginResObj, RefPtr<ResourceObject>& endMarginResObj, bool& hasStrokeWidth,
-    bool& hasStartMargin, bool& hasEndMargin)
+    Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg, SelectDividerStyleParseResult& result)
 {
     ArkUIDimensionType strokeWidthOption;
     ArkUIDimensionType startMarginOption;
     ArkUIDimensionType endMarginOption;
 
     CalcDimension strokeWidth;
-    if (!ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth, strokeWidthResObj)) {
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth, result.strokeWidthResObj)) {
         strokeWidth = invalidDimension;
     } else {
-        hasStrokeWidth = true;
+        result.hasStrokeWidth = true;
     }
     strokeWidthOption.value = strokeWidth.Value();
     strokeWidthOption.units = static_cast<int32_t>(strokeWidth.Unit());
 
     CalcDimension startMargin;
-    if (!ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin, startMarginResObj)) {
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin, result.startMarginResObj)) {
         startMargin = invalidDimension;
     } else {
-        hasStartMargin = true;
+        result.hasStartMargin = true;
     }
     startMarginOption.value = startMargin.Value();
     startMarginOption.units = static_cast<int32_t>(startMargin.Unit());
 
     CalcDimension endMargin;
-    if (!ArkTSUtils::ParseJsLengthMetrics(vm, endMarginArg, endMargin, endMarginResObj)) {
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, endMarginArg, endMargin, result.endMarginResObj)) {
         endMargin = invalidDimension;
     } else {
-        hasEndMargin = true;
+        result.hasEndMargin = true;
     }
     endMarginOption.value = endMargin.Value();
     endMarginOption.units = static_cast<int32_t>(endMargin.Unit());
@@ -1057,16 +1064,10 @@ ArkUINativeModuleValue SelectBridge::SetDividerStyle(ArkUIRuntimeCallInfo* runti
         GetArkUINodeModifiers()->getSelectModifier()->resetSelectDividerStyle(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    RefPtr<ResourceObject> strokeWidthResObj;
     RefPtr<ResourceObject> colorResObj;
-    RefPtr<ResourceObject> startMarginResObj;
-    RefPtr<ResourceObject> endMarginResObj;
-    bool hasStrokeWidth = false;
     bool hasColor = false;
-    bool hasStartMargin = false;
-    bool hasEndMargin = false;
-    auto dividerOptions = BuildSelectDividerStyleOptions(vm, strokeWidthArg, startMarginArg, endMarginArg,
-        strokeWidthResObj, startMarginResObj, endMarginResObj, hasStrokeWidth, hasStartMargin, hasEndMargin);
+    SelectDividerStyleParseResult parseResult;
+    auto dividerOptions = BuildSelectDividerStyleOptions(vm, strokeWidthArg, startMarginArg, endMarginArg, parseResult);
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     auto context = frameNode->GetContext();
@@ -1101,10 +1102,10 @@ ArkUINativeModuleValue SelectBridge::SetDividerStyle(ArkUIRuntimeCallInfo* runti
         mode = modeArg->Int32Value(vm);
     }
     dividerOptions.mode = mode;
-    auto strokeWidthRawPtr = AceType::RawPtr(strokeWidthResObj);
+    auto strokeWidthRawPtr = AceType::RawPtr(parseResult.strokeWidthResObj);
     auto colorRawPtr = AceType::RawPtr(colorResObj);
-    auto startMarginRawPtr = AceType::RawPtr(startMarginResObj);
-    auto endMarginRawPtr = AceType::RawPtr(endMarginResObj);
+    auto startMarginRawPtr = AceType::RawPtr(parseResult.startMarginResObj);
+    auto endMarginRawPtr = AceType::RawPtr(parseResult.endMarginResObj);
 
     ArkUISelectDividerStyleArgs styleArgs;
     styleArgs.dividerInfo = &dividerOptions;
@@ -1112,10 +1113,10 @@ ArkUINativeModuleValue SelectBridge::SetDividerStyle(ArkUIRuntimeCallInfo* runti
     styleArgs.colorRawPtr = colorRawPtr;
     styleArgs.startMarginRawPtr = startMarginRawPtr;
     styleArgs.endMarginRawPtr = endMarginRawPtr;
-    styleArgs.hasStrokeWidth = hasStrokeWidth;
+    styleArgs.hasStrokeWidth = parseResult.hasStrokeWidth;
     styleArgs.hasColor = hasColor;
-    styleArgs.hasStartMargin = hasStartMargin;
-    styleArgs.hasEndMargin = hasEndMargin;
+    styleArgs.hasStartMargin = parseResult.hasStartMargin;
+    styleArgs.hasEndMargin = parseResult.hasEndMargin;
     GetArkUINodeModifiers()->getSelectModifier()->setSelectDividerStyle(nativeNode, &styleArgs);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1367,8 +1368,15 @@ ArkUINativeModuleValue SelectBridge::SetMenuOutline(ArkUIRuntimeCallInfo* runtim
     std::vector<void*> outlineResObjs;
     CommonBridge::ParseOuterBorderWidth(runtimeCallInfo, vm, width);
     ParseOuterBorderColor(runtimeCallInfo, vm, color, OFFSET_OF_COLOR, outlineResObjs);
-    GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(nativeNode, width.data(), width.size(), color.data(),
-        color.size(), outlineResObjs.data(), outlineResObjs.size());
+
+    ArkUISelectOutlineArgs outlineArgs;
+    outlineArgs.width = width.data();
+    outlineArgs.widthSize = static_cast<ArkUI_Int32>(width.size());
+    outlineArgs.color = color.data();
+    outlineArgs.colorSize = static_cast<ArkUI_Int32>(color.size());
+    outlineArgs.resObjs = outlineResObjs.data();
+    outlineArgs.unitSize = static_cast<ArkUI_Int32>(outlineResObjs.size());
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(nativeNode, &outlineArgs);
     return panda::JSValueRef::Undefined(vm);
 }
 

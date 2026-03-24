@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
  * @tc.desc: Use IsSafeAreaValid and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level0)
 {
     EXPECT_EQ(safeAreaManager_->IsIgnoreSafeArea(), false);
     EXPECT_EQ(safeAreaManager_->IsFullScreen(), false);
@@ -66,7 +66,7 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
  * @tc.desc: Use CutoutSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1 call UpdateCutoutSafeArea without rootSize params.
@@ -115,7 +115,7 @@ HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use SystemSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: call UpdateSystemSafeAreaTest
@@ -141,7 +141,7 @@ HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use UpdateNavSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: call UpdateNavSafeAreaTest
@@ -164,7 +164,7 @@ HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use UpdateKeyboardSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1 call UpdateKeyboardSafeAreaTest with valid systemArea
@@ -198,7 +198,7 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(keyboardInset.end, rootHeight);
 }
 
-HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1 call UpdateKeyboardWebSafeAreaTest with valid systemArea
@@ -255,7 +255,7 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level1)
  * @tc.desc: Use CheckCutoutSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level0)
 {
     /* 
      * @tc.steps: step1 call CheckCutoutSafeArea with null rootSize params.
@@ -291,7 +291,7 @@ HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use CheckSystemSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level0)
 {
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     auto ret = safeAreaManager_->CheckSystemSafeArea(systemArea);
@@ -308,7 +308,7 @@ HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use CheckNavSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CheckNavSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CheckNavSafeAreaTest, TestSize.Level0)
 {
     safeAreaManager_->UpdateNavSafeArea(navArea);
     auto ret = safeAreaManager_->CheckNavSafeArea(navArea);
@@ -325,7 +325,7 @@ HWTEST_F(SafeAreaManagerTest, CheckNavSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use GetCombinedSafeArea GetSafeAreaWithoutCutout GetSafeAreaWithoutProcess and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level0)
 {
     auto funExPect = [this](SafeAreaExpandOpts options, float left, float right, float top, float bottom) {
         auto res = safeAreaManager_->GetCombinedSafeArea(options);
@@ -397,7 +397,7 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use UpdateScbSystemSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, ScbSystemSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, ScbSystemSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1 Call UpdateSystemSafeArea.
@@ -447,7 +447,7 @@ HWTEST_F(SafeAreaManagerTest, ScbSystemSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use ScbCutoutSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1 call UpdateScbCutoutSafeArea without rootSize params.
@@ -512,7 +512,7 @@ HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level1)
  * @tc.desc: Use UpdateScbNavSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, ScbNavSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, ScbNavSafeAreaTest, TestSize.Level0)
 {
     /**
      * @tc.steps: call UpdateScbNavSafeAreaTest
@@ -534,7 +534,7 @@ HWTEST_F(SafeAreaManagerTest, ScbNavSafeAreaTest, TestSize.Level1)
  * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::OFFSET And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest1, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest1, TestSize.Level0)
 {
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
@@ -558,7 +558,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest1, TestSize.Level1)
  * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::RESIZE And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest2, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest2, TestSize.Level0)
 {
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
@@ -582,7 +582,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest2, TestSize.Level1)
  * @tc.desc: Set KeyBoardAvoidMode to KeyBoardAvoidMode::NONE And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest3, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest3, TestSize.Level0)
 {
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
@@ -607,7 +607,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest3, TestSize.Level1)
              And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level0)
 {
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
@@ -632,7 +632,7 @@ HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest001, TestSize.Level1)
              And see if GetKeyboardOffset get right result
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level0)
 {
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
@@ -656,7 +656,7 @@ HWTEST_F(SafeAreaManagerTest, CaretAvoidModeTest002, TestSize.Level1)
  * @tc.desc: Use SetLastKeyboardPoistion GetLastKeyboardPoistion and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, LastKeyboardPoistionTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, LastKeyboardPoistionTest, TestSize.Level0)
 {
     float lastKeyPos = 10.0f;
     EXPECT_EQ(safeAreaManager_->GetLastKeyboardPoistion(), 0.0f);
@@ -671,7 +671,7 @@ HWTEST_F(SafeAreaManagerTest, LastKeyboardPoistionTest, TestSize.Level1)
  * @tc.desc: Use GetWindowWrapperOffset and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, WindowWrapperOffsetTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, WindowWrapperOffsetTest, TestSize.Level0)
 {
     auto windowModeCallback1 = []() { return WindowMode::WINDOW_MODE_FLOATING; };
     auto windowModeCallback2 = []() { return WindowMode::WINDOW_MODE_FULLSCREEN; };
@@ -706,7 +706,7 @@ HWTEST_F(SafeAreaManagerTest, WindowWrapperOffsetTest, TestSize.Level1)
  *           AddNeedExpandNode ClearNeedExpandNode ExpandSafeArea AddNodeToExpandListIfNeeded and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, NodesTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, NodesTest, TestSize.Level0)
 {
     safeAreaManager_->ExpandSafeArea();
     auto frameNode0 = FrameNode::CreateFrameNode(

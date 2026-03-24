@@ -1529,6 +1529,23 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOrphanCharOptimizationModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textInput.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2096,6 +2113,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
+      TextInputOrphanCharOptimizationModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

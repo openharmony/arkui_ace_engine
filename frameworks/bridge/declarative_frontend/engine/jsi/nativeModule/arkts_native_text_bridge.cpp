@@ -73,8 +73,13 @@ ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCa
             weight = std::to_string(weightArg->Int32Value(vm));
             variableFontWeight = weightArg->Int32Value(vm);
         } else if ((weightArg->IsString(vm) || weightArg->IsObject(vm)) &&
-            (!ArkTSUtils::ParseJsString(vm, weightArg, weight))) {
-            variableFontWeight = StringUtils::StringToInt(weight);
+            (ArkTSUtils::ParseJsString(vm, weightArg, weight))) {
+            auto parseResult = Framework::ParseFontWeight(weight);
+            if (parseResult.first) {
+                variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+            } else {
+                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            }
         }
     }
     weightInfo.weight = weight.c_str();
@@ -1135,16 +1140,24 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     std::string weight = DEFAULT_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
             variableFontWeight = weightArg->Int32Value(vm);
+            fontWeightEnum = Framework::ConvertStrToFontWeight(weight);
         } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString(vm);
-            variableFontWeight = StringUtils::StringToInt(weight);
+            auto parseResult = Framework::ParseFontWeight(weight);
+            fontWeightEnum = parseResult.second;
+            if (parseResult.first) {
+                variableFontWeight = Framework::GetFontWeightNumericValue(fontWeightEnum);
+            } else {
+                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            }
         }
     }
-    fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
+    fontInfo.fontWeight = static_cast<uint8_t>(fontWeightEnum);
     fontInfo.variableFontWeight = variableFontWeight;
 
     if (optionsArg->IsBoolean()) {
@@ -1848,9 +1861,13 @@ ArkUINativeModuleValue TextBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCallI
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(node);
-        auto obj = FrameNodeBridge::CreateGestureEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new GestureEvent(info);
+        auto obj = FrameNodeBridge::CreateGestureEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         func->Call(vm, func.ToLocal(), params, 1);
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     GetArkUINodeModifiers()->getTextModifier()->setTextOnClick(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -2130,6 +2147,33 @@ ArkUINativeModuleValue TextBridge::ResetOnMarqueeStateChange(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetOnMarqueeStateChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool isOrphanChar = false;
+    if (secondArg->IsBoolean()) {
+        isOrphanChar = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setTextOrphanCharOptimization(nativeNode, isOrphanChar);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextOrphanCharOptimization(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

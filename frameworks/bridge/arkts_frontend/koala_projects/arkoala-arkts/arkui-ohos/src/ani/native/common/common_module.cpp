@@ -1280,11 +1280,7 @@ ani_int getWindowId(ani_env* env, ani_object obj, ani_int instanceId)
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return -1;
     }
-    auto ret = modifier->getCommonAniModifier()->getWindowId(instanceId);
-    if (ret.has_value()) {
-        return ret.value();
-    }
-    return -1;
+    return modifier->getCommonAniModifier()->getWindowId(instanceId);
 }
 
 ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)

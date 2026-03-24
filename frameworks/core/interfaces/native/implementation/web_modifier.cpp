@@ -1280,8 +1280,22 @@ void SetOnClientAuthenticationRequestImpl(Ark_NativePointer node,
 void SetOnVerifyPinImpl(Ark_NativePointer node,
                         const Opt_OnVerifyPinCallback* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto VerifyPinEvent  = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnVerifyPin(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnVerifyPinRequest(frameNode, VerifyPinEvent);
+#endif // WEB_SUPPORTED
 }
 void SetOnWindowNewImpl(Ark_NativePointer node,
                         const Opt_Callback_OnWindowNewEvent_Void* value)

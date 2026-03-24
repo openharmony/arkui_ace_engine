@@ -25,7 +25,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string INIT_STRING_1 = u"初始属性字符串";
-const std::u16string INIT_U16STRING_1 = u"初始属性字符串";
 const int32_t TEST_MAX_LINE = 10;
 const Dimension TEST_BASELINE_OFFSET = Dimension(5, DimensionUnit::PX);
 const Dimension TEST_TEXT_INDENT = Dimension(20, DimensionUnit::PX);
@@ -125,9 +124,8 @@ RefPtr<MutableSpanString> RichEditorAccessibilityTestNg::CreateTextStyledString(
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
     styledString->AddSpan(AceType::MakeRefPtr<FontSpan>(TEST_FONT, 0, length));
-    std::optional<TextDecorationOptions> options;
     styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({TEXT_DECORATION_VALUE}),
-        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, options, 0, length, nullptr));
+        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, length, nullptr));
     styledString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(TEST_BASELINE_OFFSET, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(LETTER_SPACING, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(SHADOWS, 0, length));
@@ -169,6 +167,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level2
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+
     EXPECT_EQ(subComponentInfos.size(), 0);
 }
 
@@ -206,6 +205,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level2
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+
     EXPECT_EQ(subComponentInfos.size(), 1);
 }
 
@@ -221,7 +221,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level2
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller
@@ -285,7 +285,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level2
     /**
      * @tc.steps: step1. create styledString with text & onClick
      */
-    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     auto length = mutableStr->GetLength();
@@ -337,6 +337,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level2
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+
     EXPECT_EQ(subComponentInfos.size(), 1);
 }
 
@@ -388,6 +389,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level2)
     EXPECT_EQ(richEditorPattern->ExecSubComponent(-1), false);
 }
 
+
 /**
  * @tc.name: ExecSubComponent001
  * @tc.desc: Test ExecSubComponent for SetStyledString.
@@ -400,7 +402,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level2)
     /**
      * @tc.steps: step1. create styledString with text & onClick
      */
-    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     auto length = mutableStr->GetLength();
@@ -452,6 +454,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level2)
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+
     EXPECT_EQ(subComponentInfos.size(), 1);
 
     /**

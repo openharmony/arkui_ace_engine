@@ -163,6 +163,8 @@ private:
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& LayoutConstraintF);
+    void UpdateMaxSpaceHeightByMenuMaxHeight(const RefPtr<MenuPattern>& menuPattern,
+        const RefPtr<MenuLayoutProperty>& menuLayoutProps, float maxAvailableHeight, float& maxSpaceHeight);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);

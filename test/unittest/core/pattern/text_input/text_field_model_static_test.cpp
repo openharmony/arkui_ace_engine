@@ -2080,4 +2080,28 @@ HWTEST_F(TextFieldModelStaticTest, SetStrokeWidth003, TestSize.Level1)
      */
     EXPECT_TRUE(textFieldLayoutProperty->HasStrokeWidth());
 }
+
+/**
+ * @tc.name: SetOrphanCharOptimization
+ * @tc.desc: test testInput ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, SetOrphanCharOptimization, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto textFieldLayoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto node = Referenced::RawPtr(textFieldNode);
+
+    TextFieldModelStatic::SetOrphanCharOptimization(node, false);
+    EXPECT_EQ(textFieldLayoutProperty->GetOrphanCharOptimization().value(), false);
+
+    TextFieldModelStatic::SetOrphanCharOptimization(node, true);
+    EXPECT_EQ(textFieldLayoutProperty->GetOrphanCharOptimization().value(), true);
+
+    TextFieldModelStatic::SetOrphanCharOptimization(node, std::nullopt);
+    EXPECT_EQ(textFieldLayoutProperty->GetOrphanCharOptimization().value(), false);
+}
 } // namespace OHOS::Ace::NG

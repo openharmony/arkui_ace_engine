@@ -19,7 +19,9 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -3111,5 +3113,52 @@ RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead, bool isHomeOrEnd)
         }
     }
     return FindHeadOrTailDescendantFocus(isHead, isHomeOrEnd);
+}
+
+void FocusHub::SetPaintRect(const RoundRect& rect)
+{
+    if (!focusPaintParamsPtr_) {
+        focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    }
+    CHECK_NULL_VOID(focusPaintParamsPtr_);
+    focusPaintParamsPtr_->SetPaintRect(rect);
+}
+
+void FocusHub::SetPaintColor(const Color& color)
+{
+    if (!focusPaintParamsPtr_) {
+        focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    }
+    CHECK_NULL_VOID(focusPaintParamsPtr_);
+    focusPaintParamsPtr_->SetPaintColor(color);
+}
+
+void FocusHub::SetPaintWidth(const Dimension& width)
+{
+    if (!focusPaintParamsPtr_) {
+        focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    }
+    CHECK_NULL_VOID(focusPaintParamsPtr_);
+    focusPaintParamsPtr_->SetPaintWidth(width);
+}
+
+void FocusHub::SetFocusPadding(const Dimension& padding)
+{
+    if (!focusPaintParamsPtr_) {
+        focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    }
+    CHECK_NULL_VOID(focusPaintParamsPtr_);
+    focusPaintParamsPtr_->SetFocusPadding(padding);
+}
+
+size_t FocusHub::GetFocusableCount()
+{
+    size_t count = 0;
+    AllChildFocusHub([&count](const RefPtr<FocusHub>& child) {
+        if (child->IsFocusable()) {
+            count++;
+        }
+    });
+    return count;
 }
 } // namespace OHOS::Ace::NG

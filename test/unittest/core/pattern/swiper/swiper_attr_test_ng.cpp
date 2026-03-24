@@ -25,7 +25,7 @@ class SwiperAttrTestNg : public SwiperTestNg {};
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set index
@@ -42,7 +42,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex001, TestSize.Level1)
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set index:1
@@ -60,7 +60,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex002, TestSize.Level1)
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set invalid index:-1
@@ -78,7 +78,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex003, TestSize.Level1)
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level0)
 {
     /**
      * @tc.cases: Set invalid index:ITEM_NUMBER(index>maxIndex)
@@ -96,7 +96,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex004, TestSize.Level1)
  * @tc.desc: Test currentIndex_ when loop change to false.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level0)
 {
     /**
      * @tc.cases: Set index=0
@@ -120,7 +120,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level1)
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level0)
 {
     /**
      * @tc.cases: Set invalid index = ITEM_NUMBER - 1, loop = false, displayCount = 2
@@ -140,7 +140,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level1)
  * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndex007, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndex007, TestSize.Level0)
 {
     /**
      * @tc.cases: Set index = ITEM_NUMBER - 2, loop = false, displayCount = 2
@@ -160,7 +160,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex007, TestSize.Level1)
  * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Do not set value
@@ -179,7 +179,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay001, TestSize.Level1)
  * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set autoPlay to true
@@ -197,7 +197,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay002, TestSize.Level1)
  * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set autoPlay to true, set autoPlayInterval to 4000
@@ -216,7 +216,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay003, TestSize.Level1)
  * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level0)
 {
     /**
      * @tc.cases: Set autoPlay to true, set loop to false
@@ -235,7 +235,7 @@ HWTEST_F(SwiperAttrTestNg, AttrAutoPlay004, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Do not set value
@@ -268,7 +268,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Set value
@@ -314,7 +314,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set indicator type to DIGIT
@@ -342,7 +342,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level0)
 {
     /**
      * @tc.cases: Set indicator type to DIGIT
@@ -378,7 +378,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level1)
  * @tc.desc: Test property about duration
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDuration001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDuration001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set duration
@@ -395,7 +395,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDuration001, TestSize.Level1)
  * @tc.desc: Test property about duration
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDuration002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDuration002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set duration to 500
@@ -413,7 +413,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDuration002, TestSize.Level1)
  * @tc.desc: Test property about vertical
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrVertical001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrVertical001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set direction
@@ -430,7 +430,7 @@ HWTEST_F(SwiperAttrTestNg, AttrVertical001, TestSize.Level1)
  * @tc.desc: Test property about vertical
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrVertical002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrVertical002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set direction to VERTICAL
@@ -448,7 +448,7 @@ HWTEST_F(SwiperAttrTestNg, AttrVertical002, TestSize.Level1)
  * @tc.desc: Test property about itemSpace
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrItemSpace001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrItemSpace001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set itemSpace
@@ -465,7 +465,7 @@ HWTEST_F(SwiperAttrTestNg, AttrItemSpace001, TestSize.Level1)
  * @tc.desc: Test property about itemSpace
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrItemSpace002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrItemSpace002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set itemSpace to 10
@@ -483,7 +483,7 @@ HWTEST_F(SwiperAttrTestNg, AttrItemSpace002, TestSize.Level1)
  * @tc.desc: Test property about displayMode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayMode001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayMode001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set displayMode
@@ -500,7 +500,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayMode001, TestSize.Level1)
  * @tc.desc: Test property about displayMode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayMode002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayMode002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set displayMode to AUTO_LINEAR
@@ -518,7 +518,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayMode002, TestSize.Level1)
  * @tc.desc: Test property about cachedCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrCachedCount001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrCachedCount001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set cachedCount
@@ -535,7 +535,7 @@ HWTEST_F(SwiperAttrTestNg, AttrCachedCount001, TestSize.Level1)
  * @tc.desc: Test property about cachedCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrCachedCount002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrCachedCount002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set cachedCount to 2
@@ -553,7 +553,7 @@ HWTEST_F(SwiperAttrTestNg, AttrCachedCount002, TestSize.Level1)
  * @tc.desc: Test property about disableSwipe
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set disableSwipe
@@ -570,7 +570,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe001, TestSize.Level1)
  * @tc.desc: Test property about disableSwipe
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set disableSwipe to true
@@ -588,7 +588,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe002, TestSize.Level1)
  * @tc.desc: Test property about Curve
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrCurve001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrCurve001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set curve
@@ -605,7 +605,7 @@ HWTEST_F(SwiperAttrTestNg, AttrCurve001, TestSize.Level1)
  * @tc.desc: Test property about Curve
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrCurve002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrCurve002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set curve to SMOOTH
@@ -623,7 +623,7 @@ HWTEST_F(SwiperAttrTestNg, AttrCurve002, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set displayCount
@@ -642,7 +642,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount001, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set displayCount to 2
@@ -662,7 +662,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set displayCount to ITEM_NUMBER+1
@@ -684,7 +684,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level0)
 {
     /**
      * @tc.cases: Set minsize to half of swiper width
@@ -707,7 +707,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount005, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount005, TestSize.Level0)
 {
     /**
      * @tc.cases: Set displayCount to invalid 0
@@ -725,7 +725,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount005, TestSize.Level1)
  * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayCount006, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount006, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set displayCount
@@ -756,7 +756,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount006, TestSize.Level1)
  * @tc.desc: Test property about EdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set edgeEffect
@@ -774,7 +774,7 @@ HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect001, TestSize.Level1)
  * @tc.desc: Test property about EdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set edgeEffect to FADE
@@ -793,7 +793,7 @@ HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect002, TestSize.Level1)
  * @tc.desc: Test property about EdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set edgeEffect to NONE
@@ -812,7 +812,7 @@ HWTEST_F(SwiperAttrTestNg, AttrEdgeEffect003, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level0)
 {
     /**
      * @tc.cases: Do not set margin
@@ -832,7 +832,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level0)
 {
     /**
      * @tc.cases: Set margin
@@ -853,7 +853,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level0)
 {
     /**
      * @tc.cases: Set margin to invalid SWIPER_WIDTH+1 (>swiperSize)
@@ -873,7 +873,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level0)
 {
     /**
      * @tc.cases: Set margin to invalid SWIPER_WIDTH+1 (>swiperSize)
@@ -893,7 +893,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level0)
 {
     /**
      * @tc.cases: Only set nextMargin
@@ -911,7 +911,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level0)
 {
     /**
      * @tc.cases: Only set preMargin
@@ -929,7 +929,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin007, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin007, TestSize.Level0)
 {
     /**
      * @tc.cases: not support percentage
@@ -949,7 +949,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin007, TestSize.Level1)
  * @tc.desc: Test property about Margin
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrMargin008, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrMargin008, TestSize.Level0)
 {
     /**
      * @tc.cases: 'auto' not support previousMargin or nextMargin
@@ -970,7 +970,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin008, TestSize.Level1)
  * @tc.desc: Test property about NestedScroll
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level0)
 {
     /**
      * @tc.cases: NestedScroll is default
@@ -991,7 +991,7 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level1)
  * @tc.desc: Test property about NestedScroll
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level0)
 {
     /**
      * @tc.cases: NestedScroll is SELF_FIRST
@@ -1017,7 +1017,7 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level1)
  * @tc.desc: Test property about DisplayArrow
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create swiper.
@@ -1063,7 +1063,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SwiperModelNg001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg001, TestSize.Level0)
 {
     SwiperModelNG model = CreateSwiper();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1143,7 +1143,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg001, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level0)
 {
     SwiperModelNG model = CreateSwiper();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1234,7 +1234,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level0)
 {
     SwiperModelNG model = CreateSwiper();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1318,7 +1318,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SetMinSize003, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SetMinSize003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Default value
@@ -1344,7 +1344,7 @@ HWTEST_F(SwiperAttrTestNg, SetMinSize003, TestSize.Level1)
  * @tc.desc: Swiper Paint Property.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level0)
 {
     CreateSwiper();
     CreateSwiperItems();
@@ -1381,7 +1381,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create swiper and set parameters.
@@ -1410,7 +1410,7 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
  * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create swiper and set parameters.
@@ -1438,7 +1438,7 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
  * @tc.desc: Test SetNestedScroll method about NestableScrollContainer
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level1)
+HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level0)
 {
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,

@@ -959,6 +959,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableAutoSpacing));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableAutoSpacing));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrphanCharOptimization"),
+ 	    panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOrphanCharOptimization));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrphanCharOptimization"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOrphanCharOptimization));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCompressLeadingPunctuation));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
@@ -1343,6 +1347,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoSpacing));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoSpacing));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrphanCharOptimization"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOrphanCharOptimization));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrphanCharOptimization"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOrphanCharOptimization));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCompressLeadingPunctuation));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
@@ -6031,6 +6039,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOptimizeTrailingSpace));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOptimizeTrailingSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOptimizeTrailingSpace));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrphanCharOptimization"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOrphanCharOptimization));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrphanCharOptimization"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOrphanCharOptimization));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetCompressLeadingPunctuation));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),

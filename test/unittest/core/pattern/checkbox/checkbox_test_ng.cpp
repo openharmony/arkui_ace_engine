@@ -119,7 +119,7 @@ CheckboxBuilderFunc CheckBoxTestNG::CheckboxBuilder()
  * @tc.desc: Set CheckBox value into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
