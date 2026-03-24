@@ -561,11 +561,8 @@ void CalendarPickerDialogBridge::ParseShadowPropsUpdate(
     ArkTSUtils::ParseJsDouble(vm, radiusValue, radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radiusResObjValue = 0.0;
+            double radiusResObjValue = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radiusResObjValue);
-            if (LessNotEqual(radiusResObjValue, 0.0)) {
-                radiusResObjValue = 0.0;
-            }
             shadow.SetBlurRadius(radiusResObjValue);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -654,11 +651,8 @@ bool CalendarPickerDialogBridge::ParseShadowProps(EcmaVM* vm, const panda::Local
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(vm, jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(vm, jsObj, shadow);
     ParseShadowColor(vm, jsObj, shadow, configChangePerform, needResObj);

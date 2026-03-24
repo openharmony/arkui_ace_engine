@@ -246,9 +246,6 @@ NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogCon
         NativeShadowOptions shadowOptions = options.shadow.options;
         // Parse shadow
         Shadow shadow;
-        if (LessNotEqual(shadowOptions.radius, 0.0)) {
-            shadowOptions.radius = 0.0;
-        }
         shadow.SetBlurRadius(shadowOptions.radius);
         Color shadowColor = Color(shadowOptions.color);
         shadow.SetColor(shadowColor);

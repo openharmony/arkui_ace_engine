@@ -149,9 +149,6 @@ void CreateCustomShadow(const NativeShadowOptions& shadowOption, Shadow& shadow)
     shadow.SetOffsetX(xValue);
     shadow.SetOffsetY(shadowOption.offsetY);
     double radiusValue = shadowOption.radius;
-    if (LessNotEqual(radiusValue, 0.0)) {
-        radiusValue = 0.0;
-    }
     shadow.SetBlurRadius(radiusValue);
     shadow.SetColor(Color(shadowOption.color));
     int32_t shadowType = static_cast<int32_t>(shadowOption.shadowType);

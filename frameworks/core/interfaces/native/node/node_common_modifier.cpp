@@ -1939,11 +1939,8 @@ void CheckBackShadowResObj(const std::vector<RefPtr<ResourceObject>> objs, Shado
     RefPtr<ResourceObject> colorResObj = objs[NUM_3];
     if (radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -6137,7 +6134,7 @@ void ResetPointLightBloom(ArkUINodeHandle node)
     ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     ViewAbstract::SetBloom(frameNode, 0.0f);
     Shadow shadow;
-    shadow.SetBlurRadius(0);
+    shadow.SetBlurRadius(-1);
     ViewAbstract::SetBackShadow(frameNode, shadow);
 #endif
 }
