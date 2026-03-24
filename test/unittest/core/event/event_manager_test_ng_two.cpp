@@ -1537,6 +1537,12 @@ HWTEST_F(EventManagerTestNg, AddDumpTouchInfo001, TestSize.Level1)
     eventManager->SetIsUseDumpTouchInfo(true);
     eventManager->AddDumpTouchInfo(touchEvent);
     EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, true);
+    TouchEvent touchEventHistory;
+    touchEventHistory.history.push_back(touchEvent);
+    touchEventHistory.history.push_back(touchEvent);
+    touchEventHistory.history.push_back(touchEvent);
+    eventManager->AddDumpTouchInfo(touchEventHistory);
+    EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, true);
     for (int i = 0; i < MAX_HISTORY_TOUCH_INFO_SIZE; i++) {
         eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
     }
