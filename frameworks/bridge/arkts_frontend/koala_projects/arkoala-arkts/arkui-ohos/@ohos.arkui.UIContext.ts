@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -700,7 +700,7 @@ export class UIContext {
 
     static resolveUIContext(): ResolvedUIContext {
         let instance = UIContextUtil.resolveUIContext();
-        return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
+        return new ResolvedUIContext(instance[0] as int32, ResolveStrategy.fromValue(instance[1]));
     }
     public isAvailable() : boolean {
         return UIContextUtil.availableInstanceIds_.has(this.instanceId_);
@@ -1057,7 +1057,7 @@ export class UIContext {
             return WidthBreakpoint.WIDTH_XS;
         }
         ArkUIAniModule._Common_Restore_InstanceId();
-        return ret as WidthBreakpoint;
+        return WidthBreakpoint.fromValue(ret);
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -1068,7 +1068,7 @@ export class UIContext {
             return HeightBreakpoint.HEIGHT_SM;
         }
         ArkUIAniModule._Common_Restore_InstanceId();
-        return ret as HeightBreakpoint;
+        return HeightBreakpoint.fromValue(ret);
     }
     public vp2px(value: double): double {
         return ArkUIAniModule._Common_vp2px(value, this.instanceId_);

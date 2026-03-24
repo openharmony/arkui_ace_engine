@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,7 @@ export class LengthMetrics {
         let unit = returnResult.unit as int32;
         let lengthUnit: LengthUnit = LengthUnit.PX;
         if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
-            lengthUnit = unit as LengthUnit;
+            lengthUnit = LengthUnit.fromValue(unit);
         }
         return new LengthMetrics((returnResult.value as number), lengthUnit);
     }
@@ -260,7 +260,7 @@ export class ColorMetrics {
         } else if (color instanceof int32) {
             return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
-            let colorValue = color as string;
+            let colorValue = color.toString();
             if (ColorMetrics.isHexFormat(colorValue)) {
                 return ColorMetrics.hex(colorValue);
             } else {
