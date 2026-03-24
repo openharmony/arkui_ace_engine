@@ -366,9 +366,9 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_004, TestSize.Level1)
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
     EXPECT_FALSE(selectMenuInfo.showCut);
-    EXPECT_FALSE(selectMenuInfo.showCopy);
+    EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1339,7 +1339,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_008, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1380,7 +1380,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_009, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1421,7 +1421,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_010, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1576,6 +1576,163 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_003_Updated, TestSize.Level
     OptionMenuType type = OptionMenuType::MOUSE_MENU;
     EXPECT_CALL(*mockMenuResult, CopyImage).Times(1);
     overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFlag
+ * @tc.desc: Test OnUpdateMenuInfo showCopyAll when flags contain CM_ES_CAN_SELECT_ALL and isEdit is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFlag, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    mockMenuParam->SetEditStateFlags(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL);
+    mockMenuParam->SetIsEditable(true);
+    mockMenuParam->SetLinkUrl("");
+    mockMenuParam->SetMediaType(static_cast<int>(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
+
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+
+    SelectMenuInfo selectMenuInfo;
+    SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
+    overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+}
+
+/**
+ * @tc.name: OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFlagAndNotEdit
+ * @tc.desc: Test OnUpdateMenuInfo showCopyAll when flags contain CM_ES_CAN_SELECT_ALL and isEdit is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFlagAndNotEdit, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    mockMenuParam->SetEditStateFlags(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL);
+    mockMenuParam->SetIsEditable(false);
+    mockMenuParam->SetLinkUrl("");
+    mockMenuParam->SetMediaType(static_cast<int>(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
+
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+
+    SelectMenuInfo selectMenuInfo;
+    SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
+    overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+}
+
+/**
+ * @tc.name: OnUpdateMenuInfo_ShowCopyAll_WithoutSelectAllFlagAndNotEdit
+ * @tc.desc: Test OnUpdateMenuInfo showCopyAll when flags do not contain CM_ES_CAN_SELECT_ALL and isEdit is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithoutSelectAllFlagAndNotEdit, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    mockMenuParam->SetEditStateFlags(0);
+    mockMenuParam->SetIsEditable(false);
+    mockMenuParam->SetLinkUrl("");
+    mockMenuParam->SetMediaType(static_cast<int>(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
+
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+
+    SelectMenuInfo selectMenuInfo;
+    SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
+    overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+}
+
+/**
+ * @tc.name: OnUpdateMenuInfo_NoShowCopyAll_WithoutSelectAllFlagAndEdit
+ * @tc.desc: Test OnUpdateMenuInfo showCopyAll when flags do not contain CM_ES_CAN_SELECT_ALL and isEdit is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_NoShowCopyAll_WithoutSelectAllFlagAndEdit, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    mockMenuParam->SetEditStateFlags(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_CUT |
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_COPY |
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_PASTE);
+    mockMenuParam->SetIsEditable(true);
+    mockMenuParam->SetLinkUrl("");
+    mockMenuParam->SetMediaType(static_cast<int>(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
+
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+
+    SelectMenuInfo selectMenuInfo;
+    SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
+    overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 } // namespace OHOS::Ace::NG
