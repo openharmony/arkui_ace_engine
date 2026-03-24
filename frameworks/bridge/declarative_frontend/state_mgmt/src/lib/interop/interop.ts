@@ -15,6 +15,10 @@
 
 
 function isStaticProxy<T extends Object>(obj: T): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && proto._isStaticProxy === true) {
+        return true;
+    }
     const prototype = obj?.constructor?.prototype;
     if (prototype === null || prototype === undefined) {
         return false;
