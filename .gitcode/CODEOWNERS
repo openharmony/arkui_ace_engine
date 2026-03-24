@@ -3756,6 +3756,12 @@ frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
 [UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
+test/unittest/capi/accessors/children_main_size_accessor_test.cpp @arkuiscroll
+test/unittest/capi/accessors/list_scroller_accessor_test.cpp @arkuiscroll
+test/unittest/capi/accessors/scroll_result_accessor_test.cpp @arkuiscroll
+test/unittest/capi/accessors/scrollable_target_info_accessor_test.cpp @arkuiscroll
+test/unittest/capi/accessors/scroller_accessor_test.cpp @arkuiscroll
+test/unittest/capi/accessors/water_flow_section_accessor_test.cpp @arkuiscroll
 
 [window scene]
 test/unittest/core/pattern/window_scene/ @window_scene
