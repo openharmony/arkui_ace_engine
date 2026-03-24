@@ -41,12 +41,36 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr char SPLIT_LEFT_KEY[] = "container_modal_split_left_button";
 constexpr char MAXIMIZE_KEY[] = "container_modal_maximize_button";
+constexpr char WIN_COMPATIBLE_MAX_EVENT[] = "win_compatible_max_event";
+constexpr char WIN_COMPATIBLE_RECOVER_EVENT[] = "win_compatible_recover_event";
 constexpr char MINIMIZE_KEY[] = "container_modal_minimize_button";
 constexpr char CLOSE_KEY[] = "container_modal_close_button";
 constexpr float SPRINGMOTION_RESPONSE = 0.55f;
 constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
+// Maximize path: tablet WindowMaximize vs non-tablet win_compatible (see RunMaximizeButtonClick).
+enum class CjMaximizePath : int32_t {
+    UNKNOWN = -1,
+    WINDOW_MAXIMIZE = 1,
+    WIN_COMPATIBLE = 2,
+};
 float g_baseScale = 1.0f;
+
+struct CjMaximizePerInstanceState {
+    CjMaximizePath effectiveMaximizePath = CjMaximizePath::UNKNOWN;
+    bool isWinCompatibleRecover = false;
+    bool maximizeIconSurfaceSyncRegistered = false;
+};
+
+// Per UI instance (PipelineBase::instanceId_). Process-wide singletons mixed multi-window state.
+static std::unordered_map<int32_t, CjMaximizePerInstanceState> g_cjMaximizeStateByInstance;
+
+static CjMaximizePerInstanceState& GetCjMaximizeStateForPipeline(const RefPtr<PipelineContext>& pipeline)
+{
+    static CjMaximizePerInstanceState dummy;
+    CHECK_NULL_RETURN(pipeline, dummy);
+    return g_cjMaximizeStateByInstance[pipeline->GetInstanceId()];
+}
 
 RefPtr<FrameNode> BuildCjTextNode(const std::string label)
 {
@@ -418,19 +442,147 @@ RefPtr<ContainerModalPatternEnhance> GetPatternFromWeakOrParent(
     return SearchPatternInRootElement();
 }
 
+bool IsWindowMaximizedForCjTitleBar(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, false);
+    auto wm = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(wm, false);
+    auto windowMode = wm->GetWindowMode();
+    MaximizeMode mode = wm->GetCurrentWindowMaximizeMode();
+    return mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+}
+
+void UpdateMaximizeButtonIcon(const RefPtr<FrameNode>& maximizeBtn, bool isRecover)
+{
+    CHECK_NULL_VOID(maximizeBtn);
+    auto& children = maximizeBtn->GetChildren();
+    CHECK_NULL_VOID(!children.empty());
+    auto imageIcon = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(imageIcon);
+
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(isRecover ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                            : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE);
+    imageSourceInfo.SetFillColor(theme->GetControlBtnColor(false, ControlBtnColorType::NORMAL_FILL));
+
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    imageIcon->MarkModifyDone();
+    maximizeBtn->MarkModifyDone();
+}
+
+bool ComputeIsRecover(CjMaximizePath path, const RefPtr<PipelineContext>& pipeline)
+{
+    if (path == CjMaximizePath::WINDOW_MAXIMIZE) {
+        return IsWindowMaximizedForCjTitleBar(pipeline);
+    }
+    auto& st = GetCjMaximizeStateForPipeline(pipeline);
+    if (path == CjMaximizePath::UNKNOWN) {
+        return st.isWinCompatibleRecover || IsWindowMaximizedForCjTitleBar(pipeline);
+    }
+    return st.isWinCompatibleRecover;
+}
+
+void DoRecoverAction(const RefPtr<ContainerModalPatternEnhance>& pattern,
+    const RefPtr<PipelineContext>& pipeline, bool useWinCompatiblePath)
+{
+    if (useWinCompatiblePath) {
+        pattern->CallContainerModalNative(WIN_COMPATIBLE_RECOVER_EVENT, "false");
+    } else {
+        pipeline->GetWindowManager()->WindowRecover();
+    }
+    GetCjMaximizeStateForPipeline(pipeline).isWinCompatibleRecover = false;
+}
+
+void DoMaximizeAction(const RefPtr<ContainerModalPatternEnhance>& pattern,
+    const RefPtr<PipelineContext>& pipeline, bool useWinCompatiblePath, bool isDualTriggerMaximize)
+{
+    auto windowManager = pipeline->GetWindowManager();
+    if (isDualTriggerMaximize) {
+        windowManager->WindowMaximize(true);
+        pattern->CallContainerModalNative(WIN_COMPATIBLE_MAX_EVENT, "true");
+        GetCjMaximizeStateForPipeline(pipeline).isWinCompatibleRecover = true;
+    } else if (useWinCompatiblePath) {
+        pattern->CallContainerModalNative(WIN_COMPATIBLE_MAX_EVENT, "true");
+        GetCjMaximizeStateForPipeline(pipeline).isWinCompatibleRecover = true;
+    } else {
+        windowManager->WindowMaximize(true);
+    }
+}
+
+void SyncCjMaximizeButtonIconWithWindowState(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto btn = NG::Inspector::GetFrameNodeByKey("EnhanceMaximizeBtn");
+    CHECK_NULL_VOID(btn);
+    auto& st = GetCjMaximizeStateForPipeline(pipeline);
+    UpdateMaximizeButtonIcon(btn, ComputeIsRecover(st.effectiveMaximizePath, pipeline));
+}
+
+void ExecuteMaximizeAction(const RefPtr<ContainerModalPatternEnhance>& pattern,
+    const RefPtr<PipelineContext>& pipeline, bool useWinCompatiblePath, bool isDualTrigger, bool isRecover)
+{
+    auto host = pattern->GetHost();
+    if (host) {
+        host->OnWindowActivated();
+    }
+    if (isRecover) {
+        DoRecoverAction(pattern, pipeline, useWinCompatiblePath);
+    } else {
+        DoMaximizeAction(pattern, pipeline, useWinCompatiblePath, isDualTrigger);
+    }
+    SyncCjMaximizeButtonIconWithWindowState(pipeline);
+}
+
+void RunMaximizeButtonClick(const std::function<RefPtr<ContainerModalPatternEnhance>()>& getPattern)
+{
+    auto pattern = getPattern();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto& st = GetCjMaximizeStateForPipeline(pipeline);
+    auto wm = pipeline->GetWindowManager();
+    if (!wm || wm->WindowIsStartMoving()) {
+        return;
+    }
+    bool isRecover = ComputeIsRecover(st.effectiveMaximizePath, pipeline);
+    bool useWinCompatiblePath;
+    bool isDualTrigger = false;
+
+    if (st.effectiveMaximizePath == CjMaximizePath::UNKNOWN) {
+        if (isRecover) {
+            useWinCompatiblePath = (wm->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+            st.effectiveMaximizePath =
+                useWinCompatiblePath ? CjMaximizePath::WIN_COMPATIBLE : CjMaximizePath::WINDOW_MAXIMIZE;
+        } else {
+            isDualTrigger = true;
+            useWinCompatiblePath = false;
+        }
+    } else {
+        useWinCompatiblePath = (st.effectiveMaximizePath == CjMaximizePath::WIN_COMPATIBLE);
+    }
+
+    ExecuteMaximizeAction(pattern, pipeline, useWinCompatiblePath, isDualTrigger, isRecover);
+}
+
 RefPtr<FrameNode> CreateMaximizeButtonForCj(
     std::function<RefPtr<ContainerModalPatternEnhance>()> getPattern)
 {
     RefPtr<FrameNode> maximizeBtn = BuildControlButtonForCj(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [getPattern](GestureEvent& info) {
-            auto pattern = getPattern();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnMaxButtonClick(info);
+            RunMaximizeButtonClick(getPattern);
         });
     maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
 
-    // add long press event
     WeakPtr<FrameNode> weakMaximizeBtn = maximizeBtn;
+
+    // add long press event
     auto longPressCallback = [getPattern, weakMaximizeBtn](GestureEvent& info) {
         auto pattern = getPattern();
         CHECK_NULL_VOID(pattern);
@@ -529,9 +681,33 @@ RefPtr<FrameNode> BuildControlButtonForCj(
     return buttonNode;
 }
 
+void EnsureCjMaximizeIconSurfaceSyncRegistered(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto& st = GetCjMaximizeStateForPipeline(pipeline);
+    if (st.maximizeIconSurfaceSyncRegistered) {
+        return;
+    }
+    WeakPtr<PipelineContext> weakPipeline = pipeline;
+    // Callbacks run in PipelineContext::OnSurfaceChanged after CHECK_RUN_ON(UI); same thread as UI node updates.
+    int32_t cbId = pipeline->RegisterSurfaceChangedCallback(
+        [weakPipeline](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason) {
+            auto ctx = weakPipeline.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            SyncCjMaximizeButtonIconWithWindowState(ctx);
+        });
+    if (cbId != 0) {
+        st.maximizeIconSurfaceSyncRegistered = true;
+    }
+}
+
 RefPtr<FrameNode> AddControlButtonsForCj(
     const WeakPtr<ContainerModalPatternEnhance>& weakPattern, const RefPtr<FrameNode>& containerTitleRow)
 {
+    auto pipeline = containerTitleRow->GetContextRefPtr();
+    if (pipeline) {
+        EnsureCjMaximizeIconSurfaceSyncRegistered(pipeline);
+    }
     // Use WeakPtr to avoid circular reference
     WeakPtr<FrameNode> weakContainerTitleRow = containerTitleRow;
     auto getPattern = [weakPattern, weakContainerTitleRow]() -> RefPtr<ContainerModalPatternEnhance> {
