@@ -781,14 +781,15 @@ void ArktsDynamicComponentRendererImpl::UpdateDynamicViewportConfig(
             config.SetPosition(offset.GetX(), offset.GetY());
         }
         auto removeTransaction = [hostRSTransaction, reason, uiContent, aceLogTag, syncId]() {
-            if (reason != Rosen::SizeChangeReason::ROTATION) {
+            if (reason != Rosen::SizeChangeReason::ROTATION &&
+                reason != Rosen::SizeChangeReason::SCENE_WITH_ANIMATION) {
                 return;
             }
-
+            
             CHECK_NULL_VOID(uiContent);
             uiContent->NotifyRotationAnimationEnd();
 
-            if (hostRSTransaction) {
+            if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
                 auto subRSUIContext = ArktsDynamicComponentRendererImpl::GetRSUIContextByInstanceId(
                     uiContent->GetInstanceId());
                 CHECK_NULL_VOID(subRSUIContext);
