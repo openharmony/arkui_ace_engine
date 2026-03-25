@@ -18,7 +18,6 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/event/touch_event.h"
 

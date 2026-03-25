@@ -20,6 +20,7 @@
 #include <deque>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 
 #include "base/memory/ace_type.h"

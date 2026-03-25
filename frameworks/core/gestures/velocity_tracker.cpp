@@ -15,6 +15,8 @@
 
 #include "core/gestures/velocity_tracker.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
 

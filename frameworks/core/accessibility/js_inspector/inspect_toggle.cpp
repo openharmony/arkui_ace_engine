@@ -14,6 +14,7 @@
  */
 
 #include "inspect_toggle.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectToggle::InspectToggle(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}

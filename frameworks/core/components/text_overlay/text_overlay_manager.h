@@ -24,6 +24,7 @@
 #include "frameworks/base/geometry/offset.h"
 #include "frameworks/base/geometry/rect.h"
 #include "frameworks/base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "frameworks/core/common/ime/text_editing_value.h"
 #include "frameworks/core/pipeline/base/overlay_show_option.h"
 

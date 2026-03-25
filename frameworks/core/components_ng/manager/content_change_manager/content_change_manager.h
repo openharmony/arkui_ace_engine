@@ -22,8 +22,9 @@
 #include "base/thread/task_executor.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
-#include <set>
+#include <memory>
 #include <optional>
+#include <set>
 
 namespace OHOS::Ace::NG {
 class FrameNode;

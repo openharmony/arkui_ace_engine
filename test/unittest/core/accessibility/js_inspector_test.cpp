@@ -69,6 +69,7 @@
 #include "core/accessibility/js_inspector/inspect_toolbar_item.h"
 #include "core/accessibility/js_inspector/inspect_toolbar.h"
 #include "core/accessibility/js_inspector/inspect_video.h"
+#include "base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;

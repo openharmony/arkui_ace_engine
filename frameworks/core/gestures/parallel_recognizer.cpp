@@ -15,6 +15,8 @@
 
 #include "core/gestures/parallel_recognizer.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 
 void ParallelRecognizer::OnAccepted(size_t touchId)

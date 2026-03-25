@@ -16,6 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_TRANSITION_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_TRANSITION_PROPERTY_H
 
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include "core/animation/animation_pub.h"

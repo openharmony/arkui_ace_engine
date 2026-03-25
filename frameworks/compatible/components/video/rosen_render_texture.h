@@ -26,12 +26,18 @@
 
 namespace OHOS::Ace {
 
+class Animator;
+template<typename T>
+class CurveAnimation;
+
 class ACE_FORCE_EXPORT RosenRenderTexture final : public RenderTexture {
     DECLARE_ACE_TYPE(RosenRenderTexture, RenderTexture);
 
 public:
-    RosenRenderTexture() = default;
-    ~RosenRenderTexture() override = default;
+    RosenRenderTexture();
+    ~RosenRenderTexture() override;
+    RosenRenderTexture(const RosenRenderTexture&) = delete;
+    RosenRenderTexture& operator=(const RosenRenderTexture&) = delete;
 
     void Paint(RenderContext& context, const Offset& offset) override;
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/system_properties.h"
 #include "inspect_button.h"
 
 namespace OHOS::Ace::Framework {

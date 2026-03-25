@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COUNTER_COUNTER_MODEL_H
 
 #include <functional>
+#include <memory>
 #include <mutex>
 
 #include "base/geometry/dimension.h"

@@ -14,6 +14,7 @@
  */
 
 #include "inspect_input.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectInput::InspectInput(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

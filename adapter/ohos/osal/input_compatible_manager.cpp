@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "base/utils/time_util.h"
+#include "base/utils/system_properties.h"
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/event/event_info_convertor.h"
 

@@ -20,6 +20,7 @@
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
 #include "frameworks/core/common/ace_application_info.h"
 
 #ifdef __cplusplus
