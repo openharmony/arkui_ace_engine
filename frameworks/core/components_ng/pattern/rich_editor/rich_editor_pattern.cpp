@@ -11175,6 +11175,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("orphanCharOptimization", isOrphanCharOptimization_ ? "true" : "false", filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const

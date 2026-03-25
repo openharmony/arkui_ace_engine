@@ -65,6 +65,7 @@ public:
     void SetMaxLength(std::optional<int32_t> value) override;
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
+    void SetOrphanCharOptimization(bool enabled) override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
@@ -169,6 +170,8 @@ public:
     static int32_t GetMaxLength(FrameNode* frameNode);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static int32_t GetMaxLines(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool enabled);
+    static bool IsOrphanCharOptimization(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool IsEnableAutoSpacing(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);

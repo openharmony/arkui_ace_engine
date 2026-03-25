@@ -845,6 +845,53 @@ HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorToJsonValue002
+ * @tc.desc: test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    auto jsonObject = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 0;
+    filter.filterExt.clear();
+    EXPECT_FALSE(filter.IsFastFilter());
+    richEditorPattern->SetOrphanCharOptimization(true);
+    richEditorPattern->ToJsonValue(jsonObject, filter);
+    EXPECT_EQ(jsonObject->GetString("orphanCharOptimization"), "true");
+
+    filter.filterFixed = 10;
+    EXPECT_TRUE(filter.IsFastFilter());
+    richEditorPattern->ToJsonValue(jsonObject, filter);
+    EXPECT_FALSE(jsonObject->IsNull());
+}
+
+/**
+ * @tc.name: SetOrphanCharOptimization001
+ * @tc.desc: test SetOrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetOrphanCharOptimization001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    richEditorPattern->SetOrphanCharOptimization(true);
+    EXPECT_EQ(richEditorPattern->isOrphanCharOptimization_, true);
+}
+
+/**
  * @tc.name: FixMoveDownChange001
  * @tc.desc: test FixMoveDownChange
  * @tc.type: FUNC

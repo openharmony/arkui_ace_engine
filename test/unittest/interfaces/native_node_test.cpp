@@ -9468,6 +9468,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor3, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_COMPRESS_LEADING_PUNCTUATION, &item);
     value[0].i32 = false;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_SINGLE_LINE, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION, &item);
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_KEYBOARD_APPEARANCE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_STOP_BACK_PRESS), ARKUI_ERROR_CODE_NO_ERROR);
@@ -9475,6 +9477,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor3, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_FALLBACK_LINE_SPACING), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_COMPRESS_LEADING_PUNCTUATION), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_SINGLE_LINE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION),
+        ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_KEYBOARD_APPEARANCE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_STOP_BACK_PRESS), nullptr);
@@ -9482,6 +9486,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor3, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_FALLBACK_LINE_SPACING), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_COMPRESS_LEADING_PUNCTUATION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_SINGLE_LINE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION), nullptr);
 
     nodeAPI->disposeNode(rootNode);
 }

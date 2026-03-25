@@ -972,6 +972,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setPlaceholder(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum RichEditorDeleteDirection {
     BACKWARD = 0,
@@ -1332,6 +1344,9 @@ export interface RichEditorAttribute extends CommonMethod {
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         throw new Error('Unimplemented method placeholder')
     }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error('Unimplemented method orphanCharOptimization')
+    }
     attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -1573,6 +1588,11 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         const value_casted = value as (ResourceStr | undefined)
         const style_casted = style as (PlaceholderStyle | undefined)
         this.getPeer()?.setPlaceholderAttribute(value_casted, style_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

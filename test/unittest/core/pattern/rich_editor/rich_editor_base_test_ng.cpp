@@ -1003,6 +1003,34 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel023, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorModel024
+ * @tc.desc: test SetOrphanCharOptimization.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel024, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetOrphanCharOptimization(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    EXPECT_EQ(textLayoutProperty->GetOrphanCharOptimization(), true);
+    EXPECT_EQ(pattern->isOrphanCharOptimization_, true);
+
+    RichEditorModelNG::SetOrphanCharOptimization(richEditorNode, false);
+
+    EXPECT_EQ(textLayoutProperty->GetOrphanCharOptimization(), false);
+    EXPECT_EQ(pattern->isOrphanCharOptimization_, false);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC

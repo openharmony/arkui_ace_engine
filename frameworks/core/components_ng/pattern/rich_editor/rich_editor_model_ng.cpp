@@ -905,6 +905,16 @@ void RichEditorModelNG::SetMaxLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
 }
 
+void RichEditorModelNG::SetOrphanCharOptimization(bool isOrphanCharOptimization)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, OrphanCharOptimization, isOrphanCharOptimization);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrphanCharOptimization(isOrphanCharOptimization);
+}
+
 void RichEditorModelNG::SetEnableAutoSpacing(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, EnableAutoSpacing, enabled);
@@ -1022,6 +1032,24 @@ void RichEditorModelNG::SetSupportStyledUndo(bool enabled)
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSupportStyledUndo(enabled);
+}
+
+void RichEditorModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanCharOptimization)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        RichEditorLayoutProperty, OrphanCharOptimization, isOrphanCharOptimization, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrphanCharOptimization(isOrphanCharOptimization);
+}
+
+bool RichEditorModelNG::IsOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsOrphanCharOptimization();
 }
 
 void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)

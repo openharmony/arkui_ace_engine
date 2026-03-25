@@ -8242,6 +8242,9 @@ struct ArkUIRichEditorModifier {
     void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
     void (*getStyledString)(ArkUINodeHandle node, ArkUI_StyledString_Descriptor* descriptor);
     void (*setStyledPlaceholder)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
+    void (*setRichEditorOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorOrphanCharOptimization)(ArkUINodeHandle node);
+    ArkUI_Bool (*getRichEditorOrphanCharOptimization)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

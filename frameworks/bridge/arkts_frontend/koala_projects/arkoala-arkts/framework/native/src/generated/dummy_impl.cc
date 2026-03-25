@@ -10851,6 +10851,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOrphanCharOptimization(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RichEditorAttributeModifier
     namespace RichTextModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -22514,6 +22525,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
+            RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUIRichEditorModifierImpl;
     }
