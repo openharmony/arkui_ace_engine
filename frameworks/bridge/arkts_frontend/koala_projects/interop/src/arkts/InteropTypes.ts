@@ -16,10 +16,10 @@
 export type NodePointer = pointer // Improve: move to NativeModule
 
 export type KStringPtr = string
-export type KStringPtrArray = FixedArray<byte>
-export type KUint8ArrayPtr = FixedArray<byte>
-export type KInt32ArrayPtr = FixedArray<int>
-export type KFloat32ArrayPtr = FixedArray<float>
+export type KStringPtrArray = ValueArray<byte>
+export type KUint8ArrayPtr = ValueArray<byte>
+export type KInt32ArrayPtr = ValueArray<int>
+export type KFloat32ArrayPtr = ValueArray<float>
 export type KInt = int
 export type KLong = long
 export type KUInt = KInt
