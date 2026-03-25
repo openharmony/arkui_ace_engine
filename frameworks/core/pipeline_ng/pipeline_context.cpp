@@ -828,6 +828,7 @@ void PipelineContext::ReloadNodesResource()
         return;
     }
 
+    const bool originIsSystemColorChange = IsSystemColorChange();
     auto needReloadNodes = std::move(needReloadNodes_);
     for (const auto& it : needReloadNodes) {
         auto needReloadNode = it.Upgrade();
@@ -837,13 +838,17 @@ void PipelineContext::ReloadNodesResource()
             if (pattern) {
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
                 ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+                SetIsSystemColorChange(true);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
+                SetIsSystemColorChange(originIsSystemColorChange);
                 ResourceParseUtils::SetNeedReload(false);
             }
         } else if (needReloadNode) {
             bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
             ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            SetIsSystemColorChange(true);
             needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            SetIsSystemColorChange(originIsSystemColorChange);
             ResourceParseUtils::SetNeedReload(false);
         }
     }
