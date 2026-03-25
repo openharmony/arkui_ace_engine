@@ -40,7 +40,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/subwindow/subwindow_manager.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_DETENTS_ZERO = 0;

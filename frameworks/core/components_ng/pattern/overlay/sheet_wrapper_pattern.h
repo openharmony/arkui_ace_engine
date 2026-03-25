@@ -47,8 +47,6 @@ public:
         return MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     }
 
-    void OnAttachToMainTree() override;
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         ACE_UINODE_TRACE(GetHost());
@@ -88,6 +86,7 @@ public:
     void OnAttachToFrameNode() override;
     void InitSubWindowId();
     void InitMainWindowRect(int32_t subwindowId);
+    void OnAttachToMainTree() override;
 
     RectF GetMainWindowRect() const
     {

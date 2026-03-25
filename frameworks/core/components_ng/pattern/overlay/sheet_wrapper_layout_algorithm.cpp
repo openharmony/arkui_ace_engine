@@ -27,7 +27,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-using OHOS::Ace::SubwindowManager;
 constexpr int32_t DOUBLE_SIZE = 2;
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;

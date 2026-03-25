@@ -138,7 +138,6 @@ void SheetWrapperPattern::OnAttachToFrameNode()
     InitMainWindowRect(subWindowId_);
 }
 
-    
 void SheetWrapperPattern::UpdateSheetMaskResource(const RefPtr<FrameNode>& maskNode,
     const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle)
 {
