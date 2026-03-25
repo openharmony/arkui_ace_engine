@@ -27,6 +27,9 @@
 #include "ui/resource/node_info.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class UINode;
+} // namespace NG
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,

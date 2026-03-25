@@ -19,7 +19,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 class SvgDomBase;
