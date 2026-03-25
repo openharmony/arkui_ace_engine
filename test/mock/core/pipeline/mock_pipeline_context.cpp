@@ -507,7 +507,12 @@ void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
-void PipelineContext::SetRootRect(double width, double height, double offset) {}
+void PipelineContext::SetRootRect(double width, double height, double offset)
+{
+    rootWidth_ = width;
+    rootHeight_ = height;
+    MarkLpxDirtyNodes();
+}
 
 void PipelineContext::FlushBuild() {}
 
@@ -1700,6 +1705,28 @@ void NG::PipelineContext::SetMagnifierController(const RefPtr<NG::MagnifierContr
 RefPtr<NG::MagnifierController> NG::PipelineContext::GetMagnifierController() const
 {
     return magnifierController_;
+}
+
+void NG::PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.emplace(node);
+}
+
+void NG::PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.erase(node);
+}
+
+void NG::PipelineContext::MarkLpxDirtyNodes()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}

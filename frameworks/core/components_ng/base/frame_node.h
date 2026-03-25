@@ -106,6 +106,11 @@ enum {
     RET_SUCCESS = 10,
 };
 
+enum class LpxAttribute {
+    LPX_FONT_SIZE = 0,
+    ALWAYS
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -1497,6 +1502,9 @@ public:
 
     void UpdateBackground();
     void ReplacePattern(const RefPtr<Pattern>& newPattern);
+
+    void RegisterLpxAttribute(LpxAttribute attribute);
+    void UnRegisterLpxAttribute(LpxAttribute attribute);
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1852,6 +1860,8 @@ private:
     std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
     std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
     std::shared_ptr<AICallerHelper> aiCallerHelper_;
+
+    std::unordered_set<LpxAttribute> lpxAttributes_;
 };
 } // namespace OHOS::Ace::NG
 
