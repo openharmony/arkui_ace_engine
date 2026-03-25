@@ -41,6 +41,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -417,7 +418,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     auto pipeLineContext = contentNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
+        DialogView::IsSupportBlurStyle(contentNode, dialogProperties_.isShowInSubWindow) && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
         if (props.blurStyleOption.has_value()) {
             styleOption = props.blurStyleOption.value();
@@ -1470,7 +1471,8 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
+    json->PutExtAttr("uniRender",
+        DialogView::IsSupportBlurStyle(host, dialogProperties_.isShowInSubWindow) ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
@@ -2002,8 +2004,8 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
     if (!dialogProperties_.customStyle && !dialogProperties_.backgroundColor.has_value() &&
-        (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled() ||
-            !dialogProperties_.isSysBlurStyle)) {
+    (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+    !DialogView::IsSupportBlurStyle(host, dialogProperties_.isShowInSubWindow) || !dialogProperties_.isSysBlurStyle)) {
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {

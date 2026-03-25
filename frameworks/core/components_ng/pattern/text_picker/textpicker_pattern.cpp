@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
@@ -1735,7 +1736,7 @@ void TextPickerPattern::OnColorConfigurationUpdate()
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            !layoutRenderContext->IsUniRenderEnabled()) {
+            !DialogView::IsSupportBlurStyle(contentRowNode, isShowInSubWindow_)) {
             layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
         }
     }
