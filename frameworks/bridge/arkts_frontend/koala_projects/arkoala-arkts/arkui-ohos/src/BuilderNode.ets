@@ -223,6 +223,7 @@ export class BuilderNode<T = undefined> {
     private nodePtr_: KPointer | undefined;
     constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
         this._JSBuilderNode = new JSBuilderNode<T>(uiContext, nodePtr, frameNodePtr);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
         BuilderNodeFinalizationRegisterProxy.register<T>(this);     
     }
     constructor(uiContext: UIContext, options?: RenderOptions) {
@@ -532,8 +533,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__updateUseParallel = !(this.__frameNode?.isAttached() ?? true);
         this.__params!.value = arg!;
         this.__rootStage?.forceCompleteRerender();
-        this.__manager!.syncChanges();
-        this.__manager!.updateSnapshot();
+        this.__manager?.syncChanges();
+        this.__manager?.updateSnapshot();
         this.__rootStage?.value;
         this.__updateUseParallel = false;
         GlobalStateManager.SetLocalManager(old);
@@ -630,7 +631,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builderProxyNode?.dispose();
         this.__builderProxyNode = undefined;
         this.__builderRootNode = undefined;
-        this.__manager!.reset();
+        this.__manager?.reset();
     }
 
     public dispose(): void {

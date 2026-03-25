@@ -96,12 +96,16 @@ class BuilderNode extends BuilderNodeCommonBase {
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
   public _paramBoxForJsXNode: ParamBox | undefined | null;
-  constructor(uiContext: UIContext, options: RenderOptions, nodePtr?: number, frameNodePtr?: number) {
+  constructor(uiContext: UIContext, options: RenderOptions, jsBuilderNode?: JSBuilderNode) {
     super();
     this._paramBoxForJsXNode = undefined;
     this.updateEngineParams_ = null;
-    const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this), nodePtr, frameNodePtr);
-    this._JSBuilderNode = jsBuilderNode;
+    if (jsBuilderNode == null || jsBuilderNode == undefined) {
+      this._JSBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this));
+    } else {
+      this._JSBuilderNode = jsBuilderNode;
+      this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
     let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
     BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
@@ -148,7 +152,7 @@ class JSBuilderNode extends BaseNode {
   public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
   private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions,
-    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>, nodePtr?: number, frameNodePtr?: number) {
+    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
@@ -161,12 +165,23 @@ class JSBuilderNode extends BaseNode {
     this.__parentViewOfBuildNode = undefined;
     this.host_ = builderNodeRef;
     this.activeCount_ = 1;
-    if (nodePtr !== undefined) {
-      this._nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
-    }
-    if (frameNodePtr !== undefined) {
-      this.frameNode_ = new BuilderRootFrameNode(this.uiContext_, 'BuilderRootFrameNode', frameNodePtr);
-    }
+  }
+  public static createForTrans(uiContext: UIContext, nodePtr: number, frameNodePtr: number): JSBuilderNode {
+    __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
+    let jsBuilderNode = new JSBuilderNode(uiContext, {});
+    let nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
+    let frameNode = new BuilderRootFrameNode(uiContext, 'BuilderRootFrameNode', frameNodePtr); 
+    frameNode.setNodePtr(nativeRef, nativeRef.getNativeHandle());
+    frameNode.setRenderNode(nativeRef);
+    frameNode.setBaseNode(jsBuilderNode);
+    frameNode.setBuilderNode(jsBuilderNode);
+    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(frameNode.getUniqueId(), new WeakRef(frameNode));
+
+    jsBuilderNode._nativeRef = nativeRef;
+    jsBuilderNode.nodePtr_ = nativeRef.getNativeHandle();
+    jsBuilderNode.frameNode_ = frameNode;
+    __JSScopeUtil__.restoreInstanceId();
+    return jsBuilderNode;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {

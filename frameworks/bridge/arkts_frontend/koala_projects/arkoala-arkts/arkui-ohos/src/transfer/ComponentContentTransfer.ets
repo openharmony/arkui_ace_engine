@@ -24,10 +24,14 @@ import { RecordData } from '@ohos.base';
 export class ComponentContentTransfer {
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
+        }
+        let isDisposed = ESValue.wrap(input).invokeMethod('isDisposed').toBoolean();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
         }
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
 
@@ -52,12 +56,16 @@ export class ComponentContentTransfer {
 
     static transferDynamic(input: Object): Any {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
         }
         let componentContentSta = input as ComponentContent;
+        let isDisposed = componentContentSta.isDisposed();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
+        }
         const instanceId = componentContentSta.getInstanceId();
         let uiContext = UIContextTransfer.createDynamic(instanceId);
 
