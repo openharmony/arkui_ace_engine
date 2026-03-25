@@ -26,7 +26,9 @@
 #include "detached_free_root_ani_modifier.h"
 #include "keyboard_avoid_mode_ani_modifier.h"
 #include "drag_ani_modifier.h"
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "drag_controller_ani_modifier.h"
+#endif
 #include "gesture_event_uiobserver_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "image_span_ani_modifier.h"
@@ -74,7 +76,9 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
         .getVisualEffectAniModifier = OHOS::Ace::NG::GetVisualEffectAniModifier,
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
+#endif
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
         .getTextBasedAniModifier = OHOS::Ace::NG::GetTextBasedAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,

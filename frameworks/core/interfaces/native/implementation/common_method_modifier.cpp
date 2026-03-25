@@ -3399,7 +3399,9 @@ void SetOnDigitalCrownImpl(Ark_NativePointer node,
                 .angularVelocity = ArkValue<Ark_Number>(info.GetAngularVelocity()),
                 .degree = ArkValue<Ark_Number>(info.GetDegree()),
                 .action = ArkValue<Ark_CrownAction>(info.GetAction()),
+#ifndef ARKUI_WEARABLE
                 .stopPropagation = stopPropagation.ArkValue(),
+#endif
             };
             callback.Invoke(crownEvent);
         };
