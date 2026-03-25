@@ -38,6 +38,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/subwindow/subwindow_manager.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {

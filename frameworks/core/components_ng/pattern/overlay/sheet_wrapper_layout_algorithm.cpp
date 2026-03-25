@@ -22,9 +22,12 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+using OHOS::Ace::SubwindowManager;
 constexpr int32_t DOUBLE_SIZE = 2;
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;

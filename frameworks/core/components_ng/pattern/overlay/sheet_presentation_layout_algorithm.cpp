@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
