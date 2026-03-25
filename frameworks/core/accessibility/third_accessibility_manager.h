@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
-#include "core/accessibility/native_interface_accessibility_impl.h"
 
 namespace OHOS::Ace {
 class ThirdAccessibilityManager : public AceType {
