@@ -3035,9 +3035,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
             jsEngine->JsSetAceDebugMode();
-            if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
-                jsEngine->JsEnableSwitchInstance();
-            }
         }
     }
 
