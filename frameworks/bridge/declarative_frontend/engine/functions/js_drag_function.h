@@ -80,6 +80,8 @@ public:
     void GetDragInfo(const JSCallbackInfo& args);
     void SetDragBehavior(const JSCallbackInfo& args);
     void GetDragBehavior(const JSCallbackInfo& args);
+    void SetAutoHideComponentUniqueIds(const JSCallbackInfo& args);
+    void GetAutoHideComponentUniqueIds(const JSCallbackInfo& args);
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
     {
         dragEvent_ = dragEvent;

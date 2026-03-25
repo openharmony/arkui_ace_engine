@@ -32719,6 +32719,64 @@ void impl_DragEvent_setUseCustomDropAnimation(Ark_NativePointer thisPtr, Ark_Boo
         GetAccessors()->getDragEventAccessor()->setUseCustomDropAnimation(self, useCustomDropAnimation);
 }
 KOALA_INTEROP_V2(DragEvent_setUseCustomDropAnimation, Ark_NativePointer, Ark_Boolean)
+KInteropReturnBuffer impl_DragEvent_getAutoHideComponentUniqueIds(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getDragEventAccessor()->getAutoHideComponentUniqueIds(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            if (retValueTmpValue.selector == 0) {
+                _retSerializer.writeInt8(0);
+                const auto retValueTmpValueForIdx0 = retValueTmpValue.value0;
+                _retSerializer.writeInt32(retValueTmpValueForIdx0);
+            } else if (retValueTmpValue.selector == 1) {
+                _retSerializer.writeInt8(1);
+                const auto retValueTmpValueForIdx1 = retValueTmpValue.value1;
+                _retSerializer.writeInt32(retValueTmpValueForIdx1.length);
+                for (int retValueTmpValueForIdx1CounterI = 0; retValueTmpValueForIdx1CounterI < retValueTmpValueForIdx1.length; retValueTmpValueForIdx1CounterI++) {
+                    const Ark_Int32 retValueTmpValueForIdx1TmpElement = retValueTmpValueForIdx1.array[retValueTmpValueForIdx1CounterI];
+                    _retSerializer.writeInt32(retValueTmpValueForIdx1TmpElement);
+                }
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(DragEvent_getAutoHideComponentUniqueIds, KInteropReturnBuffer, Ark_NativePointer)
+void impl_DragEvent_setAutoHideComponentUniqueIds(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto autoHideComponentUniqueIdsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_I32_Array_I32 autoHideComponentUniqueIdsValueTempTmpBuf = {};
+        autoHideComponentUniqueIdsValueTempTmpBuf.tag = autoHideComponentUniqueIdsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((autoHideComponentUniqueIdsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 autoHideComponentUniqueIdsValueTempTmpBufOptUnionSelector = thisDeserializer.readInt8();
+            Ark_Union_I32_Array_I32 autoHideComponentUniqueIdsValueTempTmpBufOpt = {};
+            autoHideComponentUniqueIdsValueTempTmpBufOpt.selector = autoHideComponentUniqueIdsValueTempTmpBufOptUnionSelector;
+            if (autoHideComponentUniqueIdsValueTempTmpBufOptUnionSelector == 0) {
+                autoHideComponentUniqueIdsValueTempTmpBufOpt.selector = 0;
+                autoHideComponentUniqueIdsValueTempTmpBufOpt.value0 = thisDeserializer.readInt32();
+            } else if (autoHideComponentUniqueIdsValueTempTmpBufOptUnionSelector == 1) {
+                autoHideComponentUniqueIdsValueTempTmpBufOpt.selector = 1;
+                const Ark_Int32 autoHideComponentUniqueIdsValueTempTmpBufOptBufULength = thisDeserializer.readInt32();
+                Array_I32 autoHideComponentUniqueIdsValueTempTmpBufOptBufU = {};
+                thisDeserializer.resizeArray<std::decay<decltype(autoHideComponentUniqueIdsValueTempTmpBufOptBufU)>::type,
+        std::decay<decltype(*autoHideComponentUniqueIdsValueTempTmpBufOptBufU.array)>::type>(&autoHideComponentUniqueIdsValueTempTmpBufOptBufU, autoHideComponentUniqueIdsValueTempTmpBufOptBufULength);
+                for (int autoHideComponentUniqueIdsValueTempTmpBufOptBufUBufCounterI = 0; autoHideComponentUniqueIdsValueTempTmpBufOptBufUBufCounterI < autoHideComponentUniqueIdsValueTempTmpBufOptBufULength; autoHideComponentUniqueIdsValueTempTmpBufOptBufUBufCounterI++) {
+                    autoHideComponentUniqueIdsValueTempTmpBufOptBufU.array[autoHideComponentUniqueIdsValueTempTmpBufOptBufUBufCounterI] = thisDeserializer.readInt32();
+                }
+                autoHideComponentUniqueIdsValueTempTmpBufOpt.value1 = autoHideComponentUniqueIdsValueTempTmpBufOptBufU;
+            } else {
+                INTEROP_FATAL("One of the branches for autoHideComponentUniqueIdsValueTempTmpBufOpt has to be chosen through deserialisation.");
+            }
+            autoHideComponentUniqueIdsValueTempTmpBuf.value = static_cast<Ark_Union_I32_Array_I32>(autoHideComponentUniqueIdsValueTempTmpBufOpt);
+        }
+        Opt_Union_I32_Array_I32 autoHideComponentUniqueIdsValueTemp = autoHideComponentUniqueIdsValueTempTmpBuf;;
+        GetAccessors()->getDragEventAccessor()->setAutoHideComponentUniqueIds(self, static_cast<Opt_Union_I32_Array_I32*>(&autoHideComponentUniqueIdsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(DragEvent_setAutoHideComponentUniqueIds, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_DragEvent_setGetModifierKeyState(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

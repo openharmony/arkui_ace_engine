@@ -21,6 +21,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -267,6 +268,7 @@ struct ArkUIDragControllerAsync {
     SharedPointerWrapper dataLoadParams;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
+    std::vector<int32_t> autoHideComponentUniqueIds;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     ani_fn_object asyncCallback = nullptr;

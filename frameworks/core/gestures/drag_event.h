@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_EVENT_H
 
+#include <algorithm>
 #include <map>
 #include <string_view>
 
@@ -265,6 +266,22 @@ public:
         return dragBehavior_;
     }
 
+    void SetAutoHideComponentUniqueIds(const std::vector<int32_t>& autoHideComponentUniqueIds)
+    {
+        autoHideComponentUniqueIds_.clear();
+        for (auto uniqueId : autoHideComponentUniqueIds) {
+            if (std::find(autoHideComponentUniqueIds_.begin(), autoHideComponentUniqueIds_.end(), uniqueId) ==
+                autoHideComponentUniqueIds_.end()) {
+                autoHideComponentUniqueIds_.emplace_back(uniqueId);
+            }
+        }
+    }
+
+    const std::vector<int32_t>& GetAutoHideComponentUniqueIds() const
+    {
+        return autoHideComponentUniqueIds_;
+    }
+
     void SetUdKey(const std::string& udKey)
     {
         udKey_ = udKey;
@@ -461,6 +478,7 @@ private:
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
     DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
+    std::vector<int32_t> autoHideComponentUniqueIds_;
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;

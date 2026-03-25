@@ -267,6 +267,43 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
+Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
+{
+    auto invalid = ArkUnion<Opt_Union_I32_Array_I32>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->dragInfo, invalid);
+    const auto& uniqueIds = peer->dragInfo->GetAutoHideComponentUniqueIds();
+    if (uniqueIds.empty()) {
+        return invalid;
+    }
+    if (uniqueIds.size() == 1) {
+        return ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(uniqueIds.front());
+    }
+    return ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(uniqueIds, FC);
+}
+void SetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer,
+                                       const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);
+    std::vector<int32_t> uniqueIds;
+    auto autoHideComponentUniqueIdsOpt = GetOptPtr(autoHideComponentUniqueIds);
+    if (autoHideComponentUniqueIdsOpt) {
+        switch (autoHideComponentUniqueIdsOpt->selector) {
+            case SELECTOR_ID_0:
+                uniqueIds.emplace_back(Convert<int32_t>(autoHideComponentUniqueIdsOpt->value0));
+                break;
+            case SELECTOR_ID_1:
+                uniqueIds = Convert<std::vector<int32_t>>(autoHideComponentUniqueIdsOpt->value1);
+                break;
+            default:
+                LOGE("Unexpected selector in autoHideComponentUniqueIds: %{public}d",
+                    autoHideComponentUniqueIdsOpt->selector);
+                return;
+        }
+    }
+    peer->dragInfo->SetAutoHideComponentUniqueIds(uniqueIds);
+}
 void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
                                 const Opt_ModifierKeyStateGetter* getModifierKeyState)
 {
@@ -301,6 +338,8 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,
         DragEventAccessor::SetUseCustomDropAnimationImpl,
+        DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
+        DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
         DragEventAccessor::SetGetModifierKeyStateImpl,
     };
     return &DragEventAccessorImpl;

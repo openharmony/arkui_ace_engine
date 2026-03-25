@@ -28603,6 +28603,9 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Boolean (*getUseCustomDropAnimation)(Ark_DragEvent peer);
     void (*setUseCustomDropAnimation)(Ark_DragEvent peer,
                                       Ark_Boolean useCustomDropAnimation);
+    Opt_Union_I32_Array_I32 (*getAutoHideComponentUniqueIds)(Ark_DragEvent peer);
+    void (*setAutoHideComponentUniqueIds)(Ark_DragEvent peer,
+                                          const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds);
     void (*setGetModifierKeyState)(Ark_DragEvent peer,
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
 } GENERATED_ArkUIDragEventAccessor;
@@ -32064,4 +32067,3 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
-
