@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

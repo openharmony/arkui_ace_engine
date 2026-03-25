@@ -19,6 +19,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/dump_log.h"
 #include "core/common/transform/input_compatible_manager.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/event_info_convertor.h"
 
 namespace OHOS::Ace::Platform {

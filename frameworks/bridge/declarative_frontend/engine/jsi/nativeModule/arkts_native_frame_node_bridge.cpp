@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/event/focus_axis_event.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"

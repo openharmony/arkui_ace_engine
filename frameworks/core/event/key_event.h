@@ -19,11 +19,14 @@
 #include <map>
 
 #include "core/event/ace_events.h"
-#include "core/event/focus_axis_event.h"
 #include "core/event/non_pointer_event.h"
 
 namespace OHOS::MMI {
 class KeyEvent;
+}
+
+namespace OHOS::Ace::NG {
+class FocusAxisEventInfo;
 }
 
 namespace OHOS::Ace {

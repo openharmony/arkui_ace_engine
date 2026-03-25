@@ -53,6 +53,7 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
+#include "core/event/focus_axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
