@@ -182,9 +182,14 @@ class DragController {
 
     createDragAction(customs, dragInfo) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let dragAction = this.ohos_dragController.createDragAction(customs, dragInfo);
-        __JSScopeUtil__.restoreInstanceId();
-        return dragAction;
+        try {
+            let dragAction = this.ohos_dragController.createDragAction(customs, dragInfo);
+            __JSScopeUtil__.restoreInstanceId();
+            return dragAction;
+        } catch (e) {
+            __JSScopeUtil__.restoreInstanceId();
+            throw e;
+        }
     }
 
     getDragPreview() {
