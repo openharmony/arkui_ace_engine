@@ -1981,6 +1981,10 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternOnInjectionEventTest007, TestSize.
     std::string invalidCommand = "not valid json";
     int32_t result = pattern->OnInjectionEvent(invalidCommand);
     EXPECT_EQ(result, RET_FAILED);
+
+    pattern->SetIsShowInDialog(true);
+    result = pattern->OnInjectionEvent(invalidCommand);
+    EXPECT_EQ(result, RET_FAILED);
 }
 
 /**
@@ -2225,6 +2229,42 @@ HWTEST_F(DatePickerTestFour, OnDialogDateInjection001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnDialogDateInjection002
+ * @tc.desc: Test OnDialogDateInjection Function with pickerProperty null and success path
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, OnDialogDateInjection002, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    std::string validCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    int32_t result = datePickerPattern->OnDialogDateInjection(validCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIsShowInDialog(true);
+    pattern->SetStartDate(PickerDate(2020, 1, 1));
+    pattern->SetEndDate(PickerDate(2030, 12, 31));
+    pattern->OnModifyDone();
+
+    std::string successCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    result = pattern->OnDialogDateInjection(successCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
+
+/**
  * @tc.name: SetDatePickerDialogTime001
  * @tc.desc: Test SetDatePickerDialogTime Function
  * @tc.type: FUNC
@@ -2400,6 +2440,43 @@ HWTEST_F(DatePickerTestFour, CheckDialogParamValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckDialogParamValue002
+ * @tc.desc: Test CheckDialogParamValue Function with non-number params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, CheckDialogParamValue002, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    std::string notNumberYearCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",") +
+        "\"params\":{\"year\":\"2026\",\"month\":3,\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    auto json = JsonUtil::ParseJsonString(notNumberYearCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    bool result = datePickerPattern->CheckDialogParamValue(paramJson, notNumberYearCommand);
+    EXPECT_FALSE(result);
+
+    std::string notNumberMonthCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":\"3\",\"day\":19,\"hour\":10,\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(notNumberMonthCommand);
+    paramJson = json->GetValue("params");
+    result = datePickerPattern->CheckDialogParamValue(paramJson, notNumberMonthCommand);
+    EXPECT_FALSE(result);
+
+    std::string notNumberHourCommand = std::string("{\"cmd\":\"setDatePickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":19,\"hour\":\"10\",\"minute\":30,\"second\":0}}";
+    json = JsonUtil::ParseJsonString(notNumberHourCommand);
+    paramJson = json->GetValue("params");
+    result = datePickerPattern->CheckDialogParamValue(paramJson, notNumberHourCommand);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: CheckDialogParamDataValid001
  * @tc.desc: Test CheckDialogParamDataValid Function
  * @tc.type: FUNC
@@ -2486,6 +2563,50 @@ HWTEST_F(DatePickerTestFour, ReportDialogDateChangeEvent001, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     auto ret = datePickerPattern->ReportDateChangeEvent("DatePickerDialog", "onDateChange", "");
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReportDialogDateChangeEvent002
+ * @tc.desc: Test ReportDialogDateChangeEvent Function with valid and invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, ReportDialogDateChangeEvent002, TestSize.Level1)
+{
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    ASSERT_NE(datePickerNode, nullptr);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    int32_t nodeId = datePickerNode->GetId();
+
+    std::string invalidJson = "invalid json";
+    bool result = datePickerPattern->ReportDialogDateChangeEvent(
+        nodeId, "DatePickerDialog", "onDateChange", invalidJson);
+    EXPECT_FALSE(result);
+
+    std::string missingFields = "{\"year\":2026,\"month\":3,\"day\":19}";
+    result = datePickerPattern->ReportDialogDateChangeEvent(
+        nodeId, "DatePickerDialog", "onDateChange", missingFields);
+    EXPECT_FALSE(result);
+
+    std::string missingHour = std::string("{\"year\":2026,\"month\":3,\"day\":19,") +
+        "\"minute\":30,\"second\":0}";
+    result = datePickerPattern->ReportDialogDateChangeEvent(
+        nodeId, "DatePickerDialog", "onDateChange", missingHour);
+    EXPECT_FALSE(result);
+
+    std::string missingMinute = std::string("{\"year\":2026,\"month\":3,\"day\":19,") +
+        "\"hour\":10,\"second\":0}";
+    result = datePickerPattern->ReportDialogDateChangeEvent(
+        nodeId, "DatePickerDialog", "onDateChange", missingMinute);
+    EXPECT_FALSE(result);
+
+    std::string validData = std::string("{\"year\":2026,\"month\":3,\"day\":19,") +
+        "\"hour\":10,\"minute\":30,\"second\":0}";
+    result = datePickerPattern->ReportDialogDateChangeEvent(
+        nodeId, "DatePickerDialog", "onDateChange", validData);
+    EXPECT_TRUE(result);
 }
 
 } // namespace OHOS::Ace::NG

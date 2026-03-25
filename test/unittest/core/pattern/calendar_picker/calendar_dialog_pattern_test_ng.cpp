@@ -1794,6 +1794,79 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest037, TestSize.Lev
 }
 
 /**
+ * @tc.name: CalendarDialogPatternTest038
+ * @tc.desc: Test CheckCalendarParamDate Function with invalid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest038, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string invalidJsonCommand = "invalid json";
+    auto json = JsonUtil::ParseJsonString(invalidJsonCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    bool checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidJsonCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string missingParamsCommand = "{\"cmd\":\"setCalendarPickerDialogTime\"}";
+    json = JsonUtil::ParseJsonString(missingParamsCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingParamsCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string notNumberCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":\"2026\",\"month\":\"3\",\"day\":\"19\"}}";
+    json = JsonUtil::ParseJsonString(notNumberCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, notNumberCommand);
+    EXPECT_FALSE(checkResult);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest039
+ * @tc.desc: OnInjectionEvent injection month error Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest039, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string errorParamCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":13,\"day\":19}}";
+    int32_t result = dialogPattern->OnInjectionEvent(errorParamCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest0050
  * @tc.desc: Show Function Test
  * @tc.type: FUNC
