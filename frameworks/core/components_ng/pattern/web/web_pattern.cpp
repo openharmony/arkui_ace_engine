@@ -4453,6 +4453,25 @@ void WebPattern::OnColorConfigurationUpdate()
     }
 }
 
+void WebPattern::OnLanguageConfigurationUpdate()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+}
+
+void WebPattern::OnDirectionConfigurationUpdate()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+}
+
+void WebPattern::OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy)
+{
+    scrollbarLayoutPolicy_ = layoutPolicy;
+}
+
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -4649,6 +4668,7 @@ void WebPattern::OnModifyDone()
         OnBackToTopUpdate(backToTop_);
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
         delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+        UpdateScrollbarLayout();
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4701,6 +4721,7 @@ void WebPattern::OnModifyDone()
     CheckAndSetWebNestedScrollExisted();
     UpdateScrollBarWithBorderRadius();
     delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+    UpdateScrollbarLayout();
 }
 
 void WebPattern::SetSurfaceDensity(double density)
@@ -7505,6 +7526,15 @@ void WebPattern::OnActive()
     UpdateScrollBarWithBorderRadius();
     SetActiveStatusInner(true);
     delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+    UpdateScrollbarLayout();
+}
+
+void WebPattern::UpdateScrollbarLayout()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+    delegate_->SetScrollbarLayoutPolicy(scrollbarLayoutPolicy_);
 }
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)

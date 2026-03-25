@@ -2236,6 +2236,8 @@ struct CJUIWebModifier {
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
     void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDrag)(ArkUINodeHandle node);
+    void (*setScrollbarLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

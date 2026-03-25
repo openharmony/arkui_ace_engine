@@ -49,6 +49,7 @@ constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU = true;
 constexpr bool DEFAULT_DRAG_ENABLED = true;
+constexpr ScrollbarLayoutPolicy DEFAULT_SCROLLBAR_LAYOUT_POLICY = ScrollbarLayoutPolicy::CONTENT;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
@@ -2598,6 +2599,20 @@ void ResetBackToTop(ArkUINodeHandle node)
     WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
 }
 
+void SetScrollbarLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, static_cast<ScrollbarLayoutPolicy>(value));
+}
+
+void ResetScrollbarLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, DEFAULT_SCROLLBAR_LAYOUT_POLICY);
+}
+
 void SetOnCameraCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2908,6 +2923,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableWebAVSession = ResetEnableWebAVSession,
         .setEnableDrag = SetEnableDrag,
         .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3163,6 +3180,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableWebAVSession = ResetEnableWebAVSession,
         .setEnableDrag = SetEnableDrag,
         .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

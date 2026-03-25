@@ -2500,6 +2500,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
     JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
     JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
+    JSClass<JSWeb>::StaticMethod("scrollbarLayoutPolicy", &JSWeb::ScrollbarLayoutPolicy);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -7818,6 +7819,15 @@ void JSWeb::EnableDrag(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableDrag(isEnabled);
+}
+
+void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
+    WebModel::GetInstance()->SetScrollbarLayoutPolicy(layoutPolicy);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

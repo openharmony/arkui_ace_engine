@@ -3322,4 +3322,28 @@ HWTEST_F(WebModelStaticTest, SetMicrophoneCaptureStateChangedId001, TestSize.Lev
     EXPECT_TRUE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetScrollbarLayoutPolicy001
+ * @tc.desc: Test web_model_static.cpp SetScrollbarLayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetScrollbarLayoutPolicy001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::CONTENT);
+
+    WebModelStatic::SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::SYSTEM);
+#endif
+}
 } // namespace OHOS::Ace::NG

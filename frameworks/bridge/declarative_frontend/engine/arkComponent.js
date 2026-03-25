@@ -25582,6 +25582,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
     return this;
   }
+  scrollbarLayoutPolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -27363,6 +27367,20 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey {
   }
 }
 WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+WebScrollbarLayoutPolicyModifier.identity = Symbol('webScrollbarLayoutPolicyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

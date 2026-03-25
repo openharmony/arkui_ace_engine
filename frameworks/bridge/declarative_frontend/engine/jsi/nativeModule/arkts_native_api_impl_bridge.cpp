@@ -4639,6 +4639,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDrag));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDrag"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableDrag));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollbarLayoutPolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetScrollbarLayoutPolicy));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollbarLayoutPolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetScrollbarLayoutPolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

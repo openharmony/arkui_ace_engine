@@ -6525,6 +6525,14 @@ typedef struct Opt_ScrollBarDirection {
     Ark_Tag tag;
     Ark_ScrollBarDirection value;
 } Opt_ScrollBarDirection;
+typedef enum Ark_ScrollbarLayoutPolicy {
+    ARK_SCROLLBAR_LAYOUT_POLICY_CONTENT = 0,
+    ARK_SCROLLBAR_LAYOUT_POLICY_SYSTEM = 1,
+} Ark_ScrollbarLayoutPolicy;
+typedef struct Opt_ScrollbarLayoutPolicy {
+    Ark_Tag tag;
+    Ark_ScrollbarLayoutPolicy value;
+} Opt_ScrollbarLayoutPolicy;
 typedef enum Ark_ScrollDirection {
     ARK_SCROLL_DIRECTION_VERTICAL = 0,
     ARK_SCROLL_DIRECTION_HORIZONTAL = 1,
@@ -27503,6 +27511,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                         const Opt_Boolean* value);
     void (*setEnableDrag)(Ark_NativePointer node,
                           const Opt_Boolean* value);
+    void (*setScrollbarLayoutPolicy)(Ark_NativePointer node,
+                                     const Opt_ScrollbarLayoutPolicy* value);
     void (*setAiSessionOptions)(Ark_NativePointer node,
                                 const Opt_Array_AISessionEvent* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,

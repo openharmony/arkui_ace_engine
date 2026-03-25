@@ -1706,4 +1706,13 @@ void WebModelStatic::SetAISessionOptions(
     webPatternStatic->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));
 }
+
+void WebModelStatic::SetScrollbarLayoutPolicy(
+    FrameNode* frameNode, ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateScrollbarLayoutPolicy(policy);
+}
 } // namespace OHOS::Ace::NG
