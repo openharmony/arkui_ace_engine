@@ -233,6 +233,9 @@ public:
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
+    virtual void BindPreviewMenu(NG::TextSpanType& spanType, std::function<void()>& buildFunc,
+        NG::SelectMenuParam& menuParam) {};
+    virtual void UnBindPreviewMenu() {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
     virtual RefPtr<TextControllerBase> GetTextController()
     {

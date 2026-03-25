@@ -883,6 +883,27 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     }
 }
 
+void TextModelNG::BindPreviewMenu(TextSpanType& spanType, std::function<void()>& buildFunc,
+    SelectMenuParam& menuParam)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindPreviewMenu(spanType, buildFunc, menuParam);
+    }
+}
+
+void TextModelNG::UnBindPreviewMenu()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->UnBindPreviewMenu();
+    }
+}
+
 void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {

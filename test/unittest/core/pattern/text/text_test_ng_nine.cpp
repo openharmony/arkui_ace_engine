@@ -1408,6 +1408,43 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BindPreviewMenu001
+ * @tc.desc: test BindPreviewMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
+}
+
+/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC

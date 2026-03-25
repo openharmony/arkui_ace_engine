@@ -57,6 +57,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -4296,6 +4297,11 @@ std::unique_ptr<JsonValue> TextPattern::GetShaderStyleInJson() const
     return resultJson;
 }
 
+void TextPattern::FillPreviewMenuInJsonOneStep(const std::unique_ptr<JsonValue>& jsonValue) const
+{
+    IF_PRESENT(oneStepDragController_, FillJsonValue(jsonValue));
+}
+
 std::string TextPattern::GetBindSelectionMenuInJson() const
 {
     auto jsonArray = JsonUtil::CreateArray(true);
@@ -4307,7 +4313,11 @@ std::string TextPattern::GetBindSelectionMenuInJson() const
         jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
         jsonArray->Put(jsonItem);
     }
-    FillPreviewMenuInJson(jsonArray);
+    if (oneStepDragController_) {
+        FillPreviewMenuInJsonOneStep(jsonArray);
+    } else {
+        FillPreviewMenuInJson(jsonArray);
+    }
     return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
@@ -4506,6 +4516,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
+    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
     ProcessOverlayAfterLayout();
     return true;
 }
@@ -4866,6 +4877,7 @@ void TextPattern::UpdateContainerChildren(const RefPtr<UINode>& parentNode, cons
         if (parent->GetTextBackgroundStyle().has_value()) {
             imageLayoutProperty->UpdatePlaceHolderStyle(parent->GetTextBackgroundStyle().value());
         }
+        IF_PRESENT(oneStepDragController_, MarkDirtyNode(WeakClaim((ImageSpanNode*) RawPtr(imageNode))));
     }
 }
 
@@ -5075,9 +5087,11 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
         }
+        HandleImageDrag(imageSpanNode);
         imageSpanItem->UpdatePlaceholderBackgroundStyle(imageSpanNode);
         spans_.emplace_back(imageSpanItem);
         spans_.back()->nodeId_ = imageSpanNode->GetId();
+        IF_PRESENT(oneStepDragController_, MarkDirtyNode(WeakClaim((ImageSpanNode*) RawPtr(imageSpanNode))));
         return;
     }
     auto imageNode = DynamicCast<FrameNode>(child);
@@ -6105,6 +6119,24 @@ void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType resp
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void TextPattern::BindPreviewMenu(TextSpanType spanType, std::function<void()>& menuBuilder,
+    const SelectMenuParam& menuParam)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT, "BindPreviewMenu, spanType=%{public}d, builder=%{public}d",
+        spanType, !!menuBuilder);
+    if (!oneStepDragController_) {
+        oneStepDragController_ = std::make_unique<OneStepDragController>(WeakClaim(this));
+    }
+    oneStepDragController_->SetMenuParam(spanType, menuBuilder, menuParam);
+}
+
+void TextPattern::UnBindPreviewMenu()
+{
+    if (oneStepDragController_) {
+        oneStepDragController_->SetMenuParam(TextSpanType::IMAGE, nullptr, {});
+    }
+}
+
 void TextPattern::CloseSelectionMenu()
 {
     textResponseType_ = TextResponseType::NONE;
@@ -6520,6 +6552,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageLayoutProperty->UpdateImageSourceInfo(ParagraphUtil::CreateImageSourceInfo(options));
     imageNode->MountToParent(host, host->GetChildren().size());
     SetImageNodeGesture(imageNode);
+    HandleImageDrag(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
         SetImageNodePattern(imageNode, imgAttr);
@@ -6552,11 +6585,31 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
             paintProperty->ResetColorFilter();
         }
     }
+    IF_PRESENT(oneStepDragController_, MarkDirtyNode(WeakClaim((ImageSpanNode*) RawPtr(imageNode))));
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode)
+{
+    if (oneStepDragController_) {
+        CHECK_NULL_VOID(imageNode);
+        DisableDrag(imageNode);
+        IF_PRESENT(oneStepDragController_, EnableOneStepDrag(TextSpanType::IMAGE, imageNode));
+    }
+}
+
+void TextPattern::DisableDrag(const RefPtr<ImageSpanNode>& imageNode)
+{
+    // Disable the image itself event
+    imageNode->SetDraggable(false);
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->InitDragDropEvent();
+    gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 }
 
 void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)

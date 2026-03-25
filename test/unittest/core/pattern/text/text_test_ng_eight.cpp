@@ -154,6 +154,48 @@ HWTEST_F(TextTestNgEight, ToJsonValue007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreviewMenuToJsonValue001
+ * @tc.desc: Test textPattern ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEight, PreviewMenuToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto json = JsonUtil::Create(true);
+    /**
+     * @tc.steps: step2. Do BindPreviewMenu.
+     */
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->ToJsonValue(json, filter);
+    std::string bindSelectionMenuStr = json->GetValue("bindSelectionMenu")->GetString();
+    EXPECT_FALSE(bindSelectionMenuStr.empty());
+    EXPECT_EQ(bindSelectionMenuStr, "[{\"spanType\":1,\"responseType\":1,\"menuType\":1}]");
+}
+
+/**
  * @tc.name: TextDragOverlayModifierTestNG001
  * @tc.desc: test text_drag_overlay_modifier.cpp onDraw(DrawingContext& context) function
  * @tc.type: FUNC

@@ -68,6 +68,7 @@ constexpr int32_t MAX_SIZE_OF_LOG = 2000;
 
 class InspectorFilter;
 class PreviewMenuController;
+class OneStepDragController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
@@ -584,6 +585,16 @@ public:
 
     void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType, std::function<void()>& menuBuilder,
         const SelectMenuParam& menuParam);
+
+    void BindPreviewMenu(TextSpanType spanType, std::function<void()>& menuBuilder, const SelectMenuParam& menuParam);
+
+    void UnBindPreviewMenu();
+
+    void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
+
+    void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
+    
+    void FillPreviewMenuInJsonOneStep(const std::unique_ptr<JsonValue>& jsonValue) const;
 
     void SetTextController(const RefPtr<TextController>& controller)
     {
@@ -1400,6 +1411,9 @@ private:
 
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
+
+    friend class OneStepDragController;
+    std::unique_ptr<OneStepDragController> oneStepDragController_;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

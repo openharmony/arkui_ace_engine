@@ -92,6 +92,9 @@ public:
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
+    void BindPreviewMenu(TextSpanType& spanType, std::function<void()>& buildFunc,
+        SelectMenuParam& menuParam) override;
+    void UnBindPreviewMenu() override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge(bool clip) override;
