@@ -158,6 +158,7 @@ private:
 
     void ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
     std::map<std::string, HtmlToSpan::StyleValue> ToTextSpanStyle(xmlAttrPtr curNode);
+    void AddHeadingStyleSpan(const std::string& element, SpanInfo& info);
     void AddStyleSpan(const std::string& element, SpanInfo& info);
     void ToTextSpan(const std::string& element, xmlNodePtr node, size_t len,
         size_t& pos, std::vector<SpanInfo>& spanInfos);
@@ -192,6 +193,7 @@ private:
     std::string GetHtmlContent(xmlNodePtr node);
     RefPtr<MutableSpanString> GenerateSpans(const std::string& allContent, const std::vector<SpanInfo>& spanInfos);
     std::vector<SpanInfo> spanInfos_;
+    int32_t smallDepth_ = 0;
     static constexpr double PT_TO_PX = 1.3;
     static constexpr double ROUND_TO_INT = 0.5;
 };

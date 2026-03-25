@@ -236,6 +236,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
 
     TextDecoration GetTextDecorationFirst() const
     {
