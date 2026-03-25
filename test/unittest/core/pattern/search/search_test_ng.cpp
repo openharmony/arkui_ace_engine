@@ -1045,6 +1045,27 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCancelButtonStyle002
+ * @tc.desc: Set cancel button style
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetCancelButtonStyle002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::CONSTANT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
+}
+
+
+/**
  * @tc.name: SetCancelImageIcon001
  * @tc.desc: Set cancel image icon
  * @tc.type: FUNC
