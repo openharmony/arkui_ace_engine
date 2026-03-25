@@ -19,7 +19,7 @@ import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-export const enum AreaMode {
+export enum AreaMode {
     EL1 = 0,
     EL2 = 1,
     EL3 = 2,
