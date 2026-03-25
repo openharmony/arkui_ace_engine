@@ -2628,6 +2628,28 @@ export class FrameNodeExtender {
         FrameNodeExtender.applyAttributesFinish_serialize(peer_casted)
         return
     }
+    public static createFrameNodes(count: int32): Array<KPointer> {
+        const count_casted = count as (int32)
+        return FrameNodeExtender.createFrameNodes_serialize(count_casted)
+    }
+    public static getRenderNodesByFrameNodes(ptrs: Array<KPointer>): Array<KPointer> {
+        const ptrs_casted = ptrs as (Array<KPointer>)
+        return FrameNodeExtender.getRenderNodesByFrameNodes_serialize(ptrs_casted)
+    }
+    public static getIdsByFrameNodes(ptrs: Array<KPointer>): Array<int32> {
+        const ptrs_casted = ptrs as (Array<KPointer>)
+        return FrameNodeExtender.getIdsByFrameNodes_serialize(ptrs_casted)
+    }
+    public static getFrameNodeById(peer: FrameNode, id: string): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const id_casted = id as (string)
+        return FrameNodeExtender.getFrameNodeById1_serialize(peer_casted, id_casted)
+    }
+    public static getFrameNodeByUniqueId(peer: FrameNode, id: int32): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const id_casted = id as (int32)
+        return FrameNodeExtender.getFrameNodeByUniqueId1_serialize(peer_casted, id_casted)
+    }
     private static constructorFrameNode_serialize(supportMultiThread: boolean): KPointer {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode(supportMultiThread ? true : false)
         return retval
@@ -3020,6 +3042,61 @@ export class FrameNodeExtender {
     }
     private static applyAttributesFinish_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_applyAttributesFinish(extractors.toFrameNodePtr(peer))
+    }
+    private static createFrameNodes_serialize(count: int32): Array<KPointer> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createFrameNodes(count)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<KPointer> = new Array<KPointer>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readPointer()
+        }
+        const returnResult : Array<KPointer> = buffer
+        return returnResult
+    }
+    private static getRenderNodesByFrameNodes_serialize(ptrs: Array<KPointer>): Array<KPointer> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((ptrs.length).toInt())
+        for (let ptrsCounterI = 0; ptrsCounterI < ptrs.length; ptrsCounterI++) {
+            const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
+            thisSerializer.writePointer(ptrsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodesByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<KPointer> = new Array<KPointer>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readPointer()
+        }
+        const returnResult : Array<KPointer> = buffer
+        return returnResult
+    }
+    private static getIdsByFrameNodes_serialize(ptrs: Array<KPointer>): Array<int32> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((ptrs.length).toInt())
+        for (let ptrsCounterI = 0; ptrsCounterI < ptrs.length; ptrsCounterI++) {
+            const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
+            thisSerializer.writePointer(ptrsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdsByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<int32> = new Array<int32>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readInt32()
+        }
+        const returnResult : Array<int32> = buffer
+        return returnResult
+    }
+    static getFrameNodeById1_serialize(peer: FrameNode, id: string): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById1(extractors.toFrameNodePtr(peer), id)
+        return retval
+    }
+    private static getFrameNodeByUniqueId1_serialize(peer: FrameNode, id: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId1(extractors.toFrameNodePtr(peer), id)
+        return retval
     }
 }
 export class GaugeExtender {
