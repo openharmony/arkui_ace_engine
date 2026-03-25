@@ -40,6 +40,8 @@ public:
 
     void SetIsDelayed(bool isDelayed);
 
+    WeakPtr<WebPattern> GetWebPattern();
+
 private:
     bool isReg_ = false;
     bool isDelayed_ = false;

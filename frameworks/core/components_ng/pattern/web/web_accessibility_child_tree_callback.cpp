@@ -85,4 +85,9 @@ void WebAccessibilityChildTreeCallback::SetIsDelayed(bool isDelayed)
 {
     isDelayed_ = isDelayed;
 }
+
+WeakPtr<WebPattern> WebAccessibilityChildTreeCallback::GetWebPattern()
+{
+    return weakPattern_;
+}
 } // namespace OHOS::Ace::NG

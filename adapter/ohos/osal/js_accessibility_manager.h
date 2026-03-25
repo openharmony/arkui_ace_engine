@@ -54,6 +54,20 @@ struct SearchParameter {
     int64_t uiExtensionOffset;
 };
 
+enum WebAccFun {
+    WEB_ACC_INVALID,
+    WEB_GET_ACC,
+    WEB_ON_ACC,
+    WEB_OFF_ACC,
+    WEB_TREE,
+    WEB_NODE,
+    WEB_PRE,
+    WEB_NEXT,
+    WEB_EXE_ACTION,
+    WEB_SEND_EVENT,
+    WEB_HOVER
+};
+
 using CheckAndGetEmbedFunc = std::function<int64_t(const RefPtr<NG::FrameNode>& node)>;
 struct CommonProperty {
     int32_t innerWindowId = -1;
@@ -323,6 +337,18 @@ public:
         const WeakPtr<NG::WebPattern>& webPattern) override;
     void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
         AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
+    int64_t ConvertToSplitElementId(int64_t elementId);
+    bool DumpElementInfosIfNeed(const DumpInfoArgument& argument, std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::WebPattern>& webPattern, uint32_t windowId);
+    void ExecuteWebDump(const DumpInfoArgument& argument, std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::WebPattern>& webPattern);
+    void ChooseWebDumpEvent(DumpInfoArgument& argument, uint32_t windowId);
+    bool DumpWebInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument);
+    void ExecuteWebAccStateDump(WebAccFun fun, const RefPtr<NG::WebPattern>& webPattern);
+    void ExecuteWebInfoDump(WebAccFun fun, std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::WebPattern>& webPattern);
+    void ExecuteWebActionDump(WebAccFun fun, const DumpInfoArgument& argument, int64_t elementId,
+        const RefPtr<NG::WebPattern>& webPattern);
 #endif //WEB_SUPPORTED
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
