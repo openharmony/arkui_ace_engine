@@ -223,10 +223,10 @@ HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level0)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     HoverInfo hoverInfo;
-    richEditorPattern->OnHover(true, hoverInfo);
+    richEditorPattern->OnHover(true);
     auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
     EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), id);
-    richEditorPattern->OnHover(false, hoverInfo);
+    richEditorPattern->OnHover(false);
     EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 

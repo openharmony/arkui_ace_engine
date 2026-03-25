@@ -51,7 +51,6 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -93,6 +92,7 @@ class LoadCompleteManager;
 class PageInfo;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
+class SelectOverlayManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,

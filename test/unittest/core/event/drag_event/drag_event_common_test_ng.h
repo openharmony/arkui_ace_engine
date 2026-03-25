@@ -41,7 +41,6 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {

@@ -14,6 +14,8 @@
  */
 
 #include "core/components/common/properties/text_style.h"
+
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "ui/base/utils/utils.h"
 

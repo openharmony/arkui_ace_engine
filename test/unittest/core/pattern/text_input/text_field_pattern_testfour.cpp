@@ -1655,7 +1655,7 @@ HWTEST_F(TextFieldPatternTestFour, UpdateHandlesOffsetOnScrollTest001, TestSize.
      * @tc.expected: Should update caret offset based on scroll offset
      */
     float offset = 50.0f;
-    pattern->UpdateHandlesOffsetOnScroll(offset);
+    pattern->UpdateHandlesOffsetOnScroll(offset, true);
     
     /**
      * @tc.steps: step3. Verify pattern is still valid after operation
@@ -1692,7 +1692,7 @@ HWTEST_F(TextFieldPatternTestFour, UpdateHandlesOffsetOnScrollTest002, TestSize.
      * @tc.expected: Should update all handles offset
      */
     float offset = -30.0f;
-    pattern_->UpdateHandlesOffsetOnScroll(offset);
+    pattern_->UpdateHandlesOffsetOnScroll(offset, false);
     
     /**
      * @tc.steps: step4. Verify handles info was maintained
@@ -1724,7 +1724,7 @@ HWTEST_F(TextFieldPatternTestFour, UpdateHandlesOffsetOnScrollTest003, TestSize.
      * @tc.expected: Should handle negative scroll offset correctly
      */
     float offset = -100.0f;
-    pattern->UpdateHandlesOffsetOnScroll(offset);
+    pattern->UpdateHandlesOffsetOnScroll(offset, true);
     
     /**
      * @tc.steps: step3. Verify operation completed without error

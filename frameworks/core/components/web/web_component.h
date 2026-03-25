@@ -34,6 +34,7 @@
 #include "core/event/key_event.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 

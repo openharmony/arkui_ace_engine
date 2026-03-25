@@ -20,6 +20,7 @@
 #include "base/log/dump_log.h"
 #include "core/interfaces/native/node/node_utils.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "test/mock/core/common/mock_container.h"

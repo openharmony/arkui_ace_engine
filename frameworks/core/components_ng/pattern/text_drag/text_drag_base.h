@@ -20,6 +20,10 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/paragraph.h"
 
+namespace OHOS::Ace::NG {
+enum class AIResetSelectionReason : int;
+} // namespace OHOS::Ace::NG
+
 constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;
 constexpr uint32_t DRAGGED_TEXT_TRANSPARENCY = 0x40;
 

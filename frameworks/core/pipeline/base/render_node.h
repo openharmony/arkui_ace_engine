@@ -32,6 +32,7 @@
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_style.h"

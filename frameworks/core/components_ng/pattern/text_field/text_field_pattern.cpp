@@ -21,13 +21,11 @@
 #include <atomic>
 #include <cstdint>
 #include <optional>
-#include <ratio>
 #include <regex>
 #include <string>
 #include <utility>
 #include "base/geometry/dimension.h"
 #include "base/log/event_report.h"
-#include "base/memory/type_info_base.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
@@ -35,7 +33,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -50,7 +47,6 @@
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_connection.h"
 #include "core/common/ime/text_input_formatter.h"

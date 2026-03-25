@@ -835,7 +835,7 @@ HWTEST_F(TextFieldPatternTesteleven, IsReachedBoundary001, TestSize.Level1)
 
     textFieldPattern->textRect_ = RectF(0, 0, 100, 100);
     textFieldPattern->contentRect_ = RectF(0, 0, 50, 100);
-    auto result = textFieldPattern->IsReachedBoundary(-10.0f);
+    auto result = textFieldPattern->IsReachedBoundary(-10.0f, Axis::VERTICAL);
     EXPECT_TRUE(result);
 }
 
