@@ -176,7 +176,6 @@ public:
     {
         return { FocusType::NODE, false };
     }
-
     void DumpAdvanceInfo() override;
 
     void DumpInfo() override;
@@ -509,6 +508,7 @@ public:
     ACE_FORCE_EXPORT OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
+    bool ParseCommand(const std::string& command);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -1023,6 +1023,7 @@ public:
     {
         return isMeasured_;
     }
+    ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1222,6 +1223,9 @@ protected:
     bool IsSupportAskCelia();
 
 private:
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+        const std::string& value, int32_t start, int32_t end);
+    bool ReportCommandResult(int32_t nodeId, const std::string& event);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
@@ -1255,6 +1259,8 @@ private:
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
+    void ProcessSelectionOnMouseRelease(int32_t start, int32_t end, const RefPtr<FrameNode>& host,
+        const MouseInfo& info);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItemEvent(bool& isSpanHasClick, bool& isSpanHasLongPress);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);

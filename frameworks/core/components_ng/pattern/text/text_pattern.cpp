@@ -1418,6 +1418,77 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+bool TextPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    return true;
+}
+
+bool TextPattern::ParseCommand(const std::string& command)
+{
+    std::string cmd;
+    std::unique_ptr<JsonValue> json = nullptr;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), false);
+    cmd = json->GetString("cmd");
+    if (cmd == "selectText") {
+        if (!json->Contains("selectionStart") || !json->Contains("selectionEnd")) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "ParseCommand failed: missing selectionStart/selectionEnd");
+            return false;
+        }
+        int32_t start = json->GetInt("selectionStart");
+        int32_t end = json->GetInt("selectionEnd");
+        auto length = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+        start = std::max(start, 0);
+        end = (end < 0) ? length : end;
+        start = std::min(start, length);
+        end = std::min(end, length);
+        if (start > end) {
+            std::swap(start, end);
+        }
+        SetTextSelection(start, end);
+    } else if (cmd == "copy") {
+        HandleOnCopy();
+        ReportCommandResult(host->GetId(), "Text.onCopyComplete");
+    } else {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
+            cmd.c_str(), host->GetId());
+        return false;
+    }
+    return true;
+}
+
+int32_t TextPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        host->GetId());
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void TextPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+    const std::string& value, int32_t start, int32_t end)
+{
+    auto json = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", dataStr.c_str());
+    json->Put("value", value.c_str());
+    json->Put("start", start);
+    json->Put("end", end);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
 RefPtr<RenderContext> TextPattern::GetRenderContext()
 {
     auto frameNode = GetHost();
@@ -2756,6 +2827,22 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
     contentChangeManager->OnTextChangeEnd(rect, rootNode->GetRectWithRender());
 }
 
+void TextPattern::ProcessSelectionOnMouseRelease(int32_t start, int32_t end,
+    const RefPtr<FrameNode>& host, const MouseInfo& info)
+{
+    if (isMousePressed_ || shiftFlag_) {
+        HandleSelectionChange(start, end);
+        ReportSelectedText();
+    }
+
+    if (IsSelected() && IsSelectedBindSelectionMenu()) {
+        selectOverlay_->SetMouseMenuOffset(OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
+        textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
+        ShowSelectOverlay({ .animation = true });
+    }
+}
+
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
     bool pressBetweenSelectedPosition = blockPress_;
@@ -2784,26 +2871,18 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (!IsSelected() || (pressBetweenSelectedPosition && !mouseUpAndDownPointChange_)) {
         start = -1;
         end = -1;
     }
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
-        HandleSelectionChange(start, end);
-        ReportSelectedText();
-    }
 
-    if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
-        selectOverlay_->SetMouseMenuOffset(OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
-        textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
-        ShowSelectOverlay({ .animation = true });
-    }
+    ProcessSelectionOnMouseRelease(start, end, host, info);
     ResetMouseLeftPressedState();
     moveOverClickThreshold_ = false;
     mouseUpAndDownPointChange_ = false;
     // stop auto scroll.
-    auto host = GetHost();
     if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
         host->UnregisterNodeChangeListener();
     }
@@ -6275,6 +6354,8 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
     if (changeSymbolEffect) {
         host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    auto res = UtfUtils::Str16DebugToStr8(TextHighlightSelectedContent(start, end));
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", res, start, end);
 }
 
 bool TextPattern::IsSelectedBindSelectionMenu()
@@ -7028,9 +7109,15 @@ void TextPattern::HighlightDisappearAnimation()
 
 void TextPattern::ReportSelectedText(bool isRegister)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textSelector_.GetStart() != -1 && textSelector_.GetEnd() != -1) {
+        auto res = UtfUtils::Str16DebugToStr8(
+            TextHighlightSelectedContent(textSelector_.GetStart(), textSelector_.GetEnd()));
+        ReportSelectionChangeEvent(host->GetId(),
+            "selectionChange", res, textSelector_.GetStart(), textSelector_.GetEnd());
+    }
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto selectOverlayManager = pipeline->GetSelectOverlayManager();

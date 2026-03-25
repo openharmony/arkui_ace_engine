@@ -224,9 +224,6 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel002, TestSize.Level0)
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     richEditorModel.SetDraggable(true);
-    /**
-     * @tc.steps: step1. test draggable
-     */
     EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode()->draggable_);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -1273,6 +1270,8 @@ HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create richEditor node
      */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
 
@@ -1318,5 +1317,77 @@ HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest001, TestSize.Level1)
     EXPECT_EQ(ret, RET_SUCCESS);
 }
 
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test RichEditorPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create richEditor node
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
 
+    /**
+     * @tc.steps: step2. Get RichEditorPattern
+     */
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"addText", "params":{"value":"test123456789"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"selectText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":-1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":5, "selectionEnd":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"copy"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":1, "selectionEnd":5})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"cut"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"clear"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"requestKeyboard"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"setCaretPosition", "position":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

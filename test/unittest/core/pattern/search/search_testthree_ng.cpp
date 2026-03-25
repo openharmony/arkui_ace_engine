@@ -195,6 +195,80 @@ HWTEST_F(SearchTestThreeNg, OnInjectionEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test SearchPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get SearchPattern
+     */
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"addText", "params":{"value":"test123456789"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"selectText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":-1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":5, "selectionEnd":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"copy"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":1, "selectionEnd":5})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"cut"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"clear"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"requestKeyboard"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"setCaretPosition", "position":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
+/**
  * @tc.name: HandleBackgroundColor_003
  * @tc.desc: Test SearchPattern HandleBackgroundColor
  * @tc.type: FUNC

@@ -2522,4 +2522,60 @@ HWTEST_F(TextPatternTestNg, TextNewMaterialFunctions, TestSize.Level1)
     auto drawParagraph = textPattern->GetDrawParagraph();
     EXPECT_EQ(drawParagraph, std::nullopt);
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test TextPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<OHOS::Ace::NG::TextPattern>()
+    );
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPattern = frameNode->GetPattern<OHOS::Ace::NG::TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    std::string command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
+    auto ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"copy"})";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<OHOS::Ace::NG::TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    std::string content = "Hello World";
+    textLayoutProperty->UpdateContent(content);
+    textPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    command = R"()";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({)";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"selectText"})";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"copy"})";
+    ret = textPattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG
