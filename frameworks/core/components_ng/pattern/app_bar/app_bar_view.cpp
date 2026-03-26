@@ -174,6 +174,7 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     pattern->BeforeCreateLayoutWrapper();
     InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
     appbar->UpdateVisibilityOfMenuBarRow(pattern->GetMenuBarRow(), container);
+    appbar->AddInnerOnSizeChangeCallback(pattern->GetMenuBar());
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
@@ -197,6 +198,13 @@ void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityZIndex(MENU_BAR_AY_Z_INDEX);
+}
+
+void AppBarView::AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto callback = rectChangeCallback_;
+    frameNode->AddInnerOnSizeChangeCallback(frameNode->GetId(), std::move(callback));
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
@@ -661,4 +669,13 @@ void AppBarView::SetMenuBarVisible(bool visible)
     pattern->SetMenuBarVisibleCallBack(visible);
 }
 
+void AppBarView::SetRectChangeCallback(RectChangeFunc&& callback)
+{
+    rectChangeCallback_ = std::move(callback);
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    AddInnerOnSizeChangeCallback(pattern->GetMenuBar());
+}
 } // namespace OHOS::Ace::NG
