@@ -12,10 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare enum GridItemStyle {
+    NONE = 0,
+    PLAIN = 1
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare interface GridItemOptions {
+    style?: GridItemStyle;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+interface GridItemInterface {
+    (value?: GridItemOptions): GridItemAttribute;
+}
+declare class GridItemAttribute extends CommonMethod<GridItemAttribute> {
+}
+declare const GridItem: GridItemInterface;
+declare const GridItemInstance: GridItemAttribute;

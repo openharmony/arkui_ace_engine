@@ -12,10 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare interface CircleOptions {
+    width?: Length;
+    height?: Length;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+interface CircleInterface {
+    new (value?: CircleOptions): CircleAttribute;
+    (value?: CircleOptions): CircleAttribute;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+declare class CircleAttribute extends CommonShapeMethod<CircleAttribute> {
+}
+declare const Circle: CircleInterface;
+declare const CircleInstance: CircleAttribute;

@@ -12,10 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare interface FlexOptions {
+    direction?: FlexDirection;
+    wrap?: FlexWrap;
+    justifyContent?: FlexAlign;
+    alignItems?: ItemAlign;
+    alignContent?: FlexAlign;
+    space?: FlexSpaceOptions;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare interface FlexSpaceOptions {
+    main?: LengthMetrics;
+    cross?: LengthMetrics;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+interface FlexInterface {
+    (value?: FlexOptions): FlexAttribute;
+}
+declare class FlexAttribute extends CommonMethod<FlexAttribute> {
+}
+declare const Flex: FlexInterface;
+declare const FlexInstance: FlexAttribute;

@@ -12,10 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+
+declare class ArkContainerPickerComponent extends ArkComponent implements UIPickerComponentAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
-}
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;

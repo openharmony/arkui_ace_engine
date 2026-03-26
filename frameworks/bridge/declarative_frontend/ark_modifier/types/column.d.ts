@@ -12,10 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare type SpaceType = string | number | Resource;
+interface ColumnOptions {
+    space?: string | number;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+interface ColumnOptionsV2 {
+    space?: SpaceType;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+interface ColumnInterface {
+    (options?: ColumnOptions): ColumnAttribute;
+    (options?: ColumnOptions | ColumnOptionsV2): ColumnAttribute;
+}
+declare class ColumnAttribute extends CommonMethod<ColumnAttribute> {
+}
+declare const Column: ColumnInterface;
+declare const ColumnInstance: ColumnAttribute;

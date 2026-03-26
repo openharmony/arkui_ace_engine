@@ -12,10 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare type Scene = import('../api/@ohos.graphics.scene').Scene;
+declare enum ModelType {
+    TEXTURE = 0,
+    SURFACE = 1
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare interface SceneOptions {
+    scene?: ResourceStr | Scene;
+    modelType?: ModelType;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+interface Component3DInterface {
+    (sceneOptions?: SceneOptions): Component3DAttribute;
+}
+declare class Component3DAttribute extends CommonMethod<Component3DAttribute> {
+}
+declare const Component3D: Component3DInterface;
+declare const Component3DInstance: Component3DAttribute;

@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+interface EmbeddedComponentInterface {
+    (loader: import('../api/@ohos.app.ability.Want').default, type: EmbeddedType): EmbeddedComponentAttribute;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare interface TerminationInfo {
+    code: number;
+    want?: import('../api/@ohos.app.ability.Want').default;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+declare class EmbeddedComponentAttribute extends CommonMethod<EmbeddedComponentAttribute> {
+}
+declare const EmbeddedComponent: EmbeddedComponentInterface;
+declare const EmbeddedComponentInstance: EmbeddedComponentAttribute;

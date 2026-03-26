@@ -59,20 +59,6 @@ declare interface LabelStyle {
     textAlign?: TextAlign;
 }
 declare class ButtonAttribute extends CommonMethod<ButtonAttribute> {
-    type(value: ButtonType): ButtonAttribute;
-    stateEffect(value: boolean): ButtonAttribute;
-    buttonStyle(value: ButtonStyleMode): ButtonAttribute;
-    controlSize(value: ControlSize): ButtonAttribute;
-    role(value: ButtonRole): ButtonAttribute;
-    fontColor(value: ResourceColor): ButtonAttribute;
-    fontSize(value: Length): ButtonAttribute;
-    fontWeight(value: number | FontWeight | string): ButtonAttribute;
-    fontStyle(value: FontStyle): ButtonAttribute;
-    fontFamily(value: string | Resource): ButtonAttribute;
-    contentModifier(modifier: ContentModifier<ButtonConfiguration>): ButtonAttribute;
-    labelStyle(value: LabelStyle): ButtonAttribute;
-    minFontScale(scale: number | Resource): ButtonAttribute;
-    maxFontScale(scale: number | Resource): ButtonAttribute;
 }
 declare const Button: ButtonInterface;
 declare const ButtonInstance: ButtonAttribute;
