@@ -2248,7 +2248,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
     auto value = contentController_->GetTextValue();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", value, 0, textSize);
+    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", value, 0, textSize);
 }
 
 void TextFieldPattern::HandleOnPasswordVault()
