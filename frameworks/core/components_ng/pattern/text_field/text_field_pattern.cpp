@@ -3424,6 +3424,14 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (multipleClickRecognizer->IsTripleClick()) {
         HandleTripleClickEvent(info);
     } else if (multipleClickRecognizer->IsDoubleClick()) {
+tClickTimeStamp_ = info.GetTimeStamp();
+    multipleClickRecognizer->StartCounting(info);
+    // register click event
+    if (multipleClickRecognizer->IsTripleClick()) {
+        HandleTripleClickEvent(info);
+    } else if (multipleClickRecognizer->IsDoubleClick()) {
+ HandleTripleClickEvent(info);
+    } else if (multipleClickRecognizer->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
@@ -3766,6 +3774,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         auto endIndex = selectController_->GetEndIndex();
         auto value = contentController_->GetTextValue();
         auto valueStr = value.substr(static_cast<int32_t>(startIndex), static_cast<int32_t>(endIndex - startIndex));
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
     }
     if (IsSelected()) {
         StopTwinkling();
