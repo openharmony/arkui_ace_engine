@@ -1726,6 +1726,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
 
     pattern->contentNode_ = nullptr;
     pattern->OnExtensionDetachToDisplay();
+    SUCCEED();
 #endif
 }
 
@@ -1819,6 +1820,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level
      * @tc.steps: step4. test RegisterVisibleAreaChange
      */
     pattern->RegisterVisibleAreaChange();
+    SUCCEED();
 }
 
 /**
@@ -1879,6 +1881,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest014, TestSize.Level
      * @tc.steps: step2. test OnDetachFromMainTree
      */
     pattern->OnDetachFromMainTree();
+    SUCCEED();
 #endif
 }
 
@@ -1940,6 +1943,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
      * @tc.steps: step3. test UnRegisterPipelineEvent.
      */
     pattern->UnRegisterPipelineEvent(instanceId);
+    SUCCEED();
 #endif
 }
 
@@ -2225,6 +2229,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentUpdateWMSUIExtPropertyT
     pattern->UpdateWMSUIExtProperty(code, data, id, options);
     pattern->state_ = UIExtensionPattern::AbilityState::FOREGROUND;
     pattern->UpdateWMSUIExtProperty(code, data, id);
+    SUCCEED();
 #endif
 }
 } // namespace OHOS::Ace::NG
