@@ -269,6 +269,9 @@ public:
         needLoadAlt_ = needLoadAlt;
     }
 
+    // Public method for ImageAnimator to trigger theme updates
+    void TriggerThemeUpdate(int32_t themeScopeId);
+
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
     SizeF GetRawImageSize()

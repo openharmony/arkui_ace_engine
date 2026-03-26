@@ -177,9 +177,21 @@ public:
         return true;
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnColorConfigurationUpdate() override;
+
     void SetVisible(bool visible)
     {
         visible_ = visible;
+    }
+
+    ColorMode GetLocalColorMode() const
+    {
+        auto host = GetHost();
+        if (host) {
+            return host->GetLocalColorMode();
+        }
+        return ColorMode::COLOR_MODE_UNDEFINED;
     }
 
 private:
