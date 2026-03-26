@@ -6354,8 +6354,6 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
     if (changeSymbolEffect) {
         host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    auto res = UtfUtils::Str16DebugToStr8(TextHighlightSelectedContent(start, end));
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", res, start, end);
 }
 
 bool TextPattern::IsSelectedBindSelectionMenu()
