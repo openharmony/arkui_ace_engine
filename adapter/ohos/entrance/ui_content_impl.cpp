@@ -897,7 +897,7 @@ public:
 
     void OnRectChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
     {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "window size is changed. current rect width: %{public}u, "
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "window rect is changed. current rect width: %{public}u, "
             "height: %{public}u, left: %{public}d, top: %{public}d, instance id is %{public}d, reason: %{public}d",
             rect.width_, rect.height_, rect.posX_, rect.posY_, instanceId_, reason);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
