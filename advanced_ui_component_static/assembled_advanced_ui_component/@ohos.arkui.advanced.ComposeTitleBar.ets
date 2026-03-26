@@ -69,7 +69,7 @@ class Util {
   }
 }
 
-class ButtonGestureModifier implements GestureModifier {
+export class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;

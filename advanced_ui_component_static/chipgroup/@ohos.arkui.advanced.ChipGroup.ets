@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,12 +123,12 @@ enum ChipGroupHeight {
   SMALL = 28,
 }
 
-interface IconOptions {
+export interface IconOptions {
   src: ResourceStr;
   size?: SizeOptions;
 }
 
-interface ChipGroupPaddingOptions {
+export interface ChipGroupPaddingOptions {
   top: Length;
   bottom: Length;
 }
@@ -175,7 +175,7 @@ export interface ChipItemStyle {
   selectedBackgroundColor?: ResourceColor;
 }
 
-interface ChipGroupSpaceOptions {
+export interface ChipGroupSpaceOptions {
   itemSpace?: number | string;
   startSpace?: Length;
   endSpace?: Length;

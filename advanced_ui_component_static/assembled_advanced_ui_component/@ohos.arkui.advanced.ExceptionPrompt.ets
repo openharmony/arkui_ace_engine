@@ -57,7 +57,7 @@ import {
     isShown?: boolean
   }
   
-  class EnvironmentCallbackEntry implements EnvironmentCallback {
+  export class EnvironmentCallbackEntry implements EnvironmentCallback {
     private index: ExceptionPrompt;
   
     constructor(index: ExceptionPrompt) {

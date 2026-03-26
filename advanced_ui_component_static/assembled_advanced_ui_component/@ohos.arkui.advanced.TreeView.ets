@@ -84,7 +84,7 @@ const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
 const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_right');
 const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_right');
 
-enum Event {
+export enum Event {
   TOUCH_DOWN = 0,
   TOUCH_UP = 1,
   HOVER = 3,
@@ -95,25 +95,25 @@ enum Event {
   DRAG = 8,
 }
 
-enum MenuOperation {
+export enum MenuOperation {
   ADD_NODE = 0,
   REMOVE_NODE = 1,
   MODIFY_NODE = 2,
   COMMIT_NODE = 3,
 }
 
-enum PopUpType {
+export enum PopUpType {
   HINTS = 0,
   WARNINGS = 1,
 }
 
-enum InputError {
+export enum InputError {
   INVALID_ERROR = 0,
   LENGTH_ERROR = 1,
   NONE = 2,
 }
 
-enum Flag {
+export enum Flag {
   DOWN_FLAG = 0,
   UP_FLAG = 1,
   NONE = 2,
@@ -133,26 +133,26 @@ export enum InteractionStatus {
   FINISH_DRAG_INSERT,
 }
 
-enum CollapseImageType {
+export enum CollapseImageType {
   ARROW_DOWN = 0,
   ARROW_RIGHT,
   ARROW_DOWN_WHITE,
   ARROW_RIGHT_WHITE,
 }
 
-enum AccessibilityNodeType {
+export enum AccessibilityNodeType {
   TEXT = 0,
   PLACE = 1,
   LIFT = 2,
 }
 
-interface ChildNodeInfo {
+export interface ChildNodeInfo {
   isHasChildNode: boolean;
   childNum: int;
   allChildNum: int;
 }
 
-interface NodeItemView {
+export interface NodeItemView {
   imageNode?: ImageNode;
   inputText: InputText;
   mainTitleNode: MainTitleNode;
@@ -160,7 +160,7 @@ interface NodeItemView {
   fontColor?: ResourceColor;
 }
 
-interface Status {
+export interface Status {
   normal: ResourceColor;
   hover: ResourceColor;
   press: ResourceColor;
@@ -168,13 +168,13 @@ interface Status {
   highLight?: ResourceColor;
 }
 
-interface NodeBorder {
+export interface NodeBorder {
   borderWidth: Resource | number;
   borderColor: ResourceColor;
   borderRadius: Resource;
 }
 
-interface PopUpInfo {
+export interface PopUpInfo {
   popUpIsShow: boolean;
   popUpEnableArrow: boolean;
   popUpColor?: ResourceColor;
@@ -182,49 +182,49 @@ interface PopUpInfo {
   popUpTextColor?: ResourceColor;
 }
 
-interface BorderWidth {
+export interface BorderWidth {
   has: Resource | number;
   none: Resource | number;
 }
 
-interface TextSetting {
+export interface TextSetting {
   fontColor: ResourceColor;
   fontSize: Resource;
   fontWeight: FontWeight;
 }
 
-interface NodeInfoView {
+export interface NodeInfoView {
   itemId?: number;
   itemIcon?: ResourceStr;
   itemTitle?: ResourceStr;
   isFolder?: boolean;
 }
 
-interface FloorConstraintSize {
+export interface FloorConstraintSize {
   minWidth: string;
   maxWidth: string;
 }
 
-interface TextConstraintSize {
+export interface TextConstraintSize {
   minWidth1: string;
   maxWidth1: string;
   minWidth2: string;
   maxWidth2: string;
 }
 
-interface TreeViewPadding {
+export interface TreeViewPadding {
   left: Resource;
   right: Resource;
 }
 
-interface ItemPadding {
+export interface ItemPadding {
   left: LengthMetrics;
   right: LengthMetrics;
   top: LengthMetrics;
   bottom: LengthMetrics;
 }
 
-interface DragPopup {
+export interface DragPopup {
   floorConstraintSize: FloorConstraintSize;
   textConstraintSize: TextConstraintSize;
   padding: TreeViewPadding;
@@ -244,7 +244,7 @@ interface DragNodeParam {
   data: NodeParam,
 }
 
-interface FlagLine {
+export interface FlagLine {
   flagLineHeight: string;
   flagLineColor: Resource;
   xOffset: string;
@@ -253,7 +253,7 @@ interface FlagLine {
   yBasePlateOffset: string;
 }
 
-interface SubTitleStyle {
+export interface SubTitleStyle {
   normalFontColor: ResourceColor;
   highLightFontColor: ResourceColor;
   fontSize: Resource;
@@ -366,7 +366,7 @@ let emptyNodeInfo: NodeParam = {
   currentNodeId: -1,
 }
 
-class TreeViewTheme {
+export class TreeViewTheme {
   private static instance: TreeViewTheme = new TreeViewTheme();
   public itemSelectedBgColor: ResourceColor = '#1A0A59F7';
   public primaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_primary');
@@ -2175,7 +2175,7 @@ export class TreeController {
   }
 }
 
-class BasicDataSource implements IDataSource<NodeInfo> {
+export class BasicDataSource implements IDataSource<NodeInfo> {
   private listeners: DataChangeListener[] = []
 
   public totalCount(): int {
@@ -5079,7 +5079,7 @@ export class NodeItem {
   }
 }
 
-class NodeBaseInfo {
+export class NodeBaseInfo {
   public rightMargin: Resource | number = -1;
   private width: number = -1;
   private height: number = -1;
@@ -5473,7 +5473,7 @@ export class ImageNode extends NodeBaseInfo {
   }
 }
 
-class MainTitleNode extends NodeBaseInfo {
+export class MainTitleNode extends NodeBaseInfo {
   private mainTitleName: ResourceStr;
   public mainTitleSetting: TextSetting;
   private showPopUpTimeout: number;

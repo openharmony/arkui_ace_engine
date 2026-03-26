@@ -159,7 +159,7 @@ import {
     }
   }
   
-  class ToolBarTheme {
+  export class ToolBarTheme {
     public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
     public iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
     public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
