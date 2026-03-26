@@ -657,6 +657,7 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
         auto focusHub = GetFocusHub();
         CHECK_NULL_RETURN(focusHub, false);
         focusHub->RequestFocusImmediately();
+        ReportRequestKeyboardEvent(host);
     } else if (cmd == "setCaretPosition") {
         if (!json->Contains("position")) {
             TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "ParseCommand failed: position");
@@ -1490,7 +1491,6 @@ void TextFieldPattern::HandleFocusEvent()
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
-    ReportRequestKeyboardEvent(host);
 }
 
 void TextFieldPattern::SetFocusStyle()
