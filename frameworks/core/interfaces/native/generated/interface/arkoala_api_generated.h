@@ -5141,6 +5141,7 @@ typedef struct Opt_HapticFeedbackMode {
 typedef enum Ark_HdrType {
     ARK_HDR_TYPE_DEFAULT = 0,
     ARK_HDR_TYPE_AIHDR = 1,
+    ARK_HDR_TYPE_EDR = 2,
 } Ark_HdrType;
 typedef struct Opt_HdrType {
     Ark_Tag tag;

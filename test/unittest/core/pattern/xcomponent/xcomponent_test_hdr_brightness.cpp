@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include <iostream>
+#include <optional>
+
 #include "gtest/gtest.h"
 
-#include <optional>
-#include <iostream>
 
 #define private public
 #define protected public
@@ -51,6 +52,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void TearDown() override {}
+
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(XComponentType type);
     static RefPtr<FrameNode> CreateStaticXComponentNode(bool isTypedNode);
@@ -579,6 +581,81 @@ HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest013, TestSize.Level1)
     pattern->HdrBrightness(1.0f, HdrType::AIHDR);
     EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.4f);
     EXPECT_EQ(pattern->hdrType_, HdrType::DEFAULT);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest011
+ * @tc.desc: Test HdrBrightness with EDR HdrType
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create xcomponent node with SURFACE type
+     * @tc.expected: frameNode created successfully
+     */
+    auto frameNode = CreateXComponentNode(XCOMPONENT_SURFACE_TYPE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize renderContextForSurface_
+     * @tc.expected: renderContextForSurface_ initialized
+     */
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->renderContextForSurface_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step3. Call HdrBrightness with EDR HdrType
+     * @tc.expected: hdrBrightness_ and hdrType_ set correctly
+     */
+    constexpr float testBrightness = 0.45f;
+    pattern->HdrBrightness(testBrightness, HdrType::EDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, testBrightness);
+    EXPECT_EQ(pattern->hdrType_, HdrType::EDR);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest012
+ * @tc.desc: Test HdrBrightness clamp behavior with EDR HdrType
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestHdrBrightness, HdrBrightnessTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create xcomponent node with SURFACE type
+     * @tc.expected: frameNode created successfully
+     */
+    auto frameNode = CreateXComponentNode(XCOMPONENT_SURFACE_TYPE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize renderContextForSurface_
+     * @tc.expected: renderContextForSurface_ initialized
+     */
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->renderContextForSurface_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step3. Call HdrBrightness with brightness > 1.0f and EDR
+     * @tc.expected: hdrBrightness_ clamped to 1.0f and hdrType_ is EDR
+     */
+    pattern->HdrBrightness(1.2f, HdrType::EDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 1.0f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::EDR);
+
+    /**
+     * @tc.steps: step4. Call HdrBrightness with brightness < 0.0f and EDR
+     * @tc.expected: hdrBrightness_ clamped to 0.0f and hdrType_ is EDR
+     */
+    pattern->HdrBrightness(-0.3f, HdrType::EDR);
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, 0.0f);
+    EXPECT_EQ(pattern->hdrType_, HdrType::EDR);
 }
 
 } // namespace OHOS::Ace::NG

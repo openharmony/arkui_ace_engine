@@ -801,6 +801,7 @@ enum class XComponentNodeType {
 enum class HdrType {
     DEFAULT = 0,
     AIHDR = 1,
+    EDR = 2,
 };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
