@@ -6121,6 +6121,7 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_getItemRect(ptr: KPointer, index: KInt): KInteropReturnBuffer
     native static _Scroller_getItemIndex(ptr: KPointer, x: KDouble, y: KDouble): KInt
     native static _Scroller_contentSize(ptr: KPointer): KInteropReturnBuffer
+    native static _Scroller_getFrameNode(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ScrollResult_construct(): KPointer
     @ani.unsafe.Direct
