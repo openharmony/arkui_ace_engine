@@ -46,6 +46,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
@@ -58,6 +59,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/common/screen_lock/screen_lock_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -13143,7 +13145,7 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
 
         {"fontWeight", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
-                    FontWeight fontWeight = ConvertStrToFontWeight(*realValue);
+                    FontWeight fontWeight = Framework::ConvertStrToFontWeight(*realValue);
                     prop->UpdateFontWeight(fontWeight);
                     prop->UpdatePreferredTextLineHeightNeedToUpdate(true);
                 }

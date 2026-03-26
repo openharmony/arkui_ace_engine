@@ -39,6 +39,18 @@ namespace OHOS::Ace {
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+using Framework::WEB_ACC_INVALID;
+using Framework::WEB_EXE_ACTION;
+using Framework::WEB_GET_ACC;
+using Framework::WEB_HOVER;
+using Framework::WEB_NEXT;
+using Framework::WEB_NODE;
+using Framework::WEB_OFF_ACC;
+using Framework::WEB_ON_ACC;
+using Framework::WEB_PRE;
+using Framework::WEB_SEND_EVENT;
+using Framework::WEB_TREE;
+
 namespace {
 constexpr int64_t TEST_ELEMENT_ID_NEGATIVE = -1;
 constexpr int64_t TEST_ELEMENT_ID_POSITIVE = 100;

@@ -20,6 +20,7 @@
 #include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"

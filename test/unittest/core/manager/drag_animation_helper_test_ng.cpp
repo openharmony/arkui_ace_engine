@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/manager/drag_animation_helper_test_ng.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 

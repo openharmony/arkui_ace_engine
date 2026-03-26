@@ -17,6 +17,7 @@
 
 #include "base/log/ace_checker.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -385,7 +385,7 @@ void BadgeModelNG::ProcessFontWeight(
         std::optional<FontWeight> badgeFontWeight;
         std::string result;
         ResourceParseUtils::ParseResString(resObj, result);
-        badgeFontWeight = ConvertStrToFontWeight(result);
+        badgeFontWeight = Framework::ConvertStrToFontWeight(result);
         badgePattern->UpdateFontWeight(
             badgeFontWeight.has_value() ? badgeFontWeight.value() : FontWeight::NORMAL, isFirstLoad);
     };

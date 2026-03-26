@@ -138,10 +138,7 @@ public:
         return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
-    RefPtr<ScrollableController> GetScrollPositionController() const
-    {
-        return positionController_;
-    }
+    RefPtr<ScrollableController> GetScrollPositionController() const;
 
     void SetDirection(FlexDirection direction)
     {

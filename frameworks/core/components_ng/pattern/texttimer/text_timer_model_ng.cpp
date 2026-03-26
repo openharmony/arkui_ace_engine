@@ -349,7 +349,7 @@ void TextTimerModelNG::HandleFontWeight(FrameNode* frameNode, const RefPtr<Resou
         CHECK_NULL_VOID(pattern);
         std::string fontWeightStr;
         ResourceParseUtils::ParseResString(resObj, fontWeightStr);
-        pattern->UpdateFontWeight(ConvertStrToFontWeight(fontWeightStr), isFirstLoad);
+        pattern->UpdateFontWeight(Framework::ConvertStrToFontWeight(fontWeightStr), isFirstLoad);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

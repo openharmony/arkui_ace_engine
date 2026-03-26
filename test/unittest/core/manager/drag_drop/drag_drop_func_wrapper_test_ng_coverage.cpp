@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline/base/element_register.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"

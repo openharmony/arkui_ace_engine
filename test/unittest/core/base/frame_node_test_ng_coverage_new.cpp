@@ -18,6 +18,7 @@
 #include "core/event/touch_event.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;

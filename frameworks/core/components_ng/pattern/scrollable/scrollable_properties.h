@@ -63,6 +63,29 @@ enum class ScrollPagingStatus {
     VALID,
 };
 
+namespace NG {
+enum class NestedState {
+    GESTURE = 0,
+    CHILD_SCROLL,
+    CHILD_OVER_SCROLL,
+    CHILD_CHECK_OVER_SCROLL,
+};
+
+struct OverScrollOffset {
+    double start;
+    double end;
+};
+
+struct ScrollResult {
+    double remain;
+    bool reachEdge;
+};
+} // namespace NG
+
+using NestedState = NG::NestedState;
+using OverScrollOffset = NG::OverScrollOffset;
+using ScrollResult = NG::ScrollResult;
+
 enum class SnapType {
     SCROLL_SNAP = 0,
     LIST_SNAP,

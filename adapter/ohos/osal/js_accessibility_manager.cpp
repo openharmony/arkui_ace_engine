@@ -22,6 +22,7 @@
 #include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
@@ -6215,7 +6216,7 @@ bool JsAccessibilityManager::FindUIExtensionAccessibilityElement(const RefPtr<NG
         nextFocusMapWithSubWindow_[ngPipeline->GetInstanceId()]);
 
     std::list<Accessibility::AccessibilityElementInfo> extensionElementInfos;
-    NG::SearchExtensionElementInfoNG(searchParam, checkNode, extensionElementInfos, parentInfo);
+    SearchExtensionElementInfoNG(searchParam, checkNode, extensionElementInfos, parentInfo);
 
     for (auto& ueaInfo : extensionElementInfos) {
         if (ueaInfo.GetInspectorKey() == customId) {
