@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_H
 
-#include <memory>
-#include <mutex>
-#include <string>
-
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
