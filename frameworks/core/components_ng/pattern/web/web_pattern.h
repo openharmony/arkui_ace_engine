@@ -820,6 +820,8 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
+    bool GetAccessibilityState();
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
     bool IsAccessibilitySamePage();
     void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);

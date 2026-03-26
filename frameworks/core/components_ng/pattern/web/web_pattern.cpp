@@ -8405,6 +8405,21 @@ void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
     }
 }
 
+bool WebPattern::GetAccessibilityState()
+{
+    return accessibilityState_;
+}
+
+void WebPattern::OnAccessibilityEvent(
+    int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (!accessibilityState_) {
+        return;
+    }
+    delegate_->OnAccessibilityEvent(accessibilityId, eventType, argument);
+}
+
 bool WebPattern::IsAccessibilitySamePage()
 {
     auto host = GetHost();

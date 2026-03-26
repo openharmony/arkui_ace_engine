@@ -24,6 +24,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
@@ -74,6 +75,9 @@ constexpr size_t MIN_PARAMS_SIZE = 2;
 constexpr int32_t MIN_NUM = 2;
 constexpr int64_t INVALID_NODE_ID = -1;
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
+constexpr uint64_t WEB_MAX_ELEMENT_ID = 0xFFFFFFFFFF;
+constexpr int32_t WEB_TREE_MODE = 8;
+constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -81,6 +85,10 @@ const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
 const std::set<std::string> TAGS_EMBED_COMPONENT = {
     "embeddedObject",
 };
+
+std::map<std::string, WebAccFun> webAccFunMap = { { "getAcc", WEB_GET_ACC }, { "onAcc", WEB_ON_ACC },
+    { "offAcc", WEB_OFF_ACC }, { "tree", WEB_TREE }, { "node", WEB_NODE }, { "pre", WEB_PRE }, { "next", WEB_NEXT },
+    { "exeAction", WEB_EXE_ACTION }, { "sendEvent", WEB_SEND_EVENT }, { "hover", WEB_HOVER } };
 
 const std::map<Accessibility::ActionType, std::function<bool(const AccessibilityActionParam& param)>> ACTIONS = {
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
@@ -4666,6 +4674,10 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
             argument.verbose = true;
         } else if (*arg == "-json") {
             argument.mode = DumpMode::TREE;
+#ifdef WEB_SUPPORTED
+        } else if (*arg == "-webAccId" || *arg == "-webAccFun") {
+            return DumpWebInfoParams(params, argument);
+#endif
         } else {
             if (HandleNodeModeParam(*arg, argument)) {
                 break;
@@ -4744,6 +4756,11 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
         case DumpMode::GET_CHECKLIST_TEST:
             DumpGetCheckListTest(params);
             break;
+#ifdef WEB_SUPPORTED
+        case DumpMode::WEB_ACC_DUMP:
+            ChooseWebDumpEvent(argument, windowId);
+            break;
+#endif
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
             break;
@@ -5036,6 +5053,261 @@ static void DumpAccessibilityElementInfosTreeNG(
         DumpAccessibilityElementInfosTreeNG(infos, depth, child, false);
     }
 }
+
+#ifdef WEB_SUPPORTED
+int64_t JsAccessibilityManager::ConvertToSplitElementId(int64_t elementId)
+{
+    if (elementId <= 0) {
+        return elementId;
+    }
+    if ((static_cast<uint64_t>(elementId) & WEB_MAX_ELEMENT_ID) != static_cast<uint64_t>(elementId)) {
+        int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+        int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+        elementId = splitElementId;
+    }
+    return elementId;
+}
+
+bool JsAccessibilityManager::DumpElementInfosIfNeed(const DumpInfoArgument& argument,
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern, uint32_t windowId)
+{
+    auto funIt = webAccFunMap.find(argument.webAccFun);
+    WebAccFun fun = (funIt != webAccFunMap.end()) ? funIt->second : WEB_ACC_INVALID;
+    int32_t direction = -1;
+    int32_t mode = -1;
+    switch (fun) {
+        case WEB_TREE:
+            mode = WEB_TREE_MODE;
+            break;
+        case WEB_NODE:
+            mode = 0;
+            break;
+        case WEB_PRE:
+            direction = FocusMoveDirection::BACKWARD;
+            break;
+        case WEB_NEXT:
+            direction = FocusMoveDirection::FORWARD;
+            break;
+        default:
+            break;
+    }
+    if (direction == -1 && mode == -1) {
+        return true;
+    }
+
+    int64_t elementId = ConvertToSplitElementId(argument.webAccId);
+    AccessibilityElementInfo nodeInfo;
+    auto pipeline = GetPipelineByWindowId(windowId);
+    CHECK_NULL_RETURN(pipeline, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
+
+    if (mode != -1) {
+        SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
+    } else if (direction != -1) {
+        WebFocusMoveSearchNG(elementId, direction, nodeInfo, pipeline, webPattern);
+        WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, pipeline);
+        infos.push_back(nodeInfo);
+    }
+
+    if (infos.empty() || infos.size() > MAX_DUMP_INFO_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "JsAccessibilityManager::DumpElementInfosIfNeed fail infos.size: %{public}zu",
+            infos.size());
+        return false;
+    }
+    return true;
+}
+
+void JsAccessibilityManager::ExecuteWebAccStateDump(WebAccFun fun, const RefPtr<NG::WebPattern>& webPattern)
+{
+    CHECK_NULL_VOID(webPattern);
+    switch (fun) {
+        case WEB_GET_ACC:
+            DumpLog::GetInstance().AddDesc(
+                "===> webPattern AccessibilityState: ", BoolToString(webPattern->GetAccessibilityState()));
+            DumpLog::GetInstance().Print(0, "webPattern.AccessibilityState", 0);
+            break;
+        case WEB_ON_ACC:
+            webPattern->SetAccessibilityState(true);
+            AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+            break;
+        case WEB_OFF_ACC:
+            webPattern->SetAccessibilityState(false);
+            AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+            break;
+        default:
+            break;
+    }
+}
+
+void JsAccessibilityManager::ExecuteWebInfoDump(
+    WebAccFun fun, std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern)
+{
+    CHECK_NULL_VOID(webPattern);
+    switch (fun) {
+        case WEB_TREE:
+            if (infos.empty()) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "ExecuteWebInfoDump WEB_TREE infos is empty");
+                return;
+            }
+            DumpAccessibilityElementInfosTreeNG(infos, 1, infos.front().GetAccessibilityId(), false);
+            DumpLog::GetInstance().Print(0, "Total number of dumped nodes ", infos.size());
+            break;
+        case WEB_NODE:
+        case WEB_PRE:
+        case WEB_NEXT:
+            if (infos.empty()) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "ExecuteWebInfoDump infos is empty");
+                return;
+            }
+            DumpCommonPropertyNG(infos.front(), webPattern->GetTreeId());
+            DumpAccessibilityPropertyNG(infos.front());
+            DumpLog::GetInstance().Print(0, infos.front().GetComponentType(), infos.front().GetChildCount());
+            break;
+        default:
+            break;
+    }
+}
+
+void JsAccessibilityManager::ExecuteWebActionDump(
+    WebAccFun fun, const DumpInfoArgument& argument, int64_t elementId, const RefPtr<NG::WebPattern>& webPattern)
+{
+    CHECK_NULL_VOID(webPattern);
+    switch (fun) {
+        case WEB_EXE_ACTION: {
+            std::map<std::string, std::string> args = { { " ", " " } };
+            webPattern->ExecuteAction(elementId, static_cast<AceAction>(argument.action), args);
+            break;
+        }
+        case WEB_SEND_EVENT: {
+            webPattern->OnAccessibilityEvent(elementId, static_cast<AccessibilityEventType>(argument.eventId), " ");
+            break;
+        }
+        case WEB_HOVER: {
+            auto host = webPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto offset = host->GetOffsetRelativeToWindow();
+            const NG::PointF point(argument.pointX - offset.GetX(), argument.pointY - offset.GetY());
+            webPattern->OnAccessibilityHoverEvent(
+                point, SourceType::NONE, NG::AccessibilityHoverEventType::MOVE, TimeStamp());
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void JsAccessibilityManager::ExecuteWebDump(const DumpInfoArgument& argument,
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern)
+{
+    auto funIt = webAccFunMap.find(argument.webAccFun);
+    WebAccFun fun = (funIt != webAccFunMap.end()) ? funIt->second : WEB_ACC_INVALID;
+    int64_t elementId = ConvertToSplitElementId(argument.webAccId);
+    CHECK_NULL_VOID(webPattern);
+
+    switch (fun) {
+        case WEB_GET_ACC:
+        case WEB_ON_ACC:
+        case WEB_OFF_ACC:
+            ExecuteWebAccStateDump(fun, webPattern);
+            break;
+        case WEB_TREE:
+        case WEB_NODE:
+        case WEB_PRE:
+        case WEB_NEXT:
+            ExecuteWebInfoDump(fun, infos, webPattern);
+            break;
+        case WEB_EXE_ACTION:
+        case WEB_SEND_EVENT:
+        case WEB_HOVER:
+            ExecuteWebActionDump(fun, argument, elementId, webPattern);
+            break;
+        default:
+            TAG_LOGE(
+                AceLogTag::ACE_WEB, "ExecuteWebDump cannot find webAccFun: %{public}s", argument.webAccFun.c_str());
+            break;
+    }
+}
+
+void JsAccessibilityManager::ChooseWebDumpEvent(DumpInfoArgument& argument, uint32_t windowId)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "JsAccessibilityManager::ChooseWebDumpEvent webAccFun:%{public}s, webAccId:%{public}" PRId64
+        ", nodeId(WEB):%{public}" PRId64 ", windowId:%{public}d",
+        argument.webAccFun.c_str(), argument.webAccId, argument.nodeId, windowId);
+
+    RefPtr<NG::WebPattern> webPattern = nullptr;
+    int64_t frameNodeId = ConvertToSplitElementId(argument.nodeId);
+    {
+        std::lock_guard<std::mutex> lock(childTreeCallbackMapMutex_);
+        auto callbackIt = childTreeCallbackMap_.find(frameNodeId);
+        if (callbackIt != childTreeCallbackMap_.end()) {
+            auto callback = static_cast<NG::WebAccessibilityChildTreeCallback*>(callbackIt->second.get());
+            CHECK_NULL_VOID(callback);
+            webPattern = callback->GetWebPattern().Upgrade();
+        }
+    }
+    if (!webPattern) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "JsAccessibilityManager::ChooseWebDumpEvent webPattern null Web frameNodeId:%{public}" PRId64, frameNodeId);
+        return;
+    }
+
+    auto pipeline = GetPipelineByWindowId(windowId);
+    CHECK_NULL_VOID(pipeline);
+
+    auto weak = WeakClaim(this);
+    auto webPatternWeak = WeakPtr<NG::WebPattern>(webPattern);
+    pipeline->GetTaskExecutor()->PostSyncTask(
+        [weak, argument, webPatternWeak, windowId] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            auto webPattern = webPatternWeak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            std::list<AccessibilityElementInfo> infos;
+            if (jsAccessibilityManager->DumpElementInfosIfNeed(argument, infos, webPattern, windowId)) {
+                jsAccessibilityManager->ExecuteWebDump(argument, infos, webPattern);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebAccessibilityDump");
+}
+
+bool JsAccessibilityManager::DumpWebInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        if ((*arg == "-webAccId" || *arg == "-webAccFun") && (arg + 1 == params.end())) {
+            return false;
+        } else if (*arg == "-webAccId" && ++arg != params.end()) {
+            argument.mode = DumpMode::WEB_ACC_DUMP;
+            argument.webAccId = StringUtils::StringToLongInt(*arg);
+        } else if (*arg == "-webAccFun" && ++arg != params.end()) {
+            argument.mode = DumpMode::WEB_ACC_DUMP;
+            argument.webAccFun = *arg;
+            if (argument.webAccFun != "exeAction" && argument.webAccFun != "sendEvent" &&
+                argument.webAccFun != "hover") {
+                continue;
+            }
+            if (++arg == params.end()) {
+                return false;
+            }
+            if (argument.webAccFun == "hover" && arg + 1 == params.end()) {
+                return false;
+            }
+            if (argument.webAccFun == "exeAction") {
+                argument.action = StringUtils::StringToUint(*arg);
+            } else if (argument.webAccFun == "sendEvent") {
+                argument.eventId = StringUtils::StringToUint(*arg);
+            } else if (argument.webAccFun == "hover") {
+                argument.pointX = StringUtils::StringToUint(*arg);
+                ++arg;
+                argument.pointY = StringUtils::StringToUint(*arg);
+            }
+        }
+    }
+    return true;
+}
+#endif
 
 static void DumpTreeNodeInfoNG(
     const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
