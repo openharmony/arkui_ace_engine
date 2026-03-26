@@ -141,7 +141,7 @@ RefPtr<WithThemeNode> WithThemeTestNg::CreateWithThemeNode()
  * @tc.desc: Create withThemeNode.
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest001, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest001, TestSize.Level0)
 {
     EXPECT_TRUE(g_testProperty.withThemeNode_);
     EXPECT_EQ(g_testProperty.withThemeNode_->GetTag(), V2::JS_WITH_THEME_ETS_TAG);
@@ -152,7 +152,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest001, TestSize.Level1)
  * @tc.desc: Get withThemeNode
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest002, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest002, TestSize.Level0)
 {
     auto withThemeNode = WithThemeNode::GetWithThemeNode(WITH_THEME_NODE_ID);
     EXPECT_TRUE(withThemeNode);
@@ -163,7 +163,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest002, TestSize.Level1)
  * @tc.desc: Create Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest003, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest003, TestSize.Level0)
 {
     auto theme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
     theme->SetColors(g_testProperty.tokenColors_);
@@ -178,7 +178,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest003, TestSize.Level1)
  * @tc.desc: Get Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest004, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest004, TestSize.Level0)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(TOKEN_THEME_ID);
     EXPECT_TRUE(theme);
@@ -190,7 +190,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest004, TestSize.Level1)
  * @tc.desc: Get Theme Colors
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest005, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest005, TestSize.Level0)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(TOKEN_THEME_ID);
     EXPECT_TRUE(theme);
@@ -255,7 +255,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest005, TestSize.Level1)
  * @tc.desc: Obtain System Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest006, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest006, TestSize.Level0)
 {
     // container is not inited, can not obtain system theme
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
@@ -267,7 +267,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest006, TestSize.Level1)
  * @tc.desc: Obtain System Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, ObtainSystemTheme002, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, ObtainSystemTheme002, TestSize.Level0)
 {
     // container is not inited, can not obtain system theme
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme(ColorMode::DARK);
@@ -279,7 +279,7 @@ HWTEST_F(WithThemeTestNg, ObtainSystemTheme002, TestSize.Level1)
  * @tc.desc: Set Default Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest007, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest007, TestSize.Level0)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(TOKEN_THEME_ID);
     EXPECT_TRUE(theme);
@@ -295,7 +295,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest007, TestSize.Level1)
  * @tc.desc: Get Default Theme Colors
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest008, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest008, TestSize.Level0)
 {
     auto defaultTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
     EXPECT_TRUE(defaultTheme);
@@ -360,7 +360,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest008, TestSize.Level1)
  * @tc.desc: Obtain System Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest009, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest009, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters and call the function SetIsThemeColorAvailable.
@@ -378,7 +378,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest009, TestSize.Level1)
  * @tc.desc: Obtain System Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest010, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest010, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -403,7 +403,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest010, TestSize.Level1)
  * @tc.desc: Obtain System Theme
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest011, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest011, TestSize.Level0)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -437,7 +437,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest011, TestSize.Level1)
  * @tc.desc: test SetIsThemeColorSetByUser
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest012, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest012, TestSize.Level0)
 {
     /**
      * @tc.steps1: set invalid index.
@@ -469,7 +469,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest012, TestSize.Level1)
  * @tc.desc: reset cache color test
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level0)
 {
     /**
      * @tc.steps1: reset cached theme with defaultLightTheme_ null.
@@ -545,7 +545,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
  * @tc.desc: test GetColorWithResourceObject
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest014, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest014, TestSize.Level0)
 {
     /**
      * @tc.steps1: GetColorWithResourceObject with invalid index.
@@ -563,7 +563,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest014, TestSize.Level1)
  * @tc.desc: reset cache color test
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest015, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest015, TestSize.Level0)
 {
     /**
      * @tc.steps1: reset cahced theme with no cache.
@@ -589,7 +589,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest015, TestSize.Level1)
  * @tc.desc: Get Theme Colors with LIGHT color mode
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest016, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest016, TestSize.Level0)
 {
     constexpr uint32_t LIGHT_THEME_ID = 20001;
 
@@ -668,7 +668,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest016, TestSize.Level1)
  * @tc.desc: Get Theme Colors with COLOR_MODE_UNDEFINED color mode
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeTest017, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeTest017, TestSize.Level0)
 {
     constexpr uint32_t UNDEFINED_THEME_ID = 30001;
 
@@ -747,7 +747,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest017, TestSize.Level1)
  * @tc.desc: Test SetThemeScopeId basic functionality
  * @tc.type: FUNC
  */
-HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level1)
+HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level0)
 {
     // Create WithThemeNode and reset themeScopeId_ to 0
     auto withThemeNode = WithThemeNode::CreateWithThemeNode(60086);
