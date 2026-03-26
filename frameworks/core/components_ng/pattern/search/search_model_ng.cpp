@@ -102,16 +102,16 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::u
     CHECK_NULL_RETURN(searchNode, nullptr);
     ViewStackProcessor::GetInstance()->Push(searchNode);
     auto pattern = searchNode->GetPattern<SearchPattern>();
-    searchNode->SetNeedCallChildrenUpdate(false);
+    if (searchNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        searchNode->SetNeedCallChildrenUpdate(false);
+    }
     return pattern->GetSearchController();
 }
 
 RefPtr<SearchTheme> SearchModelNG::GetTheme(const RefPtr<SearchNode>& frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>(frameNode->GetThemeScopeId());
+    auto searchTheme = frameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_RETURN(searchTheme, nullptr);
     return searchTheme;
 }
@@ -147,8 +147,10 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     auto frameNode =
         GetOrCreateSearchNode(SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
     CHECK_NULL_RETURN(frameNode, nullptr);
-    ACE_UINODE_TRACE(frameNode);
-    ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UINODE_TRACE(frameNode);
+        ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
+    }
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetSearchNode(frameNode);
@@ -1072,7 +1074,9 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
             textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
@@ -1207,9 +1211,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
         DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     CHECK_NULL_VOID(dividerNode);
 
-    auto pipeline = dividerNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>(dividerNode->GetThemeScopeId());
+    auto searchTheme = dividerNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_VOID(searchTheme);
     auto searchDividerColor = searchTheme->GetSearchDividerColor();
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -1867,9 +1869,7 @@ void SearchModelNG::ResetDividerColor(FrameNode* frameNode)
     auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
 
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = dividerFrameNode->GetTheme<SearchTheme>(true);
     auto color = searchTheme->GetSearchDividerColor();
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, DividerColorSetByUser, frameNode);
     dividerRenderProperty->UpdateDividerColor(color);

@@ -166,6 +166,8 @@ constexpr int32_t LAND_DURATION = 100;
 constexpr int32_t ENTER_OFFSET = 1;
 
 constexpr int MAX_SELECTED_AI_ENTITY = 1;
+constexpr double DEFAULT_OPACITY = 0.2;
+const int32_t DEFAULT_ALPHA = 255;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -3084,6 +3086,11 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
         info.dragBackgroundColor = layoutProperty->GetSelectedDragPreviewStyleValue();
     } else {
         info.dragBackgroundColor = std::nullopt;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, info);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            info.dragBackgroundColor = layoutProperty->GetSelectedDragPreviewStyleColor();
+        }
     }
     return info;
 }
@@ -6148,6 +6155,48 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
 
+bool TextFieldPattern::OnThemeScopeUpdateColor(RefPtr<TextFieldLayoutProperty> textFieldLayoutProperty,
+    RefPtr<TextFieldPaintProperty> paintProperty, RefPtr<TextFieldTheme> textFieldTheme)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    CHECK_NULL_RETURN(paintProperty, result);
+    CHECK_NULL_RETURN(textFieldTheme, result);
+
+    if (!paintProperty->HasSelectedBackgroundColorFlagByUser()) {
+        auto selectedColor = textFieldTheme->GetSelectedColor();
+        if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+            selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        paintProperty->UpdateSelectedBackgroundColor(selectedColor);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        result = true;
+    }
+    if (GetShowCounterStyleValue() && HasFocus()) {
+        if (!paintProperty->HasBorderWidthFlagByUser()) {
+            paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
+            if (textFieldLayoutProperty && textFieldLayoutProperty->HasCounterTextOverflowColor()) {
+                paintProperty->UpdateInnerBorderColor(textFieldLayoutProperty->GetCounterTextOverflowColorValue());
+            } else {
+                paintProperty->UpdateInnerBorderColor(textFieldTheme->GetOverCounterColor());
+            }
+        } else {
+            BorderColorProperty overCountBorderColor;
+            if (textFieldLayoutProperty && textFieldLayoutProperty->HasCounterTextOverflowColor()) {
+                overCountBorderColor.SetColor(textFieldLayoutProperty->GetCounterTextOverflowColorValue());
+            } else {
+                overCountBorderColor.SetColor(textFieldTheme->GetOverCounterColor());
+            }
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, result);
+            renderContext->UpdateBorderColor(overCountBorderColor);
+        }
+        result = true;
+    }
+    return result;
+}
+
 bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
@@ -6163,6 +6212,10 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(themeScopeId);
     textFieldTheme_ = textFieldTheme;
     CHECK_NULL_RETURN(textFieldTheme, result);
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        result = OnThemeScopeUpdateColor(textFieldLayoutProperty, paintProperty, textFieldTheme);
+    }
 
     if (!paintProperty->HasBackgroundColor() && !IsUnderlineMode()) {
         auto renderContext = host->GetRenderContext();

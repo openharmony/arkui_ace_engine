@@ -347,6 +347,7 @@ public:
     virtual void ResetCaretColor() = 0;
     virtual void SetCaretPosition(const int32_t& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
+    virtual void ResetSelectedBackgroundColor() {};
     virtual void SetCaretStyle(const CaretStyle& value) = 0;
     virtual void SetMaxLength(uint32_t value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;

@@ -1162,6 +1162,7 @@ ArkThemeWhiteList.whiteList = [
     'JSTextClock',
     'JSTimePicker',
     'Scroll',
+    'JSSearch',
     'Swiper',
     'Text',
     'TextPicker',

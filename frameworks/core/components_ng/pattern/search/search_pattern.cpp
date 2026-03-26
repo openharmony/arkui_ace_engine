@@ -465,9 +465,7 @@ void SearchPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
+    auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
@@ -1527,13 +1525,11 @@ void SearchPattern::InitSearchTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
+    auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     searchNormalColor_ = textFieldTheme->GetBgColor();
     directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
-    searchTheme_ = pipeline->GetTheme<SearchTheme>(host->GetThemeScopeId());
+    searchTheme_ = host->GetTheme<SearchTheme>(true);
 
     // 使用分层参数控制是否需要注册相关事件以适配悬浮态、按压态的变化
     auto hoverAndPressBgColorEnabled = textFieldTheme->GetHoverAndPressBgColorEnabled();
@@ -1550,9 +1546,7 @@ RefPtr<SearchTheme> SearchPattern::GetTheme() const
     }
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, nullptr);
-    auto context = tmpHost->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<SearchTheme>(tmpHost->GetThemeScopeId());
+    auto theme = tmpHost->GetTheme<SearchTheme>(true);
     return theme;
 }
 
@@ -2116,7 +2110,7 @@ void SearchPattern::UpdateDividerColorMode()
     }
     auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
     CHECK_NULL_VOID(dividerFrameNode);
-    auto searchTheme = GetTheme();
+    auto searchTheme = dividerFrameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_VOID(searchTheme);
     auto searchDividerColor = searchTheme->GetSearchDividerColor();
     auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
@@ -2153,9 +2147,7 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
+    auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -2316,6 +2308,9 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, result);
@@ -2327,39 +2322,23 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     searchTheme_ = searchTheme; // update searchTheme_
     searchNormalColor_ = textFieldTheme->GetBgColor(); // update searchNormalColor_
 
-    if (!ButtonNodeOnThemeScopeUpdate(searchTheme)) {
-        return result;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, result);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     }
 
     OnIconColorConfigrationUpdate(searchTheme);
 
-    HandleBackgroundColor();
     UpdateDividerColorMode();
 
     TextNodeOnThemeScopeUpdate(searchTheme, textFieldTheme);
+    PaintSearchFocusState();
+    UpdateTextFieldColor();
 
     return result;
-}
-
-bool SearchPattern::ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme)
-{
-    CHECK_NULL_RETURN(searchTheme, false);
-    auto buttonNode = buttonNode_.Upgrade();
-    if (buttonNode) {
-        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
-        CHECK_NULL_RETURN(textFrameNode, false);
-        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, false);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(buttonLayoutProperty, false);
-
-        if (!buttonLayoutProperty->HasFontColor()) {
-            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-            buttonNode->MarkModifyDone();
-            buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
-    }
-    return true;
 }
 
 bool SearchPattern::TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
@@ -2886,11 +2865,9 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
         auto searchTheme = GetTheme();
         CHECK_NULL_VOID(searchTheme);
-        auto iconTheme = pipeline->GetTheme<IconTheme>(host->GetThemeScopeId());
+        auto iconTheme = host->GetTheme<IconTheme>(true);
         CHECK_NULL_VOID(iconTheme);
         if (iconOptions.GetSrc().value_or("").empty()) {
             imageSourceInfo.SetResourceId(index == SEARCH_IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG

@@ -171,7 +171,6 @@ public:
     void OnSearchColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
     void OnCancelColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
     bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
         const RefPtr<TextFieldTheme>& textFieldTheme);
 

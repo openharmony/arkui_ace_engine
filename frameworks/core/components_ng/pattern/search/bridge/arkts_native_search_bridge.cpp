@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/search_modifier.h"
 #include "frameworks/base/utils/utf_helper.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
@@ -73,6 +74,7 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
+const char SEARCH_FIELD_ETS_TAG[] = "SearchField";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
@@ -513,6 +515,9 @@ ArkUINativeModuleValue SearchBridge::JsCreate(ArkUIRuntimeCallInfo* runtimeCallI
     if (changeEventValIsValid) {
         ParseSearchValueObject(vm, changeEventVal);
     }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        Framework::JSSearchTheme::ApplyTheme();
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -719,7 +724,14 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     nativeNode = isJsView ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
                           : nativeNode;
 
-    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
+    CHECK_NULL_RETURN(searchNode, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(searchNode->HasTextFieldNode(), panda::JSValueRef::Undefined(vm));
+    auto textField = FrameNode::GetFrameNode(SEARCH_FIELD_ETS_TAG, searchNode->GetTextFieldId());
+    CHECK_NULL_RETURN(textField, panda::JSValueRef::Undefined(vm));
+    auto textFieldTheme = textField->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
     RefPtr<ResourceObject> widthObject;
@@ -731,17 +743,16 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     Color caretColor;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    auto parseResult = ArkTSUtils::ParseJsColorAlphaForMaterial(vm, caretColorArg, color, colorObject, nodeInfo);
-    if (isJsView && !parseResult) {
-        //When resetting caret color, the caret width (value/unit) will also be applied.
-        GetArkUINodeModifiers()->getSearchModifier()->resetSearchCaretColor(
-            caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
-        return panda::JSValueRef::Undefined(vm);
-    }
-    if (parseResult) {
+    if (ArkTSUtils::ParseJsColorAlphaForMaterial(vm, caretColorArg, color, colorObject, nodeInfo)) {
         caretColor = color;
     } else {
-        caretColor = textFieldTheme->GetCursorColor();
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            GetArkUINodeModifiers()->getSearchModifier()->resetSearchCaretColor(
+                caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
+            return panda::JSValueRef::Undefined(vm);
+        } else {
+            caretColor = textFieldTheme->GetCursorColor();
+        }
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCaretStyle(nativeNode, caretWidth.Value(),
         static_cast<int8_t>(caretWidth.Unit()), reinterpret_cast<ArkUI_InnerColor*>(&caretColor),
@@ -872,13 +883,13 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
-    auto theme = themeManager->GetTheme<SearchTheme>();
+    auto isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (isJsView) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto theme = frameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     int32_t style = static_cast<int32_t>(theme->GetCancelButtonStyle());
     if (secondArg->IsString(vm)) {
@@ -1266,14 +1277,13 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
         ArkTSUtils::ParseJsString(vm, secondArg, valueString, srcObject)) {
         value.value = valueString.c_str();
     }
-
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
-    auto theme = themeManager->GetTheme<SearchTheme>();
+    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (isJsView) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto theme = frameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     CalcDimension size = theme->GetButtonFontSize();
     RefPtr<ResourceObject> sizeObject;
@@ -1288,7 +1298,6 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
 
     Color fontColor;
     RefPtr<ResourceObject> colorObject;
-    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     nativeNode = isJsView ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
                           : nativeNode;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
@@ -1376,18 +1385,17 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
-    auto theme = themeManager->GetTheme<SearchTheme>();
+    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (isJsView) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto theme = frameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     Color value;
     RefPtr<ResourceObject> resourceObject;
     Color color = theme->GetTextColor();
-    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     nativeNode = isJsView ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
                           : nativeNode;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
@@ -3541,6 +3549,7 @@ ArkUINativeModuleValue SearchBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* ru
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsUndefined() || secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchBackgroundColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     Color colorVal;
