@@ -41,7 +41,7 @@ private:
     DrawingLatticeImpl() = default;
 
     int32_t type_ = 0;
-    Rosen::Drawing::Lattice* latticeNative_;
+    Rosen::Drawing::Lattice* latticeNative_ = nullptr;
     std::shared_ptr<Rosen::Drawing::Lattice> lattice_;
 };
 
