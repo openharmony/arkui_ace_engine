@@ -1134,6 +1134,8 @@ public:
         return forceDarkAllowedbyUser_;
     }
 
+    virtual void OnAllowForceDarkUpdate(uint32_t colorMode) {};
+
     bool IsArkTsRenderNode() const
     {
         return isArkTsRenderNode_;

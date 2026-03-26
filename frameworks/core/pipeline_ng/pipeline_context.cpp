@@ -826,6 +826,11 @@ void PipelineContext::ReloadNodesResource()
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 ResourceParseUtils::SetNeedReload(false);
             }
+        } else if (needReloadNode) {
+            bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
+            ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            ResourceParseUtils::SetNeedReload(false);
         }
     }
     needReloadResource_ = false;
