@@ -2755,9 +2755,6 @@ void TextFieldPattern::HandleTouchUp()
     } else {
         ScheduleDisappearDelayTask();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ReportCommandResult(host->GetId(), "selectionChange");
 }
 
 void TextFieldPattern::ResetTouchAndMoveCaretState()
