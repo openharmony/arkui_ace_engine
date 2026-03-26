@@ -3424,14 +3424,6 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (multipleClickRecognizer->IsTripleClick()) {
         HandleTripleClickEvent(info);
     } else if (multipleClickRecognizer->IsDoubleClick()) {
-tClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer->StartCounting(info);
-    // register click event
-    if (multipleClickRecognizer->IsTripleClick()) {
-        HandleTripleClickEvent(info);
-    } else if (multipleClickRecognizer->IsDoubleClick()) {
- HandleTripleClickEvent(info);
-    } else if (multipleClickRecognizer->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
