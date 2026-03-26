@@ -650,7 +650,7 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     } else if (cmd == "clear") {
         ClearTextContent();
     } else if (cmd == "requestKeyboard") {
-        if (HasFocus) {
+        if (HasFocus()) {
             TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent cmd requestKeyboard HasFocus.");
 		    return false;
         }
@@ -2247,6 +2247,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
+    auto value = contentController_->GetTextValue();
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", value, 0, textSize);
 }
 
 void TextFieldPattern::HandleOnPasswordVault()
