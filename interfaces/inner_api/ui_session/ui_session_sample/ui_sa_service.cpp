@@ -139,6 +139,7 @@ UiSaService& UiSaService::GetInstance()
 void UiSaService::OnStart()
 {
     Publish(this);
+    eventHandler_ = OHOS::AppExecFwk::EventHandler::Current();
 }
 
 void UiSaService::OnStop() {}
@@ -214,7 +215,7 @@ void UiSaService::HandleConnect(sptr<IUiContentService> service, std::vector<std
         LOGI("through uiSa, connect success, foucs window info = %{public}s", res.c_str());
     };
     if (!service->IsConnect()) {
-        service->Connect(cb);
+        service->Connect(cb, eventHandler_);
     }
 }
 
