@@ -2334,7 +2334,7 @@ void CreateOrUpdateAccessibilityFocusPaint(const RefPtr<NG::FrameNode>& focusFra
     CHECK_NULL_VOID(renderContext);
     renderContext->OnZIndexUpdate(INT32_MAX);
     renderContext->ResetAccessibilityFocusRect();
-    renderContext->UpdateAccessibilityFocus(true);
+    renderContext->UpdateAccessibilityFocus(true, focusFrameNode->GetAccessibilityId());
 
     auto pipeline = focusFrameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -2358,7 +2358,7 @@ void RemoveAccessibilityFocusPaint(const RefPtr<NG::FrameNode>& focusFrameNode)
     focusFrameNode->SetPaintNode(nullptr);
     auto renderContext = paintNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateAccessibilityFocus(false);
+    renderContext->UpdateAccessibilityFocus(false, focusFrameNode->GetAccessibilityId());
     auto pattern = paintNode->GetPattern<NG::AccessibilityFocusPaintNodePattern>();
     CHECK_NULL_VOID(pattern);
     auto rootNode = AceType::DynamicCast<NG::FrameNode>(pattern->GetRootNode().Upgrade());
