@@ -1477,8 +1477,13 @@ class PromptAction {
 
     closeToast(toastId) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_prompt.closeToast(toastId);
-        __JSScopeUtil__.restoreInstanceId();
+        try {
+            this.ohos_prompt.closeToast(toastId);
+            __JSScopeUtil__.restoreInstanceId();
+        } catch (e) {
+            __JSScopeUtil__.restoreInstanceId();
+            throw e;
+        }
     }
 
     showDialog(options, callback) {
