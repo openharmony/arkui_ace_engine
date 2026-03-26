@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
-
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/panel/close_icon_layout_property.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"

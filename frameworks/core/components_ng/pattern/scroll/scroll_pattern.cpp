@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"

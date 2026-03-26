@@ -36,7 +36,6 @@
 #include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
-#include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_raw_recognizer.h"
 #include "core/event/touch_event.h"
@@ -45,6 +44,12 @@
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Ace::V2 {
+
+class InspectorNode;
+
+}
 
 namespace OHOS::Ace {
 
@@ -1098,15 +1103,9 @@ public:
         return responseRegionList_;
     }
 
-    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const
-    {
-        return inspector_;
-    }
+    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const;
 
-    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
-    {
-        inspector_ = inspectorNode;
-    }
+    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode);
 
     virtual void SetNeedClip(bool needClip)
     {

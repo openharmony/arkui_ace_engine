@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/animation/animation_util.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"

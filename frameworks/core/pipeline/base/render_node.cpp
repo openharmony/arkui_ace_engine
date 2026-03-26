@@ -30,6 +30,7 @@
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -206,6 +207,16 @@ void RenderNode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
+}
+
+const WeakPtr<V2::InspectorNode>& RenderNode::GetInspectorNode() const
+{
+    return inspector_;
+}
+
+void RenderNode::SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
+{
+    inspector_ = inspectorNode;
 }
 
 void RenderNode::ClearChildren()
