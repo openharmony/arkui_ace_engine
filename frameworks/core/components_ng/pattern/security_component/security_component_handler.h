@@ -52,7 +52,8 @@ public:
     static bool InitButtonInfo(std::string& componentInfo,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
-    static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
+    static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect,
+        bool isSmartEdgeState);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
     static SecurityComponentProbe probe;
     static int32_t ReportSecurityComponentClickEventInner(int32_t& scId,
@@ -148,6 +149,7 @@ private:
     static bool IsSecComponentClipped(RefPtr<FrameNode>& parentNode, RectF& visibleRect, const RectF& frameRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static void CheckSecurityComponentClickEvent(const RefPtr<FrameNode>& node, std::string& message);
+    static bool QuerySmartEdgeState();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
