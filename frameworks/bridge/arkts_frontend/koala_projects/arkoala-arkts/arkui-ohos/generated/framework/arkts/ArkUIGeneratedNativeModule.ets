@@ -1645,6 +1645,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setPlaceholder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _RichEditorAttribute_setOrphanCharOptimization(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _RichText_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _RichTextInterface_setRichTextOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -4417,6 +4419,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getUseCustomDropAnimation(ptr: KPointer): boolean
     @ani.unsafe.Quick
     native static _DragEvent_setUseCustomDropAnimation(ptr: KPointer, useCustomDropAnimation: boolean): void
+    @ani.unsafe.Quick
+    native static _DragEvent_getAutoHideComponentUniqueIds(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _DragEvent_setAutoHideComponentUniqueIds(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DragEvent_setGetModifierKeyState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -4657,6 +4663,16 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_convertPositionFromWindow(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_applyAttributesFinish(peer: KPointer): void
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_createFrameNodes(count: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getRenderNodesByFrameNodes(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getIdsByFrameNodes(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getFrameNodeById1(peer: KPointer, id: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_getFrameNodeByUniqueId1(peer: KPointer, id: KInt): KPointer
     @ani.unsafe.Direct
     native static _FullScreenExitHandler_construct(): KPointer
     @ani.unsafe.Direct

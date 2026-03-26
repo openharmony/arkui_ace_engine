@@ -29,6 +29,8 @@
  * But endMainLineIndex_ corresponds to the last line in viewport.
  */
 namespace OHOS::Ace::NG {
+class GridLayoutProperty;
+
 class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 

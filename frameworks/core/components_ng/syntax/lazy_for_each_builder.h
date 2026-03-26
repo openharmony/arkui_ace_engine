@@ -185,11 +185,15 @@ public:
 
     void ReorganizeOffscreenNode();
 
+    void ProcessOffscreenNodesNotInExpiring(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+
     void ClearAllOffscreenNode();
 
     virtual void ReleaseChildGroupById(const std::string& id) = 0;
 
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
+
+    virtual void RegisterDataChangeListenerHandler() {}
 
     virtual void UnregisterDataChangeListener(V2::DataChangeListener* listener) = 0;
 

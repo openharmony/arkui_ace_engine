@@ -17,6 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_mouse_style.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
@@ -38,6 +39,53 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace NG {
+namespace {
+class ReloadResourceTestPattern : public Pattern {
+    DECLARE_ACE_TYPE(ReloadResourceTestPattern, Pattern);
+
+public:
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        observedColorMode_ = colorMode;
+        observedSystemColorChange_ = context->IsSystemColorChange();
+        callCount_++;
+    }
+
+    bool observedSystemColorChange_ = false;
+    uint32_t observedColorMode_ = 0;
+    int32_t callCount_ = 0;
+};
+
+class ReloadResourceTestNode : public UINode {
+    DECLARE_ACE_TYPE(ReloadResourceTestNode, UINode);
+
+public:
+    explicit ReloadResourceTestNode(int32_t nodeId) : UINode("ReloadResourceTestNode", nodeId, false) {}
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    void OnAllowForceDarkUpdate(uint32_t colorMode) override
+    {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        observedColorMode_ = colorMode;
+        observedSystemColorChange_ = context->IsSystemColorChange();
+        callCount_++;
+    }
+
+    bool observedSystemColorChange_ = false;
+    uint32_t observedColorMode_ = 0;
+    int32_t callCount_ = 0;
+};
+} // namespace
+
 ElementIdType PipelineContextFourTestNg::frameNodeId_ = 0;
 ElementIdType PipelineContextFourTestNg::customNodeId_ = 0;
 RefPtr<FrameNode> PipelineContextFourTestNg::frameNode_ = nullptr;
@@ -948,6 +996,106 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028, TestSize.Level
     context_->needReloadResource_ = true;
     context_->ReloadNodesResource();
     EXPECT_TRUE(context_->needReloadResource_);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg028A
+ * @tc.desc: Test ReloadNodesResource sets isSystemColorChange_ for FrameNode callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028A, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto pattern = AceType::MakeRefPtr<ReloadResourceTestPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("ReloadComponent", 2001, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(false);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(pattern->callCount_, 1);
+    EXPECT_TRUE(pattern->observedSystemColorChange_);
+    EXPECT_EQ(pattern->observedColorMode_, static_cast<uint32_t>(context_->GetColorMode()));
+    EXPECT_FALSE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg028B
+ * @tc.desc: Test ReloadNodesResource sets isSystemColorChange_ for non-FrameNode callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028B, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto testNode = AceType::MakeRefPtr<ReloadResourceTestNode>(2002);
+    ASSERT_NE(testNode, nullptr);
+    testNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(false);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(testNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(testNode->callCount_, 1);
+    EXPECT_TRUE(testNode->observedSystemColorChange_);
+    EXPECT_EQ(testNode->observedColorMode_, static_cast<uint32_t>(context_->GetColorMode()));
+    EXPECT_FALSE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg028C
+ * @tc.desc: Test ReloadNodesResource restores original isSystemColorChange_ value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028C, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto pattern = AceType::MakeRefPtr<ReloadResourceTestPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("ReloadRestoreComponent", 2003, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(true);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(pattern->callCount_, 1);
+    EXPECT_TRUE(pattern->observedSystemColorChange_);
+    EXPECT_TRUE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
 }
 
 /**

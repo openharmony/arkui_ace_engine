@@ -183,8 +183,8 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
             FontWeight fontWeightEnum = parseResult.second;
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(weight,
-                DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
@@ -301,8 +301,8 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
             FontWeight fontWeightEnum = parseResult.second;
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(fontWeight,
-                DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);

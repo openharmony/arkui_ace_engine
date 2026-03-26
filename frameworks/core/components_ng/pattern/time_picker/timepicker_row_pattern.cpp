@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
@@ -2321,7 +2322,8 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !layoutRenderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     host->MarkModifyDone();

@@ -19,6 +19,10 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #define protected public
 #define private public

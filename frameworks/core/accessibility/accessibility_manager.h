@@ -20,7 +20,6 @@
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
 #include "core/accessibility/accessibility_constants.h"
-#include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {
@@ -58,7 +57,7 @@ struct RotateTransform {
 
 class ComposedElement;
 class PipelineBase;
-
+class AccessibilityProvider;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;

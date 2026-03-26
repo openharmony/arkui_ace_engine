@@ -14,6 +14,7 @@
  */
 
 #include "core/animation/shared_transition_effect.h"
+#include "core/animation/animator.h"
 
 namespace OHOS::Ace {
 RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect(

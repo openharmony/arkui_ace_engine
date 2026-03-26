@@ -10851,6 +10851,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOrphanCharOptimization(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RichEditorAttributeModifier
     namespace RichTextModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -22514,6 +22525,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
+            RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUIRichEditorModifierImpl;
     }
@@ -30529,6 +30541,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setUseCustomDropAnimation(");
         WriteToString(&out, useCustomDropAnimation);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag=INTEROP_TAG_UNDEFINED };
+        }
+        string out("getAutoHideComponentUniqueIds(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag=INTEROP_TAG_UNDEFINED };
+    }
+    void SetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer,
+                                           const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setAutoHideComponentUniqueIds(");
+        WriteToString(&out, autoHideComponentUniqueIds);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -48845,6 +48879,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
             DragEventAccessor::SetUseCustomDropAnimationImpl,
+            DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
+            DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
             DragEventAccessor::SetGetModifierKeyStateImpl,
         };
         return &DragEventAccessorImpl;

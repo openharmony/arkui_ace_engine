@@ -17,6 +17,7 @@
 
 #include <dlfcn.h>
 
+#include "base/log/log_wrapper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 

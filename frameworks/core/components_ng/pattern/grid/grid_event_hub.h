@@ -16,29 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_EVENT_HUB_H
 
-#include <functional>
-
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/grid/grid_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "core/components_v2/grid/grid_event.h"
-#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
+class GestureEvent;
 class ItemDragInfo;
 }
 
 namespace OHOS::Ace::NG {
-
-using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
-using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>;
-using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
-using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
-using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
-using ItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
-using ItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
-using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
-
 class DragDropProxy;
+class FrameNode;
+class GestureEventHub;
 
 class GridEventHub : public ScrollableEventHub {
     DECLARE_ACE_TYPE(GridEventHub, ScrollableEventHub);
@@ -88,13 +77,7 @@ public:
         onItemDrop_ = std::move(onItemDrop);
     }
 
-    void FireOnScrollToIndex(int32_t param) const
-    {
-        if (onScrollToIndex_) {
-            V2::GridEventInfo info(param);
-            onScrollToIndex_(&info);
-        }
-    }
+    void FireOnScrollToIndex(int32_t param) const;
 
     void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
     {

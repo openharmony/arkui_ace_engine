@@ -23,6 +23,7 @@
 #include "frameworks/core/interfaces/drawable/drawable_api.h"
 
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NodeModel {

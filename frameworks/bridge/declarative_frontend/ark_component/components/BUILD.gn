@@ -32,12 +32,8 @@ template("arkui_abc") {
 
 arkui_modules = [
   "dynamiclayout",
-  "datapanel",
   "flowitem",
-  "patternlock",
-  "counter",
   "sidebarcontainer",
-  "textclock",
   "checkbox",
   "checkboxgroup",
   "alphabetindexer",
@@ -61,10 +57,6 @@ arkui_modules = [
   "richeditor",
 ]
 
-if (qrcodegen_support) {
-    arkui_modules += [ "qrcode" ]
-}
-
 if (!ace_engine_feature_wearable) {
   arkui_modules += [
     "folderstack",
@@ -83,7 +75,15 @@ foreach(item, arkui_modules) {
 # TODO: Unify arkui_modules and special_components arrays in future refactoring
 special_components = [
   "arkgauge",
+  "arkdatapanel",
+  "arktextclock",
+  "arkpatternlock",
+  "arkcounter",
 ]
+
+if (qrcodegen_support) {
+  special_components += [ "arkqrcode" ]
+}
 
 # Add special components to module_targets
 foreach(item, special_components) {

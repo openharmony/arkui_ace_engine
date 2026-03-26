@@ -14,6 +14,7 @@
  */
 
 #include "inspect_slider.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectSlider::InspectSlider(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

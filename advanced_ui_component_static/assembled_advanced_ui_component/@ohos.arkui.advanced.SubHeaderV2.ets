@@ -186,7 +186,7 @@ export class SubHeaderV2OperationItem {
   }
 }
 
-interface ContentIconOption {
+export interface ContentIconOption {
   content?: ResourceStr;
   subContent?: ResourceStr;
   iconOptions?: SubHeaderV2IconType;
@@ -211,7 +211,7 @@ class FontStyle {
 }
 
 @ObservedV2
-class SubHeaderTheme {
+export class SubHeaderTheme {
   @Trace
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   @Trace
@@ -258,7 +258,7 @@ function disabledStyle(instance: CommonMethod) {
   instance.opacity(getResourceValue('sys.float.interactive_disable'))
 }
 
-class SubHeaderModifier implements AttributeModifier<RowAttribute> {
+export class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
 
   applyNormalAttribute(instance: RowAttribute): void {

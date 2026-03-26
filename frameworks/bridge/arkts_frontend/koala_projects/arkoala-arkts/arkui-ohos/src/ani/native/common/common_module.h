@@ -42,6 +42,7 @@ void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier);
 void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_object frameNdoe);
+void SetCustomCallbackWithCheckForFrameNodes(ani_env* env, ani_object obj, ani_array ptrArray, ani_array nodeArray);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
 void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);

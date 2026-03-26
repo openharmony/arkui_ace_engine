@@ -25532,6 +25532,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setPlaceholder)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_PlaceholderStyle* style);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                     const Opt_Boolean* value);
 } GENERATED_ArkUIRichEditorModifier;
 
 typedef struct GENERATED_ArkUIRichTextModifier {
@@ -28602,6 +28604,9 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Boolean (*getUseCustomDropAnimation)(Ark_DragEvent peer);
     void (*setUseCustomDropAnimation)(Ark_DragEvent peer,
                                       Ark_Boolean useCustomDropAnimation);
+    Opt_Union_I32_Array_I32 (*getAutoHideComponentUniqueIds)(Ark_DragEvent peer);
+    void (*setAutoHideComponentUniqueIds)(Ark_DragEvent peer,
+                                          const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds);
     void (*setGetModifierKeyState)(Ark_DragEvent peer,
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
 } GENERATED_ArkUIDragEventAccessor;
@@ -28808,6 +28813,13 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Array_F64 (*convertPositionFromWindow)(Ark_FrameNode peer,
                                            const Ark_Vector2* positionByWindow);
     void (*applyAttributesFinish)(Ark_FrameNode peer);
+    Array_Pointer (*createFrameNodes)(Ark_Int32 count);
+    Array_Pointer (*getRenderNodesByFrameNodes)(const Array_Pointer* ptrs);
+    Array_I32 (*getIdsByFrameNodes)(const Array_Pointer* ptrs);
+    Ark_NativePointer (*getFrameNodeById1)(Ark_FrameNode peer,
+                                           const Ark_String* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId1)(Ark_FrameNode peer,
+                                                 Ark_Int32 id);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {
@@ -32063,4 +32075,3 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
-

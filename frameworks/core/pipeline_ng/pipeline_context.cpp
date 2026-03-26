@@ -828,6 +828,7 @@ void PipelineContext::ReloadNodesResource()
         return;
     }
 
+    const bool originIsSystemColorChange = IsSystemColorChange();
     auto needReloadNodes = std::move(needReloadNodes_);
     for (const auto& it : needReloadNodes) {
         auto needReloadNode = it.Upgrade();
@@ -837,13 +838,17 @@ void PipelineContext::ReloadNodesResource()
             if (pattern) {
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
                 ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+                SetIsSystemColorChange(true);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
+                SetIsSystemColorChange(originIsSystemColorChange);
                 ResourceParseUtils::SetNeedReload(false);
             }
         } else if (needReloadNode) {
             bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
             ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            SetIsSystemColorChange(true);
             needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            SetIsSystemColorChange(originIsSystemColorChange);
             ResourceParseUtils::SetNeedReload(false);
         }
     }
@@ -2441,6 +2446,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
+    MarkLpxDirtyNodes();
 }
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
@@ -7666,6 +7672,28 @@ void PipelineContext::FlushAsyncLoadTask()
     auto asyncLoadTasks = std::move(asyncLoadTasks_);
     for (auto& task : asyncLoadTasks) {
         task();
+    }
+}
+
+void PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.emplace(node);
+}
+
+void PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.erase(node);
+}
+
+void PipelineContext::MarkLpxDirtyNodes()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 } // namespace OHOS::Ace::NG

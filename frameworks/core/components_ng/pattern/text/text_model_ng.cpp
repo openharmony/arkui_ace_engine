@@ -2036,4 +2036,16 @@ std::optional<void*> TextModelNG::GetInnerParagraph(FrameNode* frameNode)
     CHECK_NULL_RETURN(textPattern, std::nullopt);
     return textPattern->GetDrawParagraph();
 }
+
+void TextModelNG::SetStyledString(FrameNode* frameNode, const SpanString* value)
+{
+    CHECK_NULL_VOID(frameNode && value);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+    auto length = value->GetLength();
+    auto target = value->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(target);
+    pattern->SetStyledString(mutableSpanString, true, true);
+}
 } // namespace OHOS::Ace::NG

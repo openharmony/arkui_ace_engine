@@ -72,6 +72,7 @@ struct DragControllerAsyncCtx {
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData = nullptr;
     RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams = nullptr;
+    std::vector<int32_t> autoHideComponentUniqueIds;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -437,6 +438,24 @@ void HandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
 }
 
+void ExecuteAutoHideComponentTargets(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
+{
+    CHECK_NULL_VOID(asyncCtx);
+    if (asyncCtx->autoHideComponentUniqueIds.empty()) {
+        return;
+    }
+    auto targets = DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(asyncCtx->autoHideComponentUniqueIds);
+    size_t hiddenCount = 0;
+    for (const auto& target : targets) {
+        if (DragDropFuncWrapper::UpdateAutoHideTargetVisibility(target)) {
+            ++hiddenCount;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Auto hide targets for dragController finished, config size %{public}zu, hidden size %{public}zu",
+        asyncCtx->autoHideComponentUniqueIds.size(), hiddenCount);
+}
+
 void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     CHECK_NULL_VOID(asyncCtx);
@@ -596,6 +615,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    ExecuteAutoHideComponentTargets(asyncCtx);
     Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
         Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
@@ -801,6 +821,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    ExecuteAutoHideComponentTargets(asyncCtx);
     Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
         Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
@@ -974,6 +995,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     dragAsyncContext->destroyJsFunction = asyncCtx.destroyJsFunction;
+    dragAsyncContext->autoHideComponentUniqueIds = asyncCtx.autoHideComponentUniqueIds;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {

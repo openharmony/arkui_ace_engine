@@ -15,6 +15,8 @@
 
 #include "compatible/components/video/rosen_render_texture.h"
 
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 
 #include "core/pipeline/base/rs_node_adapter.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -23,8 +25,13 @@
 
 #include "base/log/dump_log.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
+
+RosenRenderTexture::RosenRenderTexture() = default;
+
+RosenRenderTexture::~RosenRenderTexture() = default;
 
 namespace {
 

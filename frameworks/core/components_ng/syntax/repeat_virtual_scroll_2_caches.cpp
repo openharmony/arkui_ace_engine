@@ -15,7 +15,6 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 
-#include <cstdint>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>

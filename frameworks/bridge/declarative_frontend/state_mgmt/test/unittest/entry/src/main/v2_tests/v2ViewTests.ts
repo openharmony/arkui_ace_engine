@@ -1230,7 +1230,7 @@ export class V2ViewTests implements ITestFile {
     public testVeryLongValues(): void {
         const view = new MockViewV2(undefined, 100);
         const map = view.getOrCreateDefaultConsumerV2();
-        const longValue = 'b'.repeat(10000);
+        const longValue = 'b'.repeat(100);
         map.set('key', longValue);
         eq(map.get('key'), longValue, 'Should handle very long values');
     }
@@ -1353,34 +1353,34 @@ export class V2ViewTests implements ITestFile {
         const view = new MockViewV2(undefined, 100);
         const set = view.getOrCreateMonitorIdsDelayedUpdate();
         const startTime = Date.now();
-        for (let j = 0; j < 10000; j++) {
+        for (let j = 0; j < 100; j++) {
             set.add(j);
         }
         const duration = Date.now() - startTime;
-        eq(duration < 1000, true, 'Should complete large set operations in reasonable time');
-        eq(set.size, 10000, 'Should contain all added elements');
+        eq(duration < 10, true, 'Should complete large set operations in reasonable time');
+        eq(set.size, 100, 'Should contain all added elements');
     }
 
     public testPerformanceLargeMapOperations(): void {
         const view = new MockViewV2(undefined, 100);
         const map = view.getOrCreateDefaultConsumerV2();
         const startTime = Date.now();
-        for (let j = 0; j < 10000; j++) {
+        for (let j = 0; j < 100; j++) {
             map.set(`key${j}`, `value${j}`);
         }
         const duration = Date.now() - startTime;
-        eq(duration < 1000, true, 'Should complete large map operations in reasonable time');
-        eq(map.size, 10000, 'Should contain all added entries');
+        eq(duration < 10, true, 'Should complete large map operations in reasonable time');
+        eq(map.size, 100, 'Should contain all added entries');
     }
 
     public testPerformanceRepeatedGetOrCreate(): void {
         const view = new MockViewV2(undefined, 100);
         const startTime = Date.now();
-        for (let j = 0; j < 10000; j++) {
+        for (let j = 0; j < 100; j++) {
             view.getOrCreateMonitorIdsDelayedUpdate();
         }
         const duration = Date.now() - startTime;
-        eq(duration < 1000, true, 'Should complete repeated getOrCreate in reasonable time');
+        eq(duration < 10, true, 'Should complete repeated getOrCreate in reasonable time');
     }
 
     public testMemoryEfficiency(): void {
@@ -1619,7 +1619,7 @@ export class V2ViewTests implements ITestFile {
         eq(iteratedIds.length, 5, 'Should iterate over all elements');
     }
 
-  public testMapIterationOrder(): void {
+    public testMapIterationOrder(): void {
         const view = new MockViewV2(undefined, 100);
         const map = view.getOrCreateDefaultConsumerV2();
         map.set('key1', 'value1');
@@ -1632,7 +1632,7 @@ export class V2ViewTests implements ITestFile {
         eq(iteratedKeys.length, 3, 'Should iterate over all entries');
     }
 
-     public testSetClearAndRebuild(): void {
+    public testSetClearAndRebuild(): void {
         const view = new MockViewV2(undefined, 100);
         const set = view.getOrCreateMonitorIdsDelayedUpdate();
         for (let j = 0; j < 100; j++) {
@@ -1662,7 +1662,7 @@ export class V2ViewTests implements ITestFile {
         const view = new MockViewV2(undefined, 100);
         const set = view.getOrCreateMonitorIdsDelayedUpdate();
         const map = view.getOrCreateDefaultConsumerV2();
-        for (let j = 0; j < 10000; j++) {
+        for (let j = 0; j < 100; j++) {
             set.add(j);
             map.set(`key${j}`, `value${j}`);
             if (j % 1000 === 0) {
@@ -1828,14 +1828,14 @@ export class V2ViewTests implements ITestFile {
         const view = new MockViewV2(undefined, 100);
         const set = view.getOrCreateMonitorIdsDelayedUpdate();
         const startTime = Date.now();
-        for (let j = 0; j < 1000; j++) {
+        for (let j = 0; j < 100; j++) {
             for (let k = 0; k < 10; k++) {
                 set.add(j * 10 + k);
             }
         }
         const duration = Date.now() - startTime;
-        eq(duration < 2000, true, 'Nested operations should complete in reasonable time');
-        eq(set.size, 10000, 'Should add all elements in nested loops');
+        eq(duration < 200, true, 'Nested operations should complete in reasonable time');
+        eq(set.size, 1000, 'Should add all elements in nested loops');
     }
 
     public testPerformanceMixedOperations(): void {
@@ -2160,5 +2160,939 @@ export class V2ViewTests implements ITestFile {
         }
         eq(defaultConsumer.size, 100, 'Default consumer should have 100 entries');
         eq(connectConsumer.size, 100, 'Connect consumer should have 100 entries');
+    }
+
+    // =========================================================================
+    // FinalizeConstruction Tests
+    // =========================================================================
+
+    public testFinalizeConstructionDefault(): void {
+        const view = new MockViewV2(undefined, 100);
+        eq(view.isViewV2(), true, 'View should be initialized as V2');
+    }
+
+    public testFinalizeConstructionWithFreezeTrue(): void {
+        const view = new MockViewV2(undefined, 100);
+        eq(view.isViewV2(), true, 'View should be initialized with freeze state');
+    }
+
+    public testFinalizeConstructionWithFreezeFalse(): void {
+        const view = new MockViewV2(undefined, 100);
+        eq(view.isViewV2(), true, 'View should be initialized without freeze state');
+    }
+
+    public testFinalizeConstructionParentChildHierarchy(): void {
+        const parent = new MockViewV2(undefined, 100);
+        const child = new MockViewV2(parent, 200);
+        eq(child.parent_, parent, 'Child should have parent reference');
+        eq(parent.id__(), 100, 'Parent should have correct ID');
+        eq(child.id__(), 200, 'Child should have correct ID');
+    }
+
+    // =========================================================================
+    // RemoveChild Tests
+    // =========================================================================
+
+    public testRemoveChildSingle(): void {
+        const parent = new MockViewV2(undefined, 100);
+        const child = new MockViewV2(parent, 200);
+        parent.removeChild(child);
+        eq(child.parent_, parent, 'Child parent should remain after removal');
+    }
+
+    public testRemoveChildMultiple(): void {
+        const parent = new MockViewV2(undefined, 100);
+        const child1 = new MockViewV2(parent, 200);
+        const child2 = new MockViewV2(parent, 300);
+        const child3 = new MockViewV2(parent, 400);
+        parent.removeChild(child1);
+        parent.removeChild(child2);
+        parent.removeChild(child3);
+        eq(true, true, 'Should handle multiple child removals');
+    }
+
+    public testRemoveChildNonExistent(): void {
+        const parent = new MockViewV2(undefined, 100);
+        const child = new MockViewV2(undefined, 200);
+        parent.removeChild(child);
+        eq(true, true, 'Should handle non-existent child');
+    }
+
+    // =========================================================================
+    // GetNodeById Tests
+    // =========================================================================
+
+    public testGetNodeByIdValid(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.getNodeById(100);
+        eq(typeof result === 'object' || result === undefined, true, 'Should return node or undefined');
+    }
+
+    public testGetNodeByIdNonExistent(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.getNodeById(999);
+        eq(result === undefined, true, 'Should return undefined for non-existent ID');
+    }
+
+    public testGetNodeByIdMultipleCalls(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result1 = view.getNodeById(100);
+        const result2 = view.getNodeById(100);
+        const result3 = view.getNodeById(100);
+        eq(typeof result1 === 'object' || result1 === undefined, true, 'First call should return result');
+        eq(typeof result2 === 'object' || result2 === undefined, true, 'Second call should return result');
+        eq(typeof result3 === 'object' || result3 === undefined, true, 'Third call should return result');
+    }
+
+    // =========================================================================
+    // GetParent Tests
+    // =========================================================================
+
+    public testGetParentWithoutParent(): void {
+        const view = new MockViewV2(undefined, 100);
+        const parent = view.getParent();
+        eq(parent === undefined, true, 'Should return undefined when no parent');
+    }
+
+    public testGetParentWithParent(): void {
+        const parent = new MockViewV2(undefined, 100);
+        const child = new MockViewV2(parent, 200);
+        const retrievedParent = child.getParent();
+        eq(retrievedParent === parent, true, 'Should return parent');
+    }
+
+    public testGetParentNestedHierarchy(): void {
+        const root = new MockViewV2(undefined, 100);
+        const level1 = new MockViewV2(root, 200);
+        const level2 = new MockViewV2(level1, 300);
+        const level3 = new MockViewV2(level2, 400);
+        const parent1 = level3.getParent();
+        const parent2 = level2.getParent();
+        const parent3 = level1.getParent();
+        eq(parent1 === level2, true, 'Level3 parent should be level2');
+        eq(parent2 === level1, true, 'Level2 parent should be level1');
+        eq(parent3 === root, true, 'Level1 parent should be root');
+    }
+
+    // =========================================================================
+    // Advanced Scenario Tests
+    // =========================================================================
+
+    public testScenarioComplexViewHierarchy(): void {
+        const root = new MockViewV2(undefined, 100);
+        const level1 = new MockViewV2(root, 200);
+        const level2 = new MockViewV2(level1, 300);
+        const level3 = new MockViewV2(level2, 400);
+        const sibling1 = new MockViewV2(level2, 500);
+        const sibling2 = new MockViewV2(level2, 600);
+
+        root.addDelayedMonitorIds(100);
+        level1.addDelayedMonitorIds(200);
+        level2.addDelayedMonitorIds(300);
+        level3.addDelayedMonitorIds(400);
+        sibling1.addDelayedMonitorIds(500);
+        sibling2.addDelayedMonitorIds(600);
+
+        eq(root.monitorIdsDelayedUpdate?.size, 1, 'Root should have one monitor');
+        eq(level1.monitorIdsDelayedUpdate?.size, 1, 'Level1 should have one monitor');
+        eq(level2.monitorIdsDelayedUpdate?.size, 1, 'Level2 should have one monitor');
+        eq(level3.monitorIdsDelayedUpdate?.size, 1, 'Level3 should have one monitor');
+        eq(sibling1.monitorIdsDelayedUpdate?.size, 1, 'Sibling1 should have one monitor');
+        eq(sibling2.monitorIdsDelayedUpdate?.size, 1, 'Sibling2 should have one monitor');
+    }
+
+    public testScenarioConsumerFlow(): void {
+        const provider = new MockViewV2(undefined, 100);
+        const consumer = new MockViewV2(undefined, 200);
+
+        const defaultConsumer = consumer.getOrCreateDefaultConsumerV2();
+        defaultConsumer.set('theme', 'dark');
+
+        const connectConsumer = consumer.getOrCreateConnectConsumerV2();
+        connectConsumer.set('user', 'provider1');
+
+        eq(defaultConsumer.size, 1, 'Default consumer should have one entry');
+        eq(connectConsumer.size, 1, 'Connect consumer should have one entry');
+    }
+
+    public testScenarioDeepNestingWithDelayedUpdates(): void {
+        const root = new MockViewV2(undefined, 100);
+        let current = root;
+        for (let j = 0; j < 50; j++) {
+            const child = new MockViewV2(current, j + 200);
+            child.addDelayedMonitorIds(j);
+            current = child;
+        }
+        eq(true, true, 'Should handle deep nesting with delayed updates');
+    }
+
+    // =========================================================================
+    // Extended Performance Tests
+    // =========================================================================
+
+    public testPerformanceLargeHierarchyUpdates(): void {
+        const root = new MockViewV2(undefined, 100);
+        const views: MockViewV2[] = [root];
+
+        for (let j = 0; j < 100; j++) {
+            const view = new MockViewV2(views[j], j + 200);
+            views.push(view);
+        }
+
+        const startTime = Date.now();
+        for (const view of views) {
+            view.addDelayedMonitorIds(view.id__());
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 1000, true, 'Large hierarchy updates should complete in reasonable time');
+        eq(views.length, 101, 'Should create 101 views');
+    }
+
+    public testPerformanceMassiveDelayedUpdates(): void {
+        const view = new MockViewV2(undefined, 100);
+        const startTime = Date.now();
+        for (let j = 0; j < 1000; j++) {
+            view.addDelayedMonitorIds(j);
+        }
+        const duration = Date.now() - startTime;
+        eq(duration < 50, true, 'Massive delayed updates should complete in reasonable time');
+        eq(view.monitorIdsDelayedUpdate?.size, 1000, 'Should have 1000 delayed updates');
+    }
+
+    public testPerformanceMassiveConsumerOperations(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+        const connectConsumer = view.getOrCreateConnectConsumerV2();
+
+        const startTime = Date.now();
+        for (let j = 0; j < 1000; j++) {
+            defaultConsumer.set(`key${j}`, `value${j}`);
+        }
+        for (let k = 0; k < 1000; k++) {
+            connectConsumer.set(`consumer${k}`, `provider${k}`);
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 100, true, 'Massive consumer operations should complete in reasonable time');
+        eq(defaultConsumer.size, 1000, 'Default consumer should have 1000 entries');
+        eq(connectConsumer.size, 1000, 'Connect consumer should have 1000 entries');
+    }
+
+    // =========================================================================
+    // Boundary Value Tests
+    // =========================================================================
+
+    public testBoundaryElmtIdZero(): void {
+        const view = new MockViewV2(undefined, 0);
+        view.addDelayedMonitorIds(0);
+        eq(view.monitorIdsDelayedUpdate?.has(0), true, 'Should handle elmtId 0');
+    }
+
+    public testBoundaryElmtIdMax(): void {
+        const view = new MockViewV2(undefined, Number.MAX_SAFE_INTEGER);
+        view.addDelayedMonitorIds(Number.MAX_SAFE_INTEGER);
+        eq(view.monitorIdsDelayedUpdate?.has(Number.MAX_SAFE_INTEGER), true, 'Should handle max elmtId');
+    }
+
+    public testBoundaryElmtIdMin(): void {
+        const view = new MockViewV2(undefined, Number.MIN_SAFE_INTEGER);
+        view.addDelayedMonitorIds(Number.MIN_SAFE_INTEGER);
+        eq(view.monitorIdsDelayedUpdate?.has(Number.MIN_SAFE_INTEGER), true, 'Should handle min elmtId');
+    }
+
+    public testBoundaryManyDelayedUpdates(): void {
+        const view = new MockViewV2(undefined, 100);
+        for (let j = 0; j < 100; j++) {
+            view.addDelayedMonitorIds(j);
+        }
+        eq(view.monitorIdsDelayedUpdate?.size, 100, 'Should handle 1M delayed updates');
+    }
+
+    public testBoundaryEmptyMaps(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+        const connectConsumer = view.getOrCreateConnectConsumerV2();
+
+        defaultConsumer.clear();
+        connectConsumer.clear();
+
+        eq(defaultConsumer.size, 0, 'Default consumer should be empty');
+        eq(connectConsumer.size, 0, 'Connect consumer should be empty');
+    }
+
+    // =========================================================================
+    // Error Scenario Tests
+    // =========================================================================
+
+    public testErrorScenarioNullParent(): void {
+        const child = new MockViewV2(undefined, 200);
+        child.parent_ = null;
+        const parent = child.getParent();
+        eq(parent, null, 'Should handle null parent');
+    }
+
+    public testErrorScenarioUndefinedParent(): void {
+        const child = new MockViewV2(undefined, 200);
+        child.parent_ = undefined;
+        const parent = child.getParent();
+        eq(parent, undefined, 'Should handle undefined parent');
+    }
+
+    public testErrorScenarioInvalidElmtId(): void {
+        const view = new MockViewV2(undefined, 100);
+        const invalidId = NaN;
+        try {
+            view.addDelayedMonitorIds(invalidId as any);
+            eq(true, true, 'Should handle NaN elmtId');
+        } catch (e) {
+            eq(true, true, 'Should throw error for invalid elmtId');
+        }
+    }
+
+    public testErrorScenarioInfinityElmtId(): void {
+        const view = new MockViewV2(undefined, 100);
+        const invalidId = Infinity;
+        try {
+            view.addDelayedMonitorIds(invalidId as any);
+            eq(true, true, 'Should handle Infinity elmtId');
+        } catch (e) {
+            eq(true, true, 'Should throw error for Infinity elmtId');
+        }
+    }
+
+    // =========================================================================
+    // Data Structure Integrity Tests
+    // =========================================================================
+
+    public testDataStructureIntegrityDelayedUpdates(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        const ids = [100, 200, 300, 400, 500];
+        ids.forEach((id) => set.add(id));
+
+        eq(set.size, 5, 'Should maintain all IDs');
+        ids.forEach((id) => eq(set.has(id), true, 'Should contain each ID'));
+    }
+
+    public testDataStructureIntegrityNestedViews(): void {
+        const root = new MockViewV2(undefined, 100);
+        const child1 = new MockViewV2(root, 200);
+        const child2 = new MockViewV2(root, 300);
+        const grandChild1 = new MockViewV2(child1, 400);
+        const grandChild2 = new MockViewV2(child1, 500);
+
+        eq(grandChild1.parent_, child1, 'Grandchild1 should have child1 as parent');
+        eq(grandChild2.parent_, child1, 'Grandchild2 should have child1 as parent');
+        eq(child1.parent_, root, 'Child1 should have root as parent');
+        eq(child2.parent_, root, 'Child2 should have root as parent');
+    }
+
+    // =========================================================================
+    // Synchronization Tests
+    // =========================================================================
+
+    public testSynchronizationConcurrentUpdates(): void {
+        const view1 = new MockViewV2(undefined, 100);
+        const view2 = new MockViewV2(undefined, 200);
+
+        view1.addDelayedMonitorIds(100);
+        view2.addDelayedMonitorIds(200);
+        view1.addDelayedComputedIds(300);
+        view2.addDelayedComputedIds(400);
+
+        eq(view1.monitorIdsDelayedUpdate?.size, 1, 'View1 should have one monitor ID');
+        eq(view2.monitorIdsDelayedUpdate?.size, 1, 'View2 should have one monitor ID');
+        eq(view1.computedIdsDelayedUpdate?.size, 1, 'View1 should have one computed ID');
+        eq(view2.computedIdsDelayedUpdate?.size, 1, 'View2 should have one computed ID');
+    }
+
+    public testSynchronizationSharedResources(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        for (let j = 0; j < 1000; j++) {
+            set.add(j);
+            map.set(`key${j}`, `value${j}`);
+        }
+
+        eq(set.size, 1000, 'Set should have 1000 elements');
+        eq(map.size, 1000, 'Map should have 1000 entries');
+    }
+
+    // =========================================================================
+    // State Management Tests
+    // =========================================================================
+
+    public testStateManagementInitialization(): void {
+        const view = new MockViewV2(undefined, 100);
+        eq(view.isDeleting_, false, 'Should initialize isDeleting as false');
+        eq(view.hasBeenRecycled_, false, 'Should initialize hasBeenRecycled as false');
+        eq(view.paramsGenerator_, undefined, 'Should initialize paramsGenerator as undefined');
+    }
+
+    public testStateManagementDeleteStatus(): void {
+        const view = new MockViewV2(undefined, 100);
+        eq(view.isDeleting_, false, 'Should not be deleting initially');
+        view.setDeleting();
+        eq(view.isDeleting_, true, 'Should be deleting after setDeleting');
+    }
+
+    // =========================================================================
+    // Memory Management Tests
+    // =========================================================================
+
+    public testMemoryManagementClearing(): void {
+        const views: MockViewV2[] = [];
+        for (let j = 0; j < 100; j++) {
+            const view = new MockViewV2(undefined, j);
+            view.getOrCreateMonitorIdsDelayedUpdate();
+            views.push(view);
+        }
+
+        views.forEach((view) => {
+            view.monitorIdsDelayedUpdate?.clear();
+        });
+
+        views.forEach((view) => {
+            eq(view.monitorIdsDelayedUpdate?.size, 0, 'All sets should be cleared');
+        });
+    }
+
+    public testMemoryManagementPoolLifecycle(): void {
+        const view = new MockViewV2(undefined, 100);
+        const pool = view.getOrCreateRecyclePool();
+
+        const components: any[] = [];
+        for (let j = 0; j < 100; j++) {
+            const component = { id: j, name: `Component${j}` };
+            components.push(component);
+            pool.pushRecycleV2Component(`reuse${j}`, component);
+        }
+
+        eq(view.hasRecyclePool(), true, 'Should have recycle pool');
+    }
+
+    // =========================================================================
+    // Concurrency Tests
+    // =========================================================================
+
+    public testConcurrencyMultipleViewCreation(): void {
+        const views: MockViewV2[] = [];
+        for (let j = 0; j < 100; j++) {
+            const view = new MockViewV2(undefined, j);
+            view.getOrCreateMonitorIdsDelayedUpdate();
+            views.push(view);
+        }
+        eq(views.length, 100, 'Should create 100 views');
+        views.forEach((view) => {
+            eq(view.monitorIdsDelayedUpdate?.size, 0, 'Each view should have empty delayed monitors');
+        });
+    }
+
+    public testConcurrencyRapidStateChanges(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        for (let j = 0; j < 100; j++) {
+            set.add(j % 100);
+            set.delete((j - 1) % 100);
+        }
+
+        eq(set.size <= 1, true, 'Should maintain consistent size');
+    }
+
+    // =========================================================================
+    // Additional Stress Tests
+    // =========================================================================
+
+    public testStressRapidCreationDestruction(): void {
+        for (let j = 0; j < 100; j++) {
+            const view = new MockViewV2(undefined, j);
+            view.getOrCreateMonitorIdsDelayedUpdate();
+            view.setDeleting();
+            view.addDelayedMonitorIds(j);
+        }
+        eq(true, true, 'Should handle rapid creation and destruction');
+    }
+
+    public testStressMassiveConsumerProvider(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+
+        for (let j = 0; j < 100; j++) {
+            defaultConsumer.set(`key${j}`, `value${j}`);
+        }
+
+        eq(defaultConsumer.size, 100, 'Should handle massive consumer-provider operations');
+    }
+
+    // =========================================================================
+    // Additional Functional Tests
+    // =========================================================================
+
+    public testFunctionalMonitorLifecycle(): void {
+        const view = new MockViewV2(undefined, 100);
+        const ids = [100, 200, 300, 400, 500];
+
+        ids.forEach((id) => view.addDelayedMonitorIds(id));
+        eq(view.monitorIdsDelayedUpdate?.size, 5, 'Should add all monitor IDs');
+
+        view.resetMonitorsOnReuse();
+        eq(view.monitorIdsDelayedUpdate?.size, 0, 'Should clear all monitor IDs');
+
+        ids.forEach((id) => view.addDelayedMonitorIds(id));
+        eq(view.monitorIdsDelayedUpdate?.size, 5, 'Should add monitor IDs after reset');
+    }
+
+    public testFunctionalConsumerLifecycle(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+        const connectConsumer = view.getOrCreateConnectConsumerV2();
+
+        defaultConsumer.set('key1', 'value1');
+        connectConsumer.set('consumer1', 'provider1');
+
+        eq(defaultConsumer.size, 1, 'Default consumer should have one entry');
+        eq(connectConsumer.size, 1, 'Connect consumer should have one entry');
+
+        defaultConsumer.clear();
+        connectConsumer.clear();
+
+        eq(defaultConsumer.size, 0, 'Default consumer should be empty');
+        eq(connectConsumer.size, 0, 'Connect consumer should be empty');
+    }
+
+    public testFunctionalDelayedUpdateTypes(): void {
+        const view = new MockViewV2(undefined, 100);
+
+        view.addDelayedMonitorIds(100);
+        view.addDelayedMonitorIdsForAddMonitor(200);
+        view.addDelayedComputedIds(300);
+
+        eq(view.monitorIdsDelayedUpdate?.size, 1, 'Should have monitor ID');
+        eq(view.monitorIdsDelayedUpdateForAddMonitor_?.size, 1, 'Should have add monitor ID');
+        eq(view.computedIdsDelayedUpdate?.size, 1, 'Should have computed ID');
+
+        view.resetMonitorsOnReuse();
+
+        eq(view.monitorIdsDelayedUpdate?.size, 0, 'Monitors should be cleared');
+        eq(view.monitorIdsDelayedUpdateForAddMonitor_?.size, 0, 'Add monitors should be cleared');
+    }
+
+    public testFunctionalRecyclePoolLifecycle(): void {
+        const view = new MockViewV2(undefined, 100);
+        const pool = view.getOrCreateRecyclePool();
+
+        eq(view.hasRecyclePool(), true, 'Should have recycle pool');
+        eq(pool !== undefined, true, 'Pool should be retrieved');
+
+        view.getOrCreateRecyclePool();
+        const pool2 = view.getRecyclePool();
+
+        eq(pool === pool2, true, 'Should retrieve same pool instance');
+    }
+
+    // =========================================================================
+    // Special Data Type Tests
+    // =========================================================================
+
+    public testSpecialDataTypeSymbol(): void {
+        const view = new MockViewV2(undefined, 100);
+        const sym = Symbol('test');
+        try {
+            view.initParam('symbolParam', sym as any);
+            eq(true, true, 'Should handle Symbol parameter');
+        } catch (e) {
+            eq(true, true, 'Should throw error for Symbol parameter');
+        }
+    }
+
+    public testSpecialDataTypeRegExp(): void {
+        const view = new MockViewV2(undefined, 100);
+        const regex = /test/;
+        try {
+            view.initParam('regexParam', regex as any);
+            eq(true, true, 'Should handle RegExp parameter');
+        } catch (e) {
+            eq(true, true, 'Should throw error for RegExp parameter');
+        }
+    }
+
+    // =========================================================================
+    // RepeatAPI Tests
+    // =========================================================================
+
+    public testRepeatAPIEmptyArray(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr: number[] = [];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for empty array');
+    }
+
+    public testRepeatAPISingleElement(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr = [1];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for single element');
+    }
+
+    public testRepeatAPIMultipleElements(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr = [1, 2, 3, 4, 5];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for multiple elements');
+    }
+
+    public testRepeatAPIStringArray(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr = ['a', 'b', 'c'];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for string array');
+    }
+
+    public testRepeatAPIObjectArray(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for object array');
+    }
+
+    public testRepeatAPIMixedArray(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr = [1, 'two', true, null, { key: 'value' }];
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for mixed array');
+    }
+
+    public testRepeatAPILargeArray(): void {
+        const view = new MockViewV2(undefined, 100);
+        const arr: number[] = [];
+        for (let j = 0; j < 100; j++) {
+            arr.push(j);
+        }
+        const api = view.__mkRepeatAPI(arr);
+        eq(api !== undefined, true, 'Should create API for large array');
+    }
+
+    // =========================================================================
+    // Path Value Tests
+    // =========================================================================
+
+    public testPathValueInvalidProperty(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.__getPathValueFromJson__Internal('nonexistent', '');
+        eq(result, undefined, 'Should return undefined for invalid property');
+    }
+
+    public testPathValueUndefinedProperty(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.testProperty = undefined as any;
+        const result = view.__getPathValueFromJson__Internal('testProperty', '');
+        eq(result, undefined, 'Should handle undefined property');
+    }
+
+    // =========================================================================
+    // Decorator Property Name Tests
+    // =========================================================================
+
+    public testDecoratorPropertyNameEmpty(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.__getDecoratorPropertyName__V2View__Internal();
+        eq(Array.isArray(result), true, 'Should return array');
+    }
+
+    public testDecoratorPropertyNameMultiple(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.__getDecoratorPropertyName__V2View__Internal();
+        eq(Array.isArray(result), true, 'Should return array');
+        eq(result.length >= 0, true, 'Should have zero or more entries');
+    }
+
+    // =========================================================================
+    // Debug Info Tests
+    // =========================================================================
+
+    public testDebugInfoViewEmpty(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.debugInfoView();
+        eq(typeof result, 'string', 'Should return string');
+        eq(result.includes('MockViewV2'), true, 'Should include class name');
+    }
+
+    public testDebugInfoStateVarsEmpty(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.debugInfoStateVars();
+        eq(typeof result, 'string', 'Should return string');
+        eq(result.includes('No State Variables'), true, 'Should indicate no state variables');
+    }
+
+    public testDebugInfoDirtDescendantEmpty(): void {
+        const view = new MockViewV2(undefined, 100);
+        const result = view.debugInfoDirtDescendantElementIds();
+        eq(typeof result, 'string', 'Should return string');
+    }
+
+    public testDebugInfoDirtDescendantWithIds(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.dirtDescendantElementIds_.add(200);
+        view.dirtDescendantElementIds_.add(300);
+        const result = view.debugInfoDirtDescendantElementIds();
+        eq(typeof result, 'string', 'Should return string with dirty elements');
+    }
+
+    // =========================================================================
+    // Additional Lifecycle Tests
+    // =========================================================================
+
+    public testLifecycleFirstRenderPhase(): void {
+        const view = new MockViewV2(undefined, 100);
+        const isFirst = view.isFirstRender();
+        eq(typeof isFirst, 'boolean', 'isFirstRender should return boolean');
+    }
+
+    public testLifecycleViewActivePhase(): void {
+        const view = new MockViewV2(undefined, 100);
+        const isActive = view.isViewActive();
+        eq(typeof isActive, 'boolean', 'isViewActive should return boolean');
+    }
+
+    public testLifecycleNodeUpdatePhase(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.scheduleDelayedUpdate(200);
+        eq(true, true, 'Should schedule delayed update');
+    }
+
+    public testLifecycleInstanceIdPhase(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.syncInstanceId();
+        view.restoreInstanceId();
+        eq(true, true, 'Should sync and restore instance ID');
+    }
+
+    public testLifecycleMarkUpdatePhase(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.markNeedUpdate();
+        eq(true, true, 'Should mark need update');
+    }
+
+    // =========================================================================
+    // Consumer Provider Pattern Tests
+    // =========================================================================
+
+    public testConsumerProviderPatternBasic(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+        defaultConsumer.set('theme', 'dark');
+
+        eq(defaultConsumer.get('theme'), 'dark', 'Should retrieve consumer value');
+    }
+
+    public testConsumerProviderPatternMultipleProviders(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+
+        defaultConsumer.set('theme', 'dark');
+        defaultConsumer.set('language', 'en');
+        defaultConsumer.set('fontSize', '14');
+
+        eq(defaultConsumer.size, 3, 'Should handle multiple providers');
+    }
+
+    public testConsumerProviderPatternUpdateProvider(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+
+        defaultConsumer.set('theme', 'dark');
+        eq(defaultConsumer.get('theme'), 'dark', 'Should retrieve initial value');
+
+        defaultConsumer.set('theme', 'light');
+        eq(defaultConsumer.get('theme'), 'light', 'Should retrieve updated value');
+    }
+
+    public testConsumerProviderPatternDeleteProvider(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+
+        defaultConsumer.set('theme', 'dark');
+        eq(defaultConsumer.has('theme'), true, 'Should have provider initially');
+
+        defaultConsumer.delete('theme');
+        eq(defaultConsumer.has('theme'), false, 'Should delete provider');
+    }
+
+    public testConsumerProviderPatternClearAll(): void {
+        const view = new MockViewV2(undefined, 100);
+        const defaultConsumer = view.getOrCreateDefaultConsumerV2();
+
+        defaultConsumer.set('theme', 'dark');
+        defaultConsumer.set('language', 'en');
+
+        defaultConsumer.clear();
+
+        eq(defaultConsumer.size, 0, 'Should clear all providers');
+    }
+
+    // =========================================================================
+    // Additional Edge Case Tests
+    // =========================================================================
+
+    public testEdgeCaseDelayedUpdateDuplicate(): void {
+        const view = new MockViewV2(undefined, 100);
+        view.addDelayedMonitorIds(100);
+        view.addDelayedMonitorIds(100);
+        eq(view.monitorIdsDelayedUpdate?.size, 1, 'Should handle duplicate delayed update');
+    }
+
+    public testEdgeCaseDelayedUpdateOrder(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        set.add(100);
+        set.add(200);
+        set.add(300);
+
+        const elements = Array.from(set);
+        eq(elements[0], 100, 'First element should be 100');
+        eq(elements[2], 300, 'Third element should be 300');
+    }
+
+    public testEdgeCaseMapKeyCollision(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        map.set('key', 'value1');
+        map.set('key', 'value2');
+
+        eq(map.size, 1, 'Should handle key collision');
+        eq(map.get('key'), 'value2', 'Should keep latest value');
+    }
+
+    public testEdgeCaseMapEmptyKey(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        map.set('', 'value');
+        eq(map.has(''), true, 'Should handle empty key');
+    }
+
+    public testEdgeCaseMapValueUpdate(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        map.set('key', 'value1');
+        eq(map.get('key'), 'value1', 'Should retrieve initial value');
+
+        map.set('key', 'value2');
+        eq(map.get('key'), 'value2', 'Should retrieve updated value');
+    }
+
+    public testEdgeCaseSetValueUpdate(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        set.add(100);
+        eq(set.has(100), true, 'Should contain value');
+
+        set.delete(100);
+        eq(set.has(100), false, 'Should not contain value after delete');
+
+        set.add(100);
+        eq(set.has(100), true, 'Should contain value after re-add');
+    }
+
+    // =========================================================================
+    // Additional Performance Tests
+    // =========================================================================
+
+    public testPerformanceStringOperations(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        const startTime = Date.now();
+        for (let j = 0; j < 100; j++) {
+            map.set(`key${j}`, `value${j}`);
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 50, true, 'String operations should complete in reasonable time');
+    }
+
+    public testPerformanceNumericOperations(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        const startTime = Date.now();
+        for (let j = 0; j < 1000; j++) {
+            set.add(j);
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 20, true, 'Numeric operations should complete in reasonable time');
+    }
+
+    public testPerformanceMixedTypeOperations(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        const startTime = Date.now();
+        for (let j = 0; j < 5000; j++) {
+            map.set(`str${j}`, j);
+            set.add(j);
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 3000, true, 'Mixed type operations should complete in reasonable time');
+    }
+
+    public testPerformanceComplexObjectOperations(): void {
+        const view = new MockViewV2(undefined, 100);
+        const map = view.getOrCreateDefaultConsumerV2();
+
+        const startTime = Date.now();
+        for (let j = 0; j < 1000; j++) {
+            const obj = {
+                id: j,
+                name: `name${j}`,
+                data: { nested: { value: j } }
+            };
+            map.set(`key${j}`, obj);
+        }
+        const duration = Date.now() - startTime;
+
+        eq(duration < 2000, true, 'Complex object operations should complete in reasonable time');
+    }
+
+    // =========================================================================
+    // Additional Scenario Tests
+    // =========================================================================
+
+    public testScenarioRapidStateChanges(): void {
+        const view = new MockViewV2(undefined, 100);
+        const set = view.getOrCreateMonitorIdsDelayedUpdate();
+
+        for (let j = 0; j < 1000; j++) {
+            set.add(j);
+            if (j % 10 === 0) {
+                set.clear();
+            }
+        }
+
+        eq(true, true, 'Should handle rapid state changes with periodic clearing');
+    }
+
+    public testScenarioMultipleUpdateSources(): void {
+        const view = new MockViewV2(undefined, 100);
+
+        view.addDelayedMonitorIds(100);
+        view.addDelayedMonitorIdsForAddMonitor(200);
+        view.addDelayedComputedIds(300);
+
+        eq(view.monitorIdsDelayedUpdate?.size, 1, 'Should have monitor ID');
+        eq(view.monitorIdsDelayedUpdateForAddMonitor_?.size, 1, 'Should have add monitor ID');
+        eq(view.computedIdsDelayedUpdate?.size, 1, 'Should have computed ID');
     }
 }

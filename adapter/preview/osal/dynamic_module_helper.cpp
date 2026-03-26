@@ -22,6 +22,7 @@
 
 #include "base/utils/utils.h"
 #include "core/common/dynamic_module.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -176,6 +176,22 @@
         cast##target->Reset##name();                                            \
     } while (false)
 
+#define ACE_CHECK_LPX_ATTRIBUTE(dimension, attribute)                            \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(dimension, attribute, frameNode);          \
+    } while (false)
+#define ACE_CHECK_NODE_LPX_ATTRIBUTE(dimension, attribute, frameNode)            \
+    do {                                                                        \
+        CHECK_NULL_VOID(frameNode);                                             \
+        if ((dimension).Unit() == DimensionUnit::LPX) {                         \
+            (frameNode)->RegisterLpxAttribute(attribute);                        \
+        } else {                                                                 \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+        }                                                                       \
+    } while (false)
+
+
 namespace OHOS::Ace::NG {
 using PrebuildFunc = std::function<void()>;
 

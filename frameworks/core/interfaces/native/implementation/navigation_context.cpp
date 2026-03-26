@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext {
@@ -711,7 +712,7 @@ bool NavigationStack::CreateHomeDestination(const WeakPtr<NG::UINode>& customNod
     }
     const auto& name = homePathInfo_.value().name;
     if (navDestBuilder_) {
-        targetNode = navDestBuilder_(name, param);
+        targetNode = CreateProxyFrameNode(navDestBuilder_(name, param));
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;
@@ -922,7 +923,7 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         param = pathInfo->param_->data_;
     }
     if (navDestBuilder_) {
-        targetNode = navDestBuilder_(name, param);
+        targetNode = CreateProxyFrameNode(navDestBuilder_(name, param));
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;

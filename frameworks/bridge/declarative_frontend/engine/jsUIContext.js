@@ -1782,6 +1782,12 @@ class AtomicServiceBar {
         __JSScopeUtil__.restoreInstanceId();
         return rect;
     }
+
+    onBarRectChange(callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.onBarRectChange(callback);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class OverlayManager {

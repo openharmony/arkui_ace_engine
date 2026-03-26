@@ -70,7 +70,9 @@ constexpr int NUM_31 = 31;
 constexpr int NUM_59 = 59;
 constexpr int NUM_100 = 100;
 constexpr int NUM_400 = 400;
+constexpr int NUM_900 = 900;
 constexpr int DEFAULT_FONT_WEIGHT = 400;
+constexpr int DEFAULT_SPAN_FONT_WEIGHT_ENUM = static_cast<int32_t>(FontWeight::W400);
 const int ALLOW_SIZE_1(1);
 const int ALLOW_SIZE_2(2);
 const int ALLOW_SIZE_3(3);
@@ -236,6 +238,8 @@ constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 20;
 thread_local std::string g_stringValue;
 thread_local ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
 thread_local ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
+thread_local OH_ArkUI_FontWeightConfigs g_spanFontWeightConfigs = {};
+thread_local OH_ArkUI_FontConfigs g_spanFontConfigs = {};
 
 constexpr uint32_t DEFAULT_COLOR = 0xFF000000; // Black
 constexpr uint32_t DEFAULT_FIll_COLOR = 0x00000000;
@@ -4797,6 +4801,10 @@ int32_t SetOrphanCharOptimization(ArkUI_NodeHandle node, const ArkUI_AttributeIt
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputOrphanCharOptimization(
                 node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
             break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorOrphanCharOptimization(
+                node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
+            break;
         default:
             break;
     }
@@ -4821,6 +4829,11 @@ const ArkUI_AttributeItem* GetOrphanCharOptimization(ArkUI_NodeHandle node)
                 GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputOrphanCharOptimization(
                     node->uiNodeHandle);
             break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            g_numberValues[NUM_0].i32 =
+                GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorOrphanCharOptimization(
+                    node->uiNodeHandle);
+            break;
         default:
             break;
     }
@@ -4841,6 +4854,10 @@ void ResetOrphanCharOptimization(ArkUI_NodeHandle node)
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputOrphanCharOptimization(
+                node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_EDITOR:
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(
                 node->uiNodeHandle);
             break;
         default:
@@ -5533,7 +5550,7 @@ void ResetRichEditorSingleLine(ArkUI_NodeHandle node)
 {
     GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSingleLine(node->uiNodeHandle);
 }
- 
+
 int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
@@ -14338,6 +14355,14 @@ const ArkUI_AttributeItem* GetSelectedDragPreviewStyle(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetTextController(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
+    auto* controller = reinterpret_cast<OH_ArkUI_TextController*>(item->object);
+    controller->node = node;
+    return ERROR_CODE_NO_ERROR;
+}
+
 int32_t SetIncludeFontPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == NUM_0) {
@@ -14563,19 +14588,53 @@ void ProcessFontWeightConfigs(ArkUI_NodeHandle node, OH_ArkUI_FontWeightConfigs*
     }
 }
 
+int32_t ConvertSpanFontWeightValueToEnum(int32_t fontWeight)
+{
+    return static_cast<int32_t>(Framework::ConvertStrToFontWeight(std::to_string(fontWeight)));
+}
+
+int32_t ConvertSpanFontWeightEnumToValue(int32_t fontWeight)
+{
+    return Framework::GetFontWeightNumericValue(static_cast<FontWeight>(fontWeight));
+}
+
+int32_t GetSpanFontWeightValue(ArkUI_NodeHandle node, int32_t fontWeight)
+{
+    auto* modifier = GetFullImpl()->getNodeModifiers()->getSpanModifier();
+    if (modifier->getSpanEnableVariableFontWeight(node->uiNodeHandle)) {
+        auto variableFontWeight = modifier->getSpanVariableFontWeight(node->uiNodeHandle);
+        if (variableFontWeight > 0) {
+            return variableFontWeight;
+        }
+        return ConvertSpanFontWeightEnumToValue(fontWeight);
+    }
+    return ConvertSpanFontWeightEnumToValue(fontWeight);
+}
+
+void FillSpanFontWeightConfigs(ArkUI_NodeHandle node)
+{
+    auto* modifier = GetFullImpl()->getNodeModifiers()->getSpanModifier();
+    g_spanFontWeightConfigs.enableVariableFontWeight =
+        modifier->getSpanEnableVariableFontWeight(node->uiNodeHandle);
+    g_spanFontWeightConfigs.enableDeviceFontWeightCategory =
+        modifier->getSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+    g_spanFontWeightConfigs.isEnableVariableFontWeightSet = true;
+    g_spanFontWeightConfigs.isEnableDeviceFontWeightCategorySet = true;
+}
+
 int32_t SetSpanFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = GetFullImpl();
     int32_t fontWeight = DEFAULT_FONT_WEIGHT;
     if (item->size > 0) {
-        if (item->value[NUM_0].i32 < 0) {
+        if (item->value[NUM_0].i32 < NUM_100 || item->value[NUM_0].i32 > NUM_900) {
             return ERROR_CODE_PARAM_INVALID;
         }
         fontWeight = item->value[NUM_0].i32;
     }
     fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(
-        node->uiNodeHandle, fontWeight, nullptr);
+        node->uiNodeHandle, ConvertSpanFontWeightValueToEnum(fontWeight), nullptr);
     if (item->object) {
         auto* configs = reinterpret_cast<OH_ArkUI_FontWeightConfigs*>(item->object);
         ProcessFontWeightConfigs(node, configs, fontWeight);
@@ -14584,7 +14643,7 @@ int32_t SetSpanFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 }
 
 int32_t BuildArkUIFontStruct(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item,
-    ArkUIFontStruct& fontInfo)
+    ArkUIFontStruct& fontInfo, int32_t& fontWeightValue)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     if (item->size < 1) {
@@ -14595,15 +14654,17 @@ int32_t BuildArkUIFontStruct(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
     }
     fontInfo.fontSizeNumber = item->value[NUM_0].f32;
     fontInfo.fontSizeUnit = GetDefaultUnit(node, UNIT_FP);
-    fontInfo.fontWeight = DEFAULT_FONT_WEIGHT;
+    fontWeightValue = DEFAULT_FONT_WEIGHT;
+    fontInfo.fontWeight = DEFAULT_SPAN_FONT_WEIGHT_ENUM;
     fontInfo.fontStyle = ARKUI_FONT_STYLE_NORMAL;
     fontInfo.fontFamilies = nullptr;
     fontInfo.familyLength = 0;
     if (item->size > NUM_1) {
-        if (item->value[NUM_1].i32 < 0) {
+        if (item->value[NUM_1].i32 < NUM_100 || item->value[NUM_1].i32 > NUM_900) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        fontInfo.fontWeight = item->value[NUM_1].i32;
+        fontWeightValue = item->value[NUM_1].i32;
+        fontInfo.fontWeight = ConvertSpanFontWeightValueToEnum(fontWeightValue);
     }
     if (item->size > NUM_2) {
         if (item->value[NUM_2].i32 < 0 ||
@@ -14623,7 +14684,8 @@ int32_t SetSpanFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
     ArkUIFontStruct fontInfo = { 0 };
-    int32_t ret = BuildArkUIFontStruct(node, item, fontInfo);
+    int32_t fontWeightValue = DEFAULT_FONT_WEIGHT;
+    int32_t ret = BuildArkUIFontStruct(node, item, fontInfo, fontWeightValue);
     if (ret != ERROR_CODE_NO_ERROR) {
         return ret;
     }
@@ -14632,7 +14694,7 @@ int32_t SetSpanFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         auto* fontConfigs = reinterpret_cast<OH_ArkUI_FontConfigs*>(item->object);
         if (fontConfigs->fontWeightConfigs) {
             ProcessFontWeightConfigs(node, fontConfigs->fontWeightConfigs,
-                fontInfo.fontWeight);
+                fontWeightValue);
         }
     }
     return ERROR_CODE_NO_ERROR;
@@ -16815,7 +16877,10 @@ const ArkUI_AttributeItem* GetSpanTextBackgroundStyle(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetSpanFontWeight(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getSpanModifier()->getSpanFontWeight(node->uiNodeHandle);
+    auto fontWeight = fullImpl->getNodeModifiers()->getSpanModifier()->getSpanFontWeight(node->uiNodeHandle);
+    g_numberValues[0].i32 = GetSpanFontWeightValue(node, fontWeight);
+    FillSpanFontWeightConfigs(node);
+    g_attributeItem.object = &g_spanFontWeightConfigs;
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
@@ -16825,10 +16890,14 @@ const ArkUI_AttributeItem* GetSpanFont(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto unit = GetDefaultUnit(node, UNIT_FP);
     auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+    auto fontWeight = modifier->getSpanFontWeight(node->uiNodeHandle);
     g_numberValues[NUM_0].f32 = modifier->getSpanFontSize(node->uiNodeHandle, unit);
-    g_numberValues[NUM_1].i32 = modifier->getSpanFontWeight(node->uiNodeHandle);
+    g_numberValues[NUM_1].i32 = GetSpanFontWeightValue(node, fontWeight);
     g_numberValues[NUM_2].i32 = modifier->getSpanFontStyle(node->uiNodeHandle);
     g_attributeItem.string = modifier->getSpanFontFamily(node->uiNodeHandle);
+    FillSpanFontWeightConfigs(node);
+    g_spanFontConfigs.fontWeightConfigs = &g_spanFontWeightConfigs;
+    g_attributeItem.object = &g_spanFontConfigs;
     g_attributeItem.size = NUM_3;
     return &g_attributeItem;
 }
@@ -20403,7 +20472,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
         nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection, SetOrphanCharOptimization,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextMarqueeOptions, SetTextDirection,
-        SetSelectedDragPreviewStyle };
+        SetSelectedDragPreviewStyle, SetTextController };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20422,7 +20491,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
         nullptr, nullptr, GetTextTextSelection, GetOrphanCharOptimization, GetCompressLeadingPunctuation, GetIncludeFontPadding,
-        GetFallbackLineSpacing, GetTextMarqueeOptions, GetTextDirection, GetSelectedDragPreviewStyle };
+        GetFallbackLineSpacing, GetTextMarqueeOptions, GetTextDirection, GetSelectedDragPreviewStyle, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -20444,7 +20513,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSelectDetectorEnable, nullptr, ResetMinLineHeight, ResetMaxLineHeight,
         ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
-        ResetTextMarqueeOptions, ResetTextDirection, ResetSelectedDragPreviewStyle };
+        ResetTextMarqueeOptions, ResetTextDirection, ResetSelectedDragPreviewStyle, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

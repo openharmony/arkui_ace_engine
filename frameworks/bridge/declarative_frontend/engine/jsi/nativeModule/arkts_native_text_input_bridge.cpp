@@ -35,6 +35,7 @@ constexpr double DEFAULT_FONT_SIZE = 16.0;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
@@ -1269,11 +1270,11 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
-    double lineThicknessScale = 1.0;
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
     if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
-        lineThicknessScale = 1.0;
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
     }
-    lineThicknessScale = lineThicknessScale < 0 ? 1.0 : lineThicknessScale;
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputDecoration(
         nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
         AceType::RawPtr(resourceObject));

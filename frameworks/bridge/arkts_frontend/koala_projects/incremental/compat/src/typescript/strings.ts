@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,16 @@
 import { TextEncoder, TextDecoder } from 'util'
 import { int32 } from './types'
 
-interface SystemTextEncoder {
+export interface SystemTextEncoder {
     encode(input?: string): Uint8Array;
     encodeInto(src: string, dest: Uint8Array): void;
 }
 
-interface WithStreamOption {
+export interface WithStreamOption {
     stream?: boolean | undefined;
 }
 
-interface SystemTextDecoder {
+export interface SystemTextDecoder {
     decode(
         input?: ArrayBuffer | null,
         options?: WithStreamOption

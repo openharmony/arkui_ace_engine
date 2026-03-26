@@ -27,6 +27,98 @@ function isStaticProxy<T extends Object>(obj: T): boolean {
             prototype._isStaticProxy === true;
 }
 
+function isStaticArrayProxy(obj: Object): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticArrayProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticArrayProxy_');
+}
+
+function isStaticMapProxy(obj: Object): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticMapProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticMapProxy_');
+}
+
+function isStaticSetProxy(obj: Object): boolean {
+      const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticSetProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticSetProxy_');
+}
+
+function deepCopyStaticProxy(
+    obj: any,
+    recursiveCopy: (value: any) => any,
+    copiedObjects: Map<Object, Object>
+): any {
+    if (!isStaticProxy(obj)) {
+        return undefined;
+    }
+
+    let copy: any;
+
+    if (isStaticArrayProxy(obj)) {
+        copy = [];
+        copiedObjects.set(obj, copy);
+        obj.forEach((item: any, index: number) => {
+            copy[index] = recursiveCopy(item);
+        });
+    } else if (isStaticMapProxy(obj)) {
+        copy = new Map<any, any>();
+        copiedObjects.set(obj, copy);
+        obj.forEach((mapValue: any, mapKey: any) => {
+            copy.set(mapKey, recursiveCopy(mapValue));
+        });
+    } else if (isStaticSetProxy(obj)) {
+        copy = new Set<any>();
+        copiedObjects.set(obj, copy);
+        obj.forEach((setValue: any) => {
+            copy.add(recursiveCopy(setValue));
+        });
+    } else {
+        const toJSON: Function | undefined = globalThis.Panda?.STValue?.toJSON;
+        const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
+        if (typeof toJSON === 'function') {
+            const json: string = toJSON(obj);
+            if (typeof json === 'string') {
+                const jsonObj: Object = JSON.parse(json);
+                if (typeof jsonObj === 'object' && jsonObj !== null) {
+                    copy = {};
+                    copiedObjects.set(obj, copy);
+                    Object.keys(jsonObj).forEach((objKey: any) => {
+                        copy[objKey] = recursiveCopy(obj[objKey]);
+                    });
+                } else {
+                    throw err;
+                }
+            } else {
+                throw err;
+            }
+        } else {
+            throw err;
+        }
+    }
+
+    return copy;
+}
+
 class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
     private id_: number;
     constructor(callback: (property: string) => void) {

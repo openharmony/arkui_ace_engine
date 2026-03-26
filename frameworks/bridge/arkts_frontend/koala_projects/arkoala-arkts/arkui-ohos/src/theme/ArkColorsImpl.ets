@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -423,7 +423,7 @@ export class ArkColorsImpl implements Colors {
                 result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1) as Resource;
                 result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05) as Resource;
             } else {
-                const brandColorValue = brandColor as int32 | string;
+                const brandColorValue = brandColor;
                 let argbColor = 0xff000000 as int32;
                 if (brandColorValue instanceof int32) {
                     argbColor = brandColorValue as int32;

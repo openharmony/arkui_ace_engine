@@ -2675,6 +2675,8 @@ void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -2799,6 +2801,8 @@ void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -3164,7 +3168,7 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
-        {"scancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+        {"cancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     pattern->SetRightIconSrcPath(*realValue);

@@ -20,6 +20,7 @@
 
 #include "base/image/image_defines.h"
 #include "base/image/image_source.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {

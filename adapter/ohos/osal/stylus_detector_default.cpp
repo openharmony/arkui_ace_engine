@@ -15,7 +15,9 @@
 
 #include "core/common/stylus/stylus_detector_default.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
+
 namespace OHOS::Ace {
 
 namespace {

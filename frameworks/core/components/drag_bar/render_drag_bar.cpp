@@ -15,6 +15,8 @@
 
 #include "core/components/drag_bar/render_drag_bar.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/animation/curve_animation.h"
 #include "core/components/drag_bar/drag_bar_component.h"
 
 namespace OHOS::Ace {

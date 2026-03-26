@@ -15,8 +15,6 @@
 
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 
 int32_t ParallelizeUIAdapterNode::FrameCount() const

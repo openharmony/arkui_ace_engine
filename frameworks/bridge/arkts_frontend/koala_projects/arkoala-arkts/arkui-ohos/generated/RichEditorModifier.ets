@@ -98,6 +98,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     public _customKeyboard_0_1value?: KeyboardOptions | undefined
     public _placeholder_0_0value?: ResourceStr | undefined
     public _placeholder_0_1value?: PlaceholderStyle | undefined
+    public _orphanCharOptimization_0_0value?: boolean | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -843,6 +844,23 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1: {
+                    peer.setOrphanCharOptimizationAttribute((this._orphanCharOptimization_0_0value as boolean | undefined));
+                    flagArray[43] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[43] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[43] = 0;
+                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RichEditorModifier): void {
         super.mergeModifier(modifier)
@@ -1373,6 +1391,18 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1:
+                case 3: {
+                    this.orphanCharOptimization((modifier._orphanCharOptimization_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.orphanCharOptimization((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     onReady(value: VoidCallback | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -1806,6 +1836,16 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
             this._state.fireChange()
         } else {
             this._flagArray[42] = 3
+        }
+        return this
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        if (((this._flagArray[43]) == (0)) || ((this._orphanCharOptimization_0_0value) !== (value))) {
+            this._flagArray[43] = 1
+            this._orphanCharOptimization_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[43] = 3
         }
         return this
     }

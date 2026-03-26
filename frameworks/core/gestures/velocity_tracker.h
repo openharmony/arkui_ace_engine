@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/least_square_impl.h"
 #include "base/geometry/offset.h"
+#include "base/utils/system_properties.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
 

@@ -74,6 +74,7 @@ constexpr uint32_t DEFAULT_MODE = -1;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
 {
@@ -897,11 +898,13 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Color color;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    bool isThemeColor = false;
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
         ArkTSUtils::ParseJsColorAlphaForMaterial(vm, forthArg, value, colorObject, nodeInfo)) {
         color = value;
     } else {
         color = theme->GetSearchIconColor();
+        isThemeColor = true;
     }
     std::string srcStr;
     RefPtr<ResourceObject> srcObject;
@@ -914,7 +917,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     searchButtonIconObj.colorObj = AceType::RawPtr(colorObject);
     searchButtonIconObj.srcObj = AceType::RawPtr(srcObject);
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(
-        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj);
+        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj, isThemeColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1636,11 +1639,11 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
-    double lineThicknessScale = 1.0;
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
     if (!fifthArg->IsNumber() || !ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
-        lineThicknessScale = 1.0;
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
     }
-    lineThicknessScale = lineThicknessScale < 0 ? 1.0 : lineThicknessScale;
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getSearchModifier()->setSearchDecoration(
         nativeNode, searchDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
         AceType::RawPtr(resourceObject));

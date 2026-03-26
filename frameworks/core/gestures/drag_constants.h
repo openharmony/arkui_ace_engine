@@ -15,7 +15,49 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_CONSTANTS_H
 
+#include <cstdint>
+
 namespace OHOS::Ace {
+
+// Drag and drop result status
+enum class DragRet {
+    DRAG_DEFAULT = -1,
+    DRAG_SUCCESS = 0,
+    DRAG_FAIL,
+    DRAG_CANCEL,
+    ENABLE_DROP,
+    DISABLE_DROP,
+};
+
+// Drag behavior type
+enum class DragBehavior {
+    UNKNOWN = -1,
+    COPY = 0,
+    MOVE = 1,
+};
+
+// Drag drop initiating status
+enum class DragDropInitiatingStatus : int32_t {
+    IDLE = 0,
+    READY,
+    PRESS,
+    LIFTING,
+    MOVING,
+};
+
+// Drag spring loading state
+enum class DragSpringLoadingState {
+    BEGIN = 0,
+    UPDATE,
+    END,
+    CANCEL,
+};
+
+// Drag start request status
+enum class DragStartRequestStatus : int32_t {
+    WAITING = 0,
+    READY
+};
 
 enum class PreDragStatus {
     ACTION_DETECTING_STATUS = 0,

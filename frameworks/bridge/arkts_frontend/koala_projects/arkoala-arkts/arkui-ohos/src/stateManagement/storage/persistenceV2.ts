@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -520,7 +520,7 @@ export class PersistenceV2Impl {
             // add global path key
             for (let i = 0; i < this.globalKeysArr_.length; i++) {
                 if (!this.globalKeysArr_[i].size) {
-                    this.globalKeysArr_[i] = this.getKeysFromStorage(i as AreaMode);
+                    this.globalKeysArr_[i] = this.getKeysFromStorage(AreaMode.fromValue(i));
                 }
                 for (const key of this.globalKeysArr_[i]) {
                     allKeys.add(key);
@@ -919,12 +919,12 @@ export class PersistenceV2Impl {
         let removeFlag = false;
         // first call for global path
         for (let i = 0; i < this.globalKeysArr_.length; i++) {
-            if (this.storageBackend_!.has(key, i as AreaMode)) {
+            if (this.storageBackend_!.has(key, AreaMode.fromValue(i))) {
                 removeFlag = true;
-                this.storageBackend_!.delete(key, i as AreaMode);
-                this.globalKeysArr_[i] = this.getKeysFromStorage(i as AreaMode);
+                this.storageBackend_!.delete(key, AreaMode.fromValue(i));
+                this.globalKeysArr_[i] = this.getKeysFromStorage(AreaMode.fromValue(i));
                 this.globalKeysArr_[i].delete(key);
-                this.storeKeysToStorage(this.globalKeysArr_[i], i as AreaMode);
+                this.storeKeysToStorage(this.globalKeysArr_[i], AreaMode.fromValue(i));
             }
         }
         return removeFlag;

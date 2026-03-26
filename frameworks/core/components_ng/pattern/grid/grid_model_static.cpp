@@ -17,7 +17,10 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {

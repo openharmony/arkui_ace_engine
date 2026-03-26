@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_DRAG_EVENT_H
 
+#include <algorithm>
 #include <map>
 #include <string_view>
 
@@ -24,8 +25,8 @@
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 #include "core/gestures/drag_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -51,41 +52,6 @@ public:
 
 private:
     std::string plainText_;
-};
-
-enum class DragDropInitiatingStatus : int32_t {
-    IDLE = 0,
-    READY,
-    PRESS,
-    LIFTING,
-    MOVING,
-};
-
-enum class DragSpringLoadingState {
-    BEGIN = 0,
-    UPDATE,
-    END,
-    CANCEL,
-};
-
-enum class DragRet {
-    DRAG_DEFAULT = -1,
-    DRAG_SUCCESS = 0,
-    DRAG_FAIL,
-    DRAG_CANCEL,
-    ENABLE_DROP,
-    DISABLE_DROP,
-};
-
-enum class DragStartRequestStatus : int32_t {
-    WAITING = 0,
-    READY
-};
-
-enum class DragBehavior {
-    UNKNOWN = -1,
-    COPY = 0,
-    MOVE = 1,
 };
 
 class ACE_FORCE_EXPORT DragEvent : public AceType {
@@ -263,6 +229,22 @@ public:
     DragBehavior GetDragBehavior() const
     {
         return dragBehavior_;
+    }
+
+    void SetAutoHideComponentUniqueIds(const std::vector<int32_t>& autoHideComponentUniqueIds)
+    {
+        autoHideComponentUniqueIds_.clear();
+        for (auto uniqueId : autoHideComponentUniqueIds) {
+            if (std::find(autoHideComponentUniqueIds_.begin(), autoHideComponentUniqueIds_.end(), uniqueId) ==
+                autoHideComponentUniqueIds_.end()) {
+                autoHideComponentUniqueIds_.emplace_back(uniqueId);
+            }
+        }
+    }
+
+    const std::vector<int32_t>& GetAutoHideComponentUniqueIds() const
+    {
+        return autoHideComponentUniqueIds_;
     }
 
     void SetUdKey(const std::string& udKey)
@@ -461,6 +443,7 @@ private:
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
     DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
+    std::vector<int32_t> autoHideComponentUniqueIds_;
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;

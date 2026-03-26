@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
+
 #include <optional>
 #include "base/log/ace_trace.h"
 #include "base/utils/multi_thread.h"
@@ -51,6 +54,10 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 namespace OHOS::Ace::NG {
+
+SideBarContainerPattern::SideBarContainerPattern() = default;
+
+SideBarContainerPattern::~SideBarContainerPattern() = default;
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;

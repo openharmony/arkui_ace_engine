@@ -83,7 +83,7 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         "resetUndoStyle", "setScrollBarColor", "resetScrollBarColor", "setSelectedDragPreviewStyle",
         "resetSelectedDragPreviewStyle", "setSingleLine", "resetSingleLine", "setBindSelectionMenu",
         "setEnableSelectedDataDetector", "setClip", "setFocusable", "setSelectedDataDetectorConfig",
-        "setCustomKeyboardJS"
+        "setCustomKeyboardJS", "setOrphanCharOptimization", "resetOrphanCharOptimization"
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -176,6 +176,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFocusable),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectDetectConfig),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCustomKeyboardJS),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOrphanCharOptimization),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOrphanCharOptimization),
     };
 
     auto richEditor = panda::ObjectRef::NewWithNamedProperties(
@@ -3075,6 +3077,38 @@ ArkUINativeModuleValue RichEditorBridge::ResetSingleLine(ArkUIRuntimeCallInfo* r
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorSingleLine(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorOrphanCharOptimization(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

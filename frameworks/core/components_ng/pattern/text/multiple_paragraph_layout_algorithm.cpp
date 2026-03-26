@@ -110,7 +110,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
-    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
+    auto layoutTextColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
+    auto textColor = layoutTextColor;
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
     if (contentModifier) {
@@ -137,7 +138,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetIncludeFontPadding(textLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textLayoutProperty->GetFallbackLineSpacingValue(false));
     // Determines whether a foreground color is set or inherited.
-    UpdateTextColorIfForeground(frameNode, textStyle, textColor);
+    UpdateTextColorIfForeground(frameNode, textStyle, layoutTextColor, textColor);
     inheritTextStyle_ = textStyle;
 }
 
@@ -369,20 +370,21 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
     }
 }
 
-void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
-    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
+void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode,
+    TextStyle& textStyle, const Color& layoutTextColor, const Color& currentTextColor)
 {
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != layoutTextColor.GetValue() &&
+            renderContext->GetForegroundColorValue().GetValue() != currentTextColor.GetValue()) {
             textStyle.SetTextColor(Color::FOREGROUND);
         } else {
-            textStyle.SetTextColor(textColor);
+            textStyle.SetTextColor(currentTextColor);
         }
     } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     } else {
-        textStyle.SetTextColor(textColor);
+        textStyle.SetTextColor(currentTextColor);
     }
 }
 

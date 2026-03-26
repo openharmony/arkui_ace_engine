@@ -9,6 +9,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -17,6 +18,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"

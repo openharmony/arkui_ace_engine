@@ -4896,6 +4896,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_PlaceholderStyle* style)
     {
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     } // RichEditorAttributeModifier
     namespace RichTextModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -10063,6 +10067,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
+            RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUIRichEditorModifierImpl;
     }
@@ -14135,6 +14140,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
                                        Ark_Boolean useCustomDropAnimation)
+    {
+    }
+    Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    void SetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer,
+                                           const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds)
     {
     }
     void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
@@ -22229,6 +22242,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
             DragEventAccessor::SetUseCustomDropAnimationImpl,
+            DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
+            DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
             DragEventAccessor::SetGetModifierKeyStateImpl,
         };
         return &DragEventAccessorImpl;

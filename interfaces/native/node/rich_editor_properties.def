@@ -29,5 +29,6 @@ X(1, 1, 1, FallbackLineSpacing)
 X(1, 1, 1, CompressLeadingPunctuation)
 X(1, 1, 1, SelectedDragPreviewStyle)
 X(1, 1, 1, RichEditorSingleLine)
+X(1, 1, 1, OrphanCharOptimization)
 #undef IF_1
 #undef IF_0

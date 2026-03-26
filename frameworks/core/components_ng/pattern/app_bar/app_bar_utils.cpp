@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/app_bar/app_bar_utils.h"
 
+#include <fstream>
+
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 
 extern const char _binary_custom_app_bar_abc_start[];

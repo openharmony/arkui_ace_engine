@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -487,13 +487,13 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private setSize(size: Size): void {
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setSize(this, size, lengthMetricsUnitValue)
         return
     }
     private setPosition(position: NodePosition): void {
         const position_casted = position as (Vector2)
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setPosition(this, position_casted, lengthMetricsUnitValue)
         return
     }
@@ -510,7 +510,7 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private setRotation(rotation: Vector3): void {
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setRotation(this, rotation, lengthMetricsUnitValue)
         return
     }
@@ -519,7 +519,7 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private setShadowOffset(shadowOffset: Vector2): void {
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setShadowOffset(this, shadowOffset, lengthMetricsUnitValue)
         return
     }
@@ -542,7 +542,7 @@ export class RenderNode implements MaterializedBase {
         const bottom = (borderWidth.bottom === null || undefined) ? 0.0 : borderWidth.bottom;
         const right = (borderWidth.right === null || undefined) ? 0.0 : borderWidth.right;
         const edgesBorderWidth = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeF64;
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setBorderWidth(this, edgesBorderWidth, lengthMetricsUnitValue);
         return
     }
@@ -558,7 +558,7 @@ export class RenderNode implements MaterializedBase {
     private setBorderRadius(borderRadius: Corners<number>): void {
         const cornersBorderRadius = { topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
             bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight } as BorderRadiuses_graphics;
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
+        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
         RenderNodeExtender.setBorderRadius(this, cornersBorderRadius, lengthMetricsUnitValue);
         return
     }

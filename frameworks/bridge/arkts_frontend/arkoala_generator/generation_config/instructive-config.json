@@ -9,6 +9,8 @@
         "WebModifier.ets",
         "TextAreaModifier.ets",
         "TextInputModifier.ets",
-        "TextModifier.ets"
+        "TextModifier.ets",
+        "RichEditorModifier.ets",
+        "SearchModifier.ets"
     ]
 }

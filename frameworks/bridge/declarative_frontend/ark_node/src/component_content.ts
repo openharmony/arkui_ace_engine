@@ -111,16 +111,20 @@ class ComponentContentCommonBase extends Content {
   public getInstanceId(): number {
     return this.instanceId_;
   }
+
+  protected createBuilderNode(uiContext: UIContext, nodePtr: number, frameNodePtr: number): void {
+    let jsBuilderNode = JSBuilderNode.createForTrans(uiContext, nodePtr, frameNodePtr);
+    this.builderNode_ = new BuilderNode(uiContext, {}, jsBuilderNode);
+  }
 }
 
 class ComponentContent extends ComponentContentCommonBase {
-  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions,
-    nodePtr?: number, frameNodePtr?: number) {
-    super();
-    let builderNode = new BuilderNode(uiContext, {}, nodePtr, frameNodePtr);
+  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
+    super();   
     this.instanceId_ = uiContext.instanceId_;
-    this.builderNode_ = builderNode;
-    if (nodePtr === undefined && frameNodePtr === undefined) {
+    if (this.isTransferred() == false) {
+      let builderNode = new BuilderNode(uiContext, {});
+      this.builderNode_ = builderNode;
       this.builderNode_.build(builder, params ?? undefined, options);
     }
   }

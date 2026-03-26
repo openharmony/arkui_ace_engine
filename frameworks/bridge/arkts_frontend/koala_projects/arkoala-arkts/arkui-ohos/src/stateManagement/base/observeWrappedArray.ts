@@ -41,6 +41,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_: boolean;
+    @JSONStringifyIgnore
+    public isStaticArrayProxy_: boolean = true;
 
     constructor(src: Array<T>, allowDeep: boolean = false, isAPI: boolean = false) {
         super();

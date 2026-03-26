@@ -19,8 +19,6 @@
 #include <utility>
 
 #include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
 namespace OHOS::Ace::NG {
@@ -38,33 +36,7 @@ public:
     }
 
     virtual void UpdateRealGridItemPositionInfo(
-        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex)
-    {
-        auto gridItemLayoutProperty =
-            AceType::DynamicCast<GridItemLayoutProperty>(itemLayoutWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(gridItemLayoutProperty);
-        bool isItemAtExpectedPosition = gridItemLayoutProperty->CheckWhetherCurrentItemAtExpectedPosition(info_.axis_);
-        auto gridItemNode = itemLayoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(gridItemNode);
-        auto gridItemPattern = gridItemNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_VOID(gridItemPattern);
-        if (isItemAtExpectedPosition) {
-            gridItemPattern->ResetGridItemInfo();
-        }
-        if (!isItemAtExpectedPosition && info_.hasBigItem_) {
-            GridItemIndexInfo itemInfo;
-            itemInfo.mainIndex = mainIndex;
-            itemInfo.crossIndex = crossIndex;
-            itemInfo.mainSpan = gridItemLayoutProperty->GetRealMainSpan(info_.axis_);
-            itemInfo.crossSpan = gridItemLayoutProperty->GetRealCrossSpan(info_.axis_);
-            itemInfo.mainStart = mainIndex - itemInfo.mainSpan + 1;
-            itemInfo.mainEnd = mainIndex;
-            itemInfo.crossStart = crossIndex;
-            itemInfo.crossEnd = crossIndex + itemInfo.crossSpan - 1;
-            gridItemPattern->ResetGridItemInfo();
-            gridItemPattern->SetIrregularItemInfo(itemInfo);
-        }
-    }
+        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex);
 
     static void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
     bool MeasureInNextFrame() const override
@@ -84,14 +56,7 @@ protected:
         return true;
     }
 
-    void ResetFocusedIndex(LayoutWrapper* layoutWrapper)
-    {
-        auto grid = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(grid);
-        auto pattern = grid->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->ResetFocusedIndex();
-    }
+    void ResetFocusedIndex(LayoutWrapper* layoutWrapper);
 
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 

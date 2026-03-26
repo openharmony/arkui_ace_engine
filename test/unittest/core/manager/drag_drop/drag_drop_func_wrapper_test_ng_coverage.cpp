@@ -45,8 +45,10 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/pipeline/base/element_register.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
 
@@ -148,6 +150,44 @@ void SetFrameNodeAllowDrag(RefPtr<FrameNode>& frameNode)
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHub->SetOnDragStart(std::move(func));
 }
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverageAutoHide001
+ * @tc.desc: Test resolve auto hide targets by unique id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverageAutoHide001, TestSize.Level1)
+{
+    auto targetNode = FrameNode::CreateFrameNode(
+        "target", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto secondTargetNode = FrameNode::CreateFrameNode(
+        "target2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(secondTargetNode, nullptr);
+
+    auto targets = DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(
+        { targetNode->GetId(), secondTargetNode->GetId(), targetNode->GetId(), -1 });
+    ASSERT_EQ(targets.size(), 2);
+    EXPECT_EQ(targets.front(), targetNode);
+    EXPECT_EQ(targets.back(), secondTargetNode);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverageAutoHide002
+ * @tc.desc: Test update auto hide target visibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverageAutoHide002, TestSize.Level1)
+{
+    auto targetNode = FrameNode::CreateFrameNode(
+        "target", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    EXPECT_TRUE(DragDropFuncWrapper::UpdateAutoHideTargetVisibility(targetNode));
+    EXPECT_EQ(targetNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_FALSE(DragDropFuncWrapper::UpdateAutoHideTargetVisibility(targetNode));
+}
+
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage001
  * @tc.desc: Test DecideWhetherToStopDragging with valid parameters

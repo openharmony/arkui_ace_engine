@@ -23,6 +23,7 @@
 #include <malloc.h>
 #endif
 #include "base/log/dump_log.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 

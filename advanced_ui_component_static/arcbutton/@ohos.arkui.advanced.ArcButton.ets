@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,7 @@ export enum ArcButtonStatus {
   DISABLED = 2
 }
 
-interface CommonArcButtonOptions {
+export interface CommonArcButtonOptions {
   /**
    * 弧形按钮位置类型属性,默认为下弧形按钮
    */
@@ -189,7 +189,7 @@ class Constants {
   public static readonly DEFAULT_TRANSPARENCY = 0.4;
 }
 
-interface ArcButtonThemeInterface {
+export interface ArcButtonThemeInterface {
   /**
    * 弧形按钮高度
    */
@@ -667,7 +667,7 @@ export struct ArcButton {
   }
 }
 
-class DataProcessUtil {
+export class DataProcessUtil {
   private dial: ArcButtonCircle = new ArcButtonCircle(0, 0, 0);
   private arc: ArcButtonCircle = new ArcButtonCircle(0, 0, 0);
   private height: number = 0;
@@ -828,7 +828,7 @@ class DataProcessUtil {
   }
 }
 
-class ArcButtonCircle {
+export class ArcButtonCircle {
   public radius: number;
   public center: ArcButtonPoint;
 
@@ -838,7 +838,7 @@ class ArcButtonCircle {
   }
 }
 
-class ArcButtonPoint {
+export class ArcButtonPoint {
   public x: number;
   public y: number;
 
@@ -848,7 +848,7 @@ class ArcButtonPoint {
   }
 }
 
-class AllPoints {
+export class AllPoints {
   public btnWidth: number;
   public btnHeight: number;
   public leftTopPoint: ArcButtonPoint;

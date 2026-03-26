@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"

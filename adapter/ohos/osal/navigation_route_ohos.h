@@ -66,6 +66,7 @@ private:
     std::vector<AppExecFwk::HapModuleInfo> moduleInfos_;
     std::vector<PluginHspInfo> pluginHspInfos_;
     std::vector<std::string> names_;
+    std::string bundleName_ = "";
     sptr<NavigationBundleEventCallback> navigationBundleEventCallback_ = nullptr;
 };
 

@@ -15,6 +15,7 @@
 
 #include "base/utils/system_properties.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/layout_break_point.h"
 
 #include <regex>

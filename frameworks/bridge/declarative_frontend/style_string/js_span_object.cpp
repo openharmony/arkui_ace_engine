@@ -204,7 +204,8 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
             if (parseResult.first) {
                 variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
             } else {
-                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+                variableFontWeight = StringUtils::IsNumber(weight) ?
+                    StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
             }
         }
     }

@@ -17,6 +17,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"

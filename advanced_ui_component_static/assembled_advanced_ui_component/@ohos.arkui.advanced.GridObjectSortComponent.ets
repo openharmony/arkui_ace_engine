@@ -143,12 +143,12 @@ export enum GridObjectSortComponentType {
   TEXT = 'text'
 }
 
-interface PositionXY {
+export interface PositionXY {
   x: number;
   y: number;
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   private gridObjectSortComponent: GridObjectSortComponent;
 
   constructor(gridObjectSortComponent: GridObjectSortComponent) {

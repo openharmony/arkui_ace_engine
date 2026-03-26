@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_COMPATIBLE_COMPONENTS_GRID_CONTAINER_GRID_CONTAINER_MODEL_IMPL_H
 #define FRAMEWORKS_COMPATIBLE_COMPONENTS_GRID_CONTAINER_GRID_CONTAINER_MODEL_IMPL_H
 
+#include <vector>
+
 #include "core/components_ng/pattern/grid_container/grid_container_model.h"
 
 namespace OHOS::Ace::Framework {

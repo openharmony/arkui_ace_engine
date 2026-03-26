@@ -17,6 +17,8 @@
 
 #include <cinttypes>
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace::Framework {
 NativeCanvasGradient::NativeCanvasGradient(const Gradient& gradient) : FFIData()
 {

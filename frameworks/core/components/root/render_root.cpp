@@ -16,6 +16,9 @@
 #include "core/components/root/render_root.h"
 
 #include "root_component.h"
+
+#include "base/log/log_wrapper.h"
+#include "core/animation/curve_animation.h"
 #include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace {

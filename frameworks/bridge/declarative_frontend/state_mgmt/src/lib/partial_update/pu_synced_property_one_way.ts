@@ -441,27 +441,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
       } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
-        copy = {};
-        copiedObjects.set(obj, copy);
-        const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
-        const toJSON: Function | undefined = globalThis.Panda?.STValue?.toJSON;
-        if (typeof toJSON === 'function') {
-          const json: string = toJSON(obj);
-          if (typeof json === 'string') {
-            const jsonObj: Object = JSON.parse(json);
-            if (typeof jsonObj === 'object' && jsonObj !== null) {
-              Object.keys(jsonObj).forEach((objKey: any) => {
-                copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
-              });
-            } else {
-              throw err;
-            }
-          } else {
-            throw err;
-          }
-        } else {
-          throw err;
-        }
+        copy = deepCopyStaticProxy(obj, getDeepCopyOfObjectRecursive, copiedObjects);
         return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
       } else {
         /**

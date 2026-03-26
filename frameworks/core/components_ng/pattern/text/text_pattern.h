@@ -640,8 +640,9 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     bool IsShowMenu(MenuPolicy options, bool defaultValue);
-    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
-    void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true, bool isReplace = false);
+    void SetStyledStringMultiThread(const RefPtr<SpanString>& value,
+        bool closeSelectOverlay = true, bool isReplace = false);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,

@@ -35,11 +35,6 @@ link_abc_files("arkoala_abc") {
     "koala_projects/arkoala-arkts:components_abc",
   ]
 
-  deps = []
-  if (!ohos_indep_compiler_enable) {
-    deps += [ "arkoala_generator:idlize_gen" ]
-  }
-
   output_name = "arkoala"
 }
 

@@ -43,6 +43,7 @@ import {
     Orientation,
     NavDestinationCommonTitle,
     NavDestinationCustomTitle,
+    VisibilityChangeReason,
 } from 'arkui.component.navDestination';
 import { ResourceStr } from 'arkui.component.units';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -60,61 +61,53 @@ export interface NavDestinationModuleInfo {
 }
 
 export declare class ArkNavDestinationPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
-    public static create(component: ComponentBase | undefined, flags?: int32): ArkNavDestinationPeer;
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0);
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkNavDestinationPeer;
     public setNavDestinationOptionsAttribute(moduleInfo?: NavDestinationModuleInfo): void;
-    public hideTitleBar0Attribute(value: boolean | undefined): void;
-    public hideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void;
-    public hideBackButtonAttribute(value: boolean | undefined): void;
-    public onShownAttribute(value: (() => void) | undefined): void;
-    public onHiddenAttribute(value: (() => void) | undefined): void;
-    public onBackPressedAttribute(value: (() => boolean) | undefined): void;
-    public onResultAttribute(value: ((parameter: Object) => void) | undefined): void;
-    public modeAttribute(value: NavDestinationMode | undefined): void;
-    public backButtonIcon0Attribute(value: ResourceStr | PixelMap | SymbolGlyphModifier | undefined): void;
-    public backButtonIcon1Attribute(
-        icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined,
-        accessibilityText?: ResourceStr
-    ): void;
-    public menus0Attribute(value: Array<NavigationMenuItem> | CustomBuilder | undefined): void;
-    public menus1Attribute(
-        items: Array<NavigationMenuItem> | CustomBuilder | undefined,
-        options?: NavigationMenuOptions
-    ): void;
-    public onReadyAttribute(value: Callback<NavDestinationContext> | undefined): void;
-    public onWillAppearAttribute(value: (() => void) | undefined): void;
-    public onWillDisappearAttribute(value: (() => void) | undefined): void;
-    public onWillShowAttribute(value: (() => void) | undefined): void;
-    public onWillHideAttribute(value: (() => void) | undefined): void;
-    public systemBarStyleAttribute(value: SystemBarStyle | undefined): void;
-    public recoverableAttribute(value: boolean | undefined): void;
-    public systemTransitionAttribute(value: NavigationSystemTransitionType | undefined): void;
-    public bindToScrollableAttribute(value: Array<Scroller> | undefined): void;
-    public bindToNestedScrollableAttribute(value: Array<NestedScrollInfo> | undefined): void;
-    public onActiveAttribute(value: ((parameter: NavDestinationActiveReason) => void) | undefined): void;
-    public onInactiveAttribute(value: ((parameter: NavDestinationActiveReason) => void) | undefined): void;
-    public customTransitionAttribute(value: NavDestinationTransitionDelegate | undefined): void;
-    public onNewParamAttribute(value: ((parameter: Object | null | undefined) => void) | undefined): void;
-    public preferredOrientationAttribute(value: Orientation | undefined): void;
-    public enableNavigationIndicatorAttribute(value: boolean | undefined): void;
-    public titleAttribute(
+    public setHideTitleBar0Attribute(value: boolean | undefined): void;
+    public setHideBackButtonAttribute(value: boolean | undefined): void;
+    public setOnShownAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void;
+    public setOnHiddenAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void;
+    public setOnBackPressedAttribute(value: (() => boolean) | undefined): void;
+    public setOnResultAttribute(value: ((value0: Object | null | undefined) => void) | undefined): void;
+    public setModeAttribute(value: NavDestinationMode | undefined): void;
+    public setOnReadyAttribute(value: ((value0: NavDestinationContext) => void) | undefined): void;
+    public setOnWillAppearAttribute(value: (() => void) | undefined): void;
+    public setOnWillDisappearAttribute(value: (() => void) | undefined): void;
+    public setOnWillShowAttribute(value: (() => void) | undefined): void;
+    public setOnWillHideAttribute(value: (() => void) | undefined): void;
+    public setSystemBarStyleAttribute(value: window.SystemBarStyle | undefined): void;
+    public setRecoverableAttribute(value: boolean | undefined): void;
+    public setSystemTransitionAttribute(value: NavigationSystemTransitionType | undefined): void;
+    public setBindToScrollableAttribute(value: Array<Scroller> | undefined): void;
+    public setBindToNestedScrollableAttribute(value: Array<NestedScrollInfo> | undefined): void;
+    public setOnActiveAttribute(value: ((value0: NavDestinationActiveReason) => void) | undefined): void;
+    public setOnInactiveAttribute(value: ((value0: NavDestinationActiveReason) => void) | undefined): void;
+    public setCustomTransitionAttribute(value: NavDestinationTransitionDelegate | undefined): void;
+    public setOnNewParamAttribute(value: ((value0: Object | null | undefined) => void) | undefined): void;
+    public setPreferredOrientationAttribute(value: window.Orientation | undefined): void;
+    public setEnableNavigationIndicatorAttribute(value: boolean | undefined): void;
+    public setTitleAttribute(
         value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined,
-        options?: NavigationTitleOptions
-    ): void;
-    public toolbarConfigurationAttribute(
-        toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined,
-        options?: NavigationToolbarOptions
-    ): void;
-    public hideToolBarAttribute(hide: boolean | undefined, animated?: boolean): void;
-    public ignoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
-    public enableStatusBarAttribute(enabled: boolean | undefined, animated?: boolean): void;
+        options?: NavigationTitleOptions): void;
+    public setHideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void;
+    public setBackButtonIconAttribute(
+        icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void;
+    public setMenusAttribute(
+        items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void;
+    public setToolbarConfigurationAttribute(
+        toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void;
+    public setHideToolBarAttribute(hide: boolean | undefined, animated?: boolean): void;
+    public setIgnoreLayoutSafeAreaAttribute(
+        types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
+    public setEnableStatusBarAttribute(enabled: boolean | undefined, animated?: boolean): void;
 }
 
 export interface NavDestinationAttribute extends CommonMethod {
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
     hideBackButton(value: boolean | undefined): this;
-    onShown(value: (() => void) | undefined): this;
-    onHidden(value: (() => void) | undefined): this;
+    onShown(callback: Callback<VisibilityChangeReason> | undefined): this;
+    onHidden(callback: Callback<VisibilityChangeReason> | undefined): this;
     onBackPressed(value: (() => boolean) | undefined): this;
     onResult(value: ((parameter: Object) => void) | undefined): this;
     mode(value: NavDestinationMode | undefined): this;
@@ -151,72 +144,6 @@ export interface NavDestinationAttribute extends CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
     enableStatusBar(enabled: boolean | undefined, animated?: boolean): this;
 }
-export declare class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
-    public hideTitleBar_value?: boolean | undefined;
-    public hideBackButton_value?: boolean | undefined;
-    public onShown_value?: (() => void) | undefined;
-    public onHidden_value?: (() => void) | undefined;
-    public onBackPressed_value?: (() => boolean) | undefined;
-    public onResult_value?: ((parameter: Object) => void) | undefined;
-    public mode_value?: NavDestinationMode | undefined;
-    public backButtonIcon_value?: ResourceStr | PixelMap | SymbolGlyphModifier | undefined;
-    public menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined;
-    public onReady_value?: Callback<NavDestinationContext> | undefined;
-    public onWillAppear_value?: Callback<void> | undefined;
-    public onWillDisappear_value?: Callback<void> | undefined;
-    public onWillShow_value?: Callback<void> | undefined;
-    public onWillHide_value?: Callback<void> | undefined;
-    public systemBarStyle_value?: SystemBarStyle | undefined;
-    public recoverable_value?: boolean | undefined;
-    public systemTransition_value?: NavigationSystemTransitionType | undefined;
-    public bindToScrollable_value?: Array<Scroller> | undefined;
-    public bindToNestedScrollable_value?: Array<NestedScrollInfo> | undefined;
-    public onActive_value?: ((parameter: NavDestinationActiveReason) => void) | undefined;
-    public onInactive_value?: ((parameter: NavDestinationActiveReason) => void) | undefined;
-    public customTransition_value?: NavDestinationTransitionDelegate | undefined;
-    public onNewParam_value?: ((parameter: Object | null | undefined) => void) | undefined;
-    public preferredOrientation_value?: Orientation | undefined;
-    public enableNavigationIndicator_value?: boolean | undefined;
-    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
-    public hideBackButton(value: boolean | undefined): this;
-    public onShown(value: (() => void) | undefined): this;
-    public onHidden(value: (() => void) | undefined): this;
-    public onBackPressed(value: (() => boolean) | undefined): this;
-    public onResult(value: ((parameter: Object) => void) | undefined): this;
-    public mode(value: NavDestinationMode | undefined): this;
-    public backButtonIcon(
-        icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined,
-        accessibilityText?: ResourceStr
-    ): this;
-    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
-    public onReady(value: Callback<NavDestinationContext> | undefined): this;
-    public onWillAppear(value: Callback<void> | undefined): this;
-    public onWillDisappear(value: Callback<void> | undefined): this;
-    public onWillShow(value: Callback<void> | undefined): this;
-    public onWillHide(value: Callback<void> | undefined): this;
-    public systemBarStyle(value: SystemBarStyle | undefined): this;
-    public recoverable(value: boolean | undefined): this;
-    public systemTransition(value: NavigationSystemTransitionType | undefined): this;
-    public bindToScrollable(value: Array<Scroller> | undefined): this;
-    public bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this;
-    public onActive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this;
-    public onInactive(value: ((parameter: NavDestinationActiveReason) => void) | undefined): this;
-    public customTransition(value: NavDestinationTransitionDelegate | undefined): this;
-    public onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this;
-    public preferredOrientation(value: Orientation | undefined): this;
-    public enableNavigationIndicator(value: boolean | undefined): this;
-    public title(
-        value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined,
-        options?: NavigationTitleOptions
-    ): this;
-    public toolbarConfiguration(
-        toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined,
-        options?: NavigationToolbarOptions
-    ): this;
-    public hideToolBar(hide: boolean | undefined, animated?: boolean): this;
-    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
-    public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this;
-}
 
 @memo_stable() export declare class ArkNavDestinationComponent extends ArkCommonMethodComponent
         implements NavDestinationAttribute {
@@ -224,8 +151,8 @@ export declare class ArkNavDestinationStyle extends ArkCommonMethodStyle impleme
     public setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
     public hideBackButton(value: boolean | undefined): this;
-    public onShown(value: (() => void) | undefined): this;
-    public onHidden(value: (() => void) | undefined): this;
+    public onShown(callback: Callback<VisibilityChangeReason> | undefined): this;
+    public onHidden(callback: Callback<VisibilityChangeReason> | undefined): this;
     public onBackPressed(value: (() => boolean) | undefined): this;
     public onResult(value: ((parameter: Object) => void) | undefined): this;
     public mode(value: NavDestinationMode | undefined): this;
