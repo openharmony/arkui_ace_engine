@@ -154,6 +154,14 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    getSizeLimitation()
+    {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let limitation = this.ohos_componentSnapshot.getSizeLimitation();
+        __JSScopeUtil__.restoreInstanceId();
+        return limitation;
+    }
 }
 
 class DragController {

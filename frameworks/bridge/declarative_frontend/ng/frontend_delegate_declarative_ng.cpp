@@ -1417,6 +1417,15 @@ void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity&
 #endif
 }
 
+NG::SnapshotSizeLimitation FrontendDelegateDeclarativeNG::GetSizeLimitation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSizeLimitation();
+#else
+    return {};
+#endif
+}
+
 void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
     NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
 {

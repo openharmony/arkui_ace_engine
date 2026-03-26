@@ -2796,6 +2796,10 @@
         "name": "OH_ArkUI_GetNodeSnapshot"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GetNodeSnapshotSizeLimitation"
+    },
+    {
         "first_introduced": "23",
         "name": "OH_ArkUI_SnapshotOptions_SetColorMode"
     },

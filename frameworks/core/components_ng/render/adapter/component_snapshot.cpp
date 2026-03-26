@@ -428,6 +428,22 @@ void HandleCreateSyncNode(const RefPtr<FrameNode>& node, const RefPtr<PipelineCo
     pipeline->FlushMessages();
 }
 
+SnapshotSizeLimitation ComponentSnapshot::GetSizeLimitation()
+{
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    uint32_t width = 0;
+    uint32_t height = 0;
+    rsInterface.GetMaxGpuBufferSize(width, height);
+
+    SnapshotSizeLimitation limitation;
+    limitation.maxWidth = static_cast<int32_t>(width);
+    limitation.maxHeight = static_cast<int32_t>(height);
+    if (limitation.maxWidth <= 0 || limitation.maxHeight <= 0) {
+        return { -1, -1 };
+    }
+    return { limitation.maxWidth, limitation.maxHeight };
+}
+
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);

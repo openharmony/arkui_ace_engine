@@ -22,6 +22,28 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "node/node_model.h"
+
+namespace {
+struct MockDelegate {
+    int32_t GetSizeLimitation(int32_t* maxWidth, int32_t* maxHeight)
+    {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+};
+
+class ScopedDelegate {
+public:
+    ScopedDelegate() : delegate_(new MockDelegate()) {}
+    ~ScopedDelegate() { delete delegate_; }
+    MockDelegate* operator->() { return delegate_; }
+
+private:
+    MockDelegate* delegate_;
+};
+
+ArkUISnapshotAPI g_mockSnapshotAPI;
+} // namespace
 
 using namespace testing;
 using namespace testing::ext;
@@ -391,5 +413,37 @@ HWTEST_F(SnapshotTest, SnapshotTest007, TestSize.Level1)
      */
     auto result = OH_ArkUI_GetNodeSnapshot(nullptr, options, &pixelmap);
     EXPECT_EQ(result, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SnapshotTest008
+ * @tc.desc: Test OH_ArkUI_GetNodeSnapshotSizeLimitation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, SnapshotTest008, TestSize.Level1)
+{
+    auto fullImpl = const_cast<ArkUIFullNodeAPI*>(OHOS::Ace::NodeModel::GetFullImpl());
+    auto originGetSnapshotAPI = fullImpl->getSnapshotAPI;
+    if (originGetSnapshotAPI) {
+        g_mockSnapshotAPI = *originGetSnapshotAPI();
+    }
+    g_mockSnapshotAPI.getSizeLimitation = [](int32_t* maxWidth, int32_t* maxHeight) -> int32_t {
+        ScopedDelegate delegate;
+        return delegate->GetSizeLimitation(maxWidth, maxHeight);
+    };
+    fullImpl->getSnapshotAPI = []() -> const ArkUISnapshotAPI* {
+        return &g_mockSnapshotAPI;
+    };
+    int32_t maxWidth = 0;
+    int32_t maxHeight = 0;
+    EXPECT_EQ(OH_ArkUI_GetNodeSnapshotSizeLimitation(&maxWidth, nullptr),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_GetNodeSnapshotSizeLimitation(nullptr, &maxHeight),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_GetNodeSnapshotSizeLimitation(nullptr, nullptr),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_GetNodeSnapshotSizeLimitation(&maxWidth, &maxHeight),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    fullImpl->getSnapshotAPI = originGetSnapshotAPI;
 }
 } // namespace OHOS::Ace

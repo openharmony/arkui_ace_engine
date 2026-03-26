@@ -342,6 +342,10 @@ export class ComponentSnapshot {
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error('getWithRange not implemented in ComponentSnapshot!')
     }
+
+    public getSizeLimitation(): componentSnapshot.SnapshotSizeLimitation {
+        throw Error('getSizeLimitation not implemented in ComponentSnapshot!')
+    }
 }
 
 export class DragController {

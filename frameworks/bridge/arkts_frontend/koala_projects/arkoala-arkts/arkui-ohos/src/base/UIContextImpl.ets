@@ -366,6 +366,13 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
+
+    public getSizeLimitation(): componentSnapshot.SnapshotSizeLimitation {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let limitation = componentSnapshot.getSizeLimitation();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return limitation;
+    }
 }
 
 export class DragControllerImpl extends DragController {
