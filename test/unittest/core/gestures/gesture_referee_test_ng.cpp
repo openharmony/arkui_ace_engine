@@ -2034,4 +2034,231 @@ HWTEST_F(GestureRefereeTestNg, SetRecognizerDelayStatusTest003, TestSize.Level1)
     gestureReferee.HandleAcceptDisposal(panRecognizer);
     EXPECT_EQ(gestureReferee.delayRecognizer_.Upgrade(), panRecognizer);
 }
+
+/**
+ * @tc.name: GestureScopeIsAnySucceedRecognizerExistTest001
+ * @tc.desc: Test GestureScope IsAnySucceedRecognizerExist function when recognizer is SUCCEED
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeIsAnySucceedRecognizerExistTest001, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+    auto result = gestureScope.IsAnySucceedRecognizerExist();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureScopeIsAnySucceedRecognizerExistTest002
+ * @tc.desc: Test GestureScope IsAnySucceedRecognizerExist function when recognizer is SUCCEED_BLOCKED
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeIsAnySucceedRecognizerExistTest002, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+    auto result = gestureScope.IsAnySucceedRecognizerExist();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureScopeIsAnySucceedRecognizerExistTest003
+ * @tc.desc: Test GestureScope IsAnySucceedRecognizerExist function when no succeed recognizer exists
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeIsAnySucceedRecognizerExistTest003, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+    auto result = gestureScope.IsAnySucceedRecognizerExist();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureScopeIsAnySucceedRecognizerExistTest004
+ * @tc.desc: Test GestureScope IsAnySucceedRecognizerExist function when recognizers is empty
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeIsAnySucceedRecognizerExistTest004, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    auto result = gestureScope.IsAnySucceedRecognizerExist();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureScopeIsAnySucceedRecognizerExistTest005
+ * @tc.desc: Test GestureScope IsAnySucceedRecognizerExist function when recognizer is nullptr
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeIsAnySucceedRecognizerExistTest005, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), nullptr);
+    auto result = gestureScope.IsAnySucceedRecognizerExist();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeIsScopesEmptyTest001
+ * @tc.desc: Test GestureReferee IsScopesEmpty function when gestureScopes is empty
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeIsScopesEmptyTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto result = gestureReferee.IsScopesEmpty();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeIsScopesEmptyTest002
+ * @tc.desc: Test GestureReferee IsScopesEmpty function when gestureScopes is not empty
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeIsScopesEmptyTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    auto result = gestureReferee.IsScopesEmpty();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeCleanGestureStateVoluntarilyTest001
+ * @tc.desc: Test GestureReferee CleanGestureStateVoluntarily function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCleanGestureStateVoluntarilyTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.CleanGestureStateVoluntarily(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeCleanGestureStateVoluntarilyTest002
+ * @tc.desc: Test GestureReferee CleanGestureStateVoluntarily function when touchId not found
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCleanGestureStateVoluntarilyTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.CleanGestureStateVoluntarily(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureRefereeUpdateGestureRefereeTest001
+ * @tc.desc: Test GestureReferee UpdateGestureReferee function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeUpdateGestureRefereeTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.UpdateGestureReferee(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeUpdateGestureRefereeTest002
+ * @tc.desc: Test GestureReferee UpdateGestureReferee function when touchId not found
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeUpdateGestureRefereeTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.UpdateGestureReferee(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureScopeCleanGestureScopeStateVoluntarilyTest001
+ * @tc.desc: Test GestureScope CleanGestureScopeStateVoluntarily function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeCleanGestureScopeStateVoluntarilyTest001, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+    gestureScope.CleanGestureScopeStateVoluntarily();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureScopeCleanGestureScopeStateVoluntarilyTest002
+ * @tc.desc: Test GestureScope CleanGestureScopeStateVoluntarily function when recognizers is empty
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeCleanGestureScopeStateVoluntarilyTest002, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    gestureScope.CleanGestureScopeStateVoluntarily();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureScopeCleanGestureScopeStateVoluntarilyTest003
+ * @tc.desc: Test GestureScope CleanGestureScopeStateVoluntarily function when recognizer is nullptr
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeCleanGestureScopeStateVoluntarilyTest003, TestSize.Level1)
+{
+    GestureScope gestureScope = GestureScope(0);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), nullptr);
+    gestureScope.CleanGestureScopeStateVoluntarily();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeHasFailRecognizerTest001
+ * @tc.desc: Test GestureReferee HasFailRecognizer function when touchId not found
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeHasFailRecognizerTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto result = gestureReferee.HasFailRecognizer(0);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeIsAnySucceedRecognizerExistTest001
+ * @tc.desc: Test GestureReferee IsAnySucceedRecognizerExist function when touchId not found
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeIsAnySucceedRecognizerExistTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto result = gestureReferee.IsAnySucceedRecognizerExist(0);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeForceCleanGestureRefereeTest001
+ * @tc.desc: Test GestureReferee ForceCleanGestureReferee function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForceCleanGestureRefereeTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.gestureScopes_[1] = AceType::MakeRefPtr<GestureScope>(1);
+    gestureReferee.ForceCleanGestureReferee();
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureRefereeForceCleanGestureRefereeStateTest001
+ * @tc.desc: Test GestureReferee ForceCleanGestureRefereeState function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForceCleanGestureRefereeStateTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.gestureScopes_[1] = AceType::MakeRefPtr<GestureScope>(1);
+    gestureReferee.ForceCleanGestureRefereeState();
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 2);
+}
 } // namespace OHOS::Ace::NG
