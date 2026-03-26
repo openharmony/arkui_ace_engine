@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -51,23 +52,23 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
- 
+
 namespace {
     constexpr char PID_FLAG[] = "pidflag";
     constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 }
 namespace OHOS::Ace::NG {
- 
+
 PreviewUIExtensionPattern::PreviewUIExtensionPattern(): SecurityUIExtensionPattern::SecurityUIExtensionPattern()
 {
     PLATFORM_LOGI("The Preview UIExtension is created.");
 }
- 
+
 PreviewUIExtensionPattern::~PreviewUIExtensionPattern()
 {
     PLATFORM_LOGI("PreviewUIExtension The Security UIExtension is destroyed.");
 }
- 
+
 void PreviewUIExtensionPattern::Initialize(const NG::UIExtensionConfig& config)
 {
     if (sessionWrapper_ != nullptr) {
@@ -136,16 +137,16 @@ void PreviewUIExtensionPattern::OnConnect()
     InitializeAccessibility();
     InitBusinessDataHandleCallback();
 }
- 
+
 class PreviewUECAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
     public:
     PreviewUECAccessibilitySAObserverCallback(
         const WeakPtr<PreviewUIExtensionPattern> &weakPattern, int64_t accessibilityId)
         : AccessibilitySAObserverCallback(accessibilityId), weakUECPattern_(weakPattern)
     {}
- 
+
     ~PreviewUECAccessibilitySAObserverCallback() override = default;
- 
+
     bool OnState(bool state) override
     {
         auto pattern = weakUECPattern_.Upgrade();
@@ -158,7 +159,7 @@ class PreviewUECAccessibilitySAObserverCallback : public AccessibilitySAObserver
 private:
     WeakPtr<PreviewUIExtensionPattern> weakUECPattern_;
 };
- 
+
 void PreviewUIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);

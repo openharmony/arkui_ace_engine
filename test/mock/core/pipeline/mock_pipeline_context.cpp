@@ -23,6 +23,8 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
+#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_element_info.h"
+#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_event_info.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -32,6 +34,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -46,6 +49,8 @@ namespace OHOS::Ace {
 static bool g_setBoolStatus = false;
 class MockAccessibilityManager : public AccessibilityManager {
 public:
+    using ActionArguments = std::map<std::string, std::string>;
+
     MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
     MOCK_METHOD(void, SendWebAccessibilityAsyncEvent,
         (const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::WebPattern>& webPattern), (override));
@@ -98,7 +103,7 @@ public:
             const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, ExecuteExtensionActionNG,
-        (int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action,
+        (int64_t elementId, const ActionArguments& actionArguments, int32_t action,
             const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, TransferAccessibilityAsyncEvent,
@@ -1410,9 +1415,12 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+const RefPtr<NG::UIExtensionManager>& NG::PipelineContext::GetUIExtensionManager()
 {
-    return AceType::MakeRefPtr<UIExtensionManager>();
+    if (!uiExtensionManager_) {
+        uiExtensionManager_ = AceType::MakeRefPtr<NG::UIExtensionManager>();
+    }
+    return uiExtensionManager_;
 }
 #endif
 
