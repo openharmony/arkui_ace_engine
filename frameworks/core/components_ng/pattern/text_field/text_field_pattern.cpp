@@ -650,6 +650,10 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     } else if (cmd == "clear") {
         ClearTextContent();
     } else if (cmd == "requestKeyboard") {
+        if (HasFocus) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent cmd requestKeyboard HasFocus.");
+		    return false;
+        }
         auto focusHub = GetFocusHub();
         CHECK_NULL_RETURN(focusHub, false);
         focusHub->RequestFocusImmediately();
@@ -1483,10 +1487,10 @@ void TextFieldPattern::HandleFocusEvent()
     bool continueFeature = textFieldManager->GetCustomKeyboardContinueFeature();
     if (continueFeature) {
         OnFocusCustomKeyboardChange();
-        ReportRequestKeyboardEvent(host);
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
+    ReportRequestKeyboardEvent(host);
 }
 
 void TextFieldPattern::SetFocusStyle()
