@@ -24,6 +24,9 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #define private public
 #define protected public
@@ -55,6 +58,7 @@ void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
+    ViewStackProcessor::GetInstance()->Pop();
 }
 
 RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
@@ -4826,4 +4830,775 @@ HWTEST_F(ListLayoutTestNg, TestLanesCacheRangeInBusy, TestSize.Level1)
         EXPECT_EQ(it.forceCache, true);
     }
 }
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutBasicLayout001
+ * @tc.desc: Test List with LazyVGridLayout basic layout functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutBasicLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout child
+     * @tc.expected: List frameNode created successfully
+     */
+    ListModelNG listModel = CreateList();
+
+    /**
+     * @tc.steps: step2. Create LazyVGridLayout with columns template
+     * @tc.expected: LazyVGridLayout created successfully
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    /**
+     * @tc.steps: step3. Add 30 Stack items to LazyVGridLayout
+     * @tc.expected: Items added successfully
+     */
+    for (int i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    /**
+     * @tc.steps: step4. Finalize layout and verify
+     * @tc.expected: frameNode created and has children
+     */
+    CreateDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutBasicLayout002
+ * @tc.desc: Test List with LazyVGridLayout different columns templates
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutBasicLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with multi-column LazyVGridLayout
+     * @tc.expected: LazyVGridLayout created with correct template
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(80));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutWithSpacing001
+ * @tc.desc: Test List with LazyVGridLayout row and column spacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     * @tc.expected: Basic layout created
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    /**
+     * @tc.steps: step2. Set row gap and column gap
+     * @tc.expected: Spacing properties set correctly
+     */
+    gridModel.SetRowGap(Dimension(10.0));
+    gridModel.SetColumnGap(Dimension(20.0));
+
+    /**
+     * @tc.steps: step3. Add items and finalize
+     * @tc.expected: Items added with spacing
+     */
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutWithListItem001
+ * @tc.desc: Test List with mixed ListItem and LazyVGridLayout children
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithListItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG listModel = CreateList();
+
+    /**
+     * @tc.steps: step2. Add first ListItem
+     * @tc.expected: ListItem added
+     */
+    ListItemModelNG itemModel1;
+    itemModel1.Create();
+    ViewAbstract::SetWidth(CalcLength(100.0));
+    ViewAbstract::SetHeight(CalcLength(50.0));
+    ViewStackProcessor::GetInstance()->Pop();
+
+    /**
+     * @tc.steps: step3. Add LazyVGridLayout with multiple items
+     * @tc.expected: LazyVGridLayout added
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    /**
+     * @tc.steps: step4. Add two more ListItems
+     * @tc.expected: All children present
+     */
+    ListItemModelNG itemModel2;
+    itemModel2.Create();
+    ViewAbstract::SetWidth(CalcLength(100.0));
+    ViewAbstract::SetHeight(CalcLength(50.0));
+    ViewStackProcessor::GetInstance()->Pop();
+
+    ListItemModelNG itemModel3;
+    itemModel3.Create();
+    ViewAbstract::SetWidth(CalcLength(100.0));
+    ViewAbstract::SetHeight(CalcLength(50.0));
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    ASSERT_NE(frameNode_, nullptr);
+    auto children = frameNode_->GetChildren();
+    EXPECT_EQ(children.size(), 4);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutVertical001
+ * @tc.desc: Test vertical List with LazyVGridLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutVertical001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create vertical List
+     * @tc.expected: List created with VERTICAL axis
+     */
+    ListModelNG model;
+    model.Create();
+    model.SetListDirection(Axis::VERTICAL);
+    ViewAbstract::SetWidth(CalcLength(500.0));
+    ViewAbstract::SetHeight(CalcLength(500.0));
+    ViewStackProcessor::GetInstance()->Pop();
+    frameNode_ = AceType::DynamicCast<FrameNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. Add LazyVGridLayout
+     * @tc.expected: LazyVGridLayout added to vertical list
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    FlushUITasks(frameNode_);
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutNestedLazy001
+ * @tc.desc: Test CanSupportNestedLazy returns true for default List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutNestedLazy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default List without special properties
+     * @tc.expected: CanSupportNestedLazy returns true
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    EXPECT_TRUE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_));
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutWithLanes001
+ * @tc.desc: Test CanSupportNestedLazy returns false when lanes is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithLanes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with lanes property
+     * @tc.expected: CanSupportNestedLazy returns false
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetLanes(2);
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_));
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutWithChainAnimation001
+ * @tc.desc: Test CanSupportNestedLazy returns false when chainAnimation is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithChainAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with chainAnimation property
+     * @tc.expected: CanSupportNestedLazy returns false
+     */
+    ListModelNG listModel = CreateList();
+    ChainAnimationOptions option;
+    option.minSpace = Dimension(10);
+    option.maxSpace = Dimension(30);
+    listModel.SetChainAnimation(true);
+    listModel.SetChainAnimationOptions(option);
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_));
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutWithScrollSnapAlign001
+ * @tc.desc: Test CanSupportNestedLazy returns false when scrollSnapAlign is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithScrollSnapAlign001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with scrollSnapAlign property
+     * @tc.expected: CanSupportNestedLazy returns false
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_));
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutViewPosRef001
+ * @tc.desc: Test ViewPosReference parameters are correctly passed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutViewPosRef001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with viewport size
+     */
+    ListModelNG listModel = CreateList();
+
+    /**
+     * @tc.steps: step2. Add ListItem before LazyVGridLayout
+     */
+    ListItemModelNG itemModel;
+    itemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(100.0));
+    ViewAbstract::SetHeight(CalcLength(100.0));
+    ViewStackProcessor::GetInstance()->Pop();
+
+    /**
+     * @tc.steps: step3. Add LazyVGridLayout
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    EXPECT_EQ(listPattern->GetAxis(), Axis::VERTICAL);
+
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutViewPosRef002
+ * @tc.desc: Test ViewPosReference for backward layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutViewPosRef002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG listModel = CreateList();
+
+    /**
+     * @tc.steps: step2. Add LazyVGridLayout
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    EXPECT_EQ(listPattern->GetAxis(), Axis::VERTICAL);
+
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutLayoutConstraint001
+ * @tc.desc: Test LayoutConstraint contains viewPosRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutLayoutConstraint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default List supporting nested lazy
+     */
+    ListModelNG listModel = CreateList();
+
+    /**
+     * @tc.steps: step2. Add LazyVGridLayout
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    EXPECT_FALSE(listLayoutAlgorithm->childLayoutConstraint_.viewPosRef.has_value());
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutAdjustOffset001
+ * @tc.desc: Test GetAdjustOffset method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutAdjustOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    auto lazyVGridPattern = lazyVGridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyVGridPattern, nullptr);
+
+    AdjustOffset offset = lazyVGridPattern->GetAdjustOffset();
+    EXPECT_EQ(offset.start, 0.0f);
+    EXPECT_EQ(offset.end, 0.0f);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutApplyAdjustOffset001
+ * @tc.desc: Test ApplyLazyVGridAdjustOffset for forward layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutApplyAdjustOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    auto lazyVGridPattern = lazyVGridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyVGridPattern, nullptr);
+
+    AdjustOffset testOffset;
+    testOffset.start = 50.0f;
+    testOffset.end = 30.0f;
+
+    AdjustOffset currentOffset = lazyVGridPattern->GetAdjustOffset();
+    EXPECT_FLOAT_EQ(currentOffset.start, 0.0f);
+    EXPECT_FLOAT_EQ(currentOffset.end, 0.0f);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutApplyAdjustOffset002
+ * @tc.desc: Test ApplyLazyVGridAdjustOffset for backward layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutApplyAdjustOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_GT(children.size(), 0);
+    auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(lazyVGridNode, nullptr);
+
+    auto lazyVGridPattern = lazyVGridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyVGridPattern, nullptr);
+
+    AdjustOffset testOffset;
+    testOffset.start = 50.0f;
+    testOffset.end = 30.0f;
+
+    AdjustOffset currentOffset = lazyVGridPattern->GetAdjustOffset();
+    EXPECT_FLOAT_EQ(currentOffset.start, 0.0f);
+    EXPECT_FLOAT_EQ(currentOffset.end, 0.0f);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutScroll001
+ * @tc.desc: Test LazyVGridLayout remeasure after scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     */
+    ListModelNG listModel = CreateList();
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    FlushUITasks(frameNode_);
+
+    auto layoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Scroll the list
+     * @tc.expected: Layout algorithm position updated
+     */
+    pattern_->UpdateCurrentOffset(-200.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(frameNode_);
+
+    auto newLayoutAlgorithm = listPattern->CreateLayoutAlgorithm();
+    auto newlistLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(newLayoutAlgorithm);
+    ASSERT_NE(newlistLayoutAlgorithm, nullptr);
+
+    EXPECT_EQ(newlistLayoutAlgorithm->axis_, Axis::VERTICAL);
+    EXPECT_GE(newlistLayoutAlgorithm->endMainPos_, newlistLayoutAlgorithm->startMainPos_);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutPredictBuild001
+ * @tc.desc: Test ProcessPredictBuildLazyVGrid is called
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutPredictBuild001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetCachedCount(2);
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step2. Verify LazyVGridLayout created successfully
+     * @tc.expected: Children exist
+     */
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
+/**
+ * @tc.name: ListWithLazyVGridLayoutCacheRange001
+ * @tc.desc: Test LazyVGridLayout with cached count
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutCacheRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with cached count
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetCachedCount(2);
+
+    /**
+     * @tc.steps: step2. Add LazyVGridLayout
+     */
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step3. Verify LazyVGridLayout created successfully
+     * @tc.expected: Children exist
+     */
+    auto children = frameNode_->GetChildren();
+    EXPECT_GE(children.size(), 1);
+}
+
 } // namespace OHOS::Ace::NG

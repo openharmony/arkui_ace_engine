@@ -30,7 +30,9 @@
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
+class ListPattern;
 class ListPositionMap;
+struct AdjustOffset;
 
 struct ListItemGroupLayoutInfo {
     bool atStart = false;
@@ -532,6 +534,9 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
+    void MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
+    void ApplyLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
+    AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -555,6 +560,8 @@ protected:
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
     void UpdateNoLayoutedItems();
+
+    AdjustOffset GetLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -680,6 +687,16 @@ private:
     void CheckAndMeasureStartItem(
         LayoutWrapper* layoutWrapper, int32_t startIndex, float& startPos, bool isGroup, bool forwardLayout);
 
+    // Helper function for nested lazy loading support (static, no instance state needed)
+    static bool CanSupportNestedLazy(const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode);
+
+    static void ProcessPredictBuildLazyVGrid(
+        const RefPtr<LayoutWrapper>& wrapper,
+        int32_t index,
+        const RefPtr<ListPattern>& pattern,
+        const ListPredictLayoutParamV2& param,
+        const ListMainSizeValues& listMainSizeValues,
+        bool show);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -116,11 +117,25 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && parent->GetTag() != V2::SCROLL_ETS_TAG) {
+        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG &&
+            parent->GetTag() != V2::SCROLL_ETS_TAG &&
+            !IsVerticalList(parent)) {
             LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
         }
         return;
     }
+}
+
+bool LazyGridLayoutPattern::IsVerticalList(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::LIST_ETS_TAG) {
+        return false;
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo()
