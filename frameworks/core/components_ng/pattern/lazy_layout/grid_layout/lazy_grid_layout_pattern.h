@@ -79,6 +79,7 @@ public:
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsVerticalList(const RefPtr<UINode>& node);
 
     void PostIdleTask();
     void ProcessIdleTask(int64_t deadline);
