@@ -154,7 +154,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
     Media::DecodeOptions options;
     InitDecodeOptions(options, size, pixelMapConfig);
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
-    if (errorCode != Media::SUCCESS) {
+    if (errorCode != Media::SUCCESS || !pixmap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "create PixelMap from ImageSource failed, index = %{public}u, errorCode = %{public}u", index, errorCode);
         return nullptr;
