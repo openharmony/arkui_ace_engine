@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/components_ng/syntax/with_theme_node.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -31,6 +32,8 @@ void JSWithTheme::JSBind(BindingTarget globalObj)
     JSClass<JSWithTheme>::StaticMethod("sendThemeToNative", &JSWithTheme::SendThemeToNative, MethodOptions::NONE);
     JSClass<JSWithTheme>::StaticMethod("removeThemeInNative", &JSWithTheme::RemoveThemeInNative, MethodOptions::NONE);
     JSClass<JSWithTheme>::StaticMethod("setThemeScopeId", &JSWithTheme::SetThemeScopeId, MethodOptions::NONE);
+    JSClass<JSWithTheme>::StaticMethod(
+        "getCurrentBuildingWithThemeNodeId", &JSWithTheme::GetCurrentBuildingWithThemeNodeId, MethodOptions::NONE);
     JSClass<JSWithTheme>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -123,6 +126,16 @@ void JSWithTheme::SetThemeScopeId(const JSCallbackInfo& info)
     std::optional<JSTheme> themeOpt = (theme != JSThemeScope::jsThemes.end()) ?
         std::make_optional(theme->second) : std::nullopt;
     JSThemeUtils::SwapCurrentTheme(themeOpt);
+}
+
+void JSWithTheme::GetCurrentBuildingWithThemeNodeId(const JSCallbackInfo& info)
+{
+    const auto currentBuildingNodeId = NG::WithThemeNode::GetCurrentBuildingNodeId();
+    if (!currentBuildingNodeId.has_value()) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(currentBuildingNodeId.value())));
 }
 
 } // namespace OHOS::Ace::Framework

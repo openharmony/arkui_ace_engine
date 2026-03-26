@@ -28,6 +28,13 @@ declare enum ThemeColorMode {
 
 // for bind with native level and State Management
 declare function getUINativeModule(): any;
+let arkThemeApiTargetVersion: number | undefined = undefined;
+function getArkThemeApiTargetVersion(): number {
+    if (arkThemeApiTargetVersion === undefined) {
+        arkThemeApiTargetVersion = getUINativeModule().common.getApiTargetVersion();
+    }
+    return arkThemeApiTargetVersion;
+}
 declare class ViewStackProcessor {
     static GetElmtIdToAccountFor(): number;
     static visualState(state?: string): void;
