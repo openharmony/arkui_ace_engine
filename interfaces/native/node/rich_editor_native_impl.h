@@ -32,7 +32,7 @@ struct OH_ArkUI_TextEditorPlaceholderOptions {
 };
 
 struct OH_ArkUI_TextEditorStyledStringController {
-    ArkUI_NodeHandle node;
+    ArkUI_NodeHandle node = nullptr;
 };
 
 struct OH_ArkUI_TextEditorParagraphStyle {

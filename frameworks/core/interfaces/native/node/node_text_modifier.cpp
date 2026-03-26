@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
@@ -2847,6 +2848,15 @@ void GetCharacterRangeForGlyphRange(
 #else
 #endif
 }
+
+void SetStyledString(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto spanStringRawPtr = reinterpret_cast<MutableSpanString*>(descriptor->spanString);
+    CHECK_NULL_VOID(spanStringRawPtr);
+    TextModelNG::SetStyledString(frameNode, spanStringRawPtr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -3055,6 +3065,7 @@ const ArkUITextModifier* GetTextModifier()
         .getCharacterPositionAtCoordinate = GetCharacterPositionAtCoordinate,
         .getGlyphRangeForCharacterRange = GetGlyphRangeForCharacterRange,
         .getCharacterRangeForGlyphRange = GetCharacterRangeForGlyphRange,
+        .setStyledString = SetStyledString,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

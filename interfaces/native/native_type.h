@@ -9805,6 +9805,40 @@ void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
  */
 OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontConfigs_GetFontWeightConfigs(OH_ArkUI_FontConfigs* option);
 
+/**
+ * @brief Defines controller for text.
+ * @since 26.0.0
+ */
+typedef struct OH_ArkUI_TextController OH_ArkUI_TextController;
+
+/**
+ * @brief Create a controller object for text.
+ * @return A pointer to the text controller object.
+ * @since 26.0.0
+ */
+OH_ArkUI_TextController* OH_ArkUI_TextController_Create();
+
+/**
+ * @brief Destroys the text controller.
+ *
+ * @param controller <b>Text</b> controller.
+ * @since 26.0.0
+ */
+void OH_ArkUI_TextController_Destroy(OH_ArkUI_TextController* controller);
+
+/**
+ * @brief Set the StyledString of the text.
+ *
+ * @param controller <b>Text</b> controller.
+ * @param descriptor Pointer to an <b>ArkUI_StyledString_Descriptor</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
+    OH_ArkUI_TextController* controller, ArkUI_StyledString_Descriptor* descriptor);
+
 #ifdef __cplusplus
 };
 #endif

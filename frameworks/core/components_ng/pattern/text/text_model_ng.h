@@ -289,6 +289,7 @@ public:
     static void SetExternalDrawCallback(
         FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback);
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
+    static void SetStyledString(FrameNode* frameNode, const SpanString* value);
 };
 } // namespace OHOS::Ace::NG
 
