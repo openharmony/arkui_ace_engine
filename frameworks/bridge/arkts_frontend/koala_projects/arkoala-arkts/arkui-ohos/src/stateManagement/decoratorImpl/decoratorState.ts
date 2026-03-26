@@ -43,8 +43,8 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     public readonly backing_: IBackingValue<T>;
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
-    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super('@State', owningView, varName, watchFunc);
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType, decoratorName?: string) {
+        super(decoratorName ?? '@State', owningView, varName, watchFunc);
         this.checkValueIsNotFunction(initValue);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
