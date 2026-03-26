@@ -1491,7 +1491,6 @@ void TextFieldPattern::HandleFocusEvent()
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
-    ReportRequestKeyboardEvent(host);
 }
 
 void TextFieldPattern::SetFocusStyle()
