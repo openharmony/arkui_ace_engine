@@ -1285,4 +1285,18 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventInner002, Te
     EXPECT_EQ(ret, HandleHoverRet::IN_TIME_LIMIT);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: IsEventTypeChangeDirectHandleHoverTest001
+ * @tc.desc: test IsEventTypeChangeDirectHandleHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, IsEventTypeChangeDirectHandleHoverTest001, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::EXIT;
+    AccessibilityHoverEventType prevEventType = AccessibilityHoverEventType::ENTER;
+    bool ret = accessibilityManagerNg.IsEventTypeChangeDirectHandleHover(eventType, prevEventType);
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG
