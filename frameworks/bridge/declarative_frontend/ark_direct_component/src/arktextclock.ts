@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,80 +13,80 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-function loadComponent() {
+/// <reference path='./../../ark_component/src/import.ts' />
+type ComponentObj = { component: any }
+
+function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkTextClockComponent extends globalThis.__ArkComponent__ {
-      constructor(nativePtr, classType) {
+      constructor(nativePtr: any, classType: any) {
         super(nativePtr, classType);
       }
-      allowChildCount() {
+      allowChildCount(): number {
         return 0;
       }
-      initialize(value) {
-        let _a, _b;
+      initialize(value: any): this {
         if (value.length === 1 && isObject(value[0])) {
-          if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.timeZoneOffset) !== undefined) {
+          if (value[0]?.timeZoneOffset !== undefined) {
             modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
           } else {
             modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
           }
-          if (((_b = value[0]) === null || _b === void 0 ? void 0 : _b.controller) !== undefined) {
+          if (value[0]?.controller !== undefined) {
             modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, value[0].controller);
           } else {
             modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
           }
-        }
-        else {
+        } else {
           modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
           modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
         }
         return this;
       }
-      format(value) {
+      format(value: string): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
         return this;
       }
-      onDateChange(event) {
+      onDateChange(event: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
         return this;
       }
-      fontColor(value) {
+      fontColor(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
         return this;
       }
-      fontSize(value) {
+      fontSize(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontSizeModifier.identity, TextClockFontSizeModifier, value);
         return this;
       }
-      fontStyle(value) {
+      fontStyle(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontStyleModifier.identity, TextClockFontStyleModifier, value);
         return this;
       }
-      fontWeight(value) {
+      fontWeight(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontWeightModifier.identity, TextClockFontWeightModifier, value);
         return this;
       }
-      fontFamily(value) {
+      fontFamily(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontFamilyModifier.identity, TextClockFontFamilyModifier, value);
         return this;
       }
-      textShadow(value) {
+      textShadow(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
         return this;
       }
-      fontFeature(value) {
+      fontFeature(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
         return this;
       }
-      contentModifier(value) {
+      contentModifier(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
         return this;
       }
-      setContentModifier(modifier) {
+      setContentModifier(modifier: any): this {
         if (modifier === undefined || modifier === null) {
           getUINativeModule().textclock.setContentModifierBuilder(this.nativePtr, false);
-          return;
+          return this;
         }
         this.needRebuild = false;
         if (this.builder !== modifier.applyContent()) {
@@ -95,8 +95,9 @@ function loadComponent() {
         this.builder = modifier.applyContent();
         this.modifier = modifier;
         getUINativeModule().textclock.setContentModifierBuilder(this.nativePtr, this);
+        return this;
       }
-      makeContentModifierNode(context, textClockConfiguration) {
+      makeContentModifierNode(context: any, textClockConfiguration: any): any {
         textClockConfiguration.contentModifier = this.modifier;
         if (isUndefined(this.textClockNode) || this.needRebuild) {
           const xNode = globalThis.requireNapi('arkui.node');
@@ -108,16 +109,17 @@ function loadComponent() {
         }
         return this.textClockNode.getFrameNode();
       }
-      dateTimeOptions(value) {
+      dateTimeOptions(value: any): this {
         modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity, TextClockDateTimeOptionsModifier, value);
         return this;
       }
     }
-    class TextClockOnDateChangeModifier extends ModifierWithKey {
-      constructor(value) {
+
+    class TextClockOnDateChangeModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetTextClockOnDateChange(node);
         } else {
@@ -125,44 +127,47 @@ function loadComponent() {
         }
       }
     }
-    TextClockOnDateChangeModifier.identity = Symbol('textClockOnDateChange');
-    class TextClockTimeZoneOffsetModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockOnDateChangeModifier as any).identity = Symbol('textClockOnDateChange');
+
+    class TextClockTimeZoneOffsetModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.setTextClockTimeZoneOffset(node, undefined);
         } else {
           getUINativeModule().textclock.setTextClockTimeZoneOffset(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockTimeZoneOffsetModifier.identity = Symbol('textClockTimeZoneOffset');
-    class TextClockControllerModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockTimeZoneOffsetModifier as any).identity = Symbol('textClockTimeZoneOffset');
+
+    class TextClockControllerModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.setTextClockController(node, undefined);
         } else {
           getUINativeModule().textclock.setTextClockController(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockControllerModifier.identity = Symbol('textClockController');
-    class TextClockFormatModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockControllerModifier as any).identity = Symbol('textClockController');
+
+    class TextClockFormatModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFormat(node);
         }
@@ -171,12 +176,13 @@ function loadComponent() {
         }
       }
     }
-    TextClockFormatModifier.identity = Symbol('textClockFormat');
-    class TextClockFontColorModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFormatModifier as any).identity = Symbol('textClockFormat');
+
+    class TextClockFontColorModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontColor(node);
         }
@@ -184,16 +190,17 @@ function loadComponent() {
           getUINativeModule().textclock.setFontColor(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockFontColorModifier.identity = Symbol('textClockFontColor');
-    class TextClockFontSizeModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontColorModifier as any).identity = Symbol('textClockFontColor');
+
+    class TextClockFontSizeModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontSize(node);
         }
@@ -201,16 +208,17 @@ function loadComponent() {
           getUINativeModule().textclock.setFontSize(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockFontSizeModifier.identity = Symbol('textClockFontSize');
-    class TextClockFontStyleModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontSizeModifier as any).identity = Symbol('textClockFontSize');
+
+    class TextClockFontStyleModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontStyle(node);
         }
@@ -219,12 +227,13 @@ function loadComponent() {
         }
       }
     }
-    TextClockFontStyleModifier.identity = Symbol('textClockFontStyle');
-    class TextClockFontWeightModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontStyleModifier as any).identity = Symbol('textClockFontStyle');
+
+    class TextClockFontWeightModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontWeight(node);
         }
@@ -233,12 +242,13 @@ function loadComponent() {
         }
       }
     }
-    TextClockFontWeightModifier.identity = Symbol('textClockFontWeight');
-    class TextClockFontFamilyModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontWeightModifier as any).identity = Symbol('textClockFontWeight');
+
+    class TextClockFontFamilyModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontFamily(node);
         }
@@ -246,16 +256,17 @@ function loadComponent() {
           getUINativeModule().textclock.setFontFamily(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
-    class TextClockFontFeatureModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontFamilyModifier as any).identity = Symbol('textClockFontFamily');
+
+    class TextClockFontFeatureModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetFontFeature(node);
         }
@@ -263,26 +274,28 @@ function loadComponent() {
           getUINativeModule().textclock.setFontFeature(node, this.value);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
-    class TextClockContentModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockFontFeatureModifier as any).identity = Symbol('textClockFontFeature');
+
+    class TextClockContentModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset, component) {
+      applyPeer(node: any, reset: boolean, component: any): void {
         let textClockComponent = component;
         textClockComponent.setContentModifier(this.value);
       }
     }
-    TextClockContentModifier.identity = Symbol('textClockContentModifier');
-    class TextClockTextShadowModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockContentModifier as any).identity = Symbol('textClockContentModifier');
+
+    class TextClockTextShadowModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetTextShadow(node);
         }
@@ -297,7 +310,7 @@ function loadComponent() {
           }
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         let checkDiff = true;
         let arkShadow = new ArkShadowInfoToArray();
         if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
@@ -321,13 +334,13 @@ function loadComponent() {
         return checkDiff;
       }
     }
-    TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
-    
-    class TextClockDateTimeOptionsModifier extends ModifierWithKey {
-      constructor(value) {
+    (TextClockTextShadowModifier as any).identity = Symbol('textClockTextShadow');
+
+    class TextClockDateTimeOptionsModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
         super(value);
       }
-      applyPeer(node, reset) {
+      applyPeer(node: any, reset: boolean): void {
         if (reset) {
           getUINativeModule().textclock.resetDateTimeOptions(node);
         }
@@ -335,98 +348,99 @@ function loadComponent() {
           getUINativeModule().textclock.setDateTimeOptions(node, this.value.hour);
         }
       }
-      checkObjectDiff() {
+      checkObjectDiff(): boolean {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    TextClockDateTimeOptionsModifier.identity = Symbol('textClockDateTimeOptions');
+    (TextClockDateTimeOptionsModifier as any).identity = Symbol('textClockDateTimeOptions');
+
     loadComponent.componentObj = {'component' : ArkTextClockComponent };
   }
   return loadComponent.componentObj;
 }
 
 class JSTextClock extends JSViewAbstract {
-    static create(params) {
-        getUINativeModule().textclock.create(params);
+  static create(params: any): void {
+    getUINativeModule().textclock.create(params);
+  }
+  static format(value: any): void {
+    getUINativeModule().textclock.setFormat(true, value);
+  }
+  static onDateChange(event: any): void {
+    getUINativeModule().textclock.setTextClockOnDateChange(true, event);
+  }
+  static fontColor(value: any): void {
+    getUINativeModule().textclock.setFontColor(true, value);
+  }
+  static fontSize(value: any): void {
+    getUINativeModule().textclock.setFontSize(true, value);
+  }
+  static fontStyle(value: any): void {
+    getUINativeModule().textclock.setFontStyle(true, value);
+  }
+  static fontWeight(value: any): void {
+    getUINativeModule().textclock.setFontWeight(true, value);
+  }
+  static fontFamily(value: any): void {
+    getUINativeModule().textclock.setFontFamily(true, value);
+  }
+  static textShadow(value: any): void {
+    let shadow = new ArkShadowInfoToArray();
+    if (value !== undefined && value !== null) {
+      shadow.convertShadowOptions(value);
     }
-    static format(value) {
-        getUINativeModule().textclock.setFormat(true, value);
-    }
-    static onDateChange(event) {
-        getUINativeModule().textclock.setTextClockOnDateChange(true, event);
-    }
-    static fontColor(value) {
-        getUINativeModule().textclock.setFontColor(true, value);
-    }
-    static fontSize(value) {
-        getUINativeModule().textclock.setFontSize(true, value);
-    }
-    static fontStyle(value) {
-        getUINativeModule().textclock.setFontStyle(true, value);
-    }
-    static fontWeight(value) {
-        getUINativeModule().textclock.setFontWeight(true, value);
-    }
-    static fontFamily(value) {
-        getUINativeModule().textclock.setFontFamily(true, value);
-    }
-    static textShadow(value) {
-        let shadow = new ArkShadowInfoToArray();
-        if (value !== undefined && value !== null) {
-            shadow.convertShadowOptions(value);
-        }
-        getUINativeModule().textclock.setTextShadow(true, shadow.radius, shadow.type, shadow.color,
-            shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
-    }
-    static fontFeature(value) {
-        getUINativeModule().textclock.setFontFeature(true, value);
-    }
-    static contentModifier(modifier) {
-        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-        let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-        let component = this.createOrGetNode(elmtId, () => {
-            return createComponent(nativeNode, 'textclock');
-        });
-        component.setContentModifier(modifier);
-    }
-    static dateTimeOptions(dateTimeOptions) {
-        getUINativeModule().textclock.setDateTimeOptions(true, dateTimeOptions);
-    }
+    getUINativeModule().textclock.setTextShadow(true, shadow.radius, shadow.type, shadow.color,
+      shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+  }
+  static fontFeature(value: any): void {
+    getUINativeModule().textclock.setFontFeature(true, value);
+  }
+  static contentModifier(modifier: any): void {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return createComponent(nativeNode, 'textclock');
+    });
+    component.setContentModifier(modifier);
+  }
+  static dateTimeOptions(dateTimeOptions: any): void {
+    getUINativeModule().textclock.setDateTimeOptions(true, dateTimeOptions);
+  }
 
-    static onClick(value) {
-        __Common__.onClick(value);
-    }
-    static onKeyEvent(value) {
-        __Common__.onKeyEvent(value);
-    }
-    static onDeleteEvent(value) {
-        __Common__.onDeleteEvent(value);
-    }
-    static onAttach(value) {
-        __Common__.onAttach(value);
-    }
-    static onAppear(value) {
-        __Common__.onAppear(value);
-    }
-    static onDetach(value) {
-        __Common__.onAttach(value);
-    }
-    static onDisAppear(value) {
-        __Common__.onDisAppear(value);
-    }
-    static onTouch(value) {
-        __Common__.onTouch(value);
-    }
-    static attributeModifier(modifier) {
-      attributeModifierFunc.call(this, modifier, (nativePtr) => {
-        return createComponent(nativePtr);
-      }, (nativePtr, classType, modifierJS) => {
-        return new modifierJS.TextClockModifier(nativePtr, classType);
-      });
-    }
+  static onClick(value: any): void {
+    __Common__.onClick(value);
+  }
+  static onKeyEvent(value: any): void {
+    __Common__.onKeyEvent(value);
+  }
+  static onDeleteEvent(value: any): void {
+    __Common__.onDeleteEvent(value);
+  }
+  static onAttach(value: any): void {
+    __Common__.onAttach(value);
+  }
+  static onAppear(value: any): void {
+    __Common__.onAppear(value);
+  }
+  static onDetach(value: any): void {
+    __Common__.onAttach(value);
+  }
+  static onDisAppear(value: any): void {
+    __Common__.onDisAppear(value);
+  }
+  static onTouch(value: any): void {
+    __Common__.onTouch(value);
+  }
+  static attributeModifier(modifier: any): void {
+    attributeModifierFunc.call(this, modifier, (nativePtr: any) => {
+      return createComponent(nativePtr);
+    }, (nativePtr: any, classType: any, modifierJS: any) => {
+      return new modifierJS.TextClockModifier(nativePtr, classType);
+    });
+  }
 }
 
-function createComponent(nativePtr, classType) {
+function createComponent(nativePtr: any, classType: any): any {
   loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return new loadComponent.componentObj.component(nativePtr, classType);
@@ -434,13 +448,12 @@ function createComponent(nativePtr, classType) {
   return undefined;
 }
 
-function exportComponent() {
-    globalThis.ArkTextClockComponent = ArkTextClockComponent;
+function exportComponent(): void {
+  globalThis.ArkTextClockComponent = (loadComponent as any).componentObj?.component;
 }
 
-function exportView() {
-    globalThis.TextClock = JSTextClock;
+function exportView(): void {
+  globalThis.TextClock = JSTextClock;
 }
 
 export default { loadComponent, createComponent, exportComponent, exportView };
-
