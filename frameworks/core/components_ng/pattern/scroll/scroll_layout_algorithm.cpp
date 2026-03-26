@@ -184,13 +184,20 @@ SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, cons
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, childSize);
     childSize = geometryNode->GetMarginFrameSize();
-    auto alignmentPosition = GetAlignmentPosition(layoutProperty, axis, layoutDirection, contentSize, childSize);
+    auto idealSize = contentSize;
+    if (LessOrEqual(idealSize.Width(), 0.0f)) {
+        idealSize.SetWidth(childSize.Width());
+    }
+    if (LessOrEqual(idealSize.Height(), 0.0f)) {
+        idealSize.SetHeight(childSize.Height());
+    }
+    auto alignmentPosition = GetAlignmentPosition(layoutProperty, axis, layoutDirection, idealSize, childSize);
     auto alignedReferencePos = static_cast<float>(currentOffset_ + contentStartOffset_) +
         (axis == Axis::HORIZONTAL ? alignmentPosition.GetX() : alignmentPosition.GetY());
     if (!NearEqual(alignedReferencePos, currentReferencePos)) {
         childLayoutConstraint.viewPosRef = ViewPosReference {
             .viewPosStart = 0.0f,
-            .viewPosEnd = LessOrEqual(viewPortLength, 0.0f) ? LayoutInfinity<float>() : viewPortLength,
+            .viewPosEnd = GetMainAxisSize(idealSize, axis),
             .referencePos = alignedReferencePos,
             .referenceEdge = ReferenceEdge::START,
             .axis = axis,
