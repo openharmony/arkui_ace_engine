@@ -9353,6 +9353,19 @@ void impl_LazyGridLayoutAttribute_setColumnsGap(Ark_NativePointer thisPtr, KSeri
         GetNodeModifiers()->getLazyGridLayoutAttributeModifier()->setColumnsGap(self, static_cast<Opt_LengthMetrics*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(LazyGridLayoutAttribute_setColumnsGap, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_LazyGridLayoutAttribute_setOnVisibleIndexesChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+    DeserializerBase thisDeserializer(thisArray, thisLength);
+    const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_OnVisibleIndexesChangeCallback callback_ValueTempTmpBuf = {};
+    callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ONVISIBLEINDEXESCHANGECALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONVISIBLEINDEXESCHANGECALLBACK))))};
+    }
+    Opt_OnVisibleIndexesChangeCallback callback_ValueTemp = callback_ValueTempTmpBuf;;
+    GetNodeModifiers()->getLazyGridLayoutAttributeModifier()->setOnVisibleIndexesChange(self, static_cast<Opt_OnVisibleIndexesChangeCallback*>(&callback_ValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(LazyGridLayoutAttribute_setOnVisibleIndexesChange, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_LazyVGridLayout_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getLazyVGridLayoutModifier()->construct(id, flags);
 }

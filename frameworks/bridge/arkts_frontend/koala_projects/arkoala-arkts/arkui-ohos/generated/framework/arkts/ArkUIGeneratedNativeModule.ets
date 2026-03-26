@@ -1107,6 +1107,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyGridLayoutAttribute_setColumnsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setOnVisibleIndexesChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _LazyVGridLayout_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _LazyVGridLayoutInterface_setLazyVGridLayoutOptions(ptr: KPointer): void

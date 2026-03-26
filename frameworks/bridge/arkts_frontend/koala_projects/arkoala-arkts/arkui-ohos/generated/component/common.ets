@@ -10594,6 +10594,7 @@ export type OnWillStopDraggingCallback = (velocity: double) => void;
 export type OnDidStopDraggingCallback = (willFling: boolean) => void;
 export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
 export type OnGetPreviewBadgeCallback = () => boolean | int32;
+export type OnVisibleIndexesChangeCallback = (start: int32, end: int32) => void;
 export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
     onLongPress?: Callback<int32, void>;

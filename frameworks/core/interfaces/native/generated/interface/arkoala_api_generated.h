@@ -1971,6 +1971,8 @@ typedef struct OnVerifyPinCallback OnVerifyPinCallback;
 typedef struct Opt_OnVerifyPinCallback Opt_OnVerifyPinCallback;
 typedef struct OnViewportFitChangedCallback OnViewportFitChangedCallback;
 typedef struct Opt_OnViewportFitChangedCallback Opt_OnViewportFitChangedCallback;
+typedef struct OnVisibleIndexesChangeCallback OnVisibleIndexesChangeCallback;
+typedef struct Opt_OnVisibleIndexesChangeCallback Opt_OnVisibleIndexesChangeCallback;
 typedef struct OnWaterFlowScrollIndexCallback OnWaterFlowScrollIndexCallback;
 typedef struct Opt_OnWaterFlowScrollIndexCallback Opt_OnWaterFlowScrollIndexCallback;
 typedef struct OnWillScrollCallback OnWillScrollCallback;
@@ -13969,6 +13971,16 @@ typedef struct Opt_OnViewportFitChangedCallback {
     Ark_Tag tag;
     OnViewportFitChangedCallback value;
 } Opt_OnViewportFitChangedCallback;
+typedef struct OnVisibleIndexesChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+} OnVisibleIndexesChangeCallback;
+typedef struct Opt_OnVisibleIndexesChangeCallback {
+    Ark_Tag tag;
+    OnVisibleIndexesChangeCallback value;
+} Opt_OnVisibleIndexesChangeCallback;
 typedef struct OnWaterFlowScrollIndexCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24879,6 +24891,8 @@ typedef struct GENERATED_ArkUILazyGridLayoutAttributeModifier {
                        const Opt_LengthMetrics* value);
     void (*setColumnsGap)(Ark_NativePointer node,
                           const Opt_LengthMetrics* value);
+    void (*setOnVisibleIndexesChange)(Ark_NativePointer node,
+                        const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyGridLayoutAttributeModifier;
 
 typedef struct GENERATED_ArkUILazyVGridLayoutModifier {

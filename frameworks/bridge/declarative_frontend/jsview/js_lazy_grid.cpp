@@ -53,6 +53,22 @@ void JSLazyVGridLayout::JsColumnsTemplate(const std::string& value)
     NG::LazyVGridLayoutModel::SetColumnsTemplate(value);
 }
 
+void JSLazyVGridLayout::JsOnVisibleIndexesChange(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto onVisibleIndexesChange = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
+                                          const int32_t start, const int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(start, end);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        NG::LazyGridLayoutModel::SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+    } else {
+        NG::LazyGridLayoutModel::SetOnVisibleIndexesChange(nullptr);
+    }
+    info.ReturnSelf();
+}
+
 void JSLazyVGridLayout::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyVGridLayout>::Declare("LazyVGridLayout");
@@ -62,6 +78,8 @@ void JSLazyVGridLayout::JSBind(BindingTarget globalObj)
     JSClass<JSLazyVGridLayout>::StaticMethod("rowsGap", &JSLazyVGridLayout::JsRowsGap, opt);
     JSClass<JSLazyVGridLayout>::StaticMethod("columnsGap", &JSLazyVGridLayout::JsColumnsGap, opt);
     JSClass<JSLazyVGridLayout>::StaticMethod("columnsTemplate", &JSLazyVGridLayout::JsColumnsTemplate, opt);
+    JSClass<JSLazyVGridLayout>::StaticMethod(
+        "onVisibleIndexesChange", &JSLazyVGridLayout::JsOnVisibleIndexesChange, opt);
 
     JSClass<JSLazyVGridLayout>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSLazyVGridLayout>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
