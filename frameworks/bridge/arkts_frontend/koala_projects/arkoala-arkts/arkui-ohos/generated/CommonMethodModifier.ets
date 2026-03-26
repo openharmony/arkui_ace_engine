@@ -322,6 +322,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
     public _debugLine_0_0value?: string
     public _debugLine_0_1value?: string | undefined
+    public _toolbar_0_0value?: CustomBuilder | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
@@ -8749,6 +8750,16 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[212] = 3
+        }
+        return this
+    }
+    toolbar(value: CustomBuilder | undefined): this {
+        if (((this._flagArray[213]) == (0)) || (true)) {
+            this._flagArray[213] = 1
+            this._toolbar_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[213] = 3
         }
         return this
     }

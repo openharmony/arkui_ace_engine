@@ -4598,6 +4598,27 @@ void SetOnPreDragImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
+void SetToolbarImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        ViewAbstractModelStatic::SetToolbarBuilder(frameNode, nullptr);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto nativeNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(nativeNode);
+            auto builder = [uiNode]() -> RefPtr<UINode> {
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+                return uiNode;
+            };
+            ViewAbstractModelStatic::SetToolbarBuilder(AceType::RawPtr(nativeNode), std::move(builder));
+        }, node);
+}
 void SetLinearGradientImpl(Ark_NativePointer node,
                            const Opt_LinearGradientOptions* value)
 {
@@ -6790,6 +6811,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDragEndImpl,
         CommonMethodModifier::SetDraggableImpl,
         CommonMethodModifier::SetOnPreDragImpl,
+        CommonMethodModifier::SetToolbarImpl,
         CommonMethodModifier::SetLinearGradientImpl,
         CommonMethodModifier::SetSweepGradientImpl,
         CommonMethodModifier::SetRadialGradientImpl,

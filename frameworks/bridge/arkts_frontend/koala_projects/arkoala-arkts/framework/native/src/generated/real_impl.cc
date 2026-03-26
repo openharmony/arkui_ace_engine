@@ -2092,6 +2092,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Opt_Callback_PreDragStatus_Void* value)
     {
     }
+    void SetToolbarImpl(Ark_NativePointer node,
+                        const Opt_CustomNodeBuilder* value)
+    {
+    }
     void SetLinearGradientImpl(Ark_NativePointer node,
                                const Opt_LinearGradientOptions* value)
     {
@@ -9072,6 +9076,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDragEndImpl,
             CommonMethodModifier::SetDraggableImpl,
             CommonMethodModifier::SetOnPreDragImpl,
+            CommonMethodModifier::SetToolbarImpl,
             CommonMethodModifier::SetLinearGradientImpl,
             CommonMethodModifier::SetSweepGradientImpl,
             CommonMethodModifier::SetRadialGradientImpl,

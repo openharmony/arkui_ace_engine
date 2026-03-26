@@ -601,6 +601,7 @@ build_component_ng("pattern_ng") {
     "toggle/toggle_model_static.cpp",
     "toolbaritem/toolbar_row_pattern.cpp",
     "toolbaritem/toolbaritem_model_ng.cpp",
+    "toolbaritem/toolbaritem_model_static.cpp",
     "union_effect_container/union_effect_container_model_ng.cpp",
     "union_effect_container/union_effect_container_model_static.cpp",
     "union_effect_container/union_effect_container_pattern.cpp",

@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -1903,6 +1904,34 @@ void ViewAbstractModelStatic::SetBackgroundImagePosition(
         renderContext->ResetBackgroundImagePosition();
         renderContext->OnBackgroundImagePositionUpdate(bgImgPosition);
     }
+}
+
+void ViewAbstractModelStatic::SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto parent = AceType::Claim(frameNode);
+    CHECK_NULL_VOID(parent);
+    auto pipelineContext = NG::PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto rootNodeChild = rootNode->GetChildren();
+    CHECK_NULL_VOID(!rootNodeChild.empty());
+    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNodeChild.front());
+    CHECK_NULL_VOID(containerMode);
+    auto pattern = containerMode->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (buildFunc == nullptr) {
+        pattern->SetToolbarBuilder(parent, nullptr);
+        return;
+    }
+    auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        func();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    pattern->SetToolbarBuilder(parent, std::move(buildNodeFunc));
 }
 
 void ViewAbstractModelStatic::ResetOverlay(FrameNode* frameNode)
