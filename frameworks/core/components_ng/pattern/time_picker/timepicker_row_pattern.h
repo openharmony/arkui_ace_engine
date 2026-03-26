@@ -521,6 +521,8 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -538,6 +540,11 @@ public:
 
     void SetFocusDisable();
     void SetFocusEnable();
+
+    bool IsWindowFullscreen() const
+    {
+        return isWindowFullscreen_;
+    }
 
     void UpdateLanguageAndAmPmTimeOrder()
     {
@@ -887,6 +894,7 @@ private:
     bool useButtonFocusArea_ = false;
     bool isInDatePickerDialog_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool isWindowFullscreen_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -135,6 +135,8 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -728,6 +730,11 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    bool IsWindowFullscreen() const
+    {
+        return isWindowFullscreen_;
+    }
+
     void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
     {
         closeDialogEvent_ = closeDialogEvent;
@@ -847,6 +854,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void InitFocusEvent();
     void InitSelectorProps();
+    void InitFocusAndSelector();
     void HandleFocusEvent();
     void HandleBlurEvent();
     void AddIsFocusActiveUpdateEvent();
@@ -988,6 +996,7 @@ private:
     bool isFocus_ = true;
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = true;
+    bool isWindowFullscreen_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;

@@ -57,14 +57,13 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
     auto timePickerPattern = pickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isFloatingWindow = container->IsFloatingWindow();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE && !isFloatingWindow) {
-        showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
+    if (timePickerPattern->IsWindowFullscreen() &&
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE)) {
+            showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
 
     if (timePickerPattern->GetIsUserSetDividerSpacingFont()) {
