@@ -542,6 +542,23 @@ class ArkThemeScopeManager {
         return ArkThemeScopeManager.SystemTheme.colors;
     }
 
+    currentBuildingWithThemeNodeId(): number | undefined {
+        // @ts-ignore
+        return globalThis.WithTheme?.getCurrentBuildingWithThemeNodeId();
+    }
+
+    resolveParentScope(parentScope: ArkThemeScope, themeScopes: Array<ArkThemeScope>): ArkThemeScope {
+        if (getArkThemeApiTargetVersion() < 26) {
+            return parentScope;
+        }
+        const currentWithThemeId = this.currentBuildingWithThemeNodeId();
+        if (currentWithThemeId === undefined) {
+            return parentScope;
+        }
+        const scope = themeScopes.find(item => item.getWithThemeId() === currentWithThemeId);
+        return scope ?? parentScope;
+    }
+
     /**
      * Notifies listeners about app Theme change
      */

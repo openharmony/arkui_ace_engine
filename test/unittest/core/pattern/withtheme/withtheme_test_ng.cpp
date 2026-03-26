@@ -96,6 +96,31 @@ namespace {
     constexpr uint32_t TOKEN_THEME_ID = 10001;
     constexpr ColorMode THEME_COLOR_MODE = ColorMode::DARK;
     TestProperty g_testProperty;
+
+class WithThemeBuildRecordNode : public UINode {
+    DECLARE_ACE_TYPE(WithThemeBuildRecordNode, UINode);
+
+public:
+    explicit WithThemeBuildRecordNode(int32_t nodeId) : UINode("WithThemeBuildRecordNode", nodeId) {}
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
+    void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override
+    {
+        observedBuildingNodeIds.emplace_back(WithThemeNode::GetCurrentBuildingNodeId().value_or(-1));
+        UINode::Build(extraInfos);
+    }
+
+    std::vector<int32_t> observedBuildingNodeIds;
+};
 }
 
 class WithThemeTestNg : public testing::Test {
@@ -760,5 +785,66 @@ HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level1)
     // Test SetThemeScopeId when themeScopeId_ is not 0 (should not change)
     withThemeNode->SetThemeScopeId(67890);
     EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+}
+
+/**
+ * @tc.name: WithThemeNodeBuildStackTest001
+ * @tc.desc: Verify current building node id is empty when no WithThemeNode is building
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeBuildStackTest001, TestSize.Level1)
+{
+    EXPECT_FALSE(WithThemeNode::GetCurrentBuildingNodeId().has_value());
+}
+
+/**
+ * @tc.name: WithThemeNodeBuildStackTest002
+ * @tc.desc: Verify single WithThemeNode build pushes and pops node id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeBuildStackTest002, TestSize.Level1)
+{
+    constexpr int32_t singleThemeNodeId = 61001;
+    constexpr int32_t observerNodeId = 61002;
+    auto withThemeNode = WithThemeNode::CreateWithThemeNode(singleThemeNodeId);
+    auto observerNode = AceType::MakeRefPtr<WithThemeBuildRecordNode>(observerNodeId);
+    withThemeNode->AddChild(observerNode);
+
+    withThemeNode->Build(nullptr);
+
+    ASSERT_EQ(observerNode->observedBuildingNodeIds.size(), 1u);
+    EXPECT_EQ(observerNode->observedBuildingNodeIds.front(), singleThemeNodeId);
+    EXPECT_FALSE(WithThemeNode::GetCurrentBuildingNodeId().has_value());
+}
+
+/**
+ * @tc.name: WithThemeNodeBuildStackTest003
+ * @tc.desc: Verify nested WithThemeNode build always exposes the innermost node id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeBuildStackTest003, TestSize.Level1)
+{
+    constexpr int32_t outerThemeNodeId = 62001;
+    constexpr int32_t innerThemeNodeId = 62002;
+    auto outerWithThemeNode = WithThemeNode::CreateWithThemeNode(outerThemeNodeId);
+    auto innerWithThemeNode = WithThemeNode::CreateWithThemeNode(innerThemeNodeId);
+    auto beforeInnerObserver = AceType::MakeRefPtr<WithThemeBuildRecordNode>(62003);
+    auto innerObserver = AceType::MakeRefPtr<WithThemeBuildRecordNode>(62004);
+    auto afterInnerObserver = AceType::MakeRefPtr<WithThemeBuildRecordNode>(62005);
+
+    innerWithThemeNode->AddChild(innerObserver);
+    outerWithThemeNode->AddChild(beforeInnerObserver);
+    outerWithThemeNode->AddChild(innerWithThemeNode);
+    outerWithThemeNode->AddChild(afterInnerObserver);
+
+    outerWithThemeNode->Build(nullptr);
+
+    ASSERT_EQ(beforeInnerObserver->observedBuildingNodeIds.size(), 1u);
+    ASSERT_EQ(innerObserver->observedBuildingNodeIds.size(), 1u);
+    ASSERT_EQ(afterInnerObserver->observedBuildingNodeIds.size(), 1u);
+    EXPECT_EQ(beforeInnerObserver->observedBuildingNodeIds.front(), outerThemeNodeId);
+    EXPECT_EQ(innerObserver->observedBuildingNodeIds.front(), innerThemeNodeId);
+    EXPECT_EQ(afterInnerObserver->observedBuildingNodeIds.front(), outerThemeNodeId);
+    EXPECT_FALSE(WithThemeNode::GetCurrentBuildingNodeId().has_value());
 }
 } //namespace OHOS::Ace::NG

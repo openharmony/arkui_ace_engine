@@ -55,6 +55,8 @@ public:
     void NotifyThemeScopeUpdate();
     void SetOnThemeScopeDestroy(ThemeScopeDestroyCallback&& callback);
     void SetThemeScopeId(int32_t themeScopeId) override;
+    void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override;
+    static std::optional<int32_t> GetCurrentBuildingNodeId();
 
 private:
     ThemeScopeDestroyCallback themeScopeDestroyCallback_;
