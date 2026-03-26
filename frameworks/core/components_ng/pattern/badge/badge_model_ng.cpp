@@ -118,9 +118,9 @@ static void UpdateBadgeStyleProperties(BadgeParameters& badgeParameters, const R
 
 void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(frameNode);
+    auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
+    CHECK_NULL_VOID(badgeTheme);
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     if (badgeParameters.badgeColor.has_value()) {
         layoutProperty->UpdateBadgeColor(badgeParameters.badgeColor.value());
@@ -222,9 +222,9 @@ void BadgeModelNG::CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, Bad
     auto badgePattern = frameNode->GetPattern<BadgePattern>();
     CHECK_NULL_VOID(badgePattern);
     ProcessBadgeValue(badgePattern, badgeParameters.resourceBadgeValueObject);
-    ProcessBadgeTextColor(badgePattern, badgeParameters.resourceColorObject);
-    ProcessBadgeColor(badgePattern, badgeParameters.resourceBadgeColorObject);
-    ProcessBorderColor(badgePattern, badgeParameters.resourceBorderColorObject);
+    ProcessBadgeTextColor(badgePattern, badgeParameters.resourceColorObject, frameNode);
+    ProcessBadgeColor(badgePattern, badgeParameters.resourceBadgeColorObject, frameNode);
+    ProcessBorderColor(badgePattern, badgeParameters.resourceBorderColorObject, frameNode);
     ProcessOuterBorderColor(badgePattern, badgeParameters.resourceOuterBorderColorObject);
     ProcessFontWeight(badgePattern, badgeParameters.resourceFontWeightObject);
     ProcessFontSize(badgePattern, badgeParameters.resourceFontSizeObject);
@@ -270,24 +270,26 @@ void BadgeModelNG::ProcessBadgeValue(
     badgePattern->AddResObj(key, resourceObject, std::move(updateFunc));
 }
 
-void BadgeModelNG::ProcessBadgeTextColor(
-    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+void BadgeModelNG::ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern,
+    const RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     const std::string key = "badge.textColor";
     badgePattern->RemoveResObj(key);
     if (!resourceObject) {
         return;
     }
-    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
                           const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-        auto badgePattern = weak.Upgrade();
+        auto badgePattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         Color result;
         bool state = ResourceParseUtils::ParseResColor(resObj, result);
         if (!state) {
-            auto pipeline = PipelineBase::GetCurrentContextSafely();
-            CHECK_NULL_VOID(pipeline);
-            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
             result = badgeTheme->GetBadgeTextColor();
         }
         badgePattern->UpdateColor(result, isFirstLoad);
@@ -295,24 +297,26 @@ void BadgeModelNG::ProcessBadgeTextColor(
     badgePattern->AddResObj("badge.textColor", resourceObject, std::move(updateFunc));
 }
 
-void BadgeModelNG::ProcessBadgeColor(
-    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+void BadgeModelNG::ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern,
+    const RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     const std::string key = "badge.Color";
     badgePattern->RemoveResObj(key);
     if (!resourceObject) {
         return;
     }
-    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
                           const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-        auto badgePattern = weak.Upgrade();
+        auto badgePattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         Color result;
         bool state = ResourceParseUtils::ParseResColor(resObj, result);
         if (!state) {
-            auto pipeline = PipelineBase::GetCurrentContextSafely();
-            CHECK_NULL_VOID(pipeline);
-            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
             result = badgeTheme->GetBadgeColor();
         }
         badgePattern->UpdateBadgeColor(result, isFirstLoad);
@@ -320,24 +324,26 @@ void BadgeModelNG::ProcessBadgeColor(
     badgePattern->AddResObj("badge.Color", resourceObject, std::move(updateFunc));
 }
 
-void BadgeModelNG::ProcessBorderColor(
-    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+void BadgeModelNG::ProcessBorderColor(const RefPtr<BadgePattern>& badgePattern,
+    const RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     const std::string key = "badge.BorderColor";
     badgePattern->RemoveResObj(key);
     if (!resourceObject) {
         return;
     }
-    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
                           const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-        auto badgePattern = weak.Upgrade();
+        auto badgePattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         Color result;
         bool state = ResourceParseUtils::ParseResColor(resObj, result);
         if (!state) {
-            auto pipeline = PipelineBase::GetCurrentContextSafely();
-            CHECK_NULL_VOID(pipeline);
-            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
             result = badgeTheme->GetBadgeBorderColor();
         }
         badgePattern->UpdateBorderColor(result, isFirstLoad);
