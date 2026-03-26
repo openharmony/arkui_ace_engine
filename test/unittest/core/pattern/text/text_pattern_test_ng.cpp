@@ -2542,11 +2542,11 @@ HWTEST_F(TextPatternTestNg, OnInjectionEventTest001, TestSize.Level1)
 
     std::string command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
     auto ret = textPattern->OnInjectionEvent(command);
-    EXPECT_EQ(ret, RET_FAILED);
+    EXPECT_EQ(ret, RET_SUCCESS);
 
     command = R"({"cmd":"copy"})";
     ret = textPattern->OnInjectionEvent(command);
-    EXPECT_EQ(ret, RET_FAILED);
+    EXPECT_EQ(ret, RET_SUCCESS);
 
     auto textLayoutProperty = frameNode->GetLayoutProperty<OHOS::Ace::NG::TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
