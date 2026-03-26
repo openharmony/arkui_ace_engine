@@ -737,10 +737,6 @@ bool TextFieldPattern::HandleSelectTextCommand(int32_t startIndex, int32_t endIn
     if (startIndex > endIndex) {
         std::swap(startIndex, endIndex);
     }
-    auto value = contentController_->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
-            static_cast<int32_t>(endIndex - startIndex));
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
     HandleSetSelection(startIndex, endIndex);
     return true;
 }
