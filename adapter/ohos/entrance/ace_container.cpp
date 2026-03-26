@@ -5194,6 +5194,29 @@ void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
     pipelineContext->GetLoadCompleteManager()->StartCollect(url);
 }
 
+void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "RegisterTerminateUIExtension success");
+    uiExtensionContext->TerminateSelfWithAnimation(std::move(callback));
+}
+
+void AceContainer::TerminateUIExtensionInner()
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->TerminateSelfInner();
+}
+
 void AceContainer::LoadCompleteManagerStopCollect()
 {
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);

@@ -547,4 +547,12 @@ void AtomicServicePattern::CallRectChange()
     NotifyRectChange(rect.value());
     appBarRect_ = rect;
 }
+
+void AtomicServicePattern::FireAbilityCloseEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "Pattern FireAbilityCloseEvent");
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_ABILITY_CLOSE_EVENT, true);
+}
 } // namespace OHOS::Ace::NG

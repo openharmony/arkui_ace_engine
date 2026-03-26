@@ -139,6 +139,54 @@ void AppBarView::BindJSContainer()
     pattern->AppScreenCallBack();
     pattern->AppBgColorCallBack();
     FireExtensionHostParams();
+    InitAbilityContextCallback();
+}
+
+void AppBarView::OnThirdCloseEvent()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar OnThirdCloseEvent");
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtensionInner();
+    }
+}
+void AppBarView::FireAbilityCloseEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "FireAbilityCloseEvent");
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [atomicService = atomicService_]() {
+            auto atom = atomicService.Upgrade();
+            CHECK_NULL_VOID(atom);
+            auto pattern = atom->GetPattern<AtomicServicePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireAbilityCloseEvent();
+        },
+        OHOS::Ace::TaskExecutor::TaskType::UI, "ArkUIFireArkuiAbilityCloseEvent");
+}
+
+void AppBarView::InitAbilityContextCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "InitAbilityContextCallback");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto abilityRuntimeContextCallback = [weakSelf = WeakClaim(this), container]() {
+        auto self = weakSelf.Upgrade();
+        CHECK_NULL_VOID(self);
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "abilityRuntimeContextCallback");
+        self->FireAbilityCloseEvent();
+    };
+    container->RegisterTerminateUIExtension(std::move(abilityRuntimeContextCallback));
 }
 
 void AppBarView::FireExtensionHostParams()
