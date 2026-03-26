@@ -45,6 +45,7 @@ export class XComponentControllerInternal {
 export enum HdrType {
  	DEFAULT = 0,
  	AIHDR = 1,
+    EDR = 2,
 }
 export class XComponentController implements MaterializedBase {
     public peer?: Finalizable | undefined = undefined

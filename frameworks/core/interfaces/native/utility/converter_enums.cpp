@@ -2065,6 +2065,7 @@ void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src)
     switch (src) {
         case ARK_HDR_TYPE_DEFAULT: dst = HdrType::DEFAULT; break;
         case ARK_HDR_TYPE_AIHDR: dst = HdrType::AIHDR; break;
+        case ARK_HDR_TYPE_EDR: dst = HdrType::EDR; break;
         default: LOGE("Unexpected enum value in Ark_HdrType: %{public}d", src);
     }
 }
