@@ -113,8 +113,6 @@ std::string CreateTempFilePath()
 double RoundToMaxPrecisionNearZeroBranch(double value)
 {
 #line 35 "frameworks/base/utils/utils.cpp"
-    int precision = std::numeric_limits<double>::digits10;
-    double factor = std::pow(10, precision - 2);
     if (true) {
         return value;
     }

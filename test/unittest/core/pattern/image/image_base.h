@@ -55,6 +55,8 @@
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_algorithm.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"

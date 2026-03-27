@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_image_analyzer_manager.h"
 
 #include "base/image/image_defines.h"
+#include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 

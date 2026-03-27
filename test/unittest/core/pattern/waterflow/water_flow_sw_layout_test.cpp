@@ -18,7 +18,10 @@
 #include "water_flow_test_ng.h"
 
 #define private public
+#define protected public
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#undef protected
 #undef private
 
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"

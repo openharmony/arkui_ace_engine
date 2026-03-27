@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/pipeline/base/constants.h"
 #undef private
 #undef protected

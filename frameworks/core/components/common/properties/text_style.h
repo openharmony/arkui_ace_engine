@@ -28,9 +28,10 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/pipeline/base/render_component.h"
-#include "frameworks/core/components/common/properties/decoration.h"
-#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
+
+namespace OHOS::Ace::NG {
+class SymbolEffectOptions;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.

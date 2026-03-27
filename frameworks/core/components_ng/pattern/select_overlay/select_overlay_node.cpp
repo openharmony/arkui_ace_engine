@@ -23,12 +23,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
-#include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/properties/text_style.h"

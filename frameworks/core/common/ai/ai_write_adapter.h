@@ -22,7 +22,6 @@
 #include "base/memory/ace_type.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::AAFwk {

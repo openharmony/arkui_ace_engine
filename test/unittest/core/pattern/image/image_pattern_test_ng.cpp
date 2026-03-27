@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define private public
+#define protected public
 #include "image_base.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_image_analyzer_manager.h"
