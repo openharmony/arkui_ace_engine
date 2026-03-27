@@ -65,3 +65,24 @@ ace_unittest("xcomponent_test_set_rate_range") {
     external_deps += [ "napi:ace_napi" ]
   }
 }
+
+ace_unittest("xcomponent_native_interface_test_ng") {
+  module_name = "DrawingSet-Path"
+  type = "new"
+
+  sources = [
+    "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+    "$ace_root/interfaces/native/native_interface_xcomponent.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "xcomponent_native_interface_test_ng.cpp",
+  ]
+
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  if (current_os == "ohos") {
+    external_deps += [ "napi:ace_napi" ]
+  }
+}
