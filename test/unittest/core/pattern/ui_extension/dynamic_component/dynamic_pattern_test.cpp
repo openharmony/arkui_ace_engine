@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
@@ -978,6 +979,210 @@ HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect003, TestSize.Level1)
 
     bool result = handler.GetAccessibilityParentRect(reply);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DelegateTouchEventTest001
+ * @tc.desc: Test DelegateTouchEvent when pattern is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DelegateTouchEventTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin DelegateTouchEventTest001";
+
+    /**
+     * @tc.steps: step1. construct delegate
+     */
+    WeakPtr<DynamicPattern> pattern = nullptr;
+    auto delegate = DynamicTouchDelegate(pattern);
+
+    /**
+     * @tc.steps: step2. test DelegateTouchEvent
+     */
+    TouchEvent point;
+    delegate.DelegateTouchEvent(point);
+    SUCCEED();
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end DelegateTouchEventTest001";
+}
+
+/**
+ * @tc.name: DelegateTouchEventTest002
+ * @tc.desc: Test DelegateTouchEvent when pointerEvent is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DelegateTouchEventTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin DelegateTouchEventTest002";
+
+    /**
+     * @tc.steps: step1. construct delegate
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto delegate = DynamicTouchDelegate(pattern);
+
+    /**
+     * @tc.steps: step2. test DelegateTouchEvent
+     */
+    TouchEvent point;
+    EXPECT_EQ(point.pointerEvent, nullptr);
+    delegate.DelegateTouchEvent(point);
+    SUCCEED();
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end DelegateTouchEventTest002";
+}
+
+/**
+ * @tc.name: OnAccessibilityParentRectInfoUpdateTest001
+ * @tc.desc: Test OnAccessibilityParentRectInfoUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, OnAccessibilityParentRectInfoUpdateTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin OnAccessibilityParentRectInfoUpdateTest001";
+
+#ifdef OHOS_STANDARD_SYSTEM
+
+    /**
+     * @tc.steps: step1. construct dynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    IsolatedInfo curDynamicInfo;
+    void* runtime = nullptr;
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+
+    /**
+     * @tc.steps: step2. test OnAccessibilityParentRectInfoUpdate
+     */
+    dynamicPattern->OnAccessibilityParentRectInfoUpdate();
+    SUCCEED();
+#endif
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end OnAccessibilityParentRectInfoUpdateTest001";
+}
+
+/**
+ * @tc.name: OnFrameNodeChangedTest001
+ * @tc.desc: Test OnFrameNodeChanged when frameNodeChangeInfoFlag is none
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, OnFrameNodeChangedTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin OnFrameNodeChangedTest001";
+
+#ifdef OHOS_STANDARD_SYSTEM
+
+    /**
+     * @tc.steps: step1. construct dynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    FrameNodeChangeInfoFlag frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_INFO_NONE;
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    dynamicPattern->OnFrameNodeChanged(frameNodeChangeInfoFlag);
+    SUCCEED();
+
+#endif
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end OnFrameNodeChangedTest001";
+}
+
+/**
+ * @tc.name: OnFrameNodeChangedTest002
+ * @tc.desc: Test OnFrameNodeChanged when frameNodeChangeInfoFlag geometry change
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, OnFrameNodeChangedTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin OnFrameNodeChangedTest002";
+
+#ifdef OHOS_STANDARD_SYSTEM
+
+    /**
+     * @tc.steps: step1. construct dynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    FrameNodeChangeInfoFlag frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    dynamicPattern->OnFrameNodeChanged(frameNodeChangeInfoFlag);
+    SUCCEED();
+
+#endif
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end OnFrameNodeChangedTest002";
+}
+
+/**
+ * @tc.name: OnFrameNodeChangedTest003
+ * @tc.desc: Test OnFrameNodeChanged when frameNodeChangeInfoFlag transform change
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, OnFrameNodeChangedTest003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin OnFrameNodeChangedTest003";
+
+#ifdef OHOS_STANDARD_SYSTEM
+
+    /**
+     * @tc.steps: step1. construct dynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    FrameNodeChangeInfoFlag frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_TRANSFORM_CHANGE;
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    dynamicPattern->OnFrameNodeChanged(frameNodeChangeInfoFlag);
+    SUCCEED();
+
+#endif
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end OnFrameNodeChangedTest003";
+}
+
+/**
+ * @tc.name: OnFrameNodeChangedTest004
+ * @tc.desc: Test OnFrameNodeChanged when frameNodeChangeInfoFlag all change
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, OnFrameNodeChangedTest004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-begin OnFrameNodeChangedTest004";
+
+#ifdef OHOS_STANDARD_SYSTEM
+
+    /**
+     * @tc.steps: step1. construct dynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    FrameNodeChangeInfoFlag frameNodeChangeInfoFlag =
+        (FRAME_NODE_CHANGE_GEOMETRY_CHANGE | FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+
+    /**
+     * @tc.steps: step2. test OnFrameNodeChanged
+     */
+    dynamicPattern->OnFrameNodeChanged(frameNodeChangeInfoFlag);
+    SUCCEED();
+
+#endif
+
+    GTEST_LOG_(INFO) << "DynamicPatternTestNg-end OnFrameNodeChangedTest004";
 }
 
 /**
