@@ -2499,6 +2499,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
     JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
+    JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -7807,6 +7808,16 @@ void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
     bool isEnabled = objFirst->ToBoolean();
     int32_t type = objSecond->ToNumber<int32_t>();
     WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
+}
+
+void JSWeb::EnableDrag(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableDrag(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDrag(isEnabled);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

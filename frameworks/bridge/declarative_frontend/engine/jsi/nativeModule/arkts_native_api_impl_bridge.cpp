@@ -4627,6 +4627,7 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableScrollDirectionalLock));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScrollDirectionalLock"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableScrollDirectionalLock));
+<<<<<<< HEAD
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableNativeMediaPlayer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableNativeMediaPlayer));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableNativeMediaPlayer"),
@@ -4635,6 +4636,12 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableWebAVSession));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableWebAVSession"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableWebAVSession));
+=======
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDrag));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableDrag));
+>>>>>>> ff032d39501 (enable drag)
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

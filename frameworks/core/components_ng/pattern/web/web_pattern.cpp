@@ -2774,6 +2774,7 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
     InitWebEventHubDragDropEnd(eventHub);
     InitWebEventHubDragMove(eventHub);
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
 }
 
 void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub)
@@ -4645,6 +4646,7 @@ void WebPattern::OnModifyDone()
         UpdateScrollBarWithBorderRadius();
         OnBackToTopUpdate(backToTop_);
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
+        delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4696,6 +4698,7 @@ void WebPattern::OnModifyDone()
     }
     CheckAndSetWebNestedScrollExisted();
     UpdateScrollBarWithBorderRadius();
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
 }
 
 void WebPattern::SetSurfaceDensity(double density)
@@ -5584,6 +5587,13 @@ void WebPattern::OnEnableAutoFillUpdate(bool isEnabled)
 void WebPattern::OnEnableDefaultContextMenuUpdate(bool isEnabled)
 {
     isEnableDefaultContextMenu_ = isEnabled;
+}
+
+void WebPattern::OnEnableDragUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->SetEnableDrag(isEnabled);
+    }
 }
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
@@ -7492,6 +7502,7 @@ void WebPattern::OnActive()
         GetWebId(), isActive_);
     UpdateScrollBarWithBorderRadius();
     SetActiveStatusInner(true);
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
 }
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
