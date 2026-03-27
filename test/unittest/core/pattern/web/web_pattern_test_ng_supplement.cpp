@@ -2476,6 +2476,8 @@ HWTEST_F(WebPatternTestNgSupplement, OnNestedScroll_001, TestSize.Level1)
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
     webPattern->expectedScrollAxis_ = Axis::VERTICAL;
     webPattern->isScrollStarted_ = true;
+    webPattern->isDirectionalLockEnabled_ = true;
+    webPattern->scrollDirectionalLockType_ = ScrollDirectionalLockType::ALL;
     float x = 1.0f, y = 0.5f, xVelocity = 0.0f, yVelocity = 0.0f;
     bool isAvailable = false;
     EXPECT_FALSE(webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable));

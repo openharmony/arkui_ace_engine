@@ -1086,6 +1086,8 @@ namespace Converter {
         const Ark_SharedTransitionEffectType& src);
     template<>
     void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
+    template<> void AssignCast(std::optional<ScrollDirectionalLockType>& dst,
+        const Ark_ScrollDirectionalLockType& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>

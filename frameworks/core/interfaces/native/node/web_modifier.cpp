@@ -52,6 +52,7 @@ constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
 constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 0;
+constexpr int32_t DEFAULT_SCROLLDIRECTIONALLOCK_NESTED_SCROLL = 1;
 constexpr char DEFAULT_WEBSTANDARD_FONT[] = "sans serif";
 constexpr char DEFAULT_WEBSERIF_FONT[] = "serif";
 constexpr char DEFAULT_WEBSANSSERIF_FONT[] = "sans-serif";
@@ -958,7 +959,6 @@ void SetOnFullScreenExit(ArkUINodeHandle node, void* extraParam)
         WebModelNG::SetOnFullScreenExit(frameNode, nullptr);
     }
 }
-
 
 void ResetOnFullScreenExit(ArkUINodeHandle node)
 {
@@ -2508,6 +2508,21 @@ void ResetEnableDefaultContextMenu(ArkUINodeHandle node)
     WebModelNG::SetEnableDefaultContextMenu(frameNode, DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU);
 }
 
+void SetEnableScrollDirectionalLock(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableScrollDirectionalLock(frameNode, enabled, type);
+}
+
+void ResetEnableScrollDirectionalLock(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // Default: enabled=true, type=NESTED_SCROLL(1)
+    WebModelNG::SetEnableScrollDirectionalLock(frameNode, true, DEFAULT_SCROLLDIRECTIONALLOCK_NESTED_SCROLL);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2838,6 +2853,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
+        .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3085,6 +3102,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
+        .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

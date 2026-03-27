@@ -254,6 +254,7 @@ public:
     virtual void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
     virtual void SetOnTextSelectionChange(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableDefaultContextMenu(bool isEnabled) {}
+    virtual void SetEnableScrollDirectionalLock(bool enabled, int32_t type) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

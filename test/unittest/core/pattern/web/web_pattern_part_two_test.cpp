@@ -1777,6 +1777,30 @@ HWTEST_F(WebPatternPartTwoTest, SetRenderMode_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EnableScrollDirectionalLock_001
+ * @tc.desc: EnableScrollDirectionalLock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, EnableScrollDirectionalLock_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->EnableScrollDirectionalLock(false, ScrollDirectionalLockType::ALL);
+    EXPECT_EQ(webPattern->isDirectionalLockEnabled_, false);
+#endif
+}
+
+/**
  * @tc.name: GetParentAxis_001
  * @tc.desc: GetParentAxis.
  * @tc.type: FUNC

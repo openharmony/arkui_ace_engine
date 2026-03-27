@@ -20985,6 +20985,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
+                                            const Opt_Boolean* value,
+                                            const Opt_ScrollDirectionalLockType* type)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("SetEnableScrollDirectionalLock(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -23669,6 +23681,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
+            WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
         };
         return &ArkUIWebModifierImpl;
     }

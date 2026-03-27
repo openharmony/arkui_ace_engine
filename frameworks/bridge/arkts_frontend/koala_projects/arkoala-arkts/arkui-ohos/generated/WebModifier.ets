@@ -20,7 +20,7 @@ import { CommonMethodModifier } from './CommonMethodModifier'
 import { AttributeModifier } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, AISessionEvent, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from './component/web'
+import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, AISessionEvent, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt, ScrollDirectionalLockType } from './component/web'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions } from './component/common'
@@ -198,6 +198,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     public _bindSelectionMenu_0_1value?: CustomBuilder | undefined
     public _bindSelectionMenu_0_2value?: WebResponseType | undefined
     public _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
+    public _enableScrollDirectionalLock_0_0value?: boolean | undefined
+    public _enableScrollDirectionalLock_0_1value?: ScrollDirectionalLockType | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -2743,6 +2745,23 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (flagArray[148] != 0) {
+            switch (flagArray[148]) {
+                case 1: {
+                    peer.setEnableScrollDirectionalLockAttribute((this._enableScrollDirectionalLock_0_0value as boolean | undefined), (this._enableScrollDirectionalLock_0_1value as ScrollDirectionalLockType | undefined));
+                    flagArray[148] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[148] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[148] = 0;
+                    peer.setEnableScrollDirectionalLockAttribute((undefined as boolean | undefined), (undefined as ScrollDirectionalLockType | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: WebModifier): void {
         super.mergeModifier(modifier)
@@ -4548,6 +4567,18 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (flagArray[148] != 0) {
+            switch (flagArray[148]) {
+                case 1:
+                case 3: {
+                    this.enableScrollDirectionalLock((modifier._enableScrollDirectionalLock_0_0value as boolean | undefined), (modifier._enableScrollDirectionalLock_0_1value as ScrollDirectionalLockType | undefined));
+                    break;
+                }
+                default: {
+                    this.enableScrollDirectionalLock((undefined as boolean | undefined), (undefined as ScrollDirectionalLockType | undefined));
+                }
+            }
+        }
     }
     javaScriptAccess(value: boolean | undefined): this {
         if (((this._flagArray[0]) == (0)) || ((this._javaScriptAccess_0_0value) !== (value))) {
@@ -6030,6 +6061,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
             this._state.fireChange()
         } else {
             this._flagArray[147] = 3
+        }
+        return this
+    }
+    enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        if (((this._flagArray[148]) == (0)) || ((this._enableScrollDirectionalLock_0_0value) !== (value)) || (true)) {
+            this._flagArray[148] = 1
+            this._enableScrollDirectionalLock_0_0value = value
+            this._enableScrollDirectionalLock_0_1value = type
+            this._state.fireChange()
+        } else {
+            this._flagArray[148] = 3
         }
         return this
     }

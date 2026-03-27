@@ -101,6 +101,16 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
+void AssignCast(std::optional<ScrollDirectionalLockType>& dst, const Ark_ScrollDirectionalLockType& src)
+{
+    switch (src) {
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_ALL: dst = ScrollDirectionalLockType::ALL; break;
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_NESTED_SCROLL: dst = ScrollDirectionalLockType::NESTED_SCROLL; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollDirectionalLockType: %{public}d", src);
+    }
+}
+
+template<>
 ACE_FORCE_EXPORT void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
 {
     switch (src) {

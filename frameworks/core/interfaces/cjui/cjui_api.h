@@ -2228,6 +2228,8 @@ struct CJUIWebModifier {
     void (*resetEnableAutoFill)(ArkUINodeHandle node);
     void (*setEnableDefaultContextMenu)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
+    void (*setEnableScrollDirectionalLock)(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type);
+    void (*resetEnableScrollDirectionalLock)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
