@@ -685,7 +685,7 @@ export struct ToolBarV2 {
         this.gestureItem = item;
         this.gestureIndex = index;
         event.addGesture(
-          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime.toInt()})
             .onAction(() => {
               try {
                 this.getUIContext().getPromptAction().openCustomDialog({

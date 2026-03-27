@@ -353,10 +353,10 @@ export namespace extractors {
   export function toUIContextPtr(value: UIContext): KPointer {
     let uiContext = value as UIContext;
     let instanceId = uiContext.instanceId_;
-    return instanceId as KPointer;
+    return instanceId.toLong();
   }
   export function fromUIContextPtr(ptr: KPointer): UIContext {
-    let instanceId: int32 = ptr as (int32);
+    let instanceId: int32 = ptr.toInt();
     return UIContextUtil.getOrCreateUIContextById(instanceId);
   }
 

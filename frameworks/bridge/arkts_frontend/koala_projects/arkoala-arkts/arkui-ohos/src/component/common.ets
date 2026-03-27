@@ -110,7 +110,7 @@ export class KeyEventTransfer {
         let convertResult = bindFunc.invoke(esValue);
         let pointerConvertValue = convertResult.toNumber();
 
-        let peer: KPointer = ArkUIAniModule._CreateKeyEventAccessorWithPointer(pointerConvertValue as long)
+        let peer: KPointer = ArkUIAniModule._CreateKeyEventAccessorWithPointer(pointerConvertValue.toLong())
         return KeyEventInternal.fromPtr(peer);
     }
 
@@ -119,7 +119,7 @@ export class KeyEventTransfer {
             return new Object();
         }
         let objectInternal: KeyEventInternal = input as KeyEventInternal;
-        const nativePointer: KPointer = ArkUIAniModule._TransferKeyEventPointer(objectInternal.peer!.ptr as long);
+        const nativePointer: KPointer = ArkUIAniModule._TransferKeyEventPointer(objectInternal.peer!.ptr.toLong());
         let retValue = ESValue.instantiateEmptyObject()
         const global = ESValue.getGlobal();
         const wrapFunc = global.getProperty('wrapKeyEventPointer');
@@ -202,7 +202,7 @@ export class DragEventTransfer {
             throw Error("The wrapFunc is null, DragEvent transferDynamic fail")
         }
         let convertResult = wrapFunc.invoke(esValue)
-        let ptr = convertResult.toNumber() as long
+        let ptr = convertResult.toNumber().toLong()
         let peer: KPointer = ArkUIAniModule._createDragEventAccessorWithPointer(ptr)
         return DragEventInternal.fromPtr(peer)
     }
@@ -236,7 +236,7 @@ export class ClickEventTransfer {
         }
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
-        let peer: KPointer = ArkUIAniModule._createClickEventAccessorWithPointer(innerPointer as long)
+        let peer: KPointer = ArkUIAniModule._createClickEventAccessorWithPointer(innerPointer.toLong())
         let clickEvent = ClickEventInternal.fromPtr(peer);
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
@@ -266,9 +266,9 @@ export class ClickEventTransfer {
         };
         clickEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        clickEvent.timestamp = timestampValue as int64;
+        clickEvent.timestamp = timestampValue.toLong();
         const sourceValue = esValue.getProperty("source").toNumber();
-        clickEvent.source = SourceType.fromValue(sourceValue as int32);
+        clickEvent.source = SourceType.fromValue(sourceValue.toInt());
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
         clickEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
@@ -280,11 +280,11 @@ export class ClickEventTransfer {
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
         clickEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
-        clickEvent.sourceTool = SourceTool.fromValue(sourceToolValue as int32);
+        clickEvent.source = SourceType.fromValue(sourceValue.toInt());
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        clickEvent.deviceId = deviceIdValue as int32;
+        clickEvent.deviceId = deviceIdValue.toInt();
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        clickEvent.targetDisplayId = targetDisplayIdValue as int32;
+        clickEvent.targetDisplayId = targetDisplayIdValue.toInt();
         const displayXValue = esValue.getProperty("displayX").toNumber();
         clickEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
@@ -298,7 +298,7 @@ export class ClickEventTransfer {
         const yValue = esValue.getProperty("y").toNumber();
         clickEvent.y = yValue as double;
         const handValue = esValue.getProperty("hand").toNumber();
-        clickEvent.hand = InteractionHand.fromValue(handValue as int32);
+        clickEvent.hand = InteractionHand.fromValue(handValue.toInt());
         return clickEvent;
     }
     static transferDynamic(input: Object): Any {
@@ -366,7 +366,7 @@ export class HoverEventTransfer {
         }
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
-        let peer: KPointer = ArkUIAniModule._createHoverEventAccessorWithPointer(innerPointer as long)
+        let peer: KPointer = ArkUIAniModule._createHoverEventAccessorWithPointer(innerPointer.toLong())
         let hoverEvent = HoverEventInternal.fromPtr(peer);
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
@@ -396,9 +396,9 @@ export class HoverEventTransfer {
         };
         hoverEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        hoverEvent.timestamp = timestampValue as int64;
+        hoverEvent.timestamp = timestampValue.toLong();
         const sourceValue = esValue.getProperty("source").toNumber();
-        hoverEvent.source = SourceType.fromValue(sourceValue as int32);
+        hoverEvent.source = SourceType.fromValue(sourceValue.toInt());
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
         hoverEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
@@ -410,11 +410,11 @@ export class HoverEventTransfer {
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
         hoverEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
-        hoverEvent.sourceTool = SourceTool.fromValue(sourceToolValue as int32);
+        hoverEvent.sourceTool = SourceTool.fromValue(sourceToolValue.toInt());
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        hoverEvent.deviceId = deviceIdValue as int32;
+        hoverEvent.deviceId = deviceIdValue.toInt();
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        hoverEvent.targetDisplayId = targetDisplayIdValue as int32;
+        hoverEvent.targetDisplayId = targetDisplayIdValue.toInt();
         const displayXValue = esValue.getProperty("displayX").toNumber();
         hoverEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
@@ -494,12 +494,12 @@ export class MouseEventTransfer {
         }
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
-        let peer: KPointer = ArkUIAniModule._createMouseEventAccessorWithPointer(innerPointer as long)
+        let peer: KPointer = ArkUIAniModule._createMouseEventAccessorWithPointer(innerPointer.toLong())
         let mouseEvent = MouseEventInternal.fromPtr(peer);
         const buttonValue = esValue.getProperty("button").toNumber();
-        mouseEvent.button = MouseButton.fromValue(buttonValue as int32);
+        mouseEvent.button = MouseButton.fromValue(buttonValue.toInt());
         const actionValue = esValue.getProperty("action").toNumber();
-        mouseEvent.action = MouseAction.fromValue(actionValue as int32);
+        mouseEvent.action = MouseAction.fromValue(actionValue.toInt());
         const displayXValue = esValue.getProperty("displayX").toNumber();
         mouseEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
@@ -513,11 +513,11 @@ export class MouseEventTransfer {
         const yValue = esValue.getProperty("y").toNumber();
         mouseEvent.y = yValue as double;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        mouseEvent.timestamp = timestampValue as int64;
+        mouseEvent.timestamp = timestampValue.toLong();
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        mouseEvent.deviceId = deviceIdValue as int32;
+        mouseEvent.deviceId = deviceIdValue.toInt();
         const sourceValue = esValue.getProperty("source").toNumber();
-        mouseEvent.source = SourceType.fromValue(sourceValue as int32);
+        mouseEvent.source = SourceType.fromValue(sourceValue.toInt());
         const pressureValue = esValue.getProperty("pressure").toNumber();
         mouseEvent.pressure = pressureValue as double;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
@@ -525,13 +525,13 @@ export class MouseEventTransfer {
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
         mouseEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
-        mouseEvent.sourceTool = SourceTool.fromValue(sourceToolValue as int32);
+        mouseEvent.sourceTool = SourceTool.fromValue(sourceToolValue.toInt());
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
         mouseEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
         mouseEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        mouseEvent.targetDisplayId = targetDisplayIdValue as int32;
+        mouseEvent.targetDisplayId = targetDisplayIdValue.toInt();
         const rawDeltaXValue = esValue.getProperty("rawDeltaX").toNumber();
         mouseEvent.rawDeltaX = rawDeltaXValue as double;
         const rawDeltaYValue = esValue.getProperty("rawDeltaY").toNumber();
@@ -565,7 +565,7 @@ export class MouseEventTransfer {
         mouseEvent.target = target;
         const pressedButtonsValue = esValue.getProperty("pressedButtons");
         for (let button of pressedButtonsValue) {
-            mouseEvent.pressedButtons?.push(MouseButton.fromValue(button.toNumber() as int32))
+            mouseEvent.pressedButtons?.push(MouseButton.fromValue(button.toNumber().toInt()));
         }
         return mouseEvent;
     }
@@ -648,12 +648,12 @@ export class TouchEventTransfer {
         }
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
-        let peer: KPointer = ArkUIAniModule._createTouchEventAccessorWithPointer(innerPointer as long)
+        let peer: KPointer = ArkUIAniModule._createTouchEventAccessorWithPointer(innerPointer.toLong())
         let touchEvent = TouchEventInternal.fromPtr(peer);
         const sourceValue = esValue.getProperty("source").toNumber();
-        touchEvent.source = SourceType.fromValue(sourceValue as int32);
+                touchEvent.source = SourceType.fromValue(sourceValue.toInt());
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        touchEvent.timestamp = timestampValue as int64;
+        touchEvent.timestamp = timestampValue.toLong();
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -684,36 +684,36 @@ export class TouchEventTransfer {
         const pressureValue = esValue.getProperty("pressure").toNumber();
         touchEvent.pressure = pressureValue as double;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        touchEvent.deviceId = deviceIdValue as int32;
+        touchEvent.deviceId = deviceIdValue.toInt();
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
         touchEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
         touchEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
-        touchEvent.sourceTool = SourceTool.fromValue(sourceToolValue as int32);
+        touchEvent.sourceTool = SourceTool.fromValue(sourceToolValue.toInt());
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
         touchEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
         touchEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        touchEvent.targetDisplayId = targetDisplayIdValue as int32;
+        touchEvent.targetDisplayId = targetDisplayIdValue.toInt();
         const typeValue = esValue.getProperty("type").toNumber();
-        touchEvent.type = TouchType.fromValue(typeValue as int32);
+        touchEvent.type = TouchType.fromValue(typeValue.toInt());
         const changedTouchesValue = esValue.getProperty("changedTouches");
         let changedTouchArray: Array<TouchObject> = [];
         let index = 0;
         for (let changedTouch of changedTouchesValue) {
             let staticChangedTouch: TouchObject = {
-                type: TouchType.fromValue(changedTouch.getProperty("type").toNumber() as int32),
-                id: changedTouch.getProperty("id").toNumber() as int32,
+                type: TouchType.fromValue(changedTouch.getProperty("type").toNumber().toInt()),
+                id: changedTouch.getProperty("id").toNumber().toInt(),
                 displayX: changedTouch.getProperty("displayX").toNumber() as double,
                 displayY: changedTouch.getProperty("displayY").toNumber() as double,
                 windowX: changedTouch.getProperty("windowX").toNumber() as double,
                 windowY: changedTouch.getProperty("windowY").toNumber() as double,
                 x: changedTouch.getProperty("x").toNumber() as double,
                 y: changedTouch.getProperty("y").toNumber() as double,
-                hand: InteractionHand.fromValue(changedTouch.getProperty("hand").toNumber() as int32),
-                pressedTime: changedTouch.getProperty("pressedTime").toNumber() as int64,
+                hand: InteractionHand.fromValue(changedTouch.getProperty("hand").toNumber().toInt()),
+                pressedTime: changedTouch.getProperty("pressedTime").toNumber().toLong(),
                 pressure: changedTouch.getProperty("pressure").toNumber() as double,
                 width: changedTouch.getProperty("width").toNumber() as double,
                 height: changedTouch.getProperty("height").toNumber() as double,
@@ -727,16 +727,16 @@ export class TouchEventTransfer {
         index = 0;
         for (let touch of touchesValue) {
             let staticTouch: TouchObject = {
-                type: TouchType.fromValue(touch.getProperty("type").toNumber() as int32),
-                id: touch.getProperty("id").toNumber() as int32,
+                type: TouchType.fromValue(touch.getProperty("type").toNumber().toInt()),
+                id: touch.getProperty("id").toNumber().toInt(),
                 displayX: touch.getProperty("displayX").toNumber() as double,
                 displayY: touch.getProperty("displayY").toNumber() as double,
                 windowX: touch.getProperty("windowX").toNumber() as double,
                 windowY: touch.getProperty("windowY").toNumber() as double,
                 x: touch.getProperty("x").toNumber() as double,
                 y: touch.getProperty("y").toNumber() as double,
-                hand: InteractionHand.fromValue(touch.getProperty("hand").toNumber() as int32),
-                pressedTime: touch.getProperty("pressedTime").toNumber() as int64,
+                hand: InteractionHand.fromValue(touch.getProperty("hand").toNumber().toInt()),
+                pressedTime: touch.getProperty("pressedTime").toNumber().toLong(),
                 pressure: touch.getProperty("pressure").toNumber() as double,
                 width: touch.getProperty("width").toNumber() as double,
                 height: touch.getProperty("height").toNumber() as double,
@@ -847,12 +847,12 @@ export class AxisEventTransfer {
         }
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
-        let peer: KPointer = ArkUIAniModule._createAxisEventAccessorWithPointer(innerPointer as long)
+        let peer: KPointer = ArkUIAniModule._createAxisEventAccessorWithPointer(innerPointer.toLong())
         let axisEvent = AxisEventInternal.fromPtr(peer);
         const sourceValue = esValue.getProperty("source").toNumber();
-        axisEvent.source = SourceType.fromValue(sourceValue as int32);
+                axisEvent.source = SourceType.fromValue(sourceValue.toInt());
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        axisEvent.timestamp = timestampValue as int64;
+        axisEvent.timestamp = timestampValue.toLong();
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -883,21 +883,21 @@ export class AxisEventTransfer {
         const pressureValue = esValue.getProperty("pressure").toNumber();
         axisEvent.pressure = pressureValue as double;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        axisEvent.deviceId = deviceIdValue as int32;
+        axisEvent.deviceId = deviceIdValue.toInt();
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
         axisEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
         axisEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
-        axisEvent.sourceTool = SourceTool.fromValue(sourceToolValue as int32)
+        axisEvent.sourceTool = SourceTool.fromValue(sourceToolValue.toInt());
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
         axisEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
         axisEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        axisEvent.targetDisplayId = targetDisplayIdValue as int32;
+        axisEvent.targetDisplayId = targetDisplayIdValue.toInt();
         const actionValue = esValue.getProperty("action").toNumber();
-        axisEvent.action = AxisAction.fromValue(actionValue as int32);
+        axisEvent.action = AxisAction.fromValue(actionValue.toInt());
         const displayXValue = esValue.getProperty("displayX").toNumber();
         axisEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
@@ -911,7 +911,7 @@ export class AxisEventTransfer {
         const yValue = esValue.getProperty("y").toNumber();
         axisEvent.y = yValue as double;
         const scrollStepValue = esValue.getProperty("scrollStep").toNumber();
-        axisEvent.scrollStep = scrollStepValue as int32;
+        axisEvent.scrollStep = scrollStepValue.toInt();
         return axisEvent;
     }
     static transferDynamic(input: Object): Any {

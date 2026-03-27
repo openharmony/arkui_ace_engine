@@ -536,7 +536,7 @@ export struct ChipComponent {
       return undefined;
     }
     switch (this.resourceToNumber(this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
-      this.theme.chipNode.normalShadowStyle, -1) as int) {
+      this.theme.chipNode.normalShadowStyle, -1).toInt()) {
       case -1:
         return undefined;
       case 0:
@@ -1039,7 +1039,7 @@ export struct ChipComponent {
     if (this.isChipActivated()) {
       return FontWeight.Medium;
     }
-    switch (this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular) as int) {
+    switch (this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular).toInt()) {
       case 0:
         return FontWeight.Lighter
       case 1:

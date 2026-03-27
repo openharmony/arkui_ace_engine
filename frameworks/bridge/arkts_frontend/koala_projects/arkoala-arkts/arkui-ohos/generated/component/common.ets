@@ -2086,7 +2086,7 @@ export class TextContentControllerBase implements MaterializedBase {
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
         let buffer: string | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readString() as string)
+            buffer = retvalDeserializer.readString()
         }
         const returnResult: string | undefined = buffer
         return returnResult
@@ -6129,7 +6129,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (moduleName !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const moduleNameTmpValue  = moduleName!
+            const moduleNameTmpValue = moduleName!
             thisSerializer.writeString(moduleNameTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -24605,7 +24605,7 @@ export class PopupOptions_serializer {
                 global_resource_Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
             } else if (valueHolderForPopupColorTmpValue instanceof int64) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForPopupColorTmpValueForIdx3 = valueHolderForPopupColorTmpValue as int64
+                const valueHolderForPopupColorTmpValueForIdx3 = valueHolderForPopupColorTmpValue
                 valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {

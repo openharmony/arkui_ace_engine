@@ -24,7 +24,7 @@ declare interface Resource {
   type?: number;
 }
 
-type ResourceColor = Color | number | string | Resource;
+type ResourceColor = number | Color | string | Resource;
 
 // ArkBackground class
 declare class ArkBackground {

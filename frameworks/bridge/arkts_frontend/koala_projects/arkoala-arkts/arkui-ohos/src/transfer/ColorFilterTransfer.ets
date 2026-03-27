@@ -34,7 +34,7 @@ export class ColorFilterTransfer {
         if (!pointer.isNumber()) {
             return undefined;
         }
-        let pointerVal = pointer.toNumber() as long;
+        let pointerVal = pointer.toNumber().toLong();
         let ctorPtr = ArkUIAniModule._Image_ColorFilter_TransferStatic(pointerVal);
         if (ctorPtr === 0) {
             return undefined;

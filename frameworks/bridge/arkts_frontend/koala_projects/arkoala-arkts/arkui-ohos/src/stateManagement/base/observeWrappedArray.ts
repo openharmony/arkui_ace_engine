@@ -138,8 +138,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of elements.
      * @param initialValue initial value of elements.
      */
-    public static create<T>(arrayLength: int, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength);
+    public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
+        let other = new Array<T>(arrayLength.toInt());
         other.fill(initialValue);
         return new WrappedArray<T>(other);
     }

@@ -352,7 +352,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[0] = 0;
-                    peer.setWidthAttribute((undefined as Length | LayoutPolicy | undefined));
+                    peer.setWidthAttribute(undefined);
                 }
             }
         }
@@ -369,7 +369,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[1] = 0;
-                    peer.setHeightAttribute((undefined as Length | LayoutPolicy | undefined));
+                    peer.setHeightAttribute(undefined);
                 }
             }
         }
@@ -386,7 +386,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[2] = 0;
-                    hookDrawModifier(peer, (undefined as DrawModifier | undefined));
+                    hookDrawModifier(peer, undefined);
                 }
             }
         }
@@ -403,7 +403,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[3] = 0;
-                    peer.setResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                    peer.setResponseRegionAttribute(undefined);
                 }
             }
         }
@@ -420,7 +420,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[4] = 0;
-                    peer.setMouseResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                    peer.setMouseResponseRegionAttribute(undefined);
                 }
             }
         }
@@ -437,7 +437,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[5] = 0;
-                    peer.setResponseRegionListAttribute((undefined as Array<ResponseRegion> | undefined));
+                    peer.setResponseRegionListAttribute(undefined);
                 }
             }
         }
@@ -454,7 +454,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[6] = 0;
-                    peer.setSizeAttribute((undefined as SizeOptions | undefined));
+                    peer.setSizeAttribute(undefined);
                 }
             }
         }
@@ -471,7 +471,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[7] = 0;
-                    peer.setConstraintSizeAttribute((undefined as ConstraintSizeOptions | undefined));
+                    peer.setConstraintSizeAttribute(undefined);
                 }
             }
         }
@@ -488,7 +488,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[8] = 0;
-                    peer.setHitTestBehaviorAttribute((undefined as HitTestMode | undefined));
+                    peer.setHitTestBehaviorAttribute(undefined);
                 }
             }
         }
@@ -505,7 +505,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[9] = 0;
-                    peer.setOnChildTouchTestAttribute((undefined as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
+                    peer.setOnChildTouchTestAttribute(undefined);
                 }
             }
         }
@@ -522,7 +522,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[10] = 0;
-                    peer.setLayoutWeightAttribute((undefined as double | string | undefined));
+                    peer.setLayoutWeightAttribute(undefined);
                 }
             }
         }
@@ -539,7 +539,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[11] = 0;
-                    peer.setChainWeightAttribute((undefined as ChainWeightOptions | undefined));
+                    peer.setChainWeightAttribute(undefined);
                 }
             }
         }
@@ -556,7 +556,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[12] = 0;
-                    peer.setPaddingAttribute((undefined as Padding | Length | LocalizedPadding | undefined));
+                    peer.setPaddingAttribute(undefined);
                 }
             }
         }
@@ -573,7 +573,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[13] = 0;
-                    peer.setSafeAreaPaddingAttribute((undefined as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
+                    peer.setSafeAreaPaddingAttribute(undefined);
                 }
             }
         }
@@ -590,7 +590,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[14] = 0;
-                    peer.setMarginAttribute((undefined as Margin | Length | LocalizedMargin | undefined));
+                    peer.setMarginAttribute(undefined);
                 }
             }
         }
@@ -607,7 +607,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[15] = 0;
-                    peer.setBackgroundColorAttribute((undefined as ResourceColor | arkui_component_units_ColorMetrics | undefined));
+                    peer.setBackgroundColorAttribute(undefined);
                 }
             }
         }
@@ -624,7 +624,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[16] = 0;
-                    peer.setPixelRoundAttribute((undefined as PixelRoundPolicy | undefined));
+                    peer.setPixelRoundAttribute(undefined);
                 }
             }
         }
@@ -641,7 +641,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[17] = 0;
-                    peer.setBackgroundImage0Attribute((undefined as ResourceStr | PixelMap | undefined));
+                    peer.setBackgroundImage0Attribute(undefined);
                 }
             }
         }
@@ -658,7 +658,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[18] = 0;
-                    peer.setBackgroundImageSizeAttribute((undefined as SizeOptions | ImageSize | undefined));
+                    peer.setBackgroundImageSizeAttribute(undefined);
                 }
             }
         }
@@ -675,7 +675,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setBackgroundImagePositionAttribute((undefined as Position | Alignment | undefined));
+                    peer.setBackgroundImagePositionAttribute(undefined);
                 }
             }
         }
@@ -694,7 +694,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[20] = 0;
-                    peer.setBackgroundImageResizableAttribute((undefined as ResizableOptions | undefined));
+                    peer.setBackgroundImageResizableAttribute(undefined);
                 }
             }
         }
@@ -711,7 +711,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[21] = 0;
-                    peer.setForegroundEffectAttribute((undefined as ForegroundEffectOptions | undefined));
+                    peer.setForegroundEffectAttribute(undefined);
                 }
             }
         }
@@ -728,7 +728,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[22] = 0;
-                    peer.setVisualEffectAttribute((undefined as VisualEffect | undefined));
+                    peer.setVisualEffectAttribute(undefined);
                 }
             }
         }
@@ -745,7 +745,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[23] = 0;
-                    peer.setBackgroundFilterAttribute((undefined as Filter | undefined));
+                    peer.setBackgroundFilterAttribute(undefined);
                 }
             }
         }
@@ -762,7 +762,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[24] = 0;
-                    peer.setForegroundFilterAttribute((undefined as Filter | undefined));
+                    peer.setForegroundFilterAttribute(undefined);
                 }
             }
         }
@@ -779,7 +779,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setCompositingFilterAttribute((undefined as Filter | undefined));
+                    peer.setCompositingFilterAttribute(undefined);
                 }
             }
         }
@@ -796,7 +796,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setMaterialFilterAttribute((undefined as Filter | undefined));
+                    peer.setMaterialFilterAttribute(undefined);
                 }
             }
         }
@@ -813,7 +813,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setOpacityAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setOpacityAttribute(undefined);
                 }
             }
         }
@@ -830,7 +830,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setBorderAttribute((undefined as BorderOptions | undefined));
+                    peer.setBorderAttribute(undefined);
                 }
             }
         }
@@ -847,7 +847,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setBorderStyleAttribute((undefined as BorderStyle | EdgeStyles | undefined));
+                    peer.setBorderStyleAttribute(undefined);
                 }
             }
         }
@@ -864,7 +864,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setBorderWidthAttribute((undefined as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
+                    peer.setBorderWidthAttribute(undefined);
                 }
             }
         }
@@ -881,7 +881,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setBorderColorAttribute((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    peer.setBorderColorAttribute(undefined);
                 }
             }
         }
@@ -898,7 +898,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[32] = 0;
-                    peer.setBorderImageAttribute((undefined as BorderImageOption | undefined));
+                    peer.setBorderImageAttribute(undefined);
                 }
             }
         }
@@ -915,7 +915,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setOutlineAttribute((undefined as OutlineOptions | undefined));
+                    peer.setOutlineAttribute(undefined);
                 }
             }
         }
@@ -932,7 +932,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setOutlineStyleAttribute((undefined as OutlineStyle | EdgeOutlineStyles | undefined));
+                    peer.setOutlineStyleAttribute(undefined);
                 }
             }
         }
@@ -949,7 +949,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setOutlineWidthAttribute((undefined as Dimension | EdgeOutlineWidths | undefined));
+                    peer.setOutlineWidthAttribute(undefined);
                 }
             }
         }
@@ -966,7 +966,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setOutlineColorAttribute((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    peer.setOutlineColorAttribute(undefined);
                 }
             }
         }
@@ -983,7 +983,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[37] = 0;
-                    peer.setOutlineRadiusAttribute((undefined as Dimension | OutlineRadiuses | undefined));
+                    peer.setOutlineRadiusAttribute(undefined);
                 }
             }
         }
@@ -1000,7 +1000,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[38] = 0;
-                    peer.setForegroundColorAttribute((undefined as ResourceColor | ColoringStrategy | undefined));
+                    peer.setForegroundColorAttribute(undefined);
                 }
             }
         }
@@ -1017,7 +1017,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[39] = 0;
-                    peer.setOnClick0Attribute((undefined as ((event: ClickEvent) => void) | undefined));
+                    peer.setOnClick0Attribute(undefined);
                 }
             }
         }
@@ -1036,7 +1036,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[40] = 0;
-                    peer.setOnHoverAttribute((undefined as ((isHover: boolean,event: HoverEvent) => void) | undefined));
+                    peer.setOnHoverAttribute(undefined);
                 }
             }
         }
@@ -1053,7 +1053,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[41] = 0;
-                    peer.setOnHoverMoveAttribute((undefined as arkui_component_common_Callback<HoverEvent, void> | undefined));
+                    peer.setOnHoverMoveAttribute(undefined);
                 }
             }
         }
@@ -1070,7 +1070,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[42] = 0;
-                    peer.setOnAccessibilityHoverAttribute((undefined as AccessibilityCallback | undefined));
+                    peer.setOnAccessibilityHoverAttribute(undefined);
                 }
             }
         }
@@ -1087,7 +1087,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[43] = 0;
-                    peer.setOnAccessibilityHoverTransparentAttribute((undefined as AccessibilityTransparentCallback | undefined));
+                    peer.setOnAccessibilityHoverTransparentAttribute(undefined);
                 }
             }
         }
@@ -1104,7 +1104,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[44] = 0;
-                    peer.setHoverEffectAttribute((undefined as HoverEffect | undefined));
+                    peer.setHoverEffectAttribute(undefined);
                 }
             }
         }
@@ -1121,7 +1121,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[45] = 0;
-                    peer.setOnMouseAttribute((undefined as ((event: MouseEvent) => void) | undefined));
+                    peer.setOnMouseAttribute(undefined);
                 }
             }
         }
@@ -1138,7 +1138,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[46] = 0;
-                    peer.setOnTouchAttribute((undefined as ((event: TouchEvent) => void) | undefined));
+                    peer.setOnTouchAttribute(undefined);
                 }
             }
         }
@@ -1155,7 +1155,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[47] = 0;
-                    peer.setOnKeyEventAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    peer.setOnKeyEventAttribute(undefined);
                 }
             }
         }
@@ -1172,7 +1172,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[48] = 0;
-                    peer.setOnDigitalCrownAttribute((undefined as arkui_component_common_Callback<CrownEvent, void> | undefined));
+                    peer.setOnDigitalCrownAttribute(undefined);
                 }
             }
         }
@@ -1189,7 +1189,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[49] = 0;
-                    peer.setOnKeyPreImeAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    peer.setOnKeyPreImeAttribute(undefined);
                 }
             }
         }
@@ -1206,7 +1206,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[50] = 0;
-                    peer.setOnKeyEventDispatchAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    peer.setOnKeyEventDispatchAttribute(undefined);
                 }
             }
         }
@@ -1223,7 +1223,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[51] = 0;
-                    peer.setOnFocusAxisEventAttribute((undefined as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
+                    peer.setOnFocusAxisEventAttribute(undefined);
                 }
             }
         }
@@ -1240,7 +1240,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[52] = 0;
-                    peer.setOnAxisEventAttribute((undefined as arkui_component_common_Callback<AxisEvent, void> | undefined));
+                    peer.setOnAxisEventAttribute(undefined);
                 }
             }
         }
@@ -1257,7 +1257,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[53] = 0;
-                    peer.setFocusableAttribute((undefined as boolean | undefined));
+                    peer.setFocusableAttribute(undefined);
                 }
             }
         }
@@ -1274,7 +1274,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[54] = 0;
-                    peer.setNextFocusAttribute((undefined as FocusMovement | undefined));
+                    peer.setNextFocusAttribute(undefined);
                 }
             }
         }
@@ -1291,7 +1291,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[55] = 0;
-                    peer.setTabStopAttribute((undefined as boolean | undefined));
+                    peer.setTabStopAttribute(undefined);
                 }
             }
         }
@@ -1308,7 +1308,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[56] = 0;
-                    peer.setOnFocusAttribute((undefined as (() => void) | undefined));
+                    peer.setOnFocusAttribute(undefined);
                 }
             }
         }
@@ -1325,7 +1325,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[57] = 0;
-                    peer.setOnBlurAttribute((undefined as (() => void) | undefined));
+                    peer.setOnBlurAttribute(undefined);
                 }
             }
         }
@@ -1342,7 +1342,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[58] = 0;
-                    peer.setTabIndexAttribute((undefined as int32 | undefined));
+                    peer.setTabIndexAttribute(undefined);
                 }
             }
         }
@@ -1359,7 +1359,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[59] = 0;
-                    peer.setDefaultFocusAttribute((undefined as boolean | undefined));
+                    peer.setDefaultFocusAttribute(undefined);
                 }
             }
         }
@@ -1378,7 +1378,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[60] = 0;
-                    peer.setGroupDefaultFocusAttribute((undefined as boolean | undefined));
+                    peer.setGroupDefaultFocusAttribute(undefined);
                 }
             }
         }
@@ -1395,7 +1395,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[61] = 0;
-                    peer.setFocusOnTouchAttribute((undefined as boolean | undefined));
+                    peer.setFocusOnTouchAttribute(undefined);
                 }
             }
         }
@@ -1412,7 +1412,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[62] = 0;
-                    peer.setFocusBoxAttribute((undefined as FocusBoxStyle | undefined));
+                    peer.setFocusBoxAttribute(undefined);
                 }
             }
         }
@@ -1429,7 +1429,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[63] = 0;
-                    peer.setAnimationAttribute((undefined as AnimateParam | undefined));
+                    peer.setAnimationAttribute(undefined);
                 }
             }
         }
@@ -1446,7 +1446,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[64] = 0;
-                    peer.setTransition0Attribute((undefined as TransitionEffect | undefined));
+                    peer.setTransition0Attribute(undefined);
                 }
             }
         }
@@ -1463,7 +1463,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[65] = 0;
-                    peer.setMotionBlurAttribute((undefined as MotionBlurOptions | undefined));
+                    peer.setMotionBlurAttribute(undefined);
                 }
             }
         }
@@ -1480,7 +1480,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[66] = 0;
-                    peer.setBrightnessAttribute((undefined as double | undefined));
+                    peer.setBrightnessAttribute(undefined);
                 }
             }
         }
@@ -1497,7 +1497,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[67] = 0;
-                    peer.setContrastAttribute((undefined as double | undefined));
+                    peer.setContrastAttribute(undefined);
                 }
             }
         }
@@ -1514,7 +1514,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[68] = 0;
-                    peer.setGrayscaleAttribute((undefined as double | undefined));
+                    peer.setGrayscaleAttribute(undefined);
                 }
             }
         }
@@ -1531,7 +1531,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[69] = 0;
-                    peer.setColorBlendAttribute((undefined as arkui_component_enums_Color | string | global_resource_Resource | undefined));
+                    peer.setColorBlendAttribute(undefined);
                 }
             }
         }
@@ -1548,7 +1548,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[70] = 0;
-                    peer.setSaturateAttribute((undefined as double | undefined));
+                    peer.setSaturateAttribute(undefined);
                 }
             }
         }
@@ -1565,7 +1565,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[71] = 0;
-                    peer.setSepiaAttribute((undefined as double | undefined));
+                    peer.setSepiaAttribute(undefined);
                 }
             }
         }
@@ -1582,7 +1582,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[72] = 0;
-                    peer.setInvertAttribute((undefined as double | InvertOptions | undefined));
+                    peer.setInvertAttribute(undefined);
                 }
             }
         }
@@ -1599,7 +1599,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[73] = 0;
-                    peer.setHueRotateAttribute((undefined as double | string | undefined));
+                    peer.setHueRotateAttribute(undefined);
                 }
             }
         }
@@ -1616,7 +1616,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[74] = 0;
-                    peer.setUseShadowBatchingAttribute((undefined as boolean | undefined));
+                    peer.setUseShadowBatchingAttribute(undefined);
                 }
             }
         }
@@ -1633,7 +1633,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[75] = 0;
-                    peer.setUseEffect0Attribute((undefined as boolean | undefined));
+                    peer.setUseEffect0Attribute(undefined);
                 }
             }
         }
@@ -1650,7 +1650,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[76] = 0;
-                    peer.setUseUnionEffectAttribute((undefined as boolean | undefined));
+                    peer.setUseUnionEffectAttribute(undefined);
                 }
             }
         }
@@ -1667,7 +1667,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[77] = 0;
-                    peer.setRenderGroupAttribute((undefined as boolean | undefined));
+                    peer.setRenderGroupAttribute(undefined);
                 }
             }
         }
@@ -1684,7 +1684,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[78] = 0;
-                    peer.setExcludeFromRenderGroupAttribute((undefined as boolean | undefined));
+                    peer.setExcludeFromRenderGroupAttribute(undefined);
                 }
             }
         }
@@ -1701,7 +1701,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[79] = 0;
-                    peer.setFreezeAttribute((undefined as boolean | undefined));
+                    peer.setFreezeAttribute(undefined);
                 }
             }
         }
@@ -1720,7 +1720,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[80] = 0;
-                    peer.setTranslateAttribute((undefined as TranslateOptions | undefined));
+                    peer.setTranslateAttribute(undefined);
                 }
             }
         }
@@ -1737,7 +1737,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[81] = 0;
-                    peer.setScaleAttribute((undefined as ScaleOptions | undefined));
+                    peer.setScaleAttribute(undefined);
                 }
             }
         }
@@ -1754,7 +1754,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[82] = 0;
-                    peer.setRotateAttribute((undefined as RotateOptions | RotateAngleOptions | undefined));
+                    peer.setRotateAttribute(undefined);
                 }
             }
         }
@@ -1771,7 +1771,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[83] = 0;
-                    peer.setTransformAttribute((undefined as Matrix4Transit | undefined));
+                    peer.setTransformAttribute(undefined);
                 }
             }
         }
@@ -1788,7 +1788,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[84] = 0;
-                    peer.setTransform3DAttribute((undefined as Matrix4Transit | undefined));
+                    peer.setTransform3DAttribute(undefined);
                 }
             }
         }
@@ -1805,7 +1805,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[85] = 0;
-                    peer.setOnAppearAttribute((undefined as (() => void) | undefined));
+                    peer.setOnAppearAttribute(undefined);
                 }
             }
         }
@@ -1822,7 +1822,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[86] = 0;
-                    peer.setOnDisAppearAttribute((undefined as (() => void) | undefined));
+                    peer.setOnDisAppearAttribute(undefined);
                 }
             }
         }
@@ -1839,7 +1839,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[87] = 0;
-                    peer.setOnAttachAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnAttachAttribute(undefined);
                 }
             }
         }
@@ -1856,7 +1856,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[88] = 0;
-                    peer.setOnDetachAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnDetachAttribute(undefined);
                 }
             }
         }
@@ -1873,7 +1873,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[89] = 0;
-                    peer.setOnAreaChangeAttribute((undefined as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    peer.setOnAreaChangeAttribute(undefined);
                 }
             }
         }
@@ -1890,7 +1890,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[90] = 0;
-                    peer.setVisibilityAttribute((undefined as Visibility | undefined));
+                    peer.setVisibilityAttribute(undefined);
                 }
             }
         }
@@ -1907,7 +1907,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[91] = 0;
-                    peer.setFlexGrowAttribute((undefined as double | undefined));
+                    peer.setFlexGrowAttribute(undefined);
                 }
             }
         }
@@ -1924,7 +1924,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[92] = 0;
-                    peer.setFlexShrinkAttribute((undefined as double | undefined));
+                    peer.setFlexShrinkAttribute(undefined);
                 }
             }
         }
@@ -1941,7 +1941,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[93] = 0;
-                    peer.setFlexBasisAttribute((undefined as double | string | undefined));
+                    peer.setFlexBasisAttribute(undefined);
                 }
             }
         }
@@ -1958,7 +1958,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[94] = 0;
-                    peer.setAlignSelfAttribute((undefined as ItemAlign | undefined));
+                    peer.setAlignSelfAttribute(undefined);
                 }
             }
         }
@@ -1975,7 +1975,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[95] = 0;
-                    peer.setLayoutGravityAttribute((undefined as LocalizedAlignment | undefined));
+                    peer.setLayoutGravityAttribute(undefined);
                 }
             }
         }
@@ -1992,7 +1992,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[96] = 0;
-                    peer.setDisplayPriorityAttribute((undefined as double | undefined));
+                    peer.setDisplayPriorityAttribute(undefined);
                 }
             }
         }
@@ -2009,7 +2009,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[97] = 0;
-                    peer.setZIndexAttribute((undefined as int32 | undefined));
+                    peer.setZIndexAttribute(undefined);
                 }
             }
         }
@@ -2026,7 +2026,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[98] = 0;
-                    peer.setDirectionAttribute((undefined as Direction | undefined));
+                    peer.setDirectionAttribute(undefined);
                 }
             }
         }
@@ -2043,7 +2043,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[99] = 0;
-                    peer.setAlignAttribute((undefined as Alignment | LocalizedAlignment | undefined));
+                    peer.setAlignAttribute(undefined);
                 }
             }
         }
@@ -2062,7 +2062,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[100] = 0;
-                    peer.setPositionAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
+                    peer.setPositionAttribute(undefined);
                 }
             }
         }
@@ -2079,7 +2079,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[101] = 0;
-                    peer.setMarkAnchorAttribute((undefined as Position | LocalizedPosition | undefined));
+                    peer.setMarkAnchorAttribute(undefined);
                 }
             }
         }
@@ -2096,7 +2096,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[102] = 0;
-                    peer.setOffsetAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
+                    peer.setOffsetAttribute(undefined);
                 }
             }
         }
@@ -2113,7 +2113,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[103] = 0;
-                    peer.setEnabledAttribute((undefined as boolean | undefined));
+                    peer.setEnabledAttribute(undefined);
                 }
             }
         }
@@ -2130,7 +2130,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[104] = 0;
-                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesAttribute(undefined);
                 }
             }
         }
@@ -2147,7 +2147,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[105] = 0;
-                    peer.setAspectRatioAttribute((undefined as double | undefined));
+                    peer.setAspectRatioAttribute(undefined);
                 }
             }
         }
@@ -2164,7 +2164,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[106] = 0;
-                    peer.setClickEffectAttribute((undefined as ClickEffect | null | undefined));
+                    peer.setClickEffectAttribute(undefined);
                 }
             }
         }
@@ -2181,7 +2181,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[107] = 0;
-                    peer.setEnableClickSoundEffectAttribute((undefined as boolean | undefined));
+                    peer.setEnableClickSoundEffectAttribute(undefined);
                 }
             }
         }
@@ -2198,7 +2198,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[108] = 0;
-                    peer.setOnDragStartAttribute((undefined as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
+                    peer.setOnDragStartAttribute(undefined);
                 }
             }
         }
@@ -2215,7 +2215,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[109] = 0;
-                    peer.setOnDragEnterAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragEnterAttribute(undefined);
                 }
             }
         }
@@ -2232,7 +2232,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[110] = 0;
-                    peer.setOnDragMoveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragMoveAttribute(undefined);
                 }
             }
         }
@@ -2249,7 +2249,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[111] = 0;
-                    peer.setOnDragLeaveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragLeaveAttribute(undefined);
                 }
             }
         }
@@ -2266,7 +2266,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[112] = 0;
-                    peer.setOnDrop0Attribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDrop0Attribute(undefined);
                 }
             }
         }
@@ -2283,7 +2283,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[113] = 0;
-                    peer.setOnDragEndAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragEndAttribute(undefined);
                 }
             }
         }
@@ -2300,7 +2300,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[114] = 0;
-                    hookAllowDrop(peer, (undefined as Array<UniformDataType> | Array<string> | null | undefined));
+                    hookAllowDrop(peer, undefined);
                 }
             }
         }
@@ -2317,7 +2317,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[115] = 0;
-                    peer.setDraggableAttribute((undefined as boolean | undefined));
+                    peer.setDraggableAttribute(undefined);
                 }
             }
         }
@@ -2334,7 +2334,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[116] = 0;
-                    peer.setOnPreDragAttribute((undefined as arkui_component_common_Callback<PreDragStatus, void> | undefined));
+                    peer.setOnPreDragAttribute(undefined);
                 }
             }
         }
@@ -2351,7 +2351,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[117] = 0;
-                    peer.setLinearGradientAttribute((undefined as LinearGradientOptions | undefined));
+                    peer.setLinearGradientAttribute(undefined);
                 }
             }
         }
@@ -2368,7 +2368,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[118] = 0;
-                    peer.setSweepGradientAttribute((undefined as SweepGradientOptions | undefined));
+                    peer.setSweepGradientAttribute(undefined);
                 }
             }
         }
@@ -2385,7 +2385,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[119] = 0;
-                    peer.setRadialGradientAttribute((undefined as RadialGradientOptions | undefined));
+                    peer.setRadialGradientAttribute(undefined);
                 }
             }
         }
@@ -2404,7 +2404,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[120] = 0;
-                    peer.setMotionPathAttribute((undefined as MotionPathOptions | undefined));
+                    peer.setMotionPathAttribute(undefined);
                 }
             }
         }
@@ -2421,7 +2421,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[121] = 0;
-                    peer.setShadowAttribute((undefined as ShadowOptions | ShadowStyle | undefined));
+                    peer.setShadowAttribute(undefined);
                 }
             }
         }
@@ -2438,7 +2438,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[122] = 0;
-                    peer.setClipAttribute((undefined as boolean | undefined));
+                    peer.setClipAttribute(undefined);
                 }
             }
         }
@@ -2455,7 +2455,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[123] = 0;
-                    peer.setClipShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setClipShapeAttribute(undefined);
                 }
             }
         }
@@ -2472,7 +2472,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[124] = 0;
-                    peer.setMaskAttribute((undefined as ProgressMask | undefined));
+                    peer.setMaskAttribute(undefined);
                 }
             }
         }
@@ -2489,7 +2489,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[125] = 0;
-                    peer.setMaskShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setMaskShapeAttribute(undefined);
                 }
             }
         }
@@ -2506,7 +2506,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[126] = 0;
-                    peer.setKeyAttribute((undefined as string | undefined));
+                    peer.setKeyAttribute(undefined);
                 }
             }
         }
@@ -2523,7 +2523,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[127] = 0;
-                    peer.setIdAttribute((undefined as string | undefined));
+                    peer.setIdAttribute(undefined);
                 }
             }
         }
@@ -2540,7 +2540,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[128] = 0;
-                    hookStateStyleImpl(peer, (undefined as StateStyles | undefined));
+                    hookStateStyleImpl(peer, undefined);
                 }
             }
         }
@@ -2557,7 +2557,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[129] = 0;
-                    peer.setRestoreIdAttribute((undefined as int32 | undefined));
+                    peer.setRestoreIdAttribute(undefined);
                 }
             }
         }
@@ -2574,7 +2574,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[130] = 0;
-                    peer.setSphericalEffectAttribute((undefined as double | undefined));
+                    peer.setSphericalEffectAttribute(undefined);
                 }
             }
         }
@@ -2591,7 +2591,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[131] = 0;
-                    peer.setLightUpEffectAttribute((undefined as double | undefined));
+                    peer.setLightUpEffectAttribute(undefined);
                 }
             }
         }
@@ -2608,7 +2608,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[132] = 0;
-                    peer.setPixelStretchEffectAttribute((undefined as PixelStretchEffectOptions | undefined));
+                    peer.setPixelStretchEffectAttribute(undefined);
                 }
             }
         }
@@ -2625,7 +2625,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[133] = 0;
-                    peer.setAccessibilityNextFocusIdAttribute((undefined as string | undefined));
+                    peer.setAccessibilityNextFocusIdAttribute(undefined);
                 }
             }
         }
@@ -2642,7 +2642,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[134] = 0;
-                    peer.setAccessibilityDefaultFocusAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilityDefaultFocusAttribute(undefined);
                 }
             }
         }
@@ -2659,7 +2659,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[135] = 0;
-                    peer.setAccessibilityUseSamePageAttribute((undefined as AccessibilitySamePageMode | undefined));
+                    peer.setAccessibilityUseSamePageAttribute(undefined);
                 }
             }
         }
@@ -2676,7 +2676,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[136] = 0;
-                    peer.setAccessibilityScrollTriggerableAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilityScrollTriggerableAttribute(undefined);
                 }
             }
         }
@@ -2693,7 +2693,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[137] = 0;
-                    peer.setAccessibilityTextAttribute((undefined as global_resource_Resource | string | undefined));
+                    peer.setAccessibilityTextAttribute(undefined);
                 }
             }
         }
@@ -2710,7 +2710,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[138] = 0;
-                    peer.setAccessibilityRoleAttribute((undefined as AccessibilityRoleType | undefined));
+                    peer.setAccessibilityRoleAttribute(undefined);
                 }
             }
         }
@@ -2727,7 +2727,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[139] = 0;
-                    peer.setOnAccessibilityFocusAttribute((undefined as AccessibilityFocusCallback | undefined));
+                    peer.setOnAccessibilityFocusAttribute(undefined);
                 }
             }
         }
@@ -2746,7 +2746,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[140] = 0;
-                    peer.setOnAccessibilityActionInterceptAttribute((undefined as AccessibilityActionInterceptCallback | undefined));
+                    peer.setOnAccessibilityActionInterceptAttribute(undefined);
                 }
             }
         }
@@ -2763,7 +2763,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[141] = 0;
-                    peer.setAccessibilityTextHintAttribute((undefined as string | undefined));
+                    peer.setAccessibilityTextHintAttribute(undefined);
                 }
             }
         }
@@ -2780,7 +2780,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[142] = 0;
-                    peer.setAccessibilityDescriptionAttribute((undefined as global_resource_Resource | string | undefined));
+                    peer.setAccessibilityDescriptionAttribute(undefined);
                 }
             }
         }
@@ -2797,7 +2797,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[143] = 0;
-                    peer.setAccessibilityLevelAttribute((undefined as string | undefined));
+                    peer.setAccessibilityLevelAttribute(undefined);
                 }
             }
         }
@@ -2814,7 +2814,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[144] = 0;
-                    peer.setAccessibilityVirtualNodeAttribute((undefined as CustomBuilder | undefined));
+                    peer.setAccessibilityVirtualNodeAttribute(undefined);
                 }
             }
         }
@@ -2831,7 +2831,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[145] = 0;
-                    peer.setAccessibilityCheckedAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilityCheckedAttribute(undefined);
                 }
             }
         }
@@ -2848,7 +2848,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[146] = 0;
-                    peer.setAccessibilitySelectedAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilitySelectedAttribute(undefined);
                 }
             }
         }
@@ -2865,7 +2865,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[147] = 0;
-                    peer.setObscuredAttribute((undefined as Array<ObscuredReasons> | undefined));
+                    peer.setObscuredAttribute(undefined);
                 }
             }
         }
@@ -2882,7 +2882,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[148] = 0;
-                    peer.setReuseIdAttribute((undefined as string | undefined));
+                    peer.setReuseIdAttribute(undefined);
                 }
             }
         }
@@ -2899,7 +2899,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[149] = 0;
-                    peer.setReuseAttribute((undefined as ReuseOptions | undefined));
+                    peer.setReuseAttribute(undefined);
                 }
             }
         }
@@ -2916,7 +2916,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[150] = 0;
-                    peer.setRenderFitAttribute((undefined as RenderFit | undefined));
+                    peer.setRenderFitAttribute(undefined);
                 }
             }
         }
@@ -2933,7 +2933,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[151] = 0;
-                    hookGestureModifier(peer, (undefined as GestureModifier | undefined));
+                    hookGestureModifier(peer, undefined);
                 }
             }
         }
@@ -2950,7 +2950,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[152] = 0;
-                    peer.setBackgroundBrightnessAttribute((undefined as BackgroundBrightnessOptions | undefined));
+                    peer.setBackgroundBrightnessAttribute(undefined);
                 }
             }
         }
@@ -2967,7 +2967,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[153] = 0;
-                    peer.setOnGestureJudgeBeginAttribute((undefined as ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined));
+                    peer.setOnGestureJudgeBeginAttribute(undefined);
                 }
             }
         }
@@ -2984,7 +2984,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[154] = 0;
-                    peer.setOnGestureRecognizerJudgeBegin0Attribute((undefined as GestureRecognizerJudgeBeginCallback | undefined));
+                    peer.setOnGestureRecognizerJudgeBegin0Attribute(undefined);
                 }
             }
         }
@@ -3001,7 +3001,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[155] = 0;
-                    peer.setShouldBuiltInRecognizerParallelWithAttribute((undefined as ShouldBuiltInRecognizerParallelWithCallback | undefined));
+                    peer.setShouldBuiltInRecognizerParallelWithAttribute(undefined);
                 }
             }
         }
@@ -3018,7 +3018,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[156] = 0;
-                    peer.setMonopolizeEventsAttribute((undefined as boolean | undefined));
+                    peer.setMonopolizeEventsAttribute(undefined);
                 }
             }
         }
@@ -3035,7 +3035,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[157] = 0;
-                    peer.setOnTouchInterceptAttribute((undefined as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
+                    peer.setOnTouchInterceptAttribute(undefined);
                 }
             }
         }
@@ -3052,7 +3052,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[158] = 0;
-                    peer.setOnSizeChangeAttribute((undefined as SizeChangeCallback | undefined));
+                    peer.setOnSizeChangeAttribute(undefined);
                 }
             }
         }
@@ -3069,7 +3069,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[159] = 0;
-                    peer.setAccessibilityFocusDrawLevelAttribute((undefined as FocusDrawLevel | undefined));
+                    peer.setAccessibilityFocusDrawLevelAttribute(undefined);
                 }
             }
         }
@@ -3088,7 +3088,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[160] = 0;
-                    peer.setOnTouchTestDoneAttribute((undefined as TouchTestDoneCallback | undefined));
+                    peer.setOnTouchTestDoneAttribute(undefined);
                 }
             }
         }
@@ -3105,7 +3105,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[161] = 0;
-                    peer.setSystemMaterialAttribute((undefined as SystemUiMaterial | undefined));
+                    peer.setSystemMaterialAttribute(undefined);
                 }
             }
         }
@@ -3122,7 +3122,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[162] = 0;
-                    peer.setOnNeedSoftkeyboardAttribute((undefined as OnNeedSoftkeyboardCallback | undefined));
+                    peer.setOnNeedSoftkeyboardAttribute(undefined);
                 }
             }
         }
@@ -3139,7 +3139,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[163] = 0;
-                    peer.setAccessibilityStateDescriptionAttribute((undefined as string | global_resource_Resource | undefined));
+                    peer.setAccessibilityStateDescriptionAttribute(undefined);
                 }
             }
         }
@@ -3156,7 +3156,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[164] = 0;
-                    peer.setAccessibilityActionOptionsAttribute((undefined as AccessibilityActionOptions | undefined));
+                    peer.setAccessibilityActionOptionsAttribute(undefined);
                 }
             }
         }
@@ -3190,7 +3190,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[166] = 0;
-                    peer.setExpandSafeAreaAttribute((undefined as Array<SafeAreaType> | undefined), (undefined as Array<SafeAreaEdge> | undefined));
+                    peer.setExpandSafeAreaAttribute(undefined, undefined);
                 }
             }
         }
@@ -3207,7 +3207,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[167] = 0;
-                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    peer.setIgnoreLayoutSafeAreaAttribute(undefined, undefined);
                 }
             }
         }
@@ -3224,7 +3224,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[168] = 0;
-                    peer.setBackgroundAttribute((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
+                    peer.setBackgroundAttribute(undefined, undefined);
                 }
             }
         }
@@ -3273,7 +3273,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[171] = 0;
-                    peer.setBackgroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setBackgroundBlurStyleAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3290,7 +3290,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[172] = 0;
-                    peer.setBackgroundEffectAttribute((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setBackgroundEffectAttribute(undefined, undefined);
                 }
             }
         }
@@ -3307,7 +3307,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[173] = 0;
-                    peer.setForegroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setForegroundBlurStyleAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3324,7 +3324,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[174] = 0;
-                    peer.setBorderRadiusAttribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
+                    peer.setBorderRadiusAttribute(undefined, undefined);
                 }
             }
         }
@@ -3341,7 +3341,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[175] = 0;
-                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                    peer.setOnClick1Attribute(undefined, undefined);
                 }
             }
         }
@@ -3358,7 +3358,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[176] = 0;
-                    peer.setFocusScopeIdAttribute((undefined as string | undefined), (undefined as boolean | undefined), (undefined as boolean | undefined));
+                    peer.setFocusScopeIdAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3375,7 +3375,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[177] = 0;
-                    peer.setFocusScopePriorityAttribute((undefined as string | undefined), (undefined as FocusPriority | undefined));
+                    peer.setFocusScopePriorityAttribute(undefined, undefined);
                 }
             }
         }
@@ -3392,7 +3392,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[178] = 0;
-                    peer.setTransition1Attribute((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
+                    peer.setTransition1Attribute(undefined, undefined);
                 }
             }
         }
@@ -3459,7 +3459,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[182] = 0;
-                    peer.setBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setBlurAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3476,7 +3476,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[183] = 0;
-                    peer.setLinearGradientBlurAttribute((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    peer.setLinearGradientBlurAttribute(undefined, undefined);
                 }
             }
         }
@@ -3510,7 +3510,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[185] = 0;
-                    peer.setUseEffect1Attribute((undefined as boolean | undefined), (undefined as EffectType | undefined));
+                    peer.setUseEffect1Attribute(undefined, undefined);
                 }
             }
         }
@@ -3527,7 +3527,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[186] = 0;
-                    peer.setBackdropBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setBackdropBlurAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3544,7 +3544,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[187] = 0;
-                    peer.setSharedTransitionAttribute((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined));
+                    peer.setSharedTransitionAttribute(undefined, undefined);
                 }
             }
         }
@@ -3561,7 +3561,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[188] = 0;
-                    peer.setChainModeAttribute((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
+                    peer.setChainModeAttribute(undefined, undefined);
                 }
             }
         }
@@ -3594,7 +3594,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[190] = 0;
-                    peer.setOnDragSpringLoadingAttribute((undefined as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (undefined as DragSpringLoadingConfiguration | undefined));
+                    peer.setOnDragSpringLoadingAttribute(undefined, undefined);
                 }
             }
         }
@@ -3611,7 +3611,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[191] = 0;
-                    peer.setDragPreviewAttribute((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined));
+                    peer.setDragPreviewAttribute(undefined, undefined);
                 }
             }
         }
@@ -3628,7 +3628,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[192] = 0;
-                    hookDragPreviewOptions(peer, (undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined));
+                    hookDragPreviewOptions(peer, undefined, undefined);
                 }
             }
         }
@@ -3645,7 +3645,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[193] = 0;
-                    peer.setOverlayAttribute((undefined as string | CustomBuilder | ComponentContent<Object> | undefined), (undefined as OverlayOptions | undefined));
+                    peer.setOverlayAttribute(undefined, undefined);
                 }
             }
         }
@@ -3662,7 +3662,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBlendModeAttribute((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined));
+                    peer.setBlendModeAttribute(undefined, undefined);
                 }
             }
         }
@@ -3679,7 +3679,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[195] = 0;
-                    peer.setAdvancedBlendModeAttribute((undefined as BlendMode | Blender | undefined), (undefined as BlendApplyType | undefined));
+                    peer.setAdvancedBlendModeAttribute(undefined, undefined);
                 }
             }
         }
@@ -3696,7 +3696,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[196] = 0;
-                    peer.setGeometryTransitionAttribute((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined));
+                    peer.setGeometryTransitionAttribute(undefined, undefined);
                 }
             }
         }
@@ -3713,7 +3713,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[197] = 0;
-                    peer.setBindTipsAttribute((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
+                    peer.setBindTipsAttribute(undefined, undefined);
                 }
             }
         }
@@ -3730,7 +3730,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[198] = 0;
-                    peer.setBindPopupAttribute((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
+                    peer.setBindPopupAttribute(undefined, undefined);
                 }
             }
         }
@@ -3747,7 +3747,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[199] = 0;
-                    peer.setBindMenu0Attribute((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                    peer.setBindMenu0Attribute(undefined, undefined);
                 }
             }
         }
@@ -3766,7 +3766,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[200] = 0;
-                    peer.setBindMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                    peer.setBindMenu1Attribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3783,7 +3783,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[201] = 0;
-                    peer.setBindContextMenu0Attribute((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setBindContextMenu0Attribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3800,7 +3800,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[202] = 0;
-                    peer.setBindContextMenuWithResponseAttribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponseAttribute(undefined, undefined);
                 }
             }
         }
@@ -3817,7 +3817,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[203] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setBindContextMenu1Attribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3834,7 +3834,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[204] = 0;
-                    peer.setBindContentCover0Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined));
+                    peer.setBindContentCover0Attribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3851,7 +3851,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[205] = 0;
-                    peer.setBindContentCover1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined));
+                    peer.setBindContentCover1Attribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3868,7 +3868,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[206] = 0;
-                    peer.setBindSheetAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined));
+                    peer.setBindSheetAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3885,7 +3885,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[207] = 0;
-                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute(undefined, undefined);
                 }
             }
         }
@@ -3902,7 +3902,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[208] = 0;
-                    peer.setOnVisibleAreaApproximateChangeAttribute((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaApproximateChangeAttribute(undefined, undefined);
                 }
             }
         }
@@ -3919,7 +3919,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[209] = 0;
-                    peer.setKeyboardShortcutAttribute((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined));
+                    peer.setKeyboardShortcutAttribute(undefined, undefined, undefined);
                 }
             }
         }
@@ -3936,7 +3936,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[210] = 0;
-                    peer.setAccessibilityGroupAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                    peer.setAccessibilityGroupAttribute(undefined, undefined);
                 }
             }
         }
@@ -3953,7 +3953,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[211] = 0;
-                    peer.setOnGestureRecognizerJudgeBegin1Attribute((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
+                    peer.setOnGestureRecognizerJudgeBegin1Attribute(undefined, undefined);
                 }
             }
         }
@@ -3999,7 +3999,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.width((undefined as Length | LayoutPolicy | undefined));
+                    this.width(undefined);
                 }
             }
         }
@@ -4011,7 +4011,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.height((undefined as Length | LayoutPolicy | undefined));
+                    this.height(undefined);
                 }
             }
         }
@@ -4023,7 +4023,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.drawModifier((undefined as DrawModifier | undefined));
+                    this.drawModifier(undefined);
                 }
             }
         }
@@ -4035,7 +4035,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.responseRegion((undefined as Array<Rectangle> | Rectangle | undefined));
+                    this.responseRegion(undefined);
                 }
             }
         }
@@ -4047,7 +4047,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.mouseResponseRegion((undefined as Array<Rectangle> | Rectangle | undefined));
+                    this.mouseResponseRegion(undefined);
                 }
             }
         }
@@ -4059,7 +4059,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.responseRegionList((undefined as Array<ResponseRegion> | undefined));
+                    this.responseRegionList(undefined);
                 }
             }
         }
@@ -4071,7 +4071,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.size((undefined as SizeOptions | undefined));
+                    this.size(undefined);
                 }
             }
         }
@@ -4083,7 +4083,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.constraintSize((undefined as ConstraintSizeOptions | undefined));
+                    this.constraintSize(undefined);
                 }
             }
         }
@@ -4095,7 +4095,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.hitTestBehavior((undefined as HitTestMode | undefined));
+                    this.hitTestBehavior(undefined);
                 }
             }
         }
@@ -4107,7 +4107,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onChildTouchTest((undefined as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
+                    this.onChildTouchTest(undefined);
                 }
             }
         }
@@ -4119,7 +4119,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.layoutWeight((undefined as double | string | undefined));
+                    this.layoutWeight(undefined);
                 }
             }
         }
@@ -4131,7 +4131,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.chainWeight((undefined as ChainWeightOptions | undefined));
+                    this.chainWeight(undefined);
                 }
             }
         }
@@ -4143,7 +4143,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.padding((undefined as Padding | Length | LocalizedPadding | undefined));
+                    this.padding(undefined);
                 }
             }
         }
@@ -4155,7 +4155,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.safeAreaPadding((undefined as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
+                    this.safeAreaPadding(undefined);
                 }
             }
         }
@@ -4167,7 +4167,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.margin((undefined as Margin | Length | LocalizedMargin | undefined));
+                    this.margin(undefined);
                 }
             }
         }
@@ -4179,7 +4179,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundColor((undefined as ResourceColor | arkui_component_units_ColorMetrics | undefined));
+                    this.backgroundColor(undefined);
                 }
             }
         }
@@ -4191,7 +4191,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.pixelRound((undefined as PixelRoundPolicy | undefined));
+                    this.pixelRound(undefined);
                 }
             }
         }
@@ -4203,7 +4203,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundImage((undefined as ResourceStr | PixelMap | undefined));
+                    this.backgroundImage(undefined);
                 }
             }
         }
@@ -4215,7 +4215,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundImageSize((undefined as SizeOptions | ImageSize | undefined));
+                    this.backgroundImageSize(undefined);
                 }
             }
         }
@@ -4227,7 +4227,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundImagePosition((undefined as Position | Alignment | undefined));
+                    this.backgroundImagePosition(undefined);
                 }
             }
         }
@@ -4241,7 +4241,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundImageResizable((undefined as ResizableOptions | undefined));
+                    this.backgroundImageResizable(undefined);
                 }
             }
         }
@@ -4253,7 +4253,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.foregroundEffect((undefined as ForegroundEffectOptions | undefined));
+                    this.foregroundEffect(undefined);
                 }
             }
         }
@@ -4265,7 +4265,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.visualEffect((undefined as VisualEffect | undefined));
+                    this.visualEffect(undefined);
                 }
             }
         }
@@ -4277,7 +4277,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundFilter((undefined as Filter | undefined));
+                    this.backgroundFilter(undefined);
                 }
             }
         }
@@ -4289,7 +4289,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.foregroundFilter((undefined as Filter | undefined));
+                    this.foregroundFilter(undefined);
                 }
             }
         }
@@ -4301,7 +4301,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.compositingFilter((undefined as Filter | undefined));
+                    this.compositingFilter(undefined);
                 }
             }
         }
@@ -4313,7 +4313,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.materialFilter((undefined as Filter | undefined));
+                    this.materialFilter(undefined);
                 }
             }
         }
@@ -4325,7 +4325,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.opacity((undefined as double | global_resource_Resource | undefined));
+                    this.opacity(undefined);
                 }
             }
         }
@@ -4337,7 +4337,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.border((undefined as BorderOptions | undefined));
+                    this.border(undefined);
                 }
             }
         }
@@ -4349,7 +4349,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.borderStyle((undefined as BorderStyle | EdgeStyles | undefined));
+                    this.borderStyle(undefined);
                 }
             }
         }
@@ -4361,7 +4361,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.borderWidth((undefined as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
+                    this.borderWidth(undefined);
                 }
             }
         }
@@ -4373,7 +4373,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.borderColor((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    this.borderColor(undefined);
                 }
             }
         }
@@ -4385,7 +4385,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.borderImage((undefined as BorderImageOption | undefined));
+                    this.borderImage(undefined);
                 }
             }
         }
@@ -4397,7 +4397,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.outline((undefined as OutlineOptions | undefined));
+                    this.outline(undefined);
                 }
             }
         }
@@ -4409,7 +4409,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.outlineStyle((undefined as OutlineStyle | EdgeOutlineStyles | undefined));
+                    this.outlineStyle(undefined);
                 }
             }
         }
@@ -4421,7 +4421,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.outlineWidth((undefined as Dimension | EdgeOutlineWidths | undefined));
+                    this.outlineWidth(undefined);
                 }
             }
         }
@@ -4433,7 +4433,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.outlineColor((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    this.outlineColor(undefined);
                 }
             }
         }
@@ -4445,7 +4445,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.outlineRadius((undefined as Dimension | OutlineRadiuses | undefined));
+                    this.outlineRadius(undefined);
                 }
             }
         }
@@ -4457,7 +4457,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.foregroundColor((undefined as ResourceColor | ColoringStrategy | undefined));
+                    this.foregroundColor(undefined);
                 }
             }
         }
@@ -4469,7 +4469,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined));
+                    this.onClick(undefined);
                 }
             }
         }
@@ -4483,7 +4483,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onHover((undefined as ((isHover: boolean,event: HoverEvent) => void) | undefined));
+                    this.onHover(undefined);
                 }
             }
         }
@@ -4495,7 +4495,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onHoverMove((undefined as arkui_component_common_Callback<HoverEvent, void> | undefined));
+                    this.onHoverMove(undefined);
                 }
             }
         }
@@ -4507,7 +4507,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAccessibilityHover((undefined as AccessibilityCallback | undefined));
+                    this.onAccessibilityHover(undefined);
                 }
             }
         }
@@ -4519,7 +4519,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAccessibilityHoverTransparent((undefined as AccessibilityTransparentCallback | undefined));
+                    this.onAccessibilityHoverTransparent(undefined);
                 }
             }
         }
@@ -4531,7 +4531,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.hoverEffect((undefined as HoverEffect | undefined));
+                    this.hoverEffect(undefined);
                 }
             }
         }
@@ -4543,7 +4543,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onMouse((undefined as ((event: MouseEvent) => void) | undefined));
+                    this.onMouse(undefined);
                 }
             }
         }
@@ -4555,7 +4555,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onTouch((undefined as ((event: TouchEvent) => void) | undefined));
+                    this.onTouch(undefined);
                 }
             }
         }
@@ -4567,7 +4567,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onKeyEvent((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    this.onKeyEvent(undefined);
                 }
             }
         }
@@ -4579,7 +4579,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDigitalCrown((undefined as arkui_component_common_Callback<CrownEvent, void> | undefined));
+                    this.onDigitalCrown(undefined);
                 }
             }
         }
@@ -4591,7 +4591,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onKeyPreIme((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    this.onKeyPreIme(undefined);
                 }
             }
         }
@@ -4603,7 +4603,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onKeyEventDispatch((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
+                    this.onKeyEventDispatch(undefined);
                 }
             }
         }
@@ -4615,7 +4615,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onFocusAxisEvent((undefined as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
+                    this.onFocusAxisEvent(undefined);
                 }
             }
         }
@@ -4627,7 +4627,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAxisEvent((undefined as arkui_component_common_Callback<AxisEvent, void> | undefined));
+                    this.onAxisEvent(undefined);
                 }
             }
         }
@@ -4639,7 +4639,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.focusable((undefined as boolean | undefined));
+                    this.focusable(undefined);
                 }
             }
         }
@@ -4651,7 +4651,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.nextFocus((undefined as FocusMovement | undefined));
+                    this.nextFocus(undefined);
                 }
             }
         }
@@ -4663,7 +4663,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.tabStop((undefined as boolean | undefined));
+                    this.tabStop(undefined);
                 }
             }
         }
@@ -4675,7 +4675,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onFocus((undefined as (() => void) | undefined));
+                    this.onFocus(undefined);
                 }
             }
         }
@@ -4687,7 +4687,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onBlur((undefined as (() => void) | undefined));
+                    this.onBlur(undefined);
                 }
             }
         }
@@ -4699,7 +4699,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.tabIndex((undefined as int32 | undefined));
+                    this.tabIndex(undefined);
                 }
             }
         }
@@ -4711,7 +4711,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.defaultFocus((undefined as boolean | undefined));
+                    this.defaultFocus(undefined);
                 }
             }
         }
@@ -4725,7 +4725,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.groupDefaultFocus((undefined as boolean | undefined));
+                    this.groupDefaultFocus(undefined);
                 }
             }
         }
@@ -4737,7 +4737,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.focusOnTouch((undefined as boolean | undefined));
+                    this.focusOnTouch(undefined);
                 }
             }
         }
@@ -4749,7 +4749,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.focusBox((undefined as FocusBoxStyle | undefined));
+                    this.focusBox(undefined);
                 }
             }
         }
@@ -4761,7 +4761,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.animation((undefined as AnimateParam | undefined));
+                    this.animation(undefined);
                 }
             }
         }
@@ -4773,7 +4773,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.transition((undefined as TransitionEffect | undefined));
+                    this.transition(undefined);
                 }
             }
         }
@@ -4785,7 +4785,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.motionBlur((undefined as MotionBlurOptions | undefined));
+                    this.motionBlur(undefined);
                 }
             }
         }
@@ -4797,7 +4797,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.brightness((undefined as double | undefined));
+                    this.brightness(undefined);
                 }
             }
         }
@@ -4809,7 +4809,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.contrast((undefined as double | undefined));
+                    this.contrast(undefined);
                 }
             }
         }
@@ -4821,7 +4821,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.grayscale((undefined as double | undefined));
+                    this.grayscale(undefined);
                 }
             }
         }
@@ -4833,7 +4833,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.colorBlend((undefined as arkui_component_enums_Color | string | global_resource_Resource | undefined));
+                    this.colorBlend(undefined);
                 }
             }
         }
@@ -4845,7 +4845,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.saturate((undefined as double | undefined));
+                    this.saturate(undefined);
                 }
             }
         }
@@ -4857,7 +4857,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sepia((undefined as double | undefined));
+                    this.sepia(undefined);
                 }
             }
         }
@@ -4869,7 +4869,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.invert((undefined as double | InvertOptions | undefined));
+                    this.invert(undefined);
                 }
             }
         }
@@ -4881,7 +4881,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.hueRotate((undefined as double | string | undefined));
+                    this.hueRotate(undefined);
                 }
             }
         }
@@ -4893,7 +4893,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.useShadowBatching((undefined as boolean | undefined));
+                    this.useShadowBatching(undefined);
                 }
             }
         }
@@ -4905,7 +4905,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.useEffect((undefined as boolean | undefined));
+                    this.useEffect(undefined);
                 }
             }
         }
@@ -4917,7 +4917,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.useUnionEffect((undefined as boolean | undefined));
+                    this.useUnionEffect(undefined);
                 }
             }
         }
@@ -4929,7 +4929,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.renderGroup((undefined as boolean | undefined));
+                    this.renderGroup(undefined);
                 }
             }
         }
@@ -4941,7 +4941,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.excludeFromRenderGroup((undefined as boolean | undefined));
+                    this.excludeFromRenderGroup(undefined);
                 }
             }
         }
@@ -4953,7 +4953,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.freeze((undefined as boolean | undefined));
+                    this.freeze(undefined);
                 }
             }
         }
@@ -4967,7 +4967,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.translate((undefined as TranslateOptions | undefined));
+                    this.translate(undefined);
                 }
             }
         }
@@ -4979,7 +4979,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.scale((undefined as ScaleOptions | undefined));
+                    this.scale(undefined);
                 }
             }
         }
@@ -4991,7 +4991,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.rotate((undefined as RotateOptions | RotateAngleOptions | undefined));
+                    this.rotate(undefined);
                 }
             }
         }
@@ -5003,7 +5003,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.transform((undefined as Matrix4Transit | undefined));
+                    this.transform(undefined);
                 }
             }
         }
@@ -5015,7 +5015,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.transform3D((undefined as Matrix4Transit | undefined));
+                    this.transform3D(undefined);
                 }
             }
         }
@@ -5027,7 +5027,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAppear((undefined as (() => void) | undefined));
+                    this.onAppear(undefined);
                 }
             }
         }
@@ -5039,7 +5039,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDisAppear((undefined as (() => void) | undefined));
+                    this.onDisAppear(undefined);
                 }
             }
         }
@@ -5051,7 +5051,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAttach((undefined as VoidCallback | undefined));
+                    this.onAttach(undefined);
                 }
             }
         }
@@ -5063,7 +5063,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDetach((undefined as VoidCallback | undefined));
+                    this.onDetach(undefined);
                 }
             }
         }
@@ -5075,7 +5075,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAreaChange((undefined as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    this.onAreaChange(undefined);
                 }
             }
         }
@@ -5087,7 +5087,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.visibility((undefined as Visibility | undefined));
+                    this.visibility(undefined);
                 }
             }
         }
@@ -5099,7 +5099,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.flexGrow((undefined as double | undefined));
+                    this.flexGrow(undefined);
                 }
             }
         }
@@ -5111,7 +5111,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.flexShrink((undefined as double | undefined));
+                    this.flexShrink(undefined);
                 }
             }
         }
@@ -5123,7 +5123,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.flexBasis((undefined as double | string | undefined));
+                    this.flexBasis(undefined);
                 }
             }
         }
@@ -5135,7 +5135,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignSelf((undefined as ItemAlign | undefined));
+                    this.alignSelf(undefined);
                 }
             }
         }
@@ -5147,7 +5147,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.layoutGravity((undefined as LocalizedAlignment | undefined));
+                    this.layoutGravity(undefined);
                 }
             }
         }
@@ -5159,7 +5159,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.displayPriority((undefined as double | undefined));
+                    this.displayPriority(undefined);
                 }
             }
         }
@@ -5171,7 +5171,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.zIndex((undefined as int32 | undefined));
+                    this.zIndex(undefined);
                 }
             }
         }
@@ -5183,7 +5183,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.direction((undefined as Direction | undefined));
+                    this.direction(undefined);
                 }
             }
         }
@@ -5195,7 +5195,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.align((undefined as Alignment | LocalizedAlignment | undefined));
+                    this.align(undefined);
                 }
             }
         }
@@ -5209,7 +5209,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.position((undefined as Position | Edges | LocalizedEdges | undefined));
+                    this.position(undefined);
                 }
             }
         }
@@ -5221,7 +5221,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.markAnchor((undefined as Position | LocalizedPosition | undefined));
+                    this.markAnchor(undefined);
                 }
             }
         }
@@ -5233,7 +5233,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.offset((undefined as Position | Edges | LocalizedEdges | undefined));
+                    this.offset(undefined);
                 }
             }
         }
@@ -5245,7 +5245,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.enabled((undefined as boolean | undefined));
+                    this.enabled(undefined);
                 }
             }
         }
@@ -5257,7 +5257,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignRules((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
+                    this.alignRules(undefined);
                 }
             }
         }
@@ -5269,7 +5269,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.aspectRatio((undefined as double | undefined));
+                    this.aspectRatio(undefined);
                 }
             }
         }
@@ -5281,7 +5281,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.clickEffect((undefined as ClickEffect | null | undefined));
+                    this.clickEffect(undefined);
                 }
             }
         }
@@ -5293,7 +5293,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.enableClickSoundEffect((undefined as boolean | undefined));
+                    this.enableClickSoundEffect(undefined);
                 }
             }
         }
@@ -5305,7 +5305,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragStart((undefined as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
+                    this.onDragStart(undefined);
                 }
             }
         }
@@ -5317,7 +5317,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragEnter((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    this.onDragEnter(undefined);
                 }
             }
         }
@@ -5329,7 +5329,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragMove((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    this.onDragMove(undefined);
                 }
             }
         }
@@ -5341,7 +5341,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragLeave((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    this.onDragLeave(undefined);
                 }
             }
         }
@@ -5353,7 +5353,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDrop((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    this.onDrop(undefined);
                 }
             }
         }
@@ -5365,7 +5365,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragEnd((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    this.onDragEnd(undefined);
                 }
             }
         }
@@ -5377,7 +5377,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.allowDrop((undefined as Array<UniformDataType> | Array<string> | null | undefined));
+                    this.allowDrop(undefined);
                 }
             }
         }
@@ -5389,7 +5389,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.draggable((undefined as boolean | undefined));
+                    this.draggable(undefined);
                 }
             }
         }
@@ -5401,7 +5401,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onPreDrag((undefined as arkui_component_common_Callback<PreDragStatus, void> | undefined));
+                    this.onPreDrag(undefined);
                 }
             }
         }
@@ -5413,7 +5413,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.linearGradient((undefined as LinearGradientOptions | undefined));
+                    this.linearGradient(undefined);
                 }
             }
         }
@@ -5425,7 +5425,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sweepGradient((undefined as SweepGradientOptions | undefined));
+                    this.sweepGradient(undefined);
                 }
             }
         }
@@ -5437,7 +5437,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.radialGradient((undefined as RadialGradientOptions | undefined));
+                    this.radialGradient(undefined);
                 }
             }
         }
@@ -5451,7 +5451,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.motionPath((undefined as MotionPathOptions | undefined));
+                    this.motionPath(undefined);
                 }
             }
         }
@@ -5463,7 +5463,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.shadow((undefined as ShadowOptions | ShadowStyle | undefined));
+                    this.shadow(undefined);
                 }
             }
         }
@@ -5475,7 +5475,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.clip((undefined as boolean | undefined));
+                    this.clip(undefined);
                 }
             }
         }
@@ -5487,7 +5487,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.clipShape((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    this.clipShape(undefined);
                 }
             }
         }
@@ -5499,7 +5499,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.mask((undefined as ProgressMask | undefined));
+                    this.mask(undefined);
                 }
             }
         }
@@ -5511,7 +5511,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.maskShape((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    this.maskShape(undefined);
                 }
             }
         }
@@ -5523,7 +5523,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.key((undefined as string | undefined));
+                    this.key(undefined);
                 }
             }
         }
@@ -5535,7 +5535,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.id((undefined as string | undefined));
+                    this.id(undefined);
                 }
             }
         }
@@ -5547,7 +5547,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.stateStyles((undefined as StateStyles | undefined));
+                    this.stateStyles(undefined);
                 }
             }
         }
@@ -5559,7 +5559,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.restoreId((undefined as int32 | undefined));
+                    this.restoreId(undefined);
                 }
             }
         }
@@ -5571,7 +5571,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sphericalEffect((undefined as double | undefined));
+                    this.sphericalEffect(undefined);
                 }
             }
         }
@@ -5583,7 +5583,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.lightUpEffect((undefined as double | undefined));
+                    this.lightUpEffect(undefined);
                 }
             }
         }
@@ -5595,7 +5595,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.pixelStretchEffect((undefined as PixelStretchEffectOptions | undefined));
+                    this.pixelStretchEffect(undefined);
                 }
             }
         }
@@ -5607,7 +5607,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityNextFocusId((undefined as string | undefined));
+                    this.accessibilityNextFocusId(undefined);
                 }
             }
         }
@@ -5619,7 +5619,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityDefaultFocus((undefined as boolean | undefined));
+                    this.accessibilityDefaultFocus(undefined);
                 }
             }
         }
@@ -5631,7 +5631,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityUseSamePage((undefined as AccessibilitySamePageMode | undefined));
+                    this.accessibilityUseSamePage(undefined);
                 }
             }
         }
@@ -5643,7 +5643,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityScrollTriggerable((undefined as boolean | undefined));
+                    this.accessibilityScrollTriggerable(undefined);
                 }
             }
         }
@@ -5655,7 +5655,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityText((undefined as global_resource_Resource | string | undefined));
+                    this.accessibilityText(undefined);
                 }
             }
         }
@@ -5667,7 +5667,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityRole((undefined as AccessibilityRoleType | undefined));
+                    this.accessibilityRole(undefined);
                 }
             }
         }
@@ -5679,7 +5679,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAccessibilityFocus((undefined as AccessibilityFocusCallback | undefined));
+                    this.onAccessibilityFocus(undefined);
                 }
             }
         }
@@ -5693,7 +5693,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onAccessibilityActionIntercept((undefined as AccessibilityActionInterceptCallback | undefined));
+                    this.onAccessibilityActionIntercept(undefined);
                 }
             }
         }
@@ -5705,7 +5705,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityTextHint((undefined as string | undefined));
+                    this.accessibilityTextHint(undefined);
                 }
             }
         }
@@ -5717,7 +5717,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityDescription((undefined as global_resource_Resource | string | undefined));
+                    this.accessibilityDescription(undefined);
                 }
             }
         }
@@ -5729,7 +5729,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityLevel((undefined as string | undefined));
+                    this.accessibilityLevel(undefined);
                 }
             }
         }
@@ -5741,7 +5741,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityVirtualNode((undefined as CustomBuilder | undefined));
+                    this.accessibilityVirtualNode(undefined);
                 }
             }
         }
@@ -5753,7 +5753,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityChecked((undefined as boolean | undefined));
+                    this.accessibilityChecked(undefined);
                 }
             }
         }
@@ -5765,7 +5765,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilitySelected((undefined as boolean | undefined));
+                    this.accessibilitySelected(undefined);
                 }
             }
         }
@@ -5777,7 +5777,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.obscured((undefined as Array<ObscuredReasons> | undefined));
+                    this.obscured(undefined);
                 }
             }
         }
@@ -5789,7 +5789,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.reuseId((undefined as string | undefined));
+                    this.reuseId(undefined);
                 }
             }
         }
@@ -5801,7 +5801,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.reuse((undefined as ReuseOptions | undefined));
+                    this.reuse(undefined);
                 }
             }
         }
@@ -5813,7 +5813,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.renderFit((undefined as RenderFit | undefined));
+                    this.renderFit(undefined);
                 }
             }
         }
@@ -5825,7 +5825,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.gestureModifier((undefined as GestureModifier | undefined));
+                    this.gestureModifier(undefined);
                 }
             }
         }
@@ -5837,7 +5837,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundBrightness((undefined as BackgroundBrightnessOptions | undefined));
+                    this.backgroundBrightness(undefined);
                 }
             }
         }
@@ -5849,7 +5849,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onGestureJudgeBegin((undefined as ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined));
+                    this.onGestureJudgeBegin(undefined);
                 }
             }
         }
@@ -5861,7 +5861,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onGestureRecognizerJudgeBegin((undefined as GestureRecognizerJudgeBeginCallback | undefined));
+                    this.onGestureRecognizerJudgeBegin(undefined);
                 }
             }
         }
@@ -5873,7 +5873,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.shouldBuiltInRecognizerParallelWith((undefined as ShouldBuiltInRecognizerParallelWithCallback | undefined));
+                    this.shouldBuiltInRecognizerParallelWith(undefined);
                 }
             }
         }
@@ -5885,7 +5885,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.monopolizeEvents((undefined as boolean | undefined));
+                    this.monopolizeEvents(undefined);
                 }
             }
         }
@@ -5897,7 +5897,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onTouchIntercept((undefined as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
+                    this.onTouchIntercept(undefined);
                 }
             }
         }
@@ -5909,7 +5909,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onSizeChange((undefined as SizeChangeCallback | undefined));
+                    this.onSizeChange(undefined);
                 }
             }
         }
@@ -5921,7 +5921,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityFocusDrawLevel((undefined as FocusDrawLevel | undefined));
+                    this.accessibilityFocusDrawLevel(undefined);
                 }
             }
         }
@@ -5935,7 +5935,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onTouchTestDone((undefined as TouchTestDoneCallback | undefined));
+                    this.onTouchTestDone(undefined);
                 }
             }
         }
@@ -5947,7 +5947,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.systemMaterial((undefined as SystemUiMaterial | undefined));
+                    this.systemMaterial(undefined);
                 }
             }
         }
@@ -5959,7 +5959,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onNeedSoftkeyboard((undefined as OnNeedSoftkeyboardCallback | undefined));
+                    this.onNeedSoftkeyboard(undefined);
                 }
             }
         }
@@ -5971,7 +5971,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityStateDescription((undefined as string | global_resource_Resource | undefined));
+                    this.accessibilityStateDescription(undefined);
                 }
             }
         }
@@ -5983,7 +5983,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityActionOptions((undefined as AccessibilityActionOptions | undefined));
+                    this.accessibilityActionOptions(undefined);
                 }
             }
         }
@@ -6006,7 +6006,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.expandSafeArea((undefined as Array<SafeAreaType> | undefined), (undefined as Array<SafeAreaEdge> | undefined));
+                    this.expandSafeArea(undefined, undefined);
                 }
             }
         }
@@ -6018,7 +6018,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    this.ignoreLayoutSafeArea(undefined, undefined);
                 }
             }
         }
@@ -6030,7 +6030,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.background((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
+                    this.background(undefined, undefined);
                 }
             }
         }
@@ -6043,7 +6043,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     // instructive change start
-                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    this.backgroundImage(undefined)
                     // instructive change end
                 }
             }
@@ -6057,7 +6057,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     // instructive change start
-                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    this.backgroundImage(undefined)
                     // instructive change end
                 }
             }
@@ -6070,7 +6070,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundBlurStyle((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    this.backgroundBlurStyle(undefined, undefined, undefined);
                 }
             }
         }
@@ -6082,7 +6082,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundEffect((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    this.backgroundEffect(undefined, undefined);
                 }
             }
         }
@@ -6094,7 +6094,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.foregroundBlurStyle((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    this.foregroundBlurStyle(undefined, undefined, undefined);
                 }
             }
         }
@@ -6106,7 +6106,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
+                    this.borderRadius(undefined, undefined);
                 }
             }
         }
@@ -6118,7 +6118,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                    this.onClick(undefined, undefined);
                 }
             }
         }
@@ -6130,7 +6130,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.focusScopeId((undefined as string | undefined), (undefined as boolean | undefined), (undefined as boolean | undefined));
+                    this.focusScopeId(undefined, undefined, undefined);
                 }
             }
         }
@@ -6142,7 +6142,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.focusScopePriority((undefined as string | undefined), (undefined as FocusPriority | undefined));
+                    this.focusScopePriority(undefined, undefined);
                 }
             }
         }
@@ -6154,7 +6154,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.transition((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
+                    this.transition(undefined, undefined);
                 }
             }
         }
@@ -6201,7 +6201,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.blur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    this.blur(undefined, undefined, undefined);
                 }
             }
         }
@@ -6213,7 +6213,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.linearGradientBlur((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    this.linearGradientBlur(undefined, undefined);
                 }
             }
         }
@@ -6237,7 +6237,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.useEffect((undefined as boolean | undefined), (undefined as EffectType | undefined));
+                    this.useEffect(undefined, undefined);
                 }
             }
         }
@@ -6249,7 +6249,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backdropBlur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    this.backdropBlur(undefined, undefined, undefined);
                 }
             }
         }
@@ -6261,7 +6261,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sharedTransition((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined));
+                    this.sharedTransition(undefined, undefined);
                 }
             }
         }
@@ -6273,7 +6273,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.chainMode((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
+                    this.chainMode(undefined, undefined);
                 }
             }
         }
@@ -6299,7 +6299,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onDragSpringLoading((undefined as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (undefined as DragSpringLoadingConfiguration | undefined));
+                    this.onDragSpringLoading(undefined, undefined);
                 }
             }
         }
@@ -6311,7 +6311,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined));
+                    this.dragPreview(undefined, undefined);
                 }
             }
         }
@@ -6323,7 +6323,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.dragPreviewOptions((undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined));
+                    this.dragPreviewOptions(undefined, undefined);
                 }
             }
         }
@@ -6335,7 +6335,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.overlay((undefined as string | CustomBuilder | ComponentContent<Object> | undefined), (undefined as OverlayOptions | undefined));
+                    this.overlay(undefined, undefined);
                 }
             }
         }
@@ -6347,7 +6347,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.blendMode((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined));
+                    this.blendMode(undefined, undefined);
                 }
             }
         }
@@ -6359,7 +6359,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.advancedBlendMode((undefined as BlendMode | Blender | undefined), (undefined as BlendApplyType | undefined));
+                    this.advancedBlendMode(undefined, undefined);
                 }
             }
         }
@@ -6371,7 +6371,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.geometryTransition((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined));
+                    this.geometryTransition(undefined, undefined);
                 }
             }
         }
@@ -6383,7 +6383,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindTips((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
+                    this.bindTips(undefined, undefined);
                 }
             }
         }
@@ -6395,7 +6395,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindPopup((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
+                    this.bindPopup(undefined, undefined);
                 }
             }
         }
@@ -6407,7 +6407,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindMenu((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                    this.bindMenu(undefined, undefined);
                 }
             }
         }
@@ -6421,7 +6421,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                    this.bindMenu(undefined, undefined, undefined);
                 }
             }
         }
@@ -6433,7 +6433,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContextMenu((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenu(undefined, undefined, undefined);
                 }
             }
         }
@@ -6445,7 +6445,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenuWithResponse(undefined, undefined);
                 }
             }
         }
@@ -6457,7 +6457,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContextMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenu(undefined, undefined, undefined);
                 }
             }
         }
@@ -6469,7 +6469,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined));
+                    this.bindContentCover(undefined, undefined, undefined);
                 }
             }
         }
@@ -6481,7 +6481,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined));
+                    this.bindContentCover(undefined, undefined, undefined);
                 }
             }
         }
@@ -6493,7 +6493,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindSheet((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined));
+                    this.bindSheet(undefined, undefined, undefined);
                 }
             }
         }
@@ -6505,7 +6505,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    this.onVisibleAreaChange(undefined, undefined);
                 }
             }
         }
@@ -6517,7 +6517,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onVisibleAreaApproximateChange((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    this.onVisibleAreaApproximateChange(undefined, undefined);
                 }
             }
         }
@@ -6529,7 +6529,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.keyboardShortcut((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined));
+                    this.keyboardShortcut(undefined, undefined, undefined);
                 }
             }
         }
@@ -6541,7 +6541,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.accessibilityGroup((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                    this.accessibilityGroup(undefined, undefined);
                 }
             }
         }
@@ -6553,7 +6553,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onGestureRecognizerJudgeBegin((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
+                    this.onGestureRecognizerJudgeBegin(undefined, undefined);
                 }
             }
         }

@@ -379,7 +379,7 @@ export struct GridObjectSortComponent {
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
     if (this.callbackId) {
-      this.applicationContext.offEnvironment(this.callbackId! as int,
+      this.applicationContext.offEnvironment(this.callbackId!.toInt(),
         (err: BusinessError<void> | null): void => {
           hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
         })

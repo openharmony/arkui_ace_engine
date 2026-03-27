@@ -55,11 +55,11 @@ export class ShapeMaskTransfer {
         let maskVal = ESValue.wrap(input);
         let fiColor = TransferUtil.getPropColorInt(maskVal, 'fillColor');
         if (fiColor !== undefined) {
-            shapeMask.fillColor = fiColor as int32;
+            shapeMask.fillColor = fiColor.toInt();
         }
         let stroColor = TransferUtil.getPropColorInt(maskVal, 'strokeColor');
         if (stroColor !== undefined) {
-            shapeMask.strokeColor = stroColor as int32;
+            shapeMask.strokeColor = stroColor.toInt();
         }
         if (ESValue.wrap(input).getProperty('strokeWidth').isNumber()) {
             const strokeWidth = ESValue.wrap(input).getProperty('strokeWidth').toNumber();

@@ -41,7 +41,7 @@ export class ComponentContentTransfer {
         }
         let getFrameNodeRawPtr = arkUINode.getProperty('getFrameNodeRawPtr');
         let frameNodeRawPtr = getFrameNodeRawPtr.invoke(frameNodeDyn! as Object).toNumber();
-        let frameNodePeer = FrameNodeExtender.createByRawPtr(frameNodeRawPtr as KPointer);
+        let frameNodePeer = FrameNodeExtender.createByRawPtr(Double.toLong(frameNodeRawPtr));
 
         let nodePtrDyn = ESValue.wrap(input).invokeMethod('getNodePtr');
         if (typeof(nodePtrDyn) !== 'object') {
@@ -51,7 +51,7 @@ export class ComponentContentTransfer {
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
         let uiContextSta = new UIContext(instanceId as int32);
-        return new TransComponentContent(uiContextSta as UIContext, nodeRawPtr as KPointer, frameNodePeer);
+        return new TransComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
     }
 
     static transferDynamic(input: Object): Any {
