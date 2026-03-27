@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "text_base.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -1078,6 +1077,333 @@ HWTEST_F(TextTestNgFour, TextPaintMethodTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPaintMethodTest005
+ * @tc.desc: test text_paint_method.cpp DoStartTextRace early return branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest005, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod nullModifierMethod(WeakPtr<Pattern>(), BASE_LINE_OFFSET_VALUE, nullptr, textOverlayModifier);
+    nullModifierMethod.DoStartTextRace();
+    SUCCEED();
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textContentModifier = AceType::MakeRefPtr<TextContentModifier>(
+        std::optional<TextStyle>(TextStyle()), AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    TextPaintMethod noHostMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+    noHostMethod.DoStartTextRace();
+    EXPECT_FALSE(textContentModifier->marqueeSet_);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, textPattern);
+    ASSERT_NE(textFrameNode, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+    textPattern->pManager_ = nullptr;
+    noHostMethod.DoStartTextRace();
+    EXPECT_FALSE(textContentModifier->marqueeSet_);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    textPattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    noHostMethod.DoStartTextRace();
+    EXPECT_FALSE(textContentModifier->marqueeSet_);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest006
+ * @tc.desc: test text_paint_method.cpp DoStartTextRace default update branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest006, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(10.0f));
+    EXPECT_CALL(*paragraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextMarqueeStart(true);
+    textLayoutProperty->UpdateTextMarqueeStep(100.0f);
+    textLayoutProperty->UpdateTextMarqueeLoop(2);
+    textLayoutProperty->UpdateTextMarqueeDirection(MarqueeDirection::DEFAULT);
+    textLayoutProperty->UpdateTextMarqueeDelay(3);
+
+    auto textContentModifier = AceType::MakeRefPtr<TextContentModifier>(
+        std::optional<TextStyle>(TextStyle()), AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+    textPaintMethod.DoStartTextRace();
+
+    EXPECT_TRUE(textLayoutProperty->HasTextMarqueeFadeout());
+    EXPECT_TRUE(textLayoutProperty->HasTextMarqueeStartPolicy());
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeoutValue(false), textTheme->GetIsTextFadeout());
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT),
+        textTheme->GetMarqueeStartPolicy());
+    EXPECT_TRUE(textContentModifier->marqueeSet_);
+    EXPECT_TRUE(textContentModifier->marqueeOption_.step < 10.0f);
+    EXPECT_EQ(textContentModifier->marqueeOption_.loop, 2);
+    EXPECT_EQ(textContentModifier->marqueeOption_.delay, 3);
+    EXPECT_EQ(textContentModifier->marqueeOption_.direction, MarqueeDirection::LEFT);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest007
+ * @tc.desc: test text_paint_method.cpp DoStartTextRace custom property branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest007, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(20.0f));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextMarqueeStart(false);
+    textLayoutProperty->UpdateTextMarqueeStep(2.0f);
+    textLayoutProperty->UpdateTextMarqueeLoop(5);
+    textLayoutProperty->UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    textLayoutProperty->UpdateTextMarqueeDelay(8);
+    textLayoutProperty->UpdateTextMarqueeFadeout(false);
+    textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    textLayoutProperty->UpdateTextMarqueeUpdatePolicy(MarqueeUpdatePolicy::PRESERVE_POSITION);
+    textLayoutProperty->UpdateTextMarqueeSpacing(Dimension(12.0f, DimensionUnit::PX));
+
+    auto textContentModifier = AceType::MakeRefPtr<TextContentModifier>(
+        std::optional<TextStyle>(TextStyle()), AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+    textPaintMethod.DoStartTextRace();
+
+    EXPECT_TRUE(textContentModifier->marqueeSet_);
+    EXPECT_EQ(textContentModifier->marqueeOption_.start, false);
+    EXPECT_EQ(textContentModifier->marqueeOption_.step, 2.0f);
+    EXPECT_EQ(textContentModifier->marqueeOption_.loop, 5);
+    EXPECT_EQ(textContentModifier->marqueeOption_.direction, MarqueeDirection::RIGHT);
+    EXPECT_EQ(textContentModifier->marqueeOption_.delay, 8);
+    EXPECT_EQ(textContentModifier->marqueeOption_.fadeout, false);
+    EXPECT_EQ(textContentModifier->marqueeOption_.startPolicy, MarqueeStartPolicy::ON_FOCUS);
+    EXPECT_EQ(textContentModifier->marqueeOption_.updatePolicy, MarqueeUpdatePolicy::PRESERVE_POSITION);
+    ASSERT_TRUE(textContentModifier->marqueeOption_.spacing.has_value());
+    EXPECT_EQ(textContentModifier->marqueeOption_.spacing.value().ConvertToPx(), 12.0f);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest008
+ * @tc.desc: test text_paint_method.cpp UpdateOverlayModifier early return branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest008, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod nullPatternMethod(
+        WeakPtr<Pattern>(), BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    nullPatternMethod.UpdateOverlayModifier(nullptr);
+    auto emptyPaintWrapper =
+        AceType::MakeRefPtr<PaintWrapper>(WeakPtr<RenderContext>(), AceType::MakeRefPtr<GeometryNode>(), nullptr);
+    nullPatternMethod.UpdateOverlayModifier(AceType::RawPtr(emptyPaintWrapper));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        textFrameNode->GetRenderContext(), geometryNode, textPattern->CreatePaintProperty());
+
+    TextPaintMethod nullOverlayMethod(
+        AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE, textContentModifier, nullptr);
+    nullOverlayMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+
+    textPattern->pManager_ = nullptr;
+    TextPaintMethod noParagraphMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+    noParagraphMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+
+    textPattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.0f));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
+    noParagraphMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+
+    textFrameNode->layoutProperty_ = nullptr;
+    noParagraphMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    SUCCEED();
+}
+
+/**
+ * @tc.name: TextPaintMethodTest009
+ * @tc.desc: test text_paint_method.cpp UpdateOverlayModifier selection and highlight branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest009, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+    textPattern->contentRect_ = RectF(0.0f, 0.0f, 50.0f, 20.0f);
+    textPattern->showSelect_ = true;
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 3;
+    textPattern->textSelector_.Update(0, 3);
+    textPattern->textSelector_.highlightStart = 1;
+    textPattern->textSelector_.highlightEnd = 2;
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    std::vector<RectF> rects { RectF(0.0f, 0.0f, 10.0f, 10.0f) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.0f));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
+
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCursorColor(Color::RED);
+    textLayoutProperty->UpdateSelectedBackgroundColor(Color::BLUE);
+    textFrameNode->GetRenderContext()->UpdateClipEdge(true);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        textFrameNode->GetRenderContext(), geometryNode, textPattern->CreatePaintProperty());
+    auto textContentModifier = AceType::MakeRefPtr<TextContentModifier>(
+        std::optional<TextStyle>(TextStyle()), AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+
+    textPaintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+
+    EXPECT_EQ(textOverlayModifier->paintOffset_->Get(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(textOverlayModifier->contentRect_.value(), textPattern->GetTextContentRect());
+    EXPECT_TRUE(textOverlayModifier->showSelect_->Get());
+    EXPECT_FALSE(textOverlayModifier->selectedRects_.empty());
+    EXPECT_EQ(textOverlayModifier->cursorColor_->Get(), static_cast<int32_t>(Color::RED.GetValue()));
+    EXPECT_EQ(textOverlayModifier->selectedColor_->Get(), static_cast<int32_t>(Color::BLUE.GetValue()));
+    EXPECT_TRUE(textOverlayModifier->isClip_->Get());
+}
+
+/**
+ * @tc.name: TextPaintMethodTest010
+ * @tc.desc: test text_paint_method.cpp UpdateOverlayModifier reset branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextPaintMethodTest010, TestSize.Level1)
+{
+    int32_t breakPoint = __LINE__;
+    EXPECT_GT(breakPoint, 0);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->AttachToFrameNode(textFrameNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    textFrameNode->AttachContext(AceType::RawPtr(pipeline), true);
+    textPattern->contentRect_ = RectF(0.0f, 0.0f, 20.0f, 10.0f);
+    textPattern->showSelect_ = false;
+    textPattern->textSelector_.Update(2, 2);
+    textPattern->textSelector_.highlightStart = 1;
+    textPattern->textSelector_.highlightEnd = 1;
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.0f));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        textFrameNode->GetRenderContext(), geometryNode, textPattern->CreatePaintProperty());
+    auto textContentModifier = AceType::MakeRefPtr<TextContentModifier>(
+        std::optional<TextStyle>(TextStyle()), AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    textOverlayModifier->highlightRects_.push_back({ { RectF(1.0f, 1.0f, 1.0f, 1.0f) }, ParagraphStyle() });
+    TextPaintMethod textPaintMethod(AceType::WeakClaim(AceType::RawPtr(textPattern)), BASE_LINE_OFFSET_VALUE,
+        textContentModifier, textOverlayModifier);
+
+    textPaintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+
+    EXPECT_TRUE(textOverlayModifier->selectedRects_.empty());
+    EXPECT_TRUE(textOverlayModifier->highlightRects_.empty());
+    EXPECT_FALSE(textOverlayModifier->showSelect_->Get());
+}
+
+/**
  * @tc.name: TextContentModifierB001
  * @tc.desc: test text_content_modifier.cpp ChangeDragStatus
  * @tc.type: FUNC
@@ -1196,13 +1522,13 @@ HWTEST_F(TextTestNgFour, TextContentModifierB004, TestSize.Level1)
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     AnimationOption option = AnimationOption();
-    textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, []() {});
+    textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(
+        option, [&]() {}, []() {});
     textContentModifier->ResumeAnimation();
     EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
     textContentModifier->PauseAnimation();
     EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
 }
-
 
 /**
  * @tc.name: TextContentModifierB005
@@ -1232,7 +1558,6 @@ HWTEST_F(TextTestNgFour, TextContentModifierB005, TestSize.Level1)
     auto direction = textContentModifier->GetTextRaceDirectionByContent();
     EXPECT_EQ(direction, TextDirection::LTR);
 }
-
 
 /**
  * @tc.name: TextContentModifierB006
@@ -1288,7 +1613,7 @@ HWTEST_F(TextTestNgFour, TextContentModifierB007, TestSize.Level1)
     textContentModifier->SetIsFocused(false);
     EXPECT_EQ(textContentModifier->marqueeFocused_, false);
 }
- 
+
 /**
  * @tc.name: TextContentModifierB008
  * @tc.desc: test text_content_modifier.cpp AllowTextRace

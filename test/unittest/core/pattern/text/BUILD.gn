@@ -60,6 +60,7 @@ ace_unittest("text_test_ng_addition") {
   type = "new"
   sources = [
     "text_base.cpp",
+    "text_pattern_multi_thread_test_ng.cpp",
     "text_test_ng_eight.cpp",
     "text_test_ng_eleven.cpp",
     "text_test_ng_five.cpp",
