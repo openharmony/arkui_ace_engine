@@ -873,6 +873,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getFrameNodePtr(node_casted)
     }
     get commonAttribute(): CommonMethod {
+        ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr);
         if (this._commonAttribute === undefined) {
             let baseNode = new ArkBaseNode();
             const retval = FrameNodeExtender.getFrameNodePtr(this)
@@ -1151,6 +1152,10 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         this.type_ = type;
     }
     getType(): string {
+        return this.type_;
+    }
+    public getNodeType(): string {
+        ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
         return this.type_;
     }
     checkValid(node?: FrameNode): boolean {
