@@ -1376,4 +1376,22 @@ HWTEST_F(TextFieldTenPatternNg, FireOnMarqueeStateChange002, TestSize.Level1)
     pattern->FireOnMarqueeStateChange(state);
     EXPECT_TRUE(isStop);
 }
+
+/**
+ * @tc.name: FireOnMarqueeStateChange003
+ * @tc.desc: test FireOnMarqueeStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, FireOnMarqueeStateChange003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    TextMarqueeState state = TextMarqueeState::START;
+    bool isStop = false;
+    auto onChangeStop = [&isStop](int32_t state) { isStop = true; };
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    eventHub->SetOnMarqueeStateChange(onChangeStop);
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_TRUE(isStop);
+}
 } // namespace OHOS::Ace::NG
