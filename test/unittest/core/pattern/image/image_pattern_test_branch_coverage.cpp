@@ -1376,6 +1376,30 @@ HWTEST_F(ImagePatternBranchCoverageTestNg, ApplyAIModificationsWithSupport001, T
 }
 
 /**
+ * @tc.name: CreateNodePaintMethodAltImageLoadFailed001
+ * @tc.desc: Test CreateNodePaintMethod when altImage exists but loadFailed is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternBranchCoverageTestNg, CreateNodePaintMethodAltImageLoadFailed001, TestSize.Level1)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->image_ = nullptr;
+    pattern->loadFailed_ = true;
+    pattern->altErrorImage_ = nullptr;
+    pattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->altDstRect_ = std::make_unique<RectF>(0.0f, 0.0f, 100.0f, 100.0f);
+    pattern->altSrcRect_ = std::make_unique<RectF>(0.0f, 0.0f, 100.0f, 100.0f);
+    pattern->obscuredImage_ = nullptr;
+    auto paintMethod = pattern->CreateNodePaintMethod();
+
+    EXPECT_NE(paintMethod, nullptr);
+}
+
+/**
  * @tc.name: ApplyAIModificationsChanged001
  * @tc.desc: Test ApplyAIModificationsToImage with pixelMap changed
  * @tc.type: FUNC
