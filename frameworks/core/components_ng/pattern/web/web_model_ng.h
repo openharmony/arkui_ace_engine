@@ -435,6 +435,8 @@ public:
     static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type);
+    static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
+    static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

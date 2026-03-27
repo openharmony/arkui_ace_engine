@@ -75,6 +75,9 @@ constexpr WebRotateEffect DEFAULT_WEB_ROTATE_EFFECT = WebRotateEffect::TOPLEFT_E
 constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 constexpr bool DEFAULT_ENABLE_SELECTED_DATA_DETECTOR = true;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
+constexpr bool DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED = true;
+constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED = false;
+constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -2523,6 +2526,35 @@ void ResetEnableScrollDirectionalLock(ArkUINodeHandle node)
     WebModelNG::SetEnableScrollDirectionalLock(frameNode, true, DEFAULT_SCROLLDIRECTIONALLOCK_NESTED_SCROLL);
 }
 
+void SetEnableNativeMediaPlayer(ArkUINodeHandle node, ArkUI_Bool enable, ArkUI_Bool shouldOverlay)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
+}
+
+void ResetEnableNativeMediaPlayer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode,
+        DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED, DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY);
+}
+
+void SetEnableWebAVSession(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaAVSessionEnabled(frameNode, value);
+}
+
+void ResetEnableWebAVSession(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaAVSessionEnabled(frameNode, DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2855,6 +2887,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
+        .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
+        .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
+        .setEnableWebAVSession = SetEnableWebAVSession,
+        .resetEnableWebAVSession = ResetEnableWebAVSession,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3104,6 +3140,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
+        .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
+        .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
+        .setEnableWebAVSession = SetEnableWebAVSession,
+        .resetEnableWebAVSession = ResetEnableWebAVSession,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
