@@ -745,6 +745,19 @@ public:
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
     int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, const std::string& value,
+        int32_t start, int32_t end);
+    void ReportCommandExecution(int32_t nodeId, const std::string& command);
+    void ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position);
+    void ReportRichEditorRequestKeyboardEvent(int32_t nodeId);
+    void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params, int32_t hostId);
+    void HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params, int32_t hostId);
+    bool HandleSetCaretPositionCommand(int32_t position, int32_t hostId);
+    void HandleRequestKeyboardCommand(int32_t hostId);
+    void HandleCopyOrCutCommand(const std::string& cmd, int32_t hostId);
+    bool ProcessCommand(const std::string& cmd, const std::unique_ptr<JsonValue>& json,
+        int32_t hostId);
+
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
     void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan, TextChangeReason reason);
@@ -1631,6 +1644,7 @@ private:
     friend class RichEditorScrollController;
     friend class RichEditorBaseController;
     bool ParseCommand(const std::string& command);
+    void UpdateUrlColorIfNeeded(TextSpanOptions& options);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1695,6 +1709,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     bool HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    void HandleDoubleClickEditLogic(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);

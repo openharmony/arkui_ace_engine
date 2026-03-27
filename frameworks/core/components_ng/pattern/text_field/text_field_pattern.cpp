@@ -518,6 +518,58 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     callbackOldPreviewText_.offset = -1;
 }
 
+bool TextFieldPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    return true;
+}
+
+void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+    const std::string& value, int32_t start, int32_t end)
+{
+    auto json = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", dataStr.c_str());
+    json->Put("value", value.c_str());
+    json->Put("start", start);
+    json->Put("end", end);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void TextFieldPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(value);
+    value->Put("event", "caretPositionChange");
+    value->Put("position", position);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void TextFieldPattern::ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frameNode)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(value);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        value->Put("event", "TextInput.requestKeyboard");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
+            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        value->Put("event", "TextArea.requestKeyboard");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
+            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        value->Put("event", "Search.requestKeyboard");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
+            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    }
+}
+
 int32_t TextFieldPattern::OnInjectionEvent(const std::string& command)
 {
     auto host = GetHost();
@@ -530,47 +582,167 @@ int32_t TextFieldPattern::OnInjectionEvent(const std::string& command)
     return RET_SUCCESS;
 }
 
+bool TextFieldPattern::HandleSetCaretPositionCommand(int32_t position, int32_t hostId)
+{
+    position = std::max(0, position);
+    int32_t length = static_cast<int32_t>(GetTextUtf16Value().length());
+    position = std::clamp(position, 0, length);
+    SetCaretPosition(position, true);
+    ReportCaretPositionChangeEvent(hostId, position);
+    ReportSelectionChangeEvent(hostId, "selectionChange", "", position, position);
+    return true;
+}
+
+void TextFieldPattern::HandleAddTextCommand(const std::unique_ptr<JsonValue>& params)
+{
+    std::string valueStr = params->GetString("value");
+    CHECK_NULL_VOID(!valueStr.empty());
+    auto textValue = UtfUtils::Str8ToStr16(valueStr);
+    int32_t offsetIndex = -1;
+    if (params->Contains("offset")) {
+        int32_t offset = params->GetInt("offset");
+        offsetIndex = std::max(0, offset);
+    }
+    int32_t length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    offsetIndex = (offsetIndex == -1 || offsetIndex > length) ? length : offsetIndex;
+    InputCommandInfo inputCommandInfo;
+    inputCommandInfo.insertOffset = offsetIndex;
+    inputCommandInfo.insertValue = textValue;
+    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+    AddInputCommand(inputCommandInfo);
+}
+
+void TextFieldPattern::HandleSetTextCommand(const std::unique_ptr<JsonValue>& params)
+{
+    std::string valueStr = params->GetString("value");
+    auto textValue = UtfUtils::Str8ToStr16(valueStr);
+    InputCommandInfo inputCommandInfo;
+    inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) };
+    inputCommandInfo.insertOffset = 0;
+    inputCommandInfo.insertValue = textValue;
+    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+    AddInputCommand(inputCommandInfo);
+}
+
 bool TextFieldPattern::ParseCommand(const std::string& command)
 {
-    std::string cmd;
-    std::unique_ptr<JsonValue> json = nullptr;
-    std::unique_ptr<JsonValue> params = nullptr;
-    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+    auto [json, cmd] = ParseBaseJson(command);
+    CHECK_NULL_RETURN(json && !cmd.empty(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
+        auto params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        HandleTextModifyCommand(host->GetId(), params, cmd);
+    } else if (cmd == "selectText") {
+        int32_t start_ = 0;
+        int32_t end_ = 0;
+        if (!CheckAndGetSelectParams(json, &start_, &end_) || !HandleSelectTextCommand(start_, end_)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "HandleSelectTextCommand fail");
+            return false;
+        }
+    } else if (cmd == "copy" || cmd == "cut") {
+        if (!AllowCopy()) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent cmd copy is not allow.");
+		    return false;
+        }
+        HandleCopyOrCutCommand(cmd, host);
+    } else if (cmd == "clear") {
+        ClearTextContent();
+    } else if (cmd == "requestKeyboard") {
+        if (HasFocus()) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent cmd requestKeyboard HasFocus.");
+		    return false;
+        }
+        auto focusHub = GetFocusHub();
+        CHECK_NULL_RETURN(focusHub, false);
+        focusHub->RequestFocusImmediately();
+        ReportRequestKeyboardEvent(host);
+    } else if (cmd == "setCaretPosition") {
+        if (!json->Contains("position")) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "ParseCommand failed: position");
+            return false;
+        }
+        int32_t position = json->GetInt("position");
+        return HandleSetCaretPositionCommand(position, host->GetId());
+    } else {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
+            cmd.c_str(), host->GetId());
         return false;
     }
+    return true;
+}
+
+void TextFieldPattern::HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode)
+{
+    if (cmd == "copy") {
+        HandleOnCopy();
+        if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "TextInput.onCopyComplete");
+        } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "Search.onCopyComplete");
+        } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "TextArea.onCopyComplete");
+        }
+    } else if (cmd == "cut") {
+        HandleOnCut();
+        if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "TextInput.onCutComplete");
+        } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "Search.onCutComplete");
+        } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+            ReportCommandResult(frameNode->GetId(), "TextArea.onCutComplete");
+        }
+    }
+}
+
+std::pair<std::unique_ptr<JsonValue>, std::string> TextFieldPattern::ParseBaseJson(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return {nullptr, ""};
+    }
+    std::string cmd = json->GetString("cmd");
+    return {std::move(json), cmd.empty() ? "" : cmd};
+}
+
+bool TextFieldPattern::HandleTextModifyCommand(int32_t nodeId, const std::unique_ptr<JsonValue>& params, const std::string& cmd)
+{
     if (cmd == "addText") {
-        std::string valueStr = params->GetString("value");
-        CHECK_NULL_RETURN(!valueStr.empty(), true);
-        auto textValue = UtfUtils::Str8ToStr16(valueStr);
-        int32_t offsetIndex = -1;
-        if (params->Contains("offset")) {
-            int32_t offset = params->GetInt("offset");
-            offsetIndex = std::max(0, offset);
-        }
-        int32_t length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-        if (offsetIndex == -1 || offsetIndex > length) {
-            offsetIndex = length;
-        }
-        InputCommandInfo inputCommandInfo;
-        inputCommandInfo.insertOffset = offsetIndex;
-        inputCommandInfo.insertValue = textValue;
-        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
-        AddInputCommand(inputCommandInfo);
+        HandleAddTextCommand(params);
     } else if (cmd == "setText") {
-        std::string valueStr = params->GetString("value");
-        auto textValue = UtfUtils::Str8ToStr16(valueStr);
-        InputCommandInfo inputCommandInfo;
-        inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) };
-        inputCommandInfo.insertOffset = 0;
-        inputCommandInfo.insertValue = textValue;
-        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
-        AddInputCommand(inputCommandInfo);
+        HandleSetTextCommand(params);
     } else if (cmd == "deleteText") {
         HandleDeleteTextCommand(params);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+    }
+    return true;
+}
+
+bool TextFieldPattern::CheckAndGetSelectParams(const std::unique_ptr<JsonValue>& json, int32_t* start, int32_t* end)
+{
+    if (!json->Contains("selectionStart") || !json->Contains("selectionEnd")) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "ParseCommand failed: missing selectionStart/selectionEnd");
         return false;
     }
+    *start = json->GetInt("selectionStart");
+    *end = json->GetInt("selectionEnd");
+    return true;
+}
+
+bool TextFieldPattern::HandleSelectTextCommand(int32_t startIndex, int32_t endIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(contentController_ , false);
+    int32_t length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    startIndex = std::max(startIndex, 0);
+    endIndex = (endIndex < 0) ? length : endIndex;
+    startIndex = std::min(startIndex, length);
+    endIndex = std::min(endIndex, length);
+    if (startIndex > endIndex) {
+        std::swap(startIndex, endIndex);
+    }
+    HandleSetSelection(startIndex, endIndex);
     return true;
 }
 
@@ -1463,6 +1635,8 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
     UpdateCaretInfoToController();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto value = contentController_->GetSelectedValue(start, end);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", UtfUtils::Str16DebugToStr8(value), start, end);
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -2073,6 +2247,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
+    auto value = contentController_->GetTextValue();
+    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", value, 0, textSize);
 }
 
 void TextFieldPattern::HandleOnPasswordVault()
@@ -3583,9 +3759,16 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK, info.GetSourceDevice())) {
         NotifyOnEditChanged(true);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(info.GetLocalLocation());
         UpdateCaretInfoToController();
+        auto startIndex = selectController_->GetStartIndex();
+        auto endIndex = selectController_->GetEndIndex();
+        auto value = contentController_->GetTextValue();
+        auto valueStr = value.substr(static_cast<int32_t>(startIndex), static_cast<int32_t>(endIndex - startIndex));
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
     }
     if (IsSelected()) {
         StopTwinkling();
@@ -3594,8 +3777,6 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     if (info.GetSourceDevice() != SourceType::MOUSE && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -4606,23 +4787,27 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress %{public}d", host->GetId());
+    
     if (ResetObscureTickCountDown()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         return;
     }
+
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     StartVibratorByLongPress();
+
     if (BetweenSelectedPosition(info)) {
         gestureHub->SetIsTextDraggable(true);
         return;
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
+
     if (!focusHub->IsCurrentFocus()) {
         TextFieldRequestFocus(RequestFocusReason::LONG_PRESS);
     }
@@ -4635,6 +4820,12 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     SetIsSingleHandle(!IsSelected());
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
+    HandleLongPressSelectionAndReport(info, localOffset, start, end);
+}
+
+void TextFieldPattern::HandleLongPressSelectionAndReport(
+    GestureEvent& info, const Offset& localOffset, int32_t start, int32_t end)
+{
     CloseSelectOverlay();
     longPressFingerNum_ = info.GetFingerList().size();
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
@@ -4642,7 +4833,13 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     StartGestureSelection(start, end, localOffset);
     TriggerAvoidOnCaretChange();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto value = contentController_->GetTextValue();
+    auto valueStr = value.substr(static_cast<int32_t>(start),
+        static_cast<int32_t>(end - start));
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, start, end);
 }
 
 bool TextFieldPattern::BetweenSelectedPosition(GestureEvent& info)
@@ -5276,6 +5473,14 @@ void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
     blockPress_ = false;
     leftMouseCanMove_ = true;
     FocusAndUpdateCaretByMouse(info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto startIndex = selectController_->GetStartIndex();
+    auto endIndex = selectController_->GetEndIndex();
+    auto value = contentController_->GetTextValue();
+    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
+        static_cast<int32_t>(endIndex - startIndex));
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
 }
 
 void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
@@ -7553,6 +7758,12 @@ void TextFieldPattern::AfterSelection()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     showSelect_ = IsSelected();
     UpdateCaretInfoToController();
+    auto startIndex = selectController_->GetStartIndex();
+    auto endIndex = selectController_->GetEndIndex();
+    auto value = contentController_->GetTextValue();
+    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
+        static_cast<int32_t>(endIndex - startIndex));
+    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", valueStr, startIndex, endIndex);
 }
 
 void TextFieldPattern::HandleSelectionUp()

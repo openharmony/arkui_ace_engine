@@ -52,7 +52,8 @@ public:
     void HandleGetWebViewCurrentLanguage(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleStartWebViewTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params);
-
+    void HandleRegisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleUnregisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);
 

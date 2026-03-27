@@ -1423,7 +1423,21 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
     record.addText = options.value;
     RichEditorChangeValue changeValue(reason);
     bool isUndoRedo = options.optionSource == OptionSource::UNDO_REDO;
-    // When the text color is not specified, it inherits the color of the URL.
+    UpdateUrlColorIfNeeded(options);
+    CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
+    AddOperationRecord(record);
+    auto ret = AddTextSpanOperation(options, isPaste, index, false);
+    SetNeedMoveCaretToContentRect();
+    if (!previewTextRecord_.IsValid() && !isUndoRedo) {
+        AfterContentChange(changeValue);
+    }
+    return ret;
+}
+
+void RichEditorPattern::UpdateUrlColorIfNeeded(TextSpanOptions& options)
+{
     auto needUpdateUrlColor = options.urlAddress.has_value() && !options.urlAddress.value().empty()
         && options.useThemeFontColor;
     if (needUpdateUrlColor && options.style.has_value()) {
@@ -1436,16 +1450,6 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
             options.style.value().SetStrokeColor(urlSpanColor);
         }
     }
-    CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
-    ClearRedoOperationRecords();
-    record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
-    AddOperationRecord(record);
-    auto ret = AddTextSpanOperation(options, isPaste, index, false);
-    SetNeedMoveCaretToContentRect();
-    if (!previewTextRecord_.IsValid() && !isUndoRedo) {
-        AfterContentChange(changeValue);
-    }
-    return ret;
 }
 
 int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
@@ -1460,44 +1464,166 @@ int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
     return RET_SUCCESS;
 }
 
-bool RichEditorPattern::ParseCommand(const std::string& command)
+void RichEditorPattern::ReportCommandExecution(int32_t nodeId, const std::string& command)
 {
-    std::string cmd;
-    std::unique_ptr<JsonValue> json  = nullptr;
-    std::unique_ptr<JsonValue> params = nullptr;
-    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+    auto eventObj = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(eventObj);
+    eventObj->Put("event", command.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str,
+    const std::string& value, int32_t start, int32_t end)
+{
+    auto eventObj = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(eventObj);
+    eventObj->Put("event", str.c_str());
+    eventObj->Put("value", value.c_str());
+    eventObj->Put("start", start);
+    eventObj->Put("end", end);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void RichEditorPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
+{
+    auto eventObj = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(eventObj);
+    eventObj->Put("event", "caretPositionChange");
+    eventObj->Put("position", position);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void RichEditorPattern::ReportRichEditorRequestKeyboardEvent(int32_t nodeId)
+{
+    auto eventObj = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(eventObj);
+    eventObj->Put("event", "RichEditor.requestKeyboard");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void RichEditorPattern::HandleAddTextCommand(const std::unique_ptr<JsonValue>& params, int32_t hostId)
+{
+    std::string valueStr = params->GetString("value");
+    CHECK_NULL_VOID(!valueStr.empty());
+    int offset = params->GetInt("offset", GetTextContentLength());
+    std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
+    auto textOptions = TextSpanOptions{ .offset = offset, .value = textValue };
+    AddTextSpan(textOptions, TextChangeReason::INPUT);
+}
+
+void RichEditorPattern::HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params, int32_t hostId)
+{
+    RangeOptions options;
+    options.start = params->Contains("start") ? std::max(0, params->GetInt("start")) : 0;
+    options.end = params->Contains("end") ? std::max(0, params->GetInt("end")) : 0;
+    DeleteSpans(options, TextChangeReason::INPUT);
+}
+
+bool RichEditorPattern::HandleSetCaretPositionCommand(int32_t position, int32_t hostId)
+{
+    if (position < 0) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent failed hostId : %{public}d", hostId);
         return false;
     }
-    if (cmd == "addText") {
-        std::string valueStr = params->GetString("value");
-        CHECK_NULL_RETURN(!valueStr.empty(), true);
-        int offset = params->GetInt("offset", GetTextContentLength());
-        std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
-        auto textOptions = TextSpanOptions{ .offset = offset, .value = textValue };
-        AddTextSpan(textOptions, TextChangeReason::INPUT);
-    } else if (cmd == "deleteText") {
-        RangeOptions options;
-        if (params->Contains("start")) {
-            int32_t start = params->GetInt("start");
-            options.start = std::max(0, start);
+    SetCaretPosition(position);
+    MoveCaretToContentRect();
+    ReportCaretPositionChangeEvent(hostId, position);
+    ReportSelectionChangeEvent(hostId, "selectionChange", "", position, position);
+    return true;
+}
+
+void RichEditorPattern::HandleRequestKeyboardCommand(int32_t hostId)
+{
+    RequestFocusImpl();
+    if (!RequestKeyboard(true, true, true, SourceType::MOUSE)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard failed");
+        return;
+    }
+    ReportRichEditorRequestKeyboardEvent(hostId);
+}
+
+void RichEditorPattern::HandleCopyOrCutCommand(const std::string& cmd, int32_t hostId)
+{
+    if (cmd == "copy") {
+        if (copyOption_ == CopyOptions::None) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent cmd copy is not allow.");
+            return;
         }
-        if (params->Contains("end")) {
-            int32_t end = params->GetInt("end");
-            options.end = std::max(0, end);
+        HandleOnCopy();
+        ReportCommandExecution(hostId, "RichEditor.onCopyComplete");
+    } else if (cmd == "cut") {
+        if (copyOption_ == CopyOptions::None) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent cmd cut is not allow.");
+            return;
         }
-        DeleteSpans(options, TextChangeReason::INPUT);
-    } else if (cmd == "setText") {
-        std::string valueStr = params->GetString("value");
-        std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
-        RangeOptions options;
-        DeleteSpans(options, TextChangeReason::INPUT);
-        auto textOptions = TextSpanOptions{ .value = textValue };
-        AddTextSpan(textOptions, TextChangeReason::INPUT);
+        HandleOnCut();
+        ReportCommandExecution(hostId, "RichEditor.onCutComplete");
+    }
+}
+
+bool RichEditorPattern::ProcessCommand(const std::string& cmd, const std::unique_ptr<JsonValue>& json,
+    int32_t hostId)
+{
+    if (cmd == "addText" || cmd == "deleteText" || cmd == "setText") {
+        auto params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        if (cmd == "addText") {
+            HandleAddTextCommand(params, hostId);
+        } else if (cmd == "deleteText") {
+            HandleDeleteTextCommand(params, hostId);
+        } else {
+            std::string valueStr = params->GetString("value");
+            std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
+            RangeOptions options;
+            DeleteSpans(options, TextChangeReason::INPUT);
+            auto textOptions = TextSpanOptions{ .value = textValue };
+            AddTextSpan(textOptions, TextChangeReason::INPUT);
+        }
+    } else if (cmd == "clear") {
+        DeleteForward(0, GetTextContentLength());
+    } else if (cmd == "selectText") {
+        if (!json->Contains("selectionStart") || !json->Contains("selectionEnd")) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "ParseCommand failed: missing selectionStart/selectionEnd");
+            return false;
+        }
+        int32_t start = json->GetInt("selectionStart");
+        int32_t end = json->GetInt("selectionEnd");
+        SetSelection(start, end);
+    } else if (cmd == "copy" || cmd == "cut") {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ParseCommand command copy");
+        HandleCopyOrCutCommand(cmd, hostId);
+    } else if (cmd == "setCaretPosition") {
+        if (!json->Contains("position")) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "ParseCommand failed: position");
+            return false;
+        }
+        int32_t position = json->GetInt("position");
+        return HandleSetCaretPositionCommand(position, hostId);
+    } else if (cmd == "requestKeyboard") {
+        HandleRequestKeyboardCommand(hostId);
     } else {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
+            cmd.c_str(), hostId);
         return false;
     }
     return true;
+}
+
+bool RichEditorPattern::ParseCommand(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), false);
+
+    std::string cmd = json->GetString("cmd");
+    CHECK_NULL_RETURN(!cmd.empty(), false);
+    return ProcessCommand(cmd, json, host->GetId());
 }
 
 void RichEditorPattern::AdjustAddPosition(TextSpanOptions& options)
@@ -4402,12 +4528,9 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     HandleSelect(info, selectStart, selectEnd);
     MarkContentNodeForRender();
     if (overlayMod_ && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click. shall enter edit state.set 1");
-        HandleOnEditChanged(true);
-        RequestKeyboard(false, true, true);
+        HandleDoubleClickEditLogic(info, selectStart, selectEnd);
     }
-    bool isDoubleClickByMouse =
-        info.GetSourceDevice() == SourceType::MOUSE && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK;
+    bool isDoubleClickByMouse = info.GetSourceDevice() == SourceType::MOUSE && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK;
     bool isShowSelectOverlay = !isDoubleClickByMouse && caretUpdateType_ != CaretUpdateType::LONG_PRESSED;
     if (isShowSelectOverlay) {
         selectOverlay_->SwitchToOverlayMode();
@@ -4419,6 +4542,20 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         StopTwinkling();
     }
     return false;
+}
+
+void RichEditorPattern::HandleDoubleClickEditLogic(GestureEvent& info, int32_t selectStart, int32_t selectEnd)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click. shall enter edit state.set 1");
+    HandleOnEditChanged(true);
+    RequestKeyboard(false, true, true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::u16string selectTextContent;
+    GetContentBySpans(selectTextContent);
+    std::u16string selectData16 = selectTextContent.substr(selectStart, selectEnd - selectStart);
+    std::string selectData = StringUtils::Str16ToStr8(selectData16);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
 }
 
 void RichEditorPattern::StartVibratorByLongPress()
@@ -4487,6 +4624,10 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
             }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
     }
     MarkContentNodeForRender();
+    std::u16string selectTextContent;
+    GetContentBySpans(selectTextContent);
+    std::string selectData = StringUtils::Str16ToStr8(selectTextContent);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, 0, textSize);
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -8419,6 +8560,14 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::u16string selectTextContent;
+    GetContentBySpans(selectTextContent);
+    std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(selectStart),
+        static_cast<int32_t>(selectEnd - selectStart));
+    std::string selectData = StringUtils::Str16ToStr8(selectData16);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchCancelAfterLongPress()
@@ -10228,6 +10377,13 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         if (start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd()) {
             FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        std::u16string selectTextContent;
+        GetContentBySpans(selectTextContent);
+        std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(start), static_cast<int32_t>(end - start));
+        std::string selectData = StringUtils::Str16ToStr8(selectData16);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, start, end);
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     MoveCaretToContentRect();

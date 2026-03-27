@@ -124,6 +124,8 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetWebViewCurrentLanguage", &UiSaService::HandleGetWebViewCurrentLanguage },
     { "StartWebViewTranslate", &UiSaService::HandleStartWebViewTranslate },
     { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
+    { "RegisterTextChangeEventCallback", &UiSaService::HandleRegisterTextChangeEventCallback },
+    { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -411,6 +413,22 @@ void UiSaService::HandleUnregisterComponentChangeEventCallback(
 {
     service->UnregisterComponentChangeEventCallback();
     LOGI("[ComponentChangeEvent] call UnregisterComponentChangeEventCallback");
+}
+
+void UiSaService::HandleRegisterTextChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    auto eventCallback = [](std::string data) {
+        LOGI("[TextChangeEventCallback] data = %{public}s", data.c_str());
+    };
+    service->RegisterTextChangeEventCallback(eventCallback);
+}
+
+void UiSaService::HandleUnregisterTextChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    service->UnregisterTextChangeEventCallback();
+    LOGI("[TextChangeEvent] call UnregisterTextChangeEventCallback");
 }
 
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)

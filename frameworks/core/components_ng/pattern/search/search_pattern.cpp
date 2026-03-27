@@ -1463,27 +1463,31 @@ int32_t SearchPattern::OnInjectionEvent(const std::string& command)
     std::string cmd;
     std::unique_ptr<JsonValue> json = nullptr;
     std::unique_ptr<JsonValue> params = nullptr;
-    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
-        return RET_FAILED;
-    }
-    if (cmd != "setSearchText") {
-        TAG_LOGE(AceLogTag::ACE_SEARCH, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
-        return RET_FAILED;
-    }
-    // Get TextField child
     auto textFieldChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_RETURN(textFieldChild, RET_FAILED);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, RET_FAILED);
-    std::string text = params->GetString("value");
-    InputCommandInfo inputCommandInfo;
-    inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
-    inputCommandInfo.insertOffset = 0;
-    inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
-    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
-    textFieldPattern->AddInputCommand(inputCommandInfo);
-    if (isSearchButtonEnabled_) {
-        OnClickButtonAndImage();
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), RET_FAILED);
+    cmd = json->GetString("cmd");
+    CHECK_NULL_RETURN(!cmd.empty(), RET_FAILED);
+    if (cmd == "setSearchText") {
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), RET_FAILED);
+        std::string text = params->GetString("value");
+        InputCommandInfo inputCommandInfo;
+        inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
+        inputCommandInfo.insertOffset = 0;
+        inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
+        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+        textFieldPattern->AddInputCommand(inputCommandInfo);
+        if (isSearchButtonEnabled_) {
+            OnClickButtonAndImage();
+        }
+        return RET_SUCCESS;
+    }
+    if (!textFieldPattern->ParseCommand(command)) {
+        return RET_FAILED;
     }
     return RET_SUCCESS;
 }

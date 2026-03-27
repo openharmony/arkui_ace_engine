@@ -1531,6 +1531,7 @@
       "OHOS::Ace::NG::Pattern::OnColorModeChange(unsigned int)";
       "OHOS::Ace::NG::Pattern::RemoveResObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Pattern::UnRegisterResource(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::Pattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::PickerAudioHapticFactory::GetInstance(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::PickerColumnPattern::AddAnimationTextProperties(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::NG::TextLayoutProperty> const&)";
       "OHOS::Ace::NG::PickerColumnPattern::AddHotZoneRectToText()";
@@ -1873,6 +1874,7 @@
       "OHOS::Ace::NG::TextFieldManagerNG::SetOnFocusTextField(OHOS::Ace::WeakPtr<OHOS::Ace::NG::Pattern> const&)";
       "OHOS::Ace::NG::TextFieldManagerNG::TriggerAvoidOnCaretChange()";
       "OHOS::Ace::NG::TextFieldPattern::AddInputCommand(OHOS::Ace::NG::InputCommandInfo const&)";
+      "OHOS::Ace::NG::TextFieldPattern::ParseCommand(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextFieldPattern::AutoCapTypeToString() const";
       "OHOS::Ace::NG::TextFieldPattern::ClearTextContent()";
       "OHOS::Ace::NG::TextFieldPattern::FilterInitializeText()";
@@ -2076,6 +2078,7 @@
       "OHOS::Ace::NG::TextPattern::UpdateSelectorOnHandleMove(OHOS::Ace::NG::OffsetT<float> const&, float, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSelectOverlayOrCreate(OHOS::Ace::NG::SelectOverlayInfo&, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSpanItemDragStatus(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&, bool)";
+      "OHOS::Ace::NG::TextPattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextSelectOverlay::AllowSearch()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowShare()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowTranslate()";
@@ -3741,6 +3744,7 @@
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::ToJsonValue*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::ToTreeJson*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::UnRegisterResource*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnInjectionEvent*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::UpdatePropertyImpl*;
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::UINode::~UINode*;
