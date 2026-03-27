@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
