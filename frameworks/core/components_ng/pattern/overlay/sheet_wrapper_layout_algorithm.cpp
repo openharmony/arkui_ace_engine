@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
