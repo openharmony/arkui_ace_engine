@@ -220,4 +220,27 @@ HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig009, TestSize.Level1)
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.isArkUIHookEnabled);
 }
+
+/**
+ * @tc.name: ParseSystemForceSplitConfig0010
+ * @tc.desc: Branch: if (!configJson) { => false
+ *                   if (!configJson->IsObject()) { => false
+ *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
+ *                   if (!navOptions || !navOptions->IsObject()) { => false
+ *                   if (navOptions->Contains(SPLIT_DIVIDER_COLOR)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig010, TestSize.Level1)
+{
+    std::string configStr =
+        "{ \"splitDividerColor\": { \"light\": \"#FFFF0000\", \"dark\": \"#FF00FF00\"\
+        } }";
+    NG::ForceSplitConfig config;
+    auto ret = NG::ForceSplitUtils::ParseSplitDividerColor(configStr, config);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(config.splitDividerColorLight.has_value());
+    EXPECT_TRUE(config.splitDividerColorDark.has_value());
+    EXPECT_EQ(config.splitDividerColorLight.value(), Color::FromString("#FFFF0000"));
+    EXPECT_EQ(config.splitDividerColorDark.value(), Color::FromString("#FF00FF00"));
+}
 } // namespace OHOS::Ace

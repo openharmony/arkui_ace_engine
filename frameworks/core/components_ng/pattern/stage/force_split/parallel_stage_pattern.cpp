@@ -224,6 +224,38 @@ void ParallelStagePattern::OnDetachFromMainTree()
     mgr->RemoveForceSplitStateListener(id);
 }
 
+Color ParallelStagePattern::GetDividerNodeColor(RefPtr<FrameNode> hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, Color());
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, Color());
+    auto theme = pipeline->GetTheme<NavigationBarTheme>();
+    auto themeColor = theme->GetNavigationDividerColor();
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
+    if (forceSplitMgr->IsForceSplitEnable(true)) {
+        auto splitColor = forceSplitMgr->GetSplitDividerColor();
+        if (pipeline->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
+            return splitColor.first.value();
+        }
+        if (pipeline->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
+            return splitColor.second.value();
+        }
+    }
+    return themeColor;
+}
+
+void ParallelStagePattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    if (dividerNode_) {
+        dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+    }
+}
+
 void ParallelStagePattern::CreateDividerNodeIfNeeded()
 {
     if (dividerNode_) {
@@ -240,14 +272,11 @@ void ParallelStagePattern::CreateDividerNodeIfNeeded()
     dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
     dividerLayoutProperty->UpdateVertical(true);
     // set divider color
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
     auto dividerRenderProperty = dividerNode_->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
     // set background color can expand to safe area
-    dividerNode_->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
 }
 
 void ParallelStagePattern::OnWindowShow()

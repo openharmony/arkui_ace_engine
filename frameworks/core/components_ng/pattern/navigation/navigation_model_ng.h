@@ -221,6 +221,8 @@ private:
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
     void SetToolbarNavigationMode(NavigationMode mode); // Only used for the toolbar in 'container_modal' component
+    static Color GetDividerNodeColor(const RefPtr<NavigationGroupNode>& navigationGroupNode,
+        RefPtr<FrameNode> dividerNode);
     static bool navBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG
