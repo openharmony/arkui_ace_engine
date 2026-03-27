@@ -2773,8 +2773,10 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
     InitWebEventHubDragDropStart(eventHub);
     InitWebEventHubDragDropEnd(eventHub);
     InitWebEventHubDragMove(eventHub);
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
+
+    CHECK_NULL_VOID(delegate_);
     delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
 }
 
 void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub)

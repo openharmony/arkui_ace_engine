@@ -3261,6 +3261,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,

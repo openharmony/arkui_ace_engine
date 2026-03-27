@@ -2230,15 +2230,12 @@ struct CJUIWebModifier {
     void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
     void (*setEnableScrollDirectionalLock)(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type);
     void (*resetEnableScrollDirectionalLock)(ArkUINodeHandle node);
-<<<<<<< HEAD
     void (*setEnableNativeMediaPlayer)(ArkUINodeHandle node, ArkUI_Bool enable, ArkUI_Bool shouldOverlay);
     void (*resetEnableNativeMediaPlayer)(ArkUINodeHandle node);
     void (*setEnableWebAVSession)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
-=======
     void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDrag)(ArkUINodeHandle node);
->>>>>>> ff032d39501 (enable drag)
 };
 
 struct CJUIBlankModifier {

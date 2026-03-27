@@ -2554,6 +2554,8 @@ void ResetEnableWebAVSession(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetWebMediaAVSessionEnabled(frameNode, DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED);
+}
+
 void SetEnableDrag(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
