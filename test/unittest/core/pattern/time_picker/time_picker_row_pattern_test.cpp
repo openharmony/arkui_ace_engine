@@ -68,6 +68,7 @@ namespace {
     const std::string DEFAULT_RESULT_FAIL = "fail";
     const std::string DEFAULT_REASON = "";
     } // namespace
+
 namespace OHOS::Ace::NG {
 const InspectorFilter filter;
 class TimePickerRowPatternTest : public testing::Test {
@@ -78,6 +79,7 @@ public:
     void TearDown() override;
     void CreateTimePickerColumnNode();
     RefPtr<Theme> GetThemeByType(ThemeType type);
+    RefPtr<FrameNode> CreateTimePickerNode();
 
     RefPtr<IconTheme> iconThem_;
     RefPtr<DialogTheme> dialogTheme_;
@@ -152,6 +154,16 @@ RefPtr<Theme> TimePickerRowPatternTest::GetThemeByType(ThemeType type)
     } else {
         return nullptr;
     }
+}
+
+RefPtr<FrameNode> TimePickerRowPatternTest::CreateTimePickerNode()
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    return AceType::Claim(frameNode);
 }
 
 /**
@@ -924,6 +936,49 @@ HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_ValidTimeBoundaryHour23, Tes
 }
 
 /**
+ * @tc.name: OnInjectionEvent_CheckCommandDialog001
+ * @tc.desc: OnInjectionEvent Does cmd correspond to the yes/no dialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_CheckCommandDialog001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetIsShowInDialog(true);
+    std::string jsonHour23 = "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":23,\"minute\":59,\"second\":59}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonHour23);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_CheckCommandDialog002
+ * @tc.desc: OnInjectionEvent Does cmd correspond to the yes/no dialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_CheckCommandDialog002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    std::string json = "{\"cmd\":\"setTimePickerDialogTime\",\"params\":{\"hour\":23,\"minute\":59,\"second\":59}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(json);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
  * @tc.name: ReportTimeChangeEvent_NormalCase
  * @tc.desc: ReportTimeChangeEvent should return true with valid time string.
  * @tc.type: FUNC
@@ -963,6 +1018,47 @@ HWTEST_F(TimePickerRowPatternTest, ReportTimeChangeEvent_Hour12, TestSize.Level1
     int32_t nodeId = frameNode->GetId();
     auto result = timePickerRowPattern->ReportTimeChangeEvent(nodeId, TIME_STR_HOUR_12);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportTimeChangeEvent_Dialog
+ * @tc.desc: ReportTimeChangeEvent should succeed with dialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportTimeChangeEvent_Dialog, TestSize.Level1)
+{
+    auto frameNode = CreateTimePickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetIsShowInDialog(true);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result = timePickerRowPattern->ReportTimeChangeEvent(nodeId, TIME_STR_HOUR_12);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportTimeChangeEvent_Dialog002
+ * @tc.desc: ReportTimeChangeEvent should succeed with dialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportTimeChangeEvent_Dialog002, TestSize.Level1)
+{
+    auto frameNode = CreateTimePickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetIsShowInDialog(true);
+    timePickerRowPattern->SetIsInDatePickerDialog(true);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result = timePickerRowPattern->ReportTimeChangeEvent(nodeId, TIME_STR_HOUR_12);
+    EXPECT_FALSE(result);
 }
 
 /**
