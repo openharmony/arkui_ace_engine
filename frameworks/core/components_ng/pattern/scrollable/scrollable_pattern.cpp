@@ -529,6 +529,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         }
         return false;
     }
+    if (navBarPattern_ && navBarPattern_->IsScrollEffectEnabled()) {
+        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset());
+    }
 
     CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
 
@@ -1959,6 +1962,7 @@ void ScrollablePattern::GetParentNavigation()
         if (!navBarPattern_) {
             continue;
         }
+        navBarPattern_->SetScrollableNode(WeakPtr<FrameNode>(host));
         return;
     }
     navBarPattern_ = nullptr;
