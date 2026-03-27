@@ -15,13 +15,14 @@
 
 #include "gtest/gtest.h"
 #include "base/memory/ace_type.h"
+
 #define private public
 #define protected public
+
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
@@ -31,7 +32,6 @@
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
 
 #include "session/host/include/extension_session.h"
