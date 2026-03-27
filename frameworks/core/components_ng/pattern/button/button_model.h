@@ -19,7 +19,6 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 
 namespace OHOS::Ace {
