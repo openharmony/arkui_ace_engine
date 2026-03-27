@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include <unordered_map>
 
 namespace OHOS::Ace::NG {
 const int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
