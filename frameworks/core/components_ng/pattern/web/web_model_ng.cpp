@@ -1377,8 +1377,7 @@ void WebModelNG::SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, b
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     TAG_LOGD(AceLogTag::ACE_WEB,
-          "[SetNativeVideoPlayerConfig] enable=%{public}d, shouldOverlay=%{public}d",
-          enable, shouldOverlay);
+        "[SetNativeVideoPlayerConfig] enable=%{public}d, shouldOverlay=%{public}d", enable, shouldOverlay);
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 
