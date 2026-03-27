@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
-#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
+
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "want.h"
 #endif
@@ -31,33 +31,22 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/select/select_theme.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components/theme/ui_material_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components_ng/animation/geometry_transition.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -70,10 +59,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -85,18 +71,16 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
