@@ -55,6 +55,7 @@
 
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol('_____is_observed_proxied__');
+globalThis.__OBSERVED_OBJECT_NAME = Symbol('_____observed_object_name__');
 
 type Constructor = { new(...args: any[]): any };
 
@@ -81,6 +82,13 @@ function Observed<T extends Constructor>(BaseClass: T): T {
         configurable: false,
         writable: false
       });
+      try {
+        if (this.constructor.name === '') {
+          Reflect.defineProperty(this, globalThis.__OBSERVED_OBJECT_NAME, {value: BaseClass ? BaseClass.name : 'UnknownClassName', enumerable: false});
+        }
+      } catch (e) {
+        stateMgmtConsole.warn('Failed to set the value of class name in Observed constructor,', e);
+      }
       if (isProxied) {
         stateMgmtConsole.debug(`   ... new '${BaseClass.name}', is proxied already`);
         return this;
@@ -229,6 +237,9 @@ class SubscribableHandler {
             return undefined;
           case SubscribableHandler.ENABLE_V2_COMPATIBLE:
             return this.enableV2Compatible_;
+          case globalThis.__OBSERVED_OBJECT_NAME:
+            // return class name
+            return Reflect.get(this, globalThis.__OBSERVED_OBJECT_NAME);
           default:
             break;
         }
@@ -269,6 +280,17 @@ class SubscribableHandler {
       return result;
   }
 
+  public setClassNameToTarget(target: Object, newValue: any): void {
+    try {
+      const observedObjectName = Reflect.get(target, globalThis.__OBSERVED_OBJECT_NAME);
+      if (observedObjectName !== undefined && observedObjectName !== newValue) {
+        Reflect.set(target, globalThis.__OBSERVED_OBJECT_NAME, newValue);
+      }
+    } catch (e) {
+      stateMgmtConsole.warn('Failed to set the value of class name in SubscribableHandler set,', e);
+    }
+  }
+
   public set(target: Object, property: PropertyKey, newValue: any): boolean {
     // Optimizes set operations by handling symbol properties separately
     // This allows non-symbol properties to bypass the switch block, improving performance
@@ -295,6 +317,11 @@ class SubscribableHandler {
           return true;
         case ObserveV2.SYMBOL_PROXY_GET_TARGET:
           // Do nothing, just return
+          return true;
+        case globalThis.__OBSERVED_OBJECT_NAME:
+          // set value of class name
+          Reflect.set(this, globalThis.__OBSERVED_OBJECT_NAME, newValue);
+          this.setClassNameToTarget(target, newValue);
           return true;
         default:
           break;
@@ -413,6 +440,10 @@ class SubscribableMapSetHandler extends SubscribableHandler {
       }
       if (key === SubscribableHandler.OWNING_PROPERTIES) {
         return this.getOwningProperties();
+      }
+      if (key === globalThis.__OBSERVED_OBJECT_NAME) {
+        // return class name
+        return Reflect.get(this, globalThis.__OBSERVED_OBJECT_NAME);
       }
       return target[key];
     }
@@ -696,6 +727,10 @@ class SubscribableArrayHandler extends SubscribableHandler {
       if (key === SubscribableHandler.OWNING_PROPERTIES) {
         return this.getOwningProperties();
       }
+      if (key === globalThis.__OBSERVED_OBJECT_NAME) {
+        // return class name
+        return Reflect.get(this, globalThis.__OBSERVED_OBJECT_NAME);
+      }
       return target[key];
     }
 
@@ -884,6 +919,13 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     }
     else {
       proxiedObject = new ObservedObject(rawObject, new SubscribableHandler(owningProperty), owningProperty);
+    }
+    try {
+      const rawObjectName = rawObject.constructor?.name;
+      proxiedObject[globalThis.__OBSERVED_OBJECT_NAME] = rawObjectName === '' ? Reflect.get(rawObject, globalThis.__OBSERVED_OBJECT_NAME)
+        : (rawObjectName ?? 'UnknownClassName');
+    } catch (e) {
+      stateMgmtConsole.warn('Failed to set the value of class name in createNewInternal,', e);
     }
     return proxiedObject as T;
   }
