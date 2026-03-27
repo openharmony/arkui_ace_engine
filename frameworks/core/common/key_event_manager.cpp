@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/reporter/reporter.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {

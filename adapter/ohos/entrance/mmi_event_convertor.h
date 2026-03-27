@@ -26,11 +26,14 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
 #include "core/event/crown_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+
+namespace OHOS::Ace::NG {
+struct FocusAxisEvent;
+}
 
 namespace OHOS::Ace::Platform {
 namespace {
