@@ -38,6 +38,7 @@
 #endif
 #ifdef FORM_SUPPORTED
 #include "extractor.h"
+#include "file_mapper.h"
 #endif
 
 #include "ace_forward_compatibility.h"
@@ -1798,6 +1799,15 @@ bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
     return true;
 }
 
+static void ReleaseWorkerSafeMemFunc(void* mapper)
+{
+    if (mapper) {
+        AbilityBase::FileMapper* fileMapper = static_cast<AbilityBase::FileMapper*>(mapper);
+        fileMapper->SetAutoReleaseMem(true);
+        delete fileMapper;
+    }
+}
+
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
@@ -1862,12 +1872,15 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 TAG_LOGE(AceLogTag::ACE_FORM, "null data");
                 return false;
             }
-            data->SetAutoReleaseMem(true);
             extractor->SetAutoCloseFd(true);
+            arkRuntime->SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc);
             if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
+                data->SetAutoReleaseMem(true);
                 return false;
             }
-            if (!arkRuntime->ExecuteModuleBuffer(data->GetDataPtr(), data->GetDataLen(), abcPath, true)) {
+            if (!arkRuntime->ExecuteModuleBufferSecure(data->GetDataPtr(), data->GetDataLen(), abcPath, true,
+                static_cast<void*>(data.get()))) {
+                data->SetAutoReleaseMem(true);
                 return false;
             }
         }
