@@ -1095,7 +1095,7 @@ abstract class ViewPU extends PUV2ViewBase
           this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
         }
       }
-    }, 'aboutToReuse', this.constructor.name);
+    }, 'aboutToReuse', this.constructor.name, this.id__());
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
       const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);

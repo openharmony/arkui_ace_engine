@@ -229,7 +229,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
                 }
             }
-        }, 'aboutToReuseInternal', this.constructor.name);
+        }, 'aboutToReuseInternal', this.constructor.name, this.id__());
         ObserveV2.getObserve().updateDirty2(true, true);
         ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
