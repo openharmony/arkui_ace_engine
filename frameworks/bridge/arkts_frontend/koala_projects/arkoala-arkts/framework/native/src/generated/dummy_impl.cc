@@ -12078,6 +12078,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCopy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
     {
@@ -12085,6 +12096,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnCut(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCut(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -15701,6 +15723,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCopy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetCaretColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
@@ -16371,6 +16404,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCopy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value)
     {
@@ -16378,6 +16422,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnCut(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCut(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -17386,6 +17441,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCopy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
     {
@@ -17393,6 +17459,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnCut(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnWillCut(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -22704,7 +22781,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetOnTextSelectionChangeImpl,
             SearchAttributeModifier::SetOnContentScrollImpl,
             SearchAttributeModifier::SetOnCopyImpl,
+            SearchAttributeModifier::SetOnWillCopyImpl,
             SearchAttributeModifier::SetOnCutImpl,
+            SearchAttributeModifier::SetOnWillCutImpl,
             SearchAttributeModifier::SetOnPasteImpl,
             SearchAttributeModifier::SetCopyOptionImpl,
             SearchAttributeModifier::SetMaxLengthImpl,
@@ -23106,6 +23185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetWordBreakImpl,
             TextAttributeModifier::SetLineBreakStrategyImpl,
             TextAttributeModifier::SetOnCopyImpl,
+            TextAttributeModifier::SetOnWillCopyImpl,
             TextAttributeModifier::SetCaretColorImpl,
             TextAttributeModifier::SetSelectedBackgroundColorImpl,
             TextAttributeModifier::SetEllipsisModeImpl,
@@ -23171,7 +23251,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetOnContentScrollImpl,
             TextAreaAttributeModifier::SetOnEditChangeImpl,
             TextAreaAttributeModifier::SetOnCopyImpl,
+            TextAreaAttributeModifier::SetOnWillCopyImpl,
             TextAreaAttributeModifier::SetOnCutImpl,
+            TextAreaAttributeModifier::SetOnWillCutImpl,
             TextAreaAttributeModifier::SetOnPasteImpl,
             TextAreaAttributeModifier::SetCopyOptionImpl,
             TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
@@ -23274,7 +23356,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetFontWeightImpl,
             TextInputAttributeModifier::SetFontFamilyImpl,
             TextInputAttributeModifier::SetOnCopyImpl,
+            TextInputAttributeModifier::SetOnWillCopyImpl,
             TextInputAttributeModifier::SetOnCutImpl,
+            TextInputAttributeModifier::SetOnWillCutImpl,
             TextInputAttributeModifier::SetOnPasteImpl,
             TextInputAttributeModifier::SetCopyOptionImpl,
             TextInputAttributeModifier::SetShowPasswordIconImpl,

@@ -12113,6 +12113,19 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
+class TextOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextOnWillCopyModifier.identity = Symbol('textOnWillCopy');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12620,6 +12633,11 @@ class ArkTextComponent extends ArkComponent {
   }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
     return this;
   }
   onCopy(callback) {
@@ -13469,6 +13487,19 @@ class TextAreaOnEditChangeModifier extends ModifierWithKey {
   }
 }
 TextAreaOnEditChangeModifier.identity = Symbol('textAreaOnEditChange');
+class TextAreaOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCopyModifier.identity = Symbol('textAreaOnWillCopy');
 class TextAreaOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13482,6 +13513,19 @@ class TextAreaOnCopyModifier extends ModifierWithKey {
   }
 }
 TextAreaOnCopyModifier.identity = Symbol('textAreaOnCopy');
+class TextAreaOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCutModifier.identity = Symbol('textAreaOnWillCut');
 class TextAreaOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14365,8 +14409,16 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity, TextAreaOnEditChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCopyModifier.identity, TextAreaOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity, TextAreaOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCutModifier.identity, TextAreaOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {
@@ -15687,6 +15739,19 @@ class TextInputOnContentScrollModifier extends ModifierWithKey {
   }
 }
 TextInputOnContentScrollModifier.identity = Symbol('textInputOnContentScroll');
+class TextInputOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextInputOnWillCopyModifier.identity = Symbol('textInputOnWillCopy');
 class TextInputOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15700,6 +15765,19 @@ class TextInputOnCopyModifier extends ModifierWithKey {
   }
 }
 TextInputOnCopyModifier.identity = Symbol('textInputOnCopy');
+class TextInputOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextInputOnWillCutModifier.identity = Symbol('textInputOnWillCut');
 class TextInputOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16587,8 +16665,16 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputFilterModifier.identity, TextInputFilterModifier, arkValue);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCopyModifier.identity, TextInputOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity, TextInputOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCutModifier.identity, TextInputOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {

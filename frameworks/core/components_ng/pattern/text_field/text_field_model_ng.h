@@ -75,7 +75,9 @@ public:
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
@@ -260,6 +262,7 @@ public:
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::u16string& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
+    static void SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
         std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
@@ -323,6 +326,7 @@ public:
     static void SetInputFilter(FrameNode* frameNode, const std::string& value,
         const std::function<void(const std::u16string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
+    static void SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetCustomKeyboard(

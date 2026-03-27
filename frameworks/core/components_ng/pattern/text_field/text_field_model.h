@@ -364,7 +364,9 @@ public:
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
+    virtual void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) = 0;

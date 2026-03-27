@@ -1711,6 +1711,8 @@ typedef struct Callback_StateStylesChange Callback_StateStylesChange;
 typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
 typedef struct Callback_String Callback_String;
 typedef struct Opt_Callback_String Opt_Callback_String;
+typedef struct Callback_String_Boolean Callback_String_Boolean;
+typedef struct Opt_Callback_String_Boolean Opt_Callback_String_Boolean;
 typedef struct Callback_String_PasteEvent_Void Callback_String_PasteEvent_Void;
 typedef struct Opt_Callback_String_PasteEvent_Void Opt_Callback_String_PasteEvent_Void;
 typedef struct Callback_String_SurfaceRect_Void Callback_String_SurfaceRect_Void;
@@ -12669,6 +12671,16 @@ typedef struct Opt_Callback_String {
     Ark_Tag tag;
     Callback_String value;
 } Opt_Callback_String;
+typedef struct Callback_String_Boolean {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String data, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String data, const synthetic_Callback_Boolean_Void continuation);
+} Callback_String_Boolean;
+typedef struct Opt_Callback_String_Boolean {
+    Ark_Tag tag;
+    Callback_String_Boolean value;
+} Opt_Callback_String_Boolean;
 typedef struct Callback_String_PasteEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -25770,8 +25782,12 @@ typedef struct GENERATED_ArkUISearchModifier {
                                const Opt_OnContentScrollCallback* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_OnPasteCallback* value);
     void (*setCopyOption)(Ark_NativePointer node,
@@ -26456,6 +26472,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                  const Opt_LineBreakStrategy* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setCaretColor)(Ark_NativePointer node,
                           const Opt_ResourceColor* value);
     void (*setSelectedBackgroundColor)(Ark_NativePointer node,
@@ -26582,8 +26600,12 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                             const Opt_synthetic_Callback_Boolean_Void* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_Callback_String_PasteEvent_Void* value);
     void (*setCopyOption)(Ark_NativePointer node,
@@ -26771,8 +26793,12 @@ typedef struct GENERATED_ArkUITextInputModifier {
                           const Opt_ResourceStr* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_OnPasteCallback* value);
     void (*setCopyOption)(Ark_NativePointer node,

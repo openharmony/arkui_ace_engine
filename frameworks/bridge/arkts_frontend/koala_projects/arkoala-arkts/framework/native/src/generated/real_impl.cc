@@ -5371,8 +5371,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -6727,6 +6735,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_synthetic_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetCaretColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
@@ -6973,8 +6985,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_synthetic_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -7348,8 +7368,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -10246,7 +10274,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetOnTextSelectionChangeImpl,
             SearchAttributeModifier::SetOnContentScrollImpl,
             SearchAttributeModifier::SetOnCopyImpl,
+            SearchAttributeModifier::SetOnWillCopyImpl,
             SearchAttributeModifier::SetOnCutImpl,
+            SearchAttributeModifier::SetOnWillCutImpl,
             SearchAttributeModifier::SetOnPasteImpl,
             SearchAttributeModifier::SetCopyOptionImpl,
             SearchAttributeModifier::SetMaxLengthImpl,
@@ -10648,7 +10678,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetWordBreakImpl,
             TextAttributeModifier::SetLineBreakStrategyImpl,
             TextAttributeModifier::SetOnCopyImpl,
-            TextAttributeModifier::SetCaretColorImpl,
+            TextAttributeModifier::SetOnWillCopyImpl,
             TextAttributeModifier::SetSelectedBackgroundColorImpl,
             TextAttributeModifier::SetEllipsisModeImpl,
             TextAttributeModifier::SetEnableDataDetectorImpl,
@@ -10713,7 +10743,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetOnContentScrollImpl,
             TextAreaAttributeModifier::SetOnEditChangeImpl,
             TextAreaAttributeModifier::SetOnCopyImpl,
+            TextAreaAttributeModifier::SetOnWillCopyImpl,
             TextAreaAttributeModifier::SetOnCutImpl,
+            TextAreaAttributeModifier::SetOnWillCutImpl,
             TextAreaAttributeModifier::SetOnPasteImpl,
             TextAreaAttributeModifier::SetCopyOptionImpl,
             TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
@@ -10816,7 +10848,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetFontWeightImpl,
             TextInputAttributeModifier::SetFontFamilyImpl,
             TextInputAttributeModifier::SetOnCopyImpl,
+            TextInputAttributeModifier::SetOnWillCopyImpl,
             TextInputAttributeModifier::SetOnCutImpl,
+            TextInputAttributeModifier::SetOnWillCutImpl,
             TextInputAttributeModifier::SetOnPasteImpl,
             TextInputAttributeModifier::SetCopyOptionImpl,
             TextInputAttributeModifier::SetShowPasswordIconImpl,

@@ -614,6 +614,20 @@ class SearchOnSubmitModifier extends ModifierWithKey<(info: string, event?: Subm
   }
 }
 
+class SearchOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().search.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class SearchOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -624,6 +638,20 @@ class SearchOnCopyModifier extends ModifierWithKey<(value: string) => void> {
       getUINativeModule().search.resetOnCopy(node);
     } else {
       getUINativeModule().search.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class SearchOnWillCutModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillCut(node);
+    } else {
+      getUINativeModule().search.setOnWillCut(node, this.value);
     }
   }
 }
@@ -1073,9 +1101,19 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnTextSelectionChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback: Callback<string, boolean>): SearchAttribute {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillCopyModifier.identity,
+      SearchOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback: (value: string) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnCopyModifier.identity,
       SearchOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback: Callback<string, boolean>): SearchAttribute {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillCutModifier.identity,
+      SearchOnWillCutModifier, callback);
     return this;
   }
   onCut(callback: (value: string) => void): SearchAttribute {

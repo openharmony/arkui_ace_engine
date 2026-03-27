@@ -396,10 +396,30 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_AXIS;
         case NODE_TEXT_SPAN_ON_LONG_PRESS:
             return ON_TEXT_SPAN_LONG_PRESS;
+        case NODE_TEXT_ON_TEXT_SELECTION_CHANGE:
+            return ON_TEXT_TEXT_SELECTION_CHANGE;
+        case NODE_TEXT_ON_COPY:
+            return ON_TEXT_COPY;
+        case NODE_TEXT_ON_WILL_COPY:
+            return ON_TEXT_WILL_COPY;
         case NODE_TEXT_AREA_ON_WILL_CHANGE:
             return ON_TEXT_AREA_WILL_CHANGE;
+        case NODE_TEXT_AREA_ON_COPY:
+            return ON_TEXT_AREA_COPY;
+        case NODE_TEXT_AREA_ON_WILL_COPY:
+            return ON_TEXT_AREA_WILL_COPY;
+        case NODE_TEXT_AREA_ON_CUT:
+            return ON_TEXT_AREA_CUT;
+        case NODE_TEXT_AREA_ON_WILL_CUT:
+            return ON_TEXT_AREA_WILL_CUT;
         case NODE_TEXT_INPUT_ON_WILL_CHANGE:
             return ON_TEXT_INPUT_WILL_CHANGE;
+        case NODE_TEXT_INPUT_ON_COPY:
+            return ON_TEXT_INPUT_COPY;
+        case NODE_TEXT_INPUT_ON_WILL_COPY:
+            return ON_TEXT_INPUT_WILL_COPY;
+        case NODE_TEXT_INPUT_ON_WILL_CUT:
+            return ON_TEXT_INPUT_WILL_CUT;
         case NODE_GRID_ON_SCROLL_INDEX:
             return ON_GRID_SCROLL_TO_INDEX;
         case NODE_GRID_ON_WILL_SCROLL:
@@ -714,10 +734,30 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_AXIS;
         case ON_TEXT_SPAN_LONG_PRESS:
             return NODE_TEXT_SPAN_ON_LONG_PRESS;
+        case ON_TEXT_TEXT_SELECTION_CHANGE:
+            return NODE_TEXT_ON_TEXT_SELECTION_CHANGE;
+        case ON_TEXT_COPY:
+            return NODE_TEXT_ON_COPY;
+        case ON_TEXT_WILL_COPY:
+            return NODE_TEXT_ON_WILL_COPY;
         case ON_TEXT_AREA_WILL_CHANGE:
             return NODE_TEXT_AREA_ON_WILL_CHANGE;
+        case ON_TEXT_AREA_COPY:
+            return NODE_TEXT_AREA_ON_COPY;
+        case ON_TEXT_AREA_WILL_COPY:
+            return NODE_TEXT_AREA_ON_WILL_COPY;
+        case ON_TEXT_AREA_CUT:
+            return NODE_TEXT_AREA_ON_CUT;
+        case ON_TEXT_AREA_WILL_CUT:
+            return NODE_TEXT_AREA_ON_WILL_CUT;
         case ON_TEXT_INPUT_WILL_CHANGE:
             return NODE_TEXT_INPUT_ON_WILL_CHANGE;
+        case ON_TEXT_INPUT_COPY:
+            return NODE_TEXT_INPUT_ON_COPY;
+        case ON_TEXT_INPUT_WILL_COPY:
+            return NODE_TEXT_INPUT_ON_WILL_COPY;
+        case ON_TEXT_INPUT_WILL_CUT:
+            return NODE_TEXT_INPUT_ON_WILL_CUT;
         case ON_GRID_SCROLL_FRAME_BEGIN:
             return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
         case ON_GRID_SCROLL_TO_INDEX:
@@ -1329,10 +1369,34 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+bool IsSatisfiedSetReturnValue(ArkUI_NodeEvent* event)
+{
+    CHECK_NULL_RETURN(event, false);
+    CHECK_EQUAL_RETURN(event->category, static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT), true);
+    CHECK_EQUAL_RETURN(event->category, static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT), true);
+    CHECK_EQUAL_RETURN(event->category, static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT), true);
+    return false;
+}
+
+bool IsTextPreventKind(ArkUI_Int32 kind)
+{
+    switch (kind) {
+        case NODE_TEXT_ON_WILL_COPY:
+        case NODE_TEXT_INPUT_ON_WILL_CUT:
+        case NODE_TEXT_INPUT_ON_PASTE:
+        case NODE_TEXT_INPUT_ON_WILL_COPY:
+        case NODE_TEXT_AREA_ON_WILL_COPY:
+        case NODE_TEXT_AREA_ON_PASTE:
+        case NODE_TEXT_AREA_ON_WILL_CUT:
+            return true;
+        default:
+            return false;
+    }
+}
+
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
 {
-    if (!event || (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT) &&
-        event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT))) {
+    if (!IsSatisfiedSetReturnValue(event)) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
@@ -1356,6 +1420,11 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
         auto* changeEvent = reinterpret_cast<ArkUITextEditorChangeEvent*>(&(originNodeEvent->textEditorChangeEvent));
         if (changeEvent != nullptr) {
             changeEvent->returnValue = value[0].i32;
+        }
+    } else if (IsTextPreventKind(event->kind)) {
+        auto* textEvent = reinterpret_cast<ArkUIAPIEventTextInput*>(&(originNodeEvent->textInputEvent));
+        if (textEvent != nullptr) {
+            textEvent->preventDefault = value[0].i32;
         }
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;

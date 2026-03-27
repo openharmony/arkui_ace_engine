@@ -2102,15 +2102,22 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (value.empty()) {
         return;
     }
-    clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    bool isAllowCopy = true;
+    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    if (eventHub) {
+        isAllowCopy = eventHub->FireOnWillCopy(value);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy, isAllowCopy=%{public}d", isAllowCopy);
+    if (isAllowCopy) {
+        clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    }
     if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
         selectOverlay_->UpdatePasteMenu();
     }
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(eventHub && isAllowCopy);
     eventHub->FireOnCopy(value);
 }
 

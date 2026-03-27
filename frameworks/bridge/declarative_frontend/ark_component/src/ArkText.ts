@@ -863,6 +863,20 @@ class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorCon
   }
 }
 
+class TextOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class TextOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -1326,6 +1340,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   lineBreakStrategy(value: LineBreakStrategy): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
       TextLineBreakStrategyModifier, value);
+    return this;
+  }
+  onWillCopy(callback: Callback<string, boolean>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
     return this;
   }
   onCopy(callback: (value: string) => void): TextAttribute {

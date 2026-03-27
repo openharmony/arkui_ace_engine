@@ -81,6 +81,7 @@ public:
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override {};
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};
