@@ -1688,7 +1688,7 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
-static void SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+void WebModelStatic::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());

@@ -171,6 +171,7 @@ public:
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
     void EnableScrollDirectionalLock(bool enabled,
         ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
+    void UpdateEnableDrag(bool enabled) {}
 
 private:
     std::string GetMixedModeAsString() const;
