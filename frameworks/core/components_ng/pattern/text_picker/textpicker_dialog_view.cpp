@@ -84,6 +84,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -247,6 +248,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
     auto context = textPickerNode->GetContext();

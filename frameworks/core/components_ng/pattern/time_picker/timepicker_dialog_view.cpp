@@ -69,6 +69,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetIsShowInDialog(true);
+    timePickerRowPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     timePickerRowPattern->SetShowCount(showCount);
     timePickerRowPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     timePickerRowPattern->SetTextProperties(settingData.properties);
