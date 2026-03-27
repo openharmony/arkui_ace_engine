@@ -1388,4 +1388,30 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg041, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_FALSE(sessionWrapper->RefreshOccupiedAreaChangeInfo());
 }
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg042
+ * @tc.desc: Test ReDispatchWantParams when session is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg042, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-begin SessionWrapperImplNewTestNg042";
+
+    /**
+     * @tc.steps: step1. construct sessionWrapper
+     */
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_NE(sessionWrapper, nullptr);
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test ReDispatchWantParams when session is nullptr
+     */
+    sessionWrapper->ReDispatchWantParams();
+
+    SUCCEED();
+
+    GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-end SessionWrapperImplNewTestNg042";
+}
 } // namespace OHOS::Ace::NG
