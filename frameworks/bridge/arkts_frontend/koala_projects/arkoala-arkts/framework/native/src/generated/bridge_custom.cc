@@ -278,7 +278,7 @@ void impl_ApplyModifierFinish(Ark_NativePointer nodePtr)
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIBasicNodeAPI()->applyModifierFinish(nodePtrCast);
 }
-KOALA_INTEROP_DIRECT_V1(ApplyModifierFinish, Ark_NativePointer)
+KOALA_INTEROP_V1(ApplyModifierFinish, Ark_NativePointer)
 
 void impl_MarkDirty(Ark_NativePointer nodePtr, KUInt dirtyFlag)
 {
