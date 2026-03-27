@@ -794,9 +794,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, UpdateAccessibilityNodeRect001, TestSiz
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin UpdateAccessibilityNodeRect001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateAccessibilityNodeRect
+     */
     RefPtr<NG::FrameNode> frameNode = nullptr;
     jsAccessibilityManager->UpdateAccessibilityNodeRect(frameNode);
 
@@ -814,9 +820,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, UpdateAccessibilityNodeRect002, TestSiz
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin UpdateAccessibilityNodeRect002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateAccessibilityNodeRect
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
@@ -836,9 +848,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, AddToPageEventController001, TestSize.L
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin AddToPageEventController001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test AddToPageEventController
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
@@ -858,9 +876,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckPageEventCached002, TestSize.Level
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckPageEventCached002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test CheckPageEventCached
+     */
     RefPtr<NG::FrameNode> frameNode = nullptr;
     bool result = jsAccessibilityManager->CheckPageEventCached(frameNode, false);
     EXPECT_FALSE(result);

@@ -597,6 +597,9 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
         curr = curr->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_RETURN(curr, false);
+    if (ancestor->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        path.push_back(ancestor);
+    }
     pointNode = pointAncestor;
     for (auto nodePtr = path.rbegin(); nodePtr != path.rend(); ++nodePtr) {
         auto renderContext = (*nodePtr)->GetRenderContext();
