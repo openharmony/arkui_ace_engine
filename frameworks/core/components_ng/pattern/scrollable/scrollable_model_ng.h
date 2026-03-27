@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -26,7 +27,13 @@
 #include "core/event/crown_event.h"
 #endif
 
+namespace OHOS::Ace {
+class ResourceObject;
+class ShapeRect;
+}
+
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
 class ACE_FORCE_EXPORT ScrollableModelNG {

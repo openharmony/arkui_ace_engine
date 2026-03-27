@@ -39,23 +39,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-enum class NestedState {
-    GESTURE = 0,
-    CHILD_SCROLL,
-    CHILD_OVER_SCROLL,
-    CHILD_CHECK_OVER_SCROLL,
-};
-
-struct OverScrollOffset {
-    double start;
-    double end;
-};
-
-struct ScrollResult {
-    double remain;
-    bool reachEdge;
-};
-
 struct SlidInfo {
     double gestureVelocity {0.0};
     double velocityScale {0.0};

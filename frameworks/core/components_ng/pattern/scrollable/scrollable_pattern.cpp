@@ -23,29 +23,44 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
-#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
@@ -125,6 +140,15 @@ ScrollablePattern::ScrollablePattern() = default;
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
     : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
 {}
+
+void ScrollablePattern::CreateRefreshCoordination()
+{
+    if (!refreshCoordination_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
+    }
+}
 
 ScrollablePattern::~ScrollablePattern()
 {

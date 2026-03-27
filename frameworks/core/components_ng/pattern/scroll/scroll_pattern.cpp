@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1967,5 +1969,10 @@ void ScrollPattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& param
 int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+RefPtr<ScrollableController> ScrollPattern::GetScrollPositionController() const
+{
+    return positionController_;
 }
 } // namespace OHOS::Ace::NG

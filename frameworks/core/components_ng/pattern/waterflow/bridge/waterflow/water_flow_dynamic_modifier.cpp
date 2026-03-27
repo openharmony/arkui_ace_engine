@@ -16,7 +16,10 @@
 #include "interfaces/native/node/waterflow_section_option.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/common/container.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_model_impl.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"

@@ -32,6 +32,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/pattern/video/video_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

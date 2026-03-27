@@ -15,9 +15,10 @@
 
 #include "core/components_ng/pattern/text/text_free_scroll_controller.h"
 
-#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 namespace {

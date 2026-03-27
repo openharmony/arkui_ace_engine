@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 

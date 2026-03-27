@@ -22,6 +22,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

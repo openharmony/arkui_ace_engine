@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/scrollable_modifier.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 

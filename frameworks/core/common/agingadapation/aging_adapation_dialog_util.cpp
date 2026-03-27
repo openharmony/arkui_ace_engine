@@ -16,6 +16,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
