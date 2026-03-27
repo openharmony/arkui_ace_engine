@@ -2558,6 +2558,13 @@ typedef struct ArkUISelectionOptions {
     ArkUIMenuPolicy menuPolicy;
 } ArkUISelectionOptions;
 
+struct ArkUIScrollEffectOptions {
+    bool isSet = false;
+    ArkUIOptionalInt scrollEffectType;
+    ArkUIOptionalDimensionType blurEffectiveStartOffset;
+    ArkUIOptionalDimensionType blurEffectiveEndOffset;
+};
+
 struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalUint colorValue;
     ArkUIOptionalInt blurStyle;
@@ -2567,6 +2574,7 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalBool enableHoverMode;
     ArkUIOptionalBool enableCustomTitlePaddingCheck;
     void* material = NULL;
+    ArkUIScrollEffectOptions scrollEffectOptions;
 
     struct resourceUpdater {
         OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> resObj;
