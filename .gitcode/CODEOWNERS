@@ -2046,6 +2046,8 @@ frameworks/core/components/common/properties/test/
 frameworks/core/components/common/properties/text_layout_info.h @huawei_g_five
 frameworks/core/components/common/properties/text_style.cpp @huawei_g_five
 frameworks/core/components/common/properties/text_style.h @huawei_g_five
+frameworks/core/components/common/properties/text_enums.cpp @huawei_g_five
+frameworks/core/components/common/properties/text_enums.h @huawei_g_five
 frameworks/core/components/common/properties/text_style_parser.cpp @huawei_g_five
 frameworks/core/components/common/properties/text_style_parser.h @huawei_g_five
 frameworks/core/components/common/properties/tween_option.h @arkui_framework_xnode

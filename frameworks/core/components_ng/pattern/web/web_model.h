@@ -23,6 +23,7 @@
 #include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
+struct TextDetectConfig;
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;

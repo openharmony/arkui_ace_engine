@@ -1807,7 +1807,7 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderColor, TestSize.Level1)
      * @tc.steps: step2. call to ProcessBorderColor.
      */
     badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject);
+    badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject, frameNode_);
 
     /**
      * @tc.steps: step3. check the key value.
@@ -1886,7 +1886,7 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeColor, TestSize.Level1)
      * @tc.steps: step2. call to ProcessBadgeColor.
      */
     badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>();
-    badge.ProcessBadgeColor(pattern_, badgeParameters.resourceBadgeColorObject);
+    badge.ProcessBadgeColor(pattern_, badgeParameters.resourceBadgeColorObject, frameNode_);
 
     /**
      * @tc.steps: step3. check the key value.

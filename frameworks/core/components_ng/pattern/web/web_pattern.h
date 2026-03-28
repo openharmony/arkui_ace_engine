@@ -71,6 +71,7 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+struct TextDetectConfig;
 }
 
 namespace OHOS::NWeb {

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"

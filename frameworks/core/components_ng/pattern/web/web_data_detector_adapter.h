@@ -26,6 +26,10 @@
 #include "base/memory/referenced.h"
 #include "core/components/web/web_property.h"
 
+namespace OHOS::Ace {
+struct TextDetectConfig;
+}
+
 namespace OHOS::Ace::NG {
 
 struct NodeData {

@@ -30,7 +30,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 

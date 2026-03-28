@@ -23,11 +23,13 @@
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_event.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
 class UiMaterial;

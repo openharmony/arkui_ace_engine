@@ -18,6 +18,7 @@
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_element.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
 namespace {

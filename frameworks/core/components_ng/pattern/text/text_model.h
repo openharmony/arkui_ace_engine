@@ -19,14 +19,12 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/common/resource/resource_object.h"

@@ -21,7 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {

@@ -30,7 +30,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"

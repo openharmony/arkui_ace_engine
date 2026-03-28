@@ -20,7 +20,6 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/symbol_span_model.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

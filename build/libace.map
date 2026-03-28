@@ -254,6 +254,7 @@
       "OHOS::Ace::ComposedElement::UnregisterForPartialUpdates()";
       "OHOS::Ace::ComposedElement::Update()";
       "OHOS::Ace::ComposedElement::UpdateChild(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&, OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::ConvertFontWeight(OHOS::Ace::FontWeight)";
       "OHOS::Ace::Constants::ConvertSkColor(OHOS::Ace::Color)";
       "OHOS::Ace::Constants::ConvertSkRect(OHOS::Rosen::Drawing::RectF const&)";
       "OHOS::Ace::Constants::ConvertTxtFontStyle(OHOS::Ace::FontStyle)";
