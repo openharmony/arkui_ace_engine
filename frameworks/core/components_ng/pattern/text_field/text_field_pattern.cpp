@@ -30,7 +30,6 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -70,6 +69,7 @@
 #include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/text/text_emoji_processor.h"
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -1966,7 +1966,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (isOnHover_) {
         RestoreDefaultMouseState();
     }
-    ReportEvent();
+    ReportEvents();
     ReportTextChangeEvent(FIELD_BLUR_EVENT);
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
@@ -11330,7 +11330,7 @@ bool TextFieldPattern::IsContentRectNonPositive()
     return NonPositive(contentRect_.Width());
 }
 
-void TextFieldPattern::ReportEvent()
+void TextFieldPattern::ReportEvents()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto host = GetHost();

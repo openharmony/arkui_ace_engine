@@ -23,6 +23,7 @@
 #define private public
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
