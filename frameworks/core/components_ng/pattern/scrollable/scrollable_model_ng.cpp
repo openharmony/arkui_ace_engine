@@ -511,6 +511,39 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     return pattern->GetBackToTop();
 }
 
+void ScrollableModelNG::SetEnableScrollWithMouse(bool enableScrollWithMouse)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::ResetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(false);
+}
+
+bool ScrollableModelNG::GetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsAllowMouse();
+}
+
 void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

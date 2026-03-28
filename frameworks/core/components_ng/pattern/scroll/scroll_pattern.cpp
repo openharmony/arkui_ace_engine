@@ -63,6 +63,10 @@ void ScrollPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
     if (axisChanged) {
         // need to init after scrollableEvent
@@ -78,6 +82,9 @@ void ScrollPattern::OnModifyDone()
             freeScroll_.Reset();
             scrollBar2d_.Reset();
         }
+    }
+    if (freeScroll_) {
+        freeScroll_->SetIsAllowMouse(GetIsAllowMouse());
     }
     if (scrollBar2d_) {
         scrollBar2d_->Update(paintProperty->GetScrollBarProperty());

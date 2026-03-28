@@ -7326,6 +7326,21 @@ class BackToTopModifier extends ModifierWithKey {
 }
 BackToTopModifier.identity = Symbol('backToTop');
 
+class EnableScrollWithMouseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetEnableScrollWithMouse(node);
+    }
+    else {
+      getUINativeModule().scrollable.setEnableScrollWithMouse(node, this.value);
+    }
+  }
+}
+EnableScrollWithMouseModifier.identity = Symbol('enableScrollWithMouse');
+
 class ScrollBarMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7492,6 +7507,10 @@ class ArkScrollable extends ArkComponent {
   }
   backToTop(value) {
     modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
+    return this;
+  }
+  enableScrollWithMouse(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
     return this;
   }
   scrollBarMargin(value) {

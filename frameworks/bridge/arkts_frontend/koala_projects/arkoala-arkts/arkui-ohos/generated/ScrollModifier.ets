@@ -82,6 +82,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     public _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
     public _onWillStartFling_0_0value?: VoidCallback | undefined
     public _onDidStopFling_0_0value?: VoidCallback | undefined
+    public _enableScrollWithMouse_0_0value?: boolean | undefined
     public _onReachStart_0_0value?: (() => void) | undefined
     public _onReachEnd_0_0value?: (() => void) | undefined
     public _flingSpeedLimit_0_0value?: double | undefined
@@ -97,6 +98,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         const flagArray = this._flagArray;
         this.applyModifierPatch0(peer, flagArray);
         this.applyModifierPatch1(peer, flagArray);
+        this.applyModifierPatch2(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkScrollPeer, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
@@ -665,7 +667,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         if (flagArray[33] != 0) {
             switch (flagArray[33]) {
                 case 1: {
-                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
+                    peer.setEnableScrollWithMouseAttribute((this._enableScrollWithMouse_0_0value as boolean | undefined));
                     flagArray[33] = 2;
                     break;
                 }
@@ -675,14 +677,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
+                    peer.setEnableScrollWithMouseAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[34] != 0) {
             switch (flagArray[34]) {
                 case 1: {
-                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
                     flagArray[34] = 2;
                     break;
                 }
@@ -692,14 +694,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[35] != 0) {
             switch (flagArray[35]) {
                 case 1: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
+                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
                     flagArray[35] = 2;
                     break;
                 }
@@ -709,14 +711,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
+                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[36] != 0) {
             switch (flagArray[36]) {
                 case 1: {
-                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     flagArray[36] = 2;
                     break;
                 }
@@ -726,14 +728,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
         if (flagArray[37] != 0) {
             switch (flagArray[37]) {
                 case 1: {
-                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
                     flagArray[37] = 2;
                     break;
                 }
@@ -743,14 +745,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[37] = 0;
-                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
                 }
             }
         }
         if (flagArray[38] != 0) {
             switch (flagArray[38]) {
                 case 1: {
-                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
                     flagArray[38] = 2;
                     break;
                 }
@@ -760,14 +762,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[38] = 0;
-                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
         if (flagArray[39] != 0) {
             switch (flagArray[39]) {
                 case 1: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
                     flagArray[39] = 2;
                     break;
                 }
@@ -777,6 +779,25 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[39] = 0;
+                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    applyModifierPatch2(peer: ArkScrollPeer, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    flagArray[40] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[40] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[40] = 0;
                     peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined));
                 }
             }
@@ -788,6 +809,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         const flagArray = modifier._flagArray;
         this.mergeModifier0(modifier, flagArray);
         this.mergeModifier1(modifier, flagArray);
+        this.mergeModifier2(modifier, flagArray);
     }
     mergeModifier0(modifier: ScrollModifier, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
@@ -1192,6 +1214,18 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             switch (flagArray[33]) {
                 case 1:
                 case 3: {
+                    this.enableScrollWithMouse((modifier._enableScrollWithMouse_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.enableScrollWithMouse((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1:
+                case 3: {
                     this.onReachStart((modifier._onReachStart_0_0value as (() => void) | undefined));
                     break;
                 }
@@ -1200,8 +1234,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[34] != 0) {
-            switch (flagArray[34]) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1:
                 case 3: {
                     this.onReachEnd((modifier._onReachEnd_0_0value as (() => void) | undefined));
@@ -1212,8 +1246,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[35] != 0) {
-            switch (flagArray[35]) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1:
                 case 3: {
                     this.flingSpeedLimit((modifier._flingSpeedLimit_0_0value as double | undefined));
@@ -1224,8 +1258,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[36] != 0) {
-            switch (flagArray[36]) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1:
                 case 3: {
                     this.clipContent((modifier._clipContent_0_0value as ContentClipMode | RectShape | undefined));
@@ -1236,8 +1270,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[37] != 0) {
-            switch (flagArray[37]) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1:
                 case 3: {
                     this.digitalCrownSensitivity((modifier._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
@@ -1248,8 +1282,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[38] != 0) {
-            switch (flagArray[38]) {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
                 case 1:
                 case 3: {
                     this.backToTop((modifier._backToTop_0_0value as boolean | undefined));
@@ -1260,8 +1294,10 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[39] != 0) {
-            switch (flagArray[39]) {
+    }
+    mergeModifier2(modifier: ScrollModifier, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
                 case 1:
                 case 3: {
                     this.fadingEdge((modifier._fadingEdge_0_0value as boolean | undefined), (modifier._fadingEdge_0_1value as FadingEdgeOptions | undefined));
@@ -1604,74 +1640,84 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         }
         return this
     }
-    onReachStart(value: (() => void) | undefined): this {
-        if (((this._flagArray[33]) == (0)) || (true)) {
+    enableScrollWithMouse(value: boolean | undefined): this {
+        if (((this._flagArray[33]) == (0)) || ((this._enableScrollWithMouse_0_0value) !== (value))) {
             this._flagArray[33] = 1
-            this._onReachStart_0_0value = value
+            this._enableScrollWithMouse_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[33] = 3
         }
         return this
     }
-    onReachEnd(value: (() => void) | undefined): this {
+    onReachStart(value: (() => void) | undefined): this {
         if (((this._flagArray[34]) == (0)) || (true)) {
             this._flagArray[34] = 1
-            this._onReachEnd_0_0value = value
+            this._onReachStart_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[34] = 3
         }
         return this
     }
-    flingSpeedLimit(value: double | undefined): this {
-        if (((this._flagArray[35]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
+    onReachEnd(value: (() => void) | undefined): this {
+        if (((this._flagArray[35]) == (0)) || (true)) {
             this._flagArray[35] = 1
-            this._flingSpeedLimit_0_0value = value
+            this._onReachEnd_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[35] = 3
         }
         return this
     }
-    clipContent(value: ContentClipMode | RectShape | undefined): this {
-        if (((this._flagArray[36]) == (0)) || (true)) {
+    flingSpeedLimit(value: double | undefined): this {
+        if (((this._flagArray[36]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
             this._flagArray[36] = 1
-            this._clipContent_0_0value = value
+            this._flingSpeedLimit_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[36] = 3
         }
         return this
     }
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
         if (((this._flagArray[37]) == (0)) || (true)) {
             this._flagArray[37] = 1
-            this._digitalCrownSensitivity_0_0value = value
+            this._clipContent_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[37] = 3
         }
         return this
     }
-    backToTop(value: boolean | undefined): this {
-        if (((this._flagArray[38]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        if (((this._flagArray[38]) == (0)) || (true)) {
             this._flagArray[38] = 1
-            this._backToTop_0_0value = value
+            this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[38] = 3
         }
         return this
     }
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
-        if (((this._flagArray[39]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+    backToTop(value: boolean | undefined): this {
+        if (((this._flagArray[39]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
             this._flagArray[39] = 1
+            this._backToTop_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[39] = 3
+        }
+        return this
+    }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        if (((this._flagArray[40]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+            this._flagArray[40] = 1
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
             this._state.fireChange()
         } else {
-            this._flagArray[39] = 3
+            this._flagArray[40] = 3
         }
         return this
     }

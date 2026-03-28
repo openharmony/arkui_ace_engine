@@ -5231,6 +5231,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_VoidCallback* value)
     {
     }
+    void SetEnableScrollWithMouseImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
     void SetOnReachStartImpl(Ark_NativePointer node,
                              const Opt_synthetic_Callback_Void* value)
     {
@@ -10210,6 +10214,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
             ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
             ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
+            ScrollableCommonMethodModifier::SetEnableScrollWithMouseImpl,
             ScrollableCommonMethodModifier::SetOnReachStartImpl,
             ScrollableCommonMethodModifier::SetOnReachEndImpl,
             ScrollableCommonMethodModifier::SetOnScrollStartImpl,

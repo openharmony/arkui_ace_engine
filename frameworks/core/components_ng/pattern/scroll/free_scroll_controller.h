@@ -41,6 +41,13 @@ public:
         freePanGesture_->SetEnabled(enableScroll_); // workaround gesture's internal reset
         return freePanGesture_;
     }
+    
+    void SetIsAllowMouse(const bool isAllowMouse)
+    {
+        if (freePanGesture_) {
+            freePanGesture_->SetIsAllowMouse(isAllowMouse);
+        }
+    }
 
     /**
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.

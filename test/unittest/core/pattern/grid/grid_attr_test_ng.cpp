@@ -781,6 +781,23 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    pattern_->SetIsAllowMouse(true);
+    CreateDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
+}
+
+/**
  * @tc.name: Gap001
  * @tc.desc: Test gap
  * @tc.type: FUNC
