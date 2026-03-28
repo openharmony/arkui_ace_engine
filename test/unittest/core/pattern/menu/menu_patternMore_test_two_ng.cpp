@@ -433,6 +433,7 @@ HWTEST_F(MenuPattern2TwoTestNg, ShowStackMainMenuDisappearAnimation001, TestSize
     ASSERT_NE(subMenuNode, nullptr);
     auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     mainMenuPattern->originMenuYForStack_ = 10.0f;
     mainMenuPattern->originPreviewYForStack_ = 10.0f;
 
