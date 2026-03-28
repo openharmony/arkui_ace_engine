@@ -5099,6 +5099,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IUIContext_removeLocalInputEventMonitor(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _IUIContext_setTextSelectionClearPolicy(policy: KInt): void
+    @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_getFinalizer(): KPointer

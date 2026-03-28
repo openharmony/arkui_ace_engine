@@ -752,6 +752,11 @@ export class UIContext {
         IUIContext.removeLocalInputEventMonitor(monitor);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+    public setTextSelectionClearPolicy(policy: TextSelectionClearPolicy): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        IUIContext.setTextSelectionClearPolicy(policy);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
     public getMaxFontScale() : number {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let fontScale = GlobalScopeUicontextFontScale.getMaxFontScale();
@@ -1843,4 +1848,9 @@ export class MarqueeDynamicSyncScene extends DynamicSyncScene {
 export const enum CustomKeyboardContinueFeature {
     ENABLED = 0,
     DISABLED = 1,
+}
+
+export const enum TextSelectionClearPolicy {
+    KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
+    CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
 }

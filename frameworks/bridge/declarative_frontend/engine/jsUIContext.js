@@ -923,6 +923,12 @@ class UIContext {
         });
     }
 
+    setTextSelectionClearPolicy(policy) {
+        withInstanceId(this.instanceId_, () => {
+            Context.setTextSelectionClearPolicy(policy);
+        });
+    }
+
     getTextMenuController() {
         if (this.textMenuController_ == null) {
             this.textMenuController_ = new TextMenuController(this.instanceId_);

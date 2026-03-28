@@ -28,6 +28,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
 
@@ -797,6 +798,21 @@ void SetCustomCursorImpl(Ark_image_PixelMap value, const Opt_Int32* focusX, cons
         },
         TaskExecutor::TaskType::UI, "ArkUIJsSetCustomCursor");
 }
+void SetTextSelectionClearPolicyImpl(Ark_TextSelectionClearPolicy policy)
+{
+    auto policyValue = static_cast<int32_t>(policy);
+    if (policyValue <= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_BEGIN) ||
+        policyValue >= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_END)) {
+        return;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectOverlayManager = pipelineContext->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->SetTextSelectionClearPolicy(static_cast<NG::TextSelectionClearPolicy>(policyValue));
+}
 } // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -816,6 +832,7 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::EnableEventPassthroughImpl,
         IUIContextAccessor::AddLocalInputEventMonitorImpl,
         IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
+        IUIContextAccessor::SetTextSelectionClearPolicyImpl,
     };
     return &IUIContextAccessorImpl;
 }

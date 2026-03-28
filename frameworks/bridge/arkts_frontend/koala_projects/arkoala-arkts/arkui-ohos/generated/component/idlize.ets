@@ -74,7 +74,7 @@ import { StyledString, StyledStringInternal } from './styledString'
 import { default as text } from '@ohos.graphics.text'
 import { TabsController, TabsControllerInternal } from './tabs'
 import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from './scroll'
-import { CustomKeyboardContinueFeature, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
+import { CustomKeyboardContinueFeature, TextSelectionClearPolicy, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
 import { LazyForEachOptions_serializer, LazyForEachOptions } from './lazyForEach'
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from './navigation'
 import { TargetInfo_serializer } from './../framework/ohos.arkui.UIContext'
@@ -3718,6 +3718,11 @@ export class IUIContext {
         IUIContext.setCustomCursor_serialize(value_casted, focusX_casted, focusY_casted)
         return
     }
+    public static setTextSelectionClearPolicy(policy: TextSelectionClearPolicy): void {
+        const policy_casted = policy as (TextSelectionClearPolicy)
+        IUIContext.setTextSelectionClearPolicy_serialize(policy_casted)
+        return
+    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3842,6 +3847,9 @@ export class IUIContext {
         }
         ArkUIGeneratedNativeModule._IUIContext_setCustomCursor(extractors.toImagePixelMapPtr(value), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static setTextSelectionClearPolicy_serialize(policy: TextSelectionClearPolicy): void {
+        ArkUIGeneratedNativeModule._IUIContext_setTextSelectionClearPolicy(policy.valueOf())
     }
 }
 export class LazyBuild {

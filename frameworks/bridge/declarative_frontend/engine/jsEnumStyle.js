@@ -5040,6 +5040,12 @@ let TextMenuShowMode;
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
 
+let TextSelectionClearPolicy;
+(function (TextSelectionClearPolicy) {
+  TextSelectionClearPolicy[TextSelectionClearPolicy.KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0] = 'KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+  TextSelectionClearPolicy[TextSelectionClearPolicy.CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1] = 'CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+})(TextSelectionClearPolicy || (TextSelectionClearPolicy = {}));
+
 let KeyProcessingMode;
 (function (KeyProcessingMode) {
   KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';

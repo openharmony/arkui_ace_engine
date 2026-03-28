@@ -1169,6 +1169,15 @@ void SelectContentOverlayManager::SetTextSelectionHolderId(int32_t id)
     textSelectHolderId_ = id;
 }
 
+void SelectContentOverlayManager::SetTextSelectionClearPolicy(TextSelectionClearPolicy policy)
+{
+    textSelectionClearPolicy_ = policy;
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(callback);
+    callback->SetTextSelectionClearPolicy(policy);
+}
+
 void SelectContentOverlayManager::RemoveHoldSelectionCallback(int32_t id)
 {
     CHECK_NULL_VOID(holdSelectionInfo_);

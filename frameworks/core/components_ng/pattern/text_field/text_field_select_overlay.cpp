@@ -155,6 +155,12 @@ void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, Tou
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
+
+    if (IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        OnResetTextSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
 }
 
 void TextFieldSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)

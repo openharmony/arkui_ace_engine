@@ -7420,6 +7420,14 @@ typedef struct Opt_TextSelectableMode {
     Ark_Tag tag;
     Ark_TextSelectableMode value;
 } Opt_TextSelectableMode;
+typedef enum Ark_TextSelectionClearPolicy {
+    ARK_TEXT_SELECTION_CLEAR_POLICY_KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
+    ARK_TEXT_SELECTION_CLEAR_POLICY_CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
+} Ark_TextSelectionClearPolicy;
+typedef struct Opt_TextSelectionClearPolicy {
+    Ark_Tag tag;
+    Ark_TextSelectionClearPolicy value;
+} Opt_TextSelectionClearPolicy;
 typedef enum Ark_TextSpanType {
     ARK_TEXT_SPAN_TYPE_TEXT = 0,
     ARK_TEXT_SPAN_TYPE_IMAGE = 1,
@@ -29748,6 +29756,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
     Ark_InputEventMonitor (*addLocalInputEventMonitor)(Ark_Int32 eventMask,
                                                        const InputEventListener* listener);
     void (*removeLocalInputEventMonitor)(const Ark_InputEventMonitor* monitor);
+    void (*setTextSelectionClearPolicy)(Ark_TextSelectionClearPolicy policy);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
