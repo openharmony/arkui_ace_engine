@@ -1,0 +1,23 @@
+[
+  {"version":"v0.9","createSurface":{"surfaceId":"coffee_rec","catalogId":""}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"main-col","type":"column","children":["id-my-card","coffee-title","coffee-subtitle","coffee-yemeni","coffee-panama","coffee-ethiopia","coffee-colombia","coffee-kenya","coffee-kenya-reserve","btn-secondary","btn-primary"]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"id-my-card","type":"mycard","my1":"my1_value", "my2":"my2_value"}]}},
+
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-title","type":"title","text":"产区精品咖啡"}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-subtitle","type":"subtitle","text":"风味与产地理由一览"}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"btn-secondary","type":"button","text":"想试低因款","onPress":"lowcaffeine.click"}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"btn-primary","type":"button","text":"想了解产区","onPress":"region.learn"}]}},
+
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-yemeni","type":"maincard","title":"牙买加蓝山咖啡","items":[{"title":"产自埃塞俄比亚高海拔地区，风味清新，带有柔和的酸度和花香。适合冷萃或手冲，口感干净明亮。","description":"产区: 埃塞俄比亚 | 风味: 清新花香，柔和酸度 | 处理: 水洗处理","image":"coffee_blue_mountain","gradient":["#fbbf24","#f59e0b"]}]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-panama","type":"maincard","title":"巴拿马瑰夏咖啡","items":[{"title":"来自巴拿马瑰夏庄园的顶级咖啡豆，带有明显的果香和甜感。风味层次丰富，从柑橘到热带水果，余味悠长。","description":"产区: 巴拿马 | 风味: 浓郁果香，层次丰富 | 处理: 日晒处理","image":"coffee_geisha","gradient":["#4ade80","#22d3ee"]}]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-ethiopia","type":"maincard","title":"耶加雪菲咖啡","items":[{"title":"埃塞俄比亚高原咖啡豆，带有明显的莓果风味。酸度明亮但不刺口，甜感明显，是非常受欢迎的精品咖啡。","description":"产区: 埃塞俄比亚 | 风味: 莓果风味，明亮酸度 | 处理: 日晒处理","image":"coffee_yirgacheffe","color":"#6b5b4c"}]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-colombia","type":"maincard","title":"哥伦比亚咖啡","items":[{"title":"哥伦比亚高海拔种植的阿拉比卡咖啡豆，平衡感强，带有坚果和焦糖的风味，适合多种冲煮方式。","description":"产区: 哥伦比亚 | 风味: 坚果焦糖，平衡感强 | 处理: 水洗处理","gradient":["#8b5a2b","#d2691e"]}]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-kenya","type":"maincard","title":"肯尼亚咖啡","items":[{"title":"肯尼亚高海拔地区的咖啡豆，带有独特的黑醋栗风味。酸度明亮，口感清爽，是非洲咖啡的代表之一。","description":"产区: 肯尼亚 | 风味: 黑醋栗风味，清爽口感 | 处理: 水洗处理","image":"coffee_kenya","gradient":["#ff6b6b","#feca57"]}]}]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"coffee_rec","components":[{"id":"coffee-kenya-reserve","type":"maincard","title":"肯尼亚精品","items":[{"title":"肯尼亚顶级庄园的限量咖啡豆，精心挑选并手工处理。风味复杂，带有柑橘、莓果和花香的多层次体验。","description":"产区: 肯尼亚 | 风味: 多层次，柑橘莓果花香 | 处理: 双重水洗","gradient":["#667eea","#764ba2"]}]}]}}
+,
+  {"version":"v0.9", "updateDataModel":{
+    "surfaceId":"main",
+    "path":"/contact/email",
+    "value":"Jane Doe"
+  }}
+]

@@ -1,0 +1,16 @@
+{
+  "name": "a2ui_library",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/jsonschema": "^2.0.2",
+    "liba2ui_native.so": "file:./src/main/cpp/types/liba2ui_native"
+  },
+  "devDependencies": {
+    "@ohos/hypium": "1.0.25",
+    "@ohos/hamock": "1.0.0"
+  }
+}
