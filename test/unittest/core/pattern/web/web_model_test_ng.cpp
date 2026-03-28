@@ -2134,7 +2134,7 @@ HWTEST_F(WebModelTestNg, SetOptimizeParserBudgetEnabled001, TestSize.Level1)
 
 /**
  * @tc.name: SetWebMediaAVSessionEnabled001
- * @tc.desc: Test WebModelNG::SetWebMediaAVSessionEnabled
+ * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
  */
 HWTEST_F(WebModelTestNg, SetWebMediaAVSessionEnabled001, TestSize.Level1)
