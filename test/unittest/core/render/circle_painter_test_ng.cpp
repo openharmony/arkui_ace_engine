@@ -88,4 +88,22 @@ HWTEST_F(CirclePainterTestNg, CirclePainterTestNg_DrawCircle001, TestSize.Level1
     EXPECT_FALSE(result1);
     Mock::AllowLeak(testingCanvasPtr);
 }
+
+/**
+ * @tc.name: CirclePainterTestNg_DrawCircle002
+ * @tc.desc: Test hdr stroke path is limited to circle painter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CirclePainterTestNg, CirclePainterTestNg_DrawCircle002, TestSize.Level1)
+{
+    Testing::MockCanvas* testingCanvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& testingCanvas = *testingCanvasPtr;
+    NG::ShapePaintProperty hdrShapePaintProperty;
+    hdrShapePaintProperty.UpdateStroke(Color::FromFloat(0.8, 0.6, 0.4, 1.0, 2.0));
+
+    CallBack(testingCanvas);
+    NG::CirclePainter::DrawCircle(testingCanvas, radius, DRAWOFFSET, hdrShapePaintProperty);
+
+    Mock::AllowLeak(testingCanvasPtr);
+}
 } // namespace OHOS::Ace
