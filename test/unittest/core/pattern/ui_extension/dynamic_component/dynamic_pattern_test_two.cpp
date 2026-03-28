@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +29,11 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "frameworks/core/event/pointer_event.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_frontend.h"
+#include "core/event/pointer_event.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 
 using namespace testing;
 using namespace testing::ext;

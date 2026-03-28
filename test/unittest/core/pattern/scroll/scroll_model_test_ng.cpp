@@ -20,8 +20,8 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 

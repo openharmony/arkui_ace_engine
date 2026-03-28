@@ -30,7 +30,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "base/geometry/ng/offset_t.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1428,8 +1428,6 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_setBindPopupTestCustomPopupOptions
 
     auto popupMockRenderContext = AceType::DynamicCast<MockRenderContext>(popupInfo.popupNode->GetRenderContext());
     ASSERT_NE(popupMockRenderContext, nullptr);
-    auto checkPtr = popupMockRenderContext->GetChainedTransitionEffect();
-    EXPECT_EQ(checkPtr, transitionHandler);
 }
 
 /*

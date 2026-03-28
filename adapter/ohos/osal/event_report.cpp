@@ -28,11 +28,11 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 namespace OHOS::Ace {
-    FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
-    int64_t EventReport::calTime_ = 0;
-    int32_t EventReport::calFrameRate_ = 0;
-    std::unordered_map<int64_t, int32_t> EventReport::formEventTimerMap_ = {};
-    std::mutex EventReport::formEventTimerMutex_;
+FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
+int64_t EventReport::calTime_ = 0;
+int32_t EventReport::calFrameRate_ = 0;
+std::unordered_map<int64_t, int32_t> EventReport::formEventTimerMap_ = {};
+std::mutex EventReport::formEventTimerMutex_;
 namespace {
 
 constexpr char EVENT_KEY_ERROR_TYPE[] = "ERROR_TYPE";
@@ -163,20 +163,16 @@ void EventReport::SendEvent(const EventInfo& eventInfo)
         StrTrim(packageName);
     }
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
         EVENT_KEY_PACKAGE_NAME, packageName);
 }
 
 void EventReport::SendJsCardRenderTimeEvent(
-    const std::string& sessionID,
-    const std::string& timeType,
-    uint64_t timeDelay)
+    const std::string& sessionID, const std::string& timeType, uint64_t timeDelay)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, timeType,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        EVENT_KEY_SESSIONID, sessionID,
-        STATISTIC_DURATION, timeDelay);
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_SESSIONID, sessionID, STATISTIC_DURATION,
+        timeDelay);
 }
 
 void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
@@ -197,7 +193,7 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
                 int64_t endTime = GetSysTimestamp();
                 int64_t duration = endTime - calTime_;
                 calTime_ = endTime;
-            AddFrameRateDuration(calFrameRate_, duration);
+                AddFrameRateDuration(calFrameRate_, duration);
             }
             calFrameRate_ = expectedRate;
             return;
@@ -251,13 +247,9 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
     int32_t frameRateDuring_90_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_90 / NS_TO_MS);
     int32_t frameRateDuring_120_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_120 / NS_TO_MS);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_SCENE, scene,
-        EVENT_KEY_PACNAME, packageName,
-        EVENT_KEY_DURATION_120, frameRateDuring_120_ms,
-        EVENT_KEY_DURATION_90, frameRateDuring_90_ms,
-        EVENT_KEY_DURATION_72, frameRateDuring_72_ms,
-        EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, EVENT_KEY_SCENE, scene, EVENT_KEY_PACNAME, packageName,
+        EVENT_KEY_DURATION_120, frameRateDuring_120_ms, EVENT_KEY_DURATION_90, frameRateDuring_90_ms,
+        EVENT_KEY_DURATION_72, frameRateDuring_72_ms, EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
 }
 
 void EventReport::SendAppStartException(AppStartExcepType type)
@@ -298,9 +290,7 @@ void EventReport::SendComponentExceptionNG(
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EXCEPTION_COMPONENT,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_NODE_TYPE, nodeType,
-        COMMON_NODE_ID, nodeId,
+        EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_NODE_TYPE, nodeType, COMMON_NODE_ID, nodeId,
         COMMON_ERROR_MESSAGE, message);
 }
 
@@ -310,11 +300,9 @@ void EventReport::ReportPageLoadTimeout(const EventInfo& eventInfo)
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EXCEPTION_FRAMEWORK_PAGE_ROUTER,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_LOAD_COST, eventInfo.pageLoadCost);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
+        EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_ABILITY_NAME, abilityName, EVENT_KEY_PAGE_LOAD_COST,
+        eventInfo.pageLoadCost);
 }
 
 void EventReport::SendAPIChannelException(APIChannelExcepType type)
@@ -393,11 +381,8 @@ void EventReport::ReportAccessibilityFailEvent(const std::string& actionName)
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     auto processName = AceApplicationInfo::GetInstance().GetProcessName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, ACCESSIBILITY_FAIL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PROCESS_NAME, processName,
-        ACTION_NAME, actionName);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName, EVENT_KEY_ABILITY_NAME,
+        abilityName, EVENT_KEY_PROCESS_NAME, processName, ACTION_NAME, actionName);
 }
 
 void EventReport::SendFormException(FormExcepType type)
@@ -416,11 +401,8 @@ void EventReport::SendVsyncException(VsyncExcepType type, uint32_t windowId, int
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_VSYNC_TIMEOUT,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_WINDOW_ID, windowId,
-        EVENT_KEY_INSTANCE_ID, instanceId,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
+        EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_WINDOW_ID, windowId, EVENT_KEY_INSTANCE_ID, instanceId,
         EVENT_KEY_VSYNC_TIMESTAMP, timeStamp);
 }
 #endif
@@ -433,13 +415,10 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
     }
 }
 
-void EventReport::JsErrReport(
-    const std::string& packageName, const std::string& reason, const std::string& summary)
+void EventReport::JsErrReport(const std::string& packageName, const std::string& reason, const std::string& summary)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_REASON, reason,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_REASON, reason,
         EVENT_KEY_SUMMARY, summary);
 }
 
@@ -459,29 +438,21 @@ void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string
         eventName = "UI_BLOCK_RECOVERED";
     }
     std::string uidStr = std::to_string(uid);
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_UID, uidStr,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MESSAGE, msg,
-        EVENT_KEY_CMD, cmd);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_UID, uidStr, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MESSAGE, msg, EVENT_KEY_CMD, cmd);
 }
 
-void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
-    const std::string& processName, const std::string& msg)
+void EventReport::ANRShowDialog(
+    int32_t uid, const std::string& packageName, const std::string& processName, const std::string& msg)
 {
     int32_t pid = getpid();
     std::string eventName = "UI_BLOCK_DIALOG";
     std::string uidStr = std::to_string(uid);
     std::string pidStr = std::to_string(pid);
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_UID, uidStr,
-        EVENT_KEY_PID, pidStr,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_PROCESS_NAME, processName,
-        EVENT_KEY_MESSAGE, msg);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_UID, uidStr, EVENT_KEY_PID, pidStr, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_PROCESS_NAME,
+        processName, EVENT_KEY_MESSAGE, msg);
 }
 
 void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
@@ -493,15 +464,9 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
     auto packageName = Container::CurrentBundleName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        EVENT_KEY_STARTTIME, startTime,
-        STATISTIC_DURATION, duration,
-        EVENT_KEY_VERSION_CODE, app_version_code,
-        EVENT_KEY_VERSION_NAME, app_version_name,
-        EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_JANK_STATS, jank,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_STARTTIME, startTime, STATISTIC_DURATION, duration,
+        EVENT_KEY_VERSION_CODE, app_version_code, EVENT_KEY_VERSION_NAME, app_version_name, EVENT_KEY_BUNDLE_NAME,
+        packageName, EVENT_KEY_ABILITY_NAME, abilityName, EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_JANK_STATS, jank,
         EVENT_KEY_JANK_STATS_VER, jankStatusVersion);
 }
 
@@ -510,25 +475,17 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-            EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
-            EVENT_KEY_PACKAGE_NAME, packageName);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
+        EVENT_KEY_PACKAGE_NAME, packageName);
 }
 
 void EventReport::ReportDragInfo(const DragInfo& dragInfo)
 {
-    HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::DRAG_UE,
-        dragInfo.dragBehavior,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "PNAMEID", dragInfo.pNameId,
-        "PVERSIONID", dragInfo.pVersionId,
-        "ISCROSSING", dragInfo.isCrossing,
-        "RESULT", dragInfo.result,
-        "HOSTNAME", dragInfo.hostName,
-        "SUMMARYTYPE", dragInfo.summaryType,
-        "SUMMARYNUM", dragInfo.summaryNum,
-        "ALLOW_DROP_TYPE", dragInfo.allowDropType);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::DRAG_UE, dragInfo.dragBehavior,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "PNAMEID", dragInfo.pNameId, "PVERSIONID",
+        dragInfo.pVersionId, "ISCROSSING", dragInfo.isCrossing, "RESULT", dragInfo.result, "HOSTNAME",
+        dragInfo.hostName, "SUMMARYTYPE", dragInfo.summaryType, "SUMMARYNUM", dragInfo.summaryNum, "ALLOW_DROP_TYPE",
+        dragInfo.allowDropType);
 }
 
 void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
@@ -538,37 +495,27 @@ void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
     auto appVersionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     StrTrim(packageName);
     StrTrim(appVersionName);
-    HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_RICH_EDITOR_ERROR,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_VERSION_CODE, appVersionCode,
-        EVENT_KEY_VERSION_NAME, appVersionName,
-        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(richEditorInfo.errorType),
-        EVENT_KEY_SPAN_LENGTH, richEditorInfo.spanLength,
-        EVENT_KEY_TEXT_LENGTH, richEditorInfo.textLength,
-        EVENT_KEY_SPAN_INDEX, richEditorInfo.spanIndex);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_RICH_EDITOR_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName, EVENT_KEY_VERSION_CODE,
+        appVersionCode, EVENT_KEY_VERSION_NAME, appVersionName, EVENT_KEY_ERROR_TYPE,
+        static_cast<int32_t>(richEditorInfo.errorType), EVENT_KEY_SPAN_LENGTH, richEditorInfo.spanLength,
+        EVENT_KEY_TEXT_LENGTH, richEditorInfo.textLength, EVENT_KEY_SPAN_INDEX, richEditorInfo.spanIndex);
 }
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)
 {
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
-    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DOUBLE_CLICK_TITLE,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        CURRENTPKG, packageName,
-        STATECHANGE, stateChange);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DOUBLE_CLICK_TITLE, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName, STATECHANGE, stateChange);
 }
 
 void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange)
 {
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
-    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, CLICK_TITLE_MAXIMIZE_MENU,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        CURRENTPKG, packageName,
-        MAXMENUITEM, maxMenuItem,
-        STATECHANGE, stateChange);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, CLICK_TITLE_MAXIMIZE_MENU, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName, MAXMENUITEM, maxMenuItem, STATECHANGE, stateChange);
 }
 
 void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)
@@ -576,11 +523,8 @@ void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nod
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_NODE_OVERFLOW,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_PAGE_NODE_COUNT, nodeCount,
-        EVENT_KEY_PAGE_NODE_THRESHOLD, threshold);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_PAGE_NODE_COUNT, nodeCount, EVENT_KEY_PAGE_NODE_THRESHOLD, threshold);
 }
 
 void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold)
@@ -588,11 +532,8 @@ void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t de
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_DEPTH_OVERFLOW,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_PAGE_DEPTH, depth,
-        EVENT_KEY_PAGE_DEPTH_THRESHOLD, threshold);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_PAGE_DEPTH, depth, EVENT_KEY_PAGE_DEPTH_THRESHOLD, threshold);
 }
 
 void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold)
@@ -600,11 +541,8 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_LIFECIRCLE_FUNCTION_TIMEOUT,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_FUNCTION_NAME, functionName,
-        EVENT_KEY_FUNCTION_EXECUTE_TIME, time,
-        EVENT_KEY_FUNCTION_TIME_THRESHOLD, threshold);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_FUNCTION_NAME,
+        functionName, EVENT_KEY_FUNCTION_EXECUTE_TIME, time, EVENT_KEY_FUNCTION_TIME_THRESHOLD, threshold);
 }
 
 void EventReport::ReportHoverStatusChange(
@@ -613,53 +551,39 @@ void EventReport::ReportHoverStatusChange(
     auto packageName = Container::CurrentBundleName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NOTIFY_HOVER_STATUS_CHANGE,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_FOLDER_STATUS, foldStatus,
-        EVENT_KEY_HOVER_TIME, time,
-        EVENT_KEY_IS_HOVER_MODE, isHoverMode,
-        EVENT_KEY_WINDOW_MODE, windowMode,
-        EVENT_KEY_APP_ROTATION, appRotation);
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, EVENT_KEY_BUNDLE_NAME, packageName, EVENT_KEY_ABILITY_NAME,
+        abilityName, EVENT_KEY_FOLDER_STATUS, foldStatus, EVENT_KEY_HOVER_TIME, time, EVENT_KEY_IS_HOVER_MODE,
+        isHoverMode, EVENT_KEY_WINDOW_MODE, windowMode, EVENT_KEY_APP_ROTATION, appRotation);
 }
 
 void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NON_MANUAL_POSTCARD_ACTION,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_FORM_NAME, formName,
-        EVENT_KEY_BUNDLE_NAME, bundleName,
-        EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_MODULE_NAME, moduleName,
-        EVENT_KEY_DIMENSION, dimension);
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, EVENT_KEY_FORM_NAME, formName, EVENT_KEY_BUNDLE_NAME,
+        bundleName, EVENT_KEY_ABILITY_NAME, abilityName, EVENT_KEY_MODULE_NAME, moduleName, EVENT_KEY_DIMENSION,
+        dimension);
 }
 
-void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
-    const std::string& moduleName)
+void EventReport::ReportUiExtensionTransparentEvent(
+    const std::string& pageUrl, const std::string& bundleName, const std::string& moduleName)
 {
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UIEXTENSION_TRANSPARENT_DETECTED,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PAGE_NAME, pageUrl,
-        EVENT_KEY_VERSION_CODE, app_version_code,
-        EVENT_KEY_VERSION_NAME, app_version_name,
-        EVENT_KEY_BUNDLE_NAME, bundleName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PAGE_NAME, pageUrl, EVENT_KEY_VERSION_CODE,
+        app_version_code, EVENT_KEY_VERSION_NAME, app_version_name, EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_MODULE_NAME, moduleName);
 }
 
-void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
-    const std::string& moduleName)
+void EventReport::ReportMainWindowTransparentEvent(
+    const std::string& pageUrl, const std::string& bundleName, const std::string& moduleName)
 {
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, MAINWINDOW_TRANSPARENT_DETECTED,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PAGE_NAME, pageUrl,
-        EVENT_KEY_VERSION_CODE, app_version_code,
-        EVENT_KEY_VERSION_NAME, app_version_name,
-        EVENT_KEY_BUNDLE_NAME, bundleName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PAGE_NAME, pageUrl, EVENT_KEY_VERSION_CODE,
+        app_version_code, EVENT_KEY_VERSION_NAME, app_version_name, EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_MODULE_NAME, moduleName);
 }
 
@@ -673,13 +597,9 @@ void EventReport::ReportScrollableErrorEvent(
     StrTrim(packageName);
     StrTrim(app_version_name);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_SCROLLABLE_ERROR,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_NODE_TYPE, nodeType,
-        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(errorType),
-        EVENT_KEY_SUB_ERROR_TYPE, subErrorType,
-        EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_TARGET_API_VERSION, target_api_version,
-        EVENT_KEY_VERSION_CODE, app_version_code,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_NODE_TYPE, nodeType, EVENT_KEY_ERROR_TYPE,
+        static_cast<int32_t>(errorType), EVENT_KEY_SUB_ERROR_TYPE, subErrorType, EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_TARGET_API_VERSION, target_api_version, EVENT_KEY_VERSION_CODE, app_version_code,
         EVENT_KEY_VERSION_NAME, app_version_name);
 }
 
@@ -695,8 +615,8 @@ void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {
     auto packageName = Container::CurrentBundleName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName,
-        EVENT_KEY_ERROR_TYPE, errorType);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName, EVENT_KEY_ERROR_TYPE,
+        errorType);
 }
 
 void EventReport::ReportReusedNodeSkipMeasureApp()
@@ -706,32 +626,24 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
 }
 
-void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidInfo)
+void EventReport::ReportPageSlidInfo(NG::SlidInfo& slidInfo)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_PAGE_SLID_INFO,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_GESTURE_VELOCITY, slidInfo.gestureVelocity,
-        EVENT_KEY_VELOCITY_SCALE, slidInfo.velocityScale, EVENT_KEY_DRAG_GAIN,
-        slidInfo.gain, EVENT_KEY_MAX_FLING_VELOCITY, slidInfo.maxFlingVelocity,
-        EVENT_KEY_SLIP_FACTOR, slidInfo.slipFactor, EVENT_KEY_FRICTION,
-        slidInfo.friction);
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, EVENT_KEY_GESTURE_VELOCITY, slidInfo.gestureVelocity,
+        EVENT_KEY_VELOCITY_SCALE, slidInfo.velocityScale, EVENT_KEY_DRAG_GAIN, slidInfo.gain,
+        EVENT_KEY_MAX_FLING_VELOCITY, slidInfo.maxFlingVelocity, EVENT_KEY_SLIP_FACTOR, slidInfo.slipFactor,
+        EVENT_KEY_FRICTION, slidInfo.friction);
 }
 
-void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
-    const std::string &formName)
+void EventReport::StartFormModifyTimeoutReportTimer(
+    int64_t formId, const std::string& bundleName, const std::string& formName)
 {
-    auto timeoutCallback = [formId, bundleName, formName](void *) {
+    auto timeoutCallback = [formId, bundleName, formName](void*) {
         LOGE("ModifyTimeout, cardId: %{public}" PRId64, formId);
-        HiSysEventWrite(
-            OHOS::HiviewDFX::HiSysEvent::Domain::FORM_MANAGER,
-            "FORM_ERROR",
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-            EVENT_KEY_FORM_ID, formId,
-            EVENT_KEY_BUNDLE_NAME, bundleName,
-            EVENT_KEY_FORM_NAME, formName,
-            EVENT_KEY_ERROR_NAME, FORM_NODE_ERROR,
-            EVENT_KEY_ERROR_TYPE, WAIT_MODIFY_FAILED,
-            EVENT_KEY_ERROR_CODE, 0);
+        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FORM_MANAGER, "FORM_ERROR",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_FORM_ID, formId, EVENT_KEY_BUNDLE_NAME, bundleName,
+            EVENT_KEY_FORM_NAME, formName, EVENT_KEY_ERROR_NAME, FORM_NODE_ERROR, EVENT_KEY_ERROR_TYPE,
+            WAIT_MODIFY_FAILED, EVENT_KEY_ERROR_CODE, 0);
     };
     const std::string taskName = "FormPattern_WaitModifyDone_" + std::to_string(formId);
     EventReport::StopFormModifyTimeoutReportTimer(formId);
@@ -759,27 +671,21 @@ void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInf
 {
     auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
-    HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_GENERAL_INTERACTION_ERROR,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(generalEventErrorInfo.errorType),
-        EVENT_KEY_TOUCHEVENT_ID, generalEventErrorInfo.touchEventId,
-        EVENT_KEY_FINGER_ID, generalEventErrorInfo.fingerId,
-        EVENT_KEY_TAG, generalEventErrorInfo.tag);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_GENERAL_INTERACTION_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_ERROR_TYPE,
+        static_cast<int32_t>(generalEventErrorInfo.errorType), EVENT_KEY_TOUCHEVENT_ID,
+        generalEventErrorInfo.touchEventId, EVENT_KEY_FINGER_ID, generalEventErrorInfo.fingerId, EVENT_KEY_TAG,
+        generalEventErrorInfo.tag);
 }
 
-void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
-    uint64_t endTime)
+void EventReport::ReportWebBlanklessSnapshotTouchEvent(
+    uint64_t startTime, const std::string& touchInfo, uint64_t endTime)
 {
     auto packageName = Container::CurrentBundleName();
     auto versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ARKWEB_UE, EVENT_KEY_BLANKLESS_SNAPSHOT_TOUCH,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PNAMEID, packageName,
-        EVENT_KEY_PVERSIONID, versionName,
-        EVENT_KEY_APPEAR_TIMESTAMP, startTime,
-        EVENT_KEY_TOUCH_EVENTS, touchInfo,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR, EVENT_KEY_PNAMEID, packageName, EVENT_KEY_PVERSIONID,
+        versionName, EVENT_KEY_APPEAR_TIMESTAMP, startTime, EVENT_KEY_TOUCH_EVENTS, touchInfo,
         EVENT_KEY_DISAPPEAR_TIMESTAMP, endTime);
 }
 } // namespace OHOS::Ace

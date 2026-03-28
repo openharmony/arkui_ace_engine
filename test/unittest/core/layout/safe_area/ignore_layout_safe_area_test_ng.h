@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/layout/safe_area/expand_safe_area_test_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 

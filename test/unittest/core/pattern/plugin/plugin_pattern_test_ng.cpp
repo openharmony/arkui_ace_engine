@@ -28,8 +28,8 @@
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "mock/mock_bundle_mgr_interface.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"

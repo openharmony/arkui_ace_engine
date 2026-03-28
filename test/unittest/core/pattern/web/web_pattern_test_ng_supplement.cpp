@@ -18,14 +18,14 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 #undef private
 #undef protected
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #define private public
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 #include "nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"

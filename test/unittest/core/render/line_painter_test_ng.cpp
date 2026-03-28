@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/utils/utils.h"
 #define protected public

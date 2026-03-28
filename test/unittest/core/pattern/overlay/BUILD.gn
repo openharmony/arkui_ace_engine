@@ -19,7 +19,7 @@ ace_unittest("overlay_manager_test_ng") {
 
   sources = [
     "$ace_root/interfaces/napi/kits/promptaction/prompt_controller.cpp",
-    "$ace_root/test/mock/core/common/mock_window.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "accessibility_focus_paint_node_test_ng.cpp",
     "dialog_manager_test_ng.cpp",
     "modal_presentation_pattern_test_ng.cpp",

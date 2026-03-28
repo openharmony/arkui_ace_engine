@@ -7,4 +7,5 @@
 
 namespace OHOS::Ace {
 int32_t VelocityTracker::POINT_NUMBER = 0;
+VelocityTracker::VelocityTracker() = default;
 } // namespace OHOS::Ace

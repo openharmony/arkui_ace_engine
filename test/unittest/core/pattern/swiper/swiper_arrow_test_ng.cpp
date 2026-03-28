@@ -14,8 +14,8 @@
  */
 
 #include "swiper_test_ng.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"

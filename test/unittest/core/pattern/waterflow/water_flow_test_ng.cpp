@@ -15,15 +15,15 @@
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #undef protected
 #endif
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "water_flow_test_ng.h"
 
@@ -39,12 +39,12 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #undef private
 #undef protected
-#include "test/mock/adapter/mock_ui_session_manager.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 

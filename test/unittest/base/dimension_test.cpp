@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components/common/properties/text_style.h"
 #include "base/geometry/dimension.h"
 

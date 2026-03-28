@@ -19,8 +19,8 @@
 #include <cstdint>
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/focus_core/focus_test_base.h"
 
 #include "base/geometry/ng/offset_t.h"

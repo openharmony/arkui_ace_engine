@@ -18,7 +18,7 @@
 
 #include "base/utils/utils.h"
 #include "core/common/storage/storage_proxy.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;

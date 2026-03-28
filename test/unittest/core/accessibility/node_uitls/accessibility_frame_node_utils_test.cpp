@@ -19,16 +19,17 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -292,7 +293,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, IsCoveredByBrother_001, TestSize.Level
     nodeAccessibilityVisible = true;
     AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild1, nodeAccessibilityVisible);
     EXPECT_TRUE(nodeAccessibilityVisible);
-    
+
     parentNode->isWindowBoundary_ = false;
     AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
     nodeAccessibilityVisible = true;

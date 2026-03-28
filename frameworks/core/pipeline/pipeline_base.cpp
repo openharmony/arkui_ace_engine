@@ -15,6 +15,8 @@
 
 #include "core/pipeline/pipeline_base.h"
 
+#include "interfaces/inner_api/ace/ui_content_config.h"
+
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -29,8 +31,6 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/image/image_provider.h"
-#include "interfaces/inner_api/ace/ui_content_config.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -54,8 +54,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
-                               uint64_t nanoTimestamp, uint64_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -81,8 +80,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
-                               uint64_t nanoTimestamp, uint64_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -310,9 +308,8 @@ bool PipelineBase::NeedTouchInterpolation()
     CHECK_NULL_RETURN(container, false);
     auto uIContentType = container->GetUIContentType();
     return SystemProperties::IsNeedResampleTouchPoints() &&
-        (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION ||
-        uIContentType == UIContentType::UI_EXTENSION);
+           (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+               uIContentType == UIContentType::MODAL_UI_EXTENSION || uIContentType == UIContentType::UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -498,11 +495,6 @@ void PipelineBase::onRouterChange(const std::string& url)
     if (onRouterChangeCallback_ != nullptr) {
         onRouterChangeCallback_(url);
     }
-}
-
-void PipelineBase::TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback)
-{
-    ImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
 }
 
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
@@ -713,9 +705,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
 }
 
 void PipelineBase::OpenImplicitAnimation(
-    const AnimationOption& option,
-    const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback)
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareOpenImplicitAnimation();
@@ -840,15 +830,15 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #ifdef OHOS_STANDARD_SYSTEM
         int32_t instanceId = currentContainer->GetInstanceId();
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
             return;
         }
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
             return;
         }
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
             return;
         }
 #endif
@@ -868,15 +858,15 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     if (currentContainer && !currentContainer->IsSubContainer()) {
         int32_t instanceId = currentContainer->GetInstanceId();
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_DIALOG))) {
             return;
         }
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_POPUP))) {
             return;
         }
         if (MarkUpdateSubwindowKeyboardInsert(
-            instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
+                instanceId, keyboardHeight, static_cast<int32_t>(SubwindowType::TYPE_MENU))) {
             return;
         }
     }
@@ -1048,7 +1038,7 @@ void PipelineBase::FireAccessibilityEvents()
     }
     decltype(accessibilityEvents_) events;
     std::swap(accessibilityEvents_, events);
-    for (auto &event : events) {
+    for (auto& event : events) {
         FireAccessibilityEventInner(static_cast<uint32_t>(event.eventId), event.parameter);
     }
 }
@@ -1121,8 +1111,7 @@ void PipelineBase::Destroy()
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     formLinkInfoMap_.clear();
-    TAG_LOGI(AceLogTag::ACE_ANIMATION,
-        "Pipeline destroyed, %{public}zu finish callbacks unexecuted, count: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "Pipeline destroyed, %{public}zu finish callbacks unexecuted, count: %{public}s",
         finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
     finishCount_.clear();
@@ -1197,8 +1186,7 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
         pageWidth = CalcPageWidth(pageWidth);
-        designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
+        designWidthScale_ = windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;

@@ -17,6 +17,7 @@
 #include "accessibility_system_ability_client.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
 #include "js_third_accessibility_hover_ng.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;

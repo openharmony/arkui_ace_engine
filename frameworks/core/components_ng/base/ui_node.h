@@ -1072,10 +1072,6 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
-    {
-        isDestroyingState_ = isDestroying;
-    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
     /**

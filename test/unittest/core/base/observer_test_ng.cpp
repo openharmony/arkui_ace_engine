@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;

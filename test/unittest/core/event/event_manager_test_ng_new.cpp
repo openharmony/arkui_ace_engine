@@ -14,11 +14,13 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/common/mock_frontend.h"
+
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
+
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -561,13 +563,13 @@ HWTEST_F(EventManagerTestNg, EventManagerTest047, TestSize.Level1)
     MouseEvent event;
     event.action = MouseAction::PRESS;
     eventManager->DispatchMouseHoverAnimation(event);
-    
+
     event.action = MouseAction::RELEASE;
     eventManager->DispatchMouseHoverAnimation(event);
-    
+
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->DispatchMouseHoverAnimation(event);
-    
+
     event.action = MouseAction::WINDOW_LEAVE;
 
     eventManager->DispatchMouseHoverAnimation(event);
@@ -597,7 +599,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest048, TestSize.Level1)
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
     ASSERT_NE(panHorizontal1, nullptr);
     panHorizontal1->getEventTargetImpl_ = std::function<std::optional<EventTarget>()>{};
-    
+
     TouchTestResult hitTestResult;
     hitTestResult.emplace_back(panHorizontal1);
     eventManager->touchTestResults_.emplace(event.id, hitTestResult);
@@ -684,7 +686,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest051, TestSize.Level1)
     MouseEvent event;
     event.action = MouseAction::WINDOW_LEAVE;
     std::list<WeakPtr<RenderNode>> MouseHoverTestList;
-    
+
     eventManager->MouseTest(event, renderNode);
 
     event.action = MouseAction::WINDOW_ENTER;
@@ -744,7 +746,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest053, TestSize.Level1)
     MouseTestResult = {mouseEventTarget};
     eventManager->currMouseTestResultsMap_[0] = MouseTestResult;
     eventManager->LogPrintMouseTest();
-    
+
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<HoverEventTarget>> HoverTestResult = {hoverEventTarget};
     eventManager->lastHoverTestResultsMap_[0] = HoverTestResult;
@@ -796,7 +798,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest055, TestSize.Level1)
     event.action = KeyAction::DOWN;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     frameNode->isActive_ = false;
-    
+
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto frameNode3 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
@@ -850,7 +852,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest057, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     mouseEventTarget->node_ = frameNode;
     eventManager->AddGestureSnapshot(1, 1, mouseEventTarget, EventTreeType::TOUCH);
-    
+
     eventManager->AddGestureSnapshot(1, 1, nullptr, EventTreeType::TOUCH);
     EXPECT_TRUE(eventManager->eventTree_.eventTreeList.empty());
 }
@@ -927,7 +929,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest060, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     int eventId = 1;
     bool logImmediately = true;
-    
+
     SystemProperties::debugEnabled_ = false;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
     EXPECT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
@@ -992,7 +994,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest061, TestSize.Level1)
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp - 1;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
     EXPECT_FALSE(eventManager->lastConsumedEvent_.lastLogTimeStamp == currentTime);
-    
+
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);

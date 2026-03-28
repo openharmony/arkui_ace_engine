@@ -21,7 +21,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -36,12 +36,11 @@
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
 #include "core/components/select/select_theme.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -519,7 +518,7 @@ HWTEST_F(NavigationModelTestNg, RegisterToolbarHotZoneEvent002, TestSize.Level1)
     ASSERT_FALSE(containerNode->children_.empty());
     auto toolBarItemNode = AceType::DynamicCast<FrameNode>(containerNode->children_.back());
     ASSERT_NE(toolBarItemNode, nullptr);
-    
+
     MenuParam menuParam;
     menuParam.isShowInSubWindow = true;
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
@@ -2361,7 +2360,7 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions001, TestSize.Level1)
 
     EXPECT_TRUE(options.brOptions.paddingStart.has_value());
     EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
-    
+
     EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
     EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
 }
@@ -2393,7 +2392,7 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions002, TestSize.Level1)
     opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
-    
+
     NavigationModelNG::SetTitlebarOptions(&(*frameNode), std::move(opt));
 
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();

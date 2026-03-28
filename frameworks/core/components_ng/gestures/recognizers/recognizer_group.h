@@ -75,14 +75,7 @@ public:
         }
     }
 
-    void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override
-    {
-        TouchEventTarget::AttachFrameNode(node);
-        auto recognizers = GetGroupRecognizer();
-        for (const auto& recognizer : recognizers) {
-            recognizer->AttachFrameNode(node);
-        }
-    }
+    void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override;
 
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
 

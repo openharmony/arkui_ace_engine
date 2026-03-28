@@ -17,7 +17,7 @@
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {

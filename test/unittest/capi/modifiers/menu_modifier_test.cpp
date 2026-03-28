@@ -16,9 +16,9 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "base/geometry/dimension.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -28,7 +28,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
-#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
 
 
 namespace OHOS::Ace::NG {
@@ -158,7 +158,7 @@ public:
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();

@@ -14,8 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_texteffect.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_texteffect.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"

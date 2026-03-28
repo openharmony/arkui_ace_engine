@@ -18,7 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/event/key_event.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_paint_property.h"
@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/render_node/render_node_layout_property.h"
 #include "core/components_ng/pattern/render_node/render_node_layout_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 

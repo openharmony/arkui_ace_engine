@@ -14,7 +14,7 @@
  */
 
 #include "mock_task_executor.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 #include "ui/base/geometry/dimension.h"
 
@@ -23,7 +23,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
 // keep below to enable #ifdef private public
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

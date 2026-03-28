@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PIXEL_ROUND_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PIXEL_ROUND_TEST_NG_H
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/flex/flex_model_ng.h"

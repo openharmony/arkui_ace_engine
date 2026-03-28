@@ -14,8 +14,8 @@
  */
 
 #include "image_base.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
 namespace OHOS::Ace::NG {
 

@@ -28,9 +28,11 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
-#include "frameworks/core/event/pointer_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/ui_extension/platform_pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
+#include "core/event/pointer_event.h"
+
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_resource_register.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_resource_register.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/common/asset/mock_asset.h"
 
 #include "common/include/window_session_property.h"
@@ -468,10 +468,10 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadPixelM
     };
     auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
     ASSERT_NE(sceneSession_, nullptr);
-    
+
     auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
-    
+
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -491,7 +491,7 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadPixelM
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);
 }
- 
+
 /**
  * @tc.name: OnPreLoadStartingWindowFinished_WithValidPreloadSvgBuffer
  * @tc.desc: Test OnPreLoadStartingWindowFinished when valid preload SVG buffer is set
@@ -507,10 +507,10 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadSvgBuf
     };
     auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
     ASSERT_NE(sceneSession_, nullptr);
-    
+
     auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
-    
+
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -532,7 +532,7 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadSvgBuf
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);
 }
- 
+
 /**
  * @tc.name: OnPreLoadStartingWindowFinished_WithNoPreloadData
  * @tc.desc: Test OnPreLoadStartingWindowFinished when no preload data is set
@@ -548,10 +548,10 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithNoPreloadData, Tes
     };
     auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
     ASSERT_NE(sceneSession_, nullptr);
-    
+
     auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
-    
+
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -569,7 +569,7 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithNoPreloadData, Tes
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);
 }
- 
+
 /**
  * @tc.name: OnPreLoadStartingWindowFinished_WithNoStartingWindow
  * @tc.desc: Test OnPreLoadStartingWindowFinished with no starting window

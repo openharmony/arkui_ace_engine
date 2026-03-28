@@ -23,14 +23,14 @@
 #include "base/memory/ace_type.h"
 #define protected public
 #define private public
-#include "foundation/arkui/ace_engine/test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "frameworks/compatible/components/input/textinput_composed_element.h"
 #undef private
 #undef protected
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/pipeline_ng/pipeline_context.h"

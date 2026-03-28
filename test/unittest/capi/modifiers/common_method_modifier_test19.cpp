@@ -329,7 +329,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityDefaultFocusTestVa
     ASSERT_NE(frameNode, nullptr);
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
-    // test/mock/core/pipeline/mock_pipeline_context.cpp
+    // test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     ASSERT_NE(accessibilityManager, nullptr);
 

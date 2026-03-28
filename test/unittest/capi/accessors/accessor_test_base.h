@@ -22,11 +22,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using testing::NiceMock;
 
@@ -87,7 +87,7 @@ public:
         themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));

@@ -17,12 +17,14 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-#include "test/mock/base/mock_mouse_style.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/pattern/mock_pattern.h"
+#include <cstdio>
+#include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
@@ -46,6 +48,17 @@ RefPtr<CustomNode> PipelineContextTestNg::customNode_ = nullptr;
 RefPtr<PipelineContext> PipelineContextTestNg::context_ = nullptr;
 
 constexpr uint64_t LAST_VSYNC_TIME = 1000;
+
+namespace {
+class RestoreInfoPattern final : public Pattern {
+    DECLARE_ACE_TYPE(RestoreInfoPattern, Pattern);
+public:
+    std::string ProvideRestoreInfo() override
+    {
+        return "Default restore info";
+    }
+};
+} // namespace
 
 void PipelineContextTestNg::ResetEventFlag(int32_t testFlag)
 {
@@ -79,8 +92,9 @@ void PipelineContextTestNg::SetUpTestSuite()
         .WillRepeatedly(testing::Return(false));
     EXPECT_CALL(*window, FlushModifier()).Times(AnyNumber());
     EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
+    auto frontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
     context_ = AceType::MakeRefPtr<PipelineContext>(
-        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, frontend, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
     context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
@@ -96,8 +110,13 @@ void PipelineContextTestNg::SetUpTestSuite()
 
 void PipelineContextTestNg::TearDownTestSuite()
 {
-    context_->Destroy();
-    context_->window_.reset();
+    if (context_) {
+        context_->Destroy();
+        context_->window_.reset();
+    }
+    frameNode_ = nullptr;
+    customNode_ = nullptr;
+    context_ = nullptr;
     MockContainer::TearDown();
 }
 
@@ -151,6 +170,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg001, TestSize.Level1)
     EXPECT_TRUE(flagUpdate);
     EXPECT_FALSE(context_->dirtyNodes_.empty());
     context_->dirtyNodes_.clear();
+    customNode_->SetUpdateFunction([]() {});
 }
 
 /**
@@ -1307,6 +1327,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
      * @tc.expected: The return value of function is true.
      */
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    testing::Mock::AllowLeak(AceType::RawPtr(frontend));
     EXPECT_CALL(*frontend, OnBackPressed()).WillRepeatedly(testing::Return(true));
     context_->weakFrontend_ = frontend;
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1521,47 +1542,35 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg029, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
 {
+    std::printf("030: start\n");
+    std::fflush(stdout);
     /**
      * @tc.steps1: init a mockPattern.
      * @tc.expected: some calls by mockPattern.
      */
-    RefPtr<MockPattern> mockPattern_ = AceType::MakeRefPtr<MockPattern>();
-    Mock::AllowLeak(mockPattern_.rawPtr_);
-    EXPECT_CALL(*mockPattern_, ProvideRestoreInfo())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return("Default restore info"));
-    EXPECT_CALL(*mockPattern_, GetContextParam()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
-    EXPECT_CALL(*mockPattern_, CreatePaintProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<PaintProperty>()));
-    EXPECT_CALL(*mockPattern_, CreateLayoutProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<LayoutProperty>()));
-    EXPECT_CALL(*mockPattern_, CreateEventHub())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<EventHub>()));
-    EXPECT_CALL(*mockPattern_, CreateAccessibilityProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<AccessibilityProperty>()));
-    EXPECT_CALL(*mockPattern_, OnAttachToFrameNode()).Times(AnyNumber());
-    EXPECT_CALL(*mockPattern_, OnDetachFromFrameNode(_)).Times(AnyNumber());
-
-    /**
-     * @tc.steps2: init a patternCreator and Create frameNodes and call StoreNode.
-     * @tc.expected: StoreNode success.
-     */
-    auto patternCreator_ = [&mockPattern_]() { return mockPattern_; };
+    auto patternCreator_ = []() { return AceType::MakeRefPtr<RestoreInfoPattern>(); };
+    std::printf("030: before create frame nodes\n");
+    std::fflush(stdout);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId1 = frameNodeId_;
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    std::printf("030: frameNode_1 created\n");
+    std::fflush(stdout);
     ASSERT_NE(context_, nullptr);
     context_->StoreNode(DEFAULT_RESTORE_ID0, frameNode_1);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID0], frameNode_1);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId2 = frameNodeId_;
     auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, patternCreator_);
+    std::printf("030: frameNode_2 created\n");
+    std::fflush(stdout);
     context_->StoreNode(DEFAULT_RESTORE_ID0, frameNode_2);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID0], frameNode_2);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId3 = frameNodeId_;
     auto frameNode_3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    std::printf("030: frameNode_3 created\n");
+    std::fflush(stdout);
     context_->StoreNode(DEFAULT_RESTORE_ID1, frameNode_3);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID1], frameNode_3);
     context_->storeNode_[DEFAULT_RESTORE_ID2] = nullptr;
@@ -1571,7 +1580,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
      * @tc.expected: restoreNodeInfo_ is empty.
      */
     auto jsonNodeInfo = context_->GetStoredNodeInfo();
+    std::printf("030: GetStoredNodeInfo done\n");
+    auto dumpChild = jsonNodeInfo->GetChild();
+    while (dumpChild && dumpChild->IsValid()) {
+        std::printf("030: json key=%s value=%s\n", dumpChild->GetKey().c_str(), dumpChild->GetString().c_str());
+        dumpChild = dumpChild->GetNext();
+    }
+    std::fflush(stdout);
     context_->RestoreNodeInfo(jsonNodeInfo->GetChild());
+    std::printf("030: RestoreNodeInfo child done\n");
+    std::fflush(stdout);
     EXPECT_TRUE(context_->restoreNodeInfo_.empty());
 
     /**
@@ -1579,6 +1597,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
      * @tc.expected: restoreNodeInfo_ is not empty.
      */
     context_->RestoreNodeInfo(std::move(jsonNodeInfo));
+    std::printf("030: RestoreNodeInfo root done\n");
+    std::fflush(stdout);
+    std::printf("030: restoreNodeInfo size=%zu\n", context_->restoreNodeInfo_.size());
+    for (const auto& item : context_->restoreNodeInfo_) {
+        std::printf("030: restoreNodeInfo key=%d value=%s\n", item.first, item.second.c_str());
+    }
+    std::fflush(stdout);
     EXPECT_FALSE(context_->restoreNodeInfo_.empty());
 
     /**
@@ -1594,6 +1619,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
     EXPECT_FALSE(rt);
     auto iter1 = context_->restoreNodeInfo_.find(DEFAULT_RESTORE_ID0);
     EXPECT_EQ(iter1, context_->restoreNodeInfo_.end());
+
+    context_->storeNode_.clear();
+    context_->restoreNodeInfo_.clear();
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId1);
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId2);
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId3);
 }
 
 /**
@@ -2713,7 +2744,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
     context_->touchOptimizer_->rvsSignalEnable_ = true;
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     // 测试OnTouchEvent中touchOptimizer_存在的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2722,7 +2753,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     context_->OnTouchEvent(touchEvent, false);
-    
+
     // 验证touchOptimizer_的状态
     EXPECT_FALSE(context_->touchOptimizer_->GetIsTpFlushFrameDisplayPeriod());
     EXPECT_FALSE(context_->touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
@@ -2742,25 +2773,25 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TpFlushFrameDisplayPeriod_
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 调用FlushVsync
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
+
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
 }
@@ -2779,25 +2810,25 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameAfterTpFlush_Tes
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 调用FlushVsync
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
+
     // 重置状态
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
@@ -2816,7 +2847,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
     context_->touchOptimizer_->slideAccept_ = false; // 这将导致NeedTpFlushVsync返回true
@@ -2829,7 +2860,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     touchEvent.sourceType = SourceType::TOUCH;
-    
+
     // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
     EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
@@ -2886,19 +2917,19 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回false
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 创建触摸事件
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2907,10 +2938,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     touchEvent.sourceType = SourceType::TOUCH;
-    
+
     // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
 }
 

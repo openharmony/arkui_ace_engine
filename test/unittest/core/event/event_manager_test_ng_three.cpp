@@ -14,10 +14,13 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/common/mock_frontend.h"
+
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -349,11 +352,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest070, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
-    
+
     event.action = MouseAction::MOVE;
     event.button = MouseButton::RIGHT_BUTTON;
     eventManager->MouseTest(event, pageNode, touchRestrict);
-    
+
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
@@ -684,7 +687,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest082, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     TouchEvent touchPoint;
     touchPoint.id = 1;
-    
+
     touchPoint.type = TouchType::DOWN;
     eventManager->CheckDownEvent(touchPoint);
     eventManager->downFingerIds_[1] = 1;

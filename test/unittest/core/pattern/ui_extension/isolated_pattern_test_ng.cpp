@@ -21,13 +21,14 @@
 #include "accessibility_element_info.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "adapter/ohos/entrance/ace_container.h"
 
 using namespace testing;
@@ -104,7 +105,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest001, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -143,7 +144,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest002, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -192,7 +193,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest003, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -215,7 +216,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest004, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -286,7 +287,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest005, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     isolatedPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    
+
     /**
      * @tc.steps: step4. call OnDetachFromFrameNode.
      * @tc.expected: expect dynamicComponentRenderer_ is null after called.
@@ -335,7 +336,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest006, TestSize.Level1)
     std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent;
     isolatedPattern->DispatchPointerEvent(pointerEvent);
 
-    
+
     /**
      * @tc.steps: step5. call DispatchPointerEvent.
      */
@@ -344,7 +345,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest006, TestSize.Level1)
     RefPtr<FrameNode> host = FrameNode::CreateFrameNode(TAG, 2, pattern);
     isolatedPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(host, runtime, curIsolatedInfo);
     isolatedPattern->DispatchPointerEvent(pointerEvent);
-    
+
     /**
      * @tc.steps: step6. call DispatchFocusActiveEvent.
      */
@@ -476,7 +477,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest011, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -530,7 +531,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest012, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -590,7 +591,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest013, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -632,7 +633,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest014, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */
@@ -686,7 +687,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest015, TestSize.Level1)
         ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     ASSERT_NE(isolatedNode, nullptr);
     EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-    
+
     /**
      * @tc.steps: step2. get IsolatedPattern
      */

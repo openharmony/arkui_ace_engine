@@ -15,9 +15,9 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "frameworks/core/components_ng/layout/layout_algorithm.h"
 #include "frameworks/core/components_ng/layout/layout_wrapper_node.h"

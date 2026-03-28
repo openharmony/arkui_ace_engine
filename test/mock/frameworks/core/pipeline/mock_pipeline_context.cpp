@@ -24,19 +24,23 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
+#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_element_info.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace OHOS::Ace {
@@ -44,6 +48,8 @@ namespace OHOS::Ace {
 static bool g_setBoolStatus = false;
 class MockAccessibilityManager : public AccessibilityManager {
 public:
+    using ActionArguments = std::map<std::string, std::string>;
+
     MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
     MOCK_METHOD(void, SendWebAccessibilityAsyncEvent,
         (const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::WebPattern>& webPattern), (override));
@@ -96,7 +102,7 @@ public:
             const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, ExecuteExtensionActionNG,
-        (int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action,
+        (int64_t elementId, const ActionArguments& actionArguments, int32_t action,
             const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, TransferAccessibilityAsyncEvent,
@@ -507,7 +513,12 @@ void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
-void PipelineContext::SetRootRect(double width, double height, double offset) {}
+void PipelineContext::SetRootRect(double width, double height, double offset)
+{
+    rootWidth_ = width;
+    rootHeight_ = height;
+    MarkLpxDirtyNodes();
+}
 
 void PipelineContext::FlushBuild() {}
 
@@ -534,6 +545,7 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
         return;
     }
+    FlushAsyncLoadTask();
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -1241,6 +1253,19 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     CHECK_NULL_RETURN(rootNode_, nullptr);
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
 }
+
+void PipelineContext::AddAsyncLoadTask(std::function<void()>&& task)
+{
+    asyncLoadTasks_.emplace_back(task);
+}
+
+void PipelineContext::FlushAsyncLoadTask()
+{
+    auto asyncLoadTasks = std::move(asyncLoadTasks_);
+    for (auto& task : asyncLoadTasks) {
+        task();
+    }
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1686,6 +1711,28 @@ void NG::PipelineContext::SetMagnifierController(const RefPtr<NG::MagnifierContr
 RefPtr<NG::MagnifierController> NG::PipelineContext::GetMagnifierController() const
 {
     return magnifierController_;
+}
+
+void NG::PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.emplace(node);
+}
+
+void NG::PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.erase(node);
+}
+
+void NG::PipelineContext::MarkLpxDirtyNodes()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}

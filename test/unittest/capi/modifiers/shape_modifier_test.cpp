@@ -15,9 +15,9 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"

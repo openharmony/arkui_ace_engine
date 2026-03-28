@@ -14,7 +14,7 @@
  */
 
 #include "tabs_test_ng.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/tab_bar/tab_theme.h"

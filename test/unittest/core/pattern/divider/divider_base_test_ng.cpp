@@ -15,8 +15,8 @@
 
 #include "divider_base_test_ng.h"
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void DividerBaseTestNG::SetUpTestSuite()

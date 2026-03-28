@@ -16,8 +16,8 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ref_counter.h"
 #include "base/memory/referenced.h"
@@ -41,7 +41,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

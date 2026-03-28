@@ -341,11 +341,13 @@ RefPtr<CustomNode> CustomNode::FindParentCustomNode() const
     return nullptr;
 }
 
-void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+void CustomNode::SetDestroying(bool isDestroying, bool cleanStatus)
 {
+    UINode::SetDestroying(isDestroying, cleanStatus);
     if (isDestroying && cleanStatus) {
         auto context = GetContext();
         CHECK_NULL_VOID(context);
+        // add customnode to pipeline when state change, destroy them next vsync
         context->AddPendingDeleteCustomNode(Claim(this));
     }
 }
