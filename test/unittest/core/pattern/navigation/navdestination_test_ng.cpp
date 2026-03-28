@@ -43,6 +43,8 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "mock_navdestination_scrollable_processor.h"
+#include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "mock_navigation_stack.h"
 
 using namespace testing;
