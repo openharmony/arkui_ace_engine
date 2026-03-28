@@ -3443,7 +3443,7 @@ bool OverlayManager::RemoveModalInOverlay()
     if (isProhibitBack_ && pattern->GetTargetId() < 0) {
         return true;
     }
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_RETURN(builder, false);
     if (!ModalExitProcess(topModalNode)) {
         return false;
@@ -3507,7 +3507,7 @@ bool OverlayManager::RemoveAllModalInOverlayByStack()
         }
         auto rootNode = FindWindowScene(topModalNode);
         CHECK_NULL_RETURN(rootNode, true);
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
         CHECK_NULL_RETURN(builder, false);
         ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
@@ -3570,7 +3570,7 @@ bool OverlayManager::OnRemoveAllModalInOverlayByList()
         }
         auto rootNode = FindWindowScene(topModalNode);
         CHECK_NULL_RETURN(rootNode, true);
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
         CHECK_NULL_RETURN(builder, false);
         ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
@@ -3716,7 +3716,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_RETURN(builder, false);
     topModalNode->GetPattern<ModalPresentationPattern>()->OnWillDisappear();
     auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
@@ -4007,13 +4007,20 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
     }
 }
 
+RefPtr<FrameNode> OverlayManager::GetFirstFrameNodeOfModalBuilder(const RefPtr<FrameNode>& topModalNode) const
+{
+    auto buildNode = topModalNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(buildNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
+}
+
 void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
     std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto buildNode = buildNodeFunc();
+    RefPtr<UINode> buildNode = buildNodeFunc();
     CHECK_NULL_VOID(buildNode);
     auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
@@ -4052,7 +4059,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     } else {
         MountToParentWithService(rootNode, modalNode, levelOrder);
     }
-    modalNode->AddChild(builder);
+    modalNode->AddChild(buildNode);
     auto modalNodeParent = modalNode->GetParent();
     if (!modalNodeParent) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "ModalPage MountToParent error");
@@ -4107,7 +4114,7 @@ void OverlayManager::HandleModalPop(
     if (!CheckTopModalNode(topModalNode, targetId)) {
         return;
     }
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_VOID(builder);
     if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
@@ -4538,7 +4545,7 @@ void OverlayManager::DismissContentCover()
     }
     if (modalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         ModalPageLostFocus(modalNode);
-        auto builder = AceType::DynamicCast<FrameNode>(modalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(modalNode);
         if (!ModalPageExitProcess(modalNode)) {
             return;
         }

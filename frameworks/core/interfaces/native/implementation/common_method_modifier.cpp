@@ -6318,20 +6318,25 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
         .value_or(ModalTransition::DEFAULT);
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
-        CallbackHelper(*optBuilder).BuildAsync([frameNode, modalStyle](
-            const RefPtr<UINode>& uiNode) mutable {
-            auto weakNode = AceType::WeakClaim(frameNode);
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ContentCoverParam contentCoverParam;
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
-                nullptr, nullptr, nullptr, nullptr, contentCoverParam);
-            }, node);
+        auto buildFunc =
+            [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PipelineContext::SetCallBackNode(weak);
+            auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            auto finalNode = CreateProxyNode(builderNode);
+#else
+            auto finalNode = builderNode;
+#endif
+            ViewStackProcessor::GetInstance()->Push(finalNode);
+        };
+        ContentCoverParam contentCoverParam;
+        ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
+            nullptr, nullptr, nullptr, nullptr, contentCoverParam);
     } else {
         ContentCoverParam contentCoverParam;
-        std::function<RefPtr<UINode>()> buildFunc = nullptr;
+        std::function<void()> buildFunc = nullptr;
         ViewAbstractModelStatic::BindContentCover(frameNode, false, nullptr, std::move(buildFunc), modalStyle, nullptr,
             nullptr, nullptr, nullptr, contentCoverParam);
     }
@@ -6370,21 +6375,22 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
 
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
-        CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
-            changeEvent = std::move(changeEvent),
-            onShowCallback = std::move(onShowCallback),
-            onDismissCallback = std::move(onDismissCallback),
-            onWillShowCallback = std::move(onWillShowCallback),
-            onWillDismissCallback = std::move(onWillDismissCallback)
-        ](const RefPtr<UINode>& uiNode) mutable {
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
-                modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
-                std::move(onWillDismissCallback), contentCoverParam);
-            }, node);
+        auto buildFunc =
+            [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PipelineContext::SetCallBackNode(weak);
+            auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            auto finalNode = CreateProxyNode(builderNode);
+#else
+            auto finalNode = builderNode;
+#endif
+            ViewStackProcessor::GetInstance()->Push(finalNode);
+        };
+        ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
+            modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+            std::move(onWillDismissCallback), contentCoverParam);
     } else {
         ViewAbstractModelStatic::BindContentCover(frameNode, false, std::move(changeEvent), nullptr,
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback),

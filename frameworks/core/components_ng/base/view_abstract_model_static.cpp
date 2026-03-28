@@ -502,13 +502,19 @@ void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(const RefPtr<F
 }
 
 void ViewAbstractModelStatic::BindContentCover(FrameNode* frameNode, bool isShow,
-    std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+    std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
     NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
     const NG::ContentCoverParam& contentCoverParam)
 {
     auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
@@ -524,7 +530,7 @@ void ViewAbstractModelStatic::BindContentCover(FrameNode* frameNode, bool isShow
     };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::MODAL_PAGE_TAG);
 
-    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
         std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
         contentCoverParam, targetNode);
 }
