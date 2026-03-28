@@ -42,8 +42,8 @@ component_modules = [
   "menu",
 ]
 
-if (!ace_engine_feature_wearable) { 
-    component_modules += [ "folder_stack", ] 
+if (!ace_engine_feature_wearable) {
+    component_modules += [ "folder_stack", ]
 }
 
 component_modules_libs = []

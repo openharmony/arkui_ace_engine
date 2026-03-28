@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "frameworks/core/event/pointer_event.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"

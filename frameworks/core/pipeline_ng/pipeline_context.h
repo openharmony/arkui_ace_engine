@@ -54,9 +54,7 @@
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#endif
+
 #include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -93,6 +91,7 @@ class PageInfo;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
 class SelectOverlayManager;
+class UIExtensionManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -537,10 +536,7 @@ public:
     RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
-    {
-        return uiExtensionManager_;
-    }
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager();
 #endif
 
     const RefPtr<DragDropManager>& GetDragDropManager();
@@ -1655,7 +1651,7 @@ private:
     RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
+    RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();

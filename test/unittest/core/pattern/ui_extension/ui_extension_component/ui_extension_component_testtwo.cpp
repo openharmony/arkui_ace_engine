@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -482,7 +483,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
     AAFwk::Want reply;
     auto ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
@@ -519,7 +520,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
     BusinessDataSendType type = BusinessDataSendType::ASYNC;
     auto ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
@@ -907,7 +908,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest002, TestSize
     pattern->instanceId_ = context->GetInstanceId();
     pattern->OnDetachContext(rawContext);
     EXPECT_EQ(pattern->hasDetachContext_, true);
-    
+
     pattern->OnDetachContext(rawContext);
     pattern->hasDetachContext_ = false;
     auto host = pattern->GetHost();
@@ -1385,20 +1386,20 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleMouseEvent, TestSize.Le
     mouseInfo.SetPointerEvent(pointerEvent);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetSourceDevice(SourceType::MOUSE);
     mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PULL_UP);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PRESS);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::RELEASE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);

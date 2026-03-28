@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
 #include "core/image/image_file_cache.h"
@@ -191,6 +192,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         avoidInfoMgr_->SetInstanceId(instanceId);
     }
 #ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_= MakeRefPtr<UIExtensionManager>();
     if (uiExtensionManager_) {
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
         uiExtensionManager_->SetInstanceId(instanceId);
@@ -219,6 +221,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         avoidInfoMgr_->SetInstanceId(instanceId);
     }
 #ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_= MakeRefPtr<UIExtensionManager>();
     if (uiExtensionManager_) {
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
         uiExtensionManager_->SetInstanceId(instanceId);
@@ -243,6 +246,7 @@ PipelineContext::PipelineContext()
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
     }
 #ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_= MakeRefPtr<UIExtensionManager>();
     if (uiExtensionManager_) {
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
     }
@@ -695,6 +699,13 @@ void PipelineContext::FlushDragEventVoluntarily()
     }
     manager->DispatchLastDragEventVoluntarily(isTransFlag_);
 }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 void PipelineContext::FlushDragEvents()
 {

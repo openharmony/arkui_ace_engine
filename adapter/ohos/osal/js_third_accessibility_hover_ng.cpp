@@ -16,7 +16,6 @@
 
 #include "accessibility_system_ability_client.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
-#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_accessibility_hover_ng.h"
 
 using namespace OHOS::Accessibility;
@@ -136,7 +135,7 @@ std::pair<bool, bool> AccessibilityHoverManagerForThirdNG::GetSearchStrategyForT
                 }
             }
         }
-    
+
         auto hitTestMode = nodeInfo.GetHitTestBehavior();
         UpdateSearchStrategyByHitTestModeStr(
             hitTestMode, shouldSearchSelf, shouldSearchChildren);
@@ -327,7 +326,7 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
 
     NG::RectT<int32_t> rectInt { static_cast<int32_t>(left), static_cast<int32_t>(right),
         static_cast<int32_t>(width), static_cast<int32_t>(height) };
-    
+
     renderContext->UpdateAccessibilityFocusRect(rectInt);
     renderContext->UpdateAccessibilityFocus(true, ACCESSIBILITY_FOCUS_WITHOUT_EVENT);
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
@@ -548,7 +547,7 @@ void DumpHandleAction(
 
     std::map<std::string, std::string> paramsMap;
     jsAccessibilityManagerTemp->ProcessParameters(op, params, paramsMap);
-    
+
     MockDumpOperatorCallBack operatorCallback;
     jsThirdProviderOperator->ExecuteAction(nodeId, op, paramsMap, 0, operatorCallback);
 }

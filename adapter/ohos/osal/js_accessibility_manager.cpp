@@ -25,6 +25,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
@@ -32,6 +33,7 @@
 #include "frameworks/core/accessibility/utils/accessibility_action_function_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
+
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
@@ -7647,7 +7649,7 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
     auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     interactionOperation->SetWebPattern(webPattern);
-    
+
     Accessibility::Registration registration {
         .windowId = static_cast<int32_t>(windowId),
         .parentWindowId = static_cast<int32_t>(parentWindowId),

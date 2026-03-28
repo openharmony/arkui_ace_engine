@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
