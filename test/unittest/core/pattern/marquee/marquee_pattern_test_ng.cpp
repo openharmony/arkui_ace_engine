@@ -26,6 +26,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #undef protected
 #undef private
 
@@ -38,8 +42,19 @@ namespace OHOS::Ace::NG {
 
 class MarqueePatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+        MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+        MockPipelineContext::SetUp();
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+    }
 };
 
 class MockLayoutWrapper : public LayoutWrapper {
@@ -338,11 +353,14 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnModifyDone001, TestSize.Level1)
     auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
     frameNode->paintProperty_ = paintProperty;
 
-    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
-    frameNode->AddChild(textFrameNode);
+    auto textFrameNode1 = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode1);
 
+    auto textFrameNode2 = FrameNode::CreateFrameNode("Text", 3, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode2);
+
+    auto marqueeModel = AceType::DynamicCast<MarqueePattern>(pattern);
     WeakPtr<FrameNode> hostNode(frameNode);
-    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
     marqueeModel->frameNode_ = hostNode;
 
     marqueeModel->OnModifyDone();
@@ -364,8 +382,11 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnModifyDone002, TestSize.Level1)
     auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
     frameNode->paintProperty_ = paintProperty;
 
-    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
-    frameNode->AddChild(textFrameNode);
+    auto textFrameNode1 = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode1);
+
+    auto textFrameNode2 = FrameNode::CreateFrameNode("Text", 3, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode2);
 
     WeakPtr<FrameNode> hostNode(frameNode);
     auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
@@ -765,5 +786,1272 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection002, TestSize.Leve
     MarqueePattern marqueeModel;
     auto direction = marqueeModel.GetTextDirection("\u0591Hello", TextDirection::LTR);
     EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection003
+ * @tc.desc: Test GetTextDirection with RTL parameter (should return RTL directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection003, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("Hello World", TextDirection::RTL);
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection004
+ * @tc.desc: Test GetTextDirection with LTR parameter (should return LTR directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection004, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("Hebrew text", TextDirection::LTR);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection005
+ * @tc.desc: Test GetTextDirection with AUTO and text content (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection005, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u05D0\u05D1\u05D2", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection006
+ * @tc.desc: Test GetTextDirection with AUTO and text content (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection006, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u0627\u0628\u062A\u062B", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection007
+ * @tc.desc: Test GetTextDirection with empty string (should return default LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection007, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection008
+ * @tc.desc: Test GetTextDirection with mixed text - LTR first
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection008, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // LTR text first, then RTL - should return LTR (first detection wins)
+    auto direction = marqueeModel.GetTextDirection("Hello\u05D0", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection009
+ * @tc.desc: Test GetTextDirection with mixed text - first char then LTR (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection009, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u05D0Hello", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection010
+ * @tc.desc: Test GetTextDirection with mixed text - first char then LTR (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection010, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u0627Hello", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection011
+ * @tc.desc: Test GetTextDirection with AUTO and LTR text content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection011, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("Left to Right text", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection012
+ * @tc.desc: Test GetTextDirection with ASCII characters (should detect LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection012, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("ABC123", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection013
+ * @tc.desc: Test GetTextDirection with special character (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection013, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u05D0", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection014
+ * @tc.desc: Test GetTextDirection with special character (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection014, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u0627", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection015
+ * @tc.desc: Test GetTextDirection with multiple characters (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection015, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u05D0\u05D1\u05D2\u05D3\u05D4", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection016
+ * @tc.desc: Test GetTextDirection with multiple characters (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection016, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u0627\u0628\u062C\u062F\u0647", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection017
+ * @tc.desc: Test GetTextDirection with numbers only (should detect LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection017, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("123456789", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection018
+ * @tc.desc: Test GetTextDirection with whitespace only (should return default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection018, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("   ", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection019
+ * @tc.desc: Test GetTextDirection with mixed scripts (mock returns LTR)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection019, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    // Due to mock TextLayoutadapter always returning false for RTL, this returns LTR
+    auto direction = marqueeModel.GetTextDirection("\u05D0\u0627\u05D1\u0628", TextDirection::AUTO);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection020
+ * @tc.desc: Test GetTextDirection with text content and RTL parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection020, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("\u05D0\u05D1", TextDirection::RTL);
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart001
+ * @tc.desc: Test CalcAnimationStart with first marquee at visibleAreaStart, directionMoveLeft=true, condition true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart001, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 200.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart002
+ * @tc.desc: Test CalcAnimationStart with first marquee at visibleAreaStart, directionMoveLeft=true, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = -100.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, -200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart003
+ * @tc.desc: Test CalcAnimationStart with first marquee at visibleAreaStart, directionMoveLeft=false, condition true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart003, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = 300.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart004
+ * @tc.desc: Test CalcAnimationStart with first marquee at visibleAreaStart, directionMoveLeft=false, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart004, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = -100.0f;
+    float aniEndPos = 100.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart005
+ * @tc.desc: Test CalcAnimationStart with both marquees to the left of visible area, directionMoveLeft=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart005, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -400.0f;
+    float secondStart = -400.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, -200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart006
+ * @tc.desc: Test CalcAnimationStart with second marquee at visibleAreaStart, directionMoveLeft=true, condition true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart006, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 300.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = -100.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart007
+ * @tc.desc: Test CalcAnimationStart with second marquee at visibleAreaStart, directionMoveLeft=true, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart007, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 300.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = -100.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart008
+ * @tc.desc: Test CalcAnimationStart with second marquee at visibleAreaStart, directionMoveLeft=false, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart008, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -300.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = -100.0f;
+    float aniEndPos = 300.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, 200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart009
+ * @tc.desc: Test CalcAnimationStart with both marquees outside visible area, directionMoveLeft=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart009, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -300.0f;
+    float secondStart = -500.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = -200.0f;
+    float aniEndPos = 100.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, -300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart010
+ * @tc.desc: Test CalcAnimationStart with both marquees outside visible area, directionMoveLeft=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart010, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 400.0f;
+    float secondStart = 600.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, 400.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart011
+ * @tc.desc: Test CalcAnimationStart with both marquees outside visible area, directionMoveLeft=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart011, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -400.0f;
+    float secondStart = -600.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = 300.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(firstStart, -400.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart012
+ * @tc.desc: Test CalcAnimationStart with first marquee to the right of visible area, directionMoveLeft=true,
+ *  condition true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart012, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 400.0f;
+    float secondStart = 600.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 800.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 600.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart013
+ * @tc.desc: Test CalcAnimationStart with no marquee in visible area, directionMoveLeft=true, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart013, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 400.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = -100.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart014
+ * @tc.desc: Test CalcAnimationStart with both marquees outside visible area, directionMoveLeft=false, condition true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart014, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -400.0f;
+    float secondStart = -600.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = -700.0f;
+    float aniEndPos = 300.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, -600.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart015
+ * @tc.desc: Test CalcAnimationStart with both marquees outside visible area, directionMoveLeft=false, condition false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart015, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = -400.0f;
+    float secondStart = -600.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 100.0f;
+    float aniEndPos = 300.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, -200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart016
+ * @tc.desc: Test CalcAnimationStart with small visible area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart016, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(200.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 200.0f;
+    float aniStartPos = 200.0f;
+    float aniEndPos = -300.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 200.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart017
+ * @tc.desc: Test CalcAnimationStart with textTotalLen equal to boundary condition, directionMoveLeft=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart017, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(100.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 100.0f;
+    float aniStartPos = 150.0f;
+    float aniEndPos = -200.0f;
+    bool directionMoveLeft = true;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, 100.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalcAnimationStart018
+ * @tc.desc: Test CalcAnimationStart with textTotalLen equal to boundary condition, directionMoveLeft=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart018, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(100.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    float firstStart = 0.0f;
+    float secondStart = 0.0f;
+    float textTotalLen = 100.0f;
+    float aniStartPos = -150.0f;
+    float aniEndPos = 200.0f;
+    bool directionMoveLeft = false;
+
+    marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
+
+    EXPECT_EQ(secondStart, -100.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset001
+ * @tc.desc: Test GetDoubleTextOffset with IsRunMarquee() returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto res = marqueeModel.GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset002
+ * @tc.desc: Test GetDoubleTextOffset with DEFAULT marquee update strategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::DEFAULT);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset003
+ * @tc.desc: Test GetDoubleTextOffset with PRESERVE_POSITION strategy and playStatus=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset003, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(false);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset004
+ * @tc.desc: Test GetDoubleTextOffset with PRESERVE_POSITION strategy, playStatus=true, but no lastAnimationOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset004, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset005
+ * @tc.desc: Test GetDoubleTextOffset with lastAnimationOffset set but secondChildLastAnimationOffset not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset005, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(50.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset006
+ * @tc.desc: Test GetDoubleTextOffset with secondChildLastAnimationOffset set but lastAnimationOffset not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset006, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(100.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 300.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset007
+ * @tc.desc: Test GetDoubleTextOffset with both lastAnimationOffset and secondChildLastAnimationOffset set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset007, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(-50.0f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(-150.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, -50.0f);
+    EXPECT_EQ(res.second, -150.0f);
+    EXPECT_FALSE(marqueeModel->lastAnimationOffset_.has_value());
+    EXPECT_FALSE(marqueeModel->secondChildLastAnimationOffset_.has_value());
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset008
+ * @tc.desc: Test GetDoubleTextOffset with positive offset values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset008, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(75.0f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(275.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 75.0f);
+    EXPECT_EQ(res.second, 275.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset009
+ * @tc.desc: Test GetDoubleTextOffset with zero offset values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset009, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(0.0f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(0.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset010
+ * @tc.desc: Test GetDoubleTextOffset with large offset values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset010, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(-500.0f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(-700.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, -500.0f);
+    EXPECT_EQ(res.second, -700.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset011
+ * @tc.desc: Test GetDoubleTextOffset with text width less than marquee width (no scroll)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset011, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(300.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(-100.0f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(-300.0f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_EQ(res.first, 0.0f);
+    EXPECT_EQ(res.second, 500.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleTextOffset012
+ * @tc.desc: Test GetDoubleTextOffset with fractional offset values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset012, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdatePlayerStatus(true);
+    frameNode->paintProperty_ = paintProperty;
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetFrameSize(SizeF(100.0f, 50.0f));
+    frameNode->SetGeometryNode(geoNode);
+
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(200.0f, 30.0f));
+    textFrameNode->SetGeometryNode(textGeo);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->lastAnimationOffset_ = OffsetF(123.5f, 0.0f);
+    marqueeModel->secondChildLastAnimationOffset_ = OffsetF(323.5f, 0.0f);
+
+    auto res = marqueeModel->GetDoubleTextOffset();
+    EXPECT_FLOAT_EQ(res.first, 123.5f);
+    EXPECT_FLOAT_EQ(res.second, 323.5f);
 }
 } // namespace OHOS::Ace::NG

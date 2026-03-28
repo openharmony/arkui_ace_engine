@@ -100,6 +100,11 @@ public:
 
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
 
+    static const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+        const float textStartY);
+    static const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+        const float textStartY);
+
     void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
