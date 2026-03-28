@@ -14,6 +14,8 @@
  */
 
 #include "custom_layout_options.h"
+#define protected public
+#define private public
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
@@ -1547,9 +1549,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureToTargetCachedItemHeight001, Te
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(Get3LinesIrregularDemoOptions(30, ITEM_MAIN_SIZE));
     model.SetRowsGap(Dimension(5));
-    CreateItemsInLazyForEach(30, [](uint32_t idx) {
-        return idx % 3 == 0 ? ITEM_MAIN_SIZE * 2 - 5 : ITEM_MAIN_SIZE - 5;
-    });
+    CreateItemsInLazyForEach(
+        30, [](uint32_t idx) { return idx % 3 == 0 ? ITEM_MAIN_SIZE * 2 - 5 : ITEM_MAIN_SIZE - 5; });
     CreateDone();
 
     // First, scroll down to make some items out of view
@@ -1562,6 +1563,341 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureToTargetCachedItemHeight001, Te
     EXPECT_EQ(pattern_->info_.startIndex_, 3);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 2);
     EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + 5);
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck001
+ * @tc.desc: Test PreloadItems debug check for gridMatrix_ row continuity during normal scrolling
+ *           Verifies that debug continuity check does not affect normal preload behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck001, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to trigger preload with cache
+    layoutProperty_->UpdateCachedCount(2);
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Verify preload was triggered and gridMatrix_ is properly populated
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck002
+ * @tc.desc: Test PreloadItems with large scroll that triggers skip logic
+ *           Verifies debug continuity check handles large jumps correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck002, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    // Large scroll to trigger skip logic and preload
+    ScrollBy(0, ITEM_MAIN_SIZE * 20);
+
+    // Verify grid state is valid after large scroll with preload
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_GT(pattern_->info_.startIndex_, 0);
+    EXPECT_TRUE(pattern_->info_.endIndex_ >= pattern_->info_.startIndex_);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck003
+ * @tc.desc: Test PreloadItems debug check when scrolling backward
+ *           Verifies continuity check works correctly during backward scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck003, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(50);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Scroll forward then backward to trigger preload in both directions
+    ScrollBy(0, ITEM_MAIN_SIZE * 5);
+    int32_t forwardStartIndex = pattern_->info_.startIndex_;
+    EXPECT_EQ(forwardStartIndex, 10);
+
+    ScrollBy(0, -ITEM_MAIN_SIZE * 2);
+
+    // Verify backward scroll with preload maintains valid state
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_LT(pattern_->info_.startIndex_, forwardStartIndex);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck004
+ * @tc.desc: Test PreloadItems with irregular items
+ *           Verifies debug continuity check handles irregular grid layout correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck004, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(Get3LinesIrregularDemoOptions(30, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Scroll with irregular items
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Verify irregular layout with preload maintains valid gridMatrix_
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_GT(pattern_->info_.startIndex_, 0);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck005
+ * @tc.desc: Test PreloadItems at grid boundaries (start and end)
+ *           Verifies continuity check handles edge cases at grid boundaries.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck005, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(20);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // At start - preload should handle boundary correctly
+    ScrollBy(0, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+
+    // Scroll to end
+    ScrollTo(ITEM_MAIN_SIZE * 15);
+    EXPECT_TRUE(pattern_->info_.reachEnd_);
+
+    // Preload at end boundary should work correctly
+    ScrollBy(0, ITEM_MAIN_SIZE);
+    EXPECT_TRUE(pattern_->info_.reachEnd_);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck006
+ * @tc.desc: Test PreloadItems with rapid consecutive scrolls
+ *           Verifies continuity check remains stable during rapid scroll operations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck006, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Rapid consecutive scrolls
+    for (int i = 0; i < 10; i++) {
+        ScrollBy(0, ITEM_MAIN_SIZE);
+    }
+
+    // Verify grid state is consistent after rapid scrolls
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 20);
+    EXPECT_EQ(pattern_->info_.endIndex_, 27);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+namespace {
+GridLayoutOptions GetGapDemoOptions(int32_t crossCount, float itemMainSize, int32_t gapSize)
+{
+    GridLayoutOptions options;
+    auto onGetStartIndexByOffset = [crossCount, itemMainSize](float offset) -> GridStartLineInfo {
+        if (offset < 0.0f) {
+            return { .startIndex = 0, .startLine = 0, .startOffset = 0 - offset, .totalOffset = offset };
+        }
+        int32_t line = offset / static_cast<int32_t>(itemMainSize);
+        float startOffset = std::fmod(offset, itemMainSize);
+        return {
+            .startIndex = line * crossCount, .startLine = line, .startOffset = 0 - startOffset, .totalOffset = offset
+        };
+    };
+    options.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+
+    auto onGetStartIndexByIndex = [crossCount, itemMainSize, gapSize](int32_t targetIndex) -> GridStartLineInfo {
+        int32_t line = targetIndex / crossCount;
+        return { .startIndex = line * crossCount,
+            .startLine = line - gapSize,
+            .startOffset = 0.0f,
+            .totalOffset = (line - gapSize) * itemMainSize };
+    };
+    options.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
+    return options;
+}
+} // namespace
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection001
+ * @tc.desc: Test CheckMatrixContinuous detects gap when getStartIndexByIndex
+ *           returns startLine shifted by -2 rows. A large scroll triggers skip
+ *           logic, rebuilding matrix from scratch. PreloadItems calls
+ *           getStartIndexByIndex for items not in the matrix, causing
+ *           FillMatrixFromStartIndex to start from a wrong line and creating
+ *           a gap between preload rows and viewport rows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection001, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 60);
+    EXPECT_EQ(pattern_->info_.endIndex_, 67);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection002
+ * @tc.desc: Test CheckMatrixContinuous detects larger gap when getStartIndexByIndex
+ *           returns startLine shifted by -4 rows. Uses a bigger gap to verify
+ *           the check handles multi-row discontinuities.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection002, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 4));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 60);
+    EXPECT_EQ(pattern_->info_.endIndex_, 67);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection003
+ * @tc.desc: Test CheckMatrixContinuous with gap via wrong getStartIndexByIndex
+ *           in a 3-column grid. Different column count changes row layout,
+ *           verifying the gap detection works across configurations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection003, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(3, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection004
+ * @tc.desc: Test CheckMatrixContinuous with gap on smaller scroll.
+ *           Uses a moderate scroll (10 rows) with cachedCount=2 to trigger
+ *           PreloadItems where backward cache items fall outside the matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection004, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 10);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 20);
+    EXPECT_EQ(pattern_->info_.endIndex_, 27);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 10);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
 }
 
 } // namespace OHOS::Ace::NG

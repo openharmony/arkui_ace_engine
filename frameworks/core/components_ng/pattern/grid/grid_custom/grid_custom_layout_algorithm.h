@@ -95,6 +95,12 @@ private:
     void SyncPreloadItems(int32_t cacheCnt);
     void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
 
+    /**
+     * @brief Check if gridMatrix_ row numbers are continuous from startMainLineIndex_ to forwardStartLine.
+     * @param forwardStartLine the target row to check continuity towards
+     */
+    void CheckMatrixContinuous(int32_t forwardStartLine);
+
     bool TargetOffsetInCache();
 
     bool IsTargetRowInCache(int32_t jumpIndex);
