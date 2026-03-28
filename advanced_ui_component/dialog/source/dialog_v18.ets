@@ -211,8 +211,12 @@ export struct TipsDialog {
           }
           .padding({ top: TIP_TEXT_TOP_PADDING() })
         } else {
-          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-            this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null) {
+              WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                this.checkBoxPart();
+              }
+            }
           }
         }
       });
