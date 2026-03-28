@@ -386,9 +386,9 @@ HWTEST_F(SearchTestTwoNg, Pattern019, TestSize.Level1)
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->UpdateEditingValue("", 0);
     TimeStamp timeStamp;
-    KeyEvent keyEvent(KeyCode::KEY_TAB, KeyAction::DOWN, {KeyCode::KEY_TAB}, 0, timeStamp,
-        0, 0, SourceType::KEYBOARD, {});
-    KeyEvent keyEventShiftTab(KeyCode::KEY_TAB, KeyAction::DOWN, {KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB}, 0,
+    KeyEvent keyEvent(
+        KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_TAB }, 0, timeStamp, 0, 0, SourceType::KEYBOARD, {});
+    KeyEvent keyEventShiftTab(KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }, 0,
         timeStamp, 0, 0, SourceType::KEYBOARD, {});
     /**
      * @tc.step: step2. call OnKeyEvent().
@@ -475,8 +475,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     /**
      * @tc.cases: case1.
      */
-    eventHub->SetOnDragStart(
-        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    eventHub->SetOnDragStart([](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->InitTextFieldDragEvent();
     ASSERT_NE(textFieldEventHub->GetOnDragStart(), nullptr);
 
@@ -484,7 +483,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
      * @tc.cases: case2.
      */
     eventHub->SetCustomerOnDragFunc(
-        DragFuncType::DRAG_ENTER, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
+        DragFuncType::DRAG_ENTER, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {});
     pattern->InitTextFieldDragEvent();
     ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_ENTER), nullptr);
 
@@ -492,7 +491,7 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
      * @tc.cases: case3.
      */
     eventHub->SetCustomerOnDragFunc(
-        DragFuncType::DRAG_LEAVE, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&){});
+        DragFuncType::DRAG_LEAVE, [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {});
     pattern->InitTextFieldDragEvent();
     ASSERT_NE(textFieldEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE), nullptr);
 

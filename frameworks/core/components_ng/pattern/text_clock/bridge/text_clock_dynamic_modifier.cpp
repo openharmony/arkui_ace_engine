@@ -165,8 +165,13 @@ void SetFontWeightRes(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, void* font
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     std::string fontWeightStr = fontWeight;
-    TextClockModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
+    TextClockModelNG::SetFontWeight(frameNode,
+        Framework::ConvertStrToFontWeight(fontWeightStr, theme->GetTextStyle().GetFontWeight()));
     if (SystemProperties::ConfigChangePerform()) {
         auto* fontWeight = reinterpret_cast<ResourceObject*>(fontWeightRawPtr);
         auto pathFontWeightResObj = AceType::Claim(fontWeight);

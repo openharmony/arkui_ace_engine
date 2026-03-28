@@ -124,7 +124,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>(themeScopeId);
-    auto defaultColor = theme ? theme->GetTextStyle().GetTextColor() : Color::BLACK;
+    CHECK_NULL_VOID(theme);
+    auto defaultColor = theme->GetTextStyle().GetTextColor();
     /* distinguish SymbolGlyph font color list and Text font color in "fontColor" */
     if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
         const std::optional<std::vector<Color>>& colorListOptional = GetSymbolColorList();
@@ -138,7 +139,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         json->PutExtAttr("fontColor", GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
     }
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);
-    json->PutExtAttr("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("fontWeight",
+        GetFontWeightInJson(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);

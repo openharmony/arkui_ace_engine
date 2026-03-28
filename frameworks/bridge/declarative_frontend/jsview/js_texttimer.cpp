@@ -293,7 +293,8 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
             ParseJsString(fontWeight, weight);
         }
     }
-    TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+    TextTimerModel::GetInstance()->SetFontWeight(
+        ConvertStrToFontWeight(weight, textTheme->GetTextStyle().GetFontWeight()));
     TextTimerModel::GetInstance()->SetFontWeightByUser(true);
 }
 

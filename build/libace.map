@@ -1914,6 +1914,7 @@
       "OHOS::Ace::NG::TextFieldPattern::StopEditing()";
       "OHOS::Ace::NG::TextFieldPattern::StopTwinkling()";
       "OHOS::Ace::NG::TextFieldPattern::TextFieldPattern()";
+      "OHOS::Ace::NG::TextFieldPattern::TextInputActionToString() const";
       "OHOS::Ace::NG::TextFieldPattern::ToJsonValueForStroke(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextFieldPattern::ToJsonValueSelectOverlay(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextInputBridge::ParseAndCreateIMEAttachCallback(panda::ecmascript::EcmaVM*, panda::Local<panda::JSValueRef>, OHOS::Ace::NG::FrameNode*, bool)";
