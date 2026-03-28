@@ -21,6 +21,8 @@
 
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {

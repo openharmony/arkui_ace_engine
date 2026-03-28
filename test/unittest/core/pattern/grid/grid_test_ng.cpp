@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"

@@ -26,6 +26,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/grid_container_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"

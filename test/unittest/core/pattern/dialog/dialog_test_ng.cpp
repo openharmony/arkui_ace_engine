@@ -25,6 +25,8 @@
 #include "core/common/recorder/event_recorder.h"
 
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_container_info.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"

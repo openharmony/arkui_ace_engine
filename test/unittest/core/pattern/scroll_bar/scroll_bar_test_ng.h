@@ -24,6 +24,8 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

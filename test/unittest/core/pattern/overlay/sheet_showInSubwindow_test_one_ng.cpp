@@ -32,7 +32,9 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/common/ace_engine.h"
 #include "base/geometry/dimension.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"

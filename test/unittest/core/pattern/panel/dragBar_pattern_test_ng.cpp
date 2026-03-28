@@ -31,6 +31,7 @@
 
 #define private public
 #include "base/geometry/dimension.h"
+#include "core/animation/curve_animation.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

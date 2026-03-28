@@ -22,6 +22,7 @@
 
 #define private public
 #define protected public
+#include "core/components/common/layout/grid_column_info.h"
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"

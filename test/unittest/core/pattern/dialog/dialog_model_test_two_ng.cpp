@@ -25,6 +25,8 @@
 
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_container_info.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
