@@ -602,6 +602,19 @@ void VideoPattern::OnTextureRefresh(void* surface)
     CHECK_NULL_VOID(renderContextForMediaPlayer);
     renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
 }
+
+void VideoPattern::UpdatePreparedVideoSize(const RefPtr<FrameNode>& host)
+{
+    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
+    SizeF videoSize(
+        static_cast<float>(mediaPlayer_->GetVideoWidth()),
+        static_cast<float>(mediaPlayer_->GetVideoHeight()));
+    if (GreatNotEqual(videoSize.Width(), 0.0f) && GreatNotEqual(videoSize.Height(), 0.0f)) {
+        videoLayoutProperty->UpdateVideoSize(videoSize);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
 #endif
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
@@ -783,6 +796,10 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     SetIsPrepared(true);
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    UpdatePreparedVideoSize(host);
+#endif
 
     RefPtr<UINode> controlBar = nullptr;
     auto children = host->GetChildren();
