@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
+#include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/theme/shadow_theme.h"
 
@@ -1012,6 +1013,20 @@ void BubblePattern::OnColorConfigurationUpdate()
         }
         UpdateShadow();
     }
+#if defined(ENABLE_ROSEN_BACKEND)
+    // Update SDF material when color configuration changes
+    if (isUserSetMaterial_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+
+        // Reapply system material to update with new color configuration
+        if (popupParam_) {
+            BubbleView::SetBubbleSystemMaterial(childNode, popupParam_);
+        }
+    }
+#endif
     if (isCustomPopup_) {
         return;
     }
