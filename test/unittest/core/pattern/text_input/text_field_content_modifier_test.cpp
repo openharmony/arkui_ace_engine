@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "text_input_base.h"
 
@@ -1031,5 +1032,738 @@ HWTEST_F(TextFieldContentModifierTest, UpdateTextDecorationMeasureFlag003, TestS
     PropertyChangeFlag flag = 0;
     textFieldContentModifier->NeedMeasureUpdate(flag);
     EXPECT_FALSE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: ModifyTextStyle006
+ * @tc.desc: Test ModifyTextStyle when AdaptTextSize is false, adaptMinFontSize and adaptMaxFontSize should not be set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set adaptMinFontSize and adaptMaxFontSize on the modifier.
+     */
+    TextStyle textStyle;
+    Dimension adaptMinValue(10.0, DimensionUnit::PX);
+    Dimension adaptMaxValue(30.0, DimensionUnit::PX);
+    textFieldContentModifier->SetAdaptMinFontSize(adaptMinValue, textStyle);
+    textFieldContentModifier->SetAdaptMaxFontSize(adaptMaxValue, textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle with AdaptTextSize false (default).
+     * tc.expected: step3. AdaptMinFontSize and AdaptMaxFontSize should remain unchanged.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetAdaptTextSize(false);
+    Dimension defaultMinFontSize = resultTextStyle.GetAdaptMinFontSize();
+    Dimension defaultMaxFontSize = resultTextStyle.GetAdaptMaxFontSize();
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetAdaptMinFontSize().Value(), defaultMinFontSize.Value());
+    EXPECT_EQ(resultTextStyle.GetAdaptMaxFontSize().Value(), defaultMaxFontSize.Value());
+}
+
+/**
+ * @tc.name: ModifyTextStyle007
+ * @tc.desc: Test ModifyTextStyle when AdaptTextSize is true and only adaptMinFontSize is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set only adaptMinFontSize on the modifier.
+     */
+    TextStyle textStyle;
+    Dimension adaptMinValue(12.0, DimensionUnit::PX);
+    textFieldContentModifier->SetAdaptMinFontSize(adaptMinValue, textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle with AdaptTextSize true.
+     * tc.expected: step3. Only AdaptMinFontSize should be set, AdaptMaxFontSize remains default.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetAdaptTextSize(true);
+    Dimension defaultMaxFontSize = resultTextStyle.GetAdaptMaxFontSize();
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetAdaptMinFontSize().Value(), 12.0);
+    EXPECT_EQ(resultTextStyle.GetAdaptMaxFontSize().Value(), defaultMaxFontSize.Value());
+}
+
+/**
+ * @tc.name: ModifyTextStyle008
+ * @tc.desc: Test ModifyTextStyle when AdaptTextSize is true and only adaptMaxFontSize is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set only adaptMaxFontSize on the modifier.
+     */
+    TextStyle textStyle;
+    Dimension adaptMaxValue(35.0, DimensionUnit::PX);
+    textFieldContentModifier->SetAdaptMaxFontSize(adaptMaxValue, textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle with AdaptTextSize true.
+     * tc.expected: step3. Only AdaptMaxFontSize should be set, AdaptMinFontSize remains default.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetAdaptTextSize(true);
+    Dimension defaultMinFontSize = resultTextStyle.GetAdaptMinFontSize();
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetAdaptMinFontSize().Value(), defaultMinFontSize.Value());
+    EXPECT_EQ(resultTextStyle.GetAdaptMaxFontSize().Value(), 35.0);
+}
+
+/**
+ * @tc.name: ModifyTextStyle009
+ * @tc.desc: Test ModifyTextStyle with textColor placeholder property set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create a color with placeholder and set it as textColor.
+     */
+    Color textColorWithPlaceholder = Color(ColorPlaceholder::FONT_PRIMARY);
+    textFieldContentModifier->SetTextColor(textColorWithPlaceholder);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle and verify textColor placeholder is preserved.
+     * tc.expected: step3. The placeholder property should be set on the result text color.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetTextColor(Color::BLACK);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetTextColor().GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
+}
+
+/**
+ * @tc.name: ModifyTextStyle010
+ * @tc.desc: Test ModifyTextStyle with all properties set together.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set all properties on the modifier.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->SetFontSize(Dimension(22.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->SetFontWeight(FontWeight::W600);
+    textFieldContentModifier->SetTextColor(Color::GREEN);
+    textFieldContentModifier->SetAdaptMinFontSize(Dimension(8.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->SetAdaptMaxFontSize(Dimension(40.0, DimensionUnit::PX), textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle with AdaptTextSize true.
+     * tc.expected: step3. All properties should be applied correctly.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetAdaptTextSize(true);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetFontSize().Value(), 22.0);
+    EXPECT_EQ(resultTextStyle.GetFontWeight(), FontWeight::W600);
+    EXPECT_EQ(resultTextStyle.GetTextColor(), Color::GREEN);
+    EXPECT_EQ(resultTextStyle.GetAdaptMinFontSize().Value(), 8.0);
+    EXPECT_EQ(resultTextStyle.GetAdaptMaxFontSize().Value(), 40.0);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout001
+ * @tc.desc: Test UpdateTextFadeout with leftFade=true and rightFade=true and valid gradientPercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with leftFade=true, rightFade=true, gradientPercent=0.3.
+     * tc.expected: step3. Function executes successfully, DrawRect is called.
+     */
+    RectF textRect(0.0f, 0.0f, 100.0f, 50.0f);
+    float gradientPercent = 0.3f;
+    bool leftFade = true;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout002
+ * @tc.desc: Test UpdateTextFadeout with leftFade=true and rightFade=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with leftFade=true, rightFade=false.
+     * tc.expected: step3. Function executes successfully, leftEndPercent should be gradientPercent.
+     */
+    RectF textRect(10.0f, 5.0f, 200.0f, 30.0f);
+    float gradientPercent = 0.25f;
+    bool leftFade = true;
+    bool rightFade = false;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout003
+ * @tc.desc: Test UpdateTextFadeout with leftFade=false and rightFade=true and valid gradientPercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with leftFade=false, rightFade=true.
+     * tc.expected: step3. Function executes successfully, leftEndPercent should be 0, rightStartPercent adjusted.
+     */
+    RectF textRect(0.0f, 0.0f, 150.0f, 40.0f);
+    float gradientPercent = 0.4f;
+    bool leftFade = false;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout004
+ * @tc.desc: Test UpdateTextFadeout with leftFade=false and rightFade=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with leftFade=false, rightFade=false.
+     * tc.expected: step3. Function executes successfully, leftEndPercent=0, rightStartPercent=1.0f.
+     */
+    RectF textRect(20.0f, 10.0f, 300.0f, 60.0f);
+    float gradientPercent = 0.5f;
+    bool leftFade = false;
+    bool rightFade = false;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout005
+ * @tc.desc: Test UpdateTextFadeout with rightFade=true and gradientPercent=0 (boundary condition).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with gradientPercent=0.
+     * tc.expected: step3. rightStartPercent remains 1.0f because gradientPercent <= 0.
+     */
+    RectF textRect(0.0f, 0.0f, 100.0f, 50.0f);
+    float gradientPercent = 0.0f;
+    bool leftFade = true;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout006
+ * @tc.desc: Test UpdateTextFadeout with rightFade=true and gradientPercent=1.0f (boundary condition).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with gradientPercent=1.0f.
+     * tc.expected: step3. rightStartPercent remains 1.0f because gradientPercent >= 1.0f.
+     */
+    RectF textRect(5.0f, 5.0f, 200.0f, 40.0f);
+    float gradientPercent = 1.0f;
+    bool leftFade = false;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout007
+ * @tc.desc: Test UpdateTextFadeout with gradientPercent greater than 1.0f.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with gradientPercent > 1.0f.
+     * tc.expected: step3. rightStartPercent remains 1.0f because gradientPercent > 1.0f.
+     */
+    RectF textRect(0.0f, 0.0f, 100.0f, 50.0f);
+    float gradientPercent = 1.5f;
+    bool leftFade = true;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextFadeout008
+ * @tc.desc: Test UpdateTextFadeout with negative gradientPercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextFadeout008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockCanvas and set expectations.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call UpdateTextFadeout with negative gradientPercent.
+     * tc.expected: step3. rightStartPercent remains 1.0f because gradientPercent < 0.
+     */
+    RectF textRect(0.0f, 0.0f, 100.0f, 50.0f);
+    float gradientPercent = -0.5f;
+    bool leftFade = false;
+    bool rightFade = true;
+    textFieldContentModifier->UpdateTextFadeout(rsCanvas, textRect, gradientPercent, leftFade, rightFade);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: DoAutoFillDraw001
+ * @tc.desc: Test DoAutoFillDraw when autoFillParagraph is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, DoAutoFillDraw001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create autoFillController without paragraph and set animation status.
+     */
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+    autoFillController->SetAutoFillAnimationStatus(AutoFillAnimationStatus::SHOW_ICON);
+
+    /**
+     * @tc.steps: step3. Set content offset.
+     */
+    OffsetF contentOffset(10.0f, 20.0f);
+    textFieldContentModifier->SetContentOffset(contentOffset);
+
+    /**
+     * @tc.steps: step4. Create DrawingContext and call onDraw.
+     * tc.expected: step4. onDraw calls DoAutoFillDraw which returns early because paragraph is null.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldContentModifier->onDraw(context);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: DoAutoFillDraw002
+ * @tc.desc: Test DoAutoFillDraw with valid paragraph and LTR text direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, DoAutoFillDraw002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create mock paragraph with text.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetParagraphText()).WillRepeatedly(testing::Return(u"test123"));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. Create autoFillController and set paragraph.
+     */
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+    autoFillController->autoFillParagraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. Set content offset and auto fill properties.
+     */
+    OffsetF contentOffset(10.0f, 20.0f);
+    textFieldContentModifier->SetContentOffset(contentOffset);
+    textFieldContentModifier->SetAutoFillTranslationOffset(100.0f);
+    textFieldContentModifier->SetAutoFillTextScrollOffset(5.0f);
+    textFieldContentModifier->SetAutoFillDefaultCharIndex(3.0f);
+    textFieldContentModifier->SetAutoFillEmphasizeCharIndex(3.0f);
+    textFieldContentModifier->SetAutoFillOriginTextColor(Color::BLACK);
+
+    /**
+     * @tc.steps: step5. Create DrawingContext and call onDraw with LTR direction.
+     * tc.expected: step5. DoAutoFillDraw executes successfully with LTR direction.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipRect(testing::_, testing::_, testing::_)).Times(testing::AtLeast(1));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldContentModifier->onDraw(context);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: DoAutoFillDraw003
+ * @tc.desc: Test DoAutoFillDraw with RTL text direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, DoAutoFillDraw003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput with RTL direction and get content modifier.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create mock paragraph with text.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetParagraphText()).WillRepeatedly(testing::Return(u"test456"));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. Create autoFillController and set paragraph.
+     */
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+    autoFillController->autoFillParagraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. Set content offset and auto fill properties with negative translation for RTL.
+     */
+    OffsetF contentOffset(10.0f, 20.0f);
+    textFieldContentModifier->SetContentOffset(contentOffset);
+    textFieldContentModifier->SetAutoFillTranslationOffset(-100.0f);
+    textFieldContentModifier->SetAutoFillTextScrollOffset(5.0f);
+    textFieldContentModifier->SetAutoFillDefaultCharIndex(3.0f);
+    textFieldContentModifier->SetAutoFillEmphasizeCharIndex(3.0f);
+    textFieldContentModifier->SetAutoFillOriginTextColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step5. Set layout property with RTL direction.
+     */
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    /**
+     * @tc.steps: step6. Create DrawingContext and call onDraw.
+     * tc.expected: step6. DoAutoFillDraw executes successfully with RTL clip rect calculation.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipRect(testing::_, testing::_, testing::_)).Times(testing::AtLeast(1));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldContentModifier->onDraw(context);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: DoAutoFillDraw004
+ * @tc.desc: Test DoAutoFillDraw with autoFillOriginTextColor not set (using default).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, DoAutoFillDraw004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create mock paragraph with text.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetParagraphText()).WillRepeatedly(testing::Return(u"abc"));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. Create autoFillController and set paragraph.
+     */
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+    autoFillController->autoFillParagraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. Set content offset and auto fill properties without setting origin text color.
+     */
+    OffsetF contentOffset(5.0f, 15.0f);
+    textFieldContentModifier->SetContentOffset(contentOffset);
+    textFieldContentModifier->SetAutoFillTranslationOffset(50.0f);
+    textFieldContentModifier->SetAutoFillTextScrollOffset(2.0f);
+    textFieldContentModifier->SetAutoFillDefaultCharIndex(1.0f);
+    textFieldContentModifier->SetAutoFillEmphasizeCharIndex(1.0f);
+
+    /**
+     * @tc.steps: step5. Create DrawingContext and call onDraw.
+     * tc.expected: step5. DoAutoFillDraw uses default init text color when origin color not set.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipRect(testing::_, testing::_, testing::_)).Times(testing::AtLeast(1));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldContentModifier->onDraw(context);
+    EXPECT_NE(textFieldContentModifier, nullptr);
+}
+
+/**
+ * @tc.name: DoAutoFillDraw005
+ * @tc.desc: Test DoAutoFillDraw with zero translation offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, DoAutoFillDraw005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Create mock paragraph with text.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetParagraphText()).WillRepeatedly(testing::Return(u"test"));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. Create autoFillController and set paragraph.
+     */
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+    autoFillController->autoFillParagraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. Set content offset and auto fill properties with zero translation.
+     */
+    OffsetF contentOffset(0.0f, 0.0f);
+    textFieldContentModifier->SetContentOffset(contentOffset);
+    textFieldContentModifier->SetAutoFillTranslationOffset(0.0f);
+    textFieldContentModifier->SetAutoFillTextScrollOffset(0.0f);
+    textFieldContentModifier->SetAutoFillDefaultCharIndex(0.0f);
+    textFieldContentModifier->SetAutoFillEmphasizeCharIndex(0.0f);
+
+    /**
+     * @tc.steps: step5. Create DrawingContext and call onDraw.
+     * tc.expected: step5. DoAutoFillDraw executes with zero translation offset.
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(testing::AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipRect(testing::_, testing::_, testing::_)).Times(testing::AtLeast(1));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldContentModifier->onDraw(context);
+    EXPECT_NE(textFieldContentModifier, nullptr);
 }
 } // namespace OHOS::Ace::NG
