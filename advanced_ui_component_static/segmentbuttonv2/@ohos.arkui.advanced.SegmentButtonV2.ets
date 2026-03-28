@@ -1245,7 +1245,7 @@ struct SegmentButtonV2ItemContent {
   }
 
   private getItemMaxFontScale(): double {
-    if (typeof this.itemMaxFontScale === 'double') {
+    if (typeof this.itemMaxFontScale === 'number') {
       return normalize(this.itemMaxFontScale as double, this.theme.itemMaxFontScaleSmallest,
         this.theme.itemMaxFontScaleLargest);
     }
@@ -1258,7 +1258,7 @@ struct SegmentButtonV2ItemContent {
   }
 
   private getItemMinFontScale(): double {
-    if (typeof this.itemMinFontScale === 'double') {
+    if (typeof this.itemMinFontScale === 'number') {
       return normalize(this.itemMinFontScale as double, this.theme.itemMinFontScaleSmallest,
         this.theme.itemMinFontScaleLargest);
     }
