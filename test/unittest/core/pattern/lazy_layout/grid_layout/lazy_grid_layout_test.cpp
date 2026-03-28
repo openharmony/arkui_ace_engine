@@ -1265,6 +1265,7 @@ HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
         ViewStackProcessor::GetInstance()->PopContainer();
         lazyGrid = AceType::DynamicCast<FrameNode>(element);
     });
+    ViewStackProcessor::GetInstance()->Finish();
     ASSERT_NE(column, nullptr);
     ASSERT_EQ(column->GetChildren().size(), 1);
     CreateLayoutTask(column);
