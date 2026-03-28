@@ -47,6 +47,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
