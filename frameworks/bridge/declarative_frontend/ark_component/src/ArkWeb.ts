@@ -1681,6 +1681,34 @@ class WebEnableScrollDirectionalLockModifier extends ModifierWithKey<ArkEnableSc
   }
 }
 
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey<NativeMediaPlayerConfig> {
+  constructor(value: NativeMediaPlayerConfig) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableNativeMediaPlayerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableWebAVSessionModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2269,6 +2297,14 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     const config: DirectionalLockConfig = { enabled, type };
     modifierWithKey(this._modifiersWithKeys, WebEnableDirectionalLockModifier.identity, WebEnableDirectionalLockModifier, config);
     return this;
+  }
+  enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+      return this;
   }
 }
 

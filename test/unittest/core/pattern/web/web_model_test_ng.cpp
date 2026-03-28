@@ -2133,6 +2133,26 @@ HWTEST_F(WebModelTestNg, SetOptimizeParserBudgetEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWebMediaAVSessionEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebMediaAVSessionEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    webModelNG.SetWebMediaAVSessionEnabled(true);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_EQ(webPattern->GetWebMediaAVSessionEnabled(), true);
+#endif
+}
+
+/**
  * @tc.name: SetOnDragStart009
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

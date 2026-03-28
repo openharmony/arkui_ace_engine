@@ -1371,6 +1371,16 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 
+void WebModelNG::SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "[SetNativeVideoPlayerConfig] enable=%{public}d, shouldOverlay=%{public}d", enable, shouldOverlay);
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
+}
+
 void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1488,6 +1498,14 @@ void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeig
 
 void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
 {
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
+}
+
+void WebModelNG::SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);

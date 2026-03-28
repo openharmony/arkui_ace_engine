@@ -2230,6 +2230,10 @@ struct CJUIWebModifier {
     void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
     void (*setEnableScrollDirectionalLock)(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type);
     void (*resetEnableScrollDirectionalLock)(ArkUINodeHandle node);
+    void (*setEnableNativeMediaPlayer)(ArkUINodeHandle node, ArkUI_Bool enable, ArkUI_Bool shouldOverlay);
+    void (*resetEnableNativeMediaPlayer)(ArkUINodeHandle node);
+    void (*setEnableWebAVSession)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableWebAVSession)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

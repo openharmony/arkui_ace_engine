@@ -25468,7 +25468,12 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   enableNativeMediaPlayer(config) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+    return this;
   }
   onRenderProcessNotResponding(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessNotRespondingModifier.identity, WebOnRenderProcessNotRespondingModifier, callback);
@@ -27312,6 +27317,34 @@ class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
   }
 }
 WebEnableScrollDirectionalLockModifier.identity = Symbol('webEnableScrollDirectionalLockModifier');
+
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+WebEnableNativeMediaPlayerModifier.identity = Symbol('webEnableNativeMediaPlayerModifier');
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+  }
+}
+WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {
