@@ -18,17 +18,16 @@
 
 #include <optional>
 
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+
 namespace OHOS::Ace::NG {
 struct InspectorConfig;
 class InspectorFilter;
