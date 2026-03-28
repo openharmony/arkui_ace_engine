@@ -163,6 +163,6 @@ ace_unittest("text_input_listener_test") {
     "hilog:libhilog",
   ]
   if (defined(global_parts_info.inputmethod_imf)) {
-    external_deps += [ "imf:inputmethod_client" ]
+    external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
   }
 }
