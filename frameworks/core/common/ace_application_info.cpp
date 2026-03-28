@@ -14,6 +14,8 @@
  */
 
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -72,6 +74,35 @@ std::string AceApplicationInfo::GetUnicodeSetting() const
         keyValuePairsJson->Put(res[0].c_str(), value.c_str());
     }
     return keyValuePairsJson->ToString(); // Return a string in json format
+}
+
+void AceApplicationInfo::UpdateTouchPassthroughForPipelines(bool enabled, const std::string& bundleName)
+{
+    SetTouchEventPassMode(enabled ? TouchPassMode::PASS_THROUGH : TouchPassMode::ACCELERATE);
+    AceEngine::Get().NotifyContainers([enabled, bundleName](const RefPtr<Container>& container) {
+        CHECK_NULL_VOID(container);
+        if (!bundleName.empty() && container->GetBundleName() != bundleName) {
+            return;
+        }
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetTouchPassThrough(enabled);
+        pipelineContext->SetTouchAccelarate(!enabled);
+    });
+}
+
+void AceApplicationInfo::UpdateMousePassthroughForPipelines(bool enabled, const std::string& bundleName)
+{
+    SetMouseEventPassMode(enabled ? MousePassMode::PASS_THROUGH : MousePassMode::DEFAULT);
+    AceEngine::Get().NotifyContainers([enabled, bundleName](const RefPtr<Container>& container) {
+        CHECK_NULL_VOID(container);
+        if (!bundleName.empty() && container->GetBundleName() != bundleName) {
+            return;
+        }
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetMousePassThrough(enabled);
+    });
 }
 
 } // namespace OHOS::Ace

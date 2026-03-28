@@ -637,6 +637,10 @@ export enum PresetFillType {
     BREAKPOINT_SM1MD2LG3 = 1,
     BREAKPOINT_SM2MD3LG5 = 2
 }
+export enum RawInputEventType {
+    TOUCH = 0,
+    MOUSE = 1
+}
 export enum SystemProperties {
     BREAK_POINT = 'system.arkui.breakpoint',
     WINDOW_AVOID_AREA = 'system.window.avoidarea',

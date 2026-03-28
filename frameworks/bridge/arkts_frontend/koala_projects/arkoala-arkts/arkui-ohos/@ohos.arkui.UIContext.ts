@@ -67,6 +67,7 @@ import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { RawInputEventType } from 'arkui/component/enums';
 
 export const enum GestureActionPhase {
     WILL_START = 0,
@@ -1279,6 +1280,12 @@ export class UIContext {
         childScroller: Scroller): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         IUIContext.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.enableEventPassthrough(enabled, eventType);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

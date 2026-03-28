@@ -673,6 +673,12 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    enableEventPassthrough(enabled, eventType) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().enableEventPassthrough(enabled, eventType);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getPixelRoundMode() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let pixelRoundMode = JSViewAbstract.getPixelRoundMode();

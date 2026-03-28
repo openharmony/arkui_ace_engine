@@ -811,3 +811,17 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest011, TestSize.Level1)
     int32_t code = OH_ArkUI_GetNodeHandleFromNapiValue(env, value, context);
     EXPECT_EQ(code, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeNodeNapiTest012
+ * @tc.desc: Test OH_ArkUI_EnableEventPassthrough function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest012, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 10000 });
+    bool enable = true;
+    ArkUI_RawInputEventType eventType = ArkUI_RawInputEventType::ARKUI_RAW_INPUT_EVENT_TYPE_MOUSE;
+    auto code = OH_ArkUI_EnableEventPassthrough(uiContext, enable, eventType);
+    EXPECT_EQ(code, ARKUI_ERROR_CODE_PARAM_INVALID);
+}

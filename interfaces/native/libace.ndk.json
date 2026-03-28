@@ -5000,6 +5000,10 @@
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_EnableEventPassthrough"
+    },
+    {
         "first_introduced": "24",
  	    "name": "OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext"
     },

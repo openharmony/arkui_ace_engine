@@ -5154,6 +5154,12 @@ let PresetFillType;
   PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
 })(PresetFillType || (PresetFillType = {}));
 
+let RawInputEventType;
+(function (RawInputEventType) {
+  RawInputEventType[RawInputEventType.TOUCH = 0] = 'TOUCH';
+  RawInputEventType[RawInputEventType.MOUSE = 1] = 'MOUSE';
+})(RawInputEventType || (RawInputEventType = {}));
+
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
