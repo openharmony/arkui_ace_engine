@@ -97,7 +97,6 @@
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
-#include "dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 

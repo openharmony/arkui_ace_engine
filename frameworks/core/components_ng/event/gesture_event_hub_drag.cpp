@@ -27,7 +27,6 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -44,7 +43,6 @@
 #include "core/pipeline/base/element_register.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
-#include "image_source.h"
 #endif
 
 #include "core/common/udmf/udmf_client.h"

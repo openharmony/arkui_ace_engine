@@ -19,7 +19,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
-#include "unified_data_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
     template<>

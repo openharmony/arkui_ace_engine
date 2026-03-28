@@ -18,7 +18,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"

@@ -15,7 +15,6 @@
 #include "ui_scrollable_event_peer.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
