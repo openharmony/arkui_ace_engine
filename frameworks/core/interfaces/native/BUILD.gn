@@ -220,16 +220,6 @@ template("ace_core_interfaces_native_node") {
         ]
       }
 
-      if (ace_engine_feature_wearable) {
-        sources -= [
-          "ani/ani_theme.cpp",
-          "ani/ani_theme_module.cpp",
-          "ani/canvas_ani_modifier.cpp",
-          "ani/common_ani_modifier.cpp",
-          "ani/node_ani_modifier.cpp",
-        ]
-      }
-
       if (defined(config.enable_drag_framework) &&
           config.enable_drag_framework && !build_ohos_sdk) {
         sources += [ "ani/drag_controller_ani_modifier.cpp" ]
