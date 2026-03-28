@@ -33,6 +33,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
