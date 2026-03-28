@@ -16482,6 +16482,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void StopPropagationImpl(Ark_MouseEvent peer)
     {
     }
+    Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
+    {
+        return {};
+    }
     Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
     {
         return {};
@@ -23261,6 +23265,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::ConstructImpl,
             MouseEventAccessor::GetFinalizerImpl,
             MouseEventAccessor::StopPropagationImpl,
+            MouseEventAccessor::GetHistoricalPointsImpl,
             MouseEventAccessor::GetButtonImpl,
             MouseEventAccessor::SetButtonImpl,
             MouseEventAccessor::GetActionImpl,

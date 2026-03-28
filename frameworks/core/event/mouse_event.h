@@ -240,6 +240,14 @@ struct MouseEvent final : public PointerEvent {
     std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
 
+struct MouseHistoricalPoint {
+    Offset localLocation;
+    Offset screenLocation;
+    Offset globalLocation;
+    Offset globalDisplayLocation;
+    TimeStamp time;
+};
+
 class MouseInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(MouseInfo, BaseEventInfo);
 
@@ -354,6 +362,17 @@ public:
     {
         return pressedButtonsArray_;
     }
+
+    void AddHistoryLocationInfo(MouseHistoricalPoint&& point)
+    {
+        history_.emplace_back(std::move(point));
+    }
+
+    const std::list<MouseHistoricalPoint>& GetHistory() const
+    {
+        return history_;
+    }
+
     MouseEvent ConvertToMouseEvent() const;
     void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
     {
@@ -381,6 +400,7 @@ private:
     float rawDeltaX_ = 0.0f;
     float rawDeltaY_ = 0.0f;
     std::vector<MouseButton> pressedButtonsArray_;
+    std::list<MouseHistoricalPoint> history_;
     bool isRightButtonEventFromDoulbeTap_ = false;
 };
 
@@ -567,6 +587,7 @@ public:
     }
 
 private:
+    MouseHistoricalPoint CreateMouseHistoricalPoint(const MouseEvent& event, bool needPostEvent) const;
     OnMouseEventFunc onMouseCallback_;
 };
 

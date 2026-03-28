@@ -2104,7 +2104,7 @@ int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* even
 uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2116,6 +2116,13 @@ uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event)
             }
             RETURN_RET_WITH_STATUS_CHECK(touchEvent->historySize, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historySize, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2125,7 +2132,7 @@ uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event)
 int64_t OH_ArkUI_PointerEvent_GetHistoryEventTime(const ArkUI_UIInputEvent* event, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2137,6 +2144,13 @@ int64_t OH_ArkUI_PointerEvent_GetHistoryEventTime(const ArkUI_UIInputEvent* even
                 RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             RETURN_RET_WITH_STATUS_CHECK(touchEvent->historyEvents[historyIndex].timeStamp, ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].timeStamp, ARKUI_ERROR_CODE_NO_ERROR);
         }
         default:
             break;
@@ -2193,7 +2207,7 @@ int32_t OH_ArkUI_PointerEvent_GetHistoryPointerId(
 float OH_ArkUI_PointerEvent_GetHistoryX(const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2206,6 +2220,14 @@ float OH_ArkUI_PointerEvent_GetHistoryX(const ArkUI_UIInputEvent* event, uint32_
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].nodeX, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].nodeX, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2215,7 +2237,7 @@ float OH_ArkUI_PointerEvent_GetHistoryX(const ArkUI_UIInputEvent* event, uint32_
 float OH_ArkUI_PointerEvent_GetHistoryY(const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2228,6 +2250,14 @@ float OH_ArkUI_PointerEvent_GetHistoryY(const ArkUI_UIInputEvent* event, uint32_
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].nodeY, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].nodeY, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2238,7 +2268,7 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowX(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2251,6 +2281,14 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowX(
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].windowX, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].windowX, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2261,7 +2299,7 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowY(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2274,6 +2312,14 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowY(
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].windowY, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].windowY, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2284,7 +2330,7 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayX(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2297,6 +2343,14 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayX(
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].screenX, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].screenX, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2307,7 +2361,7 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2320,6 +2374,14 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].screenY, ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(mouseEvent->historyEvents[historyIndex].screenY, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2330,7 +2392,7 @@ float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2344,6 +2406,15 @@ float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
                 static_cast<float>(touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].globalDisplayX),
                 ARKUI_ERROR_CODE_NO_ERROR);
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                mouseEvent->historyEvents[historyIndex].globalDisplayX, ARKUI_ERROR_CODE_NO_ERROR);
+        }
         default:
             break;
     }
@@ -2354,7 +2425,7 @@ float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(
     const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(
-        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE | S_NODE_ON_MOUSE, event);
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -2367,6 +2438,15 @@ float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(
             RETURN_RET_WITH_STATUS_CHECK(
                 static_cast<float>(touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].globalDisplayY),
                 ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || !mouseEvent->historyEvents || mouseEvent->historySize <= historyIndex ||
+                pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                mouseEvent->historyEvents[historyIndex].globalDisplayY, ARKUI_ERROR_CODE_NO_ERROR);
         }
         default:
             break;

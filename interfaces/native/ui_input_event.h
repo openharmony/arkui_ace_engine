@@ -793,8 +793,7 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
 int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex);
 
 /**
- * @brief Obtains the number of historical events from a directional input event (such as a touch event, mouse event,
- * or axis event).
+ * @brief Obtains the number of historical events from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the number of historical events.
@@ -803,8 +802,8 @@ int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* even
 uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Obtains the occurrence time of a historical event from a directional input event (such as a touch event,
- * mouse event, or axis event).
+ * @brief Obtains the occurrence time of a historical event from a directional input event (such as a touch event
+ * or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param historyIndex Indicates the index of the target historical event.
@@ -815,7 +814,7 @@ int64_t OH_ArkUI_PointerEvent_GetHistoryEventTime(const ArkUI_UIInputEvent* even
 
 /**
  * @brief Obtains the number of touch points in a specific historical event from a directional input event (such as
- * a touch event, mouse event, or axis event).
+ * a touch event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param historyIndex Indicates the index of the target historical event.
@@ -825,8 +824,8 @@ int64_t OH_ArkUI_PointerEvent_GetHistoryEventTime(const ArkUI_UIInputEvent* even
 uint32_t OH_ArkUI_PointerEvent_GetHistoryPointerCount(const ArkUI_UIInputEvent* event, uint32_t historyIndex);
 
 /**
- * @brief Obtains the ID of a touch point in a specific historical event from a directional input event (such as
- * a touch event, mouse event, or axis event).
+ * @brief Obtains the number of touch points in a specific historical event from a directional input event (such as
+ * a touch event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -839,7 +838,7 @@ int32_t OH_ArkUI_PointerEvent_GetHistoryPointerId(
 
 /**
  * @brief Obtains the X coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current component from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current component from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -852,7 +851,7 @@ float OH_ArkUI_PointerEvent_GetHistoryX(const ArkUI_UIInputEvent* event, uint32_
 
 /**
  * @brief Obtains the Y coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current component from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current component from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -865,7 +864,7 @@ float OH_ArkUI_PointerEvent_GetHistoryY(const ArkUI_UIInputEvent* event, uint32_
 
 /**
  * @brief Obtains the X coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current application window from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current application window from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -879,7 +878,7 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowX(
 
 /**
  * @brief Obtains the Y coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current application window from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current application window from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -893,7 +892,7 @@ float OH_ArkUI_PointerEvent_GetHistoryWindowY(
 
 /**
  * @brief Obtains the X coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current screen from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current screen from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -907,7 +906,7 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayX(
 
 /**
  * @brief Obtains the Y coordinate of a specific touch point in a historical event relative to the upper left corner
- * of the current screen from a directional input event (such as a touch event, mouse event, or axis event).
+ * of the current screen from a directional input event (such as a touch event or mouse event).
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
@@ -921,7 +920,7 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
 
 /**
  * @brief Obtains the X coordinate relative to the global display for a specific touch point from historical events,
- * based on the given pointer index and history index of an input event (such as a touch, mouse, or axis event).
+ * based on the given pointer index and history index of an input event (such as a touch event or mouse event).
  * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
  * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *
@@ -938,7 +937,7 @@ float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
 
 /**
  * @brief Obtains the Y coordinate relative to the global display for a specific touch point from historical events,
- * based on the given pointer index and history index of an input event (such as a touch, mouse, or axis event).
+ * based on the given pointer index and history index of an input event (such as a touch event or mouse event).
  * Position information can only be obtained from UI input events. For mouse and axis events, if the provided
  * <b>pointerIndex</b> is greater than 0, this API always returns the default value <b>0.0f</b>.
  *

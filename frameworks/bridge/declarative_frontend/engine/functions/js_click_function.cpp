@@ -242,6 +242,7 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
     obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
     obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
+    obj->SetPropertyObject("getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetMouseHistoricalPoints));
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);

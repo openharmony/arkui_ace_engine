@@ -384,6 +384,18 @@ struct ArkUITouchEvent {
     ArkUI_Float64 rollAngle;
 };
 
+struct ArkUIHistoryMouseEvent {
+    ArkUI_Float32 nodeX;
+    ArkUI_Float32 nodeY;
+    ArkUI_Float32 screenX;
+    ArkUI_Float32 screenY;
+    ArkUI_Float32 windowX;
+    ArkUI_Float32 windowY;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
+    ArkUI_Int64 timeStamp;
+};
+
 struct ArkUIMouseEvent {
     ArkUI_Int32 action;
     ArkUI_Int32 button;
@@ -412,6 +424,8 @@ struct ArkUIMouseEvent {
      *
      */
     bool stopPropagation;
+    ArkUIHistoryMouseEvent* historyEvents;
+    ArkUI_Uint32 historySize;
 };
 
 struct ArkUIAxisEvent {

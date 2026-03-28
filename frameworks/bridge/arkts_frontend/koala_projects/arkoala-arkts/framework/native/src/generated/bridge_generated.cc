@@ -36429,6 +36429,24 @@ void impl_MouseEvent_stopPropagation(Ark_NativePointer thisPtr) {
         GetAccessors()->getMouseEventAccessor()->stopPropagation(self);
 }
 KOALA_INTEROP_DIRECT_V1(MouseEvent_stopPropagation, Ark_NativePointer)
+KInteropReturnBuffer impl_MouseEvent_getHistoricalPoints(Ark_NativePointer thisPtr) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getMouseEventAccessor()->getHistoricalPoints(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(retValueTmpValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValueTmpValue.length; retValueTmpValueCounterI++) {
+                const Ark_MouseHistoricalPoint retValueTmpValueTmpElement = retValueTmpValue.array[retValueTmpValueCounterI];
+                MouseHistoricalPoint_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MouseEvent_getHistoricalPoints, KInteropReturnBuffer, Ark_NativePointer)
 Ark_Int32 impl_MouseEvent_getButton(Ark_NativePointer thisPtr) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
         return GetAccessors()->getMouseEventAccessor()->getButton(self);

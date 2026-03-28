@@ -36293,6 +36293,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag=INTEROP_TAG_UNDEFINED };
+        }
+        string out("getHistoricalPoints(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag=INTEROP_TAG_UNDEFINED };
+    }
     Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1)) {
@@ -49907,6 +49918,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::ConstructImpl,
             MouseEventAccessor::GetFinalizerImpl,
             MouseEventAccessor::StopPropagationImpl,
+            MouseEventAccessor::GetHistoricalPointsImpl,
             MouseEventAccessor::GetButtonImpl,
             MouseEventAccessor::SetButtonImpl,
             MouseEventAccessor::GetActionImpl,

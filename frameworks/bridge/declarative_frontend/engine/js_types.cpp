@@ -146,6 +146,44 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
 
     return valueArray;
 }
+
+Local<JSValueRef> JsGetMouseHistoricalPoints(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<MouseInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+
+    const auto& history = eventInfo->GetHistory();
+    Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
+    uint32_t index = 0;
+    for (const auto& point : history) {
+        Local<ObjectRef> historyObject = ObjectRef::New(info->GetVM());
+        historyObject->Set(info->GetVM(), ToJSValue("x"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.localLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("y"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.localLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("displayX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.screenLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("displayY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.screenLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("windowX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("windowY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("globalDisplayX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalDisplayLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("globalDisplayY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalDisplayLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("timestamp"),
+            ToJSValue(static_cast<double>(point.time.time_since_epoch().count())));
+        ArrayRef::SetValueAt(info->GetVM(), valueArray, index++, historyObject);
+    }
+
+    return valueArray;
+}
 #endif
 
 } // namespace OHOS::Ace::Framework
