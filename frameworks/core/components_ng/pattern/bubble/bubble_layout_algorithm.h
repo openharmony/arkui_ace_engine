@@ -29,6 +29,9 @@
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#if defined(ENABLE_ROSEN_BACKEND)
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#endif
 namespace OHOS::Ace::NG {
 enum class ArrowOfTargetOffset {
     START,
@@ -143,7 +146,56 @@ public:
     {
         return clipFrameNode_;
     }
-    
+#if defined(ENABLE_ROSEN_BACKEND)
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetBubbleSDFShape();
+
+    // Helper functions for GetBubbleSDFShape
+    void InitArrowParam();
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFRRectShape();
+    void CalculateArrowVertices(Placement arrowBuildplacement, float arrowOffset,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateTopBottomArrowVertices(Placement placement, float arrowOffset,
+        float radiusPx, float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateLeftRightArrowVertices(Placement placement, float arrowOffset,
+        float radiusPx, float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateTopLeftCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateTopRightCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateBottomLeftCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateBottomRightCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateLeftTopCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateLeftBottomCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateRightTopCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    void CalculateRightBottomCornerArrowVertices(float arrowWidthHalf, float arrowHeight,
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+        OHOS::Rosen::Vector2f& vertex2);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFTriangleShape(
+        const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
+        const OHOS::Rosen::Vector2f& vertex2);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFCornerRectShape(Placement placement);
+#endif
+
     const std::vector<std::vector<float>>& GetArrowOffsetsFromClip() const
     {
         return arrowOffsetsFromClip_;
@@ -400,6 +452,15 @@ private:
     bool isHalfFoldHover_ = false;
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;
+    bool isUserSetMaterial_ = false;
+    // param to generate arrow shape.
+    double angleSideX_ = 0.0;
+    double angleSideY_ = 0.0;
+    double angleHeight_ = 0.0;
+    // param to generate corner arrow shape (using TYPE_ONE_BETA)
+    double cornerAngleSideX_ = 0.0;
+    double cornerAngleSideY_ = 0.0;
+    double cornerAngleHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

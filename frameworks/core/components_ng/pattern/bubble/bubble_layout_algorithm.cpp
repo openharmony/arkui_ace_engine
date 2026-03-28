@@ -135,6 +135,14 @@ constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
 constexpr Dimension TIPS_MOUSE_SPACE = 8.0_vp;
 constexpr Dimension MAX_TIP_WIDTH = 480.0_vp;
 
+// The angle to generate arrow shape.
+double g_typeOneBeta = 0.0;
+double g_typeTwoBeta = 0.0;
+#if defined(ENABLE_ROSEN_BACKEND)
+constexpr float SHAPE_SPACING = 0.1f;
+constexpr float RIGHT_ANGLE_SPACING = 0.5f;
+#endif
+
 const std::vector<Placement> FOLLOW_CURSOR_TIPS = { Placement::BOTTOM_LEFT, Placement::TOP_LEFT,
     Placement::BOTTOM_RIGHT, Placement::TOP_RIGHT, Placement::BOTTOM, Placement::TOP, Placement::RIGHT_TOP,
     Placement::LEFT_TOP, Placement::NONE };
@@ -148,6 +156,7 @@ void GetEndP2P4(const Dimension& radius)
     auto side = w1 /std::cos(theta);
     auto alpha = std::asin(radius.ConvertToPx() / side);
     auto beta = theta + alpha;
+    g_typeOneBeta = beta;
     DEFAULT_P4_END_Y = Dimension(h1);
     auto side1 = side * std::cos(alpha);
     DEFAULT_P2_END_X = Dimension(side1 * std::cos(beta));
@@ -164,6 +173,7 @@ void GetP2(const Dimension& radius)
     auto alpha = std::asin(radius.ConvertToPx() / side);
     auto side1 = radius.ConvertToPx() / std::tan(alpha);
     auto beta = alpha + theta;
+    g_typeTwoBeta = beta;
     DEFAULT_P2_HEIGHT = Dimension(side1 * std::sin(beta));
     DEFAULT_P2_WIDTH = Dimension(w1 - side1 * std::cos(beta));
 }
@@ -675,6 +685,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     ACE_UINODE_TRACE(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
+    isUserSetMaterial_ = bubblePattern->IsUserSetMaterial();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -2794,6 +2805,14 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     clipFrameNode_ = childNode;
     clipPath_.clear();
     clipPath_ = ClipBubbleWithPath();
+#if defined(ENABLE_ROSEN_BACKEND)
+    if (isUserSetMaterial_) {
+        auto bubbleSDFShape = GetBubbleSDFShape();
+        auto renderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetSDFShape(bubbleSDFShape);
+    }
+#endif
 }
 
 std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
@@ -3695,5 +3714,381 @@ void BubbleLayoutAlgorithm::UpdateMarginByWidth()
     marginStart_ = isGreatWrapperWidth_ ? 0.0f : marginStart_;
     marginEnd_ = isGreatWrapperWidth_ ? 0.0f : marginEnd_;
 }
+
+#if defined(ENABLE_ROSEN_BACKEND)
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFRRectShape()
+{
+    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto shape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
+    CHECK_NULL_RETURN(shape, nullptr);
+
+    float radiusPx = borderRadius_.ConvertToPx();
+    OHOS::Rosen::RRect rrect(
+        OHOS::Rosen::RectF(
+            childOffset_.GetX(),
+            childOffset_.GetY(),
+            childSize_.Width(),
+            childSize_.Height()
+        ),
+        OHOS::Rosen::Vector4(radiusPx, radiusPx, radiusPx, radiusPx)
+    );
+    shape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+    return shape0;
+}
+
+void BubbleLayoutAlgorithm::CalculateTopBottomArrowVertices(Placement placement,
+    float arrowOffset, float radiusPx, float arrowWidthHalf, float arrowHeight,
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+    OHOS::Rosen::Vector2f& vertex2)
+{
+    if (placement == Placement::TOP) {
+        arrowOffset = std::clamp(arrowOffset,
+            static_cast<float>(radiusPx + arrowWidthHalf),
+            static_cast<float>(childSize_.Width() - radiusPx - arrowWidthHalf));
+        vertex0 = OHOS::Rosen::Vector2f(
+            arrowHeight + arrowOffset - arrowWidthHalf - angleSideX_, childOffset_.GetY() + angleSideY_);
+        vertex1 = OHOS::Rosen::Vector2f(
+            arrowHeight + arrowOffset, childOffset_.GetY() - angleHeight_);
+        vertex2 = OHOS::Rosen::Vector2f(
+            arrowHeight + arrowOffset + arrowWidthHalf + angleSideX_, childOffset_.GetY() + angleSideY_);
+    } else if (placement == Placement::BOTTOM) {
+        arrowOffset = std::clamp(arrowOffset,
+            static_cast<float>(radiusPx + arrowWidthHalf),
+            static_cast<float>(childSize_.Width() - radiusPx - arrowWidthHalf));
+        vertex0 = OHOS::Rosen::Vector2f(arrowHeight + arrowOffset - arrowWidthHalf - angleSideX_,
+            childOffset_.GetY() + childSize_.Height() - angleSideY_);
+        vertex1 = OHOS::Rosen::Vector2f(arrowHeight + arrowOffset,
+            childOffset_.GetY() + childSize_.Height() + angleHeight_);
+        vertex2 = OHOS::Rosen::Vector2f(arrowHeight + arrowOffset + arrowWidthHalf + angleSideX_,
+            childOffset_.GetY() + childSize_.Height() - angleSideY_);
+    }
+}
+
+void BubbleLayoutAlgorithm::CalculateLeftRightArrowVertices(Placement placement,
+    float arrowOffset, float radiusPx, float arrowWidthHalf, float arrowHeight,
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1,
+    OHOS::Rosen::Vector2f& vertex2)
+{
+    if (placement == Placement::LEFT) {
+        arrowOffset = std::clamp(arrowOffset,
+            static_cast<float>(radiusPx + arrowWidthHalf),
+            static_cast<float>(childSize_.Height() - radiusPx - arrowWidthHalf));
+        vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + angleSideY_,
+            arrowHeight + arrowOffset - arrowWidthHalf - angleSideX_);
+        vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() - angleHeight_,
+            arrowHeight + arrowOffset);
+        vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + angleSideY_,
+            arrowHeight + arrowOffset + arrowWidthHalf + angleSideX_);
+    } else if (placement == Placement::RIGHT) {
+        arrowOffset = std::clamp(arrowOffset,
+            static_cast<float>(radiusPx + arrowWidthHalf),
+            static_cast<float>(childSize_.Height() - radiusPx - arrowWidthHalf));
+        vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() - angleSideY_,
+            arrowHeight + arrowOffset - arrowWidthHalf - angleSideX_);
+        vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() + angleHeight_,
+            arrowHeight + arrowOffset);
+        vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() - angleSideY_,
+            arrowHeight + arrowOffset + arrowWidthHalf + angleSideX_);
+    }
+}
+
+void BubbleLayoutAlgorithm::CalculateTopLeftCornerArrowVertices(float arrowWidthHalf,
+    float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(arrowHeight - RIGHT_ANGLE_SPACING, childOffset_.GetY() + cornerAngleSideY_);
+    vertex1 = OHOS::Rosen::Vector2f(arrowHeight - RIGHT_ANGLE_SPACING, childOffset_.GetY() - cornerAngleHeight_);
+    vertex2 = OHOS::Rosen::Vector2f(
+        arrowHeight + arrowWidthHalf * DOUBLE + cornerAngleSideX_, childOffset_.GetY() + cornerAngleSideY_);
+}
+
+void BubbleLayoutAlgorithm::CalculateTopRightCornerArrowVertices(float arrowWidthHalf,
+    float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() - arrowWidthHalf * DOUBLE - cornerAngleSideX_,
+        childOffset_.GetY() + cornerAngleSideY_);
+    vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() + RIGHT_ANGLE_SPACING,
+        childOffset_.GetY() - cornerAngleHeight_);
+    vertex2 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() + RIGHT_ANGLE_SPACING, childOffset_.GetY() + cornerAngleSideY_);
+}
+
+void BubbleLayoutAlgorithm::CalculateBottomLeftCornerArrowVertices(
+    float arrowWidthHalf, float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(
+        arrowHeight - RIGHT_ANGLE_SPACING, childOffset_.GetY() + childSize_.Height() - cornerAngleSideY_);
+    vertex1 = OHOS::Rosen::Vector2f(arrowHeight - RIGHT_ANGLE_SPACING,
+        childOffset_.GetY() + childSize_.Height() + cornerAngleHeight_);
+    vertex2 = OHOS::Rosen::Vector2f(arrowHeight + arrowWidthHalf * DOUBLE + cornerAngleSideX_,
+        childOffset_.GetY() + childSize_.Height() - cornerAngleSideY_);
+}
+
+void BubbleLayoutAlgorithm::CalculateBottomRightCornerArrowVertices(
+    float arrowWidthHalf, float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() - arrowWidthHalf * DOUBLE - cornerAngleSideX_,
+        childOffset_.GetY() + childSize_.Height() - cornerAngleSideY_);
+    vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() + RIGHT_ANGLE_SPACING,
+        childOffset_.GetY() + childSize_.Height() + cornerAngleHeight_);
+    vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() + RIGHT_ANGLE_SPACING,
+        childOffset_.GetY() + childSize_.Height() - cornerAngleSideY_);
+}
+
+void BubbleLayoutAlgorithm::CalculateLeftTopCornerArrowVertices(float arrowWidthHalf,
+    float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + cornerAngleSideY_, arrowHeight - RIGHT_ANGLE_SPACING);
+    vertex1 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() - cornerAngleHeight_, arrowHeight - RIGHT_ANGLE_SPACING);
+    vertex2 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + cornerAngleSideY_, arrowHeight + arrowWidthHalf * DOUBLE + cornerAngleSideX_);
+}
+
+void BubbleLayoutAlgorithm::CalculateLeftBottomCornerArrowVertices(
+    float arrowWidthHalf, float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + cornerAngleSideY_,
+        childOffset_.GetY() + childSize_.Height() - arrowWidthHalf * DOUBLE - cornerAngleSideX_);
+    vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() - cornerAngleHeight_,
+        childOffset_.GetY() + childSize_.Height() + RIGHT_ANGLE_SPACING);
+    vertex2 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + cornerAngleSideY_, childOffset_.GetY() + childSize_.Height() + RIGHT_ANGLE_SPACING);
+}
+
+void BubbleLayoutAlgorithm::CalculateRightTopCornerArrowVertices(float arrowWidthHalf,
+    float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() - cornerAngleSideY_, arrowHeight - RIGHT_ANGLE_SPACING);
+    vertex1 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() + cornerAngleHeight_, arrowHeight - RIGHT_ANGLE_SPACING);
+    vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() - cornerAngleSideY_,
+        arrowHeight + arrowWidthHalf * DOUBLE + cornerAngleSideX_);
+}
+
+void BubbleLayoutAlgorithm::CalculateRightBottomCornerArrowVertices(
+    float arrowWidthHalf, float arrowHeight, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() - cornerAngleSideY_,
+        childOffset_.GetY() + childSize_.Height() - arrowWidthHalf * DOUBLE - cornerAngleSideX_);
+    vertex1 = OHOS::Rosen::Vector2f(
+        childOffset_.GetX() + childSize_.Width() + cornerAngleHeight_,
+        childOffset_.GetY() + childSize_.Height() + RIGHT_ANGLE_SPACING);
+    vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childSize_.Width() - cornerAngleSideY_,
+        childOffset_.GetY() + childSize_.Height() + RIGHT_ANGLE_SPACING);
+}
+
+void BubbleLayoutAlgorithm::InitArrowParam()
+{
+    // Edge arrow parameters (using g_typeTwoBeta)
+    angleSideX_ = ARROW_RADIUS.ConvertToPx() * DOUBLE / std::tan(g_typeTwoBeta);
+    angleSideY_ = ARROW_RADIUS.ConvertToPx() * DOUBLE;
+    angleHeight_ = BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF * std::tan(g_typeTwoBeta);
+
+    // Corner arrow parameters (using g_typeOneBeta)
+    cornerAngleSideX_ = ARROW_RADIUS.ConvertToPx() * DOUBLE / std::tan(g_typeOneBeta);
+    cornerAngleSideY_ = ARROW_RADIUS.ConvertToPx() * DOUBLE;
+    cornerAngleHeight_ = BUBBLE_ARROW_WIDTH.ConvertToPx() * std::tan(g_typeOneBeta);
+}
+
+void BubbleLayoutAlgorithm::CalculateArrowVertices(Placement arrowBuildplacement,
+    float arrowOffset, OHOS::Rosen::Vector2f& vertex0,
+    OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    float radiusPx = borderRadius_.ConvertToPx();
+    auto arrowWidthHalf = BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
+    auto arrowHeight = BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    switch (arrowBuildplacement) {
+        case Placement::TOP:
+        case Placement::BOTTOM:
+            CalculateTopBottomArrowVertices(arrowBuildplacement, arrowOffset,
+                radiusPx, arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::LEFT:
+        case Placement::RIGHT:
+            CalculateLeftRightArrowVertices(arrowBuildplacement, arrowOffset,
+                radiusPx, arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::TOP_LEFT:
+            CalculateTopLeftCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::TOP_RIGHT:
+            CalculateTopRightCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::BOTTOM_LEFT:
+            CalculateBottomLeftCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::BOTTOM_RIGHT:
+            CalculateBottomRightCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::LEFT_TOP:
+            CalculateLeftTopCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::LEFT_BOTTOM:
+            CalculateLeftBottomCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::RIGHT_TOP:
+            CalculateRightTopCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        case Placement::RIGHT_BOTTOM:
+            CalculateRightBottomCornerArrowVertices(
+                arrowWidthHalf, arrowHeight, vertex0, vertex1, vertex2);
+            break;
+        default:
+            break;
+    }
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFTriangleShape(
+    const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
+    const OHOS::Rosen::Vector2f& vertex2)
+{
+    auto triangleShape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_TRIANGLE_SHAPE);
+    auto triangleShape =
+        std::static_pointer_cast<OHOS::Rosen::RSNGSDFTriangleShape>(triangleShape0);
+    CHECK_NULL_RETURN(triangleShape, nullptr);
+    float arrowRadius = ARROW_RADIUS.ConvertToPx();
+
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex0Tag>(vertex0);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex1Tag>(vertex1);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex2Tag>(vertex2);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeRadiusTag>(arrowRadius);
+
+    return triangleShape0;
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSmoothUnionShape(
+    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
+    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY)
+{
+    auto unionShape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_SMOOTH_UNION_OP_SHAPE);
+    auto unionShape =
+        std::static_pointer_cast<OHOS::Rosen::RSNGSDFSmoothUnionOpShape>(unionShape0);
+    CHECK_NULL_RETURN(unionShape, nullptr);
+
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(shapeX);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(shapeY);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(SHAPE_SPACING);
+
+    return unionShape0;
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFCornerRectShape(Placement placement)
+{
+    if (placement != Placement::TOP_LEFT && placement != Placement::TOP_RIGHT &&
+        placement != Placement::BOTTOM_LEFT && placement != Placement::BOTTOM_RIGHT &&
+        placement != Placement::LEFT_TOP && placement != Placement::LEFT_BOTTOM &&
+        placement != Placement::RIGHT_TOP && placement != Placement::RIGHT_BOTTOM) {
+        return nullptr;
+    }
+    auto rectShape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto rectShape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(rectShape0);
+    CHECK_NULL_RETURN(rectShape, nullptr);
+
+    float radiusPx = borderRadius_.ConvertToPx();
+    float cornerSize = radiusPx; // Rectangle size equals to border radius
+
+    OHOS::Rosen::RectF rect;
+    float rectRadius = 0.0f; // Rectangle has no rounded corners (sharp corners)
+    switch (placement) {
+        case Placement::TOP_LEFT:
+        case Placement::LEFT_TOP:
+            rect = OHOS::Rosen::RectF(
+                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
+                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
+                cornerSize,
+                cornerSize);
+            break;
+        case Placement::TOP_RIGHT:
+        case Placement::RIGHT_TOP:
+            rect = OHOS::Rosen::RectF(
+                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
+                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
+                cornerSize,
+                cornerSize);
+            break;
+        case Placement::BOTTOM_LEFT:
+        case Placement::LEFT_BOTTOM:
+            rect = OHOS::Rosen::RectF(
+                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
+                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
+                cornerSize,
+                cornerSize);
+            break;
+        case Placement::BOTTOM_RIGHT:
+        case Placement::RIGHT_BOTTOM:
+            rect = OHOS::Rosen::RectF(
+                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
+                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
+                cornerSize,
+                cornerSize);
+            break;
+        default:
+            return nullptr;
+    }
+
+    OHOS::Rosen::RRect rrect(rect, OHOS::Rosen::Vector4(rectRadius, rectRadius, rectRadius, rectRadius));
+    rectShape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+    return rectShape0;
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::GetBubbleSDFShape()
+{
+    if (!enableArrow_ || !showArrow_) {
+        return CreateSDFRRectShape();
+    }
+
+    auto rrectShape = CreateSDFRRectShape();
+    CHECK_NULL_RETURN(rrectShape, nullptr);
+
+    float arrowOffset = GetArrowOffset(arrowPlacement_) +
+        BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    Placement arrowBuildplacement = Placement::NONE;
+    GetArrowBuildPlacement(arrowBuildplacement);
+
+    InitArrowParam();
+    OHOS::Rosen::Vector2f vertex0;
+    OHOS::Rosen::Vector2f vertex1;
+    OHOS::Rosen::Vector2f vertex2;
+    CalculateArrowVertices(
+        arrowBuildplacement, arrowOffset, vertex0, vertex1, vertex2);
+
+    if (arrowBuildplacement == Placement::NONE) {
+        return rrectShape;
+    }
+
+    auto rectShape = CreateSDFCornerRectShape(arrowBuildplacement);
+    auto combinedShape = rrectShape;
+    if (rectShape) {
+        combinedShape = CreateSmoothUnionShape(rrectShape, rectShape);
+    }
+
+    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
+    CHECK_NULL_RETURN(triangleShape, nullptr);
+
+    return CreateSmoothUnionShape(combinedShape, triangleShape);
+}
+#endif
 
 } // namespace OHOS::Ace::NG
