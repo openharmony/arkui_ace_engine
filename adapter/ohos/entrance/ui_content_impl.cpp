@@ -5674,6 +5674,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+            config.splitDividerColorDark);
         if (!(appConfig->isRouter)) {
             navManager->SetForceSplitNavigationId(config.navigationId);
             navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
@@ -5699,6 +5701,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+        config.splitDividerColorDark);
     if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);
