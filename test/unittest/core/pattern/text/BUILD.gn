@@ -72,6 +72,7 @@ ace_unittest("text_test_ng_addition") {
     "text_test_ng_ten.cpp",
     "text_test_ng_three.cpp",
     "text_test_ng_two.cpp",
+    "text_scroll_bar_2d_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
