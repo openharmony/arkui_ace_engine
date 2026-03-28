@@ -562,6 +562,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaCopy,
     NodeModifier::SetOnTextAreaWillCopy,
     NodeModifier::SetOnTextAreaCut,
+    NodeModifier::SetOnTextAreaWillCut,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
