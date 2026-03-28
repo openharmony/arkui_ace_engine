@@ -32,6 +32,7 @@ template("napi_dragcontroller_static") {
 
     if (platform != "" && is_arkui_x) {
       deps += [ "$crossplatform_plugin_root/libs/napi:napi_$platform" ]
+      sources += ["$ace_napi_frameworks/core/common/interaction/interaction_data.cpp"]
       defines += [ "CROSS_PLATFORM" ]
       if (defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {

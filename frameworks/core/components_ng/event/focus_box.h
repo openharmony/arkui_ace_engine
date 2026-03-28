@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <optional>
+#include <unordered_map>
 
 #include "base/geometry/calc_dimension.h"
 #include "base/json/json_util.h"
