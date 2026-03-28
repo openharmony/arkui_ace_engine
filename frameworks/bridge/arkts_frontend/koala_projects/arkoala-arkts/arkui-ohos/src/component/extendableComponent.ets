@@ -263,7 +263,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         let parentCom = this.parent_;
         while (parentCom !== undefined) {
-            let provideVar = parentCom.__findProvidedVarV2__Internal(providedPropName);
+            let provideVar = parentCom.__findProvidedVarV2__Internal<Any>(providedPropName);
             if (provideVar !== undefined) {
                 return provideVar as object as IProviderDecoratedVariable<T>;
             }

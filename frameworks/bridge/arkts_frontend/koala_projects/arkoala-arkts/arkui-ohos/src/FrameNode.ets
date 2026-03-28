@@ -899,7 +899,7 @@ export class FrameNode implements MaterializedBase {
                 return customProperties.get(name_casted);
             }
         }
-        return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
+        return ArkUIAniModule._Common_getCustomProperty<Any>(this!.peer!.ptr, name_casted);
     }
     public convertPosition(position: NodePosition, targetNode: FrameNode): NodePosition {
         if (targetNode === null) {

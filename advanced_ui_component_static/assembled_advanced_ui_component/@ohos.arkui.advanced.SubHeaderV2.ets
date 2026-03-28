@@ -430,8 +430,8 @@ export struct SubHeaderV2 {
   infoChange(monitor: IMonitor) {
     monitor.dirty.forEach((path: string) => {
       if ('select' === path) {
-        this.selectedIndex = (monitor.value(path) as IMonitorValue<SubHeaderV2Select>).now?.selectedIndex;
-        this.selectedContent = (monitor.value(path) as IMonitorValue<SubHeaderV2Select>).now ?.selectedContent;
+        this.selectedIndex = (monitor.value<Any>(path) as IMonitorValue<SubHeaderV2Select>).now?.selectedIndex;
+        this.selectedContent = (monitor.value<Any>(path) as IMonitorValue<SubHeaderV2Select>).now ?.selectedContent;
       }
     })
   }
