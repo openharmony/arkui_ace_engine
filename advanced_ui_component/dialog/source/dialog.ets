@@ -212,7 +212,7 @@ export struct TipsDialog {
           .padding({ top: TIP_TEXT_TOP_PADDING() })
         } else {
           Column() {
-            if (this.checkTips !== null) {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
               WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
                 this.checkBoxPart();
               }
@@ -226,7 +226,7 @@ export struct TipsDialog {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;

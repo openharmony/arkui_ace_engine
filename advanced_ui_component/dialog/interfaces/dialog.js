@@ -539,7 +539,7 @@ export class TipsDialog extends ViewPU {
                                                 }, Column);
                                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                     If.create();
-                                                    if (this.checkTips !== null) {
+                                                    if (this.checkTips !== null && this.checkTips !== undefined) {
                                                         this.ifElseBranchUpdateFunction(0, () => {
                                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                                 WithTheme.create({
@@ -611,7 +611,7 @@ export class TipsDialog extends ViewPU {
                                                     }, Column);
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         If.create();
-                                                        if (this.checkTips !== null) {
+                                                        if (this.checkTips !== null && this.checkTips !== undefined) {
                                                             this.ifElseBranchUpdateFunction(0, () => {
                                                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                                     WithTheme.create({
@@ -701,7 +701,7 @@ export class TipsDialog extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.checkTips !== null) {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Checkbox.create({ name: '', group: 'checkboxGroup' });
