@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "ui/properties/ui_material.h"
 

@@ -21,6 +21,12 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
+
+#define private public
+#include "core/animation/curve_animation.h"
+#include "base/utils/listener.h"
+#undef private
+
 #include "core/components/common/layout/constants.h"
 
 #define private public

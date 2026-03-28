@@ -42,8 +42,9 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 

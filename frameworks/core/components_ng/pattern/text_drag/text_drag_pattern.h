@@ -21,8 +21,19 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
+
+namespace OHOS::Rosen {
+namespace Drawing {
+class Path;
+}
+}
+
+#ifndef ACE_UNITTEST
+namespace OHOS::Ace {
+using RSPath = Rosen::Drawing::Path;
+}
+#endif
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DRAG_RADIUS_2IN1 = 8.0_vp;
