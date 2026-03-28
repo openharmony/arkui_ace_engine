@@ -23,6 +23,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
