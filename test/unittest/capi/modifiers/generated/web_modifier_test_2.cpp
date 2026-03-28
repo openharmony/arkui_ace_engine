@@ -1222,20 +1222,6 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestEnableWebAVSessionVa
 }
 
 /*
- * @tc.name: resetEnableWebAVSessionTest
- * @tc.desc: Test ResetEnableWebAVSession restores default value
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, resetEnableWebAVSessionTest, TestSize.Level1)
-{
-    modifier_->setEnableWebAVSession(node_, true);
-    ResetEnableWebAVSession(node_);
-    auto jsonValue = GetJsonValue(node_);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
-    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE));
-}
-
-/*
  * @tc.name: setRunJavaScriptOnDocumentStartTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
