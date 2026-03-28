@@ -1907,4 +1907,232 @@ HWTEST_F(TextClockTestNG, TextClockTest021, TestSize.Level1)
 
     ViewStackProcessor::GetInstance()->Pop();
 }
+/**
+ * @tc.name: TextClockLayoutAlgorithm003
+ * @tc.desc: Test TextClockLayoutAlgorithm with Match layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create childFrameNode.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textNode->GetPattern()->CreateLayoutAlgorithm()));
+    textNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. Set Match layout policy and measure.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(720.f, 1136.f);
+    contentConstraint.percentReference = SizeF(720.f, 1136.f);
+    contentConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+
+    // Set Width and Height Match policy
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextClockLayoutAlgorithm>();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+
+    contentConstraint.selfIdealSize.SetSize(SizeF(200.f, 200.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: TextClockLayoutAlgorithm004
+ * @tc.desc: Test TextClockLayoutAlgorithm with Fix layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create childFrameNode.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textNode->GetPattern()->CreateLayoutAlgorithm()));
+    textNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. Set Fix layout policy and measure.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(720.f, 1136.f);
+    contentConstraint.percentReference = SizeF(720.f, 1136.f);
+    contentConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+
+    // Set Width and Height Fix policy
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextClockLayoutAlgorithm>();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+
+    contentConstraint.selfIdealSize.SetSize(SizeF(200.f, 200.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: TextClockLayoutAlgorithm006
+ * @tc.desc: Test TextClockLayoutAlgorithm with only Width Fix policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create childFrameNode.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textNode->GetPattern()->CreateLayoutAlgorithm()));
+    textNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. Set Width Fix policy only.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(720.f, 1136.f);
+    contentConstraint.percentReference = SizeF(720.f, 1136.f);
+    contentConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+
+    // Set only Width Fix policy
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextClockLayoutAlgorithm>();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: TextClockLayoutAlgorithm007
+ * @tc.desc: Test TextClockLayoutAlgorithm with only Height Fix policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create childFrameNode.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textNode->GetPattern()->CreateLayoutAlgorithm()));
+    textNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. Set Height Fix policy only.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(720.f, 1136.f);
+    contentConstraint.percentReference = SizeF(720.f, 1136.f);
+    contentConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+
+    // Set only Height Fix policy
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextClockLayoutAlgorithm>();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
 } // namespace OHOS::Ace::NG
