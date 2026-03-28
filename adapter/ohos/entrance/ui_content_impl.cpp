@@ -463,6 +463,13 @@ extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instan
     return UIContentImpl::GetUIContentWindowID(instanceId);
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ScopeErrorHivewReport()
+{
+    auto context = OHOS::Ace::PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::NAPI_SCOPE_ERROR);
+}
+
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
 {
     std::function<void(uint64_t, int, int)> logFunc = [pipeline](uint64_t nodeId, int count, int num) {

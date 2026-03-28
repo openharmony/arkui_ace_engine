@@ -110,6 +110,8 @@ if (defined(video_components_support) && video_components_support) {
   defines += [ "VIDEO_SUPPORTED" ]
 }
 
+defines += [ "NAPI_SCOPE_ERROR_HIVEW_REPORT" ]
+
 if (defined(video_support_jsstack) && video_support_jsstack) {
   defines += [ "SUPPORT_JSSTACK" ]
 }
