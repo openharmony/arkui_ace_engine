@@ -2579,7 +2579,8 @@ class CustomDialogContentComponent extends ViewV2 {
               this.buildButtonWithDivider.bind(this)(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
                 HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
             };
-            this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), forEachItemGenFunction, (item) => item.content.toString(), true, false);
+            this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
+              forEachItemGenFunction, (item) => item.content?.toString() ?? JSON.stringify(item), true, false);
           }, ForEach);
           ForEach.pop();
           Column.pop();

@@ -3903,7 +3903,7 @@ class CustomDialogContentComponent extends ViewPU {
                                 HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
                         };
                         this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
-                            forEachItemGenFunction, (item) => item.value.toString(), true, false);
+                            forEachItemGenFunction, (item) => item.value?.toString() ?? JSON.stringify(item), true, false);
                     }, ForEach);
                     ForEach.pop();
                     Column.pop();
