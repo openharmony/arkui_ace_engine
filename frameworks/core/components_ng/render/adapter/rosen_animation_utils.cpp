@@ -14,12 +14,16 @@
  */
 
 #include "render_service_client/core/animation/rs_interactive_implict_animator.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/animation/callback_thread_wrapper.h"
+#include "core/pipeline/base/render_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
 
 namespace OHOS::Ace {
 

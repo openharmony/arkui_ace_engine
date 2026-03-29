@@ -16,20 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURE_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURE_RECOGNIZER_H
 
+#include <functional>
 #include <memory>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/event/target_component.h"
-#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "frameworks/base/geometry/ng/point_t.h"
 
+// Forward declarations and type aliases from gesture_event.h
+namespace OHOS::Ace {
+class GestureEvent;
+using GestureEventFunc = std::function<void(GestureEvent& info)>;
+using GestureEventNoParameter = std::function<void()>;
+}
+
 namespace OHOS::Ace::NG {
 enum class GestureListenerType;
 enum class GestureActionPhase;
+class Gesture;
+class GestureInfo;
 
 struct DelayedTask {
     WeakPtr<NGGestureRecognizer> recognizer;
@@ -70,10 +78,7 @@ public:
         OnBeginGestureReferee(touchId, originalId, needUpdateChild);
     }
 
-    virtual RefPtr<Gesture> CreateGestureFromRecognizer() const
-    {
-        return nullptr;
-    }
+    virtual RefPtr<Gesture> CreateGestureFromRecognizer() const;
 
     // Triggered when the Gesture referee ends a gesture referee.
     void FinishReferee(int32_t touchId, bool isBlocked = false)
@@ -294,29 +299,11 @@ public:
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
     void AddGestureProcedure(const AxisEvent& event, const RefPtr<NGGestureRecognizer>& recognizer) const;
 
-    bool IsSystemGesture() const
-    {
-        if (!gestureInfo_) {
-            return false;
-        }
-        return gestureInfo_->IsSystemGesture();
-    }
+    bool IsSystemGesture() const;
 
-    GestureTypeName GetRecognizerType() const
-    {
-        if (!gestureInfo_) {
-            return GestureTypeName::UNKNOWN;
-        }
-        return gestureInfo_->GetRecognizerType();
-    }
+    GestureTypeName GetRecognizerType() const;
 
-    void SetRecognizerType(GestureTypeName trueType)
-    {
-        if (!gestureInfo_) {
-            gestureInfo_ = MakeRefPtr<GestureInfo>();
-        }
-        gestureInfo_->SetRecognizerType(trueType);
-    }
+    void SetRecognizerType(GestureTypeName trueType);
 
     virtual void ForceCleanRecognizer() {};
 
@@ -324,37 +311,18 @@ public:
         ForceCleanRecognizer();
     };
 
-    void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
-    {
-        gestureInfo_ = gestureInfo;
-    }
+    void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo);
 
-    RefPtr<GestureInfo> GetGestureInfo()
-    {
-        return gestureInfo_;
-    }
+    RefPtr<GestureInfo> GetGestureInfo();
 
-    RefPtr<GestureInfo> GetOrCreateGestureInfo()
-    {
-        if (!gestureInfo_) {
-            gestureInfo_ = MakeRefPtr<GestureInfo>();
-        }
-        return gestureInfo_;
-    }
+    RefPtr<GestureInfo> GetOrCreateGestureInfo();
 
     void SetSysGestureJudge(const GestureJudgeFunc& sysJudge)
     {
         sysJudge_ = sysJudge;
     }
 
-    void SetIsSystemGesture(bool isSystemGesture)
-    {
-        if (gestureInfo_) {
-            gestureInfo_->SetIsSystemGesture(isSystemGesture);
-        } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(isSystemGesture);
-        }
-    }
+    void SetIsSystemGesture(bool isSystemGesture);
 
     virtual void CleanRecognizerState() {};
 
@@ -365,24 +333,14 @@ public:
     bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
     
-    void SetUserData(void* userData)
-    {
-        if (gestureInfo_) {
-            gestureInfo_->SetUserData(userData);
-        }
-    }
+    void SetUserData(void* userData);
 
     virtual bool IsReady()
     {
         return refereeState_ == RefereeState::READY;
     }
 
-    void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
-    {
-        if (gestureInfo_) {
-            gestureInfo_->SetDisposeNotifyFunc(std::move(callback));
-        }
-    }
+    void SetDisposeNotifyCallback(std::function<void(void*)>&& callback);
 
     void SetBridgeMode(bool bridgeMode)
     {

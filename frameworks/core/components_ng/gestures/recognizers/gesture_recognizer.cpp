@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "ui/base/referenced.h"
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
@@ -39,6 +41,11 @@ RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer
 }
 
 } // namespace
+
+RefPtr<Gesture> NGGestureRecognizer::CreateGestureFromRecognizer() const
+{
+    return nullptr;
+}
 
 bool NGGestureRecognizer::ShouldResponse()
 {
@@ -798,5 +805,70 @@ std::string NGGestureRecognizer::GetGestureInfoString() const
     gestureInfoStr.append(",NRRS:").append(std::to_string(isNeedResetRecognizerState_));
     gestureInfoStr.append(",PB:").append(std::to_string(preventBegin_));
     return gestureInfoStr;
+}
+
+bool NGGestureRecognizer::IsSystemGesture() const
+{
+    if (!gestureInfo_) {
+        return false;
+    }
+    return gestureInfo_->IsSystemGesture();
+}
+
+GestureTypeName NGGestureRecognizer::GetRecognizerType() const
+{
+    if (!gestureInfo_) {
+        return GestureTypeName::UNKNOWN;
+    }
+    return gestureInfo_->GetRecognizerType();
+}
+
+void NGGestureRecognizer::SetRecognizerType(GestureTypeName trueType)
+{
+    if (!gestureInfo_) {
+        gestureInfo_ = MakeRefPtr<GestureInfo>();
+    }
+    gestureInfo_->SetRecognizerType(trueType);
+}
+
+RefPtr<GestureInfo> NGGestureRecognizer::GetOrCreateGestureInfo()
+{
+    if (!gestureInfo_) {
+        gestureInfo_ = MakeRefPtr<GestureInfo>();
+    }
+    return gestureInfo_;
+}
+
+void NGGestureRecognizer::SetIsSystemGesture(bool isSystemGesture)
+{
+    if (gestureInfo_) {
+        gestureInfo_->SetIsSystemGesture(isSystemGesture);
+    } else {
+        gestureInfo_ = MakeRefPtr<GestureInfo>(isSystemGesture);
+    }
+}
+
+void NGGestureRecognizer::SetUserData(void* userData)
+{
+    if (gestureInfo_) {
+        gestureInfo_->SetUserData(userData);
+    }
+}
+
+void NGGestureRecognizer::SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
+{
+    if (gestureInfo_) {
+        gestureInfo_->SetDisposeNotifyFunc(std::move(callback));
+    }
+}
+
+void NGGestureRecognizer::SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
+{
+    gestureInfo_ = gestureInfo;
+}
+
+RefPtr<GestureInfo> NGGestureRecognizer::GetGestureInfo()
+{
+    return gestureInfo_;
 }
 } // namespace OHOS::Ace::NG

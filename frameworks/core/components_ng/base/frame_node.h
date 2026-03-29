@@ -30,6 +30,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/view_data/ace_auto_fill_type.h"
 #include "core/common/resource/resource_configuration.h"
@@ -720,26 +721,11 @@ public:
         customerSet_ = true;
     }
 
-    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
-    {
-        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
-        CHECK_NULL_VOID(dragDropRelatedConfigurations);
-        dragDropRelatedConfigurations->SetDragPreviewOption(previewOption, isResetOptions);
-    }
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true);
 
-    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
-    {
-        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
-        CHECK_NULL_VOID(dragDropRelatedConfigurations);
-        dragDropRelatedConfigurations->SetOptionsAfterApplied(optionsAfterApplied);
-    }
+    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied);
 
-    DragPreviewOption GetDragPreviewOption()
-    {
-        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
-        CHECK_NULL_RETURN(dragDropRelatedConfigurations, DragPreviewOption());
-        return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
-    }
+    const DragPreviewOption& GetDragPreviewOption();
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {

@@ -41,6 +41,7 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"

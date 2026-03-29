@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"

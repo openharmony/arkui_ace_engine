@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "base/memory/referenced.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "ui/animation/animation_constants.h"
+#include "ui/animation/curve.h"
 
 namespace OHOS::Ace {
 #ifndef ENABLE_ROSEN_BACKEND

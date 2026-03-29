@@ -31,6 +31,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;

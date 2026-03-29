@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYMBOL_SYMBOL_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYMBOL_SYMBOL_MODEL_STATIC_H
 
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SymbolModelStatic {

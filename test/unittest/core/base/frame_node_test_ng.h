@@ -23,6 +23,8 @@
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {

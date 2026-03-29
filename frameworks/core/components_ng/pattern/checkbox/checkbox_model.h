@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/utils/linear_map.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 

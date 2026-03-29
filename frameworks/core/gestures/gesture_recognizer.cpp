@@ -16,6 +16,7 @@
 #include "core/gestures/gesture_recognizer.h"
 
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
