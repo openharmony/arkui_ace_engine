@@ -98,6 +98,9 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects002, TestSize.Level
     info.paragraph = mockParagraph;
     info.end = 10;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step1. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2);
     EXPECT_EQ(result.size(), 1);
@@ -118,6 +121,9 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects003, TestSize.Level
     info.paragraph = mockParagraph;
     info.end = 10;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step1. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2, RectHeightPolicy::COVER_TEXT);
     EXPECT_EQ(result.size(), 1);

@@ -877,4 +877,28 @@ void RichEditorSelectOverlay::UpdateHandleColor()
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
+bool RichEditorSelectOverlay::IsRegisterTouchCallback()
+{
+    return true;
+}
+
+bool RichEditorSelectOverlay::GetIsHandleMoving()
+{
+    return isHandleMoving_;
+}
+
+bool RichEditorSelectOverlay::GetIsHandleHidden()
+{
+    return handleIsHidden_;
+}
+
+bool RichEditorSelectOverlay::IsSingleHandleMoving()
+{
+    return isHandleMoving_ && IsSingleHandle();
+}
+
+bool RichEditorSelectOverlay::NeedRefreshMenu()
+{
+    return needRefreshMenu_;
+}
 } // namespace OHOS::Ace::NG

@@ -120,4 +120,24 @@ void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
         customSpanPlaceholder.onDraw(drawingContext, customSpanOptions);
     }
 }
+
+void RichEditorContentModifier::SetRichTextRectX(float value)
+{
+    richTextRectX_->Set(value);
+}
+
+void RichEditorContentModifier::SetRichTextRectY(float value)
+{
+    richTextRectY_->Set(value);
+}
+
+void RichEditorContentModifier::SetClipOffset(OffsetF offset)
+{
+    clipOffset_->Set(offset);
+}
+
+void RichEditorContentModifier::SetClipSize(SizeF size)
+{
+    clipSize_->Set(size);
+}
 } // namespace OHOS::Ace::NG
