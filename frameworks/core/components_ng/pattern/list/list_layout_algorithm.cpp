@@ -2095,14 +2095,6 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     } else if (forwardFeature_ || backwardFeature_) {
         itemGroup->CheckNeedAllLayout(layoutWrapper, forwardLayout);
     }
-    if (CheckNeedMeasure(layoutWrapper)) {
-        itemGroup->ResetCachedItemPosition();
-        itemGroup->ResetCachedIndex();
-        if (layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>()) {
-            auto groupPattern = layoutWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
-            groupPattern->SetRecache(true);
-        }
-    }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -2340,10 +2332,7 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
     auto group = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(group, res);
     const auto& itemPos = group->GetItemPosition();
-    bool reCache = false;
-    if (outOfView && recycledItemPosition_.count(index) == 0) {
-        reCache = CheckNeedMeasure(wrapper);
-    } else if (outOfView) {
+    if (outOfView && recycledItemPosition_.count(index) > 0) {
         wrapper->SetActive(true);
         wrapper->Layout();
         group->SyncItemsToCachedItemPosition();
@@ -2356,16 +2345,10 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         forwardCache = forward ? forwardCache : -1;
         backwardCache = backward ? backwardCache : -1;
     }
-    res = group->UpdateCachedIndex(outOfView, reCache, forwardCache, backwardCache);
+    res = group->UpdateCachedIndex(outOfView, forwardCache, backwardCache);
     ACE_SCOPED_TRACE("GetLayoutGroupCachedCount forward:%d, %d, backward:%d, %d",
         res.forwardCachedCount, res.forwardCacheMax, res.backwardCachedCount, res.backwardCacheMax);
-    if ((group->GetTotalItemCount() == 0 && outOfView) || !group->IsVisible()) {
-        if (CheckNeedMeasure(wrapper)) {
-            res = {0, 0, 1, 1};
-        } else {
-            res = {1, 1, 1, 1};
-        }
-    }
+    res.needPredict = res.needPredict || CheckNeedMeasure(wrapper);
     return res;
 }
 
@@ -2427,6 +2410,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
                 wrapper->SetActive(show);
                 SyncGeometry(wrapper, isDirty);
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
+            } else if (res.needPredict) {
+                predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache });
             }
             currCache = std::max(res.forwardCacheMax, 1);
         }
@@ -2485,6 +2470,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
                 wrapper->SetActive(show);
                 SyncGeometry(wrapper, isDirty);
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
+            } else if (res.needPredict) {
+                predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache });
             }
             currCache = std::max(res.backwardCacheMax, 1);
         }
@@ -2563,7 +2550,8 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
         auto wrapper = GetChildByIndex(layoutWrapper, startIndex);
         auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, cacheCount, startIndex, false);
         if ((res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) ||
-            (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount)) {
+            (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount) ||
+            res.needPredict) {
             int32_t forwardCached = res.forwardCacheMax > 0 ? cachedForward : -1;
             int32_t backwardCached = res.backwardCacheMax > 0 ? cachedBackward : -1;
             forceCache = (forwardCached != -1 && forwardCached < minCacheCount) ||
@@ -2576,7 +2564,8 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
         if (itemPosition_.rbegin()->second.isGroup) {
             auto wrapper = GetChildByIndex(layoutWrapper, endIndex);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, -1, endIndex, false);
-            if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) {
+            if ((res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) ||
+                res.needPredict) {
                 forceCache = cachedForward < minCacheCount;
                 predictList.emplace_back(PredictLayoutItem { endIndex, cachedForward, -1, forceCache });
             }
@@ -2585,7 +2574,8 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
         if (itemPosition_.begin()->second.isGroup) {
             auto wrapper = GetChildByIndex(layoutWrapper, startIndex);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount, startIndex, false);
-            if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount) {
+            if ((res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount) ||
+                res.needPredict) {
                 forceCache = cachedBackward < minCacheCount;
                 predictList.emplace_back(PredictLayoutItem { startIndex, -1, cachedBackward, forceCache });
             }
