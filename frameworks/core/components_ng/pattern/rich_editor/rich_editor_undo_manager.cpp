@@ -1012,4 +1012,203 @@ RichEditorAbstractSpanResult StringUndoManager::GetAdjustedInsertSpanInfo(int32_
     retInfo.SetSpanRangeEnd(spanEnd);
     return retInfo;
 }
+
+void OptionsListHandler::operator()(const OptionsList& optionsList) const
+{
+    for (const auto& option : optionsList) {
+        std::visit([&](const auto& specificOption) {
+            using T = std::decay_t<decltype(specificOption)>;
+            if constexpr (std::is_same_v<T, ImageSpanOptions>) {
+                IF_TRUE(handleImage, handleImage(specificOption));
+            } else if constexpr (std::is_same_v<T, TextSpanOptions>) {
+                IF_TRUE(handleText, handleText(specificOption));
+            } else if constexpr (std::is_same_v<T, SymbolSpanOptions>) {
+                IF_TRUE(handleSymbol, handleSymbol(specificOption));
+            } else if constexpr (std::is_same_v<T, BuilderSpanOptions>) {
+                IF_TRUE(handleBuilder, handleBuilder(specificOption));
+            }
+        }, option);
+        IF_TRUE(onOptionsProcessed, onOptionsProcessed());
+    }
 }
+
+void UndoRedoRecord::SetOperationBefore(TextRange range, const RefPtr<SpanString>& styledString,
+    TextRange selection, CaretAffinityPolicy caretAffinity)
+{
+    rangeBefore = range;
+    styledStringBefore = styledString;
+    selectionBefore = selection;
+    caretAffinityBefore = caretAffinity;
+}
+
+void UndoRedoRecord::SetOperationBefore(TextRange range, const OptionsList& optionsList,
+    TextRange selection, CaretAffinityPolicy caretAffinity)
+{
+    rangeBefore = range;
+    optionsListBefore = optionsList;
+    selectionBefore = selection;
+    caretAffinityBefore = caretAffinity;
+}
+
+void UndoRedoRecord::SetOperationAfter(TextRange range, const RefPtr<SpanString>& styledString)
+{
+    rangeAfter = range;
+    styledStringAfter = styledString;
+}
+
+void UndoRedoRecord::SetOperationAfter(TextRange range, const OptionsList& optionsList)
+{
+    rangeAfter = range;
+    optionsListAfter = optionsList;
+}
+
+void UndoRedoRecord::CopyOperationAfter(const UndoRedoRecord& record)
+{
+    rangeAfter = record.rangeAfter;
+    styledStringAfter = record.styledStringAfter;
+    optionsListAfter = record.optionsListAfter;
+}
+
+void UndoRedoRecord::AddUpdateSpanType(SpanType type)
+{
+    updateSpanTypes.insert(type);
+}
+
+void UndoRedoRecord::Reset()
+{
+    rangeBefore.Reset();
+    rangeAfter.Reset();
+    styledStringBefore = nullptr;
+    styledStringAfter = nullptr;
+    optionsListBefore = std::nullopt;
+    optionsListAfter = std::nullopt;
+    selectionBefore.Reset();
+    caretAffinityBefore = CaretAffinityPolicy::DEFAULT;
+    isOnlyStyleChange = false;
+    updateSpanTypes.clear();
+}
+
+void UndoRedoRecord::Reverse()
+{
+    std::swap(rangeBefore, rangeAfter);
+    std::swap(styledStringBefore, styledStringAfter);
+    std::swap(optionsListBefore, optionsListAfter);
+}
+
+bool UndoRedoRecord::IsBeforeStateValid() const
+{
+    return rangeBefore.IsValid() && (styledStringBefore || optionsListBefore);
+}
+
+bool UndoRedoRecord::IsAfterStateValid() const
+{
+    return rangeAfter.IsValid() && (styledStringAfter || optionsListAfter);
+}
+
+bool UndoRedoRecord::IsValid() const
+{
+    return IsBeforeStateValid() && IsAfterStateValid();
+}
+
+bool UndoRedoRecord::IsEmpty() const
+{
+    return rangeBefore.GetLength() == 0 && rangeAfter.GetLength() == 0;
+}
+
+bool UndoRedoRecord::IsRestoreBuilderSpan() const
+{
+    return isOnlyStyleChange || restoreBuilderSpan;
+}
+
+std::u16string UndoRedoRecord::GetStringFromOptionsList(const std::optional<OptionsList>& optionsList) const
+{
+    constexpr auto SYMBOL_CONTENT = u"  ";
+    constexpr auto IMAGE_CONTENT = u" ";
+    std::u16string u16Str;
+    OptionsListHandler handler(
+        [&](const ImageSpanOptions&) {
+            u16Str.append(IMAGE_CONTENT);
+        },
+        [&](const TextSpanOptions& opts) {
+            u16Str.append(opts.value);
+        },
+        [&](const SymbolSpanOptions&) {
+            u16Str.append(SYMBOL_CONTENT);
+        },
+        [&](const BuilderSpanOptions&) {
+            u16Str.append(IMAGE_CONTENT);
+        }
+    );
+    handler(optionsList.value_or(OptionsList{}));
+    return u16Str;
+}
+
+std::u16string UndoRedoRecord::GetStringBefore() const
+{
+    return GetStringFromOptionsList(optionsListBefore);
+}
+
+std::u16string UndoRedoRecord::GetStringAfter() const
+{
+    return GetStringFromOptionsList(optionsListAfter);
+}
+
+std::string UndoRedoRecord::ToString() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, rangeBefore);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, rangeAfter);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, selectionBefore);
+    JSON_STRING_PUT_INT(jsonValue, caretAffinityBefore);
+    JSON_STRING_PUT_INT(jsonValue, deleteDirection);
+    JSON_STRING_PUT_BOOL(jsonValue, isOnlyStyleChange);
+    JSON_STRING_PUT_BOOL(jsonValue, restoreBuilderSpan);
+    return jsonValue->ToString();
+}
+
+void RichEditorUndoManager::ClearSelectionBefore()
+{
+    selectionBefore_.Reset();
+}
+
+void RichEditorUndoManager::ClearPreviewInputRecord()
+{
+    if (IsPreviewInputStartWithSelection()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ClearPreviewInputRecord");
+    }
+    previewInputRecord_.Reset();
+}
+
+void RichEditorUndoManager::ClearUndoRedoRecords()
+{
+    undoRecords_.clear();
+    redoRecords_.clear();
+    ClearPreviewInputRecord();
+    ClearSelectionBefore();
+}
+
+bool RichEditorUndoManager::IsPreviewInputStartWithSelection()
+{
+    return previewInputRecord_.IsBeforeStateValid();
+}
+
+void RichEditorUndoManager::StartCountingRecord()
+{
+    CHECK_NULL_VOID(!isCountingRecord_);
+    recordCount_ = 0;
+    isCountingRecord_ = true;
+}
+
+void RichEditorUndoManager::CountRecord()
+{
+    CHECK_NULL_VOID(isCountingRecord_);
+    recordCount_ ++;
+}
+
+size_t RichEditorUndoManager::EndCountingRecord()
+{
+    CHECK_NULL_RETURN(isCountingRecord_, 0);
+    isCountingRecord_ = false;
+    return recordCount_;
+}
+} // namespace OHOS::Ace::NG

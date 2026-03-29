@@ -32,12 +32,16 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/property/measure_property.h"
@@ -668,5 +672,15 @@ void PreviewMenuController::BindContextMenu(const RefPtr<FrameNode>& targetNode,
     ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam_);
     ViewStackProcessor::GetInstance()->Finish();
 #endif
+}
+
+void PreviewMenuController::ClosePreviewMenu()
+{
+    isShow_ = false;
+}
+
+bool PreviewMenuController::IsPreviewMenuShow()
+{
+    return isShow_;
 }
 } // namespace OHOS::Ace::NG

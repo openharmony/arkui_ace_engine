@@ -733,4 +733,135 @@ bool RichEditorEventHub::HasOnStyledStringDidChange() const
 {
     return static_cast<bool>(onStyledStringDidChange_);
 }
+
+void TextInsertValueInfo::SetSpanIndex(int32_t spanIndex)
+{
+    spanIndex_ = spanIndex;
+}
+
+int32_t TextInsertValueInfo::GetSpanIndex() const
+{
+    return spanIndex_;
+}
+
+void TextInsertValueInfo::SetOffsetInSpan(int32_t offsetInSpan)
+{
+    offsetInSpan_ = offsetInSpan;
+}
+
+int32_t TextInsertValueInfo::GetOffsetInSpan() const
+{
+    return offsetInSpan_;
+}
+
+std::string TextInsertValueInfo::ToString() const
+{
+    return "spanIndex_: " + std::to_string(spanIndex_) + ", offsetInSpan_" + std::to_string(offsetInSpan_);
+}
+
+void RichEditorEventHub::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
+{
+    onSelect_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnSelect(BaseEventInfo* value)
+{
+    if (onSelect_) {
+        onSelect_(value);
+    }
+}
+
+void RichEditorEventHub::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
+{
+    OnSelectionChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnSelectionChange(BaseEventInfo* value)
+{
+    if (OnSelectionChange_) {
+        OnSelectionChange_(value);
+    }
+}
+
+void RichEditorEventHub::SetTimestamp(long long timestamp)
+{
+    timestamp_ = timestamp;
+}
+
+void RichEditorEventHub::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onPaste_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnPaste(NG::TextCommonEvent& value)
+{
+    if (onPaste_) {
+        onPaste_(value);
+    }
+}
+
+void RichEditorEventHub::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+{
+    onSubmit_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
+{
+    if (onSubmit_) {
+        onSubmit_(value, event);
+    }
+}
+
+void RichEditorEventHub::SetOnWillAttachIME(IMEAttachCallback&& func)
+{
+    onWillAttachIME_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnWillAttachIME(IMEClient& info)
+{
+    if (onWillAttachIME_) {
+        onWillAttachIME_(info);
+    }
+}
+
+void RichEditorAbstractSpanResult::SetBorderRadius(const std::string& borderRadius)
+{
+    borderRadius_ = borderRadius;
+}
+
+const std::string& RichEditorAbstractSpanResult::GetBorderRadius() const
+{
+    return borderRadius_;
+}
+
+void RichEditorAbstractSpanResult::SetMargin(const std::string& margin)
+{
+    margin_ = margin;
+}
+
+const std::string& RichEditorAbstractSpanResult::GetMargin() const
+{
+    return margin_;
+}
+
+void RichEditorAbstractSpanResult::SetFontStyle(OHOS::Ace::FontStyle fontStyle)
+{
+    fontStyle_ = fontStyle;
+}
+
+OHOS::Ace::FontStyle RichEditorAbstractSpanResult::GetFontStyle() const
+{
+    return fontStyle_;
+}
+
+void RichEditorChangeValue::reset()
+{
+    originalSpans_.clear();
+    replacedSpans_.clear();
+    replacedImageSpans_.clear();
+    replacedSymbolSpans_.clear();
+    rangeBefore_ = TextRange();
+    rangeAfter_ = TextRange();
+    changeReason_ = TextChangeReason::UNKNOWN;
+}
 } // namespace OHOS::Ace::NG
