@@ -142,6 +142,65 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsOneTimeCodeType001
+ * @tc.desc: test text input one time code type helper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, IsOneTimeCodeType001, TestSize.Level0)
+{
+    CreateTextField();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_FALSE(pattern_->IsOneTimeCodeType());
+
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE);
+    EXPECT_TRUE(pattern_->IsOneTimeCodeType());
+
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE_NUMBER);
+    EXPECT_TRUE(pattern_->IsOneTimeCodeType());
+}
+
+/**
+ * @tc.name: CheckAndUpdateInputTypeForOTP001
+ * @tc.desc: test keyword placeholder switches number to one time code number
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, CheckAndUpdateInputTypeForOTP001, TestSize.Level0)
+{
+    CreateTextField();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    layoutProperty->UpdatePlaceholder(u"请输入验证码");
+    pattern_->CheckIfNeedToResetKeyboard();
+
+    EXPECT_EQ(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED), TextInputType::ONE_TIME_CODE_NUMBER);
+    EXPECT_EQ(pattern_->GetKeyboard(), TextInputType::ONE_TIME_CODE_NUMBER);
+}
+
+/**
+ * @tc.name: CheckAndUpdateInputTypeForOTP002
+ * @tc.desc: test normal placeholder does not switch number type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, CheckAndUpdateInputTypeForOTP002, TestSize.Level0)
+{
+    CreateTextField();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    layoutProperty->UpdatePlaceholder(u"请输入手机号");
+    pattern_->CheckIfNeedToResetKeyboard();
+
+    EXPECT_EQ(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED), TextInputType::NUMBER);
+    EXPECT_EQ(pattern_->GetKeyboard(), TextInputType::NUMBER);
+}
+
+/**
  * @tc.name: GetInputStyleString001
  * @tc.desc: test testInput text GetInputStyleString
  * @tc.type: FUNC

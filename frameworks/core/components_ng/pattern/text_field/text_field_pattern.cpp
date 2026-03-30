@@ -18,11 +18,14 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
+#include <cctype>
 #include <cstdint>
 #include <optional>
 #include <regex>
 #include <string>
+#include <string_view>
 #include <utility>
 #include "base/geometry/dimension.h"
 #include "base/log/event_report.h"
@@ -303,6 +306,20 @@ static std::unordered_map<FocuseIndex, FocuseIndex> focusBackwardMap_ = {
     { FocuseIndex::VOICE, FocuseIndex::CANCEL },
     { FocuseIndex::CANCEL, FocuseIndex::TEXT }
 };
+
+constexpr std::u16string_view OTP_PLACEHOLDER_KEYWORD_CN = u"验证码";
+constexpr std::string_view OTP_PLACEHOLDER_KEYWORD_EN = "verification code";
+
+bool IsVerificationCodePlaceholder(const std::u16string& placeholder)
+{
+    if (placeholder.find(OTP_PLACEHOLDER_KEYWORD_CN) != std::u16string::npos) {
+        return true;
+    }
+    auto placeholderLower = UtfUtils::Str16DebugToStr8(placeholder);
+    std::transform(placeholderLower.begin(), placeholderLower.end(), placeholderLower.begin(),
+        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return placeholderLower.find(OTP_PLACEHOLDER_KEYWORD_EN) != std::string::npos;
+}
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -1582,6 +1599,30 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
         requestFocusReason_ == RequestFocusReason::SWITCH_EDITABLE;
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
         DoProcessAutoFill(RequestAutoFillReason::FIELD_FOCUS_EVENT);
+    }
+}
+
+void TextFieldPattern::CheckAndUpdateInputTypeForOTP()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    if (currentType != TextInputType::NUMBER || keyboard_ != TextInputType::NUMBER) {
+        return;
+    }
+    auto placeholder = layoutProperty->GetPlaceholderValue(u"");
+    if (placeholder.empty() || !IsVerificationCodePlaceholder(placeholder)) {
+        return;
+    }
+    layoutProperty->UpdateTypeChanged(true);
+    SetIsFilterChanged(true);
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE_NUMBER);
+    keyboard_ = TextInputType::ONE_TIME_CODE_NUMBER;
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Auto detected verification code, updated inputType to ONE_TIME_CODE_NUMBER");
+    if (HasFocus()) {
+        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::RESET_KEYBOARD);
     }
 }
 
@@ -4011,13 +4052,14 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
             needToResetKeyboard = true;
         }
     }
+    CheckAndUpdateInputTypeForOTP();
     if (!needToResetKeyboard && action_ != TextInputAction::UNSPECIFIED) {
         needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
     }
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
-        if (isCustomKeyboardAttached_ || keyboard_ == TextInputType::ONE_TIME_CODE) {
+        if (isCustomKeyboardAttached_ || IsOneTimeCodeType()) {
             RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::RESET_KEYBOARD);
             return;
         }
@@ -8158,30 +8200,34 @@ std::string TextFieldPattern::TextInputTypeToString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    switch (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        case TextInputType::NUMBER:
-            return IsTextArea() ? "TextAreaType.NUMBER" : "InputType.Number";
-        case TextInputType::EMAIL_ADDRESS:
-            return IsTextArea() ? "TextAreaType.EMAIL" : "InputType.Email";
-        case TextInputType::PHONE:
-            return IsTextArea() ? "TextAreaType.PHONE_NUMBER" : "InputType.PhoneNumber";
-        case TextInputType::URL:
-            return IsTextArea() ? "TextAreaType.URL" : "InputType.URL";
-        case TextInputType::VISIBLE_PASSWORD:
-            return "InputType.Password";
-        case TextInputType::USER_NAME:
-            return "InputType.USER_NAME";
-        case TextInputType::NEW_PASSWORD:
-            return "InputType.NEW_PASSWORD";
-        case TextInputType::NUMBER_PASSWORD:
-            return "InputType.NUMBER_PASSWORD";
-        case TextInputType::NUMBER_DECIMAL:
-            return IsTextArea() ? "TextAreaType.NUMBER_DECIMAL" : "InputType.NUMBER_DECIMAL";
-        case TextInputType::ONE_TIME_CODE:
-            return IsTextArea() ? "TextAreaType.ONE_TIME_CODE" : "InputType.ONE_TIME_CODE";
-        default:
-            return isTextInput_ ? "InputType.Normal" : "TextAreaType.NORMAL";
+    constexpr std::string_view DEFAULT_INPUT_TYPE = "InputType.Normal";
+    constexpr std::string_view DEFAULT_TEXT_AREA_TYPE = "TextAreaType.NORMAL";
+    struct TextInputTypeMapping {
+        TextInputType type;
+        std::string_view inputType;
+        std::string_view textAreaType;
+    };
+    static constexpr std::array<TextInputTypeMapping, 11> TEXT_INPUT_TYPE_MAPPINGS = { {
+        { TextInputType::NUMBER, "InputType.Number", "TextAreaType.NUMBER" },
+        { TextInputType::EMAIL_ADDRESS, "InputType.Email", "TextAreaType.EMAIL" },
+        { TextInputType::PHONE, "InputType.PhoneNumber", "TextAreaType.PHONE_NUMBER" },
+        { TextInputType::URL, "InputType.URL", "TextAreaType.URL" },
+        { TextInputType::VISIBLE_PASSWORD, "InputType.Password", "InputType.Password" },
+        { TextInputType::USER_NAME, "InputType.USER_NAME", "InputType.USER_NAME" },
+        { TextInputType::NEW_PASSWORD, "InputType.NEW_PASSWORD", "InputType.NEW_PASSWORD" },
+        { TextInputType::NUMBER_PASSWORD, "InputType.NUMBER_PASSWORD", "InputType.NUMBER_PASSWORD" },
+        { TextInputType::NUMBER_DECIMAL, "InputType.NUMBER_DECIMAL", "TextAreaType.NUMBER_DECIMAL" },
+        { TextInputType::ONE_TIME_CODE, "InputType.ONE_TIME_CODE", "TextAreaType.ONE_TIME_CODE" },
+        { TextInputType::ONE_TIME_CODE_NUMBER, "InputType.ONE_TIME_CODE_NUMBER", "TextAreaType.ONE_TIME_CODE_NUMBER" },
+    } };
+
+    auto textInputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    for (const auto& mapping : TEXT_INPUT_TYPE_MAPPINGS) {
+        if (mapping.type == textInputType) {
+            return std::string(IsTextArea() ? mapping.textAreaType : mapping.inputType);
+        }
     }
+    return std::string(isTextInput_ ? DEFAULT_INPUT_TYPE : DEFAULT_TEXT_AREA_TYPE);
 }
 
 std::string TextFieldPattern::TextContentTypeToString() const
@@ -9028,6 +9074,14 @@ bool TextFieldPattern::IsInPasswordMode() const
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     return inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
            inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+}
+
+bool TextFieldPattern::IsOneTimeCodeType() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    return inputType == TextInputType::ONE_TIME_CODE || inputType == TextInputType::ONE_TIME_CODE_NUMBER;
 }
 
 bool TextFieldPattern::IsNormalInlineState() const
