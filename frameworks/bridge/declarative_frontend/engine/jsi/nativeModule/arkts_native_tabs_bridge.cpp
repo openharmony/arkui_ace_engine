@@ -281,11 +281,7 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     uint32_t color;
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    auto context = frameNode->GetContext();
-    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
-    auto tabTheme = themeManager->GetTheme<TabTheme>();
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
 
     RefPtr<ResourceObject> strokeWidthResObj;

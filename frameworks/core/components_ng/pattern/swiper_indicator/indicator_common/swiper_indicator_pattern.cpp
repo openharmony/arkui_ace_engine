@@ -203,9 +203,7 @@ void SwiperIndicatorPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperTheme);
     auto maxDisplayCount = swiperPattern->GetMaxDisplayCount() > 0 ? swiperPattern->GetMaxDisplayCount()
                                                                    : swiperPattern->TotalCount();
@@ -376,9 +374,7 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(theme);
     auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
     auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
@@ -580,12 +576,10 @@ std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEn
 
 void SwiperIndicatorPattern::GetMouseClickIndex()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto theme = host->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(theme);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx());
@@ -630,9 +624,8 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(firstTextNode);
     CHECK_NULL_VOID(lastTextNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = firstTextNode->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(theme);
     firstTextNode->SetInternal();
     lastTextNode->SetInternal();
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
@@ -697,9 +690,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(firstTextNode);
     CHECK_NULL_VOID(lastTextNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = firstTextNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(theme);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(firstTextLayoutProperty);
@@ -930,9 +921,7 @@ double SwiperIndicatorPattern::GetIndicatorDragAngleThreshold(bool isMaxAngle)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto theme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(theme, 0.0f);
     if (isMaxAngle) {
         return theme->GetIndicatorDragMaxAngle();
@@ -1014,9 +1003,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     CHECK_NULL_RETURN(host, 0.0f);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, 0.0f);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(theme, 0.0f);
     auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
     auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
@@ -1144,7 +1131,12 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     ResetDotModifier();
 
     if (!overlongDotIndicatorModifier_) {
-        overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+        auto host = GetHost();
+        int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            id = host->GetThemeScopeId();
+        }
+        overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>(id);
     }
 
     overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
@@ -1169,7 +1161,12 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
     ResetOverlongModifier();
 
     if (!dotIndicatorModifier_) {
-        dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+        auto host = GetHost();
+        int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            id = host->GetThemeScopeId();
+        }
+        dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>(id);
     }
 
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
@@ -1545,5 +1542,21 @@ void SwiperIndicatorPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
             break;
         }
     }
+}
+
+bool SwiperIndicatorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    auto swiperTheme = host->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_RETURN(swiperTheme, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    focusHub->SetPaintColor(swiperTheme->GetFocusedColor());
+    return false;
 }
 } // namespace OHOS::Ace::NG

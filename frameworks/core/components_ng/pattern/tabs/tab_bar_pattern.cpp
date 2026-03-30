@@ -405,7 +405,9 @@ void TabBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetClipToFrame(true);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    renderContext->SetClipToFrame(!tabTheme->GetIsChangeFocusTextStyle());
     if (!host->GetLayoutProperty()->GetSafeAreaExpandOpts()) {
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
             SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
@@ -916,9 +918,9 @@ void TabBarPattern::HandleHoverEvent(bool isHover)
 
 void TabBarPattern::HandleHoverOnEvent(int32_t index)
 {
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     PlayPressAnimation(index, GetSubTabBarHoverColor(index), AnimationType::HOVER);
 }
@@ -975,7 +977,7 @@ WeakPtr<FocusHub> TabBarPattern::GetNextFocusNode(FocusStep step)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto indicator = 0;
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
@@ -1117,9 +1119,7 @@ void TabBarPattern::OnModifyDone()
 
     AddMaskItemClickEvent();
     InitTurnPageRateEvent();
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TabTheme>();
+    auto theme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(theme);
     InitTabBarProperties(theme);
     UpdateBackBlurStyle(theme);
@@ -1290,9 +1290,7 @@ void TabBarPattern::UpdateChildrenClipEdge()
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     bool clipEdge = tabBarRenderContext->GetClipEdgeValue(true);
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = tabBarNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     if (tabTheme->GetIsChangeFocusTextStyle()) {
         clipEdge = false;
@@ -1612,9 +1610,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     } else {
         jumpIndex_ = index;
     }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     if (tabTheme->GetIsChangeFocusTextStyle()) {
         focusIndicator_ = index;
@@ -1704,11 +1700,6 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
     OffsetF& originalUnselectedMaskOffset)
 {
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
@@ -1759,13 +1750,9 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
 
 void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex)
 {
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndexes[maskIndex]));
     CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
@@ -1882,9 +1869,7 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     ImageSourceInfo info;
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
 
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
@@ -2062,9 +2047,9 @@ void TabBarPattern::HandleTouchDown(int32_t index)
     if (removeSwiperEventCallback) {
         removeSwiperEventCallback();
     }
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     PlayPressAnimation(index, tabTheme->GetSubTabBarPressedColor(), AnimationType::PRESS);
 }
@@ -2075,9 +2060,9 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     if (addSwiperEventCallback) {
         addSwiperEventCallback();
     }
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     if (hoverIndex_.value_or(-1) == index) {
         PlayPressAnimation(index, GetSubTabBarHoverColor(index), AnimationType::HOVERTOPRESS);
@@ -2098,7 +2083,9 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     AnimationOption option = AnimationOption();
     option.SetDuration(animationType == AnimationType::HOVERTOPRESS
@@ -2134,9 +2121,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
         if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
             tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
             BorderRadiusProperty borderRadiusProperty;
-            auto pipelineContext = host->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = host->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
             renderContext->UpdateBorderRadius(borderRadiusProperty);
@@ -2282,9 +2267,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t selectedColumnId = 0;
     int32_t focusedColumnId = 0;
     GetColumnId(selectedColumnId, focusedColumnId, indicator);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = tabBarNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
@@ -2343,9 +2326,7 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     if (tabBarPattern->IsContainsBuilder()) {
         return;
     }
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = tabBarNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto childCount = tabBarNode->TotalChildCount() - IMAGE_INDICATOR_COUNT;
     CHECK_NULL_VOID(childCount >= 0);
@@ -2385,9 +2366,7 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = tabBarNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     if (tabBarPattern->IsContainsBuilder()) {
         return;
@@ -2662,9 +2641,9 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
     auto curve = GetAnimationCurve(DurationCubicCurve);
     StopTranslateAnimation();
     SetSwiperCurve(curve);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     UpdateAnimationDuration();
     AnimationOption option = AnimationOption();
@@ -2679,8 +2658,6 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         PlayTabBarTranslateAnimation(option, targetOffset);
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) !=
@@ -2813,9 +2790,7 @@ Color TabBarPattern::GetTabBarBackgroundColor() const
         if (tabsCtx->GetBackgroundColor()) {
             bgColor = *tabsCtx->GetBackgroundColor();
         } else {
-            auto pipeline = tabBarNode->GetContext();
-            CHECK_NULL_RETURN(pipeline, bgColor);
-            auto tabTheme = pipeline->GetTheme<TabTheme>();
+            auto tabTheme = tabBarNode->GetTheme<TabTheme>(true);
             CHECK_NULL_RETURN(tabTheme, bgColor);
             bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
         }
@@ -3421,12 +3396,10 @@ void TabBarPattern::UpdateAnimationDuration()
     }
 
     std::optional<int32_t> duration;
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
@@ -3866,6 +3839,19 @@ void TabBarPattern::OnColorModeChange(uint32_t colorMode)
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+}
+
+bool TabBarPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    InitTabBarProperties(tabTheme);
+    return false;
 }
 
 void TabBarPattern::UpdateSubTabBarImageIndicator()

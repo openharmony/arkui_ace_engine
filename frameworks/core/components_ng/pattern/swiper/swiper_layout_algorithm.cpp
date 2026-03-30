@@ -1345,16 +1345,14 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
         }
     }
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto frameNode = indicatorWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
 
-    auto frameNode = indicatorWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(indicatorlayoutProperty);
 
@@ -1457,9 +1455,7 @@ const OffsetF SwiperLayoutAlgorithm::CalculateCustomOffset(
     auto right = indicatorLayoutProperty->GetRight();
     auto top = indicatorLayoutProperty->GetTop();
     auto bottom = indicatorLayoutProperty->GetBottom();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, indicatorOffset);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(swiperIndicatorTheme, indicatorOffset);
     auto indicatorPadding = swiperIndicatorTheme->GetIndicatorDigitPadding().ConvertToPx();
 
@@ -1499,9 +1495,9 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     auto arrowGeometryNode = arrowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(arrowGeometryNode);
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto frameNode = arrowWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
 
     arrowGeometryNode->SetFrameSize(
@@ -1571,9 +1567,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             auto itemCount = swiperPattern->TotalCount();
             auto indicatorNode = indicatorWrapper->GetHostNode();
             CHECK_NULL_VOID(indicatorNode);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+            auto theme = hostNode->GetTheme<SwiperIndicatorTheme>(true);
             CHECK_NULL_VOID(theme);
             auto indicatorPaintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
             CHECK_NULL_VOID(indicatorPaintProperty);
@@ -1595,9 +1589,9 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         }
     }
     auto isLeftArrow = arrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto swiperIndicatorTheme = hostNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     OffsetF arrowOffset(0.0f, 0.0f);
     float startPoint = 0.0f;

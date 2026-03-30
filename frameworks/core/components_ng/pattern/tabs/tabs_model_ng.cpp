@@ -89,9 +89,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = swiperNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
     swiperPaintProperty->UpdateCurve(TabBarPhysicalCurve);
@@ -640,7 +638,7 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(layoutProperty);
 
     auto axis = layoutProperty->GetAxis().value_or((Axis::HORIZONTAL));
-    TabsItemDivider defaultDivider;
+    TabsItemDivider defaultDivider(tabsNode->GetThemeScopeId());
     auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
     auto dividerColor = divider.color;
     auto dividerStrokeWidth = divider.strokeWidth;
@@ -1626,9 +1624,7 @@ void TabsModelNG::HandleDividerColor(FrameNode* frameNode, const RefPtr<Resource
             divider.color = result;
             TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), true);
         } else {
-            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = node->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             divider.color = tabTheme->GetDividerColor();
             TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), false);

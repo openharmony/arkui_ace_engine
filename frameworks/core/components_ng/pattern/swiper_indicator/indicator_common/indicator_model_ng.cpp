@@ -233,9 +233,7 @@ void IndicatorModelNG::ProcessDotSizeWithResourceObj(FrameNode* frameNode, const
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
             if (!(parseOk && result > 0.0_vp)) {
-                auto pipelineContext = node->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                auto theme = node->GetTheme<SwiperIndicatorTheme>(true);
                 CHECK_NULL_VOID(theme);
                 result = theme->GetSize();
             }
@@ -272,9 +270,7 @@ void IndicatorModelNG::ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNod
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionFpNG(theObj, result);
             if (!parseOk || LessOrEqual(result.Value(), 0.0) || result.Unit() == DimensionUnit::PERCENT) {
-                auto pipelineContext = node->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                auto theme = node->GetTheme<SwiperIndicatorTheme>(true);
                 CHECK_NULL_VOID(theme);
                 result = theme->GetDigitalIndicatorTextStyle().GetFontSize();
             }
@@ -307,9 +303,7 @@ void IndicatorModelNG::ProcessDotColorWithResourceObj(FrameNode* frameNode, cons
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             if (!parseOk) {
-                auto pipelineContext = node->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                auto theme = node->GetTheme<SwiperIndicatorTheme>(true);
                 CHECK_NULL_VOID(theme);
                 result = name == "colorVal" ? theme->GetColor() : theme->GetSelectedColor();
             }
@@ -338,9 +332,7 @@ void IndicatorModelNG::ProcessDigitalColorWithResourceObj(FrameNode* frameNode, 
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             if (!parseOk) {
-                auto pipelineContext = node->GetContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                auto theme = node->GetTheme<SwiperIndicatorTheme>(true);
                 CHECK_NULL_VOID(theme);
                 result = theme->GetDigitalIndicatorTextStyle().GetTextColor();
             }

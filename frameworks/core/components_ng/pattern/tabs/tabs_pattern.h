@@ -175,6 +175,7 @@ public:
     int32_t OnInjectionEvent(const std::string& command) override;
     void OnColorConfigurationUpdate() override;
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
 private:

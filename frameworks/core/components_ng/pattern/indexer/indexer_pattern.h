@@ -140,6 +140,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void BuildArrayValueItems();
