@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
+#include "core/components_ng/render/drawing.h"
+
 #include <functional>
 #include <stdint.h>
 #include <string>

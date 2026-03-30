@@ -1413,4 +1413,26 @@ HWTEST_F(ImagePatternBranchCoverageTestNg, CreateNodePaintMethodLoadFailed001, T
 
     EXPECT_NE(paintMethod, nullptr);
 }
+
+/**
+ * @tc.name: CreateNodePaintMethodImageNullLoadFailed001
+ * @tc.desc: Test CreateNodePaintMethod when image is null and loadFailed is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternBranchCoverageTestNg, CreateNodePaintMethodImageNullLoadFailed001, TestSize.Level1)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->image_ = nullptr;
+    pattern->loadFailed_ = true;
+    pattern->altErrorImage_ = nullptr;
+    pattern->altImage_ = nullptr;
+    pattern->obscuredImage_ = nullptr;
+    auto paintMethod = pattern->CreateNodePaintMethod();
+
+    EXPECT_NE(paintMethod, nullptr);
+}
 } // namespace OHOS::Ace::NG

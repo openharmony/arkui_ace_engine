@@ -17,6 +17,8 @@
 #include <cstdint>
 #include <ctime>
 
+#include "core/components_ng/render/drawing.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
