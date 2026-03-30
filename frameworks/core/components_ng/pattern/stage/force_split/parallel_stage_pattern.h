@@ -64,6 +64,7 @@ public:
 
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+    void OnColorConfigurationUpdate() override;
 
     const RefPtr<FrameNode>& GetDividerNode() const
     {
@@ -108,6 +109,7 @@ private:
     void CreateDividerNodeIfNeeded();
     bool CalculateMode();
     void OnDirectionConfigurationUpdate() override;
+    Color GetDividerNodeColor(RefPtr<FrameNode> hostNode);
 
     WeakPtr<FrameNode> primaryPageNode_;
     RefPtr<FrameNode> dividerNode_;

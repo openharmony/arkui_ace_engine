@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
+constexpr Dimension DIVIDER_WIDTH = 1.0_px;
 }
 
 void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
