@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -28,16 +29,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& host, const GridLayoutInfo& info,
-    double originalWidth)
+GridIrregularFiller::FillParameters GetFillParameters(
+    const RefPtr<FrameNode>& host, const GridLayoutInfo& info, double originalWidth)
 {
     const auto& contentSize = host->GetGeometryNode()->GetContentSize();
     auto props = AceType::DynamicCast<GridLayoutProperty>(host->GetLayoutProperty());
     auto crossGap = GridUtils::GetCrossGap(props, contentSize, info.axis_);
     auto mainGap = GridUtils::GetMainGap(props, contentSize, info.axis_);
-    std::string args = info.axis_ == Axis::VERTICAL
-                           ? props->GetFinalColumnsTemplate(originalWidth).value_or("")
-                           : props->GetRowsTemplate().value_or("");
+    std::string args = info.axis_ == Axis::VERTICAL ? props->GetFinalColumnsTemplate(originalWidth).value_or("")
+                                                    : props->GetRowsTemplate().value_or("");
     const float crossSize = contentSize.CrossSize(info.axis_);
     auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap, info.GetChildrenCount());
     auto crossLens = std::vector<float>(res.first.begin(), res.first.end());
@@ -728,13 +728,24 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     }
     GridIrregularFiller filler(&info_, wrapper_);
     const auto pos = info_.GetItemPos(startIndex);
-    if (pos.second == -1) {
+    int32_t forwardStartLine = pos.second;
+    if (forwardStartLine == -1) {
         auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
         const auto& options = *props->GetLayoutOptions();
         auto startLineInfo = GetStartIndexByIndex(startIndex, options);
-        filler.FillMatrixFromStartIndex(startLineInfo.startLine, startLineInfo.startIndex, endIndex);
-    } else {
-        filler.FillMatrixFromStartIndex(pos.second, startIndex, endIndex);
+        forwardStartLine = startLineInfo.startLine;
+        startIndex = startLineInfo.startIndex;
+    }
+
+    if (startIndex < info_.startIndex_) {
+        filler.FillMatrixFromStartIndex(forwardStartLine, startIndex, info_.startIndex_ - 1);
+        if (SystemProperties::GetDebugEnabled()) {
+            CheckMatrixContinuous(forwardStartLine);
+        }
+    }
+
+    if (endIndex > info_.endIndex_) {
+        filler.FillMatrixFromStartIndex(info_.endMainLineIndex_, info_.endIndex_ + 1, endIndex);
     }
 
     auto wrapper = wrapper_->GetHostNode();
@@ -763,6 +774,32 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             FrameNode::ProcessOffscreenNode(itemFrameNode);
             return true;
         });
+}
+
+void GridCustomLayoutAlgorithm::CheckMatrixContinuous(int32_t forwardStartLine)
+{
+    if (info_.gridMatrix_.empty()) {
+        return;
+    }
+    auto startIt = info_.gridMatrix_.find(info_.startMainLineIndex_);
+    if (startIt == info_.gridMatrix_.end() || startIt == info_.gridMatrix_.begin()) {
+        return;
+    }
+
+    int32_t nextRow = startIt->first;
+    auto it = std::prev(startIt);
+    while (it != info_.gridMatrix_.end() && it->first >= forwardStartLine) {
+        if (it->first != nextRow - 1) {
+            TAG_LOGW(AceLogTag::ACE_GRID, "gridMatrix_ not continuous: expected=%{public}d, got=%{public}d",
+                nextRow - 1, it->first);
+            break;
+        }
+        nextRow = it->first;
+        if (it == info_.gridMatrix_.begin()) {
+            break;
+        }
+        --it;
+    }
 }
 
 void GridCustomLayoutAlgorithm::AdaptToChildMainSize(
