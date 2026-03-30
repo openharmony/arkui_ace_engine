@@ -2008,7 +2008,7 @@ void ScrollablePattern::StopAnimate()
         scrollBar_->StopFlingAnimation();
     }
     if (scrollBarProxy_) {
-        scrollBarProxy_->StopScrollBarAnimator();
+        scrollBarProxy_->StopScrollBarAnimator(false);
     }
 }
 
