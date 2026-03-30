@@ -406,28 +406,6 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
     return true;
 }
 
-Color NavigationModelNG::GetDividerNodeColor(const RefPtr<NavigationGroupNode>& navigationGroupNode,
-    RefPtr<FrameNode> dividerNode)
-{
-    auto context = navigationGroupNode->GetContext();
-    CHECK_NULL_RETURN(context, Color());
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, Color());
-    auto themeColor = theme->GetNavigationDividerColor();
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
-    if (forceSplitMgr->IsForceSplitEnable(false)) {
-        auto splitColor = forceSplitMgr->GetSplitDividerColor();
-        if (context->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
-            return splitColor.first.value();
-        }
-        if (context->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
-            return splitColor.second.value();
-        }
-    }
-    return themeColor;
-}
-
 bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
 {
     if (!navigationGroupNode->GetDividerNode()) {
@@ -450,9 +428,10 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
-        dividerNode->GetRenderContext()->
-            UpdateBackgroundColor(GetDividerNodeColor(navigationGroupNode, dividerNode));
+        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
         dividerNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
 

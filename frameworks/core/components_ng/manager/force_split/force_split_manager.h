@@ -93,17 +93,6 @@ public:
         return fullScreenPages_.find(name) != fullScreenPages_.end();
     }
 
-    void SetSplitDividerColor(std::optional<Color> light, std::optional<Color> dark)
-    {
-        splitDividerColorLight_ = light;
-        splitDividerColorDark_ = dark;
-    }
- 
-    std::pair<std::optional<Color>, std::optional<Color>> GetSplitDividerColor()
-    {
-        return { splitDividerColorLight_, splitDividerColorDark_ };
-    }
-
     void NotifyForceFullScreenChange(bool isForceFullScreen);
 
     void AddForceSplitStateListener(int32_t nodeId, std::function<void()>&& listener);
@@ -158,8 +147,6 @@ private:
     // the application rotation animation may include a split/stack switching animation.
     std::optional<int32_t> surfaceChangeCallbackId_;
     std::optional<bool> delayedIsForceSplitEnable_;
-    std::optional<Color> splitDividerColorLight_;
-    std::optional<Color> splitDividerColorDark_;
 };
 } // namespace OHOS::Ace::NG
 

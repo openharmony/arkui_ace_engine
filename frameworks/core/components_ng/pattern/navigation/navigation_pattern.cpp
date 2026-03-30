@@ -3310,19 +3310,7 @@ void NavigationPattern::UpdateDividerBackgroundColor()
     CHECK_NULL_VOID(theme);
     Color defaultColor = theme->GetNavigationDividerColor();
     Color dividerColor = defaultColor;
-    auto pipelineContext = navigationGroupNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto manager = pipelineContext->GetForceSplitManager();
-    if (manager != nullptr && manager->IsForceSplitEnable(false)) {
-        std::pair<std::optional<Color>, std::optional<Color>> splitColor =
-            manager->GetSplitDividerColor();
-        if (pipelineContext->GetColorMode() == ColorMode::LIGHT) {
-            dividerColor = splitColor.first.value_or(defaultColor);
-        }
-        if (pipelineContext->GetColorMode() == ColorMode::DARK) {
-            dividerColor = splitColor.second.value_or(defaultColor);
-        }
-    } else if (colorDefined) {
+    if (colorDefined) {
         dividerColor = layoutProperty->GetDividerColor().value_or(defaultColor);
     }
     auto dividerNode = GetDividerNode();
@@ -5658,7 +5646,6 @@ void NavigationPattern::RegisterForceSplitListener(PipelineContext* context, int
         CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
-        pattern->UpdateDividerBackgroundColor();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     mgr->AddForceSplitStateListener(nodeId, std::move(listener));
