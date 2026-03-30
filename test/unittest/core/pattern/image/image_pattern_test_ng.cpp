@@ -4300,4 +4300,478 @@ HWTEST_F(ImagePatternTestNg, InitFromThemeIfNeed001, TestSize.Level0)
     imagePattern->InitFromThemeIfNeed();
 }
 
+/**
+ * @tc.name: ReportImageSuccessInfo001
+ * @tc.desc: Test ReportImageSuccessInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ReportImageSuccessInfo001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto mockImage = AceType::DynamicCast<MockCanvasImage>(imagePattern->image_);
+    ASSERT_NE(mockImage, nullptr);
+    mockImage->needPixelMap = false;
+
+    ImageNodeId nodeInfo(1, 100, 1000);
+    int32_t srcType = static_cast<int32_t>(SrcType::FILE);
+    imagePattern->imageDfxConfig_ = ImageDfxConfig(nodeInfo, srcType, IMAGE_SRC_URL);
+
+    EXPECT_EQ(imagePattern->imageDfxConfig_.GetSrcType(), static_cast<int32_t>(SrcType::FILE));
+    EXPECT_EQ(imagePattern->image_->GetPixelMap(), nullptr);
+    imagePattern->ReportImageSuccessInfo(frameNode);
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: ReportImageSuccessInfo002
+ * @tc.desc: Test ReportImageSuccessInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ReportImageSuccessInfo002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto mockImage = AceType::DynamicCast<MockCanvasImage>(imagePattern->image_);
+    ASSERT_NE(mockImage, nullptr);
+    mockImage->needPixelMap = true;
+
+    ImageNodeId nodeInfo(2, 200, 2000);
+    int32_t srcType = static_cast<int32_t>(SrcType::FILE);
+    imagePattern->imageDfxConfig_ = ImageDfxConfig(nodeInfo, srcType, IMAGE_SRC_URL);
+    EXPECT_EQ(imagePattern->imageDfxConfig_.GetSrcType(), static_cast<int32_t>(SrcType::FILE));
+    EXPECT_NE(imagePattern->image_->GetPixelMap(), nullptr);
+    imagePattern->ReportImageSuccessInfo(frameNode);
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: ReportImageSuccessInfo003
+ * @tc.desc: Test ReportImageSuccessInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ReportImageSuccessInfo003, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(WEB_IMAGE, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto mockImage = AceType::DynamicCast<MockCanvasImage>(imagePattern->image_);
+    ASSERT_NE(mockImage, nullptr);
+    mockImage->needPixelMap = false;
+
+    ImageNodeId nodeInfo(3, 300, 3000);
+    int32_t srcType = static_cast<int32_t>(SrcType::NETWORK);
+    imagePattern->imageDfxConfig_ = ImageDfxConfig(nodeInfo, srcType, WEB_IMAGE);
+
+    EXPECT_EQ(imagePattern->imageDfxConfig_.GetSrcType(), static_cast<int32_t>(SrcType::NETWORK));
+    EXPECT_EQ(imagePattern->image_->GetPixelMap(), nullptr);
+    imagePattern->ReportImageSuccessInfo(frameNode);
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: ReportImageSuccessInfo004
+ * @tc.desc: Test ReportImageSuccessInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ReportImageSuccessInfo004, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(WEB_IMAGE, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto mockImage = AceType::DynamicCast<MockCanvasImage>(imagePattern->image_);
+    ASSERT_NE(mockImage, nullptr);
+    mockImage->needPixelMap = true;
+
+    ImageNodeId nodeInfo(4, 400, 4000);
+    int32_t srcType = static_cast<int32_t>(SrcType::NETWORK);
+    imagePattern->imageDfxConfig_ = ImageDfxConfig(nodeInfo, srcType, WEB_IMAGE);
+
+    EXPECT_EQ(imagePattern->imageDfxConfig_.GetSrcType(), static_cast<int32_t>(SrcType::NETWORK));
+    EXPECT_NE(imagePattern->image_->GetPixelMap(), nullptr);
+    imagePattern->ReportImageSuccessInfo(frameNode);
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext001
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = nullptr;
+    imagePattern->LoadingContext();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext002
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+/**
+ * @tc.name: LoadingContext003
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext003, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->loadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (renderProp) {
+        frameNode->paintProperty_ = nullptr;
+    }
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext004
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext004, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->loadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext005
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext005, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->loadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->image_ = nullptr;
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext006
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext006, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorCtx_ = nullptr;
+    imagePattern->LoadingContext();
+    EXPECT_EQ(imagePattern->altErrorCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext007
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext007, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altErrorCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext008
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext008, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altErrorCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (renderProp) {
+        frameNode->paintProperty_ = nullptr;
+    }
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altErrorCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext009
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext009, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altErrorCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altErrorCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext010
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext010, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altErrorCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->altErrorImage_ = nullptr;
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altErrorCtx_, nullptr);
+    EXPECT_EQ(imagePattern->altErrorImage_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext011
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext011, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altLoadingCtx_ = nullptr;
+    imagePattern->LoadingContext();
+    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext012
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext012, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext013
+ * @tc.desc: Test LoadingContext when renderProp is null for altLoadingCtx
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext013, TestSize.Level1)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altLoadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (renderProp) {
+        frameNode->paintProperty_ = nullptr;
+    }
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext014
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext014, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altLoadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext015
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext015, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->altLoadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    
+    imagePattern->altImage_ = nullptr;
+    
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name: LoadingContext016
+ * @tc.desc: Test LoadingContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, LoadingContext016, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    auto mockImageData = AceType::MakeRefPtr<MockImageData>();
+    ImageSourceInfo sourceInfo(IMAGE_SRC_URL);
+    imagePattern->loadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    imagePattern->altErrorCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    imagePattern->altErrorImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    imagePattern->altLoadingCtx_->imageObj_ =
+        AceType::MakeRefPtr<MockImageObject>(sourceInfo, SizeF(100.0f, 100.0f), mockImageData);
+    imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->LoadingContext();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    EXPECT_NE(imagePattern->altErrorCtx_, nullptr);
+    EXPECT_NE(imagePattern->altErrorImage_, nullptr);
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+    EXPECT_NE(imagePattern->altImage_, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
