@@ -18,8 +18,6 @@
 
 #include <cstdint>
 
-#include "core/components/rating/rating_theme.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
@@ -30,7 +28,11 @@
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/app_theme.h"
+
+namespace OHOS::Ace {
+class RatingTheme;
+class IconTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 const double DEFAULT_RATING_STEP_SIZE_VALUE = 0.5;

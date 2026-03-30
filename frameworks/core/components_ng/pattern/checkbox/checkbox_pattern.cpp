@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
