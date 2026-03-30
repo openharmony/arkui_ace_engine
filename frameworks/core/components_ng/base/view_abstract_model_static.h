@@ -376,6 +376,7 @@ public:
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
+    static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:

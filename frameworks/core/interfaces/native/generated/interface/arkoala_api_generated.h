@@ -24153,6 +24153,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_Boolean* value);
     void (*setOnPreDrag)(Ark_NativePointer node,
                          const Opt_Callback_PreDragStatus_Void* value);
+    void (*setToolbar)(Ark_NativePointer node,
+                       const Opt_CustomNodeBuilder* value);
     void (*setLinearGradient)(Ark_NativePointer node,
                               const Opt_LinearGradientOptions* value);
     void (*setSweepGradient)(Ark_NativePointer node,

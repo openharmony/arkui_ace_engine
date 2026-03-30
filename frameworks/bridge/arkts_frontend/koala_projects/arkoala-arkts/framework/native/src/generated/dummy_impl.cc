@@ -3587,6 +3587,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetToolbarImpl(Ark_NativePointer node,
+                        const Opt_CustomNodeBuilder* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setToolbar(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetLinearGradientImpl(Ark_NativePointer node,
                                const Opt_LinearGradientOptions* value)
     {
@@ -21553,6 +21565,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDragEndImpl,
             CommonMethodModifier::SetDraggableImpl,
             CommonMethodModifier::SetOnPreDragImpl,
+            CommonMethodModifier::SetToolbarImpl,
             CommonMethodModifier::SetLinearGradientImpl,
             CommonMethodModifier::SetSweepGradientImpl,
             CommonMethodModifier::SetRadialGradientImpl,

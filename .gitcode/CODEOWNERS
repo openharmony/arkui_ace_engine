@@ -1377,8 +1377,8 @@ frameworks/bridge/declarative_frontend/jsview/js_texttimer.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_texttimer.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_toggle.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_toggle.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @ArkUI_Event
-frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @ArkUI_Event
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @ArkUI_ability_group
@@ -2609,7 +2609,7 @@ frameworks/core/components_ng/pattern/texttimer/ @huawei_g_five
 frameworks/core/components_ng/pattern/time_picker/ @arkui001
 frameworks/core/components_ng/pattern/toast/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow_all
-frameworks/core/components_ng/pattern/toolbaritem/ @ArkUI_Event
+frameworks/core/components_ng/pattern/toolbaritem/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/ui_extension/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/union_effect_container/ @arkuicodepulse
 frameworks/core/components_ng/pattern/video/ @arkuilayout1

@@ -4401,6 +4401,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnPreDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setToolbarAttribute(value: CustomBuilder | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setToolbar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setLinearGradientAttribute(value: LinearGradientOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -9264,6 +9276,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onPreDrag')
     }
+    toolbar(value: CustomBuilder | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.toolbar(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'toolbar' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method toolbar')
+    }
     linearGradient(value: LinearGradientOptions | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -11324,6 +11348,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onPreDrag(value: Callback<PreDragStatus, void> | undefined): this {
         const value_casted = value as (Callback<PreDragStatus, void> | undefined)
         this.getPeer()?.setOnPreDragAttribute(value_casted)
+        return this
+    }
+    public toolbar(value: CustomBuilder | undefined): this {
+        const value_casted = value as (CustomBuilder | undefined)
+        this.getPeer()?.setToolbarAttribute(value_casted)
         return this
     }
     public linearGradient(value: LinearGradientOptions | undefined): this {
