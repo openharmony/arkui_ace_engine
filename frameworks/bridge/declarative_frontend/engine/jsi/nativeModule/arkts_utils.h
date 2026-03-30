@@ -133,6 +133,7 @@ public:
         RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsColorFromResourceForMaterial(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseHDRColorToColor(const EcmaVM* vm, const Local<panda::ObjectRef>& colorObj, Color& result);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseColorMetricsToColor(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
@@ -254,6 +255,9 @@ public:
         std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientCenter(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ParseGradientColorStopsWithFloatColor(const EcmaVM *vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+        const NodeInfo& nodeInfo);
     static void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
         std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
         const NodeInfo& nodeInfo);

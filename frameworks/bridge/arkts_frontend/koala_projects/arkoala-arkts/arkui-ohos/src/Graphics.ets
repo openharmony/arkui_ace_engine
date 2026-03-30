@@ -118,6 +118,10 @@ export class ColorMetrics {
     private alpha_: int32;
     private colorSpace_: ColorSpace = ColorSpace.SRGB;
     private resourceId_: int32 = -1;
+    private isHDR_: boolean = false;
+    private redValue_: double = 0.0;
+    private greenValue_: double = 0.0;
+    private blueValue_: double = 0.0;
     static readonly WHITE: int32 = 0xffffffff.toInt();
     static readonly BLACK: int32 = 0xff000000.toInt();
     static readonly BLUE: int32 = 0xff0000ff.toInt();
@@ -332,6 +336,70 @@ export class ColorMetrics {
     }
     getColorSpace(): ColorSpace {
         return this.colorSpace_;
+    }
+    isHDR(): boolean {
+        return this.isHDR_;
+    }
+    getRedValue(): double {
+        return this.redValue_;
+    }
+    getGreenValue(): double {
+        return this.greenValue_;
+    }
+    getBlueValue(): double {
+        return this.blueValue_;
+    }
+    public static createHDRColorWithLinearExposure(linearExposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        colorMetrics.redValue_ = red * linearExposure;
+        colorMetrics.greenValue_ = green * linearExposure;
+        colorMetrics.blueValue_ = blue * linearExposure;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
+        }
+        return colorMetrics;
+    }
+    public static createHDRColorWithLogExposure(exposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        const linearExposure = Math.pow(2.0, exposure);
+        colorMetrics.redValue_ = red * linearExposure;
+        colorMetrics.greenValue_ = green * linearExposure;
+        colorMetrics.blueValue_ = blue * linearExposure;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
+        }
+        return colorMetrics;
+    }
+    public static createHDRColor(colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        colorMetrics.redValue_ = red;
+        colorMetrics.greenValue_ = green;
+        colorMetrics.blueValue_ = blue;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(red * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(green * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(blue * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
+        }
+        return colorMetrics;
     }
 }
 export class ShapeMask {

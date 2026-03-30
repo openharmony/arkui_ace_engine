@@ -182,7 +182,20 @@ void ParseGradientColorStopsWithColorSpace(const EcmaVM *vm, const Local<JSValue
                 hasDimension = true;
             }
         }
-        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        if (color.GetHeadRoomColor().has_value()) {
+            // use float color
+            colors.push_back({.i32 = static_cast<ArkUI_Int32>(true)});
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.red)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.green)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)});
+        } else {
+            // use rgb color
+            colors.push_back({.i32 = static_cast<ArkUI_Int32>(false)});
+            colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        }
         colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
         colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
     }
@@ -3100,7 +3113,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
         ParseGradientColorStopsWithColorSpace(vm, metricsColorsArg, colors, colorSpace);
     } else {
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+        ArkTSUtils::ParseGradientColorStopsWithFloatColor(vm, colorsArg, colors, vectorResObj, nodeInfo);
     }
     if (!colorSpace.has_value()) {
         colorSpace = ColorSpace::SRGB;
@@ -3108,7 +3121,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     auto resRawPtr = static_cast<void*>(&vectorResObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
+    GetArkUINodeModifiers()->getCommonModifier()->setSweepGradientForHDR(nativeNode, values.data(), values.size(),
         colors.data(), colors.size(), colorSpace.value(), resRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
