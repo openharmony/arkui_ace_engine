@@ -1584,6 +1584,14 @@
         "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand"
     },
