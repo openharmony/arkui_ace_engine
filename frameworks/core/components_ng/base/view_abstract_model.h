@@ -587,6 +587,8 @@ public:
 
     // depth space
     virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
+    // edgelight
+    virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

@@ -73,6 +73,8 @@
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shader_base.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_mask_base.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/render/adapter/rosen_effect_converter.h"
@@ -82,6 +84,7 @@
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/gesture_debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
 #include "ui/properties/ui_material.h"
@@ -172,6 +175,10 @@ const int FACTOR_TWO = 2;
 constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 constexpr size_t MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC = 200;
 constexpr float HOT_ZONE = 150.0f;
+constexpr float EXTRA_LENGTH = 0.1f;
+constexpr float EDGELIGHT_POSITIONX_DEFAULT = 0.0f;
+constexpr float EDGELIGHT_POSITIONY_DEFAULT = 0.0f;
+constexpr float EDGELIGHT_ANGLE_DEFAULT = 0.0f;
 
 static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
 {
@@ -330,6 +337,14 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
     }
     return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : 0.5f;
 }
+
+class RosenRenderContext::EdgeLightImpl {
+public:
+    std::shared_ptr<Rosen::RSNGSDFEdgeLightEffect> edgeLightFilter_;
+    std::shared_ptr<Rosen::RSNGFrameGradientMask> lightMask_;
+};
+
+RosenRenderContext::RosenRenderContext() {}
 
 RosenRenderContext::~RosenRenderContext()
 {
@@ -915,6 +930,11 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
 
     if (propOverlay_) {
         PaintOverlayText();
+    }
+
+    if (propEdgeLightParam_) {
+        UpdateEdgeLightFilter(paintRect.GetSize());
+        UpdateEdgeLightFilterWithLightMask(paintRect.GetSize());
     }
 
     if (SystemProperties::GetDebugBoundaryEnabled()) {
@@ -8719,5 +8739,219 @@ void RosenRenderContext::SetMaterialWithQualityLevel(
     FREE_RS_CONTEXT_CHECK(SetMaterialWithQualityLevel, materialFilter, quality);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetMaterialWithQualityLevel(materialFilter, static_cast<Rosen::FilterQuality>(quality));
+}
+
+void RosenRenderContext::ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
+    float& positionY, float rectH, const SizeF& frameSize)
+{
+    auto edgeLightParam = GetEdgeLightParam();
+    if (!edgeLightParam.has_value()) {
+        return;
+    }
+    constexpr float EDGELIGHT_ANGLE_TOP_LEFT = -45.0f;
+    constexpr float EDGELIGHT_ANGLE_TOP_RIGHT = 45.0f;
+    constexpr float EDGELIGHT_ANGLE_LEFT_CENTER = 90.0f;
+    constexpr float EDGELIGHT_POSITIONX_LEFT = -1.0f;
+    constexpr float EDGELIGHT_POSITIONY_TOP = -1.0f;
+    constexpr float EDGELIGHT_POSITIONX_RIGHT = 1.0f;
+    constexpr float EDGELIGHT_POSITIONY_BOTTOM = 1.0f;
+    constexpr float DIAGONAL_RATIO = 2.0f;
+    constexpr float STRAIGHT_RATIO = 1.0f;
+
+    auto width = frameSize.Width();
+    auto height = frameSize.Height();
+
+    auto extraLength = EXTRA_LENGTH;
+    if (position == NG::EdgeLightPosition::TOP_LEFT) {
+        angle = EDGELIGHT_ANGLE_TOP_LEFT;
+        positionX = EDGELIGHT_POSITIONX_LEFT - (std::sqrt(rectH * rectH * height * height / DIAGONAL_RATIO) / width) -
+                    extraLength;
+        positionY = EDGELIGHT_POSITIONY_TOP - (std::sqrt(rectH * rectH / DIAGONAL_RATIO)) - extraLength;
+    } else if (position == NG::EdgeLightPosition::TOP) {
+        angle = EDGELIGHT_ANGLE_DEFAULT;
+        positionX = EDGELIGHT_POSITIONX_DEFAULT;
+        positionY = EDGELIGHT_POSITIONY_TOP - rectH / STRAIGHT_RATIO - extraLength;
+    } else if (position == NG::EdgeLightPosition::TOP_RIGHT) {
+        angle = EDGELIGHT_ANGLE_TOP_RIGHT;
+        positionX = std::sqrt(rectH * rectH * height * height / DIAGONAL_RATIO) / width + EDGELIGHT_POSITIONX_RIGHT +
+                    extraLength;
+        positionY = EDGELIGHT_POSITIONY_TOP - (std::sqrt(rectH * rectH / DIAGONAL_RATIO)) - extraLength;
+    } else if (position == NG::EdgeLightPosition::LEFT) {
+        angle = EDGELIGHT_ANGLE_LEFT_CENTER;
+        positionX = EDGELIGHT_POSITIONX_LEFT - (rectH * height / (STRAIGHT_RATIO * width)) - extraLength;
+        positionY = EDGELIGHT_POSITIONY_DEFAULT;
+    } else if (position == NG::EdgeLightPosition::RIGHT) {
+        angle = EDGELIGHT_ANGLE_LEFT_CENTER;
+        positionX = (rectH * height / (STRAIGHT_RATIO * width)) + EDGELIGHT_POSITIONX_RIGHT + extraLength;
+        positionY = EDGELIGHT_POSITIONY_DEFAULT;
+    } else if (position == NG::EdgeLightPosition::BOTTOM_LEFT) {
+        angle = EDGELIGHT_ANGLE_TOP_RIGHT;
+        positionX = EDGELIGHT_POSITIONX_LEFT - (std::sqrt(rectH * rectH * height * height / DIAGONAL_RATIO) / width) -
+                    extraLength;
+        positionY = std::sqrt(rectH * rectH / DIAGONAL_RATIO) + EDGELIGHT_POSITIONY_BOTTOM + extraLength;
+    } else if (position == NG::EdgeLightPosition::BOTTOM) {
+        angle = EDGELIGHT_ANGLE_DEFAULT;
+        positionX = EDGELIGHT_POSITIONX_DEFAULT;
+        positionY = EDGELIGHT_POSITIONY_BOTTOM + rectH / STRAIGHT_RATIO + extraLength;
+    } else if (position == NG::EdgeLightPosition::BOTTOM_RIGHT) {
+        angle = EDGELIGHT_ANGLE_TOP_LEFT;
+        positionX = std::sqrt(rectH * rectH * height * height / DIAGONAL_RATIO) / width + EDGELIGHT_POSITIONX_RIGHT +
+                    extraLength;
+        positionY = std::sqrt(rectH * rectH / DIAGONAL_RATIO) + EDGELIGHT_POSITIONY_BOTTOM + extraLength;
+    }
+}
+
+void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(rsNode_);
+    auto edgeLightParam = GetEdgeLightParam();
+    if (!edgeLightParam.has_value()) {
+        return;
+    }
+    constexpr float SPREADFACTOR_DEFAULT = 47.8f;
+    constexpr float BLOOMINTENSITYCUTOFF_DEFAULT = 0.0f;
+    constexpr float BLOOMFALLOFFPOW_DEFAULT = 8.7f;
+    constexpr float MINBORDERWIDTH_DEFAULT = 10.3f;
+    constexpr float MAXBORDERWIDTH_DEFAULT = 9.9f;
+    constexpr float LIGHTMAXINTENSITY_MAX = 2.0f;
+    constexpr float MAXBLOOMINTENSITY_MAX = 19.3f;
+    constexpr float INNERBORDERBLOOMWIDTH_RATIO = 0.8f;
+    constexpr float OUTERBORDERBLOOMWIDTH_RATIO = 0.2f;
+    constexpr float COLOR_RATIO = 255.0f;
+
+    if (!edgeLightImpl_) {
+        edgeLightImpl_ = std::make_unique<EdgeLightImpl>();
+    }
+    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
+    if (!edgeLightFilter_) {
+        edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
+    }
+    auto edgeLightThicknessValue = 0.0f;
+    edgeLightThicknessValue = edgeLightParam->thickness.ConvertToPx();
+    if (LessNotEqual(edgeLightThicknessValue, 0.0f)) {
+        edgeLightThicknessValue = 0.0f;
+    }
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectSpreadFactorTag>(SPREADFACTOR_DEFAULT);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectBloomIntensityCutoffTag>(BLOOMINTENSITYCUTOFF_DEFAULT);
+    // Intensity affects EffectLightMaxIntensity & MaxBloomIntensity
+    // LIGHTMAXINTENSITY_MAX is 2.0f, MAXBLOOMINTENSITY_MAX is 19.3f.
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectLightMaxIntensityTag>(
+        edgeLightParam->intensity * LIGHTMAXINTENSITY_MAX);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMaxBloomIntensityTag>(
+        edgeLightParam->intensity * MAXBLOOMINTENSITY_MAX);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectBloomFalloffPowTag>(BLOOMFALLOFFPOW_DEFAULT);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMinBorderWidthTag>(MINBORDERWIDTH_DEFAULT);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMaxBorderWidthTag>(MAXBORDERWIDTH_DEFAULT);
+    // Thickness affects InnerBorderBloomWidth & OuterBorderBloomWidth.
+    // InnerBorderBloomWidth has a coefficient of 0.8, OuterBorderBloomWidth has a coefficient of 0.2.
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectInnerBorderBloomWidthTag>(
+        edgeLightThicknessValue * INNERBORDERBLOOMWIDTH_RATIO);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectOuterBorderBloomWidthTag>(
+        edgeLightThicknessValue * OUTERBORDERBLOOMWIDTH_RATIO);
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectColorTag>(
+        Rosen::Vector3f(edgeLightParam->color.GetRed() / COLOR_RATIO, edgeLightParam->color.GetGreen() / COLOR_RATIO,
+            edgeLightParam->color.GetBlue() / COLOR_RATIO));
+    rsNode_->SetForegroundShader(edgeLightFilter_);
+    RequestNextFrame();
+#endif
+}
+
+void RosenRenderContext::UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(rsNode_);
+    auto edgeLightParam = GetEdgeLightParam();
+    if (!edgeLightParam.has_value()) {
+        return;
+    }
+    if (LessOrEqual(frameSize.Width(), 0.0) || LessOrEqual(frameSize.Height(), 0.0)) {
+        return;
+    }
+
+    constexpr float CORNERRADIUS_DEFAULT = 0.0f;
+    constexpr float INNERFRAMEWIDTH_DEFAULT = 1000.0f;
+    constexpr float OUTERFRAMEWIDTH_DEFAULT = 0.1f;
+    constexpr float AXIALFEATHERSTRENGTH_DEFAULT = 1.0f;
+    constexpr float AXIALCENTER_DEFAULT = 0.5f;
+    constexpr float AXIALCOREWIDTH_DEFAULT = 0.3f;
+    const Rosen::Vector4f INNERBEZIER_DEFAULT = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
+    const Rosen::Vector4f OUTERBEZIER_DEFAULT = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
+    const Rosen::Vector2f AXIALDIRECTION_DEFAULT = Rosen::Vector2f(0.0f, 0.1f);
+
+    if (!edgeLightImpl_) {
+        edgeLightImpl_ = std::make_unique<EdgeLightImpl>();
+    }
+    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
+    auto& lightMask_ = edgeLightImpl_->lightMask_;
+    if (!edgeLightFilter_) {
+        edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
+    }
+    if (!lightMask_) {
+        lightMask_ = std::make_shared<Rosen::RSNGFrameGradientMask>();
+    }
+
+    auto edgeLightLengthValue = 0.0f;
+    edgeLightLengthValue = edgeLightParam->length.ConvertToPx();
+    if (LessNotEqual(edgeLightLengthValue, 0.0f)) {
+        edgeLightLengthValue = 0.0f;
+    }
+
+    auto positionX = EDGELIGHT_POSITIONX_DEFAULT;
+    auto positionY = EDGELIGHT_POSITIONY_DEFAULT;
+    auto width = frameSize.Width();
+    auto height = frameSize.Height();
+    auto extraLength = EXTRA_LENGTH;
+    auto RectW = std::sqrt(width * width + height * height) / width + extraLength;
+    auto RectH = edgeLightLengthValue / height;
+    auto angle = EDGELIGHT_ANGLE_DEFAULT;
+    ParseEdgeLightPosition(
+        edgeLightParam->edgeLightPosition, angle, positionX, positionY, RectH, frameSize);
+
+    lightMask_->Setter<Rosen::FrameGradientMaskInnerBezierTag>(INNERBEZIER_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskOuterBezierTag>(OUTERBEZIER_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskCornerRadiusTag>(CORNERRADIUS_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskInnerFrameWidthTag>(INNERFRAMEWIDTH_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskOuterFrameWidthTag>(OUTERFRAMEWIDTH_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskRectWHTag>(Rosen::Vector2f(RectW, RectH));
+    lightMask_->Setter<Rosen::FrameGradientMaskAxialFeatherStrengthTag>(AXIALFEATHERSTRENGTH_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskAxialCenterTag>(AXIALCENTER_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskAxialCoreWidthTag>(AXIALCOREWIDTH_DEFAULT);
+    lightMask_->Setter<Rosen::FrameGradientMaskAxialDirectionTag>(Rosen::Vector2f(0.0f, 1.0f));
+    lightMask_->Setter<Rosen::FrameGradientMaskBoxAngleDegTag>(angle);
+    lightMask_->Setter<Rosen::FrameGradientMaskRectPosTag>(AXIALDIRECTION_DEFAULT);
+
+    edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectLightMaskTag>(
+        std::static_pointer_cast<Rosen::RSNGMaskBase>(lightMask_));
+    rsNode_->SetForegroundShader(edgeLightFilter_);
+    RequestNextFrame();
+#endif
+}
+
+void RosenRenderContext::OnEdgeLightParamUpdate(const NG::EdgeLightParam& param)
+{
+    FREE_RS_CONTEXT_CHECK(OnEdgeLightParamUpdate, param);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!RectIsNull()) {
+        UpdateEdgeLightFilter(rect.GetSize());
+        UpdateEdgeLightFilterWithLightMask(rect.GetSize());
+    }
+}
+
+void RosenRenderContext::ResetEdgeLightFilter()
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(rsNode_);
+    if (!edgeLightImpl_) {
+        return;
+    }
+    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
+    if (!edgeLightFilter_) {
+        return;
+    }
+    rsNode_->SetForegroundShader(nullptr);
+    edgeLightFilter_ = nullptr;
+    RequestNextFrame();
+#endif
 }
 } // namespace OHOS::Ace::NG

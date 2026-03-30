@@ -937,6 +937,7 @@ public:
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
+    static void JSEdgeLight(const JSCallbackInfo& info);
 
 private:
     static DepthVector3 ParseDepthVector3(const JSRef<JSVal>& vectorValue);

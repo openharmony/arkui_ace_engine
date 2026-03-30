@@ -65,6 +65,7 @@
 #include "core/components_ng/render/ui_material_filter_creator.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -11166,5 +11167,21 @@ void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (param.has_value()) {
+        renderContext->UpdateEdgeLightParam(param.value());
+    } else {
+        renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
+    }  
 }
 } // namespace OHOS::Ace::NG
