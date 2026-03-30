@@ -53,9 +53,6 @@ constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholde
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
-constexpr char SPLIT_DIVIDER_COLOR[] = "splitDividerColor";
-constexpr char COLOR_LIGHT[] = "light";
-constexpr char COLOR_DARK[] = "dark";
 
 std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
 {
@@ -373,32 +370,6 @@ bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& ful
     return true;
 }
 
-bool ForceSplitUtils::ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor,
-    ForceSplitConfig& config)
-{
-    if (!splitDividerColor || !splitDividerColor->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor is an invalid json object!");
-        return false;
-    }
-    if (splitDividerColor->Contains(COLOR_LIGHT)) {
-        auto lightColorValue = splitDividerColor->GetValue(COLOR_LIGHT);
-        if (!lightColorValue->IsString()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.light is not color!");
-            return false;
-        }
-        config.splitDividerColorLight = Color::FromString(lightColorValue->GetString());
-    }
-    if (splitDividerColor->Contains(COLOR_DARK)) {
-        auto darkColorValue = splitDividerColor->GetValue(COLOR_DARK);
-        if (!darkColorValue->IsString()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.dark is not color!");
-            return false;
-        }
-        config.splitDividerColorDark = Color::FromString(darkColorValue->GetString());
-    }
-    return true;
-}
-
 bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
@@ -419,11 +390,6 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
     }
     if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
         if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
-            return false;
-        }
-    }
-    if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
-        if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
             return false;
         }
     }
@@ -472,11 +438,6 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
     }
     if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
         if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
-            return false;
-        }
-    }
-    if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
-        if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
             return false;
         }
     }
