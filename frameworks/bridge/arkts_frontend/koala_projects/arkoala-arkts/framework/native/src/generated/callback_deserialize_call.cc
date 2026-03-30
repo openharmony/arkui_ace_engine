@@ -143,6 +143,26 @@ const auto callSyncMethod =
     Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, event);
 }
+void deserializeAndCallAreaChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_AREACHANGECALLBACK))));
+    thisDeserializer.readPointer();
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    call(resourceId, oldValue, newValue);
+}
+void deserializeAndCallSyncAreaChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_AREACHANGECALLBACK))));
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, oldValue, newValue);
+}
 void deserializeAndCallAnimationEndHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -12363,6 +12383,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallAnimationStartHandler(thisArray, thisLength);
     case KIND_ARCSCROLLINDEXHANDLER:
         return deserializeAndCallArcScrollIndexHandler(thisArray, thisLength);
+    case KIND_AREACHANGECALLBACK:
+        return deserializeAndCallAreaChangeCallback(thisArray, thisLength);
     case KIND_BUTTONMODIFIERBUILDER:
         return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
     case KIND_BUTTONTRIGGERCLICKCALLBACK:

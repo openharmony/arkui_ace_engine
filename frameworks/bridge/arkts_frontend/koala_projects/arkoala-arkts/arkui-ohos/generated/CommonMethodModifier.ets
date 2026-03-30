@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, GestureType, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from './component/common'
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod } from './component/common'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions } from './component/units'
@@ -322,6 +322,8 @@ export class CommonMethodModifier implements CommonMethod {
     public _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
     public _debugLine_0_0value?: string
     public _debugLine_0_1value?: string | undefined
+    public _onAreaChange_1_0value?: AreaChangeCallback
+    public _onAreaChange_1_1value?: AreaChangeOptions | undefined
     public _toolbar_0_0value?: CustomBuilder | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
@@ -1864,7 +1866,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[89] != 0) {
             switch (flagArray[89]) {
                 case 1: {
-                    peer.setOnAreaChangeAttribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    peer.setOnAreaChange0Attribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
                     flagArray[89] = 2;
                     break;
                 }
@@ -1874,7 +1876,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[89] = 0;
-                    peer.setOnAreaChangeAttribute(undefined);
+                    peer.setOnAreaChange0Attribute((undefined as ((oldValue: Area,newValue: Area) => void) | undefined));
                 }
             }
         }
@@ -3972,6 +3974,22 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[212] = 0;
+                }
+            }
+        }
+        if (flagArray[213] != 0) {
+            switch (flagArray[213]) {
+                case 1: {
+                    peer.setOnAreaChange1Attribute((this._onAreaChange_1_0value as AreaChangeCallback), (this._onAreaChange_1_1value as AreaChangeOptions | undefined));
+                    flagArray[213] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[213] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[213] = 0;
                 }
             }
         }
@@ -6569,6 +6587,17 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[213] != 0) {
+            switch (flagArray[213]) {
+                case 1:
+                case 3: {
+                    this.onAreaChange((modifier._onAreaChange_1_0value as AreaChangeCallback), (modifier._onAreaChange_1_1value as AreaChangeOptions | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8753,13 +8782,24 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    toolbar(value: CustomBuilder | undefined): this {
-        if (((this._flagArray[213]) == (0)) || (true)) {
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        if (((this._flagArray[213]) == (0)) || (true) || (true)) {
             this._flagArray[213] = 1
-            this._toolbar_0_0value = value
+            this._onAreaChange_1_0value = event
+            this._onAreaChange_1_1value = options
             this._state.fireChange()
         } else {
             this._flagArray[213] = 3
+        }
+        return this
+    }
+    toolbar(value: CustomBuilder | undefined): this {
+        if (((this._flagArray[214]) == (0)) || (true)) {
+            this._flagArray[214] = 1
+            this._toolbar_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[214] = 3
         }
         return this
     }

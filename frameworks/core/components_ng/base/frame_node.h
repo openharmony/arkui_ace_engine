@@ -269,6 +269,8 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
+    void SetOnAreaChangeCallbackWithInterval(OnAreaChangedFunc&& callback, uint32_t minInterval);
+
     void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
@@ -1514,6 +1516,9 @@ protected:
     void OnCollectRemoved() override;
 
 private:
+    void DispatchAreaChangeWithThrottle(const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
+    void GetCurrentAreaChangeInfo(
+        uint64_t nanoTimestamp, int32_t areaChangeMinDepth, RectF& currFrameRect, OffsetF& currParentOffsetToWindow);
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, Axis axis, int32_t childNumber = 0);
@@ -1607,6 +1612,9 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
+    void HandleAreaChangeEvent(uint64_t nanoTimestamp, int32_t areaChangeMinDepth);
+    void ProcessThrottledAreaChangeCallback();
+    void ThrottledAreaChangeTask();
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
@@ -1758,6 +1766,9 @@ private:
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
     bool throttledCallbackOnTheWay_ = false;
+    uint32_t onAreaChangeMinInterval_ = 0;
+    int64_t lastAreaChangeTriggerTime_ = 0;
+    bool throttledAreaChangeCallbackOnTheWay_ = false;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility

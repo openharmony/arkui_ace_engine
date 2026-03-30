@@ -120,6 +120,26 @@ enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
+int32_t NormalizeExpectedUpdateInterval(double expectedUpdateInterval)
+{
+    constexpr int32_t EXPECTED_UPDATE_INTERVAL_MAX = std::numeric_limits<int32_t>::max();
+    if (std::isnan(expectedUpdateInterval)) {
+        return DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    if (std::isinf(expectedUpdateInterval)) {
+        return expectedUpdateInterval > 0 ? EXPECTED_UPDATE_INTERVAL_MAX : DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    if (expectedUpdateInterval > static_cast<double>(EXPECTED_UPDATE_INTERVAL_MAX)) {
+        return EXPECTED_UPDATE_INTERVAL_MAX;
+    }
+
+    auto normalizedInterval = static_cast<int32_t>(expectedUpdateInterval);
+    if (normalizedInterval < 0) {
+        return DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    return normalizedInterval;
+}
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -9687,6 +9707,42 @@ ArkUINativeModuleValue CommonBridge::SetOnAreaChange(ArkUIRuntimeCallInfo* runti
         function->Call(vm, function.ToLocal(), params, 2);
     };
     NG::ViewAbstract::SetOnAreaChanged(frameNode, std::move(onAreaChange));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnAreaChangeWithInterval(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    int32_t minInterval = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (thirdArg->IsNumber()) {
+        minInterval = NormalizeExpectedUpdateInterval(thirdArg->ToNumber(vm)->Value());
+    }
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onAreaChange = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                            node = AceType::WeakClaim(frameNode), containerId](
+                            const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
+        auto area = CreateAreaObject(vm, rect, origin);
+        panda::Local<panda::JSValueRef> params[2] = { oldArea, area };
+        function->Call(vm, function.ToLocal(), params, 2);
+    };
+    NG::ViewAbstract::SetOnAreaChangedWithInterval(frameNode, std::move(onAreaChange), minInterval);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -731,6 +731,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
     /**
      * @tc.steps: step1. set a flag and init a callback(onAreaChanged)
      */
+    auto frameNode = FrameNode::CreateFrameNode(
+        "two", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
@@ -739,33 +741,35 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_1);
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_1);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
-    FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    frameNode->lastParentOffsetToWindow_ = nullptr;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step4. release lastFrameRect_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->lastFrameRect_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_3);
+    frameNode->lastFrameRect_ = nullptr;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_3);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step5.set lastParentOffsetToWindow_ and lastFrameRect_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
-    FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_4);
+    frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    frameNode->lastFrameRect_ = std::make_unique<RectF>();
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_4);
     EXPECT_FALSE(flag);
 }
 

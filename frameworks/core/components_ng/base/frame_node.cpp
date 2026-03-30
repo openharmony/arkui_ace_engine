@@ -2051,6 +2051,8 @@ void FrameNode::ClearUserOnAreaChange()
     if (eventHub_) {
         eventHub_->ClearUserOnAreaChanged();
     }
+    onAreaChangeMinInterval_ = 0;
+    throttledAreaChangeCallbackOnTheWay_ = false;
 }
 
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
@@ -2058,28 +2060,34 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     InitLastArea();
     CreateEventHubInner();
     CHECK_NULL_VOID(eventHub_);
+    onAreaChangeMinInterval_ = 0;
+    throttledAreaChangeCallbackOnTheWay_ = false;
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
+void FrameNode::SetOnAreaChangeCallbackWithInterval(OnAreaChangedFunc&& callback, uint32_t minInterval)
 {
-    ACE_BENCH_MARK_TRACE("TriggerOnAreaChange_node(%s/%d/%s/%s) active:%d isOnMainTree:%d", tag_.c_str(), nodeId_,
-        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree());
-    if (!IsActive()) {
-        if (IsDebugInspectorId()) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", tag_.c_str(),
-                nodeId_);
-        }
-        return;
+    InitLastArea();
+    CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
+    auto currFrameRect = GetFrameRectWithSafeArea();
+    auto currParentOffsetToWindow =
+        CalculateOffsetRelativeToWindow(GetCurrentTimestamp(), false) - currFrameRect.GetOffset();
+    auto oldInterval = onAreaChangeMinInterval_;
+    auto hasOnAreaChanged = eventHub_->HasOnAreaChanged();
+    auto keepThrottleState = hasOnAreaChanged && oldInterval == minInterval;
+    onAreaChangeMinInterval_ = minInterval;
+    if (!keepThrottleState) {
+        lastAreaChangeTriggerTime_ = 0;
+        throttledAreaChangeCallbackOnTheWay_ = false;
+        *lastFrameRect_ = currFrameRect;
+        *lastParentOffsetToWindow_ = currParentOffsetToWindow;
     }
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto container = Container::Current();
-    if (container && container->IsDynamicRender() &&
-        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
-        DynamicComponentManager::TriggerOnAreaChangeCallback(this, nanoTimestamp);
-        return;
-    }
-#endif
+    eventHub_->SetOnAreaChanged(std::move(callback));
+}
+
+void FrameNode::HandleAreaChangeEvent(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
+{
     if (eventHub_ && (eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
         auto currFrameRect = GetFrameRectWithSafeArea();
@@ -2111,7 +2119,89 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
         // if in this branch, next time cache is not trusted
         ClearCachedGlobalOffset();
     }
+}
+
+void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
+{
+    ACE_BENCH_MARK_TRACE("TriggerOnAreaChange_node(%s/%d/%s/%s) active:%d isOnMainTree:%d", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree());
+    ProcessThrottledAreaChangeCallback();
+    CHECK_NULL_VOID(eventHub_);
+    CHECK_NULL_VOID(onAreaChangeMinInterval_ == 0 || eventHub_->HasInnerOnAreaChanged());
+    if (!IsActive()) {
+        if (IsDebugInspectorId()) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", tag_.c_str(),
+                nodeId_);
+        }
+        return;
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        DynamicComponentManager::TriggerOnAreaChangeCallback(this, nanoTimestamp);
+        return;
+    }
+#endif
+    HandleAreaChangeEvent(nanoTimestamp, areaChangeMinDepth);
     pattern_->OnAreaChangedInner();
+}
+
+void FrameNode::ThrottledAreaChangeTask()
+{
+    CHECK_NULL_VOID(eventHub_);
+    if (!throttledAreaChangeCallbackOnTheWay_) {
+        return;
+    }
+    if (!eventHub_->HasOnAreaChanged()) {
+        throttledAreaChangeCallbackOnTheWay_ = false;
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto currFrameRect = GetFrameRectWithSafeArea();
+    if (renderContext_ && renderContext_->GetPositionProperty() &&
+        renderContext_->GetPositionProperty()->HasPosition()) {
+        auto renderPosition =
+            ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+        currFrameRect.SetOffset(
+            { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+    }
+    auto currParentOffsetToWindow =
+        CalculateOffsetRelativeToWindow(pipeline->GetVsyncTime(), false) - currFrameRect.GetOffset();
+    eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
+        currFrameRect, currParentOffsetToWindow);
+    throttledAreaChangeCallbackOnTheWay_ = false;
+    lastAreaChangeTriggerTime_ = GetCurrentTimestamp();
+}
+
+void FrameNode::ProcessThrottledAreaChangeCallback()
+{
+    CHECK_NULL_VOID(eventHub_);
+
+    if (throttledAreaChangeCallbackOnTheWay_) {
+        return;
+    }
+
+    throttledAreaChangeCallbackOnTheWay_ = true;
+    int64_t interval = GetCurrentTimestamp() - lastAreaChangeTriggerTime_;
+    if (interval < static_cast<int64_t>(onAreaChangeMinInterval_)) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto executor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        auto task = [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->ThrottledAreaChangeTask();
+        };
+        auto delay = static_cast<uint32_t>(static_cast<int64_t>(onAreaChangeMinInterval_) - interval);
+        executor->PostDelayedTask(
+            std::move(task), TaskExecutor::TaskType::UI, delay < 0 ? 0 : delay, "ThrottledAreaChangeCallback",
+            PriorityType::IDLE);
+    } else {
+        ThrottledAreaChangeTask();
+    }
 }
 
 void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)

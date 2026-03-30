@@ -1984,7 +1984,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_VoidCallback* value)
     {
     }
-    void SetOnAreaChangeImpl(Ark_NativePointer node,
+    void SetOnAreaChange0Impl(Ark_NativePointer node,
                              const Opt_Callback_Area_Area_Void* value)
     {
     }
@@ -2503,6 +2503,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetDebugLineImpl(Ark_NativePointer node,
                           const Ark_String* sourceLine,
                           const Opt_String* moduleName)
+    {
+    }
+    void SetOnAreaChange1Impl(Ark_NativePointer node,
+                              const AreaChangeCallback* event,
+                              const Opt_AreaChangeOptions* options)
     {
     }
     } // CommonMethodModifier
@@ -9062,7 +9067,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
             CommonMethodModifier::SetOnDetachImpl,
-            CommonMethodModifier::SetOnAreaChangeImpl,
+            CommonMethodModifier::SetOnAreaChange0Impl,
             CommonMethodModifier::SetVisibilityImpl,
             CommonMethodModifier::SetFlexGrowImpl,
             CommonMethodModifier::SetFlexShrinkImpl,
@@ -9179,6 +9184,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityGroupImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
             CommonMethodModifier::SetDebugLineImpl,
+            CommonMethodModifier::SetOnAreaChange1Impl,
         };
         return &ArkUICommonMethodModifierImpl;
     }

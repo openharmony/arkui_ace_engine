@@ -3577,6 +3577,9 @@ struct ArkUICommonModifier {
     void (*setCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
         ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Float32 expectedUpdateInterval);
     void (*unregisterCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node);
+    void (*setCommonOnAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
+        ArkUI_Float32 expectedUpdateInterval);
+    void (*unregisterCommonOnAreaApproximateChangeEvent)(ArkUINodeHandle node);
     void (*setWidthLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy);
     void (*resetWidthLayoutPolicy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getWidthLayoutPolicy)(ArkUINodeHandle node);

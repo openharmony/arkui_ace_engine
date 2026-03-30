@@ -1274,7 +1274,8 @@ void ViewAbstractModelImpl::SetOnVisibleChange(
 }
 
 void ViewAbstractModelImpl::SetOnAreaChanged(
-    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged)
+    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged,
+    int32_t minInterval)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(std::move(onAreaChanged));

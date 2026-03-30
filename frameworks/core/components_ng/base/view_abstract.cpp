@@ -72,6 +72,7 @@ constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
+constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -2871,6 +2872,22 @@ void ViewAbstract::SetOnAreaChanged(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::SetOnAreaChangedWithInterval(
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
+        onAreaChanged,
+    int32_t minInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (minInterval < 0) {
+        minInterval = DEFAULT_AREA_CHANGE_INTERVAL;
+    }
+    frameNode->SetOnAreaChangeCallbackWithInterval(std::move(onAreaChanged), static_cast<uint32_t>(minInterval));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
@@ -8579,6 +8596,22 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::SetOnAreaChangedWithInterval(FrameNode* frameNode,
+    std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)>
+        &&onAreaChanged,
+    int32_t minInterval)
+{
+    FREE_NODE_CHECK(frameNode, SetOnAreaChangedWithInterval, frameNode, std::move(onAreaChanged), minInterval);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (minInterval < 0) {
+        minInterval = DEFAULT_AREA_CHANGE_INTERVAL;
+    }
+    frameNode->SetOnAreaChangeCallbackWithInterval(std::move(onAreaChanged), static_cast<uint32_t>(minInterval));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
