@@ -28,6 +28,8 @@ namespace OHOS::Ace {
 
 struct CustomSpanMeasureInfo {
     float fontSize = 0.0f;
+    std::optional<float> maxWidth;
+    std::optional<LayoutCalPolicy> layoutPolicy;
 };
 
 struct CustomSpanOptions {

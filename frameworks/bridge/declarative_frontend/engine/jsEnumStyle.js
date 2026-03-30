@@ -728,22 +728,52 @@ let FlipDirection;
 class LayoutPolicy {
   id_ = '';
 
-  constructor(id) {
+  constructor(id, internal = false) {
+    if (!internal) {
+      const layoutPolicy = LayoutPolicy.fromId(id);
+      if (layoutPolicy !== undefined) {
+        return layoutPolicy;
+      }
+    }
     this.id_ = id;
   }
 
   static get matchParent() {
-    return new LayoutPolicy('matchParent');
+    if (this.matchParent_ === undefined) {
+      this.matchParent_ = new LayoutPolicy('matchParent', true);
+    }
+    return this.matchParent_;
   }
 
   static get wrapContent() {
-    return new LayoutPolicy('wrapContent');
+    if (this.wrapContent_ === undefined) {
+      this.wrapContent_ = new LayoutPolicy('wrapContent', true);
+    }
+    return this.wrapContent_;
   }
 
   static get fixAtIdealSize() {
-    return new LayoutPolicy('fixAtIdealSize');
+    if (this.fixAtIdealSize_ === undefined) {
+      this.fixAtIdealSize_ = new LayoutPolicy('fixAtIdealSize', true);
+    }
+    return this.fixAtIdealSize_;
+  }
+
+  static fromId(id) {
+    switch (id) {
+      case 'matchParent':
+        return LayoutPolicy.matchParent;
+      case 'wrapContent':
+        return LayoutPolicy.wrapContent;
+      case 'fixAtIdealSize':
+        return LayoutPolicy.fixAtIdealSize;
+      default:
+        return undefined;
+    }
   }
 }
+
+globalThis.LayoutPolicy = LayoutPolicy;
 
 var BlurStyle;
 (function (BlurStyle) {

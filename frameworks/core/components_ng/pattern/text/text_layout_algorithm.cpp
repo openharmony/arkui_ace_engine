@@ -111,7 +111,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     // inheritTextStyle_ is used to control spans_ in versions below VERSION_EIGHTEEN, preventing them from
     // adapting to font size automatically.
     inheritTextStyle_ = textStyle_;
-    MeasureChildren(layoutWrapper, textStyle_);
+    MeasureChildren(contentConstraint, layoutWrapper, textStyle_);
     CheckNeedReCreateParagraph(layoutWrapper, textStyle_);
     ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d][size:%d]", host->GetId(),
         needReCreateParagraph_, static_cast<int32_t>(spans_.size()));

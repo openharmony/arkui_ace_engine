@@ -51,10 +51,74 @@ namespace OHOS::Ace::Framework {
 namespace {
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+constexpr char JS_LAYOUT_POLICY_CLASS_NAME[] = "LayoutPolicy";
+constexpr char LAYOUT_POLICY_MATCH_PARENT[] = "matchParent";
+constexpr char LAYOUT_POLICY_WRAP_CONTENT[] = "wrapContent";
+constexpr char LAYOUT_POLICY_FIX_AT_IDEAL_SIZE[] = "fixAtIdealSize";
 const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
+
+const char* GetLayoutPolicyId(LayoutCalPolicy layoutPolicy)
+{
+    switch (layoutPolicy) {
+        case LayoutCalPolicy::NO_MATCH:
+            return nullptr;
+        case LayoutCalPolicy::MATCH_PARENT:
+            return LAYOUT_POLICY_MATCH_PARENT;
+        case LayoutCalPolicy::WRAP_CONTENT:
+            return LAYOUT_POLICY_WRAP_CONTENT;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE:
+            return LAYOUT_POLICY_FIX_AT_IDEAL_SIZE;
+    }
+}
+
+JSRef<JSObject> CreateJsLayoutPolicy(const std::string& id)
+{
+    JSRef<JSObject> empty;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, empty);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, empty);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_LAYOUT_POLICY_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    napi_value obj = nullptr;
+    ret = napi_get_named_property(env, constructor, id.c_str(), &obj);
+    if (ret == napi_ok) {
+        JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+        if (value->IsObject()) {
+            return JSRef<JSObject>::Cast(value);
+        }
+    }
+
+    napi_value layoutPolicyId = nullptr;
+    ret = napi_create_string_utf8(env, id.c_str(), id.length(), &layoutPolicyId);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    ret = napi_new_instance(env, constructor, 1, &layoutPolicyId, &obj);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+    if (!value->IsObject()) {
+        return empty;
+    }
+    return JSRef<JSObject>::Cast(value);
+}
 } // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -1512,6 +1576,19 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         objectTemplate->SetInternalFieldCount(1);
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();
         contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
+        if (customSpanMeasureInfo.maxWidth.has_value()) {
+            contextObj->SetProperty<float>("maxWidth", customSpanMeasureInfo.maxWidth.value());
+        }
+        if (customSpanMeasureInfo.layoutPolicy.has_value() &&
+            static_cast<int32_t>(customSpanMeasureInfo.layoutPolicy.value()) > 0) {
+            auto layoutPolicyId = GetLayoutPolicyId(customSpanMeasureInfo.layoutPolicy.value());
+            if (layoutPolicyId != nullptr) {
+                JSRef<JSObject> layoutPolicyObj = CreateJsLayoutPolicy(layoutPolicyId);
+                if (!layoutPolicyObj->IsEmpty()) {
+                    contextObj->SetPropertyObject("layoutPolicy", layoutPolicyObj);
+                }
+            }
+        }
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
         auto obj = func->ExecuteJS(1, &jsVal);
         if (obj->IsObject()) {

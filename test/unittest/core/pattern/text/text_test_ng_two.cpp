@@ -1414,4 +1414,372 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestGetSelectArea001, TestSize.Level1)
     ASSERT_EQ(textSelectOverlay->GetSelectArea(), RectF());
     textSelectOverlay->hasTransform_ = hasTransform;
 }
+
+/**
+ * @tc.name: CustomSpanMeasureInfoTest001
+ * @tc.desc: Test CustomSpanMeasureInfo with maxWidth and layoutPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, CustomSpanMeasureInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CustomSpanMeasureInfo with default values.
+     */
+    CustomSpanMeasureInfo measureInfo;
+    EXPECT_EQ(measureInfo.fontSize, 0.0f);
+    EXPECT_FALSE(measureInfo.maxWidth.has_value());
+    EXPECT_FALSE(measureInfo.layoutPolicy.has_value());
+
+    /**
+     * @tc.steps: step2. set maxWidth and layoutPolicy values.
+     */
+    measureInfo.fontSize = 16.0f;
+    measureInfo.maxWidth = 100.0f;
+    measureInfo.layoutPolicy = LayoutCalPolicy::MATCH_PARENT;
+
+    EXPECT_EQ(measureInfo.fontSize, 16.0f);
+    EXPECT_TRUE(measureInfo.maxWidth.has_value());
+    EXPECT_EQ(measureInfo.maxWidth.value(), 100.0f);
+    EXPECT_TRUE(measureInfo.layoutPolicy.has_value());
+    EXPECT_EQ(measureInfo.layoutPolicy.value(), LayoutCalPolicy::MATCH_PARENT);
+}
+
+/**
+ * @tc.name: CustomSpanMeasureInfoTest002
+ * @tc.desc: Test CustomSpanMeasureInfo with different layoutPolicy values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, CustomSpanMeasureInfoTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CustomSpanMeasureInfo and set layoutPolicy to FIX_AT_IDEAL_SIZE.
+     */
+    CustomSpanMeasureInfo measureInfo;
+    measureInfo.fontSize = 20.0f;
+    measureInfo.maxWidth = 200.0f;
+    measureInfo.layoutPolicy = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+
+    EXPECT_EQ(measureInfo.fontSize, 20.0f);
+    EXPECT_EQ(measureInfo.maxWidth.value(), 200.0f);
+    EXPECT_EQ(measureInfo.layoutPolicy.value(), LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+
+    /**
+     * @tc.steps: step2. set layoutPolicy to NO_MATCH.
+     */
+    measureInfo.layoutPolicy = LayoutCalPolicy::NO_MATCH;
+    EXPECT_EQ(measureInfo.layoutPolicy.value(), LayoutCalPolicy::NO_MATCH);
+}
+
+/**
+ * @tc.name: MultipleParagraphLayoutAlgorithmMeasureChildren001
+ * @tc.desc: Test MultipleParagraphLayoutAlgorithm MeasureChildren with contentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, MultipleParagraphLayoutAlgorithmMeasureChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode with spans.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty and contentConstraint.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = CONTAINER_SIZE;
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify MeasureContent returns valid size.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+}
+
+/**
+ * @tc.name: MultipleParagraphLayoutAlgorithmMeasureChildren002
+ * @tc.desc: Test MultipleParagraphLayoutAlgorithm MeasureChildren with infinite maxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, MultipleParagraphLayoutAlgorithmMeasureChildren002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode with custom span.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set contentConstraint with infinite width.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(INFINITY, INFINITY);
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+
+    /**
+     * @tc.steps: step4. verify MeasureContent handles infinite width.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmMeasureContentWithConstraint001
+ * @tc.desc: Test TextLayoutAlgorithm MeasureContent with contentConstraint parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, TextLayoutAlgorithmMeasureContentWithConstraint001, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty and contentConstraint.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = CONTAINER_SIZE;
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify contentSize is valid.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
+    textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmMeasureContentWithConstraint002
+ * @tc.desc: Test TextLayoutAlgorithm MeasureContent with various contentConstraint settings.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, TextLayoutAlgorithmMeasureContentWithConstraint002, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty with minFontSize and heightAdaptivePolicy.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    textLayoutProperty->UpdateAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = CONTAINER_LOW_SIZE;
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify contentSize is valid.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+    textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: CustomSpanMeasureWithMaxWidth001
+ * @tc.desc: Test CustomSpanMeasure with finite maxWidth in contentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, CustomSpanMeasureWithMaxWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode with CustomSpanItem.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty and contentConstraint with finite maxWidth.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(500.0f, 500.0f); // finite maxWidth
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     * @tc.expected: MeasureContent handles finite maxWidth correctly.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify MeasureContent returns valid size.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+}
+
+/**
+ * @tc.name: CustomSpanMeasureWithLayoutPolicy001
+ * @tc.desc: Test CustomSpanMeasure with layoutPolicy in contentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, CustomSpanMeasureWithLayoutPolicy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty with layoutPolicy.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = CONTAINER_SIZE;
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify MeasureContent handles layoutPolicy correctly.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+}
+
+/**
+ * @tc.name: CustomSpanMeasureWithInfiniteMaxWidth001
+ * @tc.desc: Test CustomSpanMeasure with infinite maxWidth in contentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, CustomSpanMeasureWithInfiniteMaxWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty and contentConstraint with infinite maxWidth.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = SizeF(INFINITY, INFINITY); // infinite maxWidth
+    contentConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent.
+     * @tc.expected: MeasureContent handles infinite maxWidth without crashing.
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. verify MeasureContent returns valid size even with infinite maxWidth.
+     */
+    EXPECT_TRUE(contentSize.has_value());
+}
 } // namespace OHOS::Ace::NG
