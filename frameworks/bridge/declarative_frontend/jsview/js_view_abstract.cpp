@@ -7301,7 +7301,14 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         } else if (value->IsString()) {
             Color::ParseColorString(value->ToString(), color);
         } else {
-            ParseJsColorFromResource(value, color, resObj);
+            auto obj = JSRef<JSObject>::Cast(value);
+            auto toNumericProp = obj->GetProperty("toNumeric");
+            auto colorSpaceProp = obj->GetProperty("getColorSpace");
+            if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
+                ParseColorMetricsToColor(value, color, resObj);
+            } else {
+                ParseJsColorFromResource(value, color, resObj);
+            }
         }
 
         result.emplace_back(color);

@@ -404,15 +404,23 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
         return false;
     }
+    bool parseSuccess = true;
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
     } else if (value->IsString(vm)) {
         Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
     } else if (value->IsObject(vm)) {
-        ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
+        auto obj = value->ToObject(vm);
+        auto toNumericProp = obj->Get(vm, "toNumeric");
+        auto colorSpaceProp = obj->Get(vm, "getColorSpace");
+        if (toNumericProp->IsFunction(vm) && colorSpaceProp->IsFunction(vm)) {
+            parseSuccess = ParseColorMetricsToColor(vm, value, result, resourceObject);
+        } else {
+            ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
+        }
     }
-    CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
-    return true;
+    CompleteResourceObjectFromColor(resourceObject, result, parseSuccess, nodeInfo);
+    return parseSuccess;
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,

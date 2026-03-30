@@ -130,7 +130,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
         const std::optional<std::vector<Color>>& colorListOptional = GetSymbolColorList();
         if (colorListOptional.has_value()) {
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value())
+            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToJsonString(colorListOptional.value())
                 .c_str(), filter);
         } else {
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>()).c_str(), filter);
@@ -243,3 +243,4 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     LayoutProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG
+

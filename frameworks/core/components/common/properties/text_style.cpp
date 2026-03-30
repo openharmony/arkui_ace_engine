@@ -116,6 +116,26 @@ std::string SymbolColorListToString(const std::vector<Color>& colorList)
     return symbolColorList;
 }
 
+std::string SymbolColorListToJsonString(const std::vector<Color>& colorList)
+{
+    std::string symbolColorList;
+    for (uint32_t i = 0; i < colorList.size(); ++i) {
+        if (i > 0) {
+            symbolColorList += ", ";
+        }
+        symbolColorList += colorList[i].ColorToString();
+        auto hdrColor = colorList[i].GetHeadRoomColor();
+        if (hdrColor.has_value()) {
+            std::ostringstream oss;
+            oss << "|HDR:" << hdrColor->red << "," << hdrColor->green << "," << hdrColor->blue << ","
+                << hdrColor->alpha << "," << hdrColor->headRoom;
+            oss << "|CS:" << static_cast<int32_t>(colorList[i].GetColorSpace());
+            symbolColorList += oss.str();
+        }
+    }
+    return symbolColorList;
+}
+
 std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList)
 {
     std::string symbolColorList = "";
