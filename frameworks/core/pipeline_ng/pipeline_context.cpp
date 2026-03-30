@@ -2028,8 +2028,9 @@ void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId, in
     if (frontend) {
         auto it = onDrawChildrenInfoMap_.find(parentId);
         if (it != onDrawChildrenInfoMap_.end()) {
-            frontend->OnDrawChildrenCompleted(componentId, it->second);
+            auto childIds = std::move(it->second);
             onDrawChildrenInfoMap_.erase(it);
+            frontend->OnDrawChildrenCompleted(componentId, childIds);
         }
     }
 }
@@ -2133,7 +2134,7 @@ void PipelineContext::SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId
 {
     auto iter = onDrawChildrenInfoMap_.find(parentId);
     if (iter != onDrawChildrenInfoMap_.end()) {
-        auto childIds = iter->second;
+        const auto& childIds = iter->second;
         if (std::find(childIds.begin(), childIds.end(), childId) == childIds.end()) {
             iter->second.push_back(childId);
         }
