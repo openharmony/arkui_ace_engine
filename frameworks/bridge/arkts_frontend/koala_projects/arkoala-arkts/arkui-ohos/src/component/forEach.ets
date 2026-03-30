@@ -125,13 +125,12 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
 
         /** @memo */
         const action = (e: T, idx: int32): void => {
-            const tag = newKeys[idx] + forEachId + '@ForEach'
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 receiver.itemGenerator(e, idx);
                 if (diffIndex.indexOf(idx) !== -1) {
                     manager.additionalChild.push(node.getPeerPtr())
                 }
-            }, tag);
+            });
         }
         key2Index.forEach((idx: int32, key: int32) => {
             memoEntry2<T, int32, void>(__context(), key, action, array[idx], idx);
