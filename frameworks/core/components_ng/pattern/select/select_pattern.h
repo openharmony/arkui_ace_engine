@@ -172,6 +172,16 @@ public:
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
+    const std::vector<RefPtr<FrameNode>>& GetBuilderOptions()
+    {
+        return builderOptions_;
+    }
+    void AddBuilderOptionNode(const RefPtr<FrameNode>& option)
+    {
+        CHECK_NULL_VOID(option);
+        builderOptions_.push_back(option);
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
@@ -394,6 +404,7 @@ private:
     void ShowScrollBar();
     void UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu);
     std::vector<RefPtr<FrameNode>> options_;
+    std::vector<RefPtr<FrameNode>> builderOptions_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<FrameNode> spinner_ = nullptr;
