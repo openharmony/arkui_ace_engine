@@ -1638,6 +1638,16 @@ void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStat
     parameter.newState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetNewMicrophoneCaptureState());
     arkCallback.InvokeSync(parameter);
 }
+
+void OnInputmethodAttached(const CallbackHelper<OnInputmethodAttachedCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    arkCallback.InvokeSync();
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

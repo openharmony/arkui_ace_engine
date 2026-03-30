@@ -1639,6 +1639,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicro
   }
 }
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnInputMethodAttachedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    } else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+
 class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2341,6 +2355,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   scrollbarLayoutPolicy(value: number): this {
     modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
     return this;
   }
 }

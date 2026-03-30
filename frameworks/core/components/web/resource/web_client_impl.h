@@ -403,6 +403,7 @@ public:
     void OnCameraCaptureStateChanged(int originalState, int new_state) override;
     void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
     void OnMediaCastEnter() override;
+    void OnInputMethodAttached() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

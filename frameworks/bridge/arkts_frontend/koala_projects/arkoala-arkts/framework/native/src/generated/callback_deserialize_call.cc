@@ -8557,6 +8557,27 @@ void deserializeAndCallSyncOnHoverStatusChangeCallback(Ark_VMContext vmContext, 
     Ark_HoverEventParam param = HoverEventParam_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, param);
 }
+void deserializeAndCallOnInputmethodAttachedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ONINPUTMETHODATTACHEDCALLBACK))));
+    thisDeserializer.readPointer();
+    call(resourceId);
+}
+void deserializeAndCallSyncOnInputmethodAttachedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray,
+                                                         Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONINPUTMETHODATTACHEDCALLBACK))));
+    callSyncMethod(vmContext, resourceId);
+}
 void deserializeAndCallOnIntelligentTrackingPreventionCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -12923,6 +12944,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallOnHoverCallback(thisArray, thisLength);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return deserializeAndCallOnHoverStatusChangeCallback(thisArray, thisLength);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return deserializeAndCallOnInputmethodAttachedCallback(thisArray, thisLength);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisArray, thisLength);
     case KIND_ONITEMDRAGSTARTCALLBACK:
@@ -13664,6 +13687,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncOnHoverCallback(vmContext, thisArray, thisLength);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return deserializeAndCallSyncOnInputmethodAttachedCallback(vmContext, thisArray, thisLength);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
     case KIND_ONITEMDRAGSTARTCALLBACK:

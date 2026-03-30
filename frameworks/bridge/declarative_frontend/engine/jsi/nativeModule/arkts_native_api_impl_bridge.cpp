@@ -4697,6 +4697,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetScrollbarLayoutPolicy));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollbarLayoutPolicy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetScrollbarLayoutPolicy));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnInputMethodAttached"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInputMethodAttached));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInputMethodAttached"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInputMethodAttached));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

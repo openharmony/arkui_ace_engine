@@ -21155,6 +21155,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                               const Opt_OnInputmethodAttachedCallback* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnInputmethodAttached(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -23817,6 +23828,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
             WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
+            WebAttributeModifier::SetOnInputmethodAttachedImpl,
         };
         return &ArkUIWebModifierImpl;
     }

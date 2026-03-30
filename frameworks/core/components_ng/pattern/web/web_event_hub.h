@@ -188,6 +188,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnCameraCaptureStateChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnMicrophoneCaptureStateChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnTextSelectionChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnInputMethodAttached, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

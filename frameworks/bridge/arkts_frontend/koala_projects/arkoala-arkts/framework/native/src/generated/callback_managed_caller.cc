@@ -7886,6 +7886,28 @@ void CallManagedOnHoverStatusChangeCallbackSync(Ark_VMContext vmContext, Ark_Int
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void CallManagedOnInputmethodAttachedCallback(Ark_Int32 resourceId)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource,
+                                                       releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer),
+                                                    sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_ONINPUTMETHODATTACHEDCALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedOnInputmethodAttachedCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_ONINPUTMETHODATTACHEDCALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void CallManagedOnIntelligentTrackingPreventionCallback(Ark_Int32 resourceId,
                                                         Ark_IntelligentTrackingPreventionDetails details)
 {
@@ -11838,6 +11860,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnHoverCallback);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnHoverStatusChangeCallback);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedOnInputmethodAttachedCallback);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnIntelligentTrackingPreventionCallback);
     case KIND_ONITEMDRAGSTARTCALLBACK:
@@ -12574,6 +12598,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnHoverCallbackSync);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnHoverStatusChangeCallbackSync);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedOnInputmethodAttachedCallbackSync);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedOnIntelligentTrackingPreventionCallbackSync);
     case KIND_ONITEMDRAGSTARTCALLBACK:

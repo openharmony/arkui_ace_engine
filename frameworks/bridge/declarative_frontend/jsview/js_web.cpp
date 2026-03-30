@@ -2436,6 +2436,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChange", &JSWeb::OnCameraCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChange", &JSWeb::OnMicrophoneCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onInputmethodAttached", &JSWeb::OnInputMethodAttached);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -6041,6 +6042,27 @@ void JSWeb::OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetMicrophoneCaptureStateChangedId(jsCallback);
+}
+
+void JSWeb::OnInputMethodAttached(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        func->Execute();
+    };
+    WebModel::GetInstance()->SetInputMethodAttachedId(std::move(jsCallback));
 }
 
 void JSWeb::MediaOptions(const JSCallbackInfo& args)

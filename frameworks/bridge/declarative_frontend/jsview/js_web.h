@@ -176,6 +176,7 @@ public:
     static void OnCameraCaptureStateChanged(const JSCallbackInfo& args);
     static void OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args);
     static void EnableDrag(const JSCallbackInfo& args);
+    static void OnInputMethodAttached(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo);

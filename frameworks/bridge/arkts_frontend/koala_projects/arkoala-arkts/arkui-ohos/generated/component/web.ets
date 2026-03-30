@@ -3346,6 +3346,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableScrollDirectionalLock(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnInputmethodAttachedAttribute(value: OnInputmethodAttachedCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnInputmethodAttached(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type WebviewController = webview.WebviewController;
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
@@ -3903,6 +3915,7 @@ export interface FirstScreenPaint {
     firstScreenPaintTime: int64;
 }
 export type OnFirstScreenPaintCallback = (firstScreenPaint: FirstScreenPaint) => void;
+export type OnInputmethodAttachedCallback = () => void;
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
         throw new Error('Unimplemented method setWebOptions')
@@ -4362,6 +4375,9 @@ export interface WebAttribute extends CommonMethod {
     }
     attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
+    }
+    onInputmethodAttached(value: OnInputmethodAttachedCallback | undefined): this {
+        throw new Error('Unimplemented method onInputmethodAttached')
     }
 }
 export interface SslErrorEvent {
@@ -5235,6 +5251,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public onInputmethodAttached(value: OnInputmethodAttachedCallback | undefined): this {
+        const value_casted = value as (OnInputmethodAttachedCallback | undefined)
+        this.getPeer()?.setOnInputmethodAttachedAttribute(value_casted)
+        return this
     }
 }
 

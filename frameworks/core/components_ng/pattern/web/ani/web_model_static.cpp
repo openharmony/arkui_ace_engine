@@ -1715,4 +1715,14 @@ void WebModelStatic::SetScrollbarLayoutPolicy(
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateScrollbarLayoutPolicy(policy);
 }
+
+void WebModelStatic::SetInputMethodAttachedId(
+    FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG

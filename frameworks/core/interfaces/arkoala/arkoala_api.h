@@ -6378,6 +6378,8 @@ struct ArkUIWebModifier {
     void (*resetEnableDrag)(ArkUINodeHandle node);
     void (*setScrollbarLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
+    void (*setOnInputMethodAttached)(ArkUINodeHandle node, void* callback);
+    void (*resetOnInputMethodAttached)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
