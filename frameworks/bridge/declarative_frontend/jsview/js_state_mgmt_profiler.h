@@ -19,8 +19,7 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 
 namespace OHOS::Ace::Framework {
 class JSStateMgmtProfiler : public AceType {

@@ -17,16 +17,13 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_FUNCTIONS_H
 
 #include <string>
+#include <vector>
 
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 
-namespace OHOS::Ace {
-class ComposedElement;
-} // namespace OHOS::Ace
+namespace OHOS::Ace::NG {
+class LayoutWrapper;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::Framework {
 enum class PrebuildPhase : int32_t {

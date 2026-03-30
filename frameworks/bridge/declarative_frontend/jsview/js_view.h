@@ -19,12 +19,10 @@
 #include <functional>
 #include <list>
 #include <string>
+#include <tuple>
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/view_partial_update_model.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
@@ -490,7 +488,7 @@ private:
     <1> outmost wrapping Component
     <2> main Component
     */
-    std::list<UpdateTask> pendingUpdateTasks_;
+    std::list<std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>> pendingUpdateTasks_;
 
     // The C++ JSView object owns a reference to the JS Object
     // AssignNewView assigns the JS View
