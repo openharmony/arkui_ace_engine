@@ -596,11 +596,13 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_null;
     GetNapiString(env, helper.GetArgv(0), componentId, valueType);
 
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
-            currentIdAndReason.second, Container::CurrentIdSafely());
+            reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;
@@ -679,11 +681,14 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
     int32_t uniqueId;
     napi_get_value_int32(env, helper.GetArgv(0), &uniqueId);
 
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get delegate of ace_engine. param: %{public}d", uniqueId);
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
-            currentIdAndReason.second, Container::CurrentIdSafely());
+            reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;
@@ -712,11 +717,13 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
     }
 
     napi_value result = nullptr;
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
-            currentIdAndReason.second, Container::CurrentIdSafely());
+            reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
@@ -853,11 +860,13 @@ static napi_value JSSnapshotGetWithRange(napi_env env, napi_callback_info info)
     auto endID = GetNodeIdentity(env, info, 1);
     bool isStartRect = JudgeRectValue(env, info);
 
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
-            currentIdAndReason.second, Container::CurrentIdSafely());
+            reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;
