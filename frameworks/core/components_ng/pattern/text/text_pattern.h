@@ -1260,8 +1260,6 @@ private:
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
-    void ProcessSelectionOnMouseRelease(int32_t start, int32_t end, const RefPtr<FrameNode>& host,
-        const MouseInfo& info);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItemEvent(bool& isSpanHasClick, bool& isSpanHasLongPress);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
