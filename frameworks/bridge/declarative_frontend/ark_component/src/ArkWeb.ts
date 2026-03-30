@@ -1681,6 +1681,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebAiSessionOptionsModifier extends ModifierWithKey<Array<AISessionEvent>> {
+  constructor(value: Array<AISessionEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webAiSessionOptionsModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
+    }
+  }
+}
+
 class WebEnableScrollDirectionalLockModifier extends ModifierWithKey<ArkEnableScrollDirectionalLock> {
   constructor(value: ArkEnableScrollDirectionalLock) {
     super(value);
@@ -2325,6 +2339,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
+  aiSessionOptions(value: Array<AISessionEvent>): this {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
   enableScrollDirectionalLock(value: boolean, type: number): this {
     let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
     if (!isUndefined(value) && !isNull(value)) {
@@ -2334,9 +2352,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
       arkEnableScrollDirectionalLock.type = type;
     }
     if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
     } else {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
     }
     return this;
   }

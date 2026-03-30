@@ -2228,6 +2228,9 @@ struct CJUIWebModifier {
     void (*resetEnableAutoFill)(ArkUINodeHandle node);
     void (*setEnableDefaultContextMenu)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
+    void (*setAiSessionOptions)(
+        ArkUINodeHandle node, const struct ArkUIAISessionEventStruct* aiSessionEvents, ArkUI_Int32 length);
+    void (*resetAiSessionOptions)(ArkUINodeHandle node);
     void (*setEnableScrollDirectionalLock)(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type);
     void (*resetEnableScrollDirectionalLock)(ArkUINodeHandle node);
     void (*setEnableNativeMediaPlayer)(ArkUINodeHandle node, ArkUI_Bool enable, ArkUI_Bool shouldOverlay);

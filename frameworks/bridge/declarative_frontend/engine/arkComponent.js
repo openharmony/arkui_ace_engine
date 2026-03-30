@@ -25687,6 +25687,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
+  aiSessionOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
   enableScrollDirectionalLock(enabled, type) {
     let config = new ArkEnableScrollDirectionalLock();
     config.value = enabled;
@@ -27460,6 +27464,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   }
 }
 WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
+
+class WebAiSessionOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
+    }
+  }
+}
+WebAiSessionOptionsModifier.identity = Symbol('webAiSessionOptionsModifier');
 
 class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
   constructor(value) {

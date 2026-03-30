@@ -2906,6 +2906,18 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelNG::SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISessionCallback&& onCreateAISession,
+    AISessionCallback&& onExecuteAIAction, AISessionCallback&& onDestroyAISession)
+{
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+#endif
+}
+
 void WebModelNG::SetEnableScrollDirectionalLock(bool enabled, int32_t type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
