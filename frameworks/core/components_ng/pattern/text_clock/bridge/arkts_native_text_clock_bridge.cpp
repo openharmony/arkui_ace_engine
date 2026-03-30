@@ -188,10 +188,10 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
             return panda::JSValueRef::Undefined(vm);
         }
         if (!Framework::JSTextClockTheme::ObtainTextColor(color)) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            color = theme->GetTextStyle().GetTextColor();
+            auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+            CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+            auto theme = frameNode->GetTheme<TextTheme>(true);
+            color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
             if (SystemProperties::ConfigChangePerform()) {
                 nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
                 nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
@@ -757,6 +757,19 @@ void TextClockBridge::RegisterTextClockAttributes(Local<panda::ObjectRef> object
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textclock"), textClock);
 }
 
+void SetTextClockFontColor(FrameNode* frameNode, EcmaVM* vm)
+{
+    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+    if (themeColors.has_value()) {
+        if (frameNode && frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            SystemProperties::ConfigChangePerform()) {
+            return;
+        }
+        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), themeColors->FontSecondary().GetValue());
+    }
+}
+
 ArkUINativeModuleValue TextClockBridge::CreateTextClock(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -765,19 +778,12 @@ ArkUINativeModuleValue TextClockBridge::CreateTextClock(ArkUIRuntimeCallInfo* ru
     auto controller = AceType::Claim(reinterpret_cast<OHOS::Ace::TextClockController*>(
         GetArkUINodeModifiers()->getTextClockModifier()->createTextClockController()));
     auto* frameNode = reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-
     if (runtimeCallInfo->GetArgsNumber() < 1 || !runtimeCallInfo->GetCallArgRef(0)->IsObject(vm)) {
         GetArkUINodeModifiers()->getTextClockModifier()->initFontDefault(reinterpret_cast<ArkUINodeHandle>(frameNode));
-        if (auto themeColors = Framework::JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
-            GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
-                reinterpret_cast<ArkUINodeHandle>(frameNode), themeColors->FontSecondary().GetValue());
-        }
+        SetTextClockFontColor(frameNode, vm);
         return panda::JSValueRef::Undefined(vm);
     }
-    if (auto themeColors = Framework::JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
-            reinterpret_cast<ArkUINodeHandle>(frameNode), themeColors->FontSecondary().GetValue());
-    }
+    SetTextClockFontColor(frameNode, vm);
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto paramsObj = firstArg->ToObject(vm);
