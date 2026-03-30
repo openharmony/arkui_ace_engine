@@ -17,6 +17,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_window.h"
 #include "test/mock/core/common/mock_frontend.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;

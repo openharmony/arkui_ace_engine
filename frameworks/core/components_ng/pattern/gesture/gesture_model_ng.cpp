@@ -21,6 +21,7 @@
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::NG {
 namespace {

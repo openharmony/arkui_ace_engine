@@ -16,9 +16,74 @@
 #include "core/gestures/velocity_tracker.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+
+VelocityTracker::VelocityTracker()
+{
+    static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
+    xAxis_.SetCountNum(pointNum);
+    yAxis_.SetCountNum(pointNum);
+    POINT_NUMBER = pointNum;
+}
+
+VelocityTracker::VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
+
 int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
+
+void VelocityTracker::Reset()
+{
+    lastPosition_.Reset();
+    velocity_.Reset();
+    delta_.Reset();
+    isFirstPoint_ = true;
+    xAxis_.Reset();
+    yAxis_.Reset();
+}
+
+double VelocityTracker::GetMainAxisPos() const
+{
+    switch (mainAxis_) {
+        case Axis::FREE:
+            return lastPosition_.GetDistance();
+        case Axis::HORIZONTAL:
+            return lastPosition_.GetX();
+        case Axis::VERTICAL:
+            return lastPosition_.GetY();
+        default:
+            return 0.0;
+    }
+}
+
+double VelocityTracker::GetMainAxisDeltaPos() const
+{
+    switch (mainAxis_) {
+        case Axis::FREE:
+            return delta_.GetDistance();
+        case Axis::HORIZONTAL:
+            return delta_.GetX();
+        case Axis::VERTICAL:
+            return delta_.GetY();
+        default:
+            return 0.0;
+    }
+}
+
+double VelocityTracker::GetMainAxisVelocity()
+{
+    UpdateVelocity();
+    switch (mainAxis_) {
+        case Axis::FREE:
+            return velocity_.GetVelocityValue();
+        case Axis::HORIZONTAL:
+            return velocity_.GetVelocityX();
+        case Axis::VERTICAL:
+            return velocity_.GetVelocityY();
+        default:
+            return 0.0;
+    }
+}
 
 namespace {
 static constexpr int32_t MAX_INDEX = 4;

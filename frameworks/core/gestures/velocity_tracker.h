@@ -19,7 +19,6 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/least_square_impl.h"
 #include "base/geometry/offset.h"
-#include "base/utils/system_properties.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
 
@@ -27,14 +26,8 @@ namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT VelocityTracker final {
 public:
-    VelocityTracker()
-    {
-        static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
-        xAxis_.SetCountNum(pointNum);
-        yAxis_.SetCountNum(pointNum);
-        POINT_NUMBER = pointNum;
-    }
-    explicit VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
+    VelocityTracker();
+    explicit VelocityTracker(Axis mainAxis);
     ~VelocityTracker() = default;
 
     static constexpr int32_t LEAST_SQUARE_PARAM_NUM = 3;
@@ -42,16 +35,7 @@ public:
     static constexpr float DURATION_LONGEST_THRESHOLD = 0.1;
     static int32_t POINT_NUMBER;
 
-    void Reset()
-    {
-        lastPosition_.Reset();
-        velocity_.Reset();
-        delta_.Reset();
-        isFirstPoint_ = true;
-        xAxis_.Reset();
-        yAxis_.Reset();
-    }
-
+    void Reset();
     void UpdateTouchPoint(const TouchEvent& event, bool end = false, float range = TOUCH_STILL_THRESHOLD);
 
     void UpdateTrackerPoint(double x, double y, const TimeStamp& time, bool end = false);
@@ -87,48 +71,9 @@ public:
         mainAxis_ = axis;
     }
 
-    double GetMainAxisPos() const
-    {
-        switch (mainAxis_) {
-            case Axis::FREE:
-                return lastPosition_.GetDistance();
-            case Axis::HORIZONTAL:
-                return lastPosition_.GetX();
-            case Axis::VERTICAL:
-                return lastPosition_.GetY();
-            default:
-                return 0.0;
-        }
-    }
-
-    double GetMainAxisDeltaPos() const
-    {
-        switch (mainAxis_) {
-            case Axis::FREE:
-                return delta_.GetDistance();
-            case Axis::HORIZONTAL:
-                return delta_.GetX();
-            case Axis::VERTICAL:
-                return delta_.GetY();
-            default:
-                return 0.0;
-        }
-    }
-
-    double GetMainAxisVelocity()
-    {
-        UpdateVelocity();
-        switch (mainAxis_) {
-            case Axis::FREE:
-                return velocity_.GetVelocityValue();
-            case Axis::HORIZONTAL:
-                return velocity_.GetVelocityX();
-            case Axis::VERTICAL:
-                return velocity_.GetVelocityY();
-            default:
-                return 0.0;
-        }
-    }
+    double GetMainAxisPos() const;
+    double GetMainAxisDeltaPos() const;
+    double GetMainAxisVelocity();
 
     void DumpVelocityPoints() const;
 

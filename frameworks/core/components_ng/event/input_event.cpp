@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/input_event.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {

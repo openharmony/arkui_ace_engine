@@ -29,6 +29,7 @@
 #include "core/components_v2/inspector/utils.h"
 
 #include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/common/statistic_event_reporter.h"
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;

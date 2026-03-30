@@ -22,6 +22,7 @@
 #include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
@@ -47,6 +48,7 @@ struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 class CalcDimensionRect;
+class DragEvent;
 }
 
 namespace OHOS::Ace::NG {

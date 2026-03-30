@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_gesture_event_hub.h"
+#include "base/log/ace_trace.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> SearchGestureEventHub::PackInnerRecognizer(

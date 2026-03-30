@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -8282,6 +8283,30 @@ void FrameNode::ReplacePattern(const RefPtr<Pattern>& newPattern)
         paintProperty_->SetHost(WeakClaim(this));
     }
     InitializePatternAndContext();
+}
+
+void FrameNode::SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions)
+{
+    auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(dragDropRelatedConfigurations);
+    dragDropRelatedConfigurations->SetDragPreviewOption(previewOption, isResetOptions);
+}
+
+void FrameNode::SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
+{
+    auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+    CHECK_NULL_VOID(dragDropRelatedConfigurations);
+    dragDropRelatedConfigurations->SetOptionsAfterApplied(optionsAfterApplied);
+}
+
+const DragPreviewOption& FrameNode::GetDragPreviewOption()
+{
+    auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+    if (!dragDropRelatedConfigurations) {
+        static DragPreviewOption defaultInstance;
+        return defaultInstance;
+    }
+    return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
 }
 
 void FrameNode::RegisterLpxAttribute(LpxAttribute attribute)

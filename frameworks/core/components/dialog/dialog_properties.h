@@ -26,6 +26,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
+#include "core/gestures/gesture_event.h"
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {

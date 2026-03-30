@@ -60,7 +60,7 @@ template<typename T>
 class sptr;
 } // namespace OHOS
 namespace OHOS::Ace {
-
+struct CrownEvent;
 using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;

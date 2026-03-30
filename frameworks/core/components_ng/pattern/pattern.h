@@ -49,6 +49,7 @@ class AccessibilityEventInfo;
 
 namespace OHOS::Ace {
 struct UiMaterialParam;
+class NotifyDragEvent;
 }
 
 namespace OHOS::Ace::NG {

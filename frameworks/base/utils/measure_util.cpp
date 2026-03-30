@@ -15,6 +15,7 @@
 
 #include "base/utils/measure_util.h"
 
+#include "core/pipeline/pipeline_context.h"
 #include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"

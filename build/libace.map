@@ -3499,6 +3499,7 @@
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
@@ -3921,6 +3922,7 @@
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
       vtable?for?OHOS::Ace::PanRecognizer;
+      OHOS::Ace::VelocityTracker::VelocityTracker*;
       vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
       vtable?for?OHOS::Ace::Platform::AceApplicationInfoImpl;

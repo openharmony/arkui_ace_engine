@@ -21,6 +21,7 @@
 #include <map>
 
 #include "core/gestures/multi_fingers_recognizer.h"
+#include "core/gestures/velocity_tracker.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {

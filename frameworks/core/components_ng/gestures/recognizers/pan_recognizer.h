@@ -21,6 +21,8 @@
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/gestures/velocity.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 enum class PanGestureState : int32_t;

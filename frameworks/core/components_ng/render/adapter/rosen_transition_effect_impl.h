@@ -19,6 +19,7 @@
 #include "modifier/rs_property.h"
 
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {

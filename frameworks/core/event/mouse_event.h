@@ -24,7 +24,6 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -35,6 +34,11 @@ namespace OHOS::Ace {
 class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
+
+// Forward declaration for FrameNode
+namespace NG {
+class FrameNode;
+}
 
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
@@ -119,123 +123,9 @@ struct MouseEvent final : public PointerEvent {
         return targetDisplayId;
     }
 
-    MouseEvent CloneWith(float scale) const
-    {
-        if (NearEqual(scale, 0.f)) {
-            return {};
-        }
-        MouseEvent mouseEvent;
-        mouseEvent.id = id;
-        mouseEvent.x = x / scale;
-        mouseEvent.y = y / scale;
-        mouseEvent.z = z / scale;
-        mouseEvent.deltaX = deltaX / scale;
-        mouseEvent.deltaY = deltaY /  scale;
-        mouseEvent.deltaZ = deltaZ / scale;
-        mouseEvent.scrollX = scrollX /  scale;
-        mouseEvent.scrollY = scrollY /  scale;
-        mouseEvent.scrollZ = scrollZ / scale;
-        mouseEvent.screenX = screenX / scale;
-        mouseEvent.screenY = screenY / scale;
-        mouseEvent.globalDisplayX = globalDisplayX / scale;
-        mouseEvent.globalDisplayY = globalDisplayY / scale;
-        mouseEvent.action = action;
-        mouseEvent.pullAction = pullAction;
-        mouseEvent.button = button;
-        mouseEvent.pressedButtons = pressedButtons;
-        mouseEvent.time = time;
-        mouseEvent.deviceId = deviceId;
-        mouseEvent.targetDisplayId = targetDisplayId;
-        mouseEvent.sourceType = sourceType;
-        mouseEvent.sourceTool = sourceTool;
-        mouseEvent.pointerEvent = pointerEvent;
-        mouseEvent.originalId = originalId;
-        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
-        mouseEvent.isInjected = isInjected;
-        mouseEvent.isPrivacyMode = isPrivacyMode;
-        mouseEvent.mockFlushEvent = mockFlushEvent;
-        mouseEvent.rawDeltaX = rawDeltaX;
-        mouseEvent.rawDeltaY = rawDeltaY;
-        mouseEvent.pressedButtonsArray = pressedButtonsArray;
-        mouseEvent.passThrough = passThrough;
-        mouseEvent.pressedTime = pressedTime;
-        mouseEvent.convertInfo = convertInfo;
-        mouseEvent.isRightButtonEventFromDoulbeTap = isRightButtonEventFromDoulbeTap;
-        mouseEvent.eventHandleId = eventHandleId;
-        mouseEvent.isNewReferee = isNewReferee;
-        // Only set postEventNodeId when the event supports passThrough
-        if (passThrough) {
-            mouseEvent.postEventNodeId = postEventNodeId;
-        }
-        return mouseEvent;
-    }
-
-    MouseEvent CreateScaleEvent(float scale) const
-    {
-        if (NearZero(scale)) {
-            return CloneWith(1);
-        }
-        return CloneWith(scale);
-    }
-
-    TouchEvent CreateTouchPoint() const
-    {
-        TouchType type = TouchType::UNKNOWN;
-        if (action == MouseAction::PRESS) {
-            type = TouchType::DOWN;
-        } else if (action == MouseAction::RELEASE) {
-            type = TouchType::UP;
-        } else if (action == MouseAction::MOVE) {
-            type = TouchType::MOVE;
-        } else if (action == MouseAction::CANCEL) {
-            type = TouchType::CANCEL;
-        } else {
-            type = TouchType::UNKNOWN;
-        }
-        int32_t pointId = id;
-        if (sourceType == SourceType::MOUSE) {
-            pointId = GetPointerId(pointId);
-        }
-        auto pointOriginalId = sourceType == SourceType::MOUSE ? GetId() : originalId;
-        TouchPoint point { .id = pointId,
-            .x = x,
-            .y = y,
-            .screenX = screenX,
-            .screenY = screenY,
-            .globalDisplayX = globalDisplayX,
-            .globalDisplayY = globalDisplayY,
-            .downTime = pressedTime,
-            .size = 0.0,
-            .isPressed = (type == TouchType::DOWN),
-            .originalId = pointOriginalId };
-        TouchEvent event;
-        event.SetId(pointId)
-            .SetX(x).SetY(y).SetScreenX(screenX).SetScreenY(screenY)
-            .SetGlobalDisplayX(globalDisplayX).SetGlobalDisplayY(globalDisplayY)
-            .SetType(type)
-            .SetTime(time)
-            .SetPressedTime(pressedTime)
-            .SetSize(0.0)
-            .SetDeviceId(deviceId)
-            .SetTargetDisplayId(targetDisplayId)
-            .SetSourceType(sourceType)
-            .SetSourceTool(sourceTool)
-            .SetPointerEvent(pointerEvent)
-            .SetTouchEventId(touchEventId)
-            .SetOriginalId(pointOriginalId)
-            .SetEventHandleId(pointId)
-            .SetIsInjected(isInjected);
-        event.isPrivacyMode = isPrivacyMode;
-        event.pointers.emplace_back(std::move(point));
-        event.pressedKeyCodes_ = pressedKeyCodes_;
-        event.passThrough = passThrough;
-        event.isNewReferee = isNewReferee;
-        if (passThrough) {
-            event.postEventNodeId = postEventNodeId;
-        }
-        return event;
-    }
-
+    MouseEvent CloneWith(float scale) const;
+    MouseEvent CreateScaleEvent(float scale) const;
+    TouchEvent CreateTouchPoint() const;
     MouseEvent operator-(const Offset& offset) const;
     std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
@@ -691,14 +581,8 @@ public:
     HoverEffectTarget(const std::string& nodeName, int32_t nodeId) : TouchEventTarget(nodeName, nodeId) {}
     ~HoverEffectTarget() override = default;
 
-    void SetHoverNode(const WeakPtr<NG::FrameNode>& node)
-    {
-        hoverNode_ = node;
-    }
-    WeakPtr<NG::FrameNode> GetHoverNode() const
-    {
-        return hoverNode_;
-    }
+    void SetHoverNode(const WeakPtr<NG::FrameNode>& node);
+    WeakPtr<NG::FrameNode> GetHoverNode() const;
 
     bool DispatchEvent(const TouchEvent& point) override
     {

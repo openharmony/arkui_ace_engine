@@ -16,6 +16,7 @@
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
 
 #include "test/mock/core/render/mock_render_context.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;
