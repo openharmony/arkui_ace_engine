@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/rating/rating_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 

@@ -27,7 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
