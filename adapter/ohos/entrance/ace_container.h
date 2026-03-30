@@ -953,6 +953,8 @@ public:
             return FrontendType::ARK_TS;
         }
     }
+    void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
+    void TerminateUIExtensionInner() override;
 
 private:
     virtual bool MaybeRelease() override;

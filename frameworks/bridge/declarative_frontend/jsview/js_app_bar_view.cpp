@@ -36,6 +36,7 @@ const std::string EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_di
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL = "arkui_custom_app_bar_create_service_panel";
 const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED = "arkui_app_bar_on_back_pressed";
 const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED = "arkui_app_bar_on_back_pressed_consumed";
+const std::string EVENT_NAME_CUSTOM_APP_BAR_THIRD_CLOSE = "arkui_custom_app_bar_third_close";
 
 constexpr int32_t SERVICE_PANEL_PARAM_COUNT = 2;
 constexpr int32_t PARAM_FIRST = 1;
@@ -167,6 +168,16 @@ void JSAppBar::GetParamsFromJSArray(const JSRef<JSArray>& jsArray, std::map<std:
     }
 }
 
+void JSAppBar::OnThirdClickCloseEvent(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar OnThirdClickCloseEvent");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->OnThirdCloseEvent();
+}
+
 void JSAppBar::CallNative(const JSCallbackInfo& info)
 {
     nativeFucMap_ = {
@@ -177,6 +188,7 @@ void JSAppBar::CallNative(const JSCallbackInfo& info)
         { EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL, JSAppBar::OnCreateServicePanel },
         { EVENT_NAME_APP_BAR_ON_BACK_PRESSED, JSAppBar::RequestAtomicServiceTerminate },
         { EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED, JSAppBar::SetOnBackPressedConsumed },
+         { EVENT_NAME_CUSTOM_APP_BAR_THIRD_CLOSE, JSAppBar::OnThirdClickCloseEvent },
     };
 
     if (info.Length() < 1) {
