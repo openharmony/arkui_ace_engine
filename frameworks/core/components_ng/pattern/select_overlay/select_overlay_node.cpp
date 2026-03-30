@@ -33,6 +33,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
