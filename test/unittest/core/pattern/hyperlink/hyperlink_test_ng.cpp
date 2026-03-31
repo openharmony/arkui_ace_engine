@@ -740,5 +740,8 @@ HWTEST_F(HyperlinkTestNg, OnInjectionEvent001, TestSize.Level1)
     jsonCommand = R"({")";
     result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
+    jsonCommand = "";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
 }
 } // namespace OHOS::Ace::NG

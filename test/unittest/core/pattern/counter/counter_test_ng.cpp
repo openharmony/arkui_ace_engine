@@ -810,5 +810,9 @@ HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
     jsonCommand = R"({")";
     result = counterPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = "";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
 }
 } // namespace OHOS::Ace::NG
