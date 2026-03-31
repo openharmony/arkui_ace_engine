@@ -34,6 +34,8 @@ struct ForceSplitConfig {
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
     std::set<std::string> fullScreenPages;
+    std::optional<Color> splitDividerColorLight;
+    std::optional<Color> splitDividerColorDark;
 };
 
 class ForceSplitUtils {
@@ -50,6 +52,7 @@ public:
 private:
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);
+    static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitConfig& config);
 };
 
 } // namespace OHOS::Ace::NG
