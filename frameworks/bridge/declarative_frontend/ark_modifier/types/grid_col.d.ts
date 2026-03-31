@@ -12,10 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+declare interface GridColColumnOption {
+    xs?: number;
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+    xxl?: number;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare interface GridColOptions {
+    span?: number | GridColColumnOption;
+    offset?: number | GridColColumnOption;
+    order?: number | GridColColumnOption;
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+interface GridColInterface {
+    (option?: GridColOptions): GridColAttribute;
+}
+declare class GridColAttribute extends CommonMethod<GridColAttribute> {
+}
+declare const GridCol: GridColInterface;
+declare const GridColInstance: GridColAttribute;

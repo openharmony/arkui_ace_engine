@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface BlankInterface {
-    (min?: number | string): BlankAttribute;
+interface DividerInterface {
+    (): DividerAttribute;
 }
-declare class BlankAttribute extends CommonMethod<BlankAttribute> {
+declare class DividerAttribute extends CommonMethod<DividerAttribute> {
 }
-declare const Blank: BlankInterface;
-declare const BlankInstance: BlankAttribute;
+declare const Divider: DividerInterface;
+declare const DividerInstance: DividerAttribute;
