@@ -71,6 +71,13 @@ namespace {
     const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class UIExtensionComponentTestTwoNg : public testing::Test {
 public:
     void SetUp() override;

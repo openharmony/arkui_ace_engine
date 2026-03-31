@@ -32,6 +32,13 @@ namespace {
     const int32_t VALID_WORKER_ID = 100;
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class ArktsDynamicPatternTestNg : public testing::Test {
 public:
     void SetUp() override;
