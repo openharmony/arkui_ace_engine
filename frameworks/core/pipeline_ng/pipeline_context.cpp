@@ -83,6 +83,7 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -203,6 +204,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -232,6 +234,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -256,6 +259,7 @@ PipelineContext::PipelineContext()
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -7707,5 +7711,15 @@ void PipelineContext::MarkLpxDirtyNodes()
         }
         node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
+{
+    dynamicComponentSafeManager_ = manager;
+}
+
+RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeManager() const
+{
+    return dynamicComponentSafeManager_;
 }
 } // namespace OHOS::Ace::NG

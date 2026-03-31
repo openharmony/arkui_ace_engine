@@ -92,6 +92,7 @@ class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
 class SelectOverlayManager;
 class UIExtensionManager;
+class DynamicComponentSafeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1400,7 +1401,8 @@ public:
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void MarkLpxDirtyNodes();
-
+    void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
+    RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1788,6 +1790,7 @@ private:
     bool xComponentDisplayConstraintEnabled_ = false;
     OnDrawChildrenInfoMap onDrawChildrenInfoMap_;
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
+    RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
 };
 
 /**

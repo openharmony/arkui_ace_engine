@@ -112,6 +112,11 @@ public:
         return animationOption;
     }
 
+    std::shared_ptr<UIContent> GetUIContent() const
+    {
+        return uiContent_;
+    }
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();

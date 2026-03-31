@@ -15,6 +15,13 @@
 
 #include "dynamic_component_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "wm/wm_common.h"
+#include "wm/occupied_area_change_info.h"
+#include "adapter/ohos/entrance/utils.h"
+#include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,5 +99,178 @@ void DynamicComponentManager::HandleDynamicRenderOnAreaChange(FrameNode* frameNo
     frameNode->SetLastFrameRect(currFrameRect);
     frameNode->SetLastParentOffsetToWindow(currParentOffset);
     *lastHostParentOffsetToWindow = currHostParentOffset;
+}
+
+void ConvertAvoidArea2AvoidRect(const OHOS::Rosen::Rect& rect, AvoidRect& avoidRect)
+{
+    avoidRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+}
+
+void ConvertAvoidRect2AvoidArea(const AvoidRect& avoidRect, OHOS::Rosen::Rect& rect)
+{
+    rect = { avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_ };
+}
+
+std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> DynamicComponentSafeManager::GetFaultAvoidArea() const
+{
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> faultAvoidAreas;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, faultAvoidAreas);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, faultAvoidAreas);
+    int32_t width = static_cast<int32_t>(context->GetRootWidth());
+    int32_t height = static_cast<int32_t>(context->GetRootHeight());
+    auto insets = safeAreaManager->GetSystemSafeArea();
+    auto systemAvoidArea = ConvertAvoidArea(insets, width, height);
+    faultAvoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
+    insets = safeAreaManager->GetCutoutSafeArea();
+    auto cutoutArea = ConvertAvoidArea(insets, width, height);
+    faultAvoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutArea);
+    insets = safeAreaManager->GetNavSafeArea();
+    auto navArea = ConvertAvoidArea(insets, width, height);
+    faultAvoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, navArea);
+    return faultAvoidAreas;
+}
+
+void DynamicComponentSafeManager::SetAvoidArea(
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    avoidAreas_.clear();
+    for (const auto& pair : avoidAreas) {
+        const OHOS::Rosen::AvoidAreaType& type = pair.first;
+        const OHOS::Rosen::AvoidArea& avoidArea = pair.second;
+        RefPtr<AvoidArea> avoidAreaPtr = AceType::MakeRefPtr<AvoidArea>();
+        ConvertAvoidArea2AvoidRect(avoidArea.topRect_, avoidAreaPtr->topRect_);
+        ConvertAvoidArea2AvoidRect(avoidArea.leftRect_, avoidAreaPtr->leftRect_);
+        ConvertAvoidArea2AvoidRect(avoidArea.rightRect_, avoidAreaPtr->rightRect_);
+        ConvertAvoidArea2AvoidRect(avoidArea.bottomRect_, avoidAreaPtr->bottomRect_);
+        avoidAreas_.try_emplace(type, avoidAreaPtr);
+    }
+}
+
+void DynamicComponentSafeManager::SetOccupiedAreaChangeInfo(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+{
+    CHECK_NULL_VOID(info);
+    occupiedAreaChangeInfo_ = AceType::MakeRefPtr<OccupiedAreaChangeInfo>();
+    occupiedAreaChangeInfo_->type_ = static_cast<OccupiedAreaType>(info->type_);
+    occupiedAreaChangeInfo_->safeHeight_ = info->safeHeight_;
+    occupiedAreaChangeInfo_->textFieldPositionY_ = info->textFieldPositionY_;
+    occupiedAreaChangeInfo_->textFieldHeight_ = info->textFieldHeight_;
+    AvoidRect rect = { info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_ };
+    occupiedAreaChangeInfo_->rect_ = rect;
+}
+ 
+std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> DynamicComponentSafeManager::GetAvoidArea() const
+{
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreas;
+    if (avoidAreas_.empty()) {
+        return GetFaultAvoidArea();
+    }
+    for (const auto& pair : avoidAreas_) {
+        const OHOS::Rosen::AvoidAreaType& type = pair.first;
+        const RefPtr<AvoidArea>& avoidAreaPtr = pair.second;
+        OHOS::Rosen::AvoidArea avoidArea;
+        ConvertAvoidRect2AvoidArea(avoidAreaPtr->topRect_, avoidArea.topRect_);
+        ConvertAvoidRect2AvoidArea(avoidAreaPtr->leftRect_, avoidArea.leftRect_);
+        ConvertAvoidRect2AvoidArea(avoidAreaPtr->rightRect_, avoidArea.rightRect_);
+        ConvertAvoidRect2AvoidArea(avoidAreaPtr->bottomRect_, avoidArea.bottomRect_);
+        avoidAreas.emplace(type, avoidArea);
+    }
+    return avoidAreas;
+}
+
+sptr<OHOS::Rosen::OccupiedAreaChangeInfo> DynamicComponentSafeManager::GetOccupiedAreaChangeInfo() const
+{
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OHOS::Rosen::OccupiedAreaChangeInfo();
+    CHECK_NULL_RETURN(occupiedAreaChangeInfo_, info);
+    info->type_ = static_cast<OHOS::Rosen::OccupiedAreaType>(occupiedAreaChangeInfo_->type_);
+    info->safeHeight_ = occupiedAreaChangeInfo_->safeHeight_;
+    info->textFieldPositionY_ = occupiedAreaChangeInfo_->textFieldPositionY_;
+    info->textFieldHeight_ = occupiedAreaChangeInfo_->textFieldHeight_;
+    info->rect_ = { occupiedAreaChangeInfo_->rect_.posX_, occupiedAreaChangeInfo_->rect_.posY_,
+        occupiedAreaChangeInfo_->rect_.width_, occupiedAreaChangeInfo_->rect_.height_ };
+    return info;
+}
+
+void DynamicComponentSafeManager::UpdateAllDCAvoidArea(int32_t instanceId, const OHOS::Rosen::AvoidArea avoidArea,
+    OHOS::Rosen::AvoidAreaType type)
+{
+    std::map<Rosen::AvoidAreaType, Rosen::AvoidArea> avoidAreas;
+    avoidAreas.try_emplace(type, avoidArea);
+    SetAvoidArea(avoidAreas);
+    for (const auto& pair : aliveDynamics_) {
+        const auto& pattern = pair.second.Upgrade();
+        CHECK_NULL_CONTINUE(pattern);
+        auto dynamicPattern = AceType::DynamicCast<OHOS::Ace::NG::DynamicPattern>(pattern);
+        CHECK_NULL_CONTINUE(dynamicPattern);
+        auto render = AceType::DynamicCast<OHOS::Ace::NG::DynamicComponentRendererImpl>(
+            dynamicPattern->GetDynamicComponentRenderer());
+        CHECK_NULL_CONTINUE(render);
+        CHECK_NULL_CONTINUE(render->GetUIContent());
+        auto uiContentImpl = std::static_pointer_cast<OHOS::Ace::UIContentImpl>(render->GetUIContent());
+        CHECK_NULL_CONTINUE(uiContentImpl);
+        uiContentImpl->UpdateViewportConfig(viewportConfig_, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason_),
+            rsTransaction_, GetAvoidArea(), GetOccupiedAreaChangeInfo());
+    }
+}
+
+bool DynamicComponentSafeManager::UpdateDynamicKeyBoardAvoid(const RefPtr<PipelineBase>& pipelineContext,
+    OHOS::Rosen::WindowSizeChangeReason reason, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    bool updateResult = false;
+    for (const auto& pair : aliveDynamics_) {
+        const auto& pattern = pair.second.Upgrade();
+        CHECK_NULL_CONTINUE(pattern);
+        auto dynamicPattern = AceType::DynamicCast<OHOS::Ace::NG::DynamicPattern>(pattern);
+        CHECK_NULL_CONTINUE(dynamicPattern);
+        auto host = dynamicPattern->GetHost();
+        CHECK_NULL_CONTINUE(host);
+        auto focusHub = host->GetEventHub<FocusHub>();
+        CHECK_NULL_CONTINUE(focusHub);
+        if (!dynamicPattern->GetAllowOccupied() || !focusHub->IsCurrentFocus()) {
+            continue;
+        }
+        auto render = AceType::DynamicCast<OHOS::Ace::NG::DynamicComponentRendererImpl>(
+            dynamicPattern->GetDynamicComponentRenderer());
+        CHECK_NULL_CONTINUE(render);
+        auto dcUiContent = render->GetUIContent();
+        CHECK_NULL_CONTINUE(dcUiContent);
+        auto dcPipelineContext = NG::PipelineContext::GetContextByContainerId(dcUiContent->GetInstanceId());
+        CHECK_NULL_CONTINUE(dcPipelineContext);
+        auto dcDynamicComponentSafeManager = dcPipelineContext->GetDynamicComponentSafeManager();
+        int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
+        auto curWindow = dcPipelineContext->GetCurrentWindowRect();
+        auto displayArea = dcPipelineContext->GetDisplayWindowRectInfo();
+        if (keyboardHeight > 0) {
+            if (curWindow.Bottom() >= displayArea.Bottom()) {
+                int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea.Bottom(), 0.0);
+                keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
+            } else {
+                keyboardHeight = keyboardHeight + (displayArea.Bottom() - curWindow.Bottom());
+            }
+        }
+        sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
+            info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
+        newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+        auto task = [dcUiContent, updateConfig = dcDynamicComponentSafeManager->viewportConfig_,
+            reason = static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
+            rsTransaction, avoidAreas, newInfo, dcDynamicComponentSafeManager]() {
+            auto uiContentImpl = std::static_pointer_cast<UIContentImpl>(dcUiContent);
+            CHECK_NULL_VOID(uiContentImpl);
+            ContainerScope scope(dcUiContent->GetInstanceId());
+            uiContentImpl->UpdateViewportConfigWithAnimation(updateConfig, reason, {}, rsTransaction,
+                avoidAreas, newInfo);
+        };
+        auto dcContainer = Platform::AceContainer::GetContainer(dcUiContent->GetInstanceId());
+        CHECK_NULL_CONTINUE(dcContainer);
+        auto taskExecutor = dcContainer->GetTaskExecutor();
+        CHECK_NULL_CONTINUE(taskExecutor);
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
+            "ArkUiDynamicComponentUpdateAvoidArea", PriorityType::VIP);
+        updateResult = true;
+    }
+    return updateResult;
 }
 } // namespace OHOS::Ace::NG

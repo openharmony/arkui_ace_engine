@@ -67,6 +67,7 @@
 namespace OHOS::Rosen {
 class RSTransaction;
 class AvoidArea;
+enum class AvoidAreaType : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
@@ -1693,7 +1694,6 @@ public:
     {
         return false;
     }
-
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

@@ -30,6 +30,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -765,6 +766,18 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
         }
     }
 
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreaMap;
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> occupiedAreaChangeInfo = nullptr;
+    auto pipeline = hostContainer->GetPipelineContext();
+    if (pipeline) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (ngPipeline) {
+            auto dynamicComponentSafeManager = ngPipeline->GetDynamicComponentSafeManager();
+            avoidAreaMap = dynamicComponentSafeManager->GetAvoidArea();
+            occupiedAreaChangeInfo = dynamicComponentSafeManager->GetOccupiedAreaChangeInfo();
+        }
+    }
+
     bool optionIsValid = option && option->IsValid();
     TAG_LOGI(aceLogTag_, "Update DC[%{public}d] Size: %{public}s -> [%{public}d x %{public}d], "
         "reason:[%{public}d], hasSyncTransaction:[%{public}d], orientation:[%{public}d], "
@@ -777,7 +790,7 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
         static_cast<int32_t>(reason), hostRSTransaction != nullptr, orientation,
         std::to_string(syncId).c_str(), optionIsValid);
     auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_,
-        offset, reason, hostRSTransaction, syncId]() {
+        offset, reason, hostRSTransaction, syncId, avoidAreaMap, occupiedAreaChangeInfo]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -832,7 +845,8 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             return;
         }
         uiContent->UpdateViewportConfigWithAnimation(
-            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction);
+            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction,
+            avoidAreaMap, occupiedAreaChangeInfo);
         removeTransaction();
     };
     bool contentReady = false;
