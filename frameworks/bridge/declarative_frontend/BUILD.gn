@@ -246,7 +246,7 @@ template("declarative_js_engine") {
     }
 
     deps = [
-      ":ark_modifier",
+      "ark_modifier:modifier",
       ":ark_theme_control",
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
@@ -768,7 +768,7 @@ template("declarative_js_engine_ng") {
     }
 
     deps = [
-      ":ark_modifier",
+      "ark_modifier:modifier",
       ":ark_theme_control",
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
@@ -1271,15 +1271,6 @@ ohos_abc("uicontext") {
 ohos_abc("ark_theme_control") {
   sources = [ "engine/arkThemeControl.js" ]
   output_name = "theme"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("ark_modifier") {
-  sources = [ "engine/arkModifier.js" ]
-  output_name = "modifier"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

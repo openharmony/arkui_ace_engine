@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class CommonModifier extends ArkComponent implements AttributeModifier<CommonAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
@@ -22,7 +21,7 @@ class CommonModifier extends ArkComponent implements AttributeModifier<CommonAtt
     }
     super(nativePtr, classType);
   }
-  
+
   applyNormalAttribute(instance: CommonAttribute): void {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier<CommonAttribute, ArkComponent, ArkComponent>(instance, this);

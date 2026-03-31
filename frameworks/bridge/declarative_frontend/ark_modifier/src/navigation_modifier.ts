@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class NavigationModifier extends ArkNavigationComponent implements AttributeModifier<NavigationAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class GridColModifier extends ArkGridColComponent implements AttributeModifier<GridColAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
