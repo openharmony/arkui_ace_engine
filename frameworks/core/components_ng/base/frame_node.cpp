@@ -2006,7 +2006,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
-    UpdateBackground();
+    UpdateBackground(frameSizeChange);
 
     // update focus state
     auto focusHub = GetFocusHub();
@@ -6103,7 +6103,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         TriggerOnSizeChangeCallback();
     }
 
-    UpdateBackground();
+    UpdateBackground(config.frameSizeChange);
 
     // update corner mark position on size change.
     if (config.frameSizeChange && cornerMarkNode_) {
@@ -8122,6 +8122,9 @@ void FrameNode::CleanupPipelineResources()
         if (eventManager) {
             eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
         }
+        if (refreshBackgroundBuilderId_ != 0) {
+            pipeline->UnregisterSurfaceChangedCallback(refreshBackgroundBuilderId_);
+        }
     }
 }
 
@@ -8143,12 +8146,12 @@ uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::s
     return AI_CALLER_INVALID;
 }
 
-void FrameNode::UpdateBackground()
+void FrameNode::UpdateBackground(bool frameSizeChange)
 {
     // if node has background, do update.
     if (renderContext_->HasBuilderBackgroundFlag()) {
         bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
-        if (isBuilderBackground && builderFunc_) {
+        if (isBuilderBackground && builderFunc_ && isNeedRefreshBackgroundBuilder_ && frameSizeChange) {
             auto builderNode = builderFunc_();
             auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -8157,8 +8160,20 @@ void FrameNode::UpdateBackground()
             }
             SetBackgroundLayoutConstraint(columnNode);
             renderContext_->CreateBackgroundPixelMap(columnNode);
-            builderFunc_ = nullptr;
+            isNeedRefreshBackgroundBuilder_ = false;
             backgroundNode_ = columnNode;
+            auto pipeline = GetContext();
+            CHECK_NULL_VOID(pipeline);
+            if (refreshBackgroundBuilderId_ != 0) {
+                pipeline->UnregisterSurfaceChangedCallback(refreshBackgroundBuilderId_);
+            }
+            refreshBackgroundBuilderId_ = pipeline->RegisterSurfaceChangedCallback(
+                [weakNode = WeakClaim(this)](
+                    int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight, WindowSizeChangeReason type) {
+                    auto frameNode = weakNode.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    frameNode->SetIsNeedRefreshBackgroundBuilder(true);
+                });
         } else if (!isBuilderBackground) {
             renderContext_->UpdateCustomBackground();
         }

@@ -3692,6 +3692,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
         return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     };
     frameNode->builderFunc_ = func;
+    frameNode->isNeedRefreshBackgroundBuilder_ = true;
 
     /**
      * @tc.steps: step2. set the BuilderBackgroundFlag to true.
@@ -3699,7 +3700,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
      */
     mockRenderContext->UpdateBuilderBackgroundFlag(true);
     frameNode->UpdateBackground();
-    EXPECT_EQ(frameNode->builderFunc_, nullptr);
+    EXPECT_FALSE(frameNode->isNeedRefreshBackgroundBuilder_);
 }
 
 /**
