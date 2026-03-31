@@ -39,6 +39,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
+      "$ace_root/adapter/ohos/entrance/data_share_observer_helper.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container_static.cpp",
       "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
