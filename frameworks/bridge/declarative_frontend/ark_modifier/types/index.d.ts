@@ -12,14 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface EmbeddedComponentInterface {
-    (loader: import('../api/@ohos.app.ability.Want').default, type: EmbeddedType): EmbeddedComponentAttribute;
+
+declare type Timeout = number;
+declare function clearTimeout(timeoutId: number): void;
+
+declare class __JSScopeUtil__ {
+    static syncInstanceId(instanceId: number): void;
+    static restoreInstanceId(): void;
 }
-declare interface TerminationInfo {
-    code: number;
-    want?: import('../api/@ohos.app.ability.Want').default;
-}
-declare class EmbeddedComponentAttribute extends CommonMethod<EmbeddedComponentAttribute> {
-}
-declare const EmbeddedComponent: EmbeddedComponentInterface;
-declare const EmbeddedComponentInstance: EmbeddedComponentAttribute;
