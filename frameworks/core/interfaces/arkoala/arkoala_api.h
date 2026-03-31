@@ -7587,7 +7587,8 @@ struct ArkUITextTimerModifier {
     void (*setTextShadowRes)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows,
         struct ArkUITextShadowResStruct* shadowsRes, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
-    void (*setTextTimerOptions)(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count);
+    void (*setTextTimerOptions)(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count,
+        ArkUI_Int32 startTime);
     void (*setTextTimerOnTimer)(ArkUINodeHandle node, void* callback);
     void (*resetTextTimerOnTimer)(ArkUINodeHandle node);
 };

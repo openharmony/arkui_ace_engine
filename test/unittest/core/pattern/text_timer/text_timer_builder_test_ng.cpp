@@ -47,6 +47,7 @@ const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
 struct TestProperty {
     std::optional<std::string> format = std::make_optional(TEXT_TIMER_FORMAT);
     std::optional<double> inputCount = std::nullopt;
+    std::optional<int32_t> startTime = std::nullopt;
     std::optional<bool> isCountDown = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;
     std::optional<Color> textColor = std::nullopt;
@@ -89,6 +90,9 @@ RefPtr<FrameNode> TextTimerBuilderTestNg::CreateTextTimerParagraph(const TestPro
     }
     if (testProperty.isCountDown.has_value()) {
         textTimerModel.SetIsCountDown(testProperty.isCountDown.value());
+    }
+    if (testProperty.startTime.has_value()) {
+        textTimerModel.SetStartTime(testProperty.startTime.value());
     }
     if (testProperty.fontSize.has_value()) {
         textTimerModel.SetFontSize(testProperty.fontSize.value());

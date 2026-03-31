@@ -122,15 +122,17 @@ class TextTimerOptionsModifier extends ModifierWithKey<TextTimerOptions> {
   static identity: Symbol = Symbol('textTimerOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined, undefined);
     } else {
-      getUINativeModule().textTimer.setTextTimerOptions(node, this.value?.isCountDown, this.value?.count, this.value?.controller);
+      getUINativeModule().textTimer.setTextTimerOptions(
+        node, this.value?.isCountDown, this.value?.count, this.value?.controller, this.value?.startTime);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue?.isCountDown, this.value?.isCountDown) ||
           !isBaseOrResourceEqual(this.stageValue?.count, this.value?.count) ||
-          !isBaseOrResourceEqual(this.stageValue?.controller, this.value?.controller);
+          !isBaseOrResourceEqual(this.stageValue?.controller, this.value?.controller) ||
+          !isBaseOrResourceEqual(this.stageValue?.startTime, this.value?.startTime);
   }
 }
 

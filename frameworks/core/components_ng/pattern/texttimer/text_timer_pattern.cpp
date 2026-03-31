@@ -32,6 +32,7 @@ constexpr int32_t SECONDS_OF_HUNDRED = 100;
 constexpr int32_t SECONDS_OF_TEN = 10;
 constexpr int32_t DEFAULT_SCALE = 1;
 constexpr double DEFAULT_COUNT = 60000.0;
+constexpr int32_t DEFAULT_START_TIME = 0;
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 } // namespace
 
@@ -96,8 +97,8 @@ void TextTimerPattern::InitTimerDisplay()
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         scheduler_ = SchedulerBuilder::Build(callback, context);
-        auto count = isCountDown_ ? inputCount_ : 0;
-        UpdateTextTimer(static_cast<uint32_t>(count));
+        auto initialTime = isCountDown_ ? inputCount_ : startTime_;
+        UpdateTextTimer(initialTime);
         return;
     }
     if (resetCount_) {
@@ -116,6 +117,8 @@ void TextTimerPattern::Tick(uint64_t duration)
         auto elapsedTime = GetMillisecondsDuration(GetFormatDuration(elapsedTime_));
         tmpValue =
             (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime)) : 0;
+    } else {
+        tmpValue += startTime_;
     }
     if (isCountDown_ && tmpValue <= 0) {
         UpdateTextTimer(0);
@@ -123,7 +126,7 @@ void TextTimerPattern::Tick(uint64_t duration)
         return;
     }
 
-    UpdateTextTimer(static_cast<uint32_t>(tmpValue));
+    UpdateTextTimer(tmpValue);
 }
 
 void TextTimerPattern::UpdateTextLayoutProperty(
@@ -195,6 +198,7 @@ void TextTimerPattern::OnModifyDone()
     }
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();
+    startTime_ = GetStartTime();
 
     InitTextTimerController();
     InitTimerDisplay();
@@ -241,7 +245,7 @@ void TextTimerPattern::OnVisibleAreaChange(bool visible)
     }
 }
 
-void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
+void TextTimerPattern::UpdateTextTimer(double elapsedTime)
 {
     if (UseContentModifier()) {
         FireBuilder();
@@ -254,9 +258,18 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
     CHECK_NULL_VOID(textLayoutProperty);
 
     // format time text.
-    std::string timerText = Localization::GetInstance()->FormatDuration(elapsedTime, GetFormat());
+    bool isNegative = false;
+    if (elapsedTime < 0) {
+        elapsedTime = -elapsedTime;
+        isNegative = true;
+    }
+    std::string timerText =
+        Localization::GetInstance()->FormatDuration(static_cast<uint32_t>(elapsedTime), GetFormat());
     if (timerText.empty()) {
         timerText = Localization::GetInstance()->FormatDuration(elapsedTime, DEFAULT_FORMAT);
+    }
+    if (isNegative) {
+        timerText.insert(0, "-");
     }
     textLayoutProperty->UpdateContent(timerText); // Update time text.
     if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()) ||
@@ -287,6 +300,13 @@ double TextTimerPattern::GetInputCount() const
     return textTimerLayoutProperty->GetInputCount().value_or(DEFAULT_COUNT);
 }
 
+int32_t TextTimerPattern::GetStartTime() const
+{
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_RETURN(textTimerLayoutProperty, DEFAULT_START_TIME);
+    return textTimerLayoutProperty->GetStartTime().value_or(DEFAULT_START_TIME);
+}
+
 void TextTimerPattern::HandleStart()
 {
     if (scheduler_ && !scheduler_->IsActive()) {
@@ -308,8 +328,8 @@ void TextTimerPattern::HandleReset()
     }
     elapsedTime_ = 0;
     lastElapsedTime_ = 0;
-    auto count = isCountDown_ ? inputCount_ : 0;
-    UpdateTextTimer(static_cast<uint32_t>(count));
+    auto initialTime = isCountDown_ ? inputCount_ : startTime_;
+    UpdateTextTimer(initialTime);
 }
 
 RefPtr<FrameNode> TextTimerPattern::GetTextNode()
@@ -404,7 +424,8 @@ RefPtr<FrameNode> TextTimerPattern::BuildContentModifierNode()
     auto isCountDown = textTimerLayoutProperty->GetIsCountDown().value_or(false);
     auto started = scheduler_ && scheduler_->IsActive();
     auto elapsedTime = GetFormatDuration(elapsedTime_);
-    TextTimerConfiguration textTimerConfiguration(count, isCountDown, started, elapsedTime, enabled);
+    auto startTime = GetStartTime();
+    TextTimerConfiguration textTimerConfiguration(count, isCountDown, started, elapsedTime, enabled, startTime);
     return (makeFunc_.value())(textTimerConfiguration);
 }
 
@@ -417,6 +438,7 @@ void TextTimerPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc("isCountDown: false");
     auto format = textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
     DumpLog::GetInstance().AddDesc("format: ", format);
+    DumpLog::GetInstance().AddDesc("startTime: ", GetStartTime());
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     DumpLog::GetInstance().AddDesc("elapsedTime: ", elapsedTime);
 }
@@ -427,6 +449,7 @@ void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(textTimerLayoutProperty);
     json->Put("isCountDown", textTimerLayoutProperty->GetIsCountDown().value_or(false));
     json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
+    json->Put("startTime", std::to_string(GetStartTime()).c_str());
     json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
 }
 

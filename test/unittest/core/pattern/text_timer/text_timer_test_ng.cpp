@@ -26,6 +26,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
+#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -47,6 +48,7 @@ namespace {
 const InspectorFilter filter;
 constexpr double INPUT_COUNT = 60000.0;
 constexpr double INPUT_COUNT_2 = 20000.0;
+constexpr int32_t START_TIME = 5000;
 constexpr bool IS_COUNT_DOWN = false;
 constexpr bool IS_COUNT_DOWN_2 = true;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
@@ -70,6 +72,7 @@ const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 struct TestProperty {
     std::optional<std::string> format = std::nullopt;
     std::optional<double> inputCount = std::nullopt;
+    std::optional<int32_t> startTime = std::nullopt;
     std::optional<bool> isCountDown = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;
     std::optional<Color> textColor = std::nullopt;
@@ -114,6 +117,9 @@ RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& 
     if (testProperty.inputCount.has_value()) {
         textTimerModel.SetInputCount(testProperty.inputCount.value());
     }
+    if (testProperty.startTime.has_value()) {
+        textTimerModel.SetStartTime(testProperty.startTime.value());
+    }
     if (testProperty.isCountDown.has_value()) {
         textTimerModel.SetIsCountDown(testProperty.isCountDown.value());
     }
@@ -151,6 +157,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level0)
     TestProperty testProperty;
     testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
     testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.startTime = std::make_optional(START_TIME);
     testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
@@ -177,6 +184,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level0)
      */
     EXPECT_EQ(textTimerLayoutProperty->GetFormat(), TEXT_TIMER_FORMAT);
     EXPECT_EQ(textTimerLayoutProperty->GetInputCount(), INPUT_COUNT);
+    EXPECT_EQ(textTimerLayoutProperty->GetStartTime(), START_TIME);
     EXPECT_EQ(textTimerLayoutProperty->GetIsCountDown(), IS_COUNT_DOWN);
     EXPECT_EQ(textTimerLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
@@ -877,6 +885,40 @@ HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TextTimerStartTimeCountUpTest001
+ * @tc.desc: Test startTime is used as the start value for count up mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerStartTimeCountUpTest001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.startTime = std::make_optional(START_TIME);
+    testProperty.isCountDown = std::make_optional(false);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnModifyDone();
+    auto expectedInitial = StringUtils::Str8ToStr16(
+        Localization::GetInstance()->FormatDuration(static_cast<uint32_t>(START_TIME), pattern->GetFormat()));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), expectedInitial);
+
+    constexpr uint64_t tickDuration = 2000;
+    pattern->Tick(tickDuration);
+    auto expectedAfterTick = StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDuration(
+        static_cast<uint32_t>(START_TIME + tickDuration), pattern->GetFormat()));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), expectedAfterTick);
+
+    pattern->HandleReset();
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), expectedInitial);
+}
+
+/**
  * @tc.name: TextTimerSetTextColorByUserTest001
  * @tc.desc: Test SetTextColorByUser with different conditions
  * @tc.type: FUNC
@@ -1232,6 +1274,12 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest002, TestSize.Level1)
 
     model.SetInputCount(frameNode, std::make_optional(-1.0));
     EXPECT_FALSE(layout->GetInputCount().has_value());
+
+    model.SetStartTime(frameNode, std::make_optional(START_TIME));
+    EXPECT_EQ(layout->GetStartTime().value(), START_TIME);
+
+    model.SetStartTime(frameNode, std::make_optional(-1.0));
+    EXPECT_EQ(layout->GetStartTime().value(), -1.0);
 }
 
 /**

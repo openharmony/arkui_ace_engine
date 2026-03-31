@@ -24818,25 +24818,28 @@ class TextTimerOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c;
+    let _a, _b, _c, _d;
     if (reset) {
-      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().textTimer.setTextTimerOptions(node,
         (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
         (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
-        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.startTime);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
         (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
-        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.startTime,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.startTime);
   }
 }
 TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
