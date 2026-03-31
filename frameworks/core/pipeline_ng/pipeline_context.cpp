@@ -5398,6 +5398,10 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
         weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager && (configurationChange.languageUpdate || fullUpdate)) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
         if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
             auto rootNode = pipeline->GetRootElement();
             rootNode->UpdateConfigurationUpdate(configurationChange);

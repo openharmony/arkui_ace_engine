@@ -612,4 +612,24 @@ void FontManager::UpdateHybridRenderNodes()
         }
     }
 }
+
+void FontManager::UpdateStyleOptimizeFlagInCurrentLanguage()
+{
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto resourceAdapter = themeConstants->GetResourceAdapter();
+    CHECK_NULL_VOID(resourceAdapter);
+    fallbackLineSpacingStyleOptimizeFlag_ =
+        resourceAdapter->GetStringByName("text_fallback_line_spacing") == "true";
+}
+
+bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
+{
+    return fallbackLineSpacingStyleOptimizeFlag_;
+}
+
 } // namespace OHOS::Ace

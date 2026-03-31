@@ -1853,6 +1853,14 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (context) {
         UpdateFontScale(context->GetConfiguration());
     }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
@@ -2710,6 +2718,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
     if (thpExtraManager->Init()) {
         pipeline->SetTHPExtraManager(thpExtraManager);
+    }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
     }
     return errorCode;
 }
