@@ -391,7 +391,7 @@ public:
     void ClearCachedItemPosition();
     void CalculateItemStartIndex();
     bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
-    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, int32_t forwardCache, int32_t backwardCache);
     int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
     int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
     std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);
@@ -399,10 +399,6 @@ public:
     void UpdateActiveChildRange(bool show);
     void SyncItemsToCachedItemPosition();
     bool IsVisible() const;
-    void SetRecache(bool value)
-    {
-        reCache_ = value;
-    }
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
 
@@ -524,7 +520,7 @@ private:
     bool layouted_ = false;
     bool isAxisChanged_ = false;
 
-    bool reCache_ = false;
+    bool isCacheDirty_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
     ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;

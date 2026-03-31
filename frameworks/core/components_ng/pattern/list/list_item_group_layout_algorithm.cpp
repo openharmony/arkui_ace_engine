@@ -146,7 +146,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureCacheItem(layoutWrapper);
     } else {
         MeasureListItem(layoutWrapper, childLayoutConstraint_);
-        UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
+        UpdateCachedItemPosition(layoutWrapper);
     }
 
     if (childrenSize_) {
@@ -185,18 +185,24 @@ void ListItemGroupLayoutAlgorithm::UpdateRecycledItems()
     }
 }
 
-void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
+void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(LayoutWrapper* layoutWrapper)
 {
-    if (!itemPosition_.empty()) {
-        auto iter = cachedItemPosition_.begin();
-        while (iter != cachedItemPosition_.end()) {
-            if ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
-                iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount)) {
-                iter = cachedItemPosition_.erase(iter);
-            } else {
-                iter++;
+    int32_t cacheCount = listLayoutProperty_->GetCachedCountWithDefault() * lanes_;
+    auto iter = cachedItemPosition_.begin();
+    while (iter != cachedItemPosition_.end()) {
+        if (!itemPosition_.empty() && ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
+            iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount))) {
+            iter = cachedItemPosition_.erase(iter);
+            continue;
+        }
+        if (!isCacheDirty_) {
+            auto index = !isStackFromEnd_ ? iter->first : totalItemCount_ - iter->first - 1;
+            if (index >= 0 && index < totalItemCount_) {
+                auto wrapper = layoutWrapper->GetChildByIndex(index + itemStartIndex_, true);
+                isCacheDirty_ = !wrapper || CheckNeedMeasure(wrapper);
             }
         }
+        iter++;
     }
 }
 
@@ -1525,30 +1531,30 @@ bool ListItemGroupLayoutAlgorithm::IsCardStyleForListItemGroup(const LayoutWrapp
     return listItemGroup->GetListItemGroupStyle() == V2::ListItemGroupStyle::CARD;
 }
 
-void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param)
+bool ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param)
 {
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     int32_t endIndex = itemPosition_.empty() ? -1 : GetEndIndex();
     if (endIndex >= totalItemCount_ - 1) {
-        return;
+        return true;
     }
     int32_t limit = std::min(endIndex + param.cacheCountForward * lanes_, totalItemCount_ - 1);
     float startPos = itemPosition_.empty() ? headerMainSize_ : GetEndPosition();
     int32_t curIndex = GetLanesFloor(endIndex + 1);
     while (curIndex <= limit) {
         if (GetSysTimestamp() > param.deadline) {
-            return;
+            return false;
         }
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex + i < totalItemCount_; i++) {
             auto wrapper = GetListItem(layoutWrapper, curIndex + i, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode()) {
-                return;
+                return false;
             }
             if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 pauseMeasureCacheItem_ = curIndex + i;
-                return;
+                return false;
             }
             cnt++;
             if (CheckNeedMeasure(wrapper)) {
@@ -1564,14 +1570,15 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrap
         startPos += mainLen + spaceWidth_;
         param.forwardCachedIndex = curIndex - 1;
     }
+    return curIndex > limit;
 }
 
-void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param)
+bool ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param)
 {
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     int32_t startIndex = itemPosition_.empty() ? totalItemCount_ : GetStartIndex();
     if (startIndex <= 0) {
-        return;
+        return true;
     }
     int32_t limit = std::max(startIndex - param.cacheCountBackward * lanes_, 0);
     if (limit % lanes_ != 0) {
@@ -1581,22 +1588,22 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
     int32_t curIndex = GetLanesCeil(startIndex - 1);
     while (curIndex >= limit) {
         if (GetSysTimestamp() > param.deadline) {
-            return;
+            return false;
         }
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex - i >= 0; i++) {
             auto wrapper = GetListItem(layoutWrapper, curIndex - i, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode()) {
-                return;
+                return false;
             }
             if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 pauseMeasureCacheItem_ = curIndex - i;
-                return;
+                return false;
             }
             cnt++;
             if (CheckNeedMeasure(wrapper)) {
-                ACE_SCOPED_TRACE("ListItemGroupLayoutAlgorithm::MeasureCacheForward:%d", curIndex - i);
+                ACE_SCOPED_TRACE("ListItemGroupLayoutAlgorithm::MeasureCacheBackward:%d", curIndex - i);
                 wrapper->Measure(childLayoutConstraint_);
             }
             mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
@@ -1611,18 +1618,22 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
         endPos -= (mainLen + spaceWidth_);
         param.backwardCachedIndex = curIndex + 1;
     }
+    return curIndex < limit;
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper)
 {
     pauseMeasureCacheItem_ = -1;
     ListItemGroupCacheParam& param = cacheParam_.value();
+    bool forwardComplete = true;
+    bool backwardComplete = true;
     if (param.forward) {
-        MeasureCacheForward(layoutWrapper, param);
+        forwardComplete = MeasureCacheForward(layoutWrapper, param);
     }
     if (param.backward) {
-        MeasureCacheBackward(layoutWrapper, param);
+        backwardComplete = MeasureCacheBackward(layoutWrapper, param);
     }
+    isCacheDirty_ = !forwardComplete || !backwardComplete;
     if (cachedItemPosition_.empty()) {
         return;
     }

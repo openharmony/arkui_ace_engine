@@ -1327,6 +1327,164 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListGroupRepeatCacheCount007
+ * @tc.desc: ListItemGroup in cache forward mark dirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, true);
+    model.SetSpace(Dimension(SPACE));
+    CreateRepeatVirtualScrollNode(3, [this](int32_t idx) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        groupModel.SetHeader(std::move(header));
+        CreateRepeatVirtualScrollNode(2, [this](int32_t idx) {
+            CreateListItem();
+            ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+        });
+    });
+    CreateDone();
+    FlushIdleTask(pattern_);
+
+    /**
+     * @tc.steps: step2. Update ListItem height in cached forward Group.
+     * @tc.expected: Item height updated.
+     */
+    auto group2Node = GetChildFrameNode(frameNode_, 2);
+    ASSERT_NE(group2Node, nullptr);
+    auto group2Item0 = GetChildFrameNode(group2Node, 1);
+    ASSERT_NE(group2Item0, nullptr);
+    auto property = group2Item0->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group2Item0->MarkDirtyNode();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group2Node, 1), 200.f);
+
+    /**
+     * @tc.steps: step3. Update ListItem height in edge Group.
+     * @tc.expected: Item height updated.
+     */
+    auto group1Node = GetChildFrameNode(frameNode_, 1);
+    ASSERT_NE(group1Node, nullptr);
+    auto group1Item1 = GetChildFrameNode(group1Node, 2);
+    ASSERT_NE(group1Item1, nullptr);
+    property = group1Item1->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group1Item1->MarkDirtyNode();
+    FlushUITasks();
+    EXPECT_TRUE(group2Node->IsActive());
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group1Node, 2), 200.f);
+
+    /**
+     * @tc.steps: step4. Update visible ListItem height, ListItemGroup1 only display header.
+     * @tc.expected: Item height updated.
+     */
+    auto group0Node = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(group0Node, nullptr);
+    auto group0Item1 = GetChildFrameNode(group0Node, 2);
+    ASSERT_NE(group0Item1, nullptr);
+    property = group0Item1->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group0Item1->MarkDirtyNode();
+    property = group1Item1->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(100.f)));
+    group1Item1->MarkDirtyNode();
+    FlushUITasks();
+    EXPECT_FALSE(group2Node->IsActive());
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group1Node, 2), 100.f);
+    EXPECT_EQ(GetChildHeight(group0Node, 2), 200.f);
+}
+
+/**
+ * @tc.name: ListGroupRepeatCacheCount008
+ * @tc.desc: ListItemGroup in cache backward mark dirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, true);
+    model.SetSpace(Dimension(SPACE));
+    CreateRepeatVirtualScrollNode(3, [this](int32_t idx) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        groupModel.SetFooter(std::move(footer));
+        CreateRepeatVirtualScrollNode(2, [this](int32_t idx) {
+            CreateListItem();
+            ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+        });
+    });
+    pattern_->ScrollToIndex(2, false, ScrollAlign::END);
+    CreateDone();
+    FlushIdleTask(pattern_);
+
+    /**
+     * @tc.steps: step2. Update ListItem height in cached backward Group.
+     * @tc.expected: Item height updated.
+     */
+    auto group0Node = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(group0Node, nullptr);
+    auto group0Item1 = GetChildFrameNode(group0Node, 1);
+    ASSERT_NE(group0Item1, nullptr);
+    auto property = group0Item1->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group0Item1->MarkDirtyNode();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group0Node, 1), 200.f);
+
+    /**
+     * @tc.steps: step3. Update ListItem height in edge Group.
+     * @tc.expected: Item height updated.
+     */
+    auto group1Node = GetChildFrameNode(frameNode_, 1);
+    ASSERT_NE(group1Node, nullptr);
+    auto group1Item0 = GetChildFrameNode(group1Node, 0);
+    ASSERT_NE(group1Item0, nullptr);
+    property = group1Item0->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group1Item0->MarkDirtyNode();
+    FlushUITasks();
+    EXPECT_TRUE(group0Node->IsActive());
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group1Node, 0), 200.f);
+
+    /**
+     * @tc.steps: step4. Update visible ListItem height, ListItemGroup1 only display footer.
+     * @tc.expected: Item height update.
+     */
+    auto group2Node = GetChildFrameNode(frameNode_, 2);
+    ASSERT_NE(group2Node, nullptr);
+    auto group2Item0 = GetChildFrameNode(group2Node, 0);
+    ASSERT_NE(group2Item0, nullptr);
+    property = group2Item0->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(200.f)));
+    group2Item0->MarkDirtyNode();
+    property = group1Item0->GetLayoutProperty();
+    property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(FILL_LENGTH), CalcLength(100.f)));
+    group1Item0->MarkDirtyNode();
+    pattern_->ScrollToIndex(2, false, ScrollAlign::END);
+    FlushUITasks();
+    EXPECT_FALSE(group0Node->IsActive());
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(GetChildHeight(group1Node, 0), 100.f);
+    EXPECT_EQ(GetChildHeight(group2Node, 0), 200.f);
+}
+
+/**
  * @tc.name: SetHeaderFooter001
  * @tc.desc: test SetHeader/SetFooter to null, will not has header/footer
  * @tc.type: FUNC
