@@ -65,6 +65,10 @@ public:
         const std::string& uriStr, ImageErrorInfo& errorInfo) = 0;
     virtual void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) = 0;
     virtual int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) = 0;
+    virtual int32_t RegisterDataShareSmartEdgeStateObserver() = 0;
+    virtual int32_t UnregisterDataShareObservers() = 0;
+    virtual bool IsInSmartEdgeState() = 0;
+    virtual bool QuerySmartEdgeState() = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderManagerInterface);
 };
@@ -86,6 +90,22 @@ public:
     {
         return -1;
     }
+    int32_t RegisterDataShareSmartEdgeStateObserver() override
+    {
+        return -1;
+    }
+    int32_t UnregisterDataShareObservers() override
+    {
+        return -1;
+    }
+    bool IsInSmartEdgeState() override
+    {
+        return false;
+    }
+    bool QuerySmartEdgeState() override
+    {
+        return false;
+    }
 
 private:
     DataProviderImpl platformImpl_;
@@ -98,8 +118,10 @@ class ACE_FORCE_EXPORT DataProviderManagerStandard : public DataProviderManagerI
     DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface);
 
 public:
-    explicit DataProviderManagerStandard(DataAbilityHelperImpl dataAbilityHelperImpl)
-        : dataAbilityHelperImpl_(std::move(dataAbilityHelperImpl))
+    DataProviderManagerStandard(DataAbilityHelperImpl dataAbilityHelperImpl,
+        DataAbilityHelperImpl dataShareObserverHelperImpl)
+        : dataAbilityHelperImpl_(std::move(dataAbilityHelperImpl)),
+          dataShareObserverHelperImpl_(std::move(dataShareObserverHelperImpl))
     {}
 
     ~DataProviderManagerStandard() override = default;
@@ -115,13 +137,19 @@ public:
     int64_t GetMovingPhotoCoverPosition(const std::string& columnName, const std::string& value,
         std::vector<std::string>& columns);
     std::string GetMovingPhotoImagePath(const std::string& uri);
-
+    int32_t RegisterDataShareSmartEdgeStateObserver() override;
+    int32_t UnregisterDataShareObservers() override;
+    bool IsInSmartEdgeState() override;
+    bool QuerySmartEdgeState() override;
 private:
     void InitHelper();
-
+    void InitObserverHelper();
     std::shared_mutex helperMutex_;
     DataAbilityHelperImpl dataAbilityHelperImpl_;
     RefPtr<DataAbilityHelper> helper_;
+    std::shared_mutex observerHelperMutex_;
+    DataAbilityHelperImpl dataShareObserverHelperImpl_;
+    RefPtr<DataAbilityHelper> observerHelper_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderManagerStandard);
 };
