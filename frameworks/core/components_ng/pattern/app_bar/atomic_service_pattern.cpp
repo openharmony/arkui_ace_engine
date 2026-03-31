@@ -493,6 +493,13 @@ bool AtomicServicePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(atom, false);
     auto pipeline = atom->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_RETURN(appbar, false);
+    appbar->UpdateVisibilityOfMenuBarRow(GetMenuBarRow(), container);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

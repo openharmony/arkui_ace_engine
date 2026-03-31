@@ -90,6 +90,7 @@ public:
     }
 
     void SetRectChangeCallback(RectChangeFunc&& callback);
+    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
 protected:
     virtual ~AppBarView()
     {
@@ -111,7 +112,6 @@ private:
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
     void FireExtensionHostParams();
-    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
     void InitAbilityContextCallback();
     void FireAbilityCloseEvent();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
