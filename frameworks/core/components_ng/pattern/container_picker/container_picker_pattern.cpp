@@ -16,6 +16,7 @@
 
 #include <sys/time.h>
 
+#include "core/components_ng/render/drawing.h"
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
