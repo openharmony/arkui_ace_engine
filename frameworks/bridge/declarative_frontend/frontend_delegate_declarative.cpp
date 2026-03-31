@@ -1914,7 +1914,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2040,7 +2040,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2310,6 +2311,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
