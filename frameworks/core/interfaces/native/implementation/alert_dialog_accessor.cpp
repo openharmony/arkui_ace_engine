@@ -63,6 +63,7 @@ struct DialogPropsForUpdate {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
 };
 } // namespace OHOS::Ace::NG
 
@@ -259,6 +260,10 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
     if (dialogImmersiveMode) {
         dialogProps.dialogImmersiveMode = dialogImmersiveMode.value();
     }
+    auto systemMaterial = Converter::OptConvert<UiMaterial*>(props.systemMaterial).value_or(nullptr);
+    if (systemMaterial) {
+        dialogProps.systemMaterial = systemMaterial->Copy();
+    }
 }
 DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
 {
@@ -372,7 +377,8 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void UpdateConfirmButton(DialogProperties& dialogProps, const Ark_AlertDialogParamWithConfirm params)
@@ -448,7 +454,8 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
@@ -527,7 +534,8 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)

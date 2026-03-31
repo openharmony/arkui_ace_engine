@@ -28,6 +28,7 @@ import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
 import { int32 } from "@koalaui/compat";
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial';
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -117,10 +118,12 @@ declare namespace promptAction {
         levelUniqueId?: int32;
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
+        systemMaterial?: uiMaterial.Material;
     }
 
     export interface ShowDialogOptionsInternal {
         levelOrder?: number;
+        systemMaterial?: KPointer;
     }
 
     export interface ShowDialogSuccessResponse {
@@ -149,6 +152,11 @@ declare namespace promptAction {
         onDidDisappear?: (() => void);
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
+        systemMaterial?: uiMaterial.Material;
+    }
+
+    export interface ActionMenuOptionsInternal {
+        systemMaterial?: KPointer;
     }
 
     export interface ActionMenuSuccessResponse {
@@ -182,6 +190,7 @@ declare namespace promptAction {
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
         focusable?: boolean;
+        systemMaterial?: uiMaterial.Material;
     }
 
     export interface DialogOptionsInternal {
@@ -189,6 +198,7 @@ declare namespace promptAction {
         dialogTransition?: KPointer;
         maskTransition?: KPointer;
         levelOrder?: number;
+        systemMaterial?: KPointer;
     }
 
     export interface CustomDialogOptions extends BaseDialogOptions {
@@ -243,9 +253,10 @@ declare namespace promptAction {
         optionsInternal?: ShowDialogOptionsInternal): Promise<ShowDialogSuccessResponse>;
 
     export function showActionMenu1(options: ActionMenuOptions,
-        callback: AsyncCallback<ActionMenuSuccessResponse>): void;
+        callback: AsyncCallback<ActionMenuSuccessResponse>, optionsInternal?: ActionMenuOptionsInternal): void;
 
-    export function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
+    export function showActionMenu(options: ActionMenuOptions,
+        optionsInternal?: ActionMenuOptionsInternal): Promise<ActionMenuSuccessResponse>;
 
     export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;

@@ -600,6 +600,14 @@ void CustomDialogControllerPeerImpl::SetFocusable(Opt_Boolean focusable)
     }
 }
 
+void CustomDialogControllerPeerImpl::SetSystemMaterial(Opt_uiMaterial_Material systemMaterial)
+{
+    auto result = Converter::OptConvert<UiMaterial*>(systemMaterial).value_or(nullptr);
+    if (result) {
+        dialogProperties_.systemMaterial = result->Copy();
+    }
+}
+
 DialogProperties CustomDialogControllerPeerImpl::GetDialogProperties() const
 {
     return dialogProperties_;

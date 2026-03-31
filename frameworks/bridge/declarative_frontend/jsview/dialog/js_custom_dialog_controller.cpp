@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
@@ -32,6 +33,7 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -108,6 +110,15 @@ void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> ob
         return;
     }
     properties.focusable = focusableValue->ToBoolean();
+}
+
+void ParseCustomDialogSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto systemMaterialValue = obj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
 }
 
 void ParseCustomDialogDisplayMode(DialogProperties& properties, JSRef<JSObject> obj)
@@ -345,6 +356,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Parse levelOrder.
         ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
         ParseCustomDialogFocusable(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogSystemMaterial(instance->dialogProperties_, constructorArg);
 
         // Parse displayMode.
         ParseCustomDialogDisplayMode(instance->dialogProperties_, constructorArg);

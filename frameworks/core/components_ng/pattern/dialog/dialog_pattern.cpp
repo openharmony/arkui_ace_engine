@@ -31,11 +31,13 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -372,6 +374,19 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
+void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
+{
+    CHECK_NULL_VOID(columnNode);
+    if (dialogProperties.systemMaterial &&
+        dialogProperties.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+        dialogProperties.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        auto renderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties.systemMaterial));
+    }
+}
+
 void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
     const DialogProperties& props, bool isCustomBorder, RefPtr<DialogTheme> dialogTheme)
 {
@@ -406,12 +421,14 @@ void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
         contentRenderContext->UpdateBackShadow(shadow);
     }
+    SetDialogSystemMaterial(contentNode, props);
     contentRenderContext->SetClipToBounds(true);
 }
 
 // set render context properties of content frame
 void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
+    CHECK_NULL_VOID(contentNode);
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;

@@ -79,6 +79,7 @@ public:
     void SetLevelOrder(Opt_LevelOrder levelOrder);
     void SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender);
     void SetFocusable(Opt_Boolean focusable);
+    void SetSystemMaterial(Opt_uiMaterial_Material systemMaterial);
 
     DialogProperties GetDialogProperties() const;
 
