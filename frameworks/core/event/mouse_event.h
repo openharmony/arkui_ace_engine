@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 
 #include <vector>
-#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/memory/ace_type.h"
