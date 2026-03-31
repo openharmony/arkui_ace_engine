@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
 

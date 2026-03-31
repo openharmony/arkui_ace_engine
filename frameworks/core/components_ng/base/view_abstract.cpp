@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/property/flex_property.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "ui/base/ace_type.h"

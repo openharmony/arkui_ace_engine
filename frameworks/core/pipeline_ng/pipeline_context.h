@@ -50,7 +50,6 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -93,6 +92,7 @@ class LoadCompleteManager;
 class PageInfo;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
+class SafeAreaManager;
 class SelectOverlayManager;
 class UIExtensionManager;
 
@@ -1660,7 +1660,7 @@ private:
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
-    RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
+    RefPtr<SafeAreaManager> safeAreaManager_;
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();

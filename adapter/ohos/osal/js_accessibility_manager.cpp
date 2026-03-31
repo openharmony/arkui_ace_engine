@@ -20,6 +20,7 @@
 #include "perf_monitor_adapter.h"
 
 #include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/base/observer_handler.h"
