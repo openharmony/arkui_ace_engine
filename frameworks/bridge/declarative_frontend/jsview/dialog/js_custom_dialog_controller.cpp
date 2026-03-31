@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/engine/js_converter.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"

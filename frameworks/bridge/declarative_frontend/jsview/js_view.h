@@ -21,9 +21,7 @@
 #include <string>
 #include <tuple>
 
-#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
@@ -49,58 +47,12 @@ public:
     void GetInstanceId(const JSCallbackInfo& info);
     void GetMainInstanceId(const JSCallbackInfo& info);
 
-    void FireOnShow()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnShow");
-            jsViewFunction_->ExecuteShow();
-        }
-    }
-
-    void FireOnHide()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnHide");
-            jsViewFunction_->ExecuteHide();
-        }
-    }
-
-    bool FireOnBackPress()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnBackPress");
-            return jsViewFunction_->ExecuteOnBackPress();
-        }
-        return false;
-    }
-
-    std::string FireOnFormRecycle()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnFormRecycle");
-            return jsViewFunction_->ExecuteOnFormRecycle();
-        }
-        LOGE("jsViewFunction_ is null");
-        return "";
-    }
-
-    void FireOnFormRecover(const std::string &statusData)
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnFormRecover");
-            return jsViewFunction_->ExecuteOnFormRecover(statusData);
-        }
-        LOGE("jsViewFunction_ is null");
-    }
-
-    void FireOnNewParam(const std::string &newParam)
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnNewParam");
-            return jsViewFunction_->ExecuteOnNewParam(newParam);
-        }
-        TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
-    }
+    void FireOnShow();
+    void FireOnHide();
+    bool FireOnBackPress();
+    std::string FireOnFormRecycle();
+    void FireOnFormRecover(const std::string& statusData);
+    void FireOnNewParam(const std::string& newParam);
 
     virtual void RenderJSExecution();
 

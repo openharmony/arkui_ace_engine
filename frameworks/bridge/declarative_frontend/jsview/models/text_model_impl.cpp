@@ -17,6 +17,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/focusable/focusable_component.h"
+#include "core/components/gesture_listener/gesture_listener_component.h"
 
 namespace OHOS::Ace::Framework {
 void TextModelImpl::Create(const std::string& content)

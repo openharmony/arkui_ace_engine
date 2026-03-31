@@ -42,6 +42,7 @@
 #endif
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components/touch_listener/touch_listener_component.h"
 
 namespace OHOS::Ace::Framework {
 

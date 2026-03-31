@@ -23,34 +23,41 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/flex/flex_component.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/pipeline/base/component.h"
-#include "frameworks/core/components/box/box_component.h"
 #include "frameworks/core/components/checkable/radio_group_component.h"
-#include "frameworks/core/components/coverage/coverage_component.h"
-#include "frameworks/core/components/display/display_component.h"
 #include "frameworks/core/components/flex/flex_item_component.h"
 #include "frameworks/core/components/focusable/focusable_component.h"
-#include "frameworks/core/components/gesture_listener/gesture_component.h"
-#include "frameworks/core/components/gesture_listener/gesture_listener_component.h"
-#include "frameworks/core/components/menu/menu_component.h"
-#include "frameworks/core/components/mouse_listener/mouse_listener_component.h"
-#include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components/page_transition/page_transition_component.h"
-#include "frameworks/core/components/scroll/scroll_component.h"
+#include "frameworks/core/components_v2/inspector/inspector_composed_component.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/core/components/popup/popup_component_v2.h"
 #endif
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/positioned/positioned_component.h"
-#include "frameworks/core/components/shared_transition/shared_transition_component.h"
-#include "frameworks/core/components/touch_listener/touch_listener_component.h"
-#include "frameworks/core/components/transform/transform_component.h"
-#include "frameworks/core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace {
 class AccessibilityManager;
+class BoxComponent;
+class CoverageComponent;
+class DisplayComponent;
+class FlexItemComponent;
+class FocusableComponent;
+class MenuComponent;
+class MouseListenerComponent;
+class GestureListenerComponent;
+class GestureComponent;
+class PageTransitionComponent;
+class PositionedComponent;
+class ScrollComponent;
+class SharedTransitionComponent;
+class TouchListenerComponent;
+class TransformComponent;
 } // namespace OHOS::Ace
+
+namespace OHOS::Ace::V2 {
+class InspectorComposedComponent;
+} // namespace OHOS::Ace::V2
 
 namespace OHOS::Ace::Framework {
     using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
