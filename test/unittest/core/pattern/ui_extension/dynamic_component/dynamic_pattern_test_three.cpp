@@ -81,6 +81,13 @@ std::shared_ptr<MMI::PointerEvent> CreatePointerEvent(int32_t action, int32_t so
 }
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class DynamicPatternTestNgThree : public testing::Test {
 public:
     void SetUp() override;

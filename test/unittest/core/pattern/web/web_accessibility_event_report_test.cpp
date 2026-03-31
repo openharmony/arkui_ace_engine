@@ -104,6 +104,12 @@ namespace OHOS::Ace::NG {
 namespace {
 RefPtr<WebPattern> g_webPattern = nullptr;
 }
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class WebAccessibilityEventReportTest : public testing::Test {
 public:

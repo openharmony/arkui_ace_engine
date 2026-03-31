@@ -71,6 +71,13 @@ const std::string ABILITY_VALUE_UIEXTENSIONTYPE = "sysPicker/PhotoPicker";
 constexpr int32_t ERROR_CODE = 10001;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class PreviewUIExtensionComponentTestNgTwo : public testing::Test {
 public:
     RefPtr<FrameNode> frameNode_ = nullptr;

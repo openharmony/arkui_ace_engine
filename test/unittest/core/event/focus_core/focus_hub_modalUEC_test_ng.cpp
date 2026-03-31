@@ -38,6 +38,13 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class ModalFocusHubTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
