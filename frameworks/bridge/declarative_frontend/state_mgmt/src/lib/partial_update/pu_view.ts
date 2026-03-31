@@ -604,34 +604,35 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     this.syncInstanceId();
-
-    if (dependentElmtIds?.size && !this.isFirstRender()) {
-      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-        // mark ComposedElement dirty when first elmtIds are added
-        // do not need to do this every time
-        this.markNeedUpdate();
-      }
-      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`);
-      for (const elmtId of dependentElmtIds) {
-        if (this.hasRecycleManager()) {
-          this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-        } else {
-          this.dirtDescendantElementIds_.add(elmtId);
+    try {
+      if (dependentElmtIds?.size && !this.isFirstRender()) {
+        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+          // mark ComposedElement dirty when first elmtIds are added
+          // do not need to do this every time
+          this.markNeedUpdate();
         }
+        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`);
+        for (const elmtId of dependentElmtIds) {
+          if (this.hasRecycleManager()) {
+            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+          } else {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
+        }
+        stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
+        stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
       }
-      stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
-    } else {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
-      stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
-    }
 
-    let cb = this.watchedProps.get(varName);
-    if (cb && typeof cb === 'function') {
-      stateMgmtConsole.debug(`   ... calling @Watch function`);
-      cb.call(this, varName);
+      let cb = this.watchedProps.get(varName);
+      if (cb && typeof cb === 'function') {
+        stateMgmtConsole.debug(`   ... calling @Watch function`);
+        cb.call(this, varName);
+      }
+    } finally {
+      this.restoreInstanceId();
     }
-
-    this.restoreInstanceId();
     aceDebugTrace.end();
     stateMgmtProfiler.end();
   }
@@ -665,8 +666,11 @@ abstract class ViewPU extends PUV2ViewBase
       // mark ComposedElement dirty when first elmtIds are added
       // do not need to do this every time
       this.syncInstanceId();
-      this.markNeedUpdate();
-      this.restoreInstanceId();
+      try {
+        this.markNeedUpdate();
+      } finally {
+        this.restoreInstanceId();
+      }
     }
     if (this.hasRecycleManager()) {
       this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
@@ -686,34 +690,34 @@ abstract class ViewPU extends PUV2ViewBase
     aceDebugTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
     stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
     this.syncInstanceId();
+    try {
+      for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+        const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
+        if (changedElmtIds !== undefined) {
+          const varName = stateLinkPropVar.info();
+          if (changedElmtIds?.size && !this.isFirstRender()) {
+            for (const elmtId of changedElmtIds) {
+              this.dirtDescendantElementIds_.add(elmtId);
+            }
+          }
 
-    for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
-      if (changedElmtIds !== undefined) {
-        const varName = stateLinkPropVar.info();
-        if (changedElmtIds?.size && !this.isFirstRender()) {
-          for (const elmtId of changedElmtIds) {
-            this.dirtDescendantElementIds_.add(elmtId);
+          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
+
+          const cb = this.watchedProps.get(varName);
+          if (cb) {
+            stateMgmtConsole.debug(`   ... calling @Watch function`);
+            cb.call(this, varName);
           }
         }
+      } // for all ownStateLinkProps_
 
-        stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
-
-        const cb = this.watchedProps.get(varName);
-        if (cb) {
-          stateMgmtConsole.debug(`   ... calling @Watch function`);
-          cb.call(this, varName);
-        }
+      for (let elementId of this.elmtIdsDelayedUpdate) {
+        this.dirtDescendantElementIds_.add(elementId);
       }
-    } // for all ownStateLinkProps_
-
-    for (let elementId of this.elmtIdsDelayedUpdate) {
-      this.dirtDescendantElementIds_.add(elementId);
+      this.elmtIdsDelayedUpdate.clear();
+    } finally {
+      this.restoreInstanceId();
     }
-    this.elmtIdsDelayedUpdate.clear();
-
-    this.restoreInstanceId();
-
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
@@ -945,51 +949,54 @@ abstract class ViewPU extends PUV2ViewBase
     const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
+      try {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
 
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+        ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
-      if (!this.isViewV2) {
-        // Enable PU state tracking only in PU @Components
-        this.currentlyRenderedElmtIdStack_.push(elmtId);
-        stateMgmtDFX.inRenderingElementId.push(elmtId);
+        if (!this.isViewV2) {
+          // Enable PU state tracking only in PU @Components
+          this.currentlyRenderedElmtIdStack_.push(elmtId);
+          stateMgmtDFX.inRenderingElementId.push(elmtId);
+        }
+
+        // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
+        // enable V2 object deep observation
+        // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+        if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+          stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`);
+          // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
+          // update + initial render calls, like in if and ForEach case, convert to stack as well
+          ObserveV2.getObserve().startRecordDependencies(this, elmtId);
+        }
+
+        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        if (!isFirstRender) {
+          _popFunc();
+        }
+
+        let node = this.getNodeById(elmtId);
+        if (node !== undefined) {
+          (node as ArkComponent).cleanStageValue();
+        }
+
+        if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+          ObserveV2.getObserve().stopRecordDependencies();
+        }
+        if (!this.isViewV2) {
+          this.currentlyRenderedElmtIdStack_.pop();
+          stateMgmtDFX.inRenderingElementId.pop();
+        }
+        ViewStackProcessor.StopGetAccessRecording();
+
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+
+        stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
+      } finally {
+        this.restoreInstanceId();
       }
-
-      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
-      // enable V2 object deep observation
-      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`);
-        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
-        // update + initial render calls, like in if and ForEach case, convert to stack as well
-        ObserveV2.getObserve().startRecordDependencies(this, elmtId);
-      }
-
-      compilerAssignedUpdateFunc(elmtId, isFirstRender);
-      if (!isFirstRender) {
-        _popFunc();
-      }
-
-      let node = this.getNodeById(elmtId);
-      if (node !== undefined) {
-        (node as ArkComponent).cleanStageValue();
-      }
-
-      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        ObserveV2.getObserve().stopRecordDependencies();
-      }
-      if (!this.isViewV2) {
-        this.currentlyRenderedElmtIdStack_.pop();
-        stateMgmtDFX.inRenderingElementId.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
-      this.restoreInstanceId();
     };
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
