@@ -23,8 +23,6 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
-#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_element_info.h"
-#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_event_info.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -1415,12 +1413,9 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-const RefPtr<NG::UIExtensionManager>& NG::PipelineContext::GetUIExtensionManager()
+const RefPtr<UIExtensionManager>& GetUIExtensionManager()
 {
-    if (!uiExtensionManager_) {
-        uiExtensionManager_ = AceType::MakeRefPtr<NG::UIExtensionManager>();
-    }
-    return uiExtensionManager_;
+    return AceType::MakeRefPtr<UIExtensionManager>();
 }
 #endif
 

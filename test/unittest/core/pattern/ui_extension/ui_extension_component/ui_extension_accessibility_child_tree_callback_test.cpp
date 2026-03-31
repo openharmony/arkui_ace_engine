@@ -42,6 +42,13 @@ namespace {
     int32_t platformId = 1;
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class UecAccessibilityChildTreeCallbackTest : public testing::Test {
 public:
     static void SetUpTestSuite()

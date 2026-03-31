@@ -68,6 +68,13 @@ namespace {
     constexpr double SHOW_FULL = 1.0;
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class UIExtensionComponentTestNg : public testing::Test {
 public:
     void SetUp() override;

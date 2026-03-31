@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "frameworks/core/event/pointer_event.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,6 +38,13 @@ namespace {
     const std::string EVENT_PROXT_PAN_GESTURE_HORIZONTAL = "[Left, Right]";
     const std::string EVENT_PROXT_PAN_GESTURE_ALL = "[Left, Up]";
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class PlatformEventProxyTestNg : public testing::Test {
 public:
