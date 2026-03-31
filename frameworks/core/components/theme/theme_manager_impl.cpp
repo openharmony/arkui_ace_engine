@@ -95,6 +95,7 @@
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
+#include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
@@ -209,6 +210,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { AgingAdapationDialogTheme::TypeId(),
             &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
+        { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
     };
