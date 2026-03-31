@@ -886,6 +886,35 @@ ArkUI_Bool touchRecognizerCancelTouch(void* recognizer)
     return false;
 }
 
+ArkUI_Bool isFrameNodeBelongsTo(const RefPtr<FrameNode>& node, ArkUI_Int32 uniqueId)
+{
+    auto current = node;
+    CHECK_NULL_RETURN(current, false);
+    while (current) {
+        if (current->GetId() == uniqueId) {
+            return true;
+        }
+        current = current->GetParentFrameNode();
+    }
+    return false;
+}
+
+ArkUI_Bool touchRecognizerIsHostBelongsTo(const void* recognizer, ArkUI_Int32 uniqueId)
+{
+    auto iter = static_cast<const TouchRecognizerMap::value_type*>(recognizer);
+    TouchEventTarget* touchEventTarget = iter->first;
+    return isFrameNodeBelongsTo(touchEventTarget->GetAttachedNode().Upgrade(), uniqueId);
+}
+
+ArkUI_Bool gestureRecognizerIsHostBelongsTo(const ArkUIGestureRecognizer* recognizer, ArkUI_Int32 uniqueId)
+{
+    CHECK_NULL_RETURN(recognizer, false);
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, false);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    return isFrameNodeBelongsTo(gestureRecognizer->GetAttachedNode().Upgrade(), uniqueId);
+}
+
 void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
@@ -1290,6 +1319,18 @@ ArkUI_Int32 getGestureTag(ArkUIGestureRecognizer* recognizer, char* buffer, ArkU
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 getGestureBindNodeUniqueId(const ArkUIGestureRecognizer* recognizer, ArkUI_Int32* uniqueId)
+{
+    CHECK_NULL_RETURN(uniqueId, ERROR_CODE_PARAM_INVALID);
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto attachNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(attachNode, ERROR_CODE_PARAM_INVALID);
+    *uniqueId = attachNode->GetId();
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Int32 getGestureBindNodeId(
     ArkUIGestureRecognizer* recognizer, char* nodeId, ArkUI_Int32 size, ArkUI_Int32* result)
 {
@@ -1383,13 +1424,16 @@ const ArkUIGestureModifier* GetGestureModifier()
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,
+        .getGestureBindNodeUniqueId = getGestureBindNodeUniqueId,
         .isGestureRecognizerValid = isGestureRecognizerValid,
         .setArkUIGestureRecognizerDisposeNotify = setArkUIGestureRecognizerDisposeNotify,
         .addGestureToGestureGroupWithRefCountDecrease = addGestureToGestureGroupWithRefCountDecrease,
         .addGestureToNodeWithRefCountDecrease = addGestureToNodeWithRefCountDecrease,
         .registerGestureEventExt = registerGestureEventExt,
         .touchRecognizerGetNodeHandle = touchRecognizerGetNodeHandle,
+        .touchRecognizerIsHostBelongsTo = touchRecognizerIsHostBelongsTo,
         .touchRecognizerCancelTouch = touchRecognizerCancelTouch,
+        .gestureRecognizerIsHostBelongsTo = gestureRecognizerIsHostBelongsTo,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

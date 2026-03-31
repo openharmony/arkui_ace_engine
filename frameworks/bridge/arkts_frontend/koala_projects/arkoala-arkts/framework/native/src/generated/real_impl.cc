@@ -2264,6 +2264,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_TouchTestDoneCallback* value)
     {
     }
+    void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                          const GestureCollectInterceptCallback* value)
+    {
+    }
     void SetSystemMaterialImpl(Ark_NativePointer node,
                                const Opt_uiMaterial_Material* value)
     {
@@ -9173,6 +9177,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetOnGestureCollectInterceptImpl,
             CommonMethodModifier::SetSystemMaterialImpl,
             CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -14351,6 +14356,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+    {
+        return {};
+    }
     } // EventTargetInfoAccessor
     namespace FileSelectorParamAccessor {
     void DestroyPeerImpl(Ark_FileSelectorParam peer)
@@ -15186,6 +15195,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void PreventBeginImpl(Ark_GestureRecognizer peer)
     {
+    }
+    Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        return {};
     }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
@@ -20313,6 +20327,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CancelTouchImpl(Ark_TouchRecognizer peer)
     {
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        return {};
+    }
     } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
@@ -22450,6 +22469,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::ConstructImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::GetUniqueIdImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -22722,6 +22742,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
             GestureRecognizerAccessor::PreventBeginImpl,
+            GestureRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -24951,6 +24972,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchRecognizerAccessor::GetFinalizerImpl,
             TouchRecognizerAccessor::GetEventTargetInfoImpl,
             TouchRecognizerAccessor::CancelTouchImpl,
+            TouchRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &TouchRecognizerAccessorImpl;
     }

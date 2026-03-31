@@ -2357,6 +2357,22 @@ class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
   }
 }
 
+declare type GestureCollectInterceptCallback = (recognizers: Array<GestureRecognizer>,
+  touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention;
+class OnGestureCollectInterceptModifier extends ModifierWithKey<GestureCollectInterceptCallback> {
+  constructor(value: GestureCollectInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onGestureCollectIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureCollectIntercept(node);
+    } else {
+      getUINativeModule().common.setOnGestureCollectIntercept(node, this.value);
+    }
+  }
+}
+
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
@@ -4292,6 +4308,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
   private _onTouchTestDone: TouchTestDoneCallback = null;
+  private _onGestureCollectIntercept: GestureCollectInterceptCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
@@ -4398,6 +4415,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   onTouchTestDone(callback: (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void): this {
     this._onTouchTestDone = callback;
     modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
+    return this;
+  }
+  onGestureCollectIntercept(callback: (recognizers: Array<GestureRecognizer>,
+    touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention): this {
+    this._onGestureCollectIntercept = callback;
+    modifierWithKey(this._modifiersWithKeys, OnGestureCollectInterceptModifier.identity,
+      OnGestureCollectInterceptModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {

@@ -682,6 +682,15 @@ let GestureMask;
   GestureMask[GestureMask.IgnoreInternal = 1] = 'IgnoreInternal';
 })(GestureMask || (GestureMask = {}));
 
+let GestureCollectIntervention;
+(function (GestureCollectIntervention) {
+  GestureCollectIntervention[GestureCollectIntervention.CONTINUE = 0] = 'CONTINUE';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER = 1] = 'DISCARD_LOWER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_HIGHER = 2] = 'DISCARD_HIGHER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_SELF = 3] = 'DISCARD_SELF';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER_PRIORITY_SIBLINGS = 4] = 'DISCARD_LOWER_PRIORITY_SIBLINGS';
+})(GestureCollectIntervention || (GestureCollectIntervention = {}));
+
 let GesturePriority;
 (function (GesturePriority) {
   GesturePriority[GesturePriority.Low = 0] = 'Low';

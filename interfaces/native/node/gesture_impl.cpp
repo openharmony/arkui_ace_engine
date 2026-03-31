@@ -163,6 +163,70 @@ int32_t OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(
+    const ArkUI_GestureCollectInterceptInfo* info, ArkUI_GestureRecognizerHandleArray* array, int32_t* size)
+{
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(array, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *array = reinterpret_cast<ArkUI_GestureRecognizerHandleArray>(info->interceptData.responseLinkRecognizer);
+    *size = info->interceptData.count;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(const ArkUI_GestureCollectInterceptInfo* info,
+    ArkUI_TouchRecognizerHandleArray* recognizers, int32_t* size)
+{
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(recognizers, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *recognizers = reinterpret_cast<ArkUI_TouchRecognizerHandleArray>(info->interceptData.touchRecognizers);
+    *size = info->interceptData.touchRecognizerCnt;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+    ArkUI_GestureCollectInterceptInfo* info, OH_ArkUI_GestureCollectIntervention intervention)
+{
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (intervention < OH_ARKUI_GESTURE_COLLECT_INTERVENTION_CONTINUE ||
+        intervention > OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    info->interceptData.intervention = intervention;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+bool OH_ArkUI_TouchRecognizer_IsHostBelongsTo(const ArkUI_TouchRecognizerHandle recognizer, int32_t uniqueId)
+{
+    CHECK_NULL_RETURN(recognizer, false);
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->touchRecognizerIsHostBelongsTo(static_cast<void*>(recognizer), uniqueId);
+}
+
+bool OH_ArkUI_GestureRecognizer_IsHostBelongsTo(const ArkUI_GestureRecognizer* recognizer, int32_t uniqueId)
+{
+    auto* gestureRecognizer = reinterpret_cast<const ArkUIGestureRecognizer*>(recognizer);
+    CHECK_NULL_RETURN(gestureRecognizer, false);
+    return OHOS::Ace::NodeModel::GetFullImpl()
+        ->getNodeModifiers()
+        ->getGestureModifier()
+        ->gestureRecognizerIsHostBelongsTo(gestureRecognizer, uniqueId);
+}
+
+ArkUI_ErrorCode OH_ArkUI_GetGestureBindNodeUniqueId(const ArkUI_GestureRecognizer* recognizer, int32_t* uniqueId)
+{
+    auto* gestureRecognizer = reinterpret_cast<const ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->getGestureBindNodeUniqueId(
+            gestureRecognizer, uniqueId));
+}
+
 ArkUI_NodeHandle OH_ArkUI_TouchRecognizer_GetNodeHandle(const ArkUI_TouchRecognizerHandle recognizer)
 {
     CHECK_NULL_RETURN(recognizer, nullptr);

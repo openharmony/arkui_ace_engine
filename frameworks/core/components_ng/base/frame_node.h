@@ -1628,9 +1628,6 @@ private:
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
-    void TriggerShouldParallelInnerWith(
-        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
-
     void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);

@@ -1432,6 +1432,7 @@ enum ArkUIEventCategory {
     PREVENTABLE_EVENT = 21,
     DIGITAL_CROWN_EVENT = 22,
     TEXT_EDITOR_CHANGE_EVENT = 23,
+    GESTURE_COLLECT_INTERCEPT_EVENT = 24,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1476,6 +1477,7 @@ enum ArkUIEventSubKind {
     ON_CUSTOM_OVERFLOW_SCROLL,
     ON_STACK_OVERFLOW_SCROLL,
     ON_NEED_SOFTKEYBOARD,
+    ON_GESTURE_COLLECT_INTERCEPT,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_TEXT_TEXT_SELECTION_CHANGE,
@@ -1961,6 +1963,15 @@ struct ArkUITouchTestInfo {
     ArkUI_CommonCharPtr resultId;
 };
 
+struct ArkUIGestureCollectInterceptInfo {
+    ArkUI_Int32 subKind;
+    ArkUIGestureRecognizer** responseLinkRecognizer;
+    ArkUI_Int32 count;
+    void** touchRecognizers;
+    ArkUI_Int32 touchRecognizerCnt;
+    ArkUI_Int32 intervention;
+};
+
 enum class ArkUI_CrownAction : int32_t {
     UPDATE,
     END,
@@ -2015,6 +2026,7 @@ struct ArkUINodeEvent {
         ArkUIAxisEvent axisEvent;
         ArkUICoastingAxisEvent coastingAxisEvent;
         ArkUITouchTestInfo touchTestInfo;
+        ArkUIGestureCollectInterceptInfo gestureCollectInterceptInfo;
         ArkUIPreventableEvent preventableEvent;
         ArkUICrownEvent crownEvent;
         ArkUITextEditorChangeEvent textEditorChangeEvent;
@@ -5402,6 +5414,7 @@ struct ArkUIGestureModifier {
         ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
     ArkUI_Int32 (*getGestureBindNodeId)(
         ArkUIGestureRecognizer* recognizer, char* nodeId, ArkUI_Int32 size, ArkUI_Int32* result);
+    ArkUI_Int32 (*getGestureBindNodeUniqueId)(const ArkUIGestureRecognizer* recognizer, ArkUI_Int32* uniqueId);
     ArkUI_Bool (*isGestureRecognizerValid)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*setArkUIGestureRecognizerDisposeNotify)(ArkUIGestureRecognizer* recognizer, void* userData,
         void (*callback)(ArkUIGestureRecognizer* recognizer, void* userData));
@@ -5411,7 +5424,9 @@ struct ArkUIGestureModifier {
     void (*registerGestureEventExt)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
         GestrueFunction* gestrueFunction, void* gestureData);
     ArkUINodeHandle (*touchRecognizerGetNodeHandle)(void* recognizer);
+    ArkUI_Bool (*touchRecognizerIsHostBelongsTo)(const void* recognizer, ArkUI_Int32 uniqueId);
     ArkUI_Bool (*touchRecognizerCancelTouch)(void* recognizer);
+    ArkUI_Bool (*gestureRecognizerIsHostBelongsTo)(const ArkUIGestureRecognizer* recognizer, ArkUI_Int32 uniqueId);
 };
 
 struct ArkUISliderModifier {

@@ -4283,6 +4283,13 @@ void impl_CommonMethod_setOnTouchTestDone(Ark_NativePointer thisPtr, KSerializer
         GetNodeModifiers()->getCommonMethodModifier()->setOnTouchTestDone(self, static_cast<Opt_TouchTestDoneCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnTouchTestDone, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setOnGestureCollectIntercept(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        GestureCollectInterceptCallback valueValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_GESTURECOLLECTINTERCEPTCALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_GESTURECOLLECTINTERCEPTCALLBACK))))};;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnGestureCollectIntercept(self, static_cast<GestureCollectInterceptCallback*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnGestureCollectIntercept, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setSystemMaterial(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -33185,6 +33192,11 @@ KInteropReturnBuffer impl_EventTargetInfo_getId(Ark_NativePointer thisPtr) {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(EventTargetInfo_getId, KInteropReturnBuffer, Ark_NativePointer)
+KInt impl_EventTargetInfo_getUniqueId(Ark_NativePointer thisPtr) {
+        Ark_EventTargetInfo self = reinterpret_cast<Ark_EventTargetInfo>(thisPtr);
+        return GetAccessors()->getEventTargetInfoAccessor()->getUniqueId(self);
+}
+KOALA_INTEROP_DIRECT_1(EventTargetInfo_getUniqueId, KInt, Ark_NativePointer)
 Ark_NativePointer impl_FileSelectorParam_construct() {
         return GetAccessors()->getFileSelectorParamAccessor()->construct();
 }
@@ -34312,6 +34324,11 @@ void impl_GestureRecognizer_preventBegin(Ark_NativePointer thisPtr) {
         GetAccessors()->getGestureRecognizerAccessor()->preventBegin(self);
 }
 KOALA_INTEROP_DIRECT_V1(GestureRecognizer_preventBegin, Ark_NativePointer)
+Ark_Boolean impl_GestureRecognizer_isHostBelongsTo(Ark_NativePointer thisPtr, Ark_Int32 uniqueId) {
+        Ark_GestureRecognizer self = reinterpret_cast<Ark_GestureRecognizer>(thisPtr);
+        return GetAccessors()->getGestureRecognizerAccessor()->isHostBelongsTo(self, uniqueId);
+}
+KOALA_INTEROP_DIRECT_2(GestureRecognizer_isHostBelongsTo, Ark_Boolean, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_GestureStyle_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -43118,6 +43135,11 @@ void impl_TouchRecognizer_cancelTouch(Ark_NativePointer thisPtr) {
         GetAccessors()->getTouchRecognizerAccessor()->cancelTouch(self);
 }
 KOALA_INTEROP_DIRECT_V1(TouchRecognizer_cancelTouch, Ark_NativePointer)
+Ark_Boolean impl_TouchRecognizer_isHostBelongsTo(Ark_NativePointer thisPtr, Ark_Int32 uniqueId) {
+        Ark_TouchRecognizer self = reinterpret_cast<Ark_TouchRecognizer>(thisPtr);
+        return GetAccessors()->getTouchRecognizerAccessor()->isHostBelongsTo(self, uniqueId);
+}
+KOALA_INTEROP_DIRECT_2(TouchRecognizer_isHostBelongsTo, Ark_Boolean, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TransitionEffect_construct0(const KStringPtr& type) {
         return GetAccessors()->getTransitionEffectAccessor()->construct0((const Ark_String*) (&type));
 }

@@ -420,6 +420,11 @@ public:
     static ArkUINativeModuleValue ResetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static NG::GestureCollectIntervention ProcessOnGestureCollectIntercept(EcmaVM* vm,
+        panda::Local<panda::FunctionRef> func, const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+        const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers);
     static ArkUINativeModuleValue SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);

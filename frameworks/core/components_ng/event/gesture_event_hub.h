@@ -58,6 +58,9 @@ using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRe
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 using TouchTestDoneCallback = std::function<void(
     const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
+using OnGestureCollectInterceptFunc = std::function<GestureCollectIntervention(
+    const std::vector<RefPtr<NGGestureRecognizer>>&,
+    const std::vector<RefPtr<TouchEventTarget>>&)>;
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -70,6 +73,21 @@ struct TouchTestInfo {
 struct TouchResult {
     TouchTestStrategy strategy;
     std::string id;
+};
+
+struct GestureCollectInterventionContext {
+    TouchTestResult& newComingTargets;
+    ResponseLinkResult& responseLinkResult;
+    ResponseLinkResult& newComingResponseLinkTargets;
+    const TouchTestResult& childSnapshot;
+    size_t responseLinkSnapshotSize;
+    HitTestResult testResultBeforeSelf;
+    bool preventBubblingBeforeSelf;
+    bool blockHierarchyBeforeSelf;
+    bool& preventBubbling;
+    bool& blockHierarchy;
+    bool& consumed;
+    HitTestResult& testResult;
 };
 
 struct DragDropBaseInfo {
@@ -217,6 +235,14 @@ public:
     TouchInterceptFunc GetOnTouchIntercept() const;
     void SetShouldBuildinRecognizerParallelWithFunc(ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc);
     ShouldBuiltInRecognizerParallelWithFunc GetParallelInnerGestureToFunc() const;
+    void TriggerShouldParallelInnerWith(
+        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
+    void SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func);
+    OnGestureCollectInterceptFunc GetOnGestureCollectInterceptFunc() const;
+    GestureCollectIntervention TriggerOnGestureCollectIntercept(
+        const TouchTestResult& newComingTargets, const ResponseLinkResult& responseLinkResult);
+    void HandleGestureCollectIntervention(
+        GestureCollectIntervention intervention, GestureCollectInterventionContext& context);
     void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
@@ -533,6 +559,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     ShouldBuiltInRecognizerParallelWithFunc shouldBuildinRecognizerParallelWithFunc_;
+    OnGestureCollectInterceptFunc onGestureCollectInterceptFunc_;
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;

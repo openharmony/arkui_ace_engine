@@ -517,6 +517,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setOnTouchTestDone(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setOnGestureCollectIntercept(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setSystemMaterial(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnNeedSoftkeyboard(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -4503,6 +4505,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _EventTargetInfo_getId(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _EventTargetInfo_getUniqueId(ptr: KPointer): KInt
+    @ani.unsafe.Direct
     native static _FileSelectorParam_construct(): KPointer
     @ani.unsafe.Direct
     native static _FileSelectorParam_getFinalizer(): KPointer
@@ -4854,6 +4858,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureRecognizer_isFingerCountLimit(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _GestureRecognizer_preventBegin(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _GestureRecognizer_isHostBelongsTo(ptr: KPointer, uniqueId: KInt): boolean
     @ani.unsafe.Direct
     native static _GestureStyle_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
@@ -6672,6 +6678,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchRecognizer_getEventTargetInfo(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _TouchRecognizer_cancelTouch(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _TouchRecognizer_isHostBelongsTo(ptr: KPointer, uniqueId: KInt): boolean
     @ani.unsafe.Quick
     native static _TransitionEffect_construct0(type: KStringPtr): KPointer
     @ani.unsafe.Direct

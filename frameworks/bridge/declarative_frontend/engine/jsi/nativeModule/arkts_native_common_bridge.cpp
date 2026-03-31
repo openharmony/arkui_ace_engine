@@ -9967,6 +9967,91 @@ ArkUINativeModuleValue CommonBridge::ResetOnTouchTestDone(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+NG::GestureCollectIntervention CommonBridge::ProcessOnGestureCollectIntercept(EcmaVM* vm,
+    panda::Local<panda::FunctionRef> func, const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+    const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+{
+    CHECK_NULL_RETURN(!func.IsEmpty(), NG::GestureCollectIntervention::CONTINUE);
+    CHECK_NULL_RETURN(func->IsFunction(vm), NG::GestureCollectIntervention::CONTINUE);
+
+    auto recognizersArr = panda::ArrayRef::New(vm);
+    uint32_t recognizersIdx = 0;
+    for (const auto& item : recognizers) {
+        if (!item) {
+            continue;
+        }
+        auto obj = CommonBridge::CreateRecognizerObject(vm, item);
+        recognizersArr->SetValueAt(vm, recognizersArr, recognizersIdx++, obj);
+    }
+
+    auto touchRecognizersArr = panda::ArrayRef::New(vm);
+    uint32_t touchIdx = 0;
+    for (const auto& item : touchRecognizers) {
+        if (!item) {
+            continue;
+        }
+        JSRef<JSObject> touchObj = JSClass<JSTouchRecognizer>::NewInstance();
+        auto jsTouchRecognizer = Referenced::Claim(touchObj->Unwrap<JSTouchRecognizer>());
+        if (jsTouchRecognizer) {
+            jsTouchRecognizer->SetTouchData(WeakPtr<TouchEventTarget>(item), {});
+        }
+        auto obj = touchObj->GetLocalHandle();
+        touchRecognizersArr->SetValueAt(vm, touchRecognizersArr, touchIdx++, obj);
+    }
+
+    panda::Local<panda::JSValueRef> params[2] = { recognizersArr, touchRecognizersArr };
+    auto returnValue = NG::GestureCollectIntervention::CONTINUE;
+    auto result = func->Call(vm, func, params, 2);
+    if (result->IsNumber()) {
+        auto interventionValue = result->Int32Value(vm);
+        if (interventionValue >= 0 &&
+            interventionValue <=
+                static_cast<int32_t>(NG::GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS)) {
+            returnValue = static_cast<NG::GestureCollectIntervention>(interventionValue);
+        }
+    }
+    return returnValue;
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onGestureCollectIntercept =
+        [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), node = AceType::WeakClaim(frameNode),
+            containerId](const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> NG::GestureCollectIntervention {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_RETURN(!function.IsEmpty(), NG::GestureCollectIntervention::CONTINUE);
+        CHECK_NULL_RETURN(function->IsFunction(vm), NG::GestureCollectIntervention::CONTINUE);
+        PipelineContext::SetCallBackNode(node);
+        return ProcessOnGestureCollectIntercept(vm, function.ToLocal(), recognizers, touchRecognizers);
+    };
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, std::move(onGestureCollectIntercept));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, nullptr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

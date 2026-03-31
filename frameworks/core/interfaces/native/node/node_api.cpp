@@ -496,6 +496,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnCustomOverflowScroll,
     NodeModifier::SetOnStackOverflowScroll,
     NodeModifier::SetOnNeedSoftkeyboard,
+    NodeModifier::SetOnGestureCollectIntercept,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -748,6 +749,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnCustomOverflowScroll,
     NodeModifier::ResetOnStackOverflowScroll,
     NodeModifier::ResetOnNeedSoftkeyboard,
+    NodeModifier::ResetOnGestureCollectIntercept,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

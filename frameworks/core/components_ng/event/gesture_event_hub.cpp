@@ -26,6 +26,7 @@
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -100,9 +101,150 @@ bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
     return false;
 }
 
+
+void TruncateResponseLinkResult(ResponseLinkResult& result, size_t keepSize)
+{
+    if (result.size() <= keepSize) {
+        return;
+    }
+    auto it = result.begin();
+    std::advance(it, keepSize);
+    result.erase(it, result.end());
+}
+
+void CollectLeafTargetsForIntercept(const TouchTestResult& targets,
+    std::vector<RefPtr<NGGestureRecognizer>>& gestureRecognizers,
+    std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+{
+    for (const auto& target : targets) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(target);
+        if (recognizer) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            if (group) {
+                // Recursively flatten group recognizers to expose individual leaf recognizers
+                const auto& children = group->GetGroupRecognizer();
+                TouchTestResult childList(children.begin(), children.end());
+                CollectLeafTargetsForIntercept(childList, gestureRecognizers, touchRecognizers);
+            } else {
+                gestureRecognizers.emplace_back(recognizer);
+            }
+        } else {
+            touchRecognizers.emplace_back(target);
+        }
+    }
+}
+
+HitTestResult ApplyGestureCollectIntervention(
+    GestureCollectIntervention intervention, GestureCollectInterventionContext& context)
+{
+    switch (intervention) {
+        case GestureCollectIntervention::DISCARD_LOWER:
+            // Prevent ancestors from collecting events
+            context.blockHierarchy = true;
+            return HitTestResult::BLOCK_HIERARCHY;
+        case GestureCollectIntervention::DISCARD_HIGHER: {
+            // Discard all collected targets (including self)
+            context.newComingTargets.clear();
+            TruncateResponseLinkResult(context.responseLinkResult, context.responseLinkSnapshotSize);
+            context.newComingResponseLinkTargets.clear();
+            context.preventBubbling = false;
+            context.blockHierarchy = false;
+            context.consumed = false;
+            return HitTestResult::OUT_OF_REGION;
+        }
+        case GestureCollectIntervention::DISCARD_SELF: {
+            // Restore to child-only snapshot, removing self's contributions
+            context.newComingTargets = context.childSnapshot;
+            context.newComingResponseLinkTargets.clear();
+            context.preventBubbling = context.preventBubblingBeforeSelf;
+            context.blockHierarchy = context.blockHierarchyBeforeSelf;
+            context.consumed = false;
+            return context.testResultBeforeSelf;
+        }
+        case GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS:
+            // Stop sibling traversal but allow ancestors to continue
+            context.consumed = false;
+            return HitTestResult::STOP_SIBLINGS;
+        default:
+            return context.testResultBeforeSelf;
+    }
+}
+
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 GestureEventHub::~GestureEventHub() = default;
+
+
+GestureCollectIntervention GestureEventHub::TriggerOnGestureCollectIntercept(
+    const TouchTestResult& newComingTargets, const ResponseLinkResult& responseLinkResult)
+{
+    auto interceptFunc = GetOnGestureCollectInterceptFunc();
+    if (!interceptFunc) {
+        return GestureCollectIntervention::CONTINUE;
+    }
+
+    std::vector<RefPtr<NGGestureRecognizer>> gestureRecognizers;
+    std::vector<RefPtr<TouchEventTarget>> touchRecognizers;
+    CollectLeafTargetsForIntercept(newComingTargets, gestureRecognizers, touchRecognizers);
+    return interceptFunc(gestureRecognizers, touchRecognizers);
+}
+
+void GestureEventHub::HandleGestureCollectIntervention(
+    GestureCollectIntervention intervention, GestureCollectInterventionContext& context)
+{
+    if (intervention != GestureCollectIntervention::CONTINUE) {
+        context.testResult = ApplyGestureCollectIntervention(intervention, context);
+    }
+    if (intervention != GestureCollectIntervention::DISCARD_HIGHER &&
+        intervention != GestureCollectIntervention::DISCARD_SELF) {
+        TriggerShouldParallelInnerWith(context.newComingResponseLinkTargets, context.responseLinkResult);
+        context.responseLinkResult.splice(
+            context.responseLinkResult.end(), std::move(context.newComingResponseLinkTargets));
+    }
+}
+
+void GestureEventHub::TriggerShouldParallelInnerWith(
+    const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
+{
+    auto shouldBuiltInRecognizerParallelWithFunc = GetParallelInnerGestureToFunc();
+    CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
+    std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
+
+    for (const auto& item : responseLinkRecognizers) {
+        if (item.Invalid()) {
+            continue;
+        }
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item.Upgrade());
+        if (!recognizer) {
+            continue;
+        }
+        auto type = recognizer->GetRecognizerType();
+        sortedResponseLinkRecognizers[type].emplace_back(recognizer);
+    }
+
+    for (const auto& item : currentRecognizers) {
+        if (item.Invalid()) {
+            continue;
+        }
+        auto recognizer = item.Upgrade();
+        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+            continue;
+        }
+        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
+            continue;
+        }
+        auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
+        if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
+            continue;
+        }
+        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
+        if (result && item != result) {
+            recognizer->SetBridgeMode(true);
+            result->AddBridgeObj(item);
+        }
+    }
+}
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 {
@@ -721,6 +863,16 @@ void GestureEventHub::SetShouldBuildinRecognizerParallelWithFunc(
 ShouldBuiltInRecognizerParallelWithFunc GestureEventHub::GetParallelInnerGestureToFunc() const
 {
     return shouldBuildinRecognizerParallelWithFunc_;
+}
+
+void GestureEventHub::SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func)
+{
+    onGestureCollectInterceptFunc_ = std::move(func);
+}
+
+OnGestureCollectInterceptFunc GestureEventHub::GetOnGestureCollectInterceptFunc() const
+{
+    return onGestureCollectInterceptFunc_;
 }
 
 void GestureEventHub::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
