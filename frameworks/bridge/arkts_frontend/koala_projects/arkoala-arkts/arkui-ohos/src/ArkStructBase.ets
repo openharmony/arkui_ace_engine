@@ -33,7 +33,7 @@ import { KPointer } from '@koalaui/interop'
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
     public _initializers?: () => T_Options
-    reuseForceAddRefFlag: boolean = false;
+    public reuseForceAddRefFlag: boolean = false;
     private themeScopeId?: int32
 
     setPeer(peer: PeerNode): void {
@@ -124,7 +124,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         ArkComponentRoot(this, (node: PeerNode) => {
             if (callFromReuse) {
                 // reuse component should manually update dependency
-                this.reuseForceAddRefFlag = !this.reuseForceAddRefFlag;
+                // this flag should be switched when reuse to force record again
                 if (this.reuseForceAddRefFlag) {
                     // switch branch to force update dependency
                     this.updateStructWithMemoParameter(initializers);
