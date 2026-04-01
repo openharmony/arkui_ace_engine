@@ -638,6 +638,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectScope | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
@@ -719,6 +720,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectScope | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
@@ -742,6 +744,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
             buffer = EffectDirection.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectDirection | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
@@ -805,6 +808,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectScope | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
@@ -868,6 +872,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
             buffer = EffectFillStyle.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectFillStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setFillStyle_serialize(fillStyle: EffectFillStyle | undefined): void {
@@ -969,6 +974,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectScope | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
@@ -992,6 +998,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
             buffer = ReplaceEffectType.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: ReplaceEffectType | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setReplaceType_serialize(replaceType: ReplaceEffectType | undefined): void {
@@ -1073,6 +1080,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectScope | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
@@ -1096,6 +1104,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
             buffer = EffectDirection.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: EffectDirection | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
