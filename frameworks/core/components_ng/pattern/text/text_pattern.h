@@ -1026,6 +1026,9 @@ public:
     }
     ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
 
+    bool GetFallbackLineSpacingStyleOptimizeFlag();
+    void SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()
