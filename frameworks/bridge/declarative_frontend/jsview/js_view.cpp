@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_view.h"
 
 #include "base/log/ace_checker.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -97,6 +98,59 @@ void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
     JSViewFullUpdate::JSBind(object);
+}
+
+void JSView::FireOnShow()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnShow");
+        jsViewFunction_->ExecuteShow();
+    }
+}
+
+void JSView::FireOnHide()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnHide");
+        jsViewFunction_->ExecuteHide();
+    }
+}
+
+bool JSView::FireOnBackPress()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnBackPress");
+        return jsViewFunction_->ExecuteOnBackPress();
+    }
+    return false;
+}
+
+std::string JSView::FireOnFormRecycle()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnFormRecycle");
+        return jsViewFunction_->ExecuteOnFormRecycle();
+    }
+    LOGE("jsViewFunction_ is null");
+    return "";
+}
+
+void JSView::FireOnFormRecover(const std::string& statusData)
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnFormRecover");
+        return jsViewFunction_->ExecuteOnFormRecover(statusData);
+    }
+    LOGE("jsViewFunction_ is null");
+}
+
+void JSView::FireOnNewParam(const std::string& newParam)
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnNewParam");
+        return jsViewFunction_->ExecuteOnNewParam(newParam);
+    }
+    TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
 }
 
 void JSView::RenderJSExecution()

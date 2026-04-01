@@ -20,6 +20,7 @@
 #include "core/components/box/box_component_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/padding/padding_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {

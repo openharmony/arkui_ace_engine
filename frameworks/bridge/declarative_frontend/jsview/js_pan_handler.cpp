@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
