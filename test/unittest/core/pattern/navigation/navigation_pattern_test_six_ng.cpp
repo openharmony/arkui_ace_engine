@@ -605,36 +605,24 @@ HWTEST_F(NavigationPatternTestSixNg, ShouldFireHomeDestiationLifecycle001, TestS
     ASSERT_NE(destPattern, nullptr);
 
     // ON_SHOW
-    destPattern->SetIsOnShow(false);
-    EXPECT_TRUE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_SHOW, destPattern, -1, 0, true));
     destPattern->SetIsOnShow(true);
     EXPECT_FALSE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_SHOW, destPattern, -1, 0, true));
+        NavDestinationLifecycle::ON_SHOW, destPattern, 0, true));
 
     // ON_ACTIVE
-    destPattern->SetIsActive(false);
-    EXPECT_TRUE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_ACTIVE, destPattern, -1, 0, true));
     destPattern->SetIsActive(true);
     EXPECT_FALSE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_ACTIVE, destPattern, -1, 0, true));
+        NavDestinationLifecycle::ON_ACTIVE, destPattern, 0, true));
 
     // ON_INACTIVE
     destPattern->SetIsActive(true);
     EXPECT_TRUE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_INACTIVE, destPattern, -1, 0, true));
-    destPattern->SetIsActive(false);
-    EXPECT_FALSE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_INACTIVE, destPattern, -1, 0, true));
+        NavDestinationLifecycle::ON_INACTIVE, destPattern, 0, true));
 
     // ON_HIDE
     destPattern->SetIsOnShow(true);
     EXPECT_TRUE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_HIDE, destPattern, -1, 0, true));
-    destPattern->SetIsOnShow(false);
-    EXPECT_FALSE(navigationPattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_HIDE, destPattern, -1, 0, true));
+        NavDestinationLifecycle::ON_HIDE, destPattern, 0, true));
 
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
@@ -674,36 +662,23 @@ HWTEST_F(NavigationPatternTestSixNg, ShouldFireHomeDestiationLifecycle002, TestS
     // ON_SHOW
     destPattern->SetIsOnShow(false);
     EXPECT_TRUE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_SHOW, destPattern, -1, 0, false));
-    destPattern->SetIsOnShow(true);
-    EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_SHOW, destPattern, -1, 0, false));
-    EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_SHOW, destPattern, 1, 0, false));
+        NavDestinationLifecycle::ON_SHOW, destPattern, 0, false));
 
     // ON_ACTIVE
     destPattern->SetIsActive(false);
     EXPECT_TRUE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_ACTIVE, destPattern, -1, 0, false));
+        NavDestinationLifecycle::ON_ACTIVE, destPattern, 0, false));
     EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_ACTIVE, destPattern, -1, 1, false));
+        NavDestinationLifecycle::ON_ACTIVE, destPattern, 1, false));
 
     // ON_INACTIVE
     destPattern->SetIsActive(true);
     EXPECT_TRUE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_INACTIVE, destPattern, -1, 0, false));
-    EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_INACTIVE, destPattern, -1, 1, false));
-
+        NavDestinationLifecycle::ON_INACTIVE, destPattern, 0, false));
     // ON_HIDE
     destPattern->SetIsOnShow(true);
     EXPECT_TRUE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_HIDE, destPattern, -1, 0, false));
-    destPattern->SetIsOnShow(false);
-    EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_HIDE, destPattern, -1, 0, false));
-    EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_HIDE, destPattern, 1, 0, false));
+        NavDestinationLifecycle::ON_HIDE, destPattern, 0, false));
 }
 
 /**
@@ -735,9 +710,9 @@ HWTEST_F(NavigationPatternTestSixNg, ShouldFireHomeDestiationLifecycle003, TestS
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
     EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_WILL_APPEAR, destPattern, -1, 0, true));
+        NavDestinationLifecycle::ON_WILL_APPEAR, destPattern, 0, true));
     EXPECT_FALSE(pattern->ShouldFireHomeDestiationLifecycle(
-        NavDestinationLifecycle::ON_WILL_APPEAR, destPattern, -1, 0, false));
+        NavDestinationLifecycle::ON_WILL_APPEAR, destPattern, 0, false));
 
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
