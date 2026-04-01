@@ -54,6 +54,7 @@ def load_config(config_path):
 
     Returns (ignore_set, native_list). Both empty if file missing or invalid.
     """
+    include_list = set()
     ignore_list = set()
     native_list = []
 
@@ -70,6 +71,11 @@ def load_config(config_path):
             config = json.load(f)
 
         managed = config.get('managed', {})
+        if isinstance(managed.get('include'), list):
+            for item in managed['include']:
+                normalized = str(item).replace('\\', '/')
+                include_list.add(normalized)
+            print(f"Loaded {len(include_list)} files from managed include list")
         if isinstance(managed.get('ignore'), list):
             for item in managed['ignore']:
                 normalized = str(item).replace('\\', '/')
@@ -89,10 +95,10 @@ def load_config(config_path):
     except Exception as e:
         print(f"Warning: Error reading config file: {e}")
 
-    return ignore_list, native_list
+    return include_list, ignore_list, native_list
 
 
-def copy_modifier_files(src_dir, dst_dir, ignore_list):
+def copy_modifier_files(src_dir, dst_dir, include_list, ignore_list):
     """
     Copy all *Modifier.ets files from source to destination,
     excluding files in the ignore list.
@@ -126,6 +132,17 @@ def copy_modifier_files(src_dir, dst_dir, ignore_list):
 
     copied_count = 0
     skipped_count = 0
+
+    for file in include_list:
+        included_file = src_path / file
+        if included_file.exists():
+            dst_file = dst_path / file
+            dst_file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(included_file, dst_file)
+            print(f"Included (forced copy): {file}")
+            copied_count += 1
+        else:
+            raise Exception(f"Included file not found: {file}")
 
     for src_file in sorted(modifier_files):
         src_file_path = Path(src_file)
@@ -213,7 +230,10 @@ def main():
     print("=" * 60)
     print()
 
-    ignore_list, native_list = load_config(args.config)
+    include_list, ignore_list, native_list = load_config(args.config)
+    if include_list:
+        print(f"Include list: {sorted(include_list)}")
+        print()
     if ignore_list:
         print(f"Ignore list: {sorted(ignore_list)}")
         print()
@@ -221,6 +241,7 @@ def main():
     success = copy_modifier_files(
         str(Path(args.source) / "sig/arkoala-arkts/arkui/generated"),
         args.destination,
+        include_list,
         ignore_list,
     )
 

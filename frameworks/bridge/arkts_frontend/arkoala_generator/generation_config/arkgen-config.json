@@ -697,7 +697,8 @@
             "WithTheme",
             "SaveButton",
             "PasteButton",
-            "CustomSpan"
+            "CustomSpan",
+            "TouchEvent"
         ],
         "ignoreEntry": [
             "Optional",

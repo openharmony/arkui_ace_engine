@@ -1,5 +1,8 @@
 {
     "managed": {
+        "include": [
+            "framework/arkts/ArkUIGeneratedNativeModule.ets"
+        ],
         "ignore": [
             "CommonMethodModifier.ets",
             "ImageModifier.ets",
