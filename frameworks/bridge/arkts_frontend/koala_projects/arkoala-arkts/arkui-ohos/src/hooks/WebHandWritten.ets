@@ -15,7 +15,7 @@
 
 import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from "#generated"
 import { ArkUIAniModule } from "arkui.ani"
-import { canIUse } from '@internal.full.global'
+// import { canIUse } from '@internal.full.global'
 
 export class WebHandWritten {
     static hookJavaScriptProxyImpl(component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
@@ -34,9 +34,9 @@ export class WebHandWritten {
 
     static hookConfirmImpl(handler: MaterializedBase, 
                             identity: string,credentialTypeOrCertChainFile: CredentialType | string): void {
-         if (credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
-                !canIUse("SystemCapability.Security.Huks.CryptoExtension")) {
-            throw new Error(801, "Capability not supported.");
-        }
+        //  if (credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
+        //         !canIUse("SystemCapability.Security.Huks.CryptoExtension")) {
+        //     throw new Error(801, "Capability not supported.");
+        // }
     }
 }

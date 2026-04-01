@@ -25,7 +25,8 @@
         "SectionOptions",
         "LengthMetrics",
         "ColorMetrics",
-        "CustomSpan"
+        "CustomSpan",
+        "TouchEvent"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -52,6 +53,10 @@
         {
             "from": "arkui.Graphics.ColorMetrics",
             "to": "arkui.component.idlize.ColorMetricsExt"
+        },
+        {
+            "from": "ohos.base.RecordData",
+            "to": "(Object or undefined)"
         },
         {
             "from": "arkui.component.styledString.CustomSpan",
@@ -505,7 +510,8 @@
         "PinchGestureHandler",
         "TapGestureHandler",
         "RotationGestureHandler",
-        "SwipeGestureHandler"
+        "SwipeGestureHandler",
+        "RawInputEventWrapper"
     ],
     "boundProperties": {
         "Checkbox": [

@@ -42,4 +42,7 @@ build_component_ng("linear_split_pattern_ng") {
     }
     ark_sources += [ "linear_split_model_impl.cpp" ]
   }
+  deps = [
+    "../../../../bridge/arkts_frontend/arkoala_generator:idlize_gen",
+  ]
 }

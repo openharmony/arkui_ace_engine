@@ -178,6 +178,10 @@ ohos_shared_library("ArkoalaNative_ark") {
 
   configs = [ ":arkoala_native_config" ]
 
+  deps = [
+    "./arkoala_generator:idlize_gen"
+  ]
+
   external_deps = [
     "hilog:hilog_ndk",
     "hilog:libhilog",

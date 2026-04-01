@@ -1,3 +1,4 @@
 out/
+sdk-patched/
 node_modules/
 package-lock.json

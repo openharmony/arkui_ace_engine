@@ -48,7 +48,7 @@ interface LengthMetricsCustom {
 
 [Entity=Class]
 interface UIContextGetInfo {
-    static (observer.NavigationInfo or undefined) getNavigationInfoByUniqueId(i64 id);
+    static (observer.NavigationInfo or undefined) getNavigationInfoByUniqueId(i32 id);
     static void enableSwipeBack((boolean or undefined) enabled);
 };
 

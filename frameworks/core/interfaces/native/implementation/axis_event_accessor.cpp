@@ -255,6 +255,14 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
         info->SetScrollStep(value.value());
     }
 }
+Opt_Int32 GetEventHandleIdImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
+void SetEventHandleIdImpl(Ark_AxisEvent peer,
+                          const Opt_Int32* eventHandleId)
+{
+}
 void PropagationImpl(Ark_AxisEvent peer)
 {
     CHECK_NULL_VOID(peer);
@@ -334,6 +342,8 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
+        AxisEventAccessor::GetEventHandleIdImpl,
+        AxisEventAccessor::SetEventHandleIdImpl,
         AxisEventAccessor::GetGlobalDisplayXImpl,
         AxisEventAccessor::SetGlobalDisplayXImpl,
         AxisEventAccessor::GetGlobalDisplayYImpl,

@@ -37,43 +37,59 @@ import glob
 from pathlib import Path
 
 
-def load_ignore_list(config_path):
+def load_config(config_path):
     """
-    Load ignore list from configuration file.
+    Load configuration from JSON file.
 
-    The config file should be a JSON file with relative paths from source dir:
+    Config format:
     {
-        "ignore": ["File1Modifier.ets", "subdir/File2Modifier.ets"]
+        "managed": {
+            "ignore": ["File1Modifier.ets", ...]
+        },
+        "native": [
+            {"from": "relative/from/outDir", "to": "relative/from/aceRoot"},
+            ...
+        ]
     }
 
-    Returns an empty set if file doesn't exist or is invalid.
+    Returns (ignore_set, native_list). Both empty if file missing or invalid.
     """
     ignore_list = set()
+    native_list = []
 
     if not config_path:
-        return ignore_list
+        return ignore_list, native_list
 
     config_file = Path(config_path)
     if not config_file.exists():
         print(f"Warning: Config file not found: {config_path}")
-        return ignore_list
+        return ignore_list, native_list
 
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
 
-        if isinstance(config.get('ignore'), list):
-            # Normalize paths to use forward slashes
-            for item in config['ignore']:
+        managed = config.get('managed', {})
+        if isinstance(managed.get('ignore'), list):
+            for item in managed['ignore']:
                 normalized = str(item).replace('\\', '/')
                 ignore_list.add(normalized)
-            print(f"Loaded {len(ignore_list)} files from ignore list")
+            print(f"Loaded {len(ignore_list)} files from managed ignore list")
+
+        if isinstance(config.get('native'), list):
+            for entry in config['native']:
+                if isinstance(entry, dict) and 'from' in entry and 'to' in entry:
+                    native_list.append({
+                        'from': str(entry['from']).replace('\\', '/'),
+                        'to': str(entry['to']).replace('\\', '/'),
+                    })
+            print(f"Loaded {len(native_list)} native file mappings")
     except json.JSONDecodeError as e:
         print(f"Warning: Failed to parse config file: {e}")
     except Exception as e:
         print(f"Warning: Error reading config file: {e}")
 
-    return ignore_list
+    return ignore_list, native_list
 
 
 def copy_modifier_files(src_dir, dst_dir, ignore_list):
@@ -141,6 +157,32 @@ def copy_modifier_files(src_dir, dst_dir, ignore_list):
 
     return True
 
+def copy_native_files(out_dir, config_dir, native_list):
+    """
+    Copy native (C/C++) files from generator output to ace_engine tree.
+
+    Each entry has 'from' (relative to out_dir) and 'to' (relative to config_dir).
+    """
+    out_path = Path(out_dir)
+    cfg_path = Path(config_dir)
+
+    copied = 0
+    for entry in native_list:
+        src = out_path / entry['from']
+        dst = cfg_path / entry['to']
+
+        if not src.exists():
+            print(f"  Skipped (not found): {entry['from']}")
+            continue
+
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        print(f"  Copied native: {entry['from']} -> {entry['to']}")
+        copied += 1
+
+    print(f"\nNative files: {copied} copied, {len(native_list) - copied} skipped")
+    return True
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -151,17 +193,17 @@ def main():
     parser.add_argument(
         '--source', '-s',
         required=True,
-        help='Source directory containing *Modifier.ets files'
+        help='Source directory containing generator output (out/)'
     )
     parser.add_argument(
         '--destination', '-d',
         required=True,
-        help='Destination directory to copy files to'
+        help='Destination directory to copy Modifier.ets files to'
     )
     parser.add_argument(
         '--config', '-c',
         required=False,
-        help='JSON configuration file containing ignore list of files to skip'
+        help='JSON configuration file with managed ignore list and native file mappings'
     )
 
     args = parser.parse_args()
@@ -171,14 +213,23 @@ def main():
     print("=" * 60)
     print()
 
-    # Load ignore list from config
-    ignore_list = load_ignore_list(args.config)
+    ignore_list, native_list = load_config(args.config)
     if ignore_list:
         print(f"Ignore list: {sorted(ignore_list)}")
         print()
 
-    # Copy files
-    success = copy_modifier_files(args.source, args.destination, ignore_list)
+    success = copy_modifier_files(
+        str(Path(args.source) / "sig/arkoala-arkts/arkui/generated"),
+        args.destination,
+        ignore_list,
+    )
+
+    if native_list and args.config:
+        config_dir = str(Path(args.config).parent)
+        print()
+        success = copy_native_files(args.source, config_dir, native_list) and success
+    elif native_list:
+        print("\nWarning: native entries found but --config not provided, skipping native copy")
 
     if success:
         print("\nDeployment completed successfully!")

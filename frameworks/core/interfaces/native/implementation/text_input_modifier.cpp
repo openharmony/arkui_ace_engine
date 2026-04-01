@@ -389,6 +389,15 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
     TextFieldModelNG::SetOnCopy(frameNode, onCopy);
 }
+
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // TextInputModelNG::SetSetOnWillCopy(frameNode, convValue);
+}
 void SetOnCutImpl(Ark_NativePointer node,
                   const Opt_Callback_String_Void* value)
 {
@@ -404,6 +413,14 @@ void SetOnCutImpl(Ark_NativePointer node,
         arkCallback.InvokeSync(Converter::ArkValue<Ark_String>(cutStr, &ctx));
     };
     TextFieldModelNG::SetOnCut(frameNode, onCut);
+}
+void SetOnWillCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // TextInputModelNG::SetSetOnWillCut(frameNode, convValue);
 }
 void SetOnPasteImpl(Ark_NativePointer node,
                     const Opt_OnPasteCallback* value)
@@ -1237,7 +1254,9 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetFontWeightImpl,
         TextInputAttributeModifier::SetFontFamilyImpl,
         TextInputAttributeModifier::SetOnCopyImpl,
+        TextInputAttributeModifier::SetOnWillCopyImpl,
         TextInputAttributeModifier::SetOnCutImpl,
+        TextInputAttributeModifier::SetOnWillCutImpl,
         TextInputAttributeModifier::SetOnPasteImpl,
         TextInputAttributeModifier::SetCopyOptionImpl,
         TextInputAttributeModifier::SetShowPasswordIconImpl,
@@ -1298,10 +1317,10 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextInputAttributeModifier::SetTextDirectionImpl,
         TextInputAttributeModifier::SetVoiceButtonImpl,
+        TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,
-        TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

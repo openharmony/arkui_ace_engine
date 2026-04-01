@@ -490,6 +490,14 @@ void SetOnCopyImpl(Ark_NativePointer node,
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // TextModelNG::SetSetOnWillCopy(frameNode, convValue);
+}
 void SetCaretColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
@@ -987,6 +995,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,
+        TextAttributeModifier::SetOnWillCopyImpl,
         TextAttributeModifier::SetCaretColorImpl,
         TextAttributeModifier::SetSelectedBackgroundColorImpl,
         TextAttributeModifier::SetEllipsisModeImpl,
@@ -1017,12 +1026,12 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetTextDirectionImpl,
+        TextAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
-        TextAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextModifierImpl;
 }

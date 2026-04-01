@@ -335,6 +335,14 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // TextAreaModelNG::SetSetOnWillCopy(frameNode, convValue);
+}
 void SetOnCutImpl(Ark_NativePointer node,
                   const Opt_synthetic_Callback_String_Void* value)
 {
@@ -351,6 +359,14 @@ void SetOnCutImpl(Ark_NativePointer node,
         arkCallback.InvokeSync(textArkString);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
+}
+void SetOnWillCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // TextAreaModelNG::SetSetOnWillCut(frameNode, convValue);
 }
 void SetOnPasteImpl(Ark_NativePointer node,
                     const Opt_Callback_String_PasteEvent_Void* value)
@@ -1051,7 +1067,9 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetOnContentScrollImpl,
         TextAreaAttributeModifier::SetOnEditChangeImpl,
         TextAreaAttributeModifier::SetOnCopyImpl,
+        TextAreaAttributeModifier::SetOnWillCopyImpl,
         TextAreaAttributeModifier::SetOnCutImpl,
+        TextAreaAttributeModifier::SetOnWillCutImpl,
         TextAreaAttributeModifier::SetOnPasteImpl,
         TextAreaAttributeModifier::SetCopyOptionImpl,
         TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
@@ -1100,12 +1118,12 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetTextDirectionImpl,
         TextAreaAttributeModifier::SetVoiceButtonImpl,
         TextAreaAttributeModifier::SetHorizontalScrollingImpl,
+        TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetMaxLinesImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,
         TextAreaAttributeModifier::SetLineSpacingImpl,
-        TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

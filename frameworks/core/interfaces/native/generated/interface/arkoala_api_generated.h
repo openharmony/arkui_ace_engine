@@ -190,7 +190,7 @@ typedef struct InteropObject {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 140
+#define GENERATED_ARKUI_FULL_API_VERSION 9999
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -290,6 +290,12 @@ typedef struct Opt_AccessibilityHoverEvent Opt_AccessibilityHoverEvent;
 typedef struct AppearSymbolEffectPeer AppearSymbolEffectPeer;
 typedef struct AppearSymbolEffectPeer* Ark_AppearSymbolEffect;
 typedef struct Opt_AppearSymbolEffect Opt_AppearSymbolEffect;
+typedef struct ArcSwiperContentTransitionProxyPeer ArcSwiperContentTransitionProxyPeer;
+typedef struct ArcSwiperContentTransitionProxyPeer* Ark_ArcSwiperContentTransitionProxy;
+typedef struct Opt_ArcSwiperContentTransitionProxy Opt_ArcSwiperContentTransitionProxy;
+typedef struct ArcSwiperContentTransitionProxyInnerPeer ArcSwiperContentTransitionProxyInnerPeer;
+typedef struct ArcSwiperContentTransitionProxyInnerPeer* Ark_ArcSwiperContentTransitionProxyInner;
+typedef struct Opt_ArcSwiperContentTransitionProxyInner Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct ArcSwiperControllerHelperPeer ArcSwiperControllerHelperPeer;
 typedef struct ArcSwiperControllerHelperPeer* Ark_ArcSwiperControllerHelper;
 typedef struct Opt_ArcSwiperControllerHelper Opt_ArcSwiperControllerHelper;
@@ -677,7 +683,6 @@ typedef struct Opt_Number Opt_Number;
 typedef struct NumericTextTransitionPeer NumericTextTransitionPeer;
 typedef struct NumericTextTransitionPeer* Ark_NumericTextTransition;
 typedef struct Opt_NumericTextTransition Opt_NumericTextTransition;
-typedef struct Opt_Object Opt_Object;
 typedef struct OffscreenCanvasPeer OffscreenCanvasPeer;
 typedef struct OffscreenCanvasPeer* Ark_OffscreenCanvas;
 typedef struct Opt_OffscreenCanvas Opt_OffscreenCanvas;
@@ -726,6 +731,8 @@ typedef struct Opt_PanRecognizer Opt_PanRecognizer;
 typedef struct ParagraphStylePeer ParagraphStylePeer;
 typedef struct ParagraphStylePeer* Ark_ParagraphStyle;
 typedef struct Opt_ParagraphStyle Opt_ParagraphStyle;
+typedef struct Ark_Partial_Colors Ark_Partial_Colors;
+typedef struct Opt_Partial_Colors Opt_Partial_Colors;
 typedef struct PasteEventPeer PasteEventPeer;
 typedef struct PasteEventPeer* Ark_PasteEvent;
 typedef struct Opt_PasteEvent Opt_PasteEvent;
@@ -838,8 +845,6 @@ typedef struct Opt_ScrollResult Opt_ScrollResult;
 typedef struct SearchControllerPeer SearchControllerPeer;
 typedef struct SearchControllerPeer* Ark_SearchController;
 typedef struct Opt_SearchController Opt_SearchController;
-typedef struct Ark_Set_String Ark_Set_String;
-typedef struct Opt_Set_String Opt_Set_String;
 typedef struct ShaderStylePeer ShaderStylePeer;
 typedef struct ShaderStylePeer* Ark_ShaderStyle;
 typedef struct Opt_ShaderStyle Opt_ShaderStyle;
@@ -914,8 +919,6 @@ typedef struct TapRecognizerPeer* Ark_TapRecognizer;
 typedef struct Opt_TapRecognizer Opt_TapRecognizer;
 typedef struct Ark_text_FontFeature Ark_text_FontFeature;
 typedef struct Opt_text_FontFeature Opt_text_FontFeature;
-typedef struct Ark_text_FontVariation Ark_text_FontVariation;
-typedef struct Opt_text_FontVariation Opt_text_FontVariation;
 typedef struct text_ParagraphPeer text_ParagraphPeer;
 typedef struct text_ParagraphPeer* Ark_text_Paragraph;
 typedef struct Opt_text_Paragraph Opt_text_Paragraph;
@@ -1715,6 +1718,8 @@ typedef struct Callback_StateStylesChange Callback_StateStylesChange;
 typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
 typedef struct Callback_String Callback_String;
 typedef struct Opt_Callback_String Opt_Callback_String;
+typedef struct Callback_String_Boolean Callback_String_Boolean;
+typedef struct Opt_Callback_String_Boolean Opt_Callback_String_Boolean;
 typedef struct Callback_String_PasteEvent_Void Callback_String_PasteEvent_Void;
 typedef struct Opt_Callback_String_PasteEvent_Void Opt_Callback_String_PasteEvent_Void;
 typedef struct Callback_String_SurfaceRect_Void Callback_String_SurfaceRect_Void;
@@ -1893,6 +1898,8 @@ typedef struct OnHoverCallback OnHoverCallback;
 typedef struct Opt_OnHoverCallback Opt_OnHoverCallback;
 typedef struct OnHoverStatusChangeCallback OnHoverStatusChangeCallback;
 typedef struct Opt_OnHoverStatusChangeCallback Opt_OnHoverStatusChangeCallback;
+typedef struct OnInputmethodAttachedCallback OnInputmethodAttachedCallback;
+typedef struct Opt_OnInputmethodAttachedCallback Opt_OnInputmethodAttachedCallback;
 typedef struct OnIntelligentTrackingPreventionCallback OnIntelligentTrackingPreventionCallback;
 typedef struct Opt_OnIntelligentTrackingPreventionCallback Opt_OnIntelligentTrackingPreventionCallback;
 typedef struct OnItemDragStartCallback OnItemDragStartCallback;
@@ -1983,6 +1990,8 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct OnWillStopDraggingCallback OnWillStopDraggingCallback;
 typedef struct Opt_OnWillStopDraggingCallback Opt_OnWillStopDraggingCallback;
+typedef struct Opt_Object Opt_Object;
+typedef struct Opt_Opt_Object Opt_Opt_Object;
 typedef struct PageMapNodeBuilder PageMapNodeBuilder;
 typedef struct Opt_PageMapNodeBuilder Opt_PageMapNodeBuilder;
 typedef struct PasteButtonCallback PasteButtonCallback;
@@ -2129,12 +2138,6 @@ typedef struct Ark_ArcScrollBarOptions Ark_ArcScrollBarOptions;
 typedef struct Opt_ArcScrollBarOptions Opt_ArcScrollBarOptions;
 typedef struct Ark_ArcSwiperContentAnimatedTransition Ark_ArcSwiperContentAnimatedTransition;
 typedef struct Opt_ArcSwiperContentAnimatedTransition Opt_ArcSwiperContentAnimatedTransition;
-typedef struct ArcSwiperContentTransitionProxyPeer ArcSwiperContentTransitionProxyPeer;
-typedef struct ArcSwiperContentTransitionProxyPeer* Ark_ArcSwiperContentTransitionProxy;
-typedef struct Opt_ArcSwiperContentTransitionProxy Opt_ArcSwiperContentTransitionProxy;
-typedef struct ArcSwiperContentTransitionProxyInnerPeer ArcSwiperContentTransitionProxyInnerPeer;
-typedef struct ArcSwiperContentTransitionProxyInnerPeer* Ark_ArcSwiperContentTransitionProxyInner;
-typedef struct Opt_ArcSwiperContentTransitionProxyInner Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct Ark_ArkListOptions Ark_ArkListOptions;
 typedef struct Opt_ArkListOptions Opt_ArkListOptions;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
@@ -2661,6 +2664,8 @@ typedef struct Ark_TargetInfo Ark_TargetInfo;
 typedef struct Opt_TargetInfo Opt_TargetInfo;
 typedef struct Ark_TerminationInfo Ark_TerminationInfo;
 typedef struct Opt_TerminationInfo Opt_TerminationInfo;
+typedef struct Ark_text_FontVariation Ark_text_FontVariation;
+typedef struct Opt_text_FontVariation Opt_text_FontVariation;
 typedef struct Ark_text_LineMetrics Ark_text_LineMetrics;
 typedef struct Opt_text_LineMetrics Opt_text_LineMetrics;
 typedef struct Ark_text_RectStyle Ark_text_RectStyle;
@@ -3971,7 +3976,6 @@ typedef enum Ark_AttributeModifierState {
     ARK_ATTRIBUTE_MODIFIER_STATE_FOCUSED = 2,
     ARK_ATTRIBUTE_MODIFIER_STATE_DISABLED = 3,
     ARK_ATTRIBUTE_MODIFIER_STATE_SELECTED = 4,
-    ARK_ATTRIBUTE_MODIFIER_STATE_ALL = 5,
 } Ark_AttributeModifierState;
 typedef struct Opt_AttributeModifierState {
     Ark_Tag tag;
@@ -4345,6 +4349,14 @@ typedef struct Opt_ColorSpace {
     Ark_Tag tag;
     Ark_ColorSpace value;
 } Opt_ColorSpace;
+typedef enum Ark_CompetitionStrategy {
+    ARK_COMPETITION_STRATEGY_DEFAULT = 0,
+    ARK_COMPETITION_STRATEGY_COMPETITION = 1,
+} Ark_CompetitionStrategy;
+typedef struct Opt_CompetitionStrategy {
+    Ark_Tag tag;
+    Ark_CompetitionStrategy value;
+} Opt_CompetitionStrategy;
 typedef enum Ark_ConsoleMessageSource {
     ARK_CONSOLE_MESSAGE_SOURCE_XML = 0,
     ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT = 1,
@@ -4695,6 +4707,15 @@ typedef struct Opt_DragResult {
     Ark_Tag tag;
     Ark_DragResult value;
 } Opt_DragResult;
+typedef enum Ark_drawing_FontEdging {
+    ARK_DRAWING_FONT_EDGING_ALIAS = 0,
+    ARK_DRAWING_FONT_EDGING_ANTI_ALIAS = 1,
+    ARK_DRAWING_FONT_EDGING_SUBPIXEL_ANTI_ALIAS = 2,
+} Ark_drawing_FontEdging;
+typedef struct Opt_drawing_FontEdging {
+    Ark_Tag tag;
+    Ark_drawing_FontEdging value;
+} Opt_drawing_FontEdging;
 typedef enum Ark_DynamicRangeMode {
     ARK_DYNAMIC_RANGE_MODE_HIGH = 0,
     ARK_DYNAMIC_RANGE_MODE_CONSTRAINT = 1,
@@ -5342,6 +5363,33 @@ typedef struct Opt_IndexerAlign {
     Ark_Tag tag;
     Ark_IndexerAlign value;
 } Opt_IndexerAlign;
+typedef enum Ark_InputEventInterceptAction {
+    ARK_INPUT_EVENT_INTERCEPT_ACTION_CONTINUE = 0,
+    ARK_INPUT_EVENT_INTERCEPT_ACTION_BLOCK = 1,
+} Ark_InputEventInterceptAction;
+typedef struct Opt_InputEventInterceptAction {
+    Ark_Tag tag;
+    Ark_InputEventInterceptAction value;
+} Opt_InputEventInterceptAction;
+typedef enum Ark_InputEventSubTypeMask {
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DOWN = 0,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_UP = 1,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DOWN = 2,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_UP = 3,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DOWN = 4,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_UP = 5,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DRAGGING = 6,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DRAGGING = 7,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DRAGGING = 8,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_DOWN = 9,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_UP = 10,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_DOWN = 11,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_UP = 12,
+} Ark_InputEventSubTypeMask;
+typedef struct Opt_InputEventSubTypeMask {
+    Ark_Tag tag;
+    Ark_InputEventSubTypeMask value;
+} Opt_InputEventSubTypeMask;
 typedef enum Ark_InputType {
     ARK_INPUT_TYPE_NORMAL = 0,
     ARK_INPUT_TYPE_NUMBER = 2,
@@ -5447,6 +5495,7 @@ typedef struct Opt_KeySource {
 typedef enum Ark_KeyType {
     ARK_KEY_TYPE_DOWN = 0,
     ARK_KEY_TYPE_UP = 1,
+    ARK_KEY_TYPE_CANCEL = 3,
 } Ark_KeyType;
 typedef struct Opt_KeyType {
     Ark_Tag tag;
@@ -5856,6 +5905,7 @@ typedef enum Ark_NavigationMode {
     ARK_NAVIGATION_MODE_STACK = 0,
     ARK_NAVIGATION_MODE_SPLIT = 1,
     ARK_NAVIGATION_MODE_AUTO = 2,
+    ARK_NAVIGATION_MODE_AUTO_WITH_ASPECT_RATIO = 3,
 } Ark_NavigationMode;
 typedef struct Opt_NavigationMode {
     Ark_Tag tag;
@@ -6525,6 +6575,14 @@ typedef struct Opt_ScrollBarDirection {
     Ark_Tag tag;
     Ark_ScrollBarDirection value;
 } Opt_ScrollBarDirection;
+typedef enum Ark_ScrollbarLayoutPolicy {
+    ARK_SCROLLBAR_LAYOUT_POLICY_CONTENT = 0,
+    ARK_SCROLLBAR_LAYOUT_POLICY_SYSTEM = 1,
+} Ark_ScrollbarLayoutPolicy;
+typedef struct Opt_ScrollbarLayoutPolicy {
+    Ark_Tag tag;
+    Ark_ScrollbarLayoutPolicy value;
+} Opt_ScrollbarLayoutPolicy;
 typedef enum Ark_ScrollDirection {
     ARK_SCROLL_DIRECTION_VERTICAL = 0,
     ARK_SCROLL_DIRECTION_HORIZONTAL = 1,
@@ -7694,6 +7752,16 @@ typedef struct Opt_WebElementType {
     Ark_Tag tag;
     Ark_WebElementType value;
 } Opt_WebElementType;
+typedef enum Ark_WebKeyboardAppearanceMode {
+    ARK_WEB_KEYBOARD_APPEARANCE_MODE_NONE_IMMERSIVE = 0,
+    ARK_WEB_KEYBOARD_APPEARANCE_MODE_IMMERSIVE = 1,
+    ARK_WEB_KEYBOARD_APPEARANCE_MODE_LIGHT_IMMERSIVE = 2,
+    ARK_WEB_KEYBOARD_APPEARANCE_MODE_DARK_IMMERSIVE = 3,
+} Ark_WebKeyboardAppearanceMode;
+typedef struct Opt_WebKeyboardAppearanceMode {
+    Ark_Tag tag;
+    Ark_WebKeyboardAppearanceMode value;
+} Opt_WebKeyboardAppearanceMode;
 typedef enum Ark_WebKeyboardAvoidMode {
     ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL = 0,
     ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT = 1,
@@ -7907,6 +7975,14 @@ typedef struct Opt_AppearSymbolEffect {
     Ark_Tag tag;
     Ark_AppearSymbolEffect value;
 } Opt_AppearSymbolEffect;
+typedef struct Opt_ArcSwiperContentTransitionProxy {
+    Ark_Tag tag;
+    Ark_ArcSwiperContentTransitionProxy value;
+} Opt_ArcSwiperContentTransitionProxy;
+typedef struct Opt_ArcSwiperContentTransitionProxyInner {
+    Ark_Tag tag;
+    Ark_ArcSwiperContentTransitionProxyInner value;
+} Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct Opt_ArcSwiperControllerHelper {
     Ark_Tag tag;
     Ark_ArcSwiperControllerHelper value;
@@ -8622,10 +8698,6 @@ typedef struct Opt_NumericTextTransition {
     Ark_Tag tag;
     Ark_NumericTextTransition value;
 } Opt_NumericTextTransition;
-typedef struct Opt_Object {
-    Ark_Tag tag;
-    Ark_Object value;
-} Opt_Object;
 typedef struct Opt_OffscreenCanvas {
     Ark_Tag tag;
     Ark_OffscreenCanvas value;
@@ -8779,6 +8851,14 @@ typedef struct Opt_ParagraphStyle {
     Ark_Tag tag;
     Ark_ParagraphStyle value;
 } Opt_ParagraphStyle;
+typedef struct Ark_Partial_Colors {
+    /* kind: Interface */
+    void *handle;
+} Ark_Partial_Colors;
+typedef struct Opt_Partial_Colors {
+    Ark_Tag tag;
+    Ark_Partial_Colors value;
+} Opt_Partial_Colors;
 typedef struct Opt_PasteEvent {
     Ark_Tag tag;
     Ark_PasteEvent value;
@@ -9024,14 +9104,6 @@ typedef struct Opt_SearchController {
     Ark_Tag tag;
     Ark_SearchController value;
 } Opt_SearchController;
-typedef struct Ark_Set_String {
-    /* kind: Interface */
-    void *handle;
-} Ark_Set_String;
-typedef struct Opt_Set_String {
-    Ark_Tag tag;
-    Ark_Set_String value;
-} Opt_Set_String;
 typedef struct Opt_ShaderStyle {
     Ark_Tag tag;
     Ark_ShaderStyle value;
@@ -9189,15 +9261,6 @@ typedef struct Opt_text_FontFeature {
     Ark_Tag tag;
     Ark_text_FontFeature value;
 } Opt_text_FontFeature;
-typedef struct Ark_text_FontVariation {
-    /* kind: Interface */
-    Ark_String axis;
-    Ark_Float64 value;
-} Ark_text_FontVariation;
-typedef struct Opt_text_FontVariation {
-    Ark_Tag tag;
-    Ark_text_FontVariation value;
-} Opt_text_FontVariation;
 typedef struct Opt_text_Paragraph {
     Ark_Tag tag;
     Ark_text_Paragraph value;
@@ -12709,6 +12772,16 @@ typedef struct Opt_Callback_String {
     Ark_Tag tag;
     Callback_String value;
 } Opt_Callback_String;
+typedef struct Callback_String_Boolean {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String data, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String data, const synthetic_Callback_Boolean_Void continuation);
+} Callback_String_Boolean;
+typedef struct Opt_Callback_String_Boolean {
+    Ark_Tag tag;
+    Callback_String_Boolean value;
+} Opt_Callback_String_Boolean;
 typedef struct Callback_String_PasteEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13599,6 +13672,16 @@ typedef struct Opt_OnHoverStatusChangeCallback {
     Ark_Tag tag;
     OnHoverStatusChangeCallback value;
 } Opt_OnHoverStatusChangeCallback;
+typedef struct OnInputmethodAttachedCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId);
+} OnInputmethodAttachedCallback;
+typedef struct Opt_OnInputmethodAttachedCallback {
+    Ark_Tag tag;
+    OnInputmethodAttachedCallback value;
+} Opt_OnInputmethodAttachedCallback;
 typedef struct OnIntelligentTrackingPreventionCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14049,6 +14132,14 @@ typedef struct Opt_OnWillStopDraggingCallback {
     Ark_Tag tag;
     OnWillStopDraggingCallback value;
 } Opt_OnWillStopDraggingCallback;
+typedef struct Opt_Object {
+    Ark_Tag tag;
+    Ark_Object value;
+} Opt_Object;
+typedef struct Opt_Opt_Object {
+    Ark_Tag tag;
+    Opt_Object value;
+} Opt_Opt_Object;
 typedef struct PageMapNodeBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14773,15 +14864,6 @@ typedef struct Opt_ArcSwiperContentAnimatedTransition {
     Ark_Tag tag;
     Ark_ArcSwiperContentAnimatedTransition value;
 } Opt_ArcSwiperContentAnimatedTransition;
-typedef struct Opt_ArcSwiperContentTransitionProxy {
-    Ark_Tag tag;
-    Ark_ArcSwiperContentTransitionProxy value;
-} Opt_ArcSwiperContentTransitionProxy;
-
-typedef struct Opt_ArcSwiperContentTransitionProxyInner {
-    Ark_Tag tag;
-    Ark_ArcSwiperContentTransitionProxyInner value;
-} Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct Ark_ArkListOptions {
     /* kind: Interface */
     Opt_Int32 initialIndex;
@@ -15339,6 +15421,8 @@ typedef struct Opt_CustomSpanDrawInfo {
 typedef struct Ark_CustomSpanMeasureInfo {
     /* kind: Interface */
     Ark_Float64 fontSize;
+    Opt_Float64 maxWidth;
+    Opt_LayoutPolicy layoutPolicy;
 } Ark_CustomSpanMeasureInfo;
 typedef struct Opt_CustomSpanMeasureInfo {
     Ark_Tag tag;
@@ -15366,8 +15450,8 @@ typedef struct Opt_CustomSpanWrapper {
 } Opt_CustomSpanWrapper;
 typedef struct Ark_CustomTheme {
     /* kind: Interface */
-    Opt_Object colors;
-    Opt_Object darkColors;
+    Opt_Partial_Colors colors;
+    Opt_Partial_Colors darkColors;
 } Ark_CustomTheme;
 typedef struct Opt_CustomTheme {
     Ark_Tag tag;
@@ -15864,7 +15948,7 @@ typedef struct Ark_FormLinkOptions {
     Opt_String bundleName;
     Opt_String abilityName;
     Opt_String uri;
-    Opt_Object params;
+    Opt_Opt_Object params;
 } Ark_FormLinkOptions;
 typedef struct Opt_FormLinkOptions {
     Ark_Tag tag;
@@ -17461,6 +17545,16 @@ typedef struct Opt_TerminationInfo {
     Ark_Tag tag;
     Ark_TerminationInfo value;
 } Opt_TerminationInfo;
+typedef struct Ark_text_FontVariation {
+    /* kind: Interface */
+    Ark_String axis;
+    Ark_Float64 value;
+    Opt_Boolean isNormalized;
+} Ark_text_FontVariation;
+typedef struct Opt_text_FontVariation {
+    Ark_Tag tag;
+    Ark_text_FontVariation value;
+} Opt_text_FontVariation;
 typedef struct Ark_text_LineMetrics {
     /* kind: Interface */
     Ark_Int32 startIndex;
@@ -17683,7 +17777,7 @@ typedef struct Opt_UIPickerComponentOptions {
 } Opt_UIPickerComponentOptions;
 typedef struct Ark_unifiedDataChannel_DataLoadInfo {
     /* kind: Interface */
-    Opt_Set_String types;
+    Opt_Array_String types;
     Opt_Int64 recordCount;
 } Ark_unifiedDataChannel_DataLoadInfo;
 typedef struct Opt_unifiedDataChannel_DataLoadInfo {
@@ -20183,6 +20277,7 @@ typedef struct Ark_TextDecorationOptions {
     Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
+    Opt_Float64 thicknessScale;
 } Ark_TextDecorationOptions;
 typedef struct Opt_TextDecorationOptions {
     Ark_Tag tag;
@@ -21519,6 +21614,7 @@ typedef struct Ark_text_TextStyle {
     Opt_Array_text_FontVariation fontVariations;
     Opt_text_TextBadgeType badgeType;
     Opt_text_FontWidth fontWidth;
+    Opt_drawing_FontEdging fontEdging;
 } Ark_text_TextStyle;
 typedef struct Opt_text_TextStyle {
     Ark_Tag tag;
@@ -22941,6 +23037,7 @@ typedef struct Ark_SheetOptions {
     Opt_Boolean enableFloatingDragBar;
     Opt_ModalTransition modalTransition;
     Opt_RenderStrategy radiusRenderStrategy;
+    Opt_uiMaterial_Material systemMaterial;
     Opt_ResourceColor maskColor;
     Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents detents;
     Opt_BlurStyle blurStyle;
@@ -24450,6 +24547,9 @@ typedef struct GENERATED_ArkUIContainerSpanModifier {
     void (*setContainerSpanOptions)(Ark_NativePointer node);
     void (*setTextBackgroundStyle)(Ark_NativePointer node,
                                    const Opt_TextBackgroundStyle* value);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUIContainerSpanModifier;
 
 typedef struct GENERATED_ArkUICounterModifier {
@@ -24932,7 +25032,7 @@ typedef struct GENERATED_ArkUILazyGridLayoutAttributeModifier {
     void (*setColumnsGap)(Ark_NativePointer node,
                           const Opt_LengthMetrics* value);
     void (*setOnVisibleIndexesChange)(Ark_NativePointer node,
-                        const Opt_OnVisibleIndexesChangeCallback* callback_);
+                                      const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyGridLayoutAttributeModifier;
 
 typedef struct GENERATED_ArkUILazyVGridLayoutModifier {
@@ -25192,7 +25292,8 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                                     const Opt_window_Orientation* value);
     void (*setEnableNavigationIndicator)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
-    void (*setTitle)(Ark_NativePointer node,
+    void (*setTitle)(Ark_VMContext vmContext,
+                     Ark_NativePointer node,
                      const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
                      const Opt_NavigationTitleOptions* options);
     void (*setHideTitleBar1)(Ark_NativePointer node,
@@ -25201,10 +25302,12 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setBackButtonIcon)(Ark_NativePointer node,
                               const Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier* icon,
                               const Opt_ResourceStr* accessibilityText);
-    void (*setMenus)(Ark_NativePointer node,
+    void (*setMenus)(Ark_VMContext vmContext,
+                     Ark_NativePointer node,
                      const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
                      const Opt_NavigationMenuOptions* options);
-    void (*setToolbarConfiguration)(Ark_NativePointer node,
+    void (*setToolbarConfiguration)(Ark_VMContext vmContext,
+                                    Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* toolbarParam,
                                     const Opt_NavigationToolbarOptions* options);
     void (*setHideToolBar)(Ark_NativePointer node,
@@ -25273,16 +25376,19 @@ typedef struct GENERATED_ArkUINavigationModifier {
     void (*setBackButtonIcon)(Ark_NativePointer node,
                               const Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier* icon,
                               const Opt_ResourceStr* accessibilityText);
-    void (*setTitle)(Ark_NativePointer node,
+    void (*setTitle)(Ark_VMContext vmContext,
+                     Ark_NativePointer node,
                      const Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                      const Opt_NavigationTitleOptions* options);
     void (*setHideTitleBar1)(Ark_NativePointer node,
                              const Opt_Boolean* hide,
                              const Opt_Boolean* animated);
-    void (*setMenus)(Ark_NativePointer node,
+    void (*setMenus)(Ark_VMContext vmContext,
+                     Ark_NativePointer node,
                      const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
                      const Opt_NavigationMenuOptions* options);
-    void (*setToolbarConfiguration)(Ark_NativePointer node,
+    void (*setToolbarConfiguration)(Ark_VMContext vmContext,
+                                    Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* value,
                                     const Opt_NavigationToolbarOptions* options);
     void (*setHideToolBar1)(Ark_NativePointer node,
@@ -25574,6 +25680,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                           const Opt_Boolean* value);
     void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
                                         const Opt_SelectedDragPreviewStyle* value);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setBindSelectionMenu)(Ark_NativePointer node,
                                  const Opt_RichEditorSpanType* spanType,
                                  const Opt_CustomNodeBuilder* content,
@@ -25585,8 +25693,6 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setPlaceholder)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_PlaceholderStyle* style);
-    void (*setOrphanCharOptimization)(Ark_NativePointer node,
-                                     const Opt_Boolean* value);
 } GENERATED_ArkUIRichEditorModifier;
 
 typedef struct GENERATED_ArkUIRichTextModifier {
@@ -25826,8 +25932,12 @@ typedef struct GENERATED_ArkUISearchModifier {
                                const Opt_OnContentScrollCallback* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_OnPasteCallback* value);
     void (*setCopyOption)(Ark_NativePointer node,
@@ -26222,6 +26332,9 @@ typedef struct GENERATED_ArkUISpanModifier {
     void (*setOnClick1)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* event,
                         const Opt_Float64* distanceThreshold);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUISpanModifier;
 
 typedef struct GENERATED_ArkUIStackModifier {
@@ -26369,6 +26482,9 @@ typedef struct GENERATED_ArkUISymbolSpanModifier {
                    const Opt_String* value);
     void (*setId)(Ark_NativePointer node,
                   const Opt_String* value);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUISymbolSpanModifier;
 
 typedef struct GENERATED_ArkUITabContentModifier {
@@ -26512,6 +26628,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                  const Opt_LineBreakStrategy* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setCaretColor)(Ark_NativePointer node,
                           const Opt_ResourceColor* value);
     void (*setSelectedBackgroundColor)(Ark_NativePointer node,
@@ -26572,6 +26690,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                         const Opt_SelectedDragPreviewStyle* value);
     void (*setTextDirection)(Ark_NativePointer node,
                              const Opt_TextDirection* value);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -26589,8 +26709,6 @@ typedef struct GENERATED_ArkUITextModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_TextResponseType* responseType,
                                  const Opt_SelectionMenuOptions* options);
-    void (*setOrphanCharOptimization)(Ark_NativePointer node,
-                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextModifier;
 
 typedef struct GENERATED_ArkUITextAreaModifier {
@@ -26638,8 +26756,12 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                             const Opt_synthetic_Callback_Boolean_Void* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_synthetic_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_Callback_String_PasteEvent_Void* value);
     void (*setCopyOption)(Ark_NativePointer node,
@@ -26736,6 +26858,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                            const Opt_VoiceButtonOptions* value);
     void (*setHorizontalScrolling)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_synthetic_Callback_String_Void* error);
@@ -26751,8 +26875,6 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setLineSpacing)(Ark_NativePointer node,
                            const Opt_LengthMetrics* value,
                            const Opt_LineSpacingOptions* options);
-    void (*setOrphanCharOptimization)(Ark_NativePointer node,
-                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextAreaModifier;
 
 typedef struct GENERATED_ArkUITextClockModifier {
@@ -26827,8 +26949,12 @@ typedef struct GENERATED_ArkUITextInputModifier {
                           const Opt_ResourceStr* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value);
+    void (*setOnWillCopy)(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value);
     void (*setOnCut)(Ark_NativePointer node,
                      const Opt_Callback_String_Void* value);
+    void (*setOnWillCut)(Ark_NativePointer node,
+                         const Opt_Callback_String_Boolean* value);
     void (*setOnPaste)(Ark_NativePointer node,
                        const Opt_OnPasteCallback* value);
     void (*setCopyOption)(Ark_NativePointer node,
@@ -26949,6 +27075,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                              const Opt_TextDirection* value);
     void (*setVoiceButton)(Ark_NativePointer node,
                            const Opt_VoiceButtonOptions* value);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
@@ -26958,8 +27086,6 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setShowCounter)(Ark_NativePointer node,
                            const Opt_Boolean* value,
                            const Opt_InputCounterOptions* options);
-    void (*setOrphanCharOptimization)(Ark_NativePointer node,
-                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextInputModifier;
 
 typedef struct GENERATED_ArkUITextPickerModifier {
@@ -27073,6 +27199,9 @@ typedef struct GENERATED_ArkUIToolBarItemModifier {
                                    Ark_Int32 flags);
     void (*setToolBarItemOptions)(Ark_NativePointer node,
                                   const Opt_ToolBarItemOptions* options);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUIToolBarItemModifier;
 
 typedef struct GENERATED_ArkUIUIExtensionComponentModifier {
@@ -27497,6 +27626,14 @@ typedef struct GENERATED_ArkUIWebModifier {
                                         const Opt_Boolean* value);
     void (*setAiSessionOptions)(Ark_NativePointer node,
                                 const Opt_Array_AISessionEvent* value);
+    void (*setEnableDrag)(Ark_NativePointer node,
+                          const Opt_Boolean* value);
+    void (*setScrollbarLayoutPolicy)(Ark_NativePointer node,
+                                     const Opt_ScrollbarLayoutPolicy* value);
+    void (*setKeyboardAppearance)(Ark_NativePointer node,
+                                  const Opt_WebKeyboardAppearanceMode* value);
+    void (*setOnInputmethodAttached)(Ark_NativePointer node,
+                                     const Opt_OnInputmethodAttachedCallback* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
@@ -27525,6 +27662,9 @@ typedef struct GENERATED_ArkUIWithThemeModifier {
                                    Ark_Int32 flags);
     void (*setWithThemeOptions)(Ark_NativePointer node,
                                 const Opt_WithThemeOptions* options);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUIWithThemeModifier;
 
 typedef struct GENERATED_ArkUIXComponentModifier {
@@ -27815,6 +27955,9 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Opt_Int32 (*getScrollStep)(Ark_AxisEvent peer);
     void (*setScrollStep)(Ark_AxisEvent peer,
                           const Opt_Int32* scrollStep);
+    Opt_Int32 (*getEventHandleId)(Ark_AxisEvent peer);
+    void (*setEventHandleId)(Ark_AxisEvent peer,
+                             const Opt_Int32* eventHandleId);
     Opt_Float64 (*getGlobalDisplayX)(Ark_AxisEvent peer);
     void (*setGlobalDisplayX)(Ark_AxisEvent peer,
                               const Opt_Float64* globalDisplayX);
@@ -28835,8 +28978,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Int32 (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_Int32 (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
-    Ark_NativePointer (*getFrameNodeById)(const Ark_Number* id);
-    Ark_NativePointer (*getFrameNodeByUniqueId)(Ark_Int32 id);
+    Ark_NativePointer (*getFrameNodeById0)(const Ark_Number* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId0)(Ark_Int32 id);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_Boolean (*createAnimation)(Ark_FrameNode peer,
@@ -28872,8 +29015,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                                            const Ark_Vector2* positionByWindow);
     void (*applyAttributesFinish)(Ark_FrameNode peer);
     Array_Pointer (*createFrameNodes)(Ark_Int32 count);
-    Array_Pointer (*getRenderNodesByFrameNodes)(const Array_Pointer* ptrs);
-    Array_I32 (*getIdsByFrameNodes)(const Array_Pointer* ptrs);
+    Array_Pointer (*getRenderNodeByFrameNodes)(const Array_Pointer* ptrs);
+    Array_I32 (*getIdByFrameNodes)(const Array_Pointer* ptrs);
     Ark_NativePointer (*getFrameNodeById1)(Ark_FrameNode peer,
                                            const Ark_String* id);
     Ark_NativePointer (*getFrameNodeByUniqueId1)(Ark_FrameNode peer,
@@ -29598,6 +29741,9 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Opt_Float64 (*getGlobalDisplayY)(Ark_MouseEvent peer);
     void (*setGlobalDisplayY)(Ark_MouseEvent peer,
                               const Opt_Float64* globalDisplayY);
+    Opt_Int32 (*getEventHandleId)(Ark_MouseEvent peer);
+    void (*setEventHandleId)(Ark_MouseEvent peer,
+                             const Opt_Int32* eventHandleId);
 } GENERATED_ArkUIMouseEventAccessor;
 
 typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
@@ -31796,7 +31942,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITextTimerControllerAccessor* (*getTextTimerControllerAccessor)();
     const GENERATED_ArkUIThemeOpsAccessor* (*getThemeOpsAccessor)();
     const GENERATED_ArkUIToggleExtenderAccessor* (*getToggleExtenderAccessor)();
-    // const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
     const GENERATED_ArkUITouchEventExtenderAccessor* (*getTouchEventExtenderAccessor)();
     const GENERATED_ArkUITouchRecognizerAccessor* (*getTouchRecognizerAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();
@@ -32135,3 +32280,4 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
+

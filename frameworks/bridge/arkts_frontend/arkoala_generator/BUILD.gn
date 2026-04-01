@@ -22,14 +22,27 @@ host_arch = "${host_os}-${host_cpu}"
 action("runner_gen_code") {
   script = "generation.py"
   args = [
-    rebase_path("${ohos_ets_api_path}"),
+    "--arkts-sdk-path",
+    rebase_path("${ohos_ets_api_path}/.."),
+    "--arkts-sdk-patch-path",
+    rebase_path("./sdk-patch"),
+    "--output",
     rebase_path("./out/"),
+    "--output-sdk-patched-path",
+    rebase_path("./sdk-patched/"),
+    "--arkgen-options-file",
     rebase_path("./generation_config/arkgen-config.json"),
+    "--scraper-options-file",
     rebase_path("./generation_config/scraper-config.json"),
+    "--etsgen-options-file",
     rebase_path("./generation_config/etsgen-config.json"),
+    "--arkgen-interop-types",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
+    "--panda-sdk-path",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/arkoala_generator/node_modules/@koalaui/libarkts/sdk"),
+    "--node-bin-path",
     rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--idl-files",
     rebase_path("./arkui_extra_idl/"),
   ]
   external_deps = [
@@ -45,7 +58,7 @@ action("idlize_gen") {
   script = "deploy.py"
   args = [
     "--source",
-    rebase_path("./out/sig/arkoala-arkts/arkui/generated"),
+    rebase_path("./out"),
     "--destination",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
     "--config",

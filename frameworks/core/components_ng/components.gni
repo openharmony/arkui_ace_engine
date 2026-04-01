@@ -72,7 +72,7 @@ template("build_component_ng") {
 
       deps = []
       deps += extra_deps
-      deps += []
+      deps += [ "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen" ]
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs

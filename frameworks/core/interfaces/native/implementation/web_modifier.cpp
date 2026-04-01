@@ -2478,6 +2478,38 @@ void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEv
     }
 #endif // WEB_SUPPORTED
 }
+void SetEnableDragImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetEnableDrag(frameNode, convValue);
+}
+void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                  const Opt_ScrollbarLayoutPolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetScrollbarLayoutPolicy(frameNode, convValue);
+}
+void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                               const Opt_WebKeyboardAppearanceMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetKeyboardAppearance(frameNode, convValue);
+}
+void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                  const Opt_OnInputmethodAttachedCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetOnInputmethodAttached(frameNode, convValue);
+}
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -3247,6 +3279,10 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
+        WebAttributeModifier::SetEnableDragImpl,
+        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
+        WebAttributeModifier::SetKeyboardAppearanceImpl,
+        WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,

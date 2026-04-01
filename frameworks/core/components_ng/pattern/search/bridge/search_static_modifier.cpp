@@ -339,6 +339,13 @@ void SetOnCopyImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node, const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SearchModelNG::SetSetOnWillCopy(frameNode, convValue);
+}
 void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -354,6 +361,13 @@ void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
         arkCallback.InvokeSync(textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
+}
+void SetOnWillCutImpl(Ark_NativePointer node, const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // SearchModelNG::SetSetOnWillCut(frameNode, convValue);
 }
 void SetOnPasteImpl(Ark_NativePointer node, const Opt_OnPasteCallback* value)
 {
@@ -865,7 +879,9 @@ const GENERATED_ArkUISearchModifier* GetSearchStaticModifier()
         SearchAttributeModifier::SetOnTextSelectionChangeImpl,
         SearchAttributeModifier::SetOnContentScrollImpl,
         SearchAttributeModifier::SetOnCopyImpl,
+        SearchAttributeModifier::SetOnWillCopyImpl,
         SearchAttributeModifier::SetOnCutImpl,
+        SearchAttributeModifier::SetOnWillCutImpl,
         SearchAttributeModifier::SetOnPasteImpl,
         SearchAttributeModifier::SetCopyOptionImpl,
         SearchAttributeModifier::SetMaxLengthImpl,
