@@ -141,6 +141,7 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
     { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("900"), "900" },
 };
 
+const std::string ITEM_DIVIDER_STR = "itemDivider";
 const std::string DIVIDER_DEFAULT_0_VP = "0.00vp";
 const std::string DIVIDER_DEFAULT_0_PX = "0.00px";
 const std::string DIVIDER_DEFAULT_0_INVALID = "0.00invalid";
@@ -398,7 +399,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrObject(fullJson, "itemDivider");
+    auto dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid values, color as Ark_Color aka int
@@ -408,7 +409,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_THAT(colorCheckValue, Eq("#FFFFFFFF"));
 
@@ -419,7 +420,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_THAT(colorCheckValue, Eq("#FF123456"));
 
@@ -430,7 +431,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_THAT(colorCheckValue, Eq("#11223344"));
 
@@ -440,7 +441,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1
         divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
         modifier_->setMenuItemDivider(node_, &divider);
         fullJson = GetJsonValue(node_);
-        dividerObject = GetAttrObject(fullJson, "itemDivider");
+        dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
         colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
         EXPECT_THAT(colorCheckValue, Eq(expectVal));
     }
@@ -455,7 +456,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrObject(fullJson, "itemDivider");
+    auto dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid strokeWidth value
@@ -464,7 +465,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
     EXPECT_THAT(strokeWidthCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
@@ -474,7 +475,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
     EXPECT_THAT(strokeWidthCheckValue, Eq(get<1>(DIVIDER_VALUES[2])));
 }
@@ -488,7 +489,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrObject(fullJson, "itemDivider");
+    auto dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid startMargin value
@@ -497,7 +498,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
     EXPECT_THAT(startMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
@@ -507,7 +508,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
     EXPECT_THAT(startMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[2])));
 }
@@ -521,7 +522,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrObject(fullJson, "itemDivider");
+    auto dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid endMargin value
@@ -530,7 +531,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
     EXPECT_THAT(endMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
@@ -540,7 +541,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
     EXPECT_THAT(endMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[2])));
 }
@@ -556,7 +557,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestUndefined, TestSize.Level1)
         Converter::ArkValue<Opt_DividerStyleOptions>();
     modifier_->setMenuItemDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrObject(fullJson, "itemDivider");
+    auto dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
     EXPECT_THAT(strokeWidthCheckValue, Eq(DIVIDER_DEFAULT_0_PX));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
@@ -576,7 +577,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestUndefined, TestSize.Level1)
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrObject(fullJson, "itemDivider");
+    dividerObject = GetAttrObject(fullJson, ITEM_DIVIDER_STR);
     strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
     EXPECT_THAT(strokeWidthCheckValue, Eq(DIVIDER_DEFAULT_0_PX));
     startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
