@@ -1799,6 +1799,7 @@ bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
     return true;
 }
 
+#ifdef FORM_SUPPORTED
 static void ReleaseWorkerSafeMemFunc(void* mapper)
 {
     if (mapper) {
@@ -1807,6 +1808,7 @@ static void ReleaseWorkerSafeMemFunc(void* mapper)
         delete fileMapper;
     }
 }
+#endif
 
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
@@ -1878,9 +1880,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 data->SetAutoReleaseMem(true);
                 return false;
             }
-            if (!arkRuntime->ExecuteModuleBufferSecure(data->GetDataPtr(), data->GetDataLen(), abcPath, true,
-                static_cast<void*>(data.get()))) {
-                data->SetAutoReleaseMem(true);
+            auto fileMapperPtr = data.release();
+            if (!arkRuntime->ExecuteModuleBufferSecure(fileMapperPtr->GetDataPtr(), fileMapperPtr->GetDataLen(),
+                abcPath, true, static_cast<void*>(fileMapperPtr))) {
+                fileMapperPtr->SetAutoReleaseMem(true);
+                delete fileMapperPtr;
                 return false;
             }
         }
