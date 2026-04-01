@@ -132,7 +132,6 @@ interface SegmentButtonThemeInterface {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
   SEGMENT_ITEM_TEXT_OVERFLOW: Resource,
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor,
-  SEGMENT_BUTTON_SHADOW: Resource,
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: Resource
 }
 
@@ -154,7 +153,6 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
   SEGMENT_ITEM_TEXT_OVERFLOW: $r('sys.float.segment_marquee'),
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary'),
-  SEGMENT_BUTTON_SHADOW: $r('sys.float.segment_button_shadow'),
   SEGMENT_TEXT_HORIZONTAL_PADDING: $r('sys.float.segment_button_text_l_r_padding'),
   SEGMENT_TEXT_VERTICAL_PADDING: $r('sys.float.segment_button_text_u_d_padding'),
   SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: $r('sys.float.segment_button_text_capsule_u_d_padding'),
@@ -608,7 +606,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true;
     }
-    let themePadding: number = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
+    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level2')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
     this.backgroundSystemMaterial = options.backgroundSystemMaterial;
     if (options instanceof TabSegmentButtonOptions) {
@@ -742,9 +740,6 @@ struct SelectItem {
           x: this.zoomScaleArray[this.selectedIndexes[0]],
           y: this.zoomScaleArray[this.selectedIndexes[0]]
         })
-        .shadow(numberToShadowStyle(resourceToNumber(this.getUIContext()?.getHostContext(),
-          segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
-          0)))
     }
   }
 }
@@ -1698,9 +1693,9 @@ export struct SegmentButton {
           .direction(this.options.direction)
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-          .systemMaterial(this.options.backgroundSystemMaterial)
           .borderRadius(this.getBackgroundBorderRadius())
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
+          .systemMaterial(this.options.backgroundSystemMaterial)
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

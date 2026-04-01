@@ -53,7 +53,6 @@ interface SegmentButtonThemeInterface {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
   SEGMENT_ITEM_TEXT_OVERFLOW: Resource,
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor,
-  SEGMENT_BUTTON_SHADOW: Resource,
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: Resource,
   SEGMENT_BUTTON_CONTAINER_SHAPE: Resource,
   SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: Resource,
@@ -80,7 +79,6 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
   SEGMENT_ITEM_TEXT_OVERFLOW: $r('sys.float.segment_marquee'),
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary'),
-  SEGMENT_BUTTON_SHADOW: $r('sys.float.segment_button_shadow'),
   SEGMENT_TEXT_HORIZONTAL_PADDING: $r('sys.float.segment_button_text_l_r_padding'),
   SEGMENT_TEXT_VERTICAL_PADDING: $r('sys.float.segment_button_text_u_d_padding'),
   SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: $r('sys.float.segment_button_text_capsule_u_d_padding'),
@@ -387,9 +385,9 @@ export class SegmentButtonOptions {
     this.buttonPadding = options.buttonPadding
     this.textPadding = options.textPadding
     this.type = options.type
-    this.backgroundBlurStyle =
-      options.backgroundBlurStyle ??
-        LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value as BlurStyle;
+    this.backgroundBlurStyle =	 
+       options.backgroundBlurStyle ??	 
+         LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value as BlurStyle;	 
     this.localizedTextPadding = options.localizedTextPadding
     this.localizedButtonPadding = options.localizedButtonPadding
     this.direction = options.direction ?? Direction.Auto
@@ -416,7 +414,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true
     }
-    let themePadding = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
+    let themePadding = LengthMetrics.resource($r('sys.float.padding_level2')).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
     this.backgroundSystemMaterial = options.backgroundSystemMaterial
   }
@@ -534,9 +532,6 @@ struct SelectItem {
             segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(this.isSegmentFocusStyleCustomized ? undefined :
-          resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
-            0) as ShadowStyle)
     }
   }
 }
@@ -1438,7 +1433,7 @@ export struct SegmentButton {
   private isSegmentFocusStyleCustomized(): boolean {
     if (this.isCustomizedCache === undefined) {
       this.isCustomizedCache = resourceToNumber(
-        this.getUIContext()?.getHostContext(),
+        this.getUIContext()?.getHostContext(), 
         segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED,
         1.0
       ) < 0.1; //PC platform returns 0.0, default returns 1.0, using <0.1 to differentiate platform styles.
@@ -1469,14 +1464,16 @@ export struct SegmentButton {
           .direction(this.options.direction)
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-          .systemMaterial(this.options.backgroundSystemMaterial)
           .borderRadius(getBackgroundBorderRadius(
             this.options,
             this.componentSize.height as number / 2
           ))
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
-          .borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH)
-          .borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
+          .borderWidth(this.options.backgroundSystemMaterial ? undefined 
+          : segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH)
+          .borderColor(this.options.backgroundSystemMaterial ? undefined 
+          : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
+          .systemMaterial(this.options.backgroundSystemMaterial)
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
