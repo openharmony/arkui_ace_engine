@@ -263,6 +263,7 @@ struct TextSelector {
     OnAccessibilityCallback onAccessibilityCallback_;
     int32_t lastValidStart = 0;
     std::string lastReportContent_;
+    std::string lastReportSelectionText_;
 };
 
 enum class TextSpanType : int32_t {

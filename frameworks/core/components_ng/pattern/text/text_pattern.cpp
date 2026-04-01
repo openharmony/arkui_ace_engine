@@ -2825,22 +2825,6 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
     contentChangeManager->OnTextChangeEnd(rect, rootNode->GetRectWithRender());
 }
 
-void TextPattern::ProcessSelectionOnMouseRelease(int32_t start, int32_t end,
-    const RefPtr<FrameNode>& host, const MouseInfo& info)
-{
-    if (isMousePressed_ || shiftFlag_) {
-        HandleSelectionChange(start, end);
-        ReportSelectedText();
-    }
-
-    if (IsSelected() && IsSelectedBindSelectionMenu()) {
-        selectOverlay_->SetMouseMenuOffset(OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
-        textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
-        ShowSelectOverlay({ .animation = true });
-    }
-}
-
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
     bool pressBetweenSelectedPosition = blockPress_;
@@ -2869,18 +2853,27 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (!IsSelected() || (pressBetweenSelectedPosition && !mouseUpAndDownPointChange_)) {
         start = -1;
         end = -1;
     }
 
-    ProcessSelectionOnMouseRelease(start, end, host, info);
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+        HandleSelectionChange(start, end);
+        ReportSelectedText();
+    }
+
+    if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
+        selectOverlay_->SetMouseMenuOffset(OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
+        textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
+        ShowSelectOverlay({ .animation = true });
+    }
     ResetMouseLeftPressedState();
     moveOverClickThreshold_ = false;
     mouseUpAndDownPointChange_ = false;
     // stop auto scroll.
+    auto host = GetHost();
     if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
         host->UnregisterNodeChangeListener();
     }
@@ -7112,11 +7105,16 @@ void TextPattern::ReportSelectedText(bool isRegister)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto res = UtfUtils::Str16DebugToStr8(
+        TextHighlightSelectedContent(textSelector_.GetStart(), textSelector_.GetEnd()));
     if (textSelector_.GetStart() != -1 && textSelector_.GetEnd() != -1) {
-        auto res = UtfUtils::Str16DebugToStr8(
-            TextHighlightSelectedContent(textSelector_.GetStart(), textSelector_.GetEnd()));
-        ReportSelectionChangeEvent(host->GetId(),
-            "selectionChange", res, textSelector_.GetStart(), textSelector_.GetEnd());
+        if (textSelector_.lastReportSelectionText_ != res) {
+            textSelector_.lastReportSelectionText_ = res;
+            ReportSelectionChangeEvent(host->GetId(),
+                "selectionChange", res, textSelector_.GetStart(), textSelector_.GetEnd());
+        }
+    } else {
+        textSelector_.lastReportSelectionText_ = "";
     }
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         auto pipeline = host->GetContext();
@@ -7124,8 +7122,6 @@ void TextPattern::ReportSelectedText(bool isRegister)
         auto selectOverlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(selectOverlayManager);
         auto id = selectOverlayManager->GetTextSelectionHolderId();
-        auto res = UtfUtils::Str16DebugToStr8(
-            TextHighlightSelectedContent(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
         if (id != host->GetId() && id != -1) {
             textSelector_.lastReportContent_ = "";
             return;
