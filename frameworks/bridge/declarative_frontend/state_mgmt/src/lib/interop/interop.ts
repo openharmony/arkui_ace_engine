@@ -274,6 +274,13 @@ function createObservedObject(value: Object): Object {
     return value;
 }
 
+function createV2ObservedObject(value: Object): Object {
+    if (!ObserveV2.IsObservedObjectV2(value) && !ObserveV2.IsMakeObserved(value) && !ObserveV2.IsProxiedObservedV2(value)) {
+        value = ObserveV2.autoProxyObject({ interopV2Value: value }, 'interopV2Value');
+    }
+    return value;
+}
+
 function invokeObserveFireChange(target: Object, key: string): void {
     ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
 }

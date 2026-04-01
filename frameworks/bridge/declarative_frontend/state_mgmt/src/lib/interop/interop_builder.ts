@@ -84,6 +84,12 @@ function enableCompatibleObservedV2ForStatic(value: Object,
   value[str] = [createFunc, recordFunc, updateFunc];
 }
 
+function enableCompatibleObservedV2ForStaticMeta(value: Object, 
+  createFunc: Function, recordFunc: Function, updateFunc: Function): void {
+  const str = '__staticCompatibleMetaFunc__';
+  value[str] = [createFunc, recordFunc, updateFunc];
+}
+
 function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
   let stateMeta = UIUtilsImpl.instance().makeObserved({value: 1});
   let addRef = (): void => { stateMeta.value }
