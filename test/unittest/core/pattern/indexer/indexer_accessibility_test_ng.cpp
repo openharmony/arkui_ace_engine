@@ -207,4 +207,87 @@ HWTEST_F(IndexerAccessibilityTestNg, ParseCommand001, TestSize.Level1)
     ret = pattern_->ParseCommand(R"({"cmd":"setAlphabetIndexer","params": {"value": "1"}})", select);
     EXPECT_EQ(ret, false);
 }
+
+namespace {
+    const int32_t TEST_INDEX_START = 0;
+    const int32_t TEST_INDEX_MIDDLE = 5;
+    const int32_t TEST_INDEX_END = 9;
+    const int32_t TEST_ARRAY_SIZE = 10;
+
+    std::vector<std::string> CreateTestArray(int32_t size)
+    {
+        std::vector<std::string> testArray;
+        for (int32_t i = 0; i < size; i++) {
+            testArray.push_back(std::string(1, 'A' + i));
+        }
+        return testArray;
+    }
+}
+
+/**
+ * @tc.name: SetSpecificSupportAction001
+ * @tc.desc: Test SetSpecificSupportAction when currentIndex is at start
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Level1)
+{
+    auto testArray = CreateTestArray(TEST_ARRAY_SIZE);
+    CreateIndexer(testArray, TEST_INDEX_START);
+    CreateDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    auto supportActions = accessibilityProperty_->GetSupportAction();
+    EXPECT_FALSE(supportActions.count(AceAction::ACTION_SCROLL_BACKWARD) > 0);
+    EXPECT_TRUE(supportActions.count(AceAction::ACTION_SCROLL_FORWARD) > 0);
+    accessibilityProperty_->ResetSupportAction();
+}
+
+/**
+ * @tc.name: SetSpecificSupportAction002
+ * @tc.desc: Test SetSpecificSupportAction when currentIndex is in middle
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, SetSpecificSupportAction002, TestSize.Level1)
+{
+    auto testArray = CreateTestArray(TEST_ARRAY_SIZE);
+    CreateIndexer(testArray, TEST_INDEX_MIDDLE);
+    CreateDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    auto supportActions = accessibilityProperty_->GetSupportAction();
+    EXPECT_TRUE(supportActions.count(AceAction::ACTION_SCROLL_BACKWARD) > 0);
+    EXPECT_TRUE(supportActions.count(AceAction::ACTION_SCROLL_FORWARD) > 0);
+    accessibilityProperty_->ResetSupportAction();
+}
+
+/**
+ * @tc.name: SetSpecificSupportAction003
+ * @tc.desc: Test SetSpecificSupportAction when currentIndex is at end
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, SetSpecificSupportAction003, TestSize.Level1)
+{
+    auto testArray = CreateTestArray(TEST_ARRAY_SIZE);
+    CreateIndexer(testArray, TEST_INDEX_END);
+    CreateDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    auto supportActions = accessibilityProperty_->GetSupportAction();
+    EXPECT_TRUE(supportActions.count(AceAction::ACTION_SCROLL_BACKWARD) > 0);
+    EXPECT_FALSE(supportActions.count(AceAction::ACTION_SCROLL_FORWARD) > 0);
+    accessibilityProperty_->ResetSupportAction();
+}
+
+/**
+ * @tc.name: SetSpecificSupportAction004
+ * @tc.desc: Test SetSpecificSupportAction with single element array
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, SetSpecificSupportAction004, TestSize.Level1)
+{
+    CreateIndexer({ "A" }, TEST_INDEX_START);
+    CreateDone();
+    accessibilityProperty_->SetSpecificSupportAction();
+    auto supportActions = accessibilityProperty_->GetSupportAction();
+    EXPECT_FALSE(supportActions.count(AceAction::ACTION_SCROLL_BACKWARD) > 0);
+    EXPECT_FALSE(supportActions.count(AceAction::ACTION_SCROLL_FORWARD) > 0);
+    accessibilityProperty_->ResetSupportAction();
+}
 } // namespace OHOS::Ace::NG

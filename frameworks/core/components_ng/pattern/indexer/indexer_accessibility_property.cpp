@@ -61,4 +61,16 @@ std::string IndexerAccessibilityProperty::GetText() const
     }
     return "";
 }
+
+void IndexerAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto currentIndex = GetCurrentIndex();
+    auto endIndex = GetEndIndex();
+    if (currentIndex > 0) {
+        AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    }
+    if (currentIndex < endIndex) {
+        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    }
+}
 } // namespace OHOS::Ace::NG
