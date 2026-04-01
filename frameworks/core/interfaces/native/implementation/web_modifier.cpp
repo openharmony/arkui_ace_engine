@@ -2427,6 +2427,21 @@ void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+
+void SetEnableDragImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDrag(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEvent* value)
 {
 #ifdef WEB_SUPPORTED
@@ -3246,6 +3261,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,

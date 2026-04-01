@@ -242,6 +242,7 @@ public:
     virtual void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableImageAnalyzer(bool isEnabled) {}
     virtual void SetEnableAutoFill(bool isEnabled) {}
+    virtual void SetEnableDrag(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}

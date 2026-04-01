@@ -1688,6 +1688,14 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelStatic::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDrag(isEnabled);
+}
+
 void WebModelStatic::SetAISessionOptions(
     FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
     const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)

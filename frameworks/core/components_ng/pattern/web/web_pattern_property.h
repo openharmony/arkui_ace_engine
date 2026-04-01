@@ -100,6 +100,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackToTop, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDrag, bool);
 };
 
 } // namespace OHOS::Ace::NG
