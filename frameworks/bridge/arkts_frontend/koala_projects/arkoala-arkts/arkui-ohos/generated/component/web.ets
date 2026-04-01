@@ -3235,6 +3235,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableDefaultContextMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableDragAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAiSessionOptionsAttribute(value: Array<AISessionEvent> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4318,6 +4330,9 @@ export interface WebAttribute extends CommonMethod {
     enableDefaultContextMenu(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDefaultContextMenu')
     }
+    enableDrag(value: boolean | undefined): this {
+        throw new Error('Unimplemented method enableDrag')
+    }
     aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
         throw new Error('Unimplemented method aiSessionOptions')
     }
@@ -5152,6 +5167,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public enableDefaultContextMenu(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
+        return this
+    }
+    public enableDrag(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableDragAttribute(value_casted)
         return this
     }
     public aiSessionOptions(value: Array<AISessionEvent> | undefined): this {

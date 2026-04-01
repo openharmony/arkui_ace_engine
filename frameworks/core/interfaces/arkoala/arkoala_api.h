@@ -6350,6 +6350,8 @@ struct ArkUIWebModifier {
     void (*resetEnableNativeMediaPlayer)(ArkUINodeHandle node);
     void (*setEnableWebAVSession)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
+    void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableDrag)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

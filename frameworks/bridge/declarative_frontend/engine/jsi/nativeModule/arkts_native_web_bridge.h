@@ -267,6 +267,8 @@ public:
     static ArkUINativeModuleValue ResetEnableNativeMediaPlayer(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableWebAVSession(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableWebAVSession(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif

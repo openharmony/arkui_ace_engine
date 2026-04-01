@@ -191,6 +191,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     public _onCameraCaptureStateChange_0_0value?: OnCameraCaptureStateChangeCallback | undefined
     public _onMicrophoneCaptureStateChange_0_0value?: OnMicrophoneCaptureStateChangeCallback | undefined
     public _enableDefaultContextMenu_0_0value?: boolean | undefined
+    public _enableDrag_0_0value?: boolean | undefined
     public _aiSessionOptions_0_0value?: Array<AISessionEvent> | undefined
     public _registerNativeEmbedRule_0_0value?: string | undefined
     public _registerNativeEmbedRule_0_1value?: string | undefined
@@ -2697,7 +2698,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         if (flagArray[145] != 0) {
             switch (flagArray[145]) {
                 case 1: {
-                    peer.setAiSessionOptionsAttribute((this._aiSessionOptions_0_0value as Array<AISessionEvent> | undefined));
+                    peer.setEnableDragAttribute((this._enableDrag_0_0value as boolean | undefined));
                     flagArray[145] = 2;
                     break;
                 }
@@ -2707,14 +2708,14 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[145] = 0;
-                    peer.setAiSessionOptionsAttribute((undefined as Array<AISessionEvent> | undefined));
+                    peer.setEnableDragAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[146] != 0) {
             switch (flagArray[146]) {
                 case 1: {
-                    peer.setRegisterNativeEmbedRuleAttribute((this._registerNativeEmbedRule_0_0value as string | undefined), (this._registerNativeEmbedRule_0_1value as string | undefined));
+                    peer.setAiSessionOptionsAttribute((this._aiSessionOptions_0_0value as Array<AISessionEvent> | undefined));
                     flagArray[146] = 2;
                     break;
                 }
@@ -2724,14 +2725,14 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[146] = 0;
-                    peer.setRegisterNativeEmbedRuleAttribute((undefined as string | undefined), (undefined as string | undefined));
+                    peer.setAiSessionOptionsAttribute((undefined as Array<AISessionEvent> | undefined));
                 }
             }
         }
         if (flagArray[147] != 0) {
             switch (flagArray[147]) {
                 case 1: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
+                    peer.setRegisterNativeEmbedRuleAttribute((this._registerNativeEmbedRule_0_0value as string | undefined), (this._registerNativeEmbedRule_0_1value as string | undefined));
                     flagArray[147] = 2;
                     break;
                 }
@@ -2741,14 +2742,14 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[147] = 0;
-                    peer.setBindSelectionMenuAttribute((undefined as WebElementType | undefined), (undefined as CustomBuilder | undefined), (undefined as WebResponseType | undefined), (undefined as SelectionMenuOptionsExt | undefined | undefined));
+                    peer.setRegisterNativeEmbedRuleAttribute((undefined as string | undefined), (undefined as string | undefined));
                 }
             }
         }
         if (flagArray[148] != 0) {
             switch (flagArray[148]) {
                 case 1: {
-                    peer.setEnableScrollDirectionalLockAttribute((this._enableScrollDirectionalLock_0_0value as boolean | undefined), (this._enableScrollDirectionalLock_0_1value as ScrollDirectionalLockType | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
                     flagArray[148] = 2;
                     break;
                 }
@@ -2758,6 +2759,23 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     flagArray[148] = 0;
+                    peer.setBindSelectionMenuAttribute((undefined as WebElementType | undefined), (undefined as CustomBuilder | undefined), (undefined as WebResponseType | undefined), (undefined as SelectionMenuOptionsExt | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[149] != 0) {
+            switch (flagArray[149]) {
+                case 1: {
+                    peer.setEnableScrollDirectionalLockAttribute((this._enableScrollDirectionalLock_0_0value as boolean | undefined), (this._enableScrollDirectionalLock_0_1value as ScrollDirectionalLockType | undefined));
+                    flagArray[149] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[149] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[149] = 0;
                     peer.setEnableScrollDirectionalLockAttribute((undefined as boolean | undefined), (undefined as ScrollDirectionalLockType | undefined));
                 }
             }
@@ -4535,6 +4553,18 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
             switch (flagArray[145]) {
                 case 1:
                 case 3: {
+                    this.enableDrag((modifier._enableDrag_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.enableDrag((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[146] != 0) {
+            switch (flagArray[146]) {
+                case 1:
+                case 3: {
                     this.aiSessionOptions((modifier._aiSessionOptions_0_0value as Array<AISessionEvent> | undefined));
                     break;
                 }
@@ -4543,8 +4573,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (flagArray[146] != 0) {
-            switch (flagArray[146]) {
+        if (flagArray[147] != 0) {
+            switch (flagArray[147]) {
                 case 1:
                 case 3: {
                     this.registerNativeEmbedRule((modifier._registerNativeEmbedRule_0_0value as string | undefined), (modifier._registerNativeEmbedRule_0_1value as string | undefined));
@@ -4555,8 +4585,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (flagArray[147] != 0) {
-            switch (flagArray[147]) {
+        if (flagArray[148] != 0) {
+            switch (flagArray[148]) {
                 case 1:
                 case 3: {
                     this.bindSelectionMenu((modifier._bindSelectionMenu_0_0value as WebElementType | undefined), (modifier._bindSelectionMenu_0_1value as CustomBuilder | undefined), (modifier._bindSelectionMenu_0_2value as WebResponseType | undefined), (modifier._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined));
@@ -4567,8 +4597,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (flagArray[148] != 0) {
-            switch (flagArray[148]) {
+        if (flagArray[149] != 0) {
+            switch (flagArray[149]) {
                 case 1:
                 case 3: {
                     this.enableScrollDirectionalLock((modifier._enableScrollDirectionalLock_0_0value as boolean | undefined), (modifier._enableScrollDirectionalLock_0_1value as ScrollDirectionalLockType | undefined));
@@ -6030,48 +6060,58 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
-    aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
-        if (((this._flagArray[145]) == (0)) || (true)) {
+    enableDrag(value: boolean | undefined): this {
+        if (((this._flagArray[145]) == (0)) || ((this._enableDrag_0_0value) !== (value))) {
             this._flagArray[145] = 1
-            this._aiSessionOptions_0_0value = value
+            this._enableDrag_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[145] = 3
         }
         return this
     }
-    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        if (((this._flagArray[146]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
+    aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        if (((this._flagArray[146]) == (0)) || (true)) {
             this._flagArray[146] = 1
-            this._registerNativeEmbedRule_0_0value = tag
-            this._registerNativeEmbedRule_0_1value = type
+            this._aiSessionOptions_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[146] = 3
         }
         return this
     }
-    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        if (((this._flagArray[147]) == (0)) || (true) || (true) || (true) || (true)) {
+    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+        if (((this._flagArray[147]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
             this._flagArray[147] = 1
-            this._bindSelectionMenu_0_0value = elementType
-            this._bindSelectionMenu_0_1value = content
-            this._bindSelectionMenu_0_2value = responseType
-            this._bindSelectionMenu_0_3value = options
+            this._registerNativeEmbedRule_0_0value = tag
+            this._registerNativeEmbedRule_0_1value = type
             this._state.fireChange()
         } else {
             this._flagArray[147] = 3
         }
         return this
     }
-    enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
-        if (((this._flagArray[148]) == (0)) || ((this._enableScrollDirectionalLock_0_0value) !== (value)) || (true)) {
+    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+        if (((this._flagArray[148]) == (0)) || (true) || (true) || (true) || (true)) {
             this._flagArray[148] = 1
+            this._bindSelectionMenu_0_0value = elementType
+            this._bindSelectionMenu_0_1value = content
+            this._bindSelectionMenu_0_2value = responseType
+            this._bindSelectionMenu_0_3value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[148] = 3
+        }
+        return this
+    }
+    enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        if (((this._flagArray[149]) == (0)) || ((this._enableScrollDirectionalLock_0_0value) !== (value)) || (true)) {
+            this._flagArray[149] = 1
             this._enableScrollDirectionalLock_0_0value = value
             this._enableScrollDirectionalLock_0_1value = type
             this._state.fireChange()
         } else {
-            this._flagArray[148] = 3
+            this._flagArray[149] = 3
         }
         return this
     }

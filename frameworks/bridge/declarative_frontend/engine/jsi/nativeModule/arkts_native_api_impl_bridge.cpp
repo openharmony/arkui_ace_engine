@@ -4635,6 +4635,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableWebAVSession));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableWebAVSession"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableWebAVSession));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDrag));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableDrag));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

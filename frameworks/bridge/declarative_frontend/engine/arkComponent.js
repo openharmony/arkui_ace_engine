@@ -25578,6 +25578,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, config);
     return this;
   }
+  enableDrag(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -27289,6 +27293,20 @@ class WebEnableAutoFillModifier extends ModifierWithKey {
   }
 }
 WebEnableAutoFillModifier.identity = Symbol('webEnableAutoFillModifier');
+
+class WebEnableDragModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+WebEnableDragModifier.identity = Symbol('webEnableDragModifier');
 
 class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   constructor(value) {
