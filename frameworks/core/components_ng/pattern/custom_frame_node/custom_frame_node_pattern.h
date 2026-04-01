@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_paint_method.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {

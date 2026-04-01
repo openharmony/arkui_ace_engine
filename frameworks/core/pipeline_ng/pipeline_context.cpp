@@ -50,6 +50,7 @@
 #include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/statistic_event_reporter.h"
@@ -71,6 +72,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -200,6 +202,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
@@ -229,6 +232,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
@@ -253,6 +257,7 @@ PipelineContext::PipelineContext()
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);

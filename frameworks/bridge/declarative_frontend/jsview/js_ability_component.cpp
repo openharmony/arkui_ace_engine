@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
 
 #include "frameworks/base/log/ace_scoring_log.h"
+#include "frameworks/core/components/ability_component/ability_component.h"
+#include "frameworks/core/components_v2/ability_component/ability_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/ability_component_model_impl.h"
