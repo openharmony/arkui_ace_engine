@@ -1313,6 +1313,7 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);

@@ -360,6 +360,8 @@ public:
 
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
 
+    bool OnNestedScrollV2(float& x, float& y) override;
+
     void OnLoadStarted(const std::string& url) override;
 
     void OnLoadFinished(const std::string& url) override;

@@ -809,6 +809,7 @@ public:
     {
         return isImeStatus_ == VkState::VK_SHOW;
     }
+    bool OnNestedScrollV2(float& x, float& y);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     void EnableScrollDirectionalLock(bool enabled,

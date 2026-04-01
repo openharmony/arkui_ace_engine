@@ -7950,6 +7950,39 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
     return isConsumed;
 }
 
+bool WebPattern::OnNestedScrollV2(float& x, float& y)
+{
+    bool hasHorizontalParent = parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end();
+    bool hasVerticalParent = parentsMap_.find(Axis::VERTICAL) != parentsMap_.end();
+    if (!hasHorizontalParent && !hasVerticalParent) {
+        return false;
+    }
+    float offset = y;
+    float velocity = yVelocity;
+    if (expectedScrollAxis_ == Axis::HORIZONTAL) {
+        offset = x;
+        velocity = xVelocity;
+        if (isScrollStarted_) {
+            y = 0.0f;
+            yVelocity = 0.0f;
+        }
+    } else {
+        if (isScrollStarted_) {
+            x = 0.0f;
+            xVelocity = 0.0f;
+        }
+    }
+    bool isConsumed = false;
+    if (offset != 0) {
+        isConsumed = FilterScrollEventHandleOffset(offset);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, "
+        "isConsumed:%{public}d",
+        x, y, xVelocity, yVelocity, isConsumed);
+    return isConsumed;
+}
+
 bool WebPattern::IsRtl()
 {
     auto host = GetHost();
