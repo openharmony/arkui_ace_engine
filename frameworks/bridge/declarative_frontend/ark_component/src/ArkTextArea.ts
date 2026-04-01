@@ -868,6 +868,20 @@ class TextAreaOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) 
   }
 }
 
+class TextAreaOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -878,6 +892,20 @@ class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
       getUINativeModule().textArea.resetOnCopy(node);
     } else {
       getUINativeModule().textArea.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnWillCutModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCut(node, this.value);
     }
   }
 }
@@ -1715,9 +1743,19 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
       TextAreaOnEditChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback: Callback<string, boolean>): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCopyModifier.identity,
+      TextAreaOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback: (value: string) => void): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity,
       TextAreaOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback: Callback<string, boolean>): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCutModifier.identity,
+      TextAreaOnWillCutModifier, callback);
     return this;
   }
   onCut(callback: (value: string) => void): TextAreaAttribute {

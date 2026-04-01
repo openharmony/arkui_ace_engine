@@ -1180,4 +1180,33 @@ HWTEST_F(TextTwelveTestNg, TextConvertMenuId, TestSize.Level1)
     strId = SelectOverlayNode::ConvertToStrMenuId(200);
     EXPECT_EQ(strId, "200");
 }
+
+/**
+ * @tc.name: OnWillCopy.
+ * @tc.desc: Test OnWillCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, OnWillCopy, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCopyResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textModelNG.SetOnWillCopy(frameNode, onWillCopyResult);
+    EXPECT_FALSE(eventHub->FireOnWillCopy(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+}
 } // namespace OHOS::Ace::NG

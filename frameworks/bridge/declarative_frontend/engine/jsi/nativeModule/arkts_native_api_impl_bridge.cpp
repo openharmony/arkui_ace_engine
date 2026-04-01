@@ -845,10 +845,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnEditChange));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnEditChange));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnWillCopy));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnWillCopy));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCopy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnCopy));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCopy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnCopy));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnWillCut));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnWillCut));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnCut));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCut"),
@@ -1199,10 +1207,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnContentScroll));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnContentScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnContentScroll));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnWillCopy));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnWillCopy));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCopy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnCopy));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCopy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnCopy));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnWillCut));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnWillCut));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnCut));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCut"),
@@ -6125,6 +6141,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDataDetectorConfig));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataDetectorConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetDataDetectorConfig));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnWillCopy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnWillCopy));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCopy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnCopy));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCopy"),

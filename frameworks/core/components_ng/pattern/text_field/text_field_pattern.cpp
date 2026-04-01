@@ -2356,15 +2356,22 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (value.empty()) {
         return;
     }
-    clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    bool isAllowCopy = true;
+    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    if (eventHub) {
+        isAllowCopy = eventHub->FireOnWillCopy(value);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy, isAllowCopy=%{public}d", isAllowCopy);
+    if (isAllowCopy) {
+        clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    }
     if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
         selectOverlay_->UpdatePasteMenu();
     }
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(eventHub && isAllowCopy);
     eventHub->FireOnCopy(value);
 }
 
@@ -2690,6 +2697,22 @@ void TextFieldPattern::HandleOnCut()
     }
     UpdateEditingValueToRecord();
     auto selectedText = contentController_->GetSelectedValue(start, end);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    bool isAllowCut = true;
+    if (eventHub) {
+        isAllowCut = eventHub->FireOnWillCut(selectedText);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCut, isAllowCut=%{public}d", isAllowCut);
+    if (!isAllowCut) {
+        if (selectOverlay_->IsShowMouseMenu()) {
+            CloseSelectOverlay(true);
+        } else {
+            selectOverlay_->HideMenu();
+        }
+        return;
+    }
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value size is %{private}zu",
             UtfUtils::Str16DebugToStr8(selectedText).size());
@@ -2697,9 +2720,6 @@ void TextFieldPattern::HandleOnCut()
             layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
     DeleteRange(start, end, false);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCut(selectedText);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF

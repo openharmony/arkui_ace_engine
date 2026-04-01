@@ -24,8 +24,14 @@ namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextModifier* GetTextModifier();
     const CJUITextModifier* GetCJUITextModifier();
     void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextTextSelectionChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextWillCopy(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextCopy(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnDetectResultUpdate(ArkUINodeHandle node);
+    void ResetOnTextTextSelectionChange(ArkUINodeHandle node);
+    void ResetOnTextWillCopy(ArkUINodeHandle node);
+    void ResetOnTextCopy(ArkUINodeHandle node);
     template<typename T>
     void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr);
 }

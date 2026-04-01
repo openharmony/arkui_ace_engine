@@ -1852,6 +1852,28 @@ export function deserializeAndCallCallback_String(thisDeserializer: Deserializer
     let data: string = (thisDeserializer.readString() as string)
     call(data)
 }
+export function deserializeAndCallCallback_String_Boolean(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<string, boolean>)
+    let data: string = (thisDeserializer.readString() as string)
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (isSelected: boolean):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeBoolean(isSelected);
+        InteropNativeModule._CallCallbackSync(10, -2127714345, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((isSelected: boolean) => void) = continuationBufferClosure
+    const callResult = call(data)
+    continuationResult(callResult)
+}
 export function deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: string,event: PasteEvent) => void))
@@ -4486,6 +4508,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_STARTLINEINFO_VOID: return deserializeAndCallCallback_StartLineInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STATESTYLESCHANGE: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING: return deserializeAndCallCallback_String(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_STRING_BOOLEAN: return deserializeAndCallCallback_String_Boolean(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_PASTEEVENT_VOID: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_SURFACERECT_VOID: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_VOID: return deserializeAndCallCallback_String_Void(thisDeserializer);

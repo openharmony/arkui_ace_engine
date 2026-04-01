@@ -73,6 +73,8 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetOnWillCopy(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateSimpleJsOnWillObj(const std::u16string& value);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetContentTransition(const JSCallbackInfo& info);

@@ -247,6 +247,19 @@ public:
         }
     }
 
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+    {
+        onWillCopy_ = std::move(func);
+    }
+
+    bool FireOnWillCopy(const std::u16string& value)
+    {
+        if (onWillCopy_) {
+            return onWillCopy_(value);
+        }
+        return true;
+    }
+
     void SetOnCopy(std::function<void(const std::u16string&)>&& func)
     {
         onCopy_ = std::move(func);
@@ -258,6 +271,20 @@ public:
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy size %{public}zu", UtfUtils::Str16DebugToStr8(value).size());
             onCopy_(value);
         }
+    }
+
+    void SetOnWillCut(std::function<bool(const std::u16string&)>&& func)
+    {
+        onWillCut_ = std::move(func);
+    }
+
+    bool FireOnWillCut(const std::u16string& value)
+    {
+        if (onWillCut_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut size %{public}zu", UtfUtils::Str16DebugToStr8(value).size());
+            return onWillCut_(value);
+        }
+        return true;
     }
 
     void SetOnCut(std::function<void(const std::u16string&)>&& func)
@@ -495,7 +522,9 @@ private:
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
+    std::function<bool(const std::u16string&)> onWillCopy_;
     std::function<void(const std::u16string&)> onCopy_;
+    std::function<bool(const std::u16string&)> onWillCut_;
     std::function<void(const std::u16string&)> onCut_;
     std::function<void(const std::u16string&)> onPaste_;
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteWithEvent_;

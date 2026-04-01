@@ -1544,4 +1544,63 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateFocusOffsetIfNeed001, TestSize.Level0)
     pattern->UpdateFocusOffsetIfNeed(paintRect);
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x, 0.0f);
 }
+
+/**
+ * @tc.name: onWillCopy
+ * @tc.desc: test onWillCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, onWillCopy, TestSize.Level0)
+{
+    TextFieldModelNG textFieldModelNG;
+
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCopyResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textFieldModelNG.SetOnWillCopy(AceType::RawPtr(textFieldNode), onWillCopyResult);
+    EXPECT_FALSE(eventHub->FireOnWillCopy(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+}
+
+/**
+ * @tc.name: onWillCut
+ * @tc.desc: test onWillCut
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, onWillCut, TestSize.Level0)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCut(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCutResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textFieldModelNG.SetOnWillCut(AceType::RawPtr(textFieldNode), onWillCutResult);
+    EXPECT_FALSE(eventHub->FireOnWillCut(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCut(expected));
+}
 } // namespace OHOS::Ace::NG

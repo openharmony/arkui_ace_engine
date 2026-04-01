@@ -591,6 +591,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWillCopyAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setOnWillCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setCaretColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1202,6 +1214,9 @@ export interface TextAttribute extends CommonMethod {
     onCopy(value: ((breakpoints: string) => void) | undefined): this {
         throw new Error('Unimplemented method onCopy')
     }
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCopy')
+    }
     caretColor(value: ResourceColor | undefined): this {
         throw new Error('Unimplemented method caretColor')
     }
@@ -1484,6 +1499,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public onCopy(value: ((breakpoints: string) => void) | undefined): this {
         const value_casted = value as (((breakpoints: string) => void) | undefined)
         this.getPeer()?.setOnCopyAttribute(value_casted)
+        return this
+    }
+    public onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCopyAttribute(value_casted)
         return this
     }
     public caretColor(value: ResourceColor | undefined): this {
