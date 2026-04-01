@@ -2870,6 +2870,14 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
     this.lazyComponent.onDidStopFling(value);
     return this;
   };
+  onWillScroll(value) {
+    this.lazyComponent.onWillScroll(value);
+    return this;
+  };
+  onDidScroll(value) {
+    this.lazyComponent.onDidScroll(value);
+    return this;
+  };
 }
 class WaterFlowModifier extends LazyArkWaterFlowComponent {
   constructor(nativePtr, classType) {
