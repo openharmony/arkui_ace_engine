@@ -1782,26 +1782,15 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
     return false;
 }
 
-std::string ArkTSUtils::GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type)
+std::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision)
 {
     auto localization = Localization::GetInstance();
     if (!localization) {
-        return std::string();
+        return numStr;
     }
 
-    if (type == "d" && item->IsNumber()) {
-        std::string numStr = std::to_string(item->Int32Value(vm));
-        std::string result;
-        return localization->LocalizeNumber(numStr, result, 0) ? result : std::string();
-    }
-
-    if (type == "f" && item->IsNumber()) {
-        std::string numStr = std::to_string(item->ToNumber(vm)->Value());
-        std::string result;
-        return localization->LocalizeNumber(numStr, result, FLOAT_PRECISION) ? result : std::string();
-    }
-
-    return std::string();
+    std::string result;
+    return localization->LocalizeNumber(numStr, result, precision) ? result : numStr;
 }
 
 std::string GetReplaceContentStr(
@@ -1814,17 +1803,29 @@ std::string GetReplaceContentStr(
     auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
-            return result.empty() ? std::to_string(item->Int32Value(vm)) : result;
+            std::string result = std::to_string(item->Int32Value(vm));
+            return TryLocalizeNumberStr(result, 0);
+        } else if (item->IsObject(vm)) {
+            int32_t result = 0;
+            ArkTSUtils::ParseJsIntegerWithResource(vm, item, result);
+            return TryLocalizeNumberStr(std::to_string(result), 0);
         }
     } else if (type == "s") {
         if (item->IsString(vm)) {
             return item->ToString(vm)->ToString(vm);
+        } else if (item->IsObject(vm)) {
+            std::string result;
+            ArkTSUtils::ParseJsString(vm, item, result);
+            return result;
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
-            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
-            return result.empty() ? std::to_string(item->ToNumber(vm)->Value()) : result;
+            std::string result = std::to_string(item->ToNumber(vm)->Value());
+            return TryLocalizeNumberStr(result, FLOAT_PRECISION);
+        } else if (item->IsObject(vm)) {
+            double result = 0.0;
+            ArkTSUtils::ParseJsDouble(vm, item, result);
+            return TryLocalizeNumberStr(std::to_string(result), FLOAT_PRECISION);
         }
     }
     return std::string();
