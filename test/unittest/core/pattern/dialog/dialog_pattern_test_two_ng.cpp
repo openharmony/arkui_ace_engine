@@ -56,6 +56,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

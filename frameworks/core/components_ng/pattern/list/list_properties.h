@@ -127,6 +127,14 @@ using OnExitDeleteAreaEvent = std::function<void()>;
 using OnOffsetChangeFunc = std::function<void(int32_t)>;
 using OnStateChangedEvent = std::function<void(SwipeActionState)>;
 
+namespace NG {
+using ItemState = uint32_t;
+inline constexpr ItemState ITEM_STATE_NORMAL = 0;
+inline constexpr ItemState ITEM_STATE_PRESSED = 1;
+inline constexpr ItemState ITEM_STATE_FOCUSED = 1 << 1;
+inline constexpr ItemState ITEM_STATE_HOVERED = 1 << 2;
+} // namespace NG
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PROPERTIES_H

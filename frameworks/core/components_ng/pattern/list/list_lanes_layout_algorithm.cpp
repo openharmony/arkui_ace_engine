@@ -17,6 +17,9 @@
 
 #include "base/log/event_report.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 

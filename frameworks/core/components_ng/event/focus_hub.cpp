@@ -22,6 +22,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"

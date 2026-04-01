@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
