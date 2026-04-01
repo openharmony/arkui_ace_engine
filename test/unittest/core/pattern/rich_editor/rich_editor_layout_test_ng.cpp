@@ -621,6 +621,51 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetCustomSpanMeasureMaxWidth001
+ * @tc.desc: test RichEditor custom span maxWidth follows layout policy preprocessing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, GetCustomSpanMeasureMaxWidth001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    auto maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(
+        parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), CONTAINER_WIDTH);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), CONTAINER_WIDTH);
+
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), std::numeric_limits<float>::infinity());
+}
+
+/**
  * @tc.name: HandleAISpanTest001
  * @tc.desc: test HandleAISpanTest
  * @tc.type: FUNC
