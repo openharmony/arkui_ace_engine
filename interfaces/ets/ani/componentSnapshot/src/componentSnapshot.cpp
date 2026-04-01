@@ -767,6 +767,29 @@ static ani_object ANI_GetWithRange([[maybe_unused]] ani_env* env, ani_object sta
     return result;
 }
 
+static ani_object ANI_GetSizeLimitation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object options)
+{
+    OHOS::Ace::NG::SnapshotSizeLimitation limitation = OHOS::Ace::NG::ComponentSnapshot::GetSizeLimitation();
+    ani_class cls;
+    if (env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotSizeLimitationInner", &cls) != ANI_OK) {
+        AniThrowError(env, OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, "FindClass SnapshotSizeLimitationInner failed");
+        return nullptr;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", "ii:", &ctor) != ANI_OK) {
+        AniThrowError(env, OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, "Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object result = nullptr;
+    ani_int maxWidth = limitation.maxWidth;
+    ani_int maxHeight = limitation.maxHeight;
+    if (env->Object_New(cls, ctor, &result, maxWidth, maxHeight) != ANI_OK) {
+        AniThrowError(env, OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, "Object_New failed");
+        return nullptr;
+    }
+    return result;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     ani_env* env;
@@ -799,6 +822,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "getWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetWithUniqueId) },
         ani_native_function { "getSyncWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetSyncWithUniqueId) },
         ani_native_function { "getWithRange", nullptr, reinterpret_cast<void*>(ANI_GetWithRange) },
+        ani_native_function { "getSizeLimitation", nullptr, reinterpret_cast<void*>(ANI_GetSizeLimitation) },
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ANI BindNativeFunctions failed!");

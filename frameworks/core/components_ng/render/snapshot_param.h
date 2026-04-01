@@ -79,6 +79,12 @@ struct SnapshotOptions {
                colorSpaceStr + ", " + dynamicRangeStr + "}";
     }
 };
+
+struct SnapshotSizeLimitation {
+    int32_t maxWidth = -1;
+    int32_t maxHeight = -1;
+};
+
 struct SnapshotParam {
     int32_t delay;
     bool checkImageStatus;

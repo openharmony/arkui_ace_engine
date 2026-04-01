@@ -140,6 +140,14 @@ class ComponentSnapshot {
             return this.ohos_componentSnapshot.getWithRange(start, end, isStartRect, options);
         });
     }
+
+    getSizeLimitation()
+    {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let limitation = this.ohos_componentSnapshot.getSizeLimitation();
+        __JSScopeUtil__.restoreInstanceId();
+        return limitation;
+    }
 }
 
 class DragController {
