@@ -2574,6 +2574,7 @@ frameworks/core/components_ng/pattern/shape/ @arkuilayout1
 frameworks/core/components_ng/pattern/sheet/ @arkuicodepulse
 frameworks/core/components_ng/pattern/side_bar/ @arkui_navigation
 frameworks/core/components_ng/pattern/slider/ @arkuipopupwindow_all
+frameworks/core/components_ng/pattern/smart_layout/ @arkuilayout1
 frameworks/core/components_ng/pattern/stack/ @arkuilayout1
 frameworks/core/components_ng/pattern/stage/content_root_pattern.cpp @ArkUI_Event
 frameworks/core/components_ng/pattern/stage/content_root_pattern.h @ArkUI_Event
