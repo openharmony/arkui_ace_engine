@@ -18,7 +18,7 @@
 
 import { int32, hashCodeFromString } from '@koalaui/common'
 import { pointer } from '@koalaui/interop'
-import { memoEntry2, __context, __id, NodeAttach, remember } from '@koalaui/runtime'
+import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
 import { SyntaxItemPeer, ForEachNodePeer } from '../base/SyntaxNodeBase'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { PeerNode } from '../PeerNode'
@@ -91,7 +91,6 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
     let duplicateIndex = new Array<int32>()
     let diffIndex = new Array<int32>()
     let key2Index = new Map<int32, int32>()
-    const forEachId = __id();
     /** @memo */
     const createAndUpdate = (): void => {
         const array: Array<T> = receiver.arr();
