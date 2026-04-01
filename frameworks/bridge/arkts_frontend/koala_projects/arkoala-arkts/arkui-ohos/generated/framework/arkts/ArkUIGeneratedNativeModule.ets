@@ -1801,7 +1801,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SearchAttribute_setOnCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SearchAttribute_setOnWillCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SearchAttribute_setOnCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setOnWillCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setOnPaste(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2441,6 +2445,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAttribute_setOnCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _TextAttribute_setOnWillCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _TextAttribute_setCaretColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAttribute_setSelectedBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2557,7 +2563,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setOnCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _TextAreaAttribute_setOnWillCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _TextAreaAttribute_setOnCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setOnWillCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setOnPaste(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2735,7 +2745,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextInputAttribute_setOnCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _TextInputAttribute_setOnWillCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _TextInputAttribute_setOnCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setOnWillCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setOnPaste(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

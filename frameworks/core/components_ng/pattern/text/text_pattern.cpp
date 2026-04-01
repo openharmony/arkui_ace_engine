@@ -975,6 +975,18 @@ void TextPattern::HandleOnCopy()
     ACE_UINODE_TRACE(host);
     auto [start, end] = GetSelectedStartAndEnd();
     auto value = GetSelectedText(start, end, false, false, true);
+    if (!value.empty()) {
+        auto eventHub = host->GetEventHub<TextEventHub>();
+        bool isAllowCopy = true;
+        if (eventHub) {
+            isAllowCopy = eventHub->FireOnWillCopy(value);
+        }
+        TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy, isAllowCopy=%{public}d", isAllowCopy);
+        if (!isAllowCopy) {
+            HiddenMenu();
+            return;
+        }
+    }
     if (IsSelectableAndCopy() || dataDetectorAdapter_->hasClickedMenuOption_) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();

@@ -49,5 +49,12 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextInputWillCopy(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextInputCopy(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextInputWillCut(ArkUINodeHandle node, void* extraParam);
+
+    void ResetOnTextInputWillCopy(ArkUINodeHandle node);
+    void ResetOnTextInputCopy(ArkUINodeHandle node);
+    void ResetOnTextInputWillCut(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H

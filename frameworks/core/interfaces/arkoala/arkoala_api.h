@@ -1450,6 +1450,9 @@ enum ArkUIEventSubKind {
     ON_NEED_SOFTKEYBOARD,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
+    ON_TEXT_TEXT_SELECTION_CHANGE,
+    ON_TEXT_COPY,
+    ON_TEXT_WILL_COPY,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
     ON_IMAGE_SVG_PLAY_FINISH,
@@ -1487,6 +1490,9 @@ enum ArkUIEventSubKind {
     ON_TEXT_INPUT_DID_DELETE,
     ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT,
     ON_TEXT_INPUT_WILL_CHANGE,
+    ON_TEXT_INPUT_COPY,
+    ON_TEXT_INPUT_WILL_COPY,
+    ON_TEXT_INPUT_WILL_CUT,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -1503,6 +1509,10 @@ enum ArkUIEventSubKind {
     ON_TEXT_AREA_DID_DELETE,
     ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT,
     ON_TEXT_AREA_WILL_CHANGE,
+    ON_TEXT_AREA_COPY,
+    ON_TEXT_AREA_WILL_COPY,
+    ON_TEXT_AREA_CUT,
+    ON_TEXT_AREA_WILL_CUT,
 
     ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
     ON_SWIPER_ANIMATION_START,
@@ -1749,6 +1759,7 @@ struct ArkUIAPIEventTextInput {
     // used by c-api, should be the first place.
     ArkUI_Int64 nativeStringPtr;
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+    ArkUI_Int32 preventDefault;
 };
 
 struct ArkUIAPIEventTextInputMixed {
@@ -3879,6 +3890,8 @@ struct ArkUITextModifier {
         ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig,
         void* entityColorRawPtr, void* entityDecorationColorRawPtr);
     void (*resetTextDataDetectorConfigWithEvent)(ArkUINodeHandle node);
+    void (*setTextOnWillCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnWillCopy)(ArkUINodeHandle node);
     void (*setTextOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
@@ -5725,8 +5738,12 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnContentScroll)(ArkUINodeHandle node);
     void (*setTextAreaOnEditChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnEditChange)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnWillCopy)(ArkUINodeHandle node);
     void (*setTextAreaOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnCopy)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillCut)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnWillCut)(ArkUINodeHandle node);
     void (*setTextAreaOnCut)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnCut)(ArkUINodeHandle node);
     void (*setTextAreaOnPaste)(ArkUINodeHandle node, void* callback);
@@ -5986,8 +6003,12 @@ struct ArkUITextInputModifier {
     void (*resetTextInputOnTextSelectionChange)(ArkUINodeHandle node);
     void (*setTextInputOnContentScroll)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnContentScroll)(ArkUINodeHandle node);
+    void (*setTextInputOnWillCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnWillCopy)(ArkUINodeHandle node);
     void (*setTextInputOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnCopy)(ArkUINodeHandle node);
+    void (*setTextInputOnWillCut)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnWillCut)(ArkUINodeHandle node);
     void (*setTextInputOnCut)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnCut)(ArkUINodeHandle node);
     void (*setTextInputOnPaste)(ArkUINodeHandle node, void* callback);
@@ -7343,8 +7364,12 @@ struct ArkUISearchModifier {
     void (*resetSearchOnEditChange)(ArkUINodeHandle node);
     void (*setSearchOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnSubmitWithEvent)(ArkUINodeHandle node);
+    void (*setSearchOnWillCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetSearchOnWillCopy)(ArkUINodeHandle node);
     void (*setSearchOnCopy)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnCopy)(ArkUINodeHandle node);
+    void (*setSearchOnWillCut)(ArkUINodeHandle node, void* callback);
+    void (*resetSearchOnWillCut)(ArkUINodeHandle node);
     void (*setSearchOnCut)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnCut)(ArkUINodeHandle node);
     void (*setSearchOnPaste)(ArkUINodeHandle node, void* callback);

@@ -640,6 +640,13 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
+void TextModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void TextModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -1541,6 +1548,14 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     textPattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
+void TextModelNG::SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2037,11 +2052,12 @@ std::optional<void*> TextModelNG::GetInnerParagraph(FrameNode* frameNode)
     return textPattern->GetDrawParagraph();
 }
 
-void TextModelNG::SetStyledString(FrameNode* frameNode, const SpanString* value)
+void TextModelNG::SetStyledString(FrameNode* frameNode, SpanString* value)
 {
     CHECK_NULL_VOID(frameNode && value);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    value->SetFramNode(pattern->GetHost());
     auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
     auto length = value->GetLength();
     auto target = value->GetSubSpanString(0, length);

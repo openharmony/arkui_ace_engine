@@ -490,6 +490,24 @@ void SetOnCopyImpl(Ark_NativePointer node,
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
+}
 void SetCaretColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
@@ -987,6 +1005,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,
+        TextAttributeModifier::SetOnWillCopyImpl,
         TextAttributeModifier::SetCaretColorImpl,
         TextAttributeModifier::SetSelectedBackgroundColorImpl,
         TextAttributeModifier::SetEllipsisModeImpl,

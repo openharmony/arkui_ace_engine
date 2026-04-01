@@ -517,6 +517,9 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnDetectResultUpdate,
     NodeModifier::SetOnTextSpanLongPress,
+    NodeModifier::SetOnTextTextSelectionChange,
+    NodeModifier::SetOnTextCopy,
+    NodeModifier::SetOnTextWillCopy,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -535,6 +538,9 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
     NodeModifier::SetOnTextInputWillChange,
+    NodeModifier::SetOnTextInputCopy,
+    NodeModifier::SetOnTextInputWillCopy,
+    NodeModifier::SetOnTextInputWillCut,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -553,6 +559,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
     NodeModifier::SetOnTextAreaWillChange,
+    NodeModifier::SetOnTextAreaCopy,
+    NodeModifier::SetOnTextAreaWillCopy,
+    NodeModifier::SetOnTextAreaCut,
+    NodeModifier::SetOnTextAreaWillCut,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -759,6 +769,9 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnDetectResultUpdate,
     NodeModifier::ResetOnTextSpanLongPress,
+    NodeModifier::ResetOnTextTextSelectionChange,
+    NodeModifier::ResetOnTextCopy,
+    NodeModifier::ResetOnTextWillCopy,
 };
 
 const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -777,6 +790,9 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
     NodeModifier::ResetOnTextInputWillChange,
+    NodeModifier::ResetOnTextInputCopy,
+    NodeModifier::ResetOnTextInputWillCopy,
+    NodeModifier::ResetOnTextInputWillCut,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -795,6 +811,10 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
     NodeModifier::ResetOnTextAreaWillChange,
+    NodeModifier::ResetOnTextAreaCopy,
+    NodeModifier::ResetOnTextAreaWillCopy,
+    NodeModifier::ResetOnTextAreaCut,
+    NodeModifier::ResetOnTextAreaWillCut,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

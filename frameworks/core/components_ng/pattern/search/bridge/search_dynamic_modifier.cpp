@@ -1050,6 +1050,25 @@ void ResetSearchOnSubmitWithEvent(ArkUINodeHandle node)
     SearchModelNG::SetOnSubmit(frameNode, nullptr);
 }
 
+void SetSearchOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCopy(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = GetFrameNode(node);
@@ -1067,6 +1086,25 @@ void ResetSearchOnCopy(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetSearchOnWillCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCut(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCut(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCut(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCut(frameNode, nullptr);
 }
 
 void SetSearchOnCut(ArkUINodeHandle node, void* callback)
@@ -2114,8 +2152,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchOnEditChange = nullptr,
             .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEventImpl,
             .resetSearchOnSubmitWithEvent = nullptr,
+            .setSearchOnWillCopy = nullptr,
+            .resetSearchOnWillCopy = nullptr,
             .setSearchOnCopy = SetSearchOnCopyImpl,
             .resetSearchOnCopy = nullptr,
+            .setSearchOnWillCut = nullptr,
+            .resetSearchOnWillCut = nullptr,
             .setSearchOnCut = SetSearchOnCutImpl,
             .resetSearchOnCut = nullptr,
             .setSearchOnPaste = SetSearchOnPasteImpl,
@@ -2277,8 +2319,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchOnEditChange = ResetSearchOnEditChange,
         .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEvent,
         .resetSearchOnSubmitWithEvent = ResetSearchOnSubmitWithEvent,
+        .setSearchOnWillCopy = SetSearchOnWillCopy,
+        .resetSearchOnWillCopy = ResetSearchOnWillCopy,
         .setSearchOnCopy = SetSearchOnCopy,
         .resetSearchOnCopy = ResetSearchOnCopy,
+        .setSearchOnWillCut = SetSearchOnWillCut,
+        .resetSearchOnWillCut = ResetSearchOnWillCut,
         .setSearchOnCut = SetSearchOnCut,
         .resetSearchOnCut = ResetSearchOnCut,
         .setSearchOnPaste = SetSearchOnPaste,
