@@ -7818,4 +7818,24 @@ std::optional<void*> TextPattern::GetDrawParagraph()
     }
     return std::nullopt;
 }
+
+bool TextPattern::GetFallbackLineSpacingStyleOptimizeFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
+
+void TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateIncludeFontPadding(flag);
+    textLayoutProperty->UpdateFallbackLineSpacing(flag);
+}
+
 } // namespace OHOS::Ace::NG

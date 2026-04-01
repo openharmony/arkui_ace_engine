@@ -1265,4 +1265,41 @@ HWTEST_F(TextTestNgSeven, CreateTextDragInfo005, TestSize.Level1)
     color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
     EXPECT_NE(color.GetValue(), Color::BLUE.GetValue());
 }
+
+/**
+ * @tc.name: SetFallbackLineSpacingAndIncludeFontPadding001
+ * @tc.desc: Test the IncludeFontPadding attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, SetFallbackLineSpacingAndIncludeFontPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize text and copyOption.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567891");
+
+    /**
+     * @tc.steps: step3. test the param keyEventInitialized_ is or not true.
+     * @tc.expect: expect keyEventInitialized_ is true.
+     */
+    textPattern->SetFallbackLineSpacingAndIncludeFontPadding(true);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.expected: Get IncludeFontPadding Value true.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), true);
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), true);
+}
 } // namespace OHOS::Ace::NG
