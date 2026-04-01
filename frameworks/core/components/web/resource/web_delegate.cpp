@@ -9910,6 +9910,25 @@ void WebDelegate::SetEnableAutoFill(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableAutoFill");
 }
 
+void WebDelegate::SetEnableDrag(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->SetEnableDrag(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableDrag");
+}
+
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
 {
     CHECK_NULL_VOID(taskExecutor_);

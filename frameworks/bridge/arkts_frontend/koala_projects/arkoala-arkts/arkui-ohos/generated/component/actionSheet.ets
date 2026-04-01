@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, Callback as arkui_component_common_Callback, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, TransitionEffect_serializer, ShadowOptions_serializer } from './common'
+import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, Callback as arkui_component_common_Callback, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType, SystemUiMaterial, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, TransitionEffect_serializer, ShadowOptions_serializer } from './common'
 import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -29,8 +29,10 @@ import { DialogButtonStyle, Color as arkui_component_enums_Color, BorderStyle } 
 import { DialogAlignment } from './alertDialog'
 import { LevelMode, ImmersiveMode, LevelOrder } from '@ohos.promptAction'
 import { extractors } from '#handwritten'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { LevelOrder_serializer } from './../framework/ohos.promptAction'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export interface DismissDialogAction {
     reason: DismissReason
     dismiss(): void
@@ -134,6 +136,7 @@ export interface ActionSheetOptions {
     levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
+    systemMaterial?: SystemUiMaterial;
 }
 export class DismissDialogAction_serializer {
     public static write(buffer: SerializerBase, value: DismissDialogAction): void {
@@ -798,6 +801,14 @@ export class ActionSheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ActionSheetOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -1227,7 +1238,13 @@ export class ActionSheetOptions_serializer {
             levelOrderTmpBuf = (LevelOrder_serializer.read(valueDeserializer) as LevelOrder)
         }
         const levelOrderTmpResult: LevelOrder | undefined = levelOrderTmpBuf
-        let value: ActionSheetOptions = ({title: titleTmpResult, subtitle: subtitleTmpResult, message: messageTmpResult, confirm: confirmTmpResult, cancel: cancelTmpResult, sheets: sheetsTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, maskRect: maskRectTmpResult, showInSubWindow: showInSubWindowTmpResult, isModal: isModalTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onWillDismiss: onWillDismissTmpResult, transition: transitionTmpResult, cornerRadius: cornerRadiusTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult} as ActionSheetOptions)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        let value: ActionSheetOptions = ({title: titleTmpResult, subtitle: subtitleTmpResult, message: messageTmpResult, confirm: confirmTmpResult, cancel: cancelTmpResult, sheets: sheetsTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, maskRect: maskRectTmpResult, showInSubWindow: showInSubWindowTmpResult, isModal: isModalTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onWillDismiss: onWillDismissTmpResult, transition: transitionTmpResult, cornerRadius: cornerRadiusTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult, systemMaterial: systemMaterialTmpResult} as ActionSheetOptions)
         return value
     }
 }

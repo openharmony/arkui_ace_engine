@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/render/drawing.h"
+
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"

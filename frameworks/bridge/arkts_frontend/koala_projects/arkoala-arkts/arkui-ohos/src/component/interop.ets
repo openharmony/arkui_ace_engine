@@ -34,7 +34,7 @@ import {
     LocalStorage
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
-import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
+import { IDecoratedV1Variable, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { UIContext } from "@ohos/arkui/UIContext"
 import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
@@ -297,6 +297,12 @@ export function getRawObject<T>(value: T): T {
 export function getObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
     const createObservedObject = global.getProperty('createObservedObject');
+    return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
+}
+
+export function getV2ObservedObject<T>(value: T): T {
+    const global = ESValue.getGlobal();
+    const createObservedObject = global.getProperty('createV2ObservedObject');
     return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
@@ -1047,6 +1053,24 @@ export function enableCompatibleObservedV2ForStatic<T>(
     let updateStaticState = (value: MutableState<int32>) => {
         value.value++
         ESValue.getGlobal().getProperty('runPendingJobs').invoke();
+    }
+    method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
+        ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))
+    return value;
+}
+
+export function enableCompatibleObservedV2ForStaticMeta<T>(
+    value: T
+): T {
+    let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStaticMeta');
+    let createStaticState = () => {
+        return STATE_MGMT_FACTORY.makeMutableStateMeta();
+    }
+    let recordStaticState = (value: IMutableStateMeta) => {
+        value.addRef();
+    }
+    let updateStaticState = (value: IMutableStateMeta) => {
+        ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {value.fireChange()})
     }
     method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
         ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))

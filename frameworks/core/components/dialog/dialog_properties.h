@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
+class UiMaterial;
 class Component;
 class Gesture;
 
@@ -335,6 +336,7 @@ struct DialogProperties {
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
     DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
+    RefPtr<UiMaterial> systemMaterial;
 };
 
 struct PromptDialogAttr {
@@ -388,6 +390,7 @@ struct PromptDialogAttr {
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
     DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
+    RefPtr<UiMaterial> systemMaterial;
 };
 
 enum class PromptActionCommonState {

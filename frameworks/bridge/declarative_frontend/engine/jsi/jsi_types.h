@@ -18,10 +18,7 @@
 
 #include <string>
 
-#include "ecmascript/napi/include/jsnapi.h"
-
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_fwd.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 
 #define FAKE_PTR_FOR_FUNCTION_ACCESS(klass) \
@@ -31,6 +28,12 @@
     }
 
 namespace OHOS::Ace::Framework {
+
+template<typename T>
+class JsiRef;
+
+template<typename T>
+class JsiWeak;
 
 using JsiFunctionCallback = panda::Local<panda::JSValueRef> (*)(panda::JsiRuntimeCallInfo*);
 using EcmaVM = panda::ecmascript::EcmaVM;

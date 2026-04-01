@@ -1425,21 +1425,6 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
     record.addText = options.value;
     RichEditorChangeValue changeValue(reason);
     bool isUndoRedo = options.optionSource == OptionSource::UNDO_REDO;
-    UpdateUrlColorIfNeeded(options);
-    CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
-    ClearRedoOperationRecords();
-    record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
-    AddOperationRecord(record);
-    auto ret = AddTextSpanOperation(options, isPaste, index, false);
-    SetNeedMoveCaretToContentRect();
-    if (!previewTextRecord_.IsValid() && !isUndoRedo) {
-        AfterContentChange(changeValue);
-    }
-    return ret;
-}
-
-void RichEditorPattern::UpdateUrlColorIfNeeded(TextSpanOptions& options)
-{
     auto needUpdateUrlColor = options.urlAddress.has_value() && !options.urlAddress.value().empty()
         && options.useThemeFontColor;
     if (needUpdateUrlColor && options.style.has_value()) {
@@ -1452,6 +1437,16 @@ void RichEditorPattern::UpdateUrlColorIfNeeded(TextSpanOptions& options)
             options.style.value().SetStrokeColor(urlSpanColor);
         }
     }
+    CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
+    AddOperationRecord(record);
+    auto ret = AddTextSpanOperation(options, isPaste, index, false);
+    SetNeedMoveCaretToContentRect();
+    if (!previewTextRecord_.IsValid() && !isUndoRedo) {
+        AfterContentChange(changeValue);
+    }
+    return ret;
 }
 
 int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
@@ -1550,18 +1545,14 @@ void RichEditorPattern::HandleRequestKeyboardCommand(int32_t hostId)
 
 void RichEditorPattern::HandleCopyOrCutCommand(const std::string& cmd, int32_t hostId)
 {
+    if (copyOption_ == CopyOptions::None) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent cmd copy is not allow.");
+        return;
+    }
     if (cmd == "copy") {
-        if (copyOption_ == CopyOptions::None) {
-            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent cmd copy is not allow.");
-            return;
-        }
         HandleOnCopy();
         ReportCommandExecution(hostId, "RichEditor.onCopyComplete");
     } else if (cmd == "cut") {
-        if (copyOption_ == CopyOptions::None) {
-            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent cmd cut is not allow.");
-            return;
-        }
         HandleOnCut();
         ReportCommandExecution(hostId, "RichEditor.onCutComplete");
     }
@@ -1596,7 +1587,6 @@ bool RichEditorPattern::ProcessCommand(const std::string& cmd, const std::unique
         int32_t end = json->GetInt("selectionEnd");
         SetSelection(start, end);
     } else if (cmd == "copy" || cmd == "cut") {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ParseCommand command copy");
         HandleCopyOrCutCommand(cmd, hostId);
     } else if (cmd == "setCaretPosition") {
         if (!json->Contains("position")) {
@@ -4553,11 +4543,8 @@ void RichEditorPattern::HandleDoubleClickEditLogic(GestureEvent& info, int32_t s
     RequestKeyboard(false, true, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::u16string selectTextContent;
-    GetContentBySpans(selectTextContent);
-    std::u16string selectData16 = selectTextContent.substr(selectStart, selectEnd - selectStart);
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
+    auto value = selectOverlay_->GetSelectedText();
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", value, selectStart, selectEnd);
 }
 
 void RichEditorPattern::StartVibratorByLongPress()
@@ -8564,11 +8551,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::u16string selectTextContent;
-    GetContentBySpans(selectTextContent);
-    std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(selectStart),
-        static_cast<int32_t>(selectEnd - selectStart));
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
+    std::string selectData = selectOverlay_->GetSelectedText();
     ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
 }
 
@@ -10381,10 +10364,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        std::u16string selectTextContent;
-        GetContentBySpans(selectTextContent);
-        std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(start), static_cast<int32_t>(end - start));
-        std::string selectData = StringUtils::Str16ToStr8(selectData16);
+        std::string selectData = selectOverlay_->GetSelectedText();
         ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, start, end);
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());

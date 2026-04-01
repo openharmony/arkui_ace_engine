@@ -2059,6 +2059,17 @@ void IndexerPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        auto indexerPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indexerPattern);
+        indexerPattern->MoveIndexByStep(1);
+    });
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        auto indexerPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indexerPattern);
+        indexerPattern->MoveIndexByStep(-1);
+    });
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto textNode = DynamicCast<NG::FrameNode>(iter);

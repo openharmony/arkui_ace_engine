@@ -121,18 +121,21 @@ abstract class View extends NativeViewFullUpdate implements
     if (info) {
       // need to sync container instanceId to switch instanceId in C++ side.
       this.syncInstanceId();
-      if (this.propsUsedForRender.has(info)) {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View needs update`);
-        this.markNeedUpdate();
-      } else {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View does NOT need update`);
+      try {
+        if (this.propsUsedForRender.has(info)) {
+          stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View needs update`);
+          this.markNeedUpdate();
+        } else {
+          stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View does NOT need update`);
+        }
+        let cb = this.watchedProps.get(info);
+        if (cb) {
+          stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. calling @Watch function`);
+          cb.call(this, info);
+        }
+      } finally {
+        this.restoreInstanceId();
       }
-      let cb = this.watchedProps.get(info);
-      if (cb) {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. calling @Watch function`);
-        cb.call(this, info);
-      }
-      this.restoreInstanceId();
     } // if info avail.
   }
 

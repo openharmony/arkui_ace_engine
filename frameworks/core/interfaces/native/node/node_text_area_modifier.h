@@ -47,5 +47,13 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaWillCopy(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaCopy(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaWillCut(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaCut(ArkUINodeHandle node, void* extraParam);
+    void ResetOnTextAreaWillCopy(ArkUINodeHandle node);
+    void ResetOnTextAreaCopy(ArkUINodeHandle node);
+    void ResetOnTextAreaWillCut(ArkUINodeHandle node);
+    void ResetOnTextAreaCut(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

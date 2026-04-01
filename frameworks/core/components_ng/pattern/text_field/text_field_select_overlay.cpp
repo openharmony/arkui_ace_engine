@@ -649,10 +649,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto startIndex = selectController->GetStartIndex();
     auto endIndex = selectController->GetEndIndex();
-    auto value = pattern->GetTextContentController()->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
-        static_cast<int32_t>(endIndex - startIndex));
-    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
+    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldSelectOverlay::UpdateHandlesPosition(RefPtr<TextSelectController> selectController, bool isFirst)

@@ -517,6 +517,9 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnDetectResultUpdate,
     NodeModifier::SetOnTextSpanLongPress,
+    NodeModifier::SetOnTextTextSelectionChange,
+    NodeModifier::SetOnTextCopy,
+    NodeModifier::SetOnTextWillCopy,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -535,6 +538,9 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
     NodeModifier::SetOnTextInputWillChange,
+    NodeModifier::SetOnTextInputCopy,
+    NodeModifier::SetOnTextInputWillCopy,
+    NodeModifier::SetOnTextInputWillCut,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -553,6 +559,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
     NodeModifier::SetOnTextAreaWillChange,
+    NodeModifier::SetOnTextAreaCopy,
+    NodeModifier::SetOnTextAreaWillCopy,
+    NodeModifier::SetOnTextAreaCut,
+    NodeModifier::SetOnTextAreaWillCut,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -759,6 +769,9 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnDetectResultUpdate,
     NodeModifier::ResetOnTextSpanLongPress,
+    NodeModifier::ResetOnTextTextSelectionChange,
+    NodeModifier::ResetOnTextCopy,
+    NodeModifier::ResetOnTextWillCopy,
 };
 
 const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -777,6 +790,9 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
     NodeModifier::ResetOnTextInputWillChange,
+    NodeModifier::ResetOnTextInputCopy,
+    NodeModifier::ResetOnTextInputWillCopy,
+    NodeModifier::ResetOnTextInputWillCut,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -795,6 +811,10 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
     NodeModifier::ResetOnTextAreaWillChange,
+    NodeModifier::ResetOnTextAreaCopy,
+    NodeModifier::ResetOnTextAreaWillCopy,
+    NodeModifier::ResetOnTextAreaCut,
+    NodeModifier::ResetOnTextAreaWillCut,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2795,6 +2815,15 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
     return result.first;
 }
 
+ArkUI_Int32 GetSnapshotSizeLimitation(ArkUI_Int32* maxWidth, ArkUI_Int32* maxHeight)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    auto limitation = delegate->GetSizeLimitation();
+    *maxWidth = limitation.maxWidth;
+    *maxHeight = limitation.maxHeight;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2804,7 +2833,8 @@ const ArkUISnapshotAPI* GetComponentSnapshotAPI()
         .snapshotOptionsSetScale = SnapshotOptionsSetScale,
         .snapshotOptionsSetColorMode = SnapshotOptionsSetColorMode,
         .snapshotOptionsSetDynamicRangeMode = SnapshotOptionsSetDynamicRangeMode,
-        .getSyncSnapshot = GetNodeSnapshot
+        .getSyncSnapshot = GetNodeSnapshot,
+        .getSizeLimitation = GetSnapshotSizeLimitation
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

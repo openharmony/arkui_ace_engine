@@ -38,6 +38,7 @@ export interface IFactoryInternal {
     mkObservedInterfaceProxy<T extends Object>(x: T): T;
     
     mkInteropDecoratorValue<T>(info: string, initValue: T): IBackingValue<T>;
+    mkInteropV2DecoratorValue<T>(info: string, initValue: T): IBackingValue<T>;
 }
 
 export const FactoryInternal: IFactoryInternal = new FactoryInternalImpl();

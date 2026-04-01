@@ -482,7 +482,7 @@ public:
         const std::string& resName, const std::string& bundleName, const std::string& moduleName, int32_t& resId);
     static bool HasGetter(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, int32_t propertyIndex);
     static int32_t GetStringFormatStartIndex(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
-    static std::string GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type);
+    static std::string TryLocalizeNumberStr(const std::string& result, const std::string& type);
     static void ParseMarginOrPaddingCorner(const EcmaVM* vm, const Local<JSValueRef>& value,
         std::optional<CalcDimension>& top, std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left,
         std::optional<CalcDimension>& right);

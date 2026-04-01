@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/image_provider/drawing_image_data.h"
+#include "utils/data.h"
 
 #include "include/core/SkStream.h"
 

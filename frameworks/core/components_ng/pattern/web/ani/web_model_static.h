@@ -255,6 +255,7 @@ public:
     static void SetCameraCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
     static void SetAISessionOptions(FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
         const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, const std::optional<bool>& isEnable,

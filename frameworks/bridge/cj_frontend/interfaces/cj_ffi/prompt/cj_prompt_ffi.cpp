@@ -375,7 +375,8 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
 
     // shadow
     Shadow shadow;
-    if (options.shadowOption.radius == SHADOW_OPTION_NONE) {
+    if (options.shadowOption.radius == SHADOW_OPTION_NONE
+        && Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         if (options.shadowStyle == SHADOW_STYLE_NONE) {
             shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
         } else {
@@ -430,7 +431,8 @@ void SetShowDialog(DialogProperties& dialogProperties, const NativeShowDialogOpt
 
     // shadow
     Shadow shadow;
-    if (options.shadowOption.radius == SHADOW_OPTION_NONE) {
+    if (options.shadowOption.radius == SHADOW_OPTION_NONE
+        && Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         if (options.shadowStyle == SHADOW_STYLE_NONE) {
             shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
         } else {

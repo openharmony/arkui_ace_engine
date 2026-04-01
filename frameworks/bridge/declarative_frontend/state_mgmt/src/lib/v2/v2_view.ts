@@ -555,34 +555,37 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
         const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
-            stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
+            try {
+                stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
-            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                compilerAssignedUpdateFunc(elmtId, isFirstRender);
 
-            // After first render, new bindings (pending) need to be recorded
-            // immediately, as they may fire changes before the next idle time,
-            // e.g. in the onAreaChange handler
-            if (isFirstRender) {
-                ObserveV2.getObserve().runIdleTasks();
+                // After first render, new bindings (pending) need to be recorded
+                // immediately, as they may fire changes before the next idle time,
+                // e.g. in the onAreaChange handler
+                if (isFirstRender) {
+                    ObserveV2.getObserve().runIdleTasks();
+                }
+
+                if (!isFirstRender) {
+                    _popFunc();
+                }
+
+                let node = this.getNodeById(elmtId);
+                if (node !== undefined) {
+                    (node as ArkComponent).cleanStageValue();
+                }
+
+                ObserveV2.getObserve().stopRecordDependencies();
+                ViewStackProcessor.StopGetAccessRecording();
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+                stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
+            } finally {
+                this.restoreInstanceId();
             }
-
-            if (!isFirstRender) {
-                _popFunc();
-            }
-
-            let node = this.getNodeById(elmtId);
-            if (node !== undefined) {
-                (node as ArkComponent).cleanStageValue();
-            }
-
-            ObserveV2.getObserve().stopRecordDependencies();
-            ViewStackProcessor.StopGetAccessRecording();
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
-            this.restoreInstanceId();
         };
 
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -664,8 +667,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
             this.syncInstanceId();
-            this.markNeedUpdate();
-            this.restoreInstanceId();
+            try {
+                this.markNeedUpdate();
+            } finally {
+                this.restoreInstanceId();
+            }
         }
         this.dirtDescendantElementIds_.add(elmtId);
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);

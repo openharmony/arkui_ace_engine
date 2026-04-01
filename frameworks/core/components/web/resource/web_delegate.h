@@ -1493,6 +1493,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 

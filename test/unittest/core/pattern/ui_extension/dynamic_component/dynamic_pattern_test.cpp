@@ -46,6 +46,13 @@ namespace {
     const std::string TAG = "Test node tag";
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class DynamicPatternTestNg : public testing::Test {
 public:
     void SetUp() override;

@@ -1392,4 +1392,238 @@ HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
     EXPECT_THAT(result, HasSubstr("DE:[,0->(1,2)]"));
     EXPECT_THAT(result, HasSubstr("MT:[,1]"));
 }
+
+/**
+ * @tc.name: SwipeRecognizerDumpTest001
+ * @tc.desc: Test SwipeRecognizer function: Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerDumpTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::HORIZONTAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto dump = swipeRecognizerPtr->Dump();
+    EXPECT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("direction:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("speed:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("fingers:"));
+}
+
+/**
+ * @tc.name: SwipeRecognizerDumpTest002
+ * @tc.desc: Test SwipeRecognizer function: Dump with VERTICAL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerDumpTest002, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::VERTICAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto dump = swipeRecognizerPtr->Dump();
+    EXPECT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("direction: 2"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("fingers:"));
+}
+
+/**
+ * @tc.name: SwipeRecognizerDumpTest003
+ * @tc.desc: Test SwipeRecognizer function: Dump with ALL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerDumpTest003, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::ALL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto dump = swipeRecognizerPtr->Dump();
+    EXPECT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("direction: 3"));
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleReportsTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleReports with ACTION callback type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleReportsTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    swipeRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    swipeRecognizerPtr->HandleReports(info, GestureCallbackType::ACTION);
+}
+
+/**
+ * @tc.name: SwipeRecognizerUpdateGestureEventInfoTest002
+ * @tc.desc: Test SwipeRecognizer function: UpdateGestureEventInfo with TOUCH device type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerUpdateGestureEventInfoTest002, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    swipeRecognizerPtr->deviceType_ = SourceType::TOUCH;
+    swipeRecognizerPtr->resultSpeed_ = 100.0;
+    swipeRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    swipeRecognizerPtr->lastTouchEvent_.sourceTool = SourceTool::FINGER;
+    auto info = std::make_shared<SwipeGestureEvent>();
+    swipeRecognizerPtr->UpdateGestureEventInfo(info);
+    EXPECT_EQ(info->GetSpeed(), 100.0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerUpdateGestureEventInfoTest003
+ * @tc.desc: Test SwipeRecognizer function: UpdateGestureEventInfo with tiltX and tiltY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerUpdateGestureEventInfoTest003, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    swipeRecognizerPtr->lastTouchEvent_.tiltX = 10.0;
+    swipeRecognizerPtr->lastTouchEvent_.tiltY = 20.0;
+    swipeRecognizerPtr->lastTouchEvent_.rollAngle = 30.0;
+    auto info = std::make_shared<SwipeGestureEvent>();
+    swipeRecognizerPtr->UpdateGestureEventInfo(info);
+    EXPECT_TRUE(info->GetTiltX().has_value());
+    EXPECT_TRUE(info->GetTiltY().has_value());
+    EXPECT_TRUE(info->GetRollAngle().has_value());
+}
+
+/**
+ * @tc.name: SwipeRecognizerCheckAngleTest001
+ * @tc.desc: Test SwipeRecognizer function: CheckAngle with ALL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerCheckAngleTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::ALL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto result = swipeRecognizerPtr->CheckAngle(0);
+    EXPECT_EQ(result, true);
+    result = swipeRecognizerPtr->CheckAngle(45);
+    EXPECT_EQ(result, true);
+    result = swipeRecognizerPtr->CheckAngle(90);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SwipeRecognizerCheckAngleTest002
+ * @tc.desc: Test SwipeRecognizer function: CheckAngle with negative angles
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerCheckAngleTest002, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::HORIZONTAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto result = swipeRecognizerPtr->CheckAngle(-30);
+    EXPECT_EQ(result, true);
+    result = swipeRecognizerPtr->CheckAngle(-50);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SwipeRecognizerCheckAngleTest003
+ * @tc.desc: Test SwipeRecognizer function: CheckAngle with VERTICAL direction and angle near 90
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerCheckAngleTest003, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::VERTICAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    swipeRecognizerPtr->prevAngle_ = std::nullopt;
+    auto result = swipeRecognizerPtr->CheckAngle(80);
+    EXPECT_EQ(result, true);
+    result = swipeRecognizerPtr->CheckAngle(-80);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTriggerGestureJudgeCallbackTest001
+ * @tc.desc: Test SwipeRecognizer function: TriggerGestureJudgeCallback with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTriggerGestureJudgeCallbackTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto result = swipeRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: SwipeRecognizerGetAxisDirectionTest001
+ * @tc.desc: Test SwipeRecognizer function: GetAxisDirection with HORIZONTAL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerGetAxisDirectionTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::HORIZONTAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto axis = swipeRecognizerPtr->GetAxisDirection();
+    EXPECT_EQ(axis, Axis::HORIZONTAL);
+}
+
+/**
+ * @tc.name: SwipeRecognizerGetAxisDirectionTest002
+ * @tc.desc: Test SwipeRecognizer function: GetAxisDirection with VERTICAL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerGetAxisDirectionTest002, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::VERTICAL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto axis = swipeRecognizerPtr->GetAxisDirection();
+    EXPECT_EQ(axis, Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: SwipeRecognizerGetAxisDirectionTest003
+ * @tc.desc: Test SwipeRecognizer function: GetAxisDirection with ALL direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerGetAxisDirectionTest003, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::ALL;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto axis = swipeRecognizerPtr->GetAxisDirection();
+    EXPECT_EQ(axis, Axis::FREE);
+}
+
+/**
+ * @tc.name: SwipeRecognizerGetAxisDirectionTest004
+ * @tc.desc: Test SwipeRecognizer function: GetAxisDirection with NONE direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerGetAxisDirectionTest004, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    swipeDirection.type = SwipeDirection::NONE;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto axis = swipeRecognizerPtr->GetAxisDirection();
+    EXPECT_EQ(axis, Axis::NONE);
+}
 } // namespace OHOS::Ace::NG

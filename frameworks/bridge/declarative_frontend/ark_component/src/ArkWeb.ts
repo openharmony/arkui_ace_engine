@@ -1706,6 +1706,19 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey<boolean> {
       } else {
           getUINativeModule().web.setEnableWebAVSession(node, this.value);
       }
+    }
+}
+class WebEnableDragModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDrag');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
   }
 }
 
@@ -2289,6 +2302,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
+
+  enableDrag(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+
   enableDefaultContextMenu(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;

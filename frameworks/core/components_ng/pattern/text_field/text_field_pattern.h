@@ -312,8 +312,8 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
     bool ParseCommand(const std::string& command);
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+        int32_t end);
 
     int32_t GetInstanceId() const override
     {
@@ -2274,6 +2274,9 @@ private:
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
+    void ProcessMagnifierInBlurEvent();
+    void ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection);
+    void ProcessCaretIndexInBlurEvent(bool shouldKeepSelection);
 
     void TwinklingByFocus();
 
@@ -2350,6 +2353,8 @@ private:
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
     void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
+    bool QuerySmartEdgeState();
+    bool ShouldKeepSelectionOnWindowBlur();
 
     RectF frameRect_;
     RectF textRect_;

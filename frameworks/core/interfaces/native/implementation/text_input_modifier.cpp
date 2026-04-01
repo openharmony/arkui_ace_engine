@@ -389,14 +389,23 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
     TextFieldModelNG::SetOnCopy(frameNode, onCopy);
 }
-
 void SetOnWillCopyImpl(Ark_NativePointer node,
                        const Opt_Callback_String_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // TextInputModelNG::SetSetOnWillCopy(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
 }
 void SetOnCutImpl(Ark_NativePointer node,
                   const Opt_Callback_String_Void* value)
@@ -419,8 +428,18 @@ void SetOnWillCutImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // TextInputModelNG::SetSetOnWillCut(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillCut(frameNode, std::move(onCallback));
 }
 void SetOnPasteImpl(Ark_NativePointer node,
                     const Opt_OnPasteCallback* value)

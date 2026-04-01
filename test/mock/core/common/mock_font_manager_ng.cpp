@@ -88,4 +88,12 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 {
     fontList = fontNames_;
 }
+
+void FontManager::UpdateStyleOptimizeFlagInCurrentLanguage() {}
+
+bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
+{
+    return false;
+}
+
 } // namespace OHOS::Ace

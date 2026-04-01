@@ -339,12 +339,23 @@ void SetOnCopyImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
-void SetOnWillCopyImpl(Ark_NativePointer node, const Opt_Callback_String_Boolean* value)
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SearchModelNG::SetSetOnWillCopy(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    SearchModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
 }
 void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
 {
@@ -362,12 +373,23 @@ void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
-void SetOnWillCutImpl(Ark_NativePointer node, const Opt_Callback_String_Boolean* value)
+void SetOnWillCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SearchModelNG::SetSetOnWillCut(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelNG::SetOnWillCut(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    SearchModelNG::SetOnWillCut(frameNode, std::move(onCallback));
 }
 void SetOnPasteImpl(Ark_NativePointer node, const Opt_OnPasteCallback* value)
 {

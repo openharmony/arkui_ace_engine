@@ -11457,7 +11457,7 @@ void impl_NavigationInterface_setNavigationOptions1(Ark_NativePointer thisPtr, K
         Opt_NavigationModuleInfo moduleInfoValueTemp = moduleInfoValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setNavigationOptions1(self, static_cast<Opt_NavPathStack*>(&pathInfosValueTemp), static_cast<Opt_HomePathInfo*>(&homeDestinationValueTemp), static_cast<Opt_NavigationModuleInfo*>(&moduleInfoValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationInterface_setNavigationOptions1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationInterface_setNavigationOptions1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setNavBarWidth(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28241,6 +28241,19 @@ void impl_WebAttribute_setEnableDefaultContextMenu(Ark_NativePointer thisPtr, KS
         GetNodeModifiers()->getWebModifier()->setEnableDefaultContextMenu(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableDefaultContextMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_setEnableDrag(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setEnableDrag(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableDrag, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setAiSessionOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

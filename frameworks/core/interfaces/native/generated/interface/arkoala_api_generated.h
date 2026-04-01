@@ -22297,6 +22297,7 @@ typedef struct Ark_ActionSheetOptions {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_ActionSheetOptions;
 typedef struct Opt_ActionSheetOptions {
     Ark_Tag tag;
@@ -22339,6 +22340,7 @@ typedef struct Ark_AlertDialogParamWithButtons {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
     Ark_AlertDialogButtonBaseOptions primaryButton;
     Ark_AlertDialogButtonBaseOptions secondaryButton;
 } Ark_AlertDialogParamWithButtons;
@@ -22383,6 +22385,7 @@ typedef struct Ark_AlertDialogParamWithConfirm {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
     Opt_AlertDialogButtonBaseOptions confirm;
 } Ark_AlertDialogParamWithConfirm;
 typedef struct Opt_AlertDialogParamWithConfirm {
@@ -22426,6 +22429,7 @@ typedef struct Ark_AlertDialogParamWithOptions {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
     Array_AlertDialogButtonOptions buttons;
     Opt_DialogButtonDirection buttonDirection;
 } Ark_AlertDialogParamWithOptions;
@@ -22613,6 +22617,7 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -22658,6 +22663,7 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrderExtender levelOrderExtender;
     Opt_Boolean focusable;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_CustomDialogControllerOptionsExtender;
 typedef struct Opt_CustomDialogControllerOptionsExtender {
     Ark_Tag tag;
@@ -27624,6 +27630,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value);
     void (*setEnableDefaultContextMenu)(Ark_NativePointer node,
                                         const Opt_Boolean* value);
+    void (*setEnableDrag)(Ark_NativePointer node,
+                          const Opt_Boolean* value);
     void (*setAiSessionOptions)(Ark_NativePointer node,
                                 const Opt_Array_AISessionEvent* value);
     void (*setEnableDrag)(Ark_NativePointer node,
