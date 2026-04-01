@@ -16,10 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_BINDINGS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_BINDINGS_H
 
-#include "ecmascript/napi/include/jsnapi.h"
-
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 
 namespace __detail__ {
 
