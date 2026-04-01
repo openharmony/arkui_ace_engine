@@ -1196,6 +1196,7 @@
         "arkui.component.navigation.NavigationAttribute.title",
         "arkui.component.navigation.NavigationAttribute.menus",
         "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
+        "arkui.component.navigation.NavigationAttribute.setNavigationOptions",
         "arkui.component.navigation.NavPathStack.pushPath",
         "arkui.component.navigation.NavPathStack.pushDestination",
         "arkui.component.navigation.NavPathStack.pushPathByName",
