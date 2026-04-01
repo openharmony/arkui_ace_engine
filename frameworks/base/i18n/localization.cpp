@@ -207,10 +207,10 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
     if (!script.empty()) {
         languageTag_.append("-").append(script);
     }
+    fontLocale_ = languageTag_;
     if (!countryOrRegion.empty()) {
         languageTag_.append("-").append(countryOrRegion);
     }
-    fontLocale_ = languageTag_;
     // Simple chinese
     if (languageTag_ == "zh-Hans-CN") {
         languageTag_ = "zh-CN";
@@ -225,8 +225,8 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
         selectLanguage_ = "b+sr+Latn";
     }
 
-    LOGI("SetLocale language tag: %{public}s, select language: %{public}s", languageTag_.c_str(),
-        selectLanguage_.c_str());
+    LOGI("SetLocale language tag: %{public}s, font locale: %{public}s, select language: %{public}s",
+        languageTag_.c_str(), fontLocale_.c_str(), selectLanguage_.c_str());
     if (!isPromiseUsed_) {
         promise_.set_value(true);
         isPromiseUsed_ = true;
