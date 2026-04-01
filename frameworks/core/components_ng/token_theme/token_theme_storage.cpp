@@ -154,6 +154,8 @@ void TokenThemeStorage::CacheResetColor()
         }
         ResetThemeColor(themeId, theme, defaultTheme, colorMode);
     }
+    TAG_LOGI(AceLogTag::ACE_THEME, "Update %{public}d themes in cache, colorMode: %{public}s",
+        static_cast<int32_t>(themeCache_.size()), colorMode == ColorMode::DARK ? "dark" : "light");
 }
 
 void TokenThemeStorage::CacheSet(const RefPtr<TokenTheme>& theme)

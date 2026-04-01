@@ -342,6 +342,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadResourceThemes();
 
     if (clearCache) {
+        LOGI("[%{public}s][%{public}s][%{public}d] Clear resource cache when init.", bundleName.c_str(),
+            moduleName.c_str(), pipelineContext->GetInstanceId());
         ResourceManager::GetInstance().Reset();
     }
 
