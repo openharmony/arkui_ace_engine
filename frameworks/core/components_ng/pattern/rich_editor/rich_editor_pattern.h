@@ -755,8 +755,7 @@ public:
     bool HandleSetCaretPositionCommand(int32_t position, int32_t hostId);
     void HandleRequestKeyboardCommand(int32_t hostId);
     void HandleCopyOrCutCommand(const std::string& cmd, int32_t hostId);
-    bool ProcessCommand(const std::string& cmd, const std::unique_ptr<JsonValue>& json,
-        int32_t hostId);
+    bool ProcessCommand(const std::string& cmd, const std::unique_ptr<JsonValue>& json, int32_t hostId);
 
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
@@ -1644,7 +1643,6 @@ private:
     friend class RichEditorScrollController;
     friend class RichEditorBaseController;
     bool ParseCommand(const std::string& command);
-    void UpdateUrlColorIfNeeded(TextSpanOptions& options);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);

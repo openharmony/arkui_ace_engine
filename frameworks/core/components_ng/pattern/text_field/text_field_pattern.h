@@ -312,8 +312,8 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
     bool ParseCommand(const std::string& command);
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+        int32_t end);
 
     int32_t GetInstanceId() const override
     {
