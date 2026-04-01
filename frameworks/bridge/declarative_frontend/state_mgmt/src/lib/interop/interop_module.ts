@@ -39,6 +39,32 @@ class InteropExtractorModule {
         return newValue;
     }
 
+    static getV2InteropObservedObject<T extends Object>(newValue: T, owningProperty: object, propertyKey: string, watchKeyPrefix: string): T {
+        const isStaBuiltin =
+          globalThis.Panda.STValue.isSTArray(newValue) ||
+          globalThis.Panda.STValue.isSTSet(newValue) ||
+          globalThis.Panda.STValue.isSTMap(newValue) ||
+          newValue instanceof Date;
+        if (
+          isStaBuiltin &&
+          !('addWatchSubscriber' in newValue) &&
+          typeof InteropExtractorModule.makeObserved !== undefined &&
+          typeof InteropExtractorModule.makeObserved === 'function'
+        ) {
+          newValue = InteropExtractorModule.makeObserved(newValue) as T;
+        }
+        if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
+            const callback = () => {
+                ObserveV2.getObserve().fireChange(owningProperty, propertyKey);
+            };
+            if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
+                const watchStoreKey = `${watchKeyPrefix}${propertyKey}`;
+                owningProperty[watchStoreKey] = InteropExtractorModule.createWatchFunc(callback, newValue);
+            }
+        }
+        return newValue;
+    }
+
     static setStaticValueForInterop<T>(state: ObservedPropertyPU<T> | SynchedPropertyOneWayPU<T>, newValue: T): void {
         if (state._setInteropValueForStaticState !== undefined &&
             typeof state._setInteropValueForStaticState === 'function') {

@@ -30,6 +30,9 @@ class VariableUtilV2 {
      * @param newValue - update to new value
      */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
+      if (InteropConfigureStateMgmt.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
+        newValue = InteropExtractorModule.getV2InteropObservedObject(newValue, target, attrName, '__paramStaticWatch_');
+      }
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
@@ -48,6 +51,9 @@ class VariableUtilV2 {
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
 
       const storeProp = ObserveV2.OB_PREFIX + attrName;
+      if (InteropConfigureStateMgmt.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
+        newValue = InteropExtractorModule.getV2InteropObservedObject(newValue, target, attrName, '__paramStaticWatch_');
+      }
       // @Observed class and @Track attrName
       if (newValue === target[storeProp]) {
         stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);

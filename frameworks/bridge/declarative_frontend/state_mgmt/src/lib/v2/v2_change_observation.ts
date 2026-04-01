@@ -375,6 +375,15 @@ class ObserveV2 {
             }
             staticCompatibleFunc[1](staticStatic);
           }
+          let staticCompatibleMetaFunc = target['__staticCompatibleMetaFunc__'];
+          if (staticCompatibleMetaFunc) {
+            let staticStatic = target['__staticMetaState__' + attrName];
+            if (!staticStatic) {
+              staticStatic = staticCompatibleMetaFunc[0]();
+              target['__staticMetaState__' + attrName] = staticStatic;
+            }
+            staticCompatibleMetaFunc[1](staticStatic);
+          }
       }
     }
     if (!bound) {
@@ -549,6 +558,13 @@ class ObserveV2 {
         let staticStatic = target['__staticStatic__' + attrName];
         if (staticStatic) {
           staticCompatibleFunc[2](staticStatic);
+        }
+      }
+      let staticCompatibleMetaFunc = target['__staticCompatibleMetaFunc__'];
+      if (staticCompatibleMetaFunc) {
+        let staticStatic = target['__staticMetaState__' + attrName];
+        if (staticStatic) {
+          staticCompatibleMetaFunc[2](staticStatic);
         }
       }
     }
@@ -1573,6 +1589,9 @@ const trackInternal = (
     },
     set(val) {
       // If the object has not been observed, you can directly assign a value to it. This improves performance.
+      if (InteropConfigureStateMgmt.needsInterop() && val && typeof val === 'object' && isStaticProxy(val)) {
+        val = InteropExtractorModule.getV2InteropObservedObject(val, this, propertyKey, '__localStaticWatch_');
+      }
       if (val !== this[storeProp]) {
         this[storeProp] = val;
 
