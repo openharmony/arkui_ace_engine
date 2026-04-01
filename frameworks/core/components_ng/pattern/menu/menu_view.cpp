@@ -1123,7 +1123,10 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, true, menuNode);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
+    } else {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, false, menuNode);
     }
 }
 
@@ -1390,7 +1393,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     menuWrapperPattern->SetMenuParam(menuParam);
@@ -1621,7 +1625,8 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);

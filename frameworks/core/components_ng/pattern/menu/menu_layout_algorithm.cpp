@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
+#if defined(ENABLE_ROSEN_BACKEND)
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +49,12 @@ constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_P1_OFFSET_Y = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_Y = 0.68_vp;
+#if defined(ENABLE_ROSEN_BACKEND)
+constexpr Dimension ARROW_P3_OFFSET_X = 0.0_vp;
+constexpr Dimension ARROW_P7_OFFSET_X = 11.0_vp;
+constexpr Dimension ARROW_P3_OFFSET_Y = -1.0_vp;
+constexpr Dimension ARROW_P7_OFFSET_Y = 11.36_vp;
+#endif
 constexpr Dimension MIN_KEYBOARD_AVOID_DISTANCE = 8.0_vp;
 constexpr Dimension MIN_MENU_HEIGHT = 48.0_vp;
 
@@ -3911,7 +3920,7 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
     }
     auto childOffset = targetOffset + childOffset_;
     auto arrowPosition = targetOffset + arrowPosition_;
-    MenuPathParams params = {
+    pathParams_ = {
         radiusTopLeftPx,
         radiusTopRightPx,
         radiusBottomLeftPx,
@@ -3922,7 +3931,7 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
         arrowPlacement_,
         didNeedArrow,
     };
-    menuPattern->UpdateMenuPathParams(params);
+    menuPattern->UpdateMenuPathParams(pathParams_);
     if (!didNeedArrow) {
         return "";
     }
@@ -3939,6 +3948,26 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
 {
     bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
     clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
+#if defined(ENABLE_ROSEN_BACKEND)
+    CHECK_NULL_VOID(layoutWrapper);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    const auto& menuParam = menuWrapperPattern->GetMenuParam();
+    if (menuParam.systemMaterial) {
+        auto menuSDFShape = GetMenuSDFShape(didNeedArrow);
+        auto menuNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(menuNode);
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetSDFShape(menuSDFShape);
+    }
+#endif
 }
 
 bool MenuLayoutAlgorithm::UpdateSelectOverlayMenuColumnInfo(
@@ -4075,4 +4104,163 @@ bool MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
     maxSpaceHeight_ = std::min<float>(wrapperRect_.Height(), maxSpaceHeight);
     return true;
 }
+
+#if defined(ENABLE_ROSEN_BACKEND)
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSDFRRectShape()
+{
+    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto shape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
+    CHECK_NULL_RETURN(shape, nullptr);
+
+    float radiusTopLeftPx = pathParams_.value_or(MenuPathParams()).radiusTopLeftPx;
+    float radiusTopRightPx = pathParams_.value_or(MenuPathParams()).radiusTopRightPx;
+    float radiusBottomLeftPx = pathParams_.value_or(MenuPathParams()).radiusBottomLeftPx;
+    float radiusBottomRightPx = pathParams_.value_or(MenuPathParams()).radiusBottomRightPx;
+    
+    OHOS::Rosen::RRect rrect(
+        OHOS::Rosen::RectF(
+            childOffset_.GetX(),
+            childOffset_.GetY(),
+            childMarginFrameSize_.Width(),
+            childMarginFrameSize_.Height()
+        ),
+        OHOS::Rosen::Vector4(radiusTopLeftPx, radiusTopRightPx, radiusBottomRightPx, radiusBottomLeftPx)
+    );
+    shape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+    return shape0;
+}
+
+void MenuLayoutAlgorithm::CalculateBottomArrowVertices(
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P7_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P7_OFFSET_Y.ConvertToPx()); // P7
+    vertex1 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P3_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P3_OFFSET_Y.ConvertToPx()); // P3
+    vertex2 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P7_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P7_OFFSET_Y.ConvertToPx()); // P8
+}
+
+void MenuLayoutAlgorithm::CalculateLeftArrowVertices(
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P7_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P7_OFFSET_X.ConvertToPx()); // P7
+    vertex1 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P3_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P3_OFFSET_X.ConvertToPx()); // P3
+    vertex2 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P7_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P7_OFFSET_X.ConvertToPx()); // P8
+}
+
+void MenuLayoutAlgorithm::CalculateTopArrowVertices(
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P7_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P7_OFFSET_Y.ConvertToPx()); // P7
+    vertex1 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() - ARROW_P3_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P3_OFFSET_Y.ConvertToPx()); // P3
+    vertex2 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P7_OFFSET_X.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P7_OFFSET_Y.ConvertToPx()); // P8
+}
+
+void MenuLayoutAlgorithm::CalculateRightArrowVertices(
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    vertex0 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P7_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P7_OFFSET_X.ConvertToPx()); // P7
+    vertex1 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P3_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() - ARROW_P3_OFFSET_X.ConvertToPx()); // P3
+    vertex2 = OHOS::Rosen::Vector2f(arrowPosition_.GetX() + ARROW_P7_OFFSET_Y.ConvertToPx(),
+        arrowPosition_.GetY() + ARROW_P7_OFFSET_X.ConvertToPx()); // P8
+}
+
+void MenuLayoutAlgorithm::CalculateArrowVertices(
+    OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2)
+{
+    switch (arrowPlacement_) {
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            CalculateBottomArrowVertices(vertex0, vertex1, vertex2);
+            break;
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            CalculateLeftArrowVertices(vertex0, vertex1, vertex2);
+            break;
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            CalculateTopArrowVertices(vertex0, vertex1, vertex2);
+            break;
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            CalculateRightArrowVertices(vertex0, vertex1, vertex2);
+            break;
+        default:
+            break;
+    }
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSDFTriangleShape(
+    const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
+    const OHOS::Rosen::Vector2f& vertex2)
+{
+    auto triangleShape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_TRIANGLE_SHAPE);
+    auto triangleShape =
+        std::static_pointer_cast<OHOS::Rosen::RSNGSDFTriangleShape>(triangleShape0);
+    CHECK_NULL_RETURN(triangleShape, nullptr);
+    float arrowRadius = ARROW_RADIUS.ConvertToPx();
+
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex0Tag>(vertex0);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex1Tag>(vertex1);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeVertex2Tag>(vertex2);
+    triangleShape->Setter<OHOS::Rosen::SDFTriangleShapeRadiusTag>(arrowRadius);
+
+    return triangleShape0;
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSmoothUnionShape(
+    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
+    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY)
+{
+    auto unionShape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_SMOOTH_UNION_OP_SHAPE);
+    auto unionShape =
+        std::static_pointer_cast<OHOS::Rosen::RSNGSDFSmoothUnionOpShape>(unionShape0);
+    CHECK_NULL_RETURN(unionShape, nullptr);
+
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(shapeX);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(shapeY);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(0.1f);
+
+    return unionShape0;
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::GetMenuSDFShape(bool didNeedArrow)
+{
+    if (!didNeedArrow || !pathParams_.has_value()) {
+        return CreateSDFRRectShape();
+    }
+
+    auto rrectShape = CreateSDFRRectShape();
+    CHECK_NULL_RETURN(rrectShape, nullptr);
+    if (arrowPlacement_ == Placement::NONE) {
+        return rrectShape;
+    }
+
+    OHOS::Rosen::Vector2f vertex0;
+    OHOS::Rosen::Vector2f vertex1;
+    OHOS::Rosen::Vector2f vertex2;
+    CalculateArrowVertices(vertex0, vertex1, vertex2);
+    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
+    CHECK_NULL_RETURN(triangleShape, nullptr);
+
+    return CreateSmoothUnionShape(rrectShape, triangleShape);
+}
+#endif
+
 } // namespace OHOS::Ace::NG
