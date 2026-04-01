@@ -1800,7 +1800,7 @@ bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
 }
 
 #ifdef FORM_SUPPORTED
-static void ReleaseWorkerSafeMemFunc(void* mapper)
+void ReleaseWorkerSafeMemFunc(void* mapper)
 {
     if (mapper) {
         AbilityBase::FileMapper* fileMapper = static_cast<AbilityBase::FileMapper*>(mapper);
