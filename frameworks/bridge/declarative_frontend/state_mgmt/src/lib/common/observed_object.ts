@@ -84,7 +84,11 @@ function Observed<T extends Constructor>(BaseClass: T): T {
       });
       try {
         if (this.constructor.name === '') {
-          Reflect.defineProperty(this, globalThis.__OBSERVED_OBJECT_NAME, {value: BaseClass ? BaseClass.name : 'UnknownClassName', enumerable: false});
+          if (!Reflect.has(this, globalThis.__OBSERVED_OBJECT_NAME)) {
+            Reflect.defineProperty(this, globalThis.__OBSERVED_OBJECT_NAME, {value: BaseClass ? BaseClass.name : 'UnknownClassName', enumerable: false, writable: true});
+          } else {
+            Reflect.set(this, globalThis.__OBSERVED_OBJECT_NAME, BaseClass ? BaseClass.name : 'UnknownClassName');
+          }        
         }
       } catch (e) {
         stateMgmtConsole.warn('Failed to set the value of class name in Observed constructor,', e);
