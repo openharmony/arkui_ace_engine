@@ -430,6 +430,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public enabled(value: boolean | undefined): this {
         this.getPeer().setEnabledAttribute(value);
+        this.markDirty();
         return this
     }
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
