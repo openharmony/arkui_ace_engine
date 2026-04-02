@@ -110,11 +110,29 @@ enum {
     PARAM_DATA_SOURCE,
     PARAM_ITEM_GENERATOR,
     PARAM_KEY_GENERATOR,
+    PARAM_OPTIONS,
     PARAM_UPDATE_CHANGEDNODE,
 
     MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
-    MAX_PARAM_SIZE = 6,
+    MAX_PARAM_SIZE = 7,
 };
+
+void ParseOptionalParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
+{
+    if (info.Length() > PARAM_KEY_GENERATOR) {
+        params[PARAM_KEY_GENERATOR] = info[PARAM_KEY_GENERATOR];
+        if (info.Length() > MIN_PARAM_SIZE + 1 && info[PARAM_OPTIONS]->IsObject()) {
+            params[PARAM_OPTIONS] = info[PARAM_OPTIONS];
+        }
+        if (info.Length() > MIN_PARAM_SIZE + 1 && info[PARAM_OPTIONS]->IsBoolean()) {
+            params[PARAM_UPDATE_CHANGEDNODE] = info[PARAM_OPTIONS];
+        }
+    }
+
+    if (info.Length() > PARAM_UPDATE_CHANGEDNODE) {
+        params[PARAM_UPDATE_CHANGEDNODE] = info[PARAM_UPDATE_CHANGEDNODE];
+    }
+}
 
 bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
 {
@@ -138,14 +156,96 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
         !(info[PARAM_KEY_GENERATOR]->IsFunction() || info[PARAM_KEY_GENERATOR]->IsUndefined())) {
         return false;
     }
-    if (info.Length() > MIN_PARAM_SIZE + 1 && !info[PARAM_UPDATE_CHANGEDNODE]->IsBoolean()) {
+    if (info.Length() > PARAM_UPDATE_CHANGEDNODE && !info[PARAM_UPDATE_CHANGEDNODE]->IsBoolean()) {
+        return false;
+    }
+    if (info.Length() > PARAM_OPTIONS && !(info[PARAM_OPTIONS]->IsObject() || info[PARAM_OPTIONS]->IsBoolean())) {
         return false;
     }
 
-    for (uint32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
-        params[idx] = info[idx];
-    }
+    params[PARAM_VIEW_ID] = info[PARAM_VIEW_ID];
+    params[PARAM_PARENT_VIEW] = info[PARAM_PARENT_VIEW];
+    params[PARAM_DATA_SOURCE] = info[PARAM_DATA_SOURCE];
+    params[PARAM_ITEM_GENERATOR] = info[PARAM_ITEM_GENERATOR];
+
+    ParseOptionalParams(info, params);
+
     return true;
+}
+
+LazyForEachReleaseStrategy ParseLazyForEachReleaseStrategy(const JSRef<JSVal>& value)
+{
+    // try to convert to number
+    int32_t intValue = 0;
+    if (ConvertFromJSValue(value, intValue)) {
+        if (intValue == 1) {
+            return LazyForEachReleaseStrategy::PROGRESSIVE;
+        }
+        return LazyForEachReleaseStrategy::BATCH;
+    }
+    
+    // try to convert to string
+    std::string strValue;
+    if (ConvertFromJSValue(value, strValue)) {
+        if (strValue == "PROGRESSIVE" || strValue == "1") {
+            return LazyForEachReleaseStrategy::PROGRESSIVE;
+        }
+        if (strValue == "BATCH" || strValue == "0") {
+            return LazyForEachReleaseStrategy::BATCH;
+        }
+    }
+    
+    return LazyForEachReleaseStrategy::BATCH;
+}
+
+LazyForEachCustomComponentFreezeMode ParseLazyForEachCustomComponentFreezeMode(const JSRef<JSVal>& value)
+{
+    // try to convert to number
+    int32_t intValue = 0;
+    if (ConvertFromJSValue(value, intValue)) {
+        if (intValue == 1) {
+            return LazyForEachCustomComponentFreezeMode::DISABLED;
+        }
+        if (intValue == 2) {
+            return LazyForEachCustomComponentFreezeMode::ENABLED;
+        }
+        return LazyForEachCustomComponentFreezeMode::AUTO;
+    }
+    
+    // try to convert to string
+    std::string strValue;
+    if (ConvertFromJSValue(value, strValue)) {
+        if (strValue == "DISABLED" || strValue == "1") {
+            return LazyForEachCustomComponentFreezeMode::DISABLED;
+        }
+        if (strValue == "ENABLED" || strValue == "2") {
+            return LazyForEachCustomComponentFreezeMode::ENABLED;
+        }
+        if (strValue == "AUTO" || strValue == "0") {
+            return LazyForEachCustomComponentFreezeMode::AUTO;
+        }
+    }
+    
+    return LazyForEachCustomComponentFreezeMode::AUTO;
+}
+
+LazyForEachOptions ParseOptions(const JSRef<JSVal>& optionsVal)
+{
+    LazyForEachOptions options;
+    
+    if (!optionsVal->IsObject() || optionsVal->IsUndefined()) {
+        return options;
+    }
+    
+    JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(optionsVal);
+    
+    JSRef<JSVal> cacheVal = optionsObj->GetProperty("customComponentFreezeMode");
+    options.enableCustomComponentFreeze = ParseLazyForEachCustomComponentFreezeMode(cacheVal);
+    
+    JSRef<JSVal> strategyVal = optionsObj->GetProperty("releaseStrategy");
+    options.releaseStrategy = ParseLazyForEachReleaseStrategy(strategyVal);
+    
+    return options;
 }
 
 } // namespace
@@ -209,6 +309,10 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     actuator->SetDataSourceObj(dataSourceObj);
     actuator->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
     actuator->SetUpdateChangedNodeFlag(updateChangedNodeFlag);
+    // Parse and set options
+    LazyForEachOptions options = ParseOptions(params[PARAM_OPTIONS]);
+    actuator->SetOptions(options);
+    
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
         auto createFunc = [actuator]() {
             LazyForEachModel::GetInstance()->Create(actuator);

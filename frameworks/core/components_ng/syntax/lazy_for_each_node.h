@@ -207,6 +207,19 @@ public:
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
 
     void EnablePreBuild(bool enable);
+
+    LazyForEachCustomComponentFreezeMode GetEnableCustomComponentFreeze() const
+    {
+        return builder_ ? builder_->GetEnableCustomComponentFreeze(): LazyForEachCustomComponentFreezeMode::AUTO;
+    }
+
+    LazyForEachReleaseStrategy GetLazyForEachReleaseStrategy() const
+    {
+        return builder_? builder_->GetLazyForEachReleaseStrategy(): LazyForEachReleaseStrategy::BATCH;
+    }
+
+    bool hasRegisterLazyForEachToCustomNode = false;
+
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
     void DumpInfo() override;

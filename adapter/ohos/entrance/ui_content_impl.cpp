@@ -62,6 +62,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
@@ -2154,6 +2155,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
+    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
+    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
+    });
+    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);

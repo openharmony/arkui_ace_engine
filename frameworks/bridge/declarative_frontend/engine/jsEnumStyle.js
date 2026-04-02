@@ -5311,3 +5311,16 @@ let InputEventInterceptAction;
   InputEventInterceptAction[InputEventInterceptAction.CONTINUE = 0] = 'CONTINUE';
   InputEventInterceptAction[InputEventInterceptAction.BLOCK = 1] = 'BLOCK';
 })(InputEventInterceptAction || (InputEventInterceptAction = {}));
+
+let LazyForEachReleaseStrategy;
+(function (LazyForEachReleaseStrategy) {
+  LazyForEachReleaseStrategy.BATCH = 0;
+  LazyForEachReleaseStrategy.PROGRESSIVE = 1;
+})(LazyForEachReleaseStrategy || (LazyForEachReleaseStrategy = {}));
+
+let LazyForEachCustomComponentFreezeMode ;
+(function (LazyForEachCustomComponentFreezeMode ) {
+  LazyForEachCustomComponentFreezeMode.AUTO = 0;
+  LazyForEachCustomComponentFreezeMode.DISABLED = 1;
+  LazyForEachCustomComponentFreezeMode.ENABLED = 2;
+})(LazyForEachCustomComponentFreezeMode  || (LazyForEachCustomComponentFreezeMode  = {}));

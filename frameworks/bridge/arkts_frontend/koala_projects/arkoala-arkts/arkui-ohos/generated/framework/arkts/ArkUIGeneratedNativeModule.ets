@@ -5181,6 +5181,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _LazyForEachOps_SetOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _LeadingMarginSpan_construct(): KPointer
     @ani.unsafe.Direct
     native static _LeadingMarginSpan_getFinalizer(): KPointer
