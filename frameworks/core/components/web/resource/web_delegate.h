@@ -1550,6 +1550,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

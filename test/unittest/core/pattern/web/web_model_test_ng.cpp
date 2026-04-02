@@ -6010,4 +6010,56 @@ HWTEST_F(WebModelTestNg, SetAISessionOptions003, TestSize.Level1)
     EXPECT_TRUE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetScrollbarLayoutPolicy001
+ * @tc.desc: Test web_model_ng.cpp SetScrollbarLayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetScrollbarLayoutPolicy001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WebModelNG webModelNG;
+    webModelNG.SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::CONTENT);
+
+    webModelNG.SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::SYSTEM);
+#endif
+}
+
+/**
+ * @tc.name: SetScrollbarLayoutPolicy002
+ * @tc.desc: Test web_model_ng.cpp SetScrollbarLayoutPolicy with FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetScrollbarLayoutPolicy002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WebModelNG webModelNG;
+    webModelNG.SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::CONTENT);
+
+    webModelNG.SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::SYSTEM);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -2920,4 +2920,19 @@ void WebModelNG::SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabl
     CHECK_NULL_VOID(webPattern);
     webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
 }
+
+void WebModelNG::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
+
+void WebModelNG::SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
 } // namespace OHOS::Ace::NG

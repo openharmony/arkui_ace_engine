@@ -127,6 +127,11 @@ enum class ScrollDirectionalLockType : int32_t {
     NESTED_SCROLL = 1
 };
 
+enum class ScrollbarLayoutPolicy : int32_t {
+    CONTENT = 0,
+    SYSTEM = 1
+};
+
 struct WebPreviewSelectionMenuParam {
     WebElementType type = WebElementType::NONE;
     ResponseType responseType = ResponseType::LONG_PRESS;

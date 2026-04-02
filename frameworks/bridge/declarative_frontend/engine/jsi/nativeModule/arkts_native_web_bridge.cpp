@@ -4365,6 +4365,38 @@ ArkUINativeModuleValue WebBridge::ResetEnableWebAVSession(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WebBridge::SetScrollbarLayoutPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        int32_t policy = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getWebModifier()->setScrollbarLayoutPolicy(nativeNode, policy);
+    } else {
+        GetArkUINodeModifiers()->getWebModifier()->resetScrollbarLayoutPolicy(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetScrollbarLayoutPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetScrollbarLayoutPolicy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WebBridge::SetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

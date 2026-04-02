@@ -2166,6 +2166,12 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 
+let ScrollbarLayoutPolicy;
+(function (ScrollbarLayoutPolicy) {
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.CONTENT = 0] = 'CONTENT';
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.SYSTEM = 1] = 'SYSTEM';
+})(ScrollbarLayoutPolicy || (ScrollbarLayoutPolicy = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
