@@ -105,7 +105,7 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_layoutalgorithm:layoutalgorithm",
-      "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_theme_control",
       "$ace_root/frameworks/bridge/declarative_frontend:shape",
       "$ace_root/frameworks/bridge/declarative_frontend:statemanagement",
@@ -117,7 +117,7 @@ if (is_ohos_standard_system) {
       ":copy_component_model_abc_library",
     ]
     out_path = get_label_info(
-            "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+            "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/layoutalgorithm.abc",
@@ -177,7 +177,7 @@ if (is_ohos_standard_system) {
       ]
     }
     out_path = get_label_info(
-            "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+            "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/arkdynamiclayout.abc",

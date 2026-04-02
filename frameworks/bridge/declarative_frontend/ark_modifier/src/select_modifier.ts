@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SelectModifier extends ArkSelectComponent implements AttributeModifier<SelectAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

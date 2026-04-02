@@ -13,12 +13,51 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class StepperModifier extends ArkStepperComponent implements AttributeModifier<StepperAttribute> {
+class LazyArkStepperComponent extends ArkComponent {
+  static module: StepperComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkStepperComponent.module === undefined) {
+     LazyArkStepperComponent.module = globalThis.requireNapi('arkui.components.arkstepper');
+   }
+
+   this.lazyComponent = LazyArkStepperComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  onFinish(callback: () => void): this {
+   this.lazyComponent.onFinish(callback);
+   return this;
+  }
+
+  onSkip(callback: () => void): this {
+   this.lazyComponent.onSkip(callback);
+   return this;
+  }
+
+  onChange(callback: (prevIndex: number, index: number) => void): this {
+   this.lazyComponent.onChange(callback);
+   return this;
+  }
+
+  onNext(callback: (index: number, pendingIndex: number) => void): this {
+   this.lazyComponent.onNext(callback);
+   return this;
+  }
+
+  onPrevious(callback: (index: number, pendingIndex: number) => void): this {
+   this.lazyComponent.onPrevious(callback);
+   return this;
+  }
+}class StepperModifier extends LazyArkStepperComponent implements AttributeModifier<StepperAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: StepperAttribute): void {

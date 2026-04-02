@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-class RelativeContainerModifier extends ArkRelativeContainerComponent implements AttributeModifier<RelativeContainerAttribute> {
+class ParticleModifier extends ArkParticleComponent implements AttributeModifier<ParticleAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
-  applyNormalAttribute(instance: RelativeContainerAttribute): void {
+  applyNormalAttribute(instance: ParticleAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<RelativeContainerAttribute, ArkRelativeContainerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<ParticleAttribute, ArkParticleComponent, ArkComponent>(instance, this);
   }
 }

@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ButtonModifier extends ArkButtonComponent implements AttributeModifier<ButtonAttribute> {
-  
+
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
-  
+
   applyNormalAttribute(instance: ButtonAttribute): void {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier<ButtonAttribute, ArkButtonComponent, ArkComponent>(instance, this);

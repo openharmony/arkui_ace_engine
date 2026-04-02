@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SwiperModifier extends ArkSwiperComponent implements AttributeModifier<SwiperAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

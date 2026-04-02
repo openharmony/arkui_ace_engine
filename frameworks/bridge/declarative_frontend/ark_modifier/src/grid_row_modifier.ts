@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class GridRowModifier extends ArkGridRowComponent implements AttributeModifier<GridRowAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

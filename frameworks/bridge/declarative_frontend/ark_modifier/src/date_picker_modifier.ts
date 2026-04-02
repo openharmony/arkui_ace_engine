@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class DatePickerModifier extends ArkDatePickerComponent implements AttributeModifier<DatePickerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

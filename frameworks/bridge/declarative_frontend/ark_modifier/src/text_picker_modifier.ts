@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class TextPickerModifier extends ArkTextPickerComponent implements AttributeModifier<TextPickerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class IndicatorComponentModifier extends ArkIndicatorComponentComponent implements AttributeModifier<IndicatorComponentAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
