@@ -501,7 +501,7 @@ HWTEST_F(GridIrregularFillerTest, Fill004, TestSize.Level1)
     info.childrenCount_ = 8;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 300.0f, 0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 300.0f, 0);
 
     EXPECT_EQ(res.length, 401.0f);
 
@@ -509,7 +509,7 @@ HWTEST_F(GridIrregularFillerTest, Fill004, TestSize.Level1)
     EXPECT_EQ(res.endMainLineIndex, 2);
 
     // call Fill on an already filled matrix
-    res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 500.0f, 2);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 500.0f, 2);
 
     EXPECT_EQ(res.length, 602.0f);
 
@@ -539,7 +539,7 @@ HWTEST_F(GridIrregularFillerTest, Fill005, TestSize.Level1)
     info.childrenCount_ = 8;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1500.0f, 0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1500.0f, 0);
 
     EXPECT_EQ(res.length, 1104.5f);
 
@@ -548,7 +548,7 @@ HWTEST_F(GridIrregularFillerTest, Fill005, TestSize.Level1)
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_10);
 
     // call Fill on an already filled matrix
-    res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1500.0f, 3);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1500.0f, 3);
 
     EXPECT_EQ(res.length, 501.5f);
 
