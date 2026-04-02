@@ -15673,6 +15673,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
     }
+    void EnableEventPassthroughImpl(const Opt_Boolean* enabled,
+                                    Ark_RawInputEventType eventType)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -22914,6 +22918,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::EnableEventPassthroughImpl,
         };
         return &IUIContextAccessorImpl;
     }

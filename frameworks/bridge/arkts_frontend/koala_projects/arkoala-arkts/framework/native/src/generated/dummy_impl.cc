@@ -34347,6 +34347,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void EnableEventPassthroughImpl(const Opt_Boolean* enabled,
+                                    Ark_RawInputEventType eventType)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("enableEventPassthrough(");
+        WriteToString(&out, enabled);
+        out.append(", ");
+        WriteToString(&out, eventType);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -49631,6 +49644,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::EnableEventPassthroughImpl,
         };
         return &IUIContextAccessorImpl;
     }

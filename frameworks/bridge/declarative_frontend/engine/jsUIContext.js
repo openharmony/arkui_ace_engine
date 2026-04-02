@@ -632,6 +632,12 @@ class UIContext {
         });
     }
 
+    enableEventPassthrough(enabled, eventType) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().enableEventPassthrough(enabled, eventType);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getPixelRoundMode() {
         return withInstanceId(this.instanceId_, () => {
             return JSViewAbstract.getPixelRoundMode();

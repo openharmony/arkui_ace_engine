@@ -35226,6 +35226,18 @@ void impl_IUIContext_setCustomKeyboardContinueFeature(Ark_Int32 feature) {
         GetAccessors()->getIUIContextAccessor()->setCustomKeyboardContinueFeature(static_cast<Ark_CustomKeyboardContinueFeature>(feature));
 }
 KOALA_INTEROP_DIRECT_V1(IUIContext_setCustomKeyboardContinueFeature, Ark_Int32)
+void impl_IUIContext_enableEventPassthrough(KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 eventType) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto enabledValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean enabledValueTempTmpBuf = {};
+        enabledValueTempTmpBuf.tag = enabledValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((enabledValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            enabledValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean enabledValueTemp = enabledValueTempTmpBuf;;
+        GetAccessors()->getIUIContextAccessor()->enableEventPassthrough(static_cast<Opt_Boolean*>(&enabledValueTemp), static_cast<Ark_RawInputEventType>(eventType));
+}
+KOALA_INTEROP_DIRECT_V3(IUIContext_enableEventPassthrough, KSerializerBuffer, int32_t, Ark_Int32)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }

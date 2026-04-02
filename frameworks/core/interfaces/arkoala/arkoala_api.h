@@ -9181,6 +9181,7 @@ struct ArkUIBasicAPI {
     void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
     void (*unRegisterNodeAsyncCommonEventReceiver)();
     ArkUI_Int32 (*checkUIContextInvalid)(ArkUI_Int32 instanceId);
+    ArkUI_Int32 (*enableEventPassthrough)(ArkUI_Int32 instanceId, ArkUI_Bool enabled, ArkUI_Int32 type);
 };
 
 struct ArkUIMultiThreadManagerAPI {

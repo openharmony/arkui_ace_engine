@@ -4610,7 +4610,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     NotifyDragMouseEvent(event);
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
-        if (event.passThrough) {
+        if (isMousePassThrough_ || event.passThrough) {
             DispatchMouseEvent(event, node);
             if (postEventManager_) {
                 postEventManager_->SetPassThroughResult(eventManager_->GetPassThroughResult());

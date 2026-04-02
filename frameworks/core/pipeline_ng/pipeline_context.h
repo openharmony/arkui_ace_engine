@@ -1492,6 +1492,10 @@ private:
     {
         isEventsPassThrough_ = isEnable;
     }
+    void SetMousePassThrough(bool isEnable) override
+    {
+        isMousePassThrough_ = isEnable;
+    }
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
     void FlushTouchEvents();
@@ -1670,6 +1674,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
+    bool isMousePassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;

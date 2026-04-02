@@ -16,6 +16,8 @@
 
 #include "jsnapi_expo.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
@@ -109,6 +111,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+enum class RawInputEventType : int32_t {
+    TOUCH = 0,
+    MOUSE = 1,
+};
+
 void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
 {
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNode"),
@@ -400,6 +407,37 @@ ArkUINativeModuleValue ArkUINativeModule::RequireDynamicSyncScene(ArkUIRuntimeCa
     const char* keys[] = { "nativeRef", "tag" };
     Local<JSValueRef> values[] = { nativeRef, panda::StringRef::NewFromUtf8(vm, sceneTag.c_str()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+ArkUINativeModuleValue ArkUINativeModule::EnableEventPassthrough(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+
+    if (!firstArg->IsBoolean() || !secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool enabled = firstArg->ToBoolean(vm)->Value();
+    auto eventType = static_cast<RawInputEventType>(secondArg->Int32Value(vm));
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+
+    switch (eventType) {
+        case RawInputEventType::TOUCH:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabled, container->GetBundleName());
+            break;
+        case RawInputEventType::MOUSE:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabled, container->GetBundleName());
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "enableEventPassthrough: unknown eventType=%{public}d", static_cast<int32_t>(eventType));
+            break;
+    }
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue ArkUINativeModule::SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -5063,6 +5101,8 @@ void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetAttachedFrameNodeById));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "requireDynamicSyncScene"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequireDynamicSyncScene));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "enableEventPassthrough"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), EnableEventPassthrough));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFrameRateRange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetFrameRateRange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeFrameRateRange"),

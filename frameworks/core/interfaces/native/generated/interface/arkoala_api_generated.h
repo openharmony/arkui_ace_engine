@@ -6294,6 +6294,14 @@ typedef struct Opt_RadioIndicatorType {
     Ark_Tag tag;
     Ark_RadioIndicatorType value;
 } Opt_RadioIndicatorType;
+typedef enum Ark_RawInputEventType {
+    ARK_RAW_INPUT_EVENT_TYPE_TOUCH = 0,
+    ARK_RAW_INPUT_EVENT_TYPE_MOUSE = 1,
+} Ark_RawInputEventType;
+typedef struct Opt_RawInputEventType {
+    Ark_Tag tag;
+    Ark_RawInputEventType value;
+} Opt_RawInputEventType;
 typedef enum Ark_RefreshStatus {
     ARK_REFRESH_STATUS_INACTIVE = 0,
     ARK_REFRESH_STATUS_DRAG = 1,
@@ -29271,6 +29279,8 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
+    void (*enableEventPassthrough)(const Opt_Boolean* enabled,
+                                   Ark_RawInputEventType eventType);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
