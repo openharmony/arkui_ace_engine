@@ -6603,5 +6603,13 @@
     {
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
+    },
+    {
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent"
+    },
+ 	{
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent"
     }
 ]

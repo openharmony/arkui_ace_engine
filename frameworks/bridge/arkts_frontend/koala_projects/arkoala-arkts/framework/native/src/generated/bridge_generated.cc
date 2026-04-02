@@ -3216,7 +3216,7 @@ void impl_CommonMethod_setOnDetach(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetNodeModifiers()->getCommonMethodModifier()->setOnDetach(self, static_cast<Opt_VoidCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setOnAreaChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CommonMethod_setOnAreaChange0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -3226,9 +3226,9 @@ void impl_CommonMethod_setOnAreaChange(Ark_NativePointer thisPtr, KSerializerBuf
             valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_AREA_AREA_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_AREA_AREA_VOID))))};
         }
         Opt_Callback_Area_Area_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setOnAreaChange(self, static_cast<Opt_Callback_Area_Area_Void*>(&valueValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setOnAreaChange0(self, static_cast<Opt_Callback_Area_Area_Void*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnAreaChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnAreaChange0, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setVisibility(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -5600,6 +5600,20 @@ void impl_CommonMethod_setDebugLine(Ark_NativePointer thisPtr, const KStringPtr&
         GetNodeModifiers()->getCommonMethodModifier()->setDebugLine(self, (const Ark_String*) (&sourceLine), static_cast<Opt_String*>(&moduleNameValueTemp));
 }
 KOALA_INTEROP_V4(CommonMethod_setDebugLine, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setOnAreaChange1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        AreaChangeCallback eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_AREACHANGECALLBACK)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_AREACHANGECALLBACK))))};;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_AreaChangeOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = AreaChangeOptions_serializer::read(thisDeserializer);
+        }
+        Opt_AreaChangeOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnAreaChange1(self, static_cast<AreaChangeCallback*>(&eventValueTemp), static_cast<Opt_AreaChangeOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnAreaChange1, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CommonShapeMethod_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCommonShapeMethodModifier()->construct(id, flags);
 }

@@ -1067,6 +1067,142 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback03, TestSize.Level
 }
 
 /**
+ * @tc.name: FrameNodeTriggerOnAreaChangeCallback04
+ * @tc.desc: Test the function TriggerOnAreaChangeCallback uses throttled area change path when interval is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback04, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
+    frameNode->isActive_ = true;
+    int32_t callbackCount = 0;
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [&callbackCount](const RectF&, const OffsetF&, const RectF&, const OffsetF&) { callbackCount++; }, 1000);
+    *(frameNode->lastFrameRect_) = RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f));
+    *(frameNode->lastParentOffsetToWindow_) = OffsetF(50.0f, 50.0f);
+    frameNode->lastAreaChangeTriggerTime_ = OHOS::Ace::GetCurrentTimestamp();
+
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_1);
+
+    EXPECT_EQ(callbackCount, 0);
+    EXPECT_TRUE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    EXPECT_EQ(frameNode->GetLastFrameRect(), RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f)));
+    EXPECT_EQ(frameNode->GetLastParentOffsetToWindow(), OffsetF(50.0f, 50.0f));
+    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
+}
+
+/**
+ * @tc.name: FrameNodeSetOnAreaChangeCallbackWithInterval01
+ * @tc.desc: Test the function SetOnAreaChangeCallbackWithInterval resets throttle state when interval changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetOnAreaChangeCallbackWithInterval01, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    ASSERT_NE(frameNode->eventHub_, nullptr);
+    frameNode->onAreaChangeMinInterval_ = 5000;
+    frameNode->lastAreaChangeTriggerTime_ = 123;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, 3000);
+
+    EXPECT_EQ(frameNode->onAreaChangeMinInterval_, 3000);
+    EXPECT_EQ(frameNode->lastAreaChangeTriggerTime_, 0);
+    EXPECT_FALSE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    EXPECT_NE(frameNode->lastFrameRect_, nullptr);
+    EXPECT_NE(frameNode->lastParentOffsetToWindow_, nullptr);
+    EXPECT_TRUE(frameNode->eventHub_->HasOnAreaChanged());
+}
+
+/**
+ * @tc.name: FrameNodeSetOnAreaChangeCallbackWithInterval02
+ * @tc.desc: Test the function SetOnAreaChangeCallbackWithInterval keeps throttle state when interval is unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetOnAreaChangeCallbackWithInterval02, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, 3000);
+    frameNode->lastAreaChangeTriggerTime_ = 456;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    const RectF pendingRect(OffsetF(6.0f, 7.0f), SizeF(30.0f, 40.0f));
+    const OffsetF pendingOffset(8.0f, 9.0f);
+    const RectF lastRect(OffsetF(10.0f, 11.0f), SizeF(50.0f, 60.0f));
+    const OffsetF lastOffset(12.0f, 13.0f);
+    *(frameNode->lastFrameRect_) = lastRect;
+    *(frameNode->lastParentOffsetToWindow_) = lastOffset;
+
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, 3000);
+
+    EXPECT_EQ(frameNode->onAreaChangeMinInterval_, 3000);
+    EXPECT_EQ(frameNode->lastAreaChangeTriggerTime_, 456);
+    EXPECT_TRUE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    EXPECT_EQ(*(frameNode->lastFrameRect_), lastRect);
+    EXPECT_EQ(*(frameNode->lastParentOffsetToWindow_), lastOffset);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledAreaChangeCallback01
+ * @tc.desc: Test the function ProcessThrottledAreaChangeCallback posts delayed task when interval is not reached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledAreaChangeCallback01, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
+    frameNode->CreateEventHubInner();
+    ASSERT_NE(frameNode->eventHub_, nullptr);
+    frameNode->eventHub_->SetOnAreaChanged([](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {});
+    frameNode->onAreaChangeMinInterval_ = 1000;
+    frameNode->lastAreaChangeTriggerTime_ = OHOS::Ace::GetCurrentTimestamp();
+
+    frameNode->ProcessThrottledAreaChangeCallback();
+
+    EXPECT_TRUE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
+}
+
+/**
+ * @tc.name: FrameNodeThrottledAreaChangeTask01
+ * @tc.desc: Test the function ThrottledAreaChangeTask fires callback and clears pending state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeThrottledAreaChangeTask01, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    int32_t callbackCount = 0;
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [&callbackCount](const RectF&, const OffsetF&, const RectF&, const OffsetF&) { callbackCount++; }, 3000);
+    *(frameNode->lastFrameRect_) = RectF(OffsetF(0.0f, 0.0f), SizeF(10.0f, 10.0f));
+    *(frameNode->lastParentOffsetToWindow_) = OffsetF(0.0f, 0.0f);
+    frameNode->geometryNode_->frame_.rect_ = RectF(OffsetF(9.0f, 10.0f), SizeF(40.0f, 50.0f));
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->lastAreaChangeTriggerTime_ = 0;
+
+    frameNode->ThrottledAreaChangeTask();
+
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_FALSE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    EXPECT_EQ(frameNode->GetLastFrameRect(), RectF(OffsetF(9.0f, 10.0f), SizeF(40.0f, 50.0f)));
+    EXPECT_EQ(frameNode->GetLastParentOffsetToWindow(), OffsetF(0.0f, 0.0f));
+    EXPECT_GT(frameNode->lastAreaChangeTriggerTime_, 0);
+}
+
+/**
  * @tc.name: FrameNodeAddInnerOnSizeChangeCallback01
  * @tc.desc: Test the function AddInnerOnSizeChangeCallback
  * @tc.type: FUNC

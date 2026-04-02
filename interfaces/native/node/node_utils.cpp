@@ -810,6 +810,34 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node,
+    float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event))
+{
+    if (!node || !callback) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE, userData, callback)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->setCommonOnAreaApproximateChangeEvent(
+        node->uiNodeHandle, node, expectedUpdateInterval);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnAreaApproximateChangeEvent(node->uiNodeHandle);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type)
 {
     ArkUI_ContentTransitionEffect* contentTransitionEffect = new ArkUI_ContentTransitionEffect;

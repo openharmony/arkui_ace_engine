@@ -284,6 +284,8 @@ typedef struct AnimationStartHandler AnimationStartHandler;
 typedef struct Opt_AnimationStartHandler Opt_AnimationStartHandler;
 typedef struct ArcScrollIndexHandler ArcScrollIndexHandler;
 typedef struct Opt_ArcScrollIndexHandler Opt_ArcScrollIndexHandler;
+typedef struct AreaChangeCallback AreaChangeCallback;
+typedef struct Opt_AreaChangeCallback Opt_AreaChangeCallback;
 typedef struct AccessibilityHoverEventPeer AccessibilityHoverEventPeer;
 typedef struct AccessibilityHoverEventPeer* Ark_AccessibilityHoverEvent;
 typedef struct Opt_AccessibilityHoverEvent Opt_AccessibilityHoverEvent;
@@ -2131,6 +2133,8 @@ typedef struct Ark_ArcScrollBarOptions Ark_ArcScrollBarOptions;
 typedef struct Opt_ArcScrollBarOptions Opt_ArcScrollBarOptions;
 typedef struct Ark_ArcSwiperContentAnimatedTransition Ark_ArcSwiperContentAnimatedTransition;
 typedef struct Opt_ArcSwiperContentAnimatedTransition Opt_ArcSwiperContentAnimatedTransition;
+typedef struct Ark_AreaChangeOptions Ark_AreaChangeOptions;
+typedef struct Opt_AreaChangeOptions Opt_AreaChangeOptions;
 typedef struct ArcSwiperContentTransitionProxyPeer ArcSwiperContentTransitionProxyPeer;
 typedef struct ArcSwiperContentTransitionProxyPeer* Ark_ArcSwiperContentTransitionProxy;
 typedef struct Opt_ArcSwiperContentTransitionProxy Opt_ArcSwiperContentTransitionProxy;
@@ -7917,6 +7921,16 @@ typedef struct Opt_ArcScrollIndexHandler {
     Ark_Tag tag;
     ArcScrollIndexHandler value;
 } Opt_ArcScrollIndexHandler;
+typedef struct AreaChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue);
+} AreaChangeCallback;
+typedef struct Opt_AreaChangeCallback {
+    Ark_Tag tag;
+    AreaChangeCallback value;
+} Opt_AreaChangeCallback;
 typedef struct Opt_AccessibilityHoverEvent {
     Ark_Tag tag;
     Ark_AccessibilityHoverEvent value;
@@ -14792,6 +14806,14 @@ typedef struct Opt_ArcScrollBarOptions {
     Ark_Tag tag;
     Ark_ArcScrollBarOptions value;
 } Opt_ArcScrollBarOptions;
+typedef struct Ark_AreaChangeOptions {
+    /* kind: Interface */
+    Opt_Int32 expectedUpdateInterval;
+} Ark_AreaChangeOptions;
+typedef struct Opt_AreaChangeOptions {
+    Ark_Tag tag;
+    Ark_AreaChangeOptions value;
+} Opt_AreaChangeOptions;
 typedef struct Ark_ArcSwiperContentAnimatedTransition {
     /* kind: Interface */
     Opt_Int32 timeout;
@@ -24133,7 +24155,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                         const Opt_VoidCallback* value);
     void (*setOnDetach)(Ark_NativePointer node,
                         const Opt_VoidCallback* value);
-    void (*setOnAreaChange)(Ark_NativePointer node,
+    void (*setOnAreaChange0)(Ark_NativePointer node,
                             const Opt_Callback_Area_Area_Void* value);
     void (*setVisibility)(Ark_NativePointer node,
                           const Opt_Visibility* value);
@@ -24420,6 +24442,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDebugLine)(Ark_NativePointer node,
                          const Ark_String* sourceLine,
                          const Opt_String* moduleName);
+    void (*setOnAreaChange1)(Ark_NativePointer node,
+                             const AreaChangeCallback* event,
+                             const Opt_AreaChangeOptions* options);
 } GENERATED_ArkUICommonMethodModifier;
 
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {
