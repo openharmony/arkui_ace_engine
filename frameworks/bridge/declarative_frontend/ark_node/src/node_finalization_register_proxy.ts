@@ -19,7 +19,7 @@ class BuilderNodeFinalizationRegisterProxy {
       if (heldValue.name === 'BuilderRootFrameNode') {
         const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-        builderNode?.dispose();
+        builderNode?.deref()?.dispose();
       }
     });
   }
@@ -28,7 +28,7 @@ class BuilderNodeFinalizationRegisterProxy {
   }
 
   public static instance_: BuilderNodeFinalizationRegisterProxy = new BuilderNodeFinalizationRegisterProxy();
-  public static ElementIdToOwningBuilderNode_ = new Map<Symbol, JSBuilderNode>();
+  public static ElementIdToOwningBuilderNode_ = new Map<Symbol, WeakRef<JSBuilderNode>>();
   private finalizationRegistry_: FinalizationRegistry;
 }
 
