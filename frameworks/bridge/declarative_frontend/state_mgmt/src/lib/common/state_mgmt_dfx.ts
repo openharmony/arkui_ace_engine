@@ -20,7 +20,6 @@ class stateMgmtDFX {
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
   public static enableDebug: boolean = false;
-  public static enableSwitchInstance: boolean = false;
 
   public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
     changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
@@ -329,14 +328,6 @@ declare function _arkUIUncaughtPromiseError(error: any);
 
 function setAceDebugMode(): void {
   stateMgmtDFX.enableDebug = true;
-}
-
-function enableSwitchInstance(): void {
-  stateMgmtDFX.enableSwitchInstance = true;
-}
-
-function getEnableSwitchInstance(): boolean {
-  return stateMgmtDFX.enableSwitchInstance;
 }
 
 function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath: string): Array<string | undefined> {
