@@ -17,12 +17,13 @@ Deploy script for copying generated Modifier.ets files from arkoala generator
 to the koala_projects directory.
 
 Usage:
-    python deploy.py --source <src_dir> --destination <dst_dir> --config <config_file>
+    python deploy.py --source <src_dir> --destination <dst_dir> --config <config_file> --stamp <stamp_file>
 
 Arguments:
     --source       Source directory containing *Modifier.ets files
     --destination  Destination directory to copy files to
     --config       JSON configuration file containing ignore list of files to skip
+    --stamp        Path to stamp file created on successful completion
 
 Ignore format (relative paths from source directory):
     {
@@ -222,6 +223,11 @@ def main():
         required=False,
         help='JSON configuration file with managed ignore list and native file mappings'
     )
+    parser.add_argument(
+        '--stamp',
+        required=True,
+        help='Path to stamp file to create on successful completion'
+    )
 
     args = parser.parse_args()
 
@@ -253,6 +259,8 @@ def main():
         print("\nWarning: native entries found but --config not provided, skipping native copy")
 
     if success:
+        Path(args.stamp).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.stamp).touch()
         print("\nDeployment completed successfully!")
         return 0
     else:

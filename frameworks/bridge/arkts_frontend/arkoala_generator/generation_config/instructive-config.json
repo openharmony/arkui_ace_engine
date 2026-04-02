@@ -28,22 +28,6 @@
             "to": "../../../../core/interfaces/native/utility/generated/converter_generated.h"
         },
         {
-            "from": "sig/arkoala-arkts/framework/native/src/generated/bridge_generated.cc",
-            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/bridge_generated.cc"
-        },
-        {
-            "from": "sig/arkoala-arkts/framework/native/src/generated/callback_deserialize_call.cc",
-            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/callback_deserialize_call.cc"
-        },
-        {
-            "from": "sig/arkoala-arkts/framework/native/src/generated/callback_managed_caller.cc",
-            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/callback_managed_caller.cc"
-        },
-        {
-            "from": "sig/arkoala-arkts/framework/native/src/generated/Serializers.h",
-            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/Serializers.h"
-        },
-        {
             "from": "sig/arkoala-arkts/framework/native/src/generated/callback_kind.h",
             "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/callback_kind.h"
         }

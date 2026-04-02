@@ -18,6 +18,35 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
+template("scan_sources") {
+  action(target_name) {
+    script = "./scan_sources.py"
+
+    # Output: base path for generated files (without extension)
+    _depfile_base = "${target_gen_dir}/${target_name}_filelist"
+
+    # Explicit outputs GN needs to know about
+    outputs = [
+      "${_depfile_base}.txt",
+      "${_depfile_base}.d",
+    ]
+
+    args = [
+      "--depfile",
+      rebase_path(_depfile_base, root_build_dir),
+      "--input",
+      rebase_path(invoker.input_dir, root_build_dir),
+    ]
+
+    depfile = "${_depfile_base}.d"
+
+    forward_variables_from(invoker, "*", [])
+  }
+}
+
+scan_sources("arkui_extra_idl") {
+  input_dir = "arkui_extra_idl"
+}
 
 action("runner_gen_code") {
   script = "generation.py"
@@ -27,7 +56,7 @@ action("runner_gen_code") {
     "--arkts-sdk-patch-path",
     rebase_path("./sdk-patch"),
     "--output",
-    rebase_path("./out/"),
+    rebase_path(idlize_gen_output_path),
     "--output-sdk-patched-path",
     rebase_path("./sdk-patched/"),
     "--arkgen-options-file",
@@ -45,12 +74,36 @@ action("runner_gen_code") {
     "--idl-files",
     rebase_path("./arkui_extra_idl/"),
   ]
+  inputs = [
+    "generation_config/arkgen-config.json",
+    "generation_config/etsgen-config.json",
+    "generation_config/instructive-config.json",
+    "generation_config/scraper-config.json",
+    "../arkui_idlize/idlizer-arkgen-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "../arkui_idlize/idlizer-core-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "../arkui_idlize/idlizer-etsgen-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "../arkui_idlize/idlizer-interfaces-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "../arkui_idlize/idlizer-libohos-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "../arkui_idlize/idlizer-runner-2.1.140-panda-1.5.0-dev.58082.tgz",
+  ]
+  deps = [
+    ":arkui_extra_idl",
+  ]
   external_deps = [
     ohos_ets_api_deps,
     ohos_ets_libarkts_deps,
   ]
   outputs = [
-    "$target_out_dir/idlize_gen",
+    # bridges output
+    "$idlize_gen_bridges_output_path/arkoala_api_generated.h",
+    "$idlize_gen_bridges_output_path/Serializers.h",
+    "$idlize_gen_bridges_output_path/callback_kind.cc",
+    "$idlize_gen_bridges_output_path/bridge_generated.cc",
+    "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
+    "$idlize_gen_bridges_output_path/callback_managed_caller.cc",
+    # ace engine internals output
+    "$idlize_gen_output_path/libace/generated/interface/node_interface.gni",
+    "$idlize_gen_output_path/libace/utility/generated/converter_generated.h",
   ]
 }
 
@@ -63,11 +116,16 @@ action("idlize_gen") {
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
     "--config",
     rebase_path("./generation_config/instructive-config.json"),
+    "--stamp",
+    rebase_path("$target_out_dir/idlize_gen_stamp"),
   ]
   deps = [
     ":runner_gen_code",
   ]
+  public_deps = [
+    ":runner_gen_code",
+  ]
   outputs = [
-    "$target_out_dir/deploy_gen_code",
+    "$target_out_dir/idlize_gen_stamp",
   ]
 }
