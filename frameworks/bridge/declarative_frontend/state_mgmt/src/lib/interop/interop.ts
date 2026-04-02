@@ -284,3 +284,11 @@ function createV2ObservedObject(value: Object): Object {
 function invokeObserveFireChange(target: Object, key: string): void {
     ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
 }
+
+function createMutableBinding(getter: () => Object, setter: (newValue: Object) => void): MutableBinding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter, setter);
+}
+
+function createBinding(getter: () => Object): Binding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter);
+}
