@@ -1054,24 +1054,37 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     isCustomTransition_ = onFinish ? false : true;
+    auto removeCallback = std::make_shared<std::function<void()>>();
+    auto wrappedOnFinish = option.GetOnFinishEvent();
+    auto finishWithRemove = [wrappedOnFinish, removeCallback]() {
+        if (*removeCallback) {
+            (*removeCallback)();
+        }
+        if (wrappedOnFinish) {
+            wrappedOnFinish();
+        }
+    };
     if (transitionIn) {
         InitTransitionIn(effect, type);
-        auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->TransitionInFinish(effect, type);
-        }, option.GetOnFinishEvent());
-        stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_PUSH);
+        auto animation = AnimationUtils::StartAnimation(option,
+            [weakPattern = WeakClaim(this), effect, type]() {
+                auto pattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->TransitionInFinish(effect, type);
+            }, finishWithRemove);
+        *removeCallback =
+            stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_PUSH);
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
         return;
     }
     InitTransitionOut(effect, type);
-    auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
-        auto pagePattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->TransitionOutFinish(effect, type);
-    }, option.GetOnFinishEvent());
-    stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_POP);
+    auto animation = AnimationUtils::StartAnimation(option,
+        [weakPattern = WeakClaim(this), effect, type]() {
+            auto pagePattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pagePattern);
+            pagePattern->TransitionOutFinish(effect, type);
+        }, finishWithRemove);
+    *removeCallback = stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_POP);
     MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
 }
 
