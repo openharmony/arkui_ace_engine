@@ -4792,6 +4792,17 @@ char* HandleWebMessage(const char** params, int32_t size)
 }
 }
 
+std::string WebPattern::GetLayoutModeStr()
+{
+    switch (GetLayoutMode()) {
+        case WebLayoutMode::FIT_CONTENT:
+            return "FIT_CONTENT";
+        case WebLayoutMode::NONE:
+        default:
+            return "NONE";
+    }
+}
+
 void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
@@ -4800,6 +4811,7 @@ void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     if (config.withWeb && webDomDocument_->IsValid()) {
         json->Put(WEB_DOM_JSON_URL, webDomDocument_->GetUrl().c_str());
         json->Put(WEB_DOM_JSON_TITLE, webDomDocument_->GetTitle().c_str());
+        json->Put(WEB_DOM_JSON_LAYOUTMODE, GetLayoutModeStr().c_str());
     }
 }
 
