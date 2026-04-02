@@ -29,7 +29,7 @@ export type KDouble = double;
 export type KPointer = long // look once again
 export type pointer = KPointer
 export type KNativePointer = KPointer
-export type KInteropReturnBuffer = FixedArray<byte>
+export type KInteropReturnBuffer = ValueArray<byte>
 export type KSerializerBuffer = pointer
 
 export const nullptr: pointer = 0
