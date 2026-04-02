@@ -519,6 +519,23 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
 }
 
 /**
+ * @tc.name: GetCharacterRangeForGlyphRange002
+ * @tc.desc: Test GetCharacterRangeForGlyphRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange002, TestSize.Level1)
+{
+    auto result = pManager->GetCharacterRangeForGlyphRange(-10, -5);
+    auto glyphStart = result.first.start;
+    auto glyphEnd = result.first.end;
+    auto charStart = result.second.start;
+    auto charEnd = result.second.end;
+    EXPECT_EQ(glyphStart, -1);
+    EXPECT_EQ(glyphEnd, -1);
+    EXPECT_EQ(charStart, -1);
+    EXPECT_EQ(charEnd, -1);
+}
+/**
  * @tc.name: GetGlyphRangeForCharacterRangeWithEmptyParagraph001
  * @tc.desc: Test GetGlyphRangeForCharacterRange with empty paragraph (charLength <= 0).
  * @tc.type: FUNC
