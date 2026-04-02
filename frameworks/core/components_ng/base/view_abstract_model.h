@@ -385,7 +385,7 @@ public:
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport = false) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) = 0;
+            onAreaChanged, int32_t minInterval = 0) = 0;
     virtual void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) = 0;
     virtual void* GetFrameNode() = 0;

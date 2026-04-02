@@ -8308,17 +8308,34 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         return;
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(jsVal));
+    int32_t minInterval = 0;
+    if (info.Length() > 1) {
+        minInterval = DEFAULT_DURATION;
+        if (info[1]->IsNumber()) {
+            ParseJsInteger(info[1], minInterval);
+        } else if (info[1]->IsObject()) {
+            auto options = JSRef<JSObject>::Cast(info[1]);
+            auto intervalVal = options->GetProperty("expectedUpdateInterval");
+            if (intervalVal->IsNumber()) {
+                ParseJsInteger(intervalVal, minInterval);
+            }
+        }
+        if (minInterval < 0) {
+            minInterval = DEFAULT_DURATION;
+        }
+    }
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WeakPtr<NG::FrameNode> weakFrameNode = AceType::WeakClaim(frameNode);
     auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction),
-                             node = frameNode](
+                             node = weakFrameNode](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
         PipelineContext::SetCallBackNode(node);
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged), minInterval);
 }
 
 void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)

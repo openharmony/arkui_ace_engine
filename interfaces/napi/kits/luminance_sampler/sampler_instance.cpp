@@ -87,7 +87,8 @@ void SamplerInstance::SetCallBackToGraphic()
     auto func = [weak = AceType::WeakClaim(this), node = targetNode_](uint32_t luminance) {
         auto samplerInstance = weak.Upgrade();
         CHECK_NULL_VOID(samplerInstance);
-        for (const auto& listener : samplerInstance->samplingListeners_) {
+        auto samplingListenners = samplerInstance->samplingListeners_;
+        for (const auto& listener : samplingListenners) {
             listener->OnLuminanceChange(luminance);
         }
     };

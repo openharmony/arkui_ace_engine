@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <unordered_map>
 
 #include "base/memory/referenced.h"

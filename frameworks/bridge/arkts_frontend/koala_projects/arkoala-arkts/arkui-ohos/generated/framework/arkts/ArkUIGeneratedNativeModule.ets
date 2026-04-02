@@ -615,6 +615,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CommonMethod_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setOnAreaChange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _CommonShapeMethod_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _CommonShapeMethod_setStroke(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -3393,6 +3395,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableDrag(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setScrollbarLayoutPolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setAiSessionOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setScrollbarLayoutPolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -5060,6 +5064,8 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_unbindTabsFromNestedScrollable(tabsController: KPointer, parentScroller: KPointer, childScroller: KPointer): void
     @ani.unsafe.Direct
     native static _IUIContext_setCustomKeyboardContinueFeature(feature: KInt): void
+    @ani.unsafe.Direct
+    native static _IUIContext_enableEventPassthrough(thisArray: KSerializerBuffer, thisLength: KInt, eventType: KInt): void
     @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct

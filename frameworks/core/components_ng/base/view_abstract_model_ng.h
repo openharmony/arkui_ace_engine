@@ -1430,7 +1430,8 @@ public:
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override
+            onAreaChanged,
+        int32_t minInterval) override
     {
         auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
                                       const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
@@ -1438,7 +1439,11 @@ public:
                 Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
                 Offset(origin.GetX(), origin.GetY()));
         };
-        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        if (minInterval > 0) {
+            ViewAbstract::SetOnAreaChangedWithInterval(std::move(areaChangeCallback), minInterval);
+        } else {
+            ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        }
     }
 
     void SetOnSizeChanged(

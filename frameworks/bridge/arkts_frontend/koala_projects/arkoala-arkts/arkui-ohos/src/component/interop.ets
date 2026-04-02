@@ -54,6 +54,7 @@ import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
 import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
+import { InteropTransferMutableBinding, InteropTransferBinding } from '../stateManagement/interop/interopBinding';
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -492,7 +493,22 @@ export function transferCompatibleBuilder<T extends Function>(
     /** @memo */
     builder: T
 ): ESValue {
-    const staticBuilderFunc = (...params: FixedArray<Any>): number => {
+    const staticBuilderFunc = (...params: FixedArray<Any>): Any => {
+        let state: MutableState<int32> | undefined = undefined;
+        for (let i = 0; i < params.length; i++) {
+            if (params[i] instanceof InteropTransferMutableBinding) {
+                if (state === undefined) {
+                    state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                }
+                (params[i] as InteropTransferMutableBinding<Object>).interopAddState(state);
+            } else if (params[i] instanceof InteropTransferBinding) {
+                if (state === undefined) {
+                    state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                }
+                (params[i] as InteropTransferBinding<Object>).interopAddState(state);
+            }
+        }
+        
         /** @memo */
         const func = () => {
             builder.unsafeCall(...[__context(), __id(), ...params]);
@@ -511,7 +527,10 @@ export function transferCompatibleBuilder<T extends Function>(
 
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
-        return ptr.toDouble();
+        if (state === undefined) {
+            return ptr as number;
+        }
+        return [ptr as number, ()=>{ if (state) { state.value++; } }]
     }
     const createDynamicBuilder = ESValue.getGlobal().getProperty('createDynamicBuilder');
     const dynamicBuilder = createDynamicBuilder.invoke(ESValue.wrap(staticBuilderFunc));
@@ -524,7 +543,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
     builder: (args: T) => void
 ): ESValue {
     const staticBuilderFunc = (args: T): [number, ()=>void] => {
-        let state: MutableState<int32> | undefined;
+        let state: MutableState<int32> | undefined = undefined;
         if (isDynamicObject(args)) {
             state = updateDynamicObjectForInterop(args);
         } else {
@@ -533,6 +552,9 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
                 if (handler instanceof InteropBuilderLiteralProxyHandler) {
                     state = handler!.state;
                 }
+            } else if (args instanceof InteropTransferMutableBinding || args instanceof InteropTransferBinding) {
+                state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                args.interopAddState(state);
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;

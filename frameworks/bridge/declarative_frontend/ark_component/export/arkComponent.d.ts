@@ -42,6 +42,10 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
     applyPeer(node: KNode, reset: boolean): void;
     checkObjectDiff(): boolean;
 }
+declare type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
+declare interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -131,7 +135,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;
@@ -600,7 +604,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;
@@ -1737,7 +1741,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;

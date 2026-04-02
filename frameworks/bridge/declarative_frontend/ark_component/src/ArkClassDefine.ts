@@ -78,6 +78,24 @@ class ArkOnVisibleAreaChange {
   }
 }
 
+class ArkOnAreaChange {
+  event: (oldValue: Area, newValue: Area) => void;
+  expectedUpdateInterval?: int32;
+  hasOptionsArg: boolean;
+
+  constructor(event: (oldValue: Area, newValue: Area) => void | undefined,
+    expectedUpdateInterval?: int32 | undefined, hasOptionsArg: boolean = false) {
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.hasOptionsArg = hasOptionsArg;
+  }
+
+  isEqual(another: ArkOnAreaChange): boolean {
+    return this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval &&
+      this.hasOptionsArg === another.hasOptionsArg;
+  }
+}
+
 class ArkOnVisibleAreaApproximateChange {
   ratios: Array<number>;
   event: (isVisible: boolean, currentRatio: number) => void;

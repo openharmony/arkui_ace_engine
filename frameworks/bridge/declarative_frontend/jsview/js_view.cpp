@@ -35,6 +35,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/layout_inspector.h"
@@ -921,6 +922,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
             uiNode->SetFilePath(sources);
         }
     }
+
+    // Register __onJSInstanceIdUpdate__Internal callback when enableCustomComponentCrossAbility is enabled
+    if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
+        JSRef<JSVal> onInstanceIdUpdateFunc = jsViewObject_->GetProperty("__onJSInstanceIdUpdate__Internal");
+        if (onInstanceIdUpdateFunc->IsFunction()) {
+            RegisterOnInstanceIdUpdateCallback(onInstanceIdUpdateFunc);
+        }
+    }
+
     return node;
 }
 
@@ -1421,8 +1431,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
-    JSClass<JSViewPartialUpdate>::CustomMethod(
-        "registerUpdateJSInstanceCallback", &JSViewPartialUpdate::JSRegisterUpdateJSInstanceCallback);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
@@ -1503,41 +1511,6 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
     RegisterCombinedCallbackToBackend();
 }
 
-void JSViewPartialUpdate::JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("NativeViewPartialUpdate JSRegisterUpdateJSInstanceCallback argument invalid");
-        return;
-    }
-
-    auto jsCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-    CHECK_NULL_VOID(jsCallback);
-
-    // Save Switch callback
-    updateJSInstanceCallback_ = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
-                                 func = std::move(jsCallback), viewNode = this->viewNode_](int32_t instanceId) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        // Switch scenario logic: check GetInstanceId
-        if (self->GetInstanceId() != instanceId) {
-            self->SetInstanceId(instanceId);
-            // Call the frontend callback to clear dirtDescendantElementIds_ when needRebuild is true
-            RefPtr<AceType> node = viewNode.Upgrade();
-            auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
-            CHECK_NULL_VOID(customNodeBase);
-            if (customNodeBase->NeedRebuild()) {
-                func->ExecuteJS(0, nullptr);
-                customNodeBase->ResetNeedRebuild();
-            }
-        }
-    };
-
-    // Re-register combined callback
-    RegisterCombinedCallbackToBackend();
-}
-
 void JSViewPartialUpdate::RegisterCombinedCallbackToBackend()
 {
     // Create combined callback
@@ -1560,6 +1533,39 @@ void JSViewPartialUpdate::RegisterCombinedCallbackToBackend()
     // This directly sets updateJSInstanceCallback_ without needRebuild_ check
     ViewPartialUpdateModel::GetInstance()->RegisterUpdateJSInstanceCallback(
         viewNode_, std::move(combinedCallback));
+}
+
+void JSViewPartialUpdate::RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc)
+{
+    // Save Switch callback for cross-ability scenario
+    updateJSInstanceCallback_ = [weak = WeakClaim(this), func = std::move(onInstanceIdUpdateFunc),
+                                 viewNode = this->viewNode_](int32_t instanceId) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+        if (self->GetInstanceId() == instanceId) {
+            return;
+        }
+        self->SetInstanceId(instanceId);
+        RefPtr<AceType> node = viewNode.Upgrade();
+        auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
+        CHECK_NULL_VOID(customNodeBase);
+        if (!customNodeBase->NeedRebuild()) {
+            return;
+        }
+        auto jsFunc = JSRef<JSFunc>::Cast(func);
+        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
+            jsFunc->Call(self->jsViewObject_);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT,
+                "JSView %{public}s jsViewObject_ is empty, cannot invoke updateJSInstanceCallback_",
+                self->GetJSViewName().c_str());
+        }
+        customNodeBase->ResetNeedRebuild();
+    };
+
+    // Re-register combined callback
+    RegisterCombinedCallbackToBackend();
 }
 
 

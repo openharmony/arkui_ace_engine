@@ -3290,13 +3290,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetOnAreaChangeImpl(Ark_NativePointer node,
+    void SetOnAreaChange0Impl(Ark_NativePointer node,
                              const Opt_Callback_Area_Area_Void* value)
     {
         if (!needGroupedLog(1)) {
             return;
         }
-        string out("setOnAreaChange(");
+        string out("setOnAreaChange0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -4736,6 +4736,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, sourceLine);
         out.append(", ");
         WriteToString(&out, moduleName);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnAreaChange1Impl(Ark_NativePointer node,
+                              const AreaChangeCallback* event,
+                              const Opt_AreaChangeOptions* options)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnAreaChange1(");
+        WriteToString(&out, event);
+        out.append(", ");
+        WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21097,6 +21111,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node, const Opt_ScrollbarLayoutPolicy* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setScrollbarLayoutPolicy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -21615,7 +21639,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
             CommonMethodModifier::SetOnDetachImpl,
-            CommonMethodModifier::SetOnAreaChangeImpl,
+            CommonMethodModifier::SetOnAreaChange0Impl,
             CommonMethodModifier::SetVisibilityImpl,
             CommonMethodModifier::SetFlexGrowImpl,
             CommonMethodModifier::SetFlexShrinkImpl,
@@ -21732,6 +21756,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityGroupImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
             CommonMethodModifier::SetDebugLineImpl,
+            CommonMethodModifier::SetOnAreaChange1Impl,
         };
         return &ArkUICommonMethodModifierImpl;
     }
@@ -23787,6 +23812,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+            WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
             WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
@@ -34333,6 +34359,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setCustomKeyboardContinueFeature(");
         WriteToString(&out, feature);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void EnableEventPassthroughImpl(const Opt_Boolean* enabled,
+                                    Ark_RawInputEventType eventType)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("enableEventPassthrough(");
+        WriteToString(&out, enabled);
+        out.append(", ");
+        WriteToString(&out, eventType);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -49620,6 +49659,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::EnableEventPassthroughImpl,
         };
         return &IUIContextAccessorImpl;
     }

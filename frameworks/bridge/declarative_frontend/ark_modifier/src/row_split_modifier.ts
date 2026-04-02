@@ -13,16 +13,43 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class RowSplitModifier extends ArkRowSplitComponent implements AttributeModifier<RowSplitAttribute> {
+class LazyArkRowSplitComponent extends ArkComponent {
+  static module: RowSplitComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkRowSplitComponent.module === undefined) {
+     LazyArkRowSplitComponent.module = globalThis.requireNapi('arkui.components.arkrowsplit');
+   }
+
+   this.lazyComponent = LazyArkRowSplitComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  resizeable(value: boolean): LazyArkRowSplitComponent {
+   this.lazyComponent.resizeable(value);
+   return this;
+  }
+
+  clip(value: boolean): this {
+    this.lazyComponent.clip(value);
+    return this;
+  }
+}
+
+class RowSplitModifier extends LazyArkRowSplitComponent implements AttributeModifier<RowSplitAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: RowSplitAttribute): void {
     ModifierUtils.applySetOnChange(this);
+    // @ts-ignore
     ModifierUtils.applyAndMergeModifier<RowSplitAttribute, ArkRowSplitComponent, ArkComponent>(instance, this);
   }
 }

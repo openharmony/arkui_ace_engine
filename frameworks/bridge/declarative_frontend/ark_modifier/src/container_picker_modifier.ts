@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class ContainerPickerModifier extends ArkContainerPickerComponent implements AttributeModifier<UIPickerComponentAttribute> {
+class UIPickerComponentModifier extends ArkContainerPickerComponent implements AttributeModifier<UIPickerComponentAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);

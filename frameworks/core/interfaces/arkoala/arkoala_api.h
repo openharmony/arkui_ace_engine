@@ -3588,6 +3588,9 @@ struct ArkUICommonModifier {
     void (*setCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
         ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Float32 expectedUpdateInterval);
     void (*unregisterCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node);
+    void (*setCommonOnAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
+        ArkUI_Float32 expectedUpdateInterval);
+    void (*unregisterCommonOnAreaApproximateChangeEvent)(ArkUINodeHandle node);
     void (*setWidthLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy);
     void (*resetWidthLayoutPolicy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getWidthLayoutPolicy)(ArkUINodeHandle node);
@@ -6373,6 +6376,8 @@ struct ArkUIWebModifier {
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
     void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDrag)(ArkUINodeHandle node);
+    void (*setScrollbarLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -9179,6 +9184,7 @@ struct ArkUIBasicAPI {
     void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
     void (*unRegisterNodeAsyncCommonEventReceiver)();
     ArkUI_Int32 (*checkUIContextInvalid)(ArkUI_Int32 instanceId);
+    ArkUI_Int32 (*enableEventPassthrough)(ArkUI_Int32 instanceId, ArkUI_Bool enabled, ArkUI_Int32 type);
 };
 
 struct ArkUIMultiThreadManagerAPI {

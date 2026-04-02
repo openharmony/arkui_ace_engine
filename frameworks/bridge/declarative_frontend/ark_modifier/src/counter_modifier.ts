@@ -13,12 +13,69 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class CounterModifier extends ArkCounterComponent implements AttributeModifier<CounterAttribute> {
+class LazyArkCounterComponent extends ArkComponent {
+  static module: CounterComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkCounterComponent.module === undefined) {
+      LazyArkCounterComponent.module = globalThis.requireNapi('arkui.components.arkcounter');
+    }
+
+    this.lazyComponent = LazyArkCounterComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  onInc(event: VoidCallback): this {
+    this.lazyComponent.onInc(event);
+    return this;
+  }
+
+  onDec(event: VoidCallback): this {
+    this.lazyComponent.onDec(event);
+    return this;
+  }
+
+  enableDec(value: boolean): this {
+    this.lazyComponent.enableDec(value);
+    return this;
+  }
+
+  enableInc(value: boolean): this {
+    this.lazyComponent.enableInc(value);
+    return this;
+  }
+
+  backgroundColor(value: ResourceColor): this {
+    this.lazyComponent.backgroundColor(value);
+    return this;
+  }
+
+  width(value: Length): this {
+    this.lazyComponent.width(value);
+    return this;
+  }
+
+  height(value: Length): this {
+    this.lazyComponent.height(value);
+    return this;
+  }
+
+  size(value: SizeOptions): this {
+    this.lazyComponent.size(value);
+    return this;
+  }
+}
+
+class CounterModifier extends LazyArkCounterComponent implements AttributeModifier<CounterAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: CounterAttribute): void {

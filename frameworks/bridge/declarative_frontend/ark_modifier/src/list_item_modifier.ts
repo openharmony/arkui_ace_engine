@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ListItemModifier extends ArkListItemComponent implements AttributeModifier<ListItemAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

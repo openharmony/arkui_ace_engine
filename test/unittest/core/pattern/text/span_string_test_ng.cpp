@@ -2898,4 +2898,20 @@ HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo008, TestSize.Level1)
     EXPECT_GT(paraVec.size(), 0);
 }
 
+/**
+ * @tc.name: MutableSpanString022
+ * @tc.desc: Test for fontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString022, TestSize.Level1)
+{
+    Font fontOne { .fontColor = OHOS::Ace::Color::RED };
+    auto spanString1 = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    spanString1->AddSpan(AceType::MakeRefPtr<FontSpan>(fontOne, 0, 3));
+    auto spans = spanString1->GetSpans(1, 7);
+    auto firstFontSpan = AceType::DynamicCast<FontSpan>(spans[0]);
+    EXPECT_NE(firstFontSpan, nullptr);
+    EXPECT_EQ(firstFontSpan->GetFont().GetFontColor(), OHOS::Ace::Color::RED.ColorToString());
+}
+
 } // namespace OHOS::Ace::NG

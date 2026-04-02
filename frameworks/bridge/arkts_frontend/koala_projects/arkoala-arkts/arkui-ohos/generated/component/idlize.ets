@@ -29,7 +29,7 @@ import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_seria
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -3664,6 +3664,12 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
+    public static enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        const enabled_casted = enabled as (boolean | undefined)
+        const eventType_casted = eventType as (RawInputEventType)
+        IUIContext.enableEventPassthrough_serialize(enabled_casted, eventType_casted)
+        return
+    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3742,6 +3748,18 @@ export class IUIContext {
     }
     private static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
         ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
+    }
+    private static enableEventPassthrough_serialize(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (enabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enabledTmpValue = enabled!
+            thisSerializer.writeBoolean(enabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._IUIContext_enableEventPassthrough(thisSerializer.asBuffer(), thisSerializer.length(), eventType.valueOf())
+        thisSerializer.release()
     }
 }
 export class LazyBuild {

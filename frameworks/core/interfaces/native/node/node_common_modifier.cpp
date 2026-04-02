@@ -166,6 +166,28 @@ const std::vector<AnimationDirection> DIRECTION_LIST = {
 constexpr int32_t DEFAULT_DURATION = 1000;
 thread_local std::string g_strValue;
 
+int32_t NormalizeExpectedUpdateInterval(ArkUI_Float32 expectedUpdateInterval)
+{
+    constexpr int32_t EXPECTED_UPDATE_INTERVAL_MAX = std::numeric_limits<int32_t>::max();
+    constexpr ArkUI_Float32 EXPECTED_UPDATE_INTERVAL_MAX_FLOAT =
+        static_cast<ArkUI_Float32>(EXPECTED_UPDATE_INTERVAL_MAX);
+    if (std::isnan(expectedUpdateInterval)) {
+        return DEFAULT_DURATION;
+    }
+    if (std::isinf(expectedUpdateInterval)) {
+        return expectedUpdateInterval > 0 ? EXPECTED_UPDATE_INTERVAL_MAX : DEFAULT_DURATION;
+    }
+    if (expectedUpdateInterval > EXPECTED_UPDATE_INTERVAL_MAX_FLOAT) {
+        return EXPECTED_UPDATE_INTERVAL_MAX;
+    }
+
+    auto normalizedInterval = static_cast<int32_t>(expectedUpdateInterval);
+    if (normalizedInterval < 0) {
+        return DEFAULT_DURATION;
+    }
+    return normalizedInterval;
+}
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -10675,6 +10697,63 @@ void UnregisterCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node)
     ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(frameNode);
 }
 
+void SetCommonOnAreaApproximateChangeEvent(ArkUINodeHandle node, void* userData,
+    ArkUI_Float32 expectedUpdateInterval)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onAreaChanged = [nodeId, weak = AceType::WeakClaim(frameNode), userData](
+                             const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_AREA_CHANGE;
+        PipelineContext::SetCallBackNode(weak);
+
+        auto oldLocalOffset = oldRect.GetOffset();
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY());
+        event.componentAsyncEvent.data[4].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX() + oldOrigin.GetX());
+        event.componentAsyncEvent.data[5].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY() + oldOrigin.GetY());
+
+        auto localOffset = rect.GetOffset();
+        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        event.componentAsyncEvent.data[8].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[9].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[10].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX());
+        event.componentAsyncEvent.data[11].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY());
+        SendArkUIAsyncCommonEvent(&event);
+    };
+
+    auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+    auto normalizedInterval = NormalizeExpectedUpdateInterval(expectedUpdateInterval);
+
+    ViewAbstract::SetOnAreaChangedWithInterval(
+        frameNode, std::move(areaChangeCallback), normalizedInterval);
+}
+
+void UnregisterCommonOnAreaApproximateChangeEvent(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAreaChange(frameNode);
+}
 
 ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
     void (*touchTestDone)(
@@ -11535,6 +11614,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .unregisterCommonOnSizeChange = UnregisterCommonOnSizeChange,
         .setCommonOnVisibleAreaApproximateChangeEvent = SetCommonOnVisibleAreaApproximateChangeEvent,
         .unregisterCommonOnVisibleAreaApproximateChangeEvent = UnregisterCommonOnVisibleAreaApproximateChangeEvent,
+        .setCommonOnAreaApproximateChangeEvent = SetCommonOnAreaApproximateChangeEvent,
+        .unregisterCommonOnAreaApproximateChangeEvent = UnregisterCommonOnAreaApproximateChangeEvent,
         .setWidthLayoutPolicy = SetWidthLayoutPolicy,
         .resetWidthLayoutPolicy = ResetWidthLayoutPolicy,
         .getWidthLayoutPolicy = GetWidthLayoutPolicy,

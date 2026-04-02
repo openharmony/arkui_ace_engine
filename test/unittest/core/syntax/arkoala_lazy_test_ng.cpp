@@ -479,6 +479,11 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
 {
+    /**
+     * @tc.steps: step1. Test attached nodes for LazyForEach node
+     * @tc.expected: Only nodes in active range and cache range are attached,
+     *   and the size of node4Index is same with active range plus cache range.
+     */
     int32_t totalCount = 50;
     auto lazyNode = CreateLazyForEachNode(GetNextId());
     CreateChildren(lazyNode, totalCount);
@@ -489,6 +494,10 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
     int32_t children_size = INDEX_9 - INDEX_1 + 1;
     EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), children_size);
 
+    /**
+     * @tc.steps: step2. Test attached nodes for Repeat node
+     * @tc.expected: Only nodes in active range are attached, and the size of node4Index is same with active range.
+     */
     auto repeatNode = CreateRepeatNode(GetNextId());
     CreateChildren(repeatNode, totalCount);
     repeatNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);

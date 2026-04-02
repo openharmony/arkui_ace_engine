@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class FlexModifier extends ArkFlexComponent implements AttributeModifier<FlexAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
-  
+
   applyNormalAttribute(instance: FlexAttribute): void {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier<FlexAttribute, ArkFlexComponent, ArkComponent>(instance, this);

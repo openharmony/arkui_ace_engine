@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
-
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {

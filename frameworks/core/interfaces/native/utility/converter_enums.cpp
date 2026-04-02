@@ -1718,6 +1718,16 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
 }
 
 template<>
+void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src)
+{
+    switch (src) {
+        case ARK_SCROLLBAR_LAYOUT_POLICY_CONTENT: dst = ScrollbarLayoutPolicy::CONTENT; break;
+        case ARK_SCROLLBAR_LAYOUT_POLICY_SYSTEM: dst = ScrollbarLayoutPolicy::SYSTEM; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollbarLayoutPolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
 {
     switch (src) {

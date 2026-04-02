@@ -468,11 +468,6 @@ abstract class ViewPU extends PUV2ViewBase
 
   public initialRenderView(): void {
     stateMgmtProfiler.begin('ViewPU.initialRenderView');
-    // Register callback for instanceId changes
-    // Only register when enableSwitchInstance is true which set in config.json5
-    if (getEnableSwitchInstance()) {
-      this.__registerUpdateJSInstanceCallback__Internal(this.__onJSInstanceIdUpdate__Internal.bind(this));
-    }
     this.onWillApplyThemeInternally();
     this.obtainOwnObservedProperties();
     this.isRenderInProgress = true;

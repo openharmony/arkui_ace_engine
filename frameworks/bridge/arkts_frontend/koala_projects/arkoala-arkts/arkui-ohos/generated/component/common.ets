@@ -6162,6 +6162,19 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(event)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     attributeSet?: CommonShapeMethodModifier;
@@ -10465,6 +10478,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
     }
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method onAreaChange')
+    }
     applyAttributesFinish(): void {
     }
 }
@@ -10763,6 +10788,10 @@ export interface Bindable<T> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
+export interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
+export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -11918,6 +11947,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
             return this
         }
+        return this
+    }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const event_casted = event as (AreaChangeCallback)
+        const options_casted = options as (AreaChangeOptions | undefined)
+        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {

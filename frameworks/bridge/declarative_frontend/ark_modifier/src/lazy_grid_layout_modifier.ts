@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class LazyVGridLayoutModifier extends ArkLazyVGridLayoutComponent implements AttributeModifier<LazyVGridLayoutAttribute> {
     constructor(nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);

@@ -1482,6 +1482,8 @@ bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
+void WebDelegate::SetIsSystemRtlEnable(bool enable) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::SetEnableDrag(bool isEnabled) {}

@@ -648,8 +648,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     ACE_UINODE_TRACE(dialog);
     auto pipeline = dialog->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
+    CHECK_NULL_VOID(dialogTheme_);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
     if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
@@ -660,7 +659,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
         CHECK_NULL_VOID(extraMaskNodeContext);
         auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(maskLayoutProps);
-        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme_->GetMaskColorEnd()));
         extraMaskNodeContext->UpdateZIndex(-1);
         extraMaskNode->MountToParent(dialog);
         extraMaskNode_ = extraMaskNode;
@@ -995,9 +994,9 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipeline = buttonNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto theme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     if (!isSuitableForElderly_) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
@@ -1184,9 +1183,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, textNode);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, textNode);
-    auto textTheme = context->GetTheme<TextTheme>();
+    auto textTheme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_RETURN(textTheme, textNode);
     if (textTheme->GetIsTextFadeout()) {
         textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
@@ -1411,13 +1408,13 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
-Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
+Shadow DialogPattern::GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
     CHECK_NULL_RETURN(frameNode, shadow);
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, shadow);
-    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    auto shadowTheme = frameNode->GetTheme<ShadowTheme>(true);
     CHECK_NULL_RETURN(shadowTheme, shadow);
     auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
@@ -1496,17 +1493,35 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    dialogTheme_ = dialogTheme;
+    UpdateDialogTheme();
     UpdateTitleAndContentColor();
     UpdateMaskColor();
-    UpdateWrapperBackgroundStyle(host, dialogTheme);
+    UpdateWrapperBackgroundStyle(host, dialogTheme_);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    OnColorConfigurationUpdate();
+    return true;
+}
+
+void DialogPattern::UpdateDialogTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogThemeNode_) {
+        host->AllowUseParentTheme(false);
+        host->SetThemeScopeId(dialogThemeNode_->GetThemeScopeIdForTheme(true));
+    }
+    dialogTheme_ = host->GetTheme<DialogTheme>(true);
 }
 
 void DialogPattern::UpdateMaskColor()

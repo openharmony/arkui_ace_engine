@@ -277,6 +277,7 @@ public:
     void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetEnableDefaultContextMenu(bool isEnabled) override;
     void SetEnableScrollDirectionalLock(bool enabled, int32_t type) override;
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -439,6 +440,7 @@ public:
     static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
     static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
+    static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

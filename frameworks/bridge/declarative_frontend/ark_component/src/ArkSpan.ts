@@ -676,7 +676,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
 
-  onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+  onAreaChange(event: (oldValue: Area, newValue: Area) => void,
+    options?: { expectedUpdateInterval?: int32 }): this {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
 

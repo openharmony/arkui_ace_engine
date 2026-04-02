@@ -502,6 +502,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/transfer/ComponentContentTransfer.ets",
   "arkui-preprocessed/arkui/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/transfer/RenderNodeTransfer.ets",
+  "arkui-preprocessed/arkui/transfer/BindingTransfer.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBadgeNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBaseNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBlankNode.ets",
@@ -548,6 +549,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
+  "arkui-preprocessed/arkui/stateManagement/interop/interopBinding.ets",
 ]
 
 arkui_path_keys = [

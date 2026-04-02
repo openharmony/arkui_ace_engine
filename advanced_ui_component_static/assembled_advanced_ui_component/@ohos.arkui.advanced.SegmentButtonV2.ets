@@ -298,7 +298,7 @@ export struct TabSegmentButtonV2 {
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
   @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
-  @Param enableStateAnimation?: boolean = true;
+  @Param enableStateAnimation?: boolean = false;
 
   build() {
     SimpleSegmentButtonV2({
@@ -378,7 +378,7 @@ export struct CapsuleSegmentButtonV2 {
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
   @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
-  @Param enableStateAnimation?: boolean = true;
+  @Param enableStateAnimation?: boolean = false;
 
   build() {
     SimpleSegmentButtonV2({
@@ -459,7 +459,7 @@ struct SimpleSegmentButtonV2 {
   @Require @Param buttonPadding?: LengthMetrics = undefined;
   @Require @Param languageDirection?: Direction = undefined;
   @Require @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
-  @Param enableStateAnimation?: boolean = true;
+  @Param enableStateAnimation?: boolean = false;
   @Local itemRects: Map<int, SegmentButtonV2ItemRect> = new Map<int, SegmentButtonV2ItemRect>();
   @Local itemScale: double = 1;
   @Local hoveredItemIndex: int = -1;

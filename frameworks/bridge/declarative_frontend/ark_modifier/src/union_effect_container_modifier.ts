@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class LinearIndicatorModifier extends ArkLinearIndicatorComponent implements AttributeModifier<LinearIndicatorAttribute> {
+class UnionEffectContainerModifier extends ArkUnionEffectContainerComponent implements AttributeModifier<UnionEffectContainerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
-  applyNormalAttribute(instance: LinearIndicatorAttribute): void {
+  applyNormalAttribute(instance: UnionEffectContainerAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<LinearIndicatorAttribute, ArkLinearIndicatorComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<UnionEffectContainerAttribute, ArkUnionEffectContainerComponent, ArkComponent>(instance, this);
   }
 }

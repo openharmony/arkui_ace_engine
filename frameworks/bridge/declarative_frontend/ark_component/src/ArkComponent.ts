@@ -2292,8 +2292,8 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
 }
 
 declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
-class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
-  constructor(value: AreaChangeEventCallback) {
+class OnAreaChangeModifier extends ModifierWithKey<ArkOnAreaChange> {
+  constructor(value: ArkOnAreaChange) {
     super(value);
   }
   static identity: Symbol = Symbol('onAreaChange');
@@ -2301,7 +2301,12 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(
+          node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -5308,9 +5313,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+  onAreaChange(event: (oldValue: Area, newValue: Area) => void,
+    options?: { expectedUpdateInterval?: int32 }): this {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
 

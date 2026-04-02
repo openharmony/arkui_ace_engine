@@ -2198,7 +2198,11 @@ class OnAreaChangeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -4955,9 +4959,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
   visibility(value) {
@@ -10863,7 +10868,7 @@ class ArkSpanComponent {
   onDetach(event) {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
@@ -17848,6 +17853,17 @@ class ArkOnVisibleAreaChange {
   }
   isEqual(another) {
     return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
+  }
+}
+class ArkOnAreaChange {
+  constructor(event, expectedUpdateInterval, hasOptionsArg = false) {
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.hasOptionsArg = hasOptionsArg;
+  }
+  isEqual(another) {
+    return this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval &&
+      this.hasOptionsArg === another.hasOptionsArg;
   }
 }
 
@@ -25668,6 +25684,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
     return this;
   }
+  scrollbarLayoutPolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -27449,6 +27469,20 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey {
   }
 }
 WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+WebScrollbarLayoutPolicyModifier.identity = Symbol('webScrollbarLayoutPolicyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

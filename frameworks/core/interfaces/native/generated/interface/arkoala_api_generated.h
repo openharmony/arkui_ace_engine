@@ -14899,6 +14899,14 @@ typedef struct Opt_ArcScrollBarOptions {
     Ark_Tag tag;
     Ark_ArcScrollBarOptions value;
 } Opt_ArcScrollBarOptions;
+typedef struct Ark_AreaChangeOptions {
+    /* kind: Interface */
+    Opt_Int32 expectedUpdateInterval;
+} Ark_AreaChangeOptions;
+typedef struct Opt_AreaChangeOptions {
+    Ark_Tag tag;
+    Ark_AreaChangeOptions value;
+} Opt_AreaChangeOptions;
 typedef struct Ark_ArcSwiperContentAnimatedTransition {
     /* kind: Interface */
     Opt_Int32 timeout;
@@ -24560,6 +24568,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDebugLine)(Ark_NativePointer node,
                          const Ark_String* sourceLine,
                          const Opt_String* moduleName);
+    void (*setOnAreaChange1)(Ark_NativePointer node,
+                             const AreaChangeCallback* event,
+                             const Opt_AreaChangeOptions* options);
 } GENERATED_ArkUICommonMethodModifier;
 
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {
@@ -27703,6 +27714,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                         const Opt_Boolean* value);
     void (*setEnableDrag)(Ark_NativePointer node,
                           const Opt_Boolean* value);
+    void (*setScrollbarLayoutPolicy)(Ark_NativePointer node,
+                                     const Opt_ScrollbarLayoutPolicy* value);
     void (*setAiSessionOptions)(Ark_NativePointer node,
                                 const Opt_Array_AISessionEvent* value);
     void (*setScrollbarLayoutPolicy)(Ark_NativePointer node,
@@ -29450,6 +29463,8 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
+    void (*enableEventPassthrough)(const Opt_Boolean* enabled,
+                                   Ark_RawInputEventType eventType);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

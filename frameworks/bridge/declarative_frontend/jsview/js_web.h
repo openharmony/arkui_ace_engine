@@ -246,6 +246,7 @@ public:
     static void EnableAutoFill(const JSCallbackInfo& args);
     static void EnableDefaultContextMenu(const JSCallbackInfo& args);
     static void EnableScrollDirectionalLock(const JSCallbackInfo& args);
+    static void ScrollbarLayoutPolicy(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

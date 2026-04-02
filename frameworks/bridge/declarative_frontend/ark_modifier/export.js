@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const fs = require('fs');
+
+function processDistFile(fileName) {
+    let content = fs.readFileSync(fileName, 'utf8');
+
+    // Add export statement
+    if (!content.includes('export default {')) {
+        content += `
+export default {
+  AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier,
+  CheckboxGroupModifier, CircleModifier, ColumnModifier, ColumnSplitModifier, CommonModifier,
+  CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier,
+  GaugeModifier, GridModifier, GridItemModifier, GridColModifier, GridRowModifier, HyperlinkModifier,
+  ImageModifier, ImageAnimatorModifier, ImageSpanModifier, LineModifier, ListModifier, ListItemModifier,
+  ListItemGroupModifier, LoadingProgressModifier, MarqueeModifier, MenuModifier, MenuItemModifier,
+  NavDestinationModifier, NavigationModifier, NavigatorModifier, NavRouterModifier, PanelModifier,
+  PathModifier, PatternLockModifier, PluginComponentModifier, PolygonModifier, PolylineModifier,
+  ProgressModifier, QRCodeModifier, RadioModifier, RatingModifier, RectModifier, RefreshModifier,
+  RelativeContainerModifier, RichEditorModifier, RowModifier, RowSplitModifier, ScrollModifier,
+  SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier,
+  StackModifier, StepperModifier, StepperItemModifier, SwiperModifier, TabsModifier, TabContentModifier,
+  TextModifier, TextAreaModifier, TextClockModifier, TextInputModifier, TextPickerModifier,
+  TextTimerModifier, TimePickerModifier, ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier,
+  ModifierUtils, AttributeUpdater, ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier,
+  SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, ModifierMap, IndicatorComponentModifier,
+  LazyVGridLayoutModifier, EmbeddedComponentModifier, UIPickerComponentModifier, UnionEffectContainerModifier
+};
+`;
+    }
+    fs.writeFileSync(fileName, content);
+}
+
+function main() {
+    if (process.argv.length < 3) {
+        console.log('Usage: node export.js <dist-file>');
+        process.exit(1);
+    }
+
+    let distFileName = process.argv[2];
+    processDistFile(distFileName);
+    console.log(`Updated export file: ${distFileName}`);
+}
+
+main();

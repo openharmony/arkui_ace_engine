@@ -251,6 +251,8 @@ public:
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
+    void SetShadowPath(const std::string path) override;
+    void ResetShadowPath() override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;

@@ -13,12 +13,44 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class HyperlinkModifier extends ArkHyperlinkComponent implements AttributeModifier<HyperlinkAttribute> {
+class LazyArkHyperlinkComponent extends ArkComponent {
+  static module: HyperlinkComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkHyperlinkComponent.module === undefined) {
+      LazyArkHyperlinkComponent.module = globalThis.requireNapi('arkui.components.arkhyperlink');
+    }
+
+    this.lazyComponent = LazyArkHyperlinkComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  color(color: Color | number | string | Resource): this {
+    this.lazyComponent.color(color);
+    return this;
+  }
+
+  draggable(draggable: boolean): this {
+    this.lazyComponent.draggable(draggable);
+    return this;
+  }
+
+  responseRegion(region: Array<Rectangle> | Rectangle): this {
+    this.lazyComponent.responseRegion(region);
+    return this;
+  }
+}
+
+class HyperlinkModifier extends LazyArkHyperlinkComponent implements AttributeModifier<HyperlinkAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: HyperlinkAttribute): void {

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class LineModifier extends ArkLineComponent implements AttributeModifier<LineAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

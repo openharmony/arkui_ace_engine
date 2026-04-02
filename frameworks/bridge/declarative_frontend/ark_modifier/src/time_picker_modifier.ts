@@ -13,12 +13,77 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class TimePickerModifier extends ArkTimePickerComponent implements AttributeModifier<TimePickerAttribute> {
+class LazyArkTimePickerComponent extends ArkComponent {
+  static module: TimePickerComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkTimePickerComponent.module === undefined) {
+     LazyArkTimePickerComponent.module = globalThis.requireNapi('arkui.components.arktimepicker');
+   }
+
+   this.lazyComponent = LazyArkTimePickerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  loop(value: boolean): this {
+   this.lazyComponent.loop(value);
+   return this;
+  }
+
+  digitalCrownSensitivity(value: CrownSensitivity): this {
+   this.lazyComponent.digitalCrownSensitivity(value);
+   return this;
+  }
+
+  useMilitaryTime(value: boolean): this {
+   this.lazyComponent.useMilitaryTime(value);
+   return this;
+  }
+
+  disappearTextStyle(value: PickerTextStyle): this {
+   this.lazyComponent.disappearTextStyle(value);
+   return this;
+  }
+
+  textStyle(value: PickerTextStyle): this {
+   this.lazyComponent.textStyle(value);
+   return this;
+  }
+
+  selectedTextStyle(value: PickerTextStyle): this {
+   this.lazyComponent.selectedTextStyle(value);
+   return this;
+  }
+
+  enableCascade(value: boolean): this {
+   this.lazyComponent.enableCascade(value);
+   return this;
+  }
+
+  onChange(value: (value: TimePickerResult) => void): this {
+   this.lazyComponent.onChange(value);
+   return this;
+  }
+
+  dateTimeOptions(value: DateTimeOptions): this {
+   this.lazyComponent.dateTimeOptions(value);
+   return this;
+  }
+
+  enableHapticFeedback(value: boolean): this {
+   this.lazyComponent.enableHapticFeedback(value);
+   return this;
+  }
+}
+class TimePickerModifier extends LazyArkTimePickerComponent implements AttributeModifier<TimePickerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: TimePickerAttribute): void {

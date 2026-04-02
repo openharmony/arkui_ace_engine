@@ -20,9 +20,6 @@
 #include <functional>
 #include <list>
 #include <string>
-#include <vector>
-#include <memory>
-#include <mutex>
 
 #include "base/utils/macros.h"
 

@@ -440,8 +440,8 @@ std::pair<TextRange, TextRange> TxtParagraph::GetGlyphRangeForCharacterRange(int
         paragrah->GetGlyphRangeForCharacterRange(static_cast<size_t>(start), static_cast<size_t>(end), &boundary);
     range.first.start = static_cast<int32_t>(result.leftIndex);
     range.first.end = static_cast<int32_t>(result.rightIndex);
-    range.second.start = boundary.leftIndex;
-    range.second.end = boundary.rightIndex;
+    range.second.start = static_cast<int32_t>(boundary.leftIndex);
+    range.second.end = static_cast<int32_t>(boundary.rightIndex);
     return range;
 }
 
@@ -455,8 +455,8 @@ std::pair<TextRange, TextRange> TxtParagraph::GetCharacterRangeForGlyphRange(int
         paragrah->GetCharacterRangeForGlyphRange(static_cast<size_t>(start), static_cast<size_t>(end), &boundary);
     range.first.start = static_cast<int32_t>(result.leftIndex);
     range.first.end = static_cast<int32_t>(result.rightIndex);
-    range.second.start = boundary.leftIndex;
-    range.second.end = boundary.rightIndex;
+    range.second.start = static_cast<int32_t>(boundary.leftIndex);
+    range.second.end = static_cast<int32_t>(boundary.rightIndex);
     return range;
 }
 

@@ -57,10 +57,16 @@ public:
         static MockAceApplicationInfo instance;
         return instance;
     }
+    void UpdateTouchPassthroughForPipelines(bool enabled, const std::string& bundleName) {}
 
+    void UpdateMousePassthroughForPipelines(bool enabled, const std::string& bundleName) {}
 private:
     std::string packageName_;
 };
+
+void AceApplicationInfo::UpdateTouchPassthroughForPipelines(bool enabled, const std::string& bundleName) {}
+
+void AceApplicationInfo::UpdateMousePassthroughForPipelines(bool enabled, const std::string& bundleName) {}
 
 const std::string& AceApplicationInfo::GetAbilityName() const
 {
