@@ -90,6 +90,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_theme_wrapper.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
+#include "core/components_ng/pattern/dialog/dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
@@ -198,6 +199,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
+        { DialogTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DialogThemeWrapper::WrapperBuilder> },
         { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
