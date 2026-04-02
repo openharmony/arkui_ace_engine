@@ -16,11 +16,8 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H
 
 #include <mutex>
-#include <vector>
 
 #include "ui/base/referenced.h"
-
-#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"

@@ -58,7 +58,6 @@
 #include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -71,6 +70,10 @@ using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 
 namespace OHOS::Rosen {
   class RSUIDirector;
+}
+
+namespace OHOS::Ace::NG {
+    class RecycleManager;
 }
 
 namespace OHOS::Ace {
@@ -1737,7 +1740,7 @@ private:
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
-    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
+    std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
