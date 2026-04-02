@@ -155,7 +155,7 @@ ani_long ExtractorsToInputMethodExtraConfigPtr(ani_env* env, [[maybe_unused]] an
     CHECK_NULL_RETURN(shareConfigPtr, 0);
     auto status = OHOS::MiscServices::AniExtraConfig::GetExtraConfig(env, extraConfigObj, *shareConfigPtr);
     if (!status) {
-        HILOGE("GetExtraConfig failed, size: %{public}u", shareConfigPtr->customSettings.size());
+        HILOGE("GetExtraConfig failed, size: %{public}zu", shareConfigPtr->customSettings.size());
         return 0;
     }
     auto extraConfigPtr = reinterpret_cast<void*>(&shareConfigPtr);
