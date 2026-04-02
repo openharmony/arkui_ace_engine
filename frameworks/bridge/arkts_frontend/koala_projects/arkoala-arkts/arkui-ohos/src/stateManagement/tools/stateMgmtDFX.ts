@@ -836,7 +836,7 @@ function determineClassName(observedType: ObservedType, obj: Object): string {
     } else if (observedType === ObservedType.OBSERVED) {
         return transferTypeName(Class.of(obj).getName());
     } else if (observedType === ObservedType.INTERFACE_MAKEOBSERVED) {
-        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getName());
+        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getInterfaces()![0]!.getName());
     } else if (observedType === ObservedType.TRACE) {
         return transferTypeName(Class.of(obj).getName());
     } else if (observedType === ObservedType.BUILTIN_V2) {
@@ -846,7 +846,7 @@ function determineClassName(observedType: ObservedType, obj: Object): string {
     } else if (observedType === ObservedType.BUILTIN_V1) {
         return transferTypeName(Class.of((obj as ObserveWrappedBase).getRaw()).getName());
     } else if (observedType === ObservedType.INTERFACE_V1) {
-        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getName());
+        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getInterfaces()![0]!.getName());
     } else {
         return 'Unknown Class Name';
     }
