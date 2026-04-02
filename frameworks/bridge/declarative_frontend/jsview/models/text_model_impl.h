@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/text/text_component_v2.h"
 #include "core/components_ng/pattern/text/text_model.h"
 

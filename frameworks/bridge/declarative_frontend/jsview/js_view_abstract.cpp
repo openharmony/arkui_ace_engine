@@ -76,6 +76,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif

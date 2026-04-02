@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/web_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"

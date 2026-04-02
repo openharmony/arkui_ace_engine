@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/common/resource/resource_object.h"
 #include "frameworks/base/i18n/time_format.h"

@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #define protected public
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #include "test/mock/core/pipeline/mock_pipeline_context.h"

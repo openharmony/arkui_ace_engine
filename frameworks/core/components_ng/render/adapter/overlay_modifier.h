@@ -28,6 +28,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"

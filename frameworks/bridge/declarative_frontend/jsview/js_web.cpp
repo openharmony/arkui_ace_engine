@@ -51,6 +51,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"

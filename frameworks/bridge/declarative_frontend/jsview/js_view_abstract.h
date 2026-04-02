@@ -36,7 +36,6 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -44,6 +43,7 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+struct TextDetectConfig;
 }
 
 namespace OHOS::Ace::Framework {

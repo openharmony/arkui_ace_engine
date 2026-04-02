@@ -19,6 +19,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"

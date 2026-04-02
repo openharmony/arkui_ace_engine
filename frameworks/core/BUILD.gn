@@ -841,6 +841,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/shadow.cpp",
       "components/common/properties/shadow_config.cpp",
+      "components/common/properties/text_enums.cpp",
       "components/common/properties/text_style.cpp",
       "components/common/properties/text_style_parser.cpp",
       "components/common/properties/ui_material.cpp",

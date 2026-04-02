@@ -22,7 +22,7 @@
 #include "ui/base/referenced.h"
 
 #include "base/memory/ace_type.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {

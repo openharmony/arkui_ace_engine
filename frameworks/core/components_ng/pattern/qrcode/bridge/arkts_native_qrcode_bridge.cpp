@@ -14,7 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/qrcode/bridge/arkts_native_qrcode_bridge.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_qrcode_theme.h"
