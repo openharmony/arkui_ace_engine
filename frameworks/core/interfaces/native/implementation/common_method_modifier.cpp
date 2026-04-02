@@ -4040,7 +4040,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
-void SetOnAreaChangeImpl(Ark_NativePointer node,
+void SetOnAreaChange0Impl(Ark_NativePointer node,
                          const Opt_Callback_Area_Area_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5312,6 +5312,15 @@ void SetOnTouchTestDoneImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnTouchTestDone(frameNode, std::move(onTouchTestDoneFunc));
 }
+void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                      const GestureCollectInterceptCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    // CommonMethodModelNG::SetSetOnGestureCollectIntercept(frameNode, convValue);
+}
 void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5697,6 +5706,16 @@ void SetBackdropBlurImpl(Ark_NativePointer node,
     auto optOption = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions).value_or(SysOptions());
     ViewAbstractModelStatic::SetBackdropBlur(frameNode, Dimension(radiusValue, DimensionUnit::PX), optOption, sysOpts);
+}
+void SetOnAreaChange1Impl(Ark_NativePointer node,
+                          const AreaChangeCallback* event,
+                          const Opt_AreaChangeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(event);
+    //auto convValue = Converter::OptConvert<type>(event); // for enums
+    // CommonMethodModelNG::SetSetOnAreaChange1(frameNode, convValue);
 }
 void SetSharedTransitionImpl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -6795,7 +6814,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDisAppearImpl,
         CommonMethodModifier::SetOnAttachImpl,
         CommonMethodModifier::SetOnDetachImpl,
-        CommonMethodModifier::SetOnAreaChangeImpl,
+        CommonMethodModifier::SetOnAreaChange0Impl,
         CommonMethodModifier::SetVisibilityImpl,
         CommonMethodModifier::SetFlexGrowImpl,
         CommonMethodModifier::SetFlexShrinkImpl,
@@ -6865,6 +6884,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetOnTouchTestDoneImpl,
+        CommonMethodModifier::SetOnGestureCollectInterceptImpl,
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -6887,6 +6907,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemBarEffectImpl,
         CommonMethodModifier::SetUseEffect1Impl,
         CommonMethodModifier::SetBackdropBlurImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,

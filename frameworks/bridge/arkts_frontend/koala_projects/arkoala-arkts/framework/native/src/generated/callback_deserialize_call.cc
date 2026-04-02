@@ -161,6 +161,26 @@ void deserializeAndCallSyncArcScrollIndexHandler(Ark_VMContext vmContext, KSeria
     Ark_Int32 center = thisDeserializer.readInt32();
     callSyncMethod(vmContext, resourceId, start, end, center);
 }
+void deserializeAndCallAreaChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_AREACHANGECALLBACK))));
+    thisDeserializer.readPointer();
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    call(resourceId, oldValue, newValue);
+}
+void deserializeAndCallSyncAreaChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_AREACHANGECALLBACK))));
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, oldValue, newValue);
+}
 void deserializeAndCallButtonModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1136,6 +1156,24 @@ void deserializeAndCallSyncCallback_FullscreenInfo_Void(Ark_VMContext vmContext,
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_FullscreenInfo data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_FULLSCREENINFO_VOID))));
     Ark_FullscreenInfo data = FullscreenInfo_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, data);
+}
+void deserializeAndCallCallback_GestureCollectIntervention_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID))));
+    thisDeserializer.readPointer();
+    Ark_GestureCollectIntervention value = static_cast<Ark_GestureCollectIntervention>(thisDeserializer.readInt32());
+    call(resourceId, value);
+}
+void deserializeAndCallSyncCallback_GestureCollectIntervention_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID))));
+    Ark_GestureCollectIntervention value = static_cast<Ark_GestureCollectIntervention>(thisDeserializer.readInt32());
+    callSyncMethod(vmContext, resourceId, value);
 }
 void deserializeAndCallCallback_GestureEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4590,6 +4628,68 @@ void deserializeAndCallSyncGaugeModifierBuilder(Ark_VMContext vmContext, KSerial
     Ark_GaugeConfiguration config = GaugeConfiguration_serializer::read(thisDeserializer);
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_POINTER_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_POINTER_VOID))))};
     callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
+}
+void deserializeAndCallGestureCollectInterceptCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_GESTURECOLLECTINTERCEPTCALLBACK))));
+    thisDeserializer.readPointer();
+    const Ark_Int32 recognizersTmpBufLength = thisDeserializer.readInt32();
+    Array_GestureRecognizer recognizersTmpBuf = {};
+    thisDeserializer.resizeArray<std::decay<decltype(recognizersTmpBuf)>::type,
+        std::decay<decltype(*recognizersTmpBuf.array)>::type>(&recognizersTmpBuf, recognizersTmpBufLength);
+    for (int recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
+        recognizersTmpBuf.array[recognizersTmpBufBufCounterI] = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    }
+    Array_GestureRecognizer recognizers = recognizersTmpBuf;
+    const auto touchRecognizersTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Array_TouchRecognizer touchRecognizersTmpBuf = {};
+    touchRecognizersTmpBuf.tag = touchRecognizersTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((touchRecognizersTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        const Ark_Int32 touchRecognizersTmpBufOptLength = thisDeserializer.readInt32();
+        Array_TouchRecognizer touchRecognizersTmpBufOpt = {};
+        thisDeserializer.resizeArray<std::decay<decltype(touchRecognizersTmpBufOpt)>::type,
+        std::decay<decltype(*touchRecognizersTmpBufOpt.array)>::type>(&touchRecognizersTmpBufOpt, touchRecognizersTmpBufOptLength);
+        for (int touchRecognizersTmpBufOptBufCounterI = 0; touchRecognizersTmpBufOptBufCounterI < touchRecognizersTmpBufOptLength; touchRecognizersTmpBufOptBufCounterI++) {
+            touchRecognizersTmpBufOpt.array[touchRecognizersTmpBufOptBufCounterI] = static_cast<Ark_TouchRecognizer>(TouchRecognizer_serializer::read(thisDeserializer));
+        }
+        touchRecognizersTmpBuf.value = touchRecognizersTmpBufOpt;
+    }
+    Opt_Array_TouchRecognizer touchRecognizers = touchRecognizersTmpBuf;
+    Callback_GestureCollectIntervention_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID))))};
+    call(resourceId, recognizers, touchRecognizers, continuationResult);
+}
+void deserializeAndCallSyncGestureCollectInterceptCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_GESTURECOLLECTINTERCEPTCALLBACK))));
+    const Ark_Int32 recognizersTmpBufLength = thisDeserializer.readInt32();
+    Array_GestureRecognizer recognizersTmpBuf = {};
+    thisDeserializer.resizeArray<std::decay<decltype(recognizersTmpBuf)>::type,
+        std::decay<decltype(*recognizersTmpBuf.array)>::type>(&recognizersTmpBuf, recognizersTmpBufLength);
+    for (int recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
+        recognizersTmpBuf.array[recognizersTmpBufBufCounterI] = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    }
+    Array_GestureRecognizer recognizers = recognizersTmpBuf;
+    const auto touchRecognizersTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Array_TouchRecognizer touchRecognizersTmpBuf = {};
+    touchRecognizersTmpBuf.tag = touchRecognizersTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((touchRecognizersTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        const Ark_Int32 touchRecognizersTmpBufOptLength = thisDeserializer.readInt32();
+        Array_TouchRecognizer touchRecognizersTmpBufOpt = {};
+        thisDeserializer.resizeArray<std::decay<decltype(touchRecognizersTmpBufOpt)>::type,
+        std::decay<decltype(*touchRecognizersTmpBufOpt.array)>::type>(&touchRecognizersTmpBufOpt, touchRecognizersTmpBufOptLength);
+        for (int touchRecognizersTmpBufOptBufCounterI = 0; touchRecognizersTmpBufOptBufCounterI < touchRecognizersTmpBufOptLength; touchRecognizersTmpBufOptBufCounterI++) {
+            touchRecognizersTmpBufOpt.array[touchRecognizersTmpBufOptBufCounterI] = static_cast<Ark_TouchRecognizer>(TouchRecognizer_serializer::read(thisDeserializer));
+        }
+        touchRecognizersTmpBuf.value = touchRecognizersTmpBufOpt;
+    }
+    Opt_Array_TouchRecognizer touchRecognizers = touchRecognizersTmpBuf;
+    Callback_GestureCollectIntervention_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_GestureCollectIntervention value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID))))};
+    callSyncMethod(vmContext, resourceId, recognizers, touchRecognizers, continuationResult);
 }
 void deserializeAndCallGestureEventHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -8267,6 +8367,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case KIND_ANIMATIONENDHANDLER: return deserializeAndCallAnimationEndHandler(thisArray, thisLength);
         case KIND_ANIMATIONSTARTHANDLER: return deserializeAndCallAnimationStartHandler(thisArray, thisLength);
         case KIND_ARCSCROLLINDEXHANDLER: return deserializeAndCallArcScrollIndexHandler(thisArray, thisLength);
+        case KIND_AREACHANGECALLBACK: return deserializeAndCallAreaChangeCallback(thisArray, thisLength);
         case KIND_BUTTONMODIFIERBUILDER: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
         case KIND_BUTTONTRIGGERCLICKCALLBACK: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
         case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisArray, thisLength);
@@ -8313,6 +8414,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case KIND_CALLBACK_FOCUSAXISEVENT_VOID: return deserializeAndCallCallback_FocusAxisEvent_Void(thisArray, thisLength);
         case KIND_CALLBACK_FORMCALLBACKINFO_VOID: return deserializeAndCallCallback_FormCallbackInfo_Void(thisArray, thisLength);
         case KIND_CALLBACK_FULLSCREENINFO_VOID: return deserializeAndCallCallback_FullscreenInfo_Void(thisArray, thisLength);
+        case KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID: return deserializeAndCallCallback_GestureCollectIntervention_Void(thisArray, thisLength);
         case KIND_CALLBACK_GESTUREEVENT_VOID: return deserializeAndCallCallback_GestureEvent_Void(thisArray, thisLength);
         case KIND_CALLBACK_GESTUREINFO_BASEGESTUREEVENT_GESTUREJUDGERESULT: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisArray, thisLength);
         case KIND_CALLBACK_GESTUREJUDGERESULT_VOID: return deserializeAndCallCallback_GestureJudgeResult_Void(thisArray, thisLength);
@@ -8471,6 +8573,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case KIND_EDITABLETEXTONCHANGECALLBACK: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
         case KIND_ERRORCALLBACK_BUSINESSERRORINTERFACE_VOID: return deserializeAndCallErrorCallback_BusinessErrorInterface_Void(thisArray, thisLength);
         case KIND_GAUGEMODIFIERBUILDER: return deserializeAndCallGaugeModifierBuilder(thisArray, thisLength);
+        case KIND_GESTURECOLLECTINTERCEPTCALLBACK: return deserializeAndCallGestureCollectInterceptCallback(thisArray, thisLength);
         case KIND_GESTUREEVENTHANDLER: return deserializeAndCallGestureEventHandler(thisArray, thisLength);
         case KIND_GESTURERECOGNIZERJUDGEBEGINCALLBACK: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisArray, thisLength);
         case KIND_GESTURESWIPEHANDLER: return deserializeAndCallGestureSwipeHandler(thisArray, thisLength);
@@ -8639,6 +8742,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case KIND_ANIMATIONENDHANDLER: return deserializeAndCallSyncAnimationEndHandler(vmContext, thisArray, thisLength);
         case KIND_ANIMATIONSTARTHANDLER: return deserializeAndCallSyncAnimationStartHandler(vmContext, thisArray, thisLength);
         case KIND_ARCSCROLLINDEXHANDLER: return deserializeAndCallSyncArcScrollIndexHandler(vmContext, thisArray, thisLength);
+        case KIND_AREACHANGECALLBACK: return deserializeAndCallSyncAreaChangeCallback(vmContext, thisArray, thisLength);
         case KIND_BUTTONMODIFIERBUILDER: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
         case KIND_BUTTONTRIGGERCLICKCALLBACK: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID: return deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(vmContext, thisArray, thisLength);
@@ -8685,6 +8789,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case KIND_CALLBACK_FOCUSAXISEVENT_VOID: return deserializeAndCallSyncCallback_FocusAxisEvent_Void(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_FORMCALLBACKINFO_VOID: return deserializeAndCallSyncCallback_FormCallbackInfo_Void(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_FULLSCREENINFO_VOID: return deserializeAndCallSyncCallback_FullscreenInfo_Void(vmContext, thisArray, thisLength);
+        case KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID: return deserializeAndCallSyncCallback_GestureCollectIntervention_Void(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_GESTUREEVENT_VOID: return deserializeAndCallSyncCallback_GestureEvent_Void(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_GESTUREINFO_BASEGESTUREEVENT_GESTUREJUDGERESULT: return deserializeAndCallSyncCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(vmContext, thisArray, thisLength);
         case KIND_CALLBACK_GESTUREJUDGERESULT_VOID: return deserializeAndCallSyncCallback_GestureJudgeResult_Void(vmContext, thisArray, thisLength);
@@ -8843,6 +8948,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case KIND_EDITABLETEXTONCHANGECALLBACK: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
         case KIND_ERRORCALLBACK_BUSINESSERRORINTERFACE_VOID: return deserializeAndCallSyncErrorCallback_BusinessErrorInterface_Void(vmContext, thisArray, thisLength);
         case KIND_GAUGEMODIFIERBUILDER: return deserializeAndCallSyncGaugeModifierBuilder(vmContext, thisArray, thisLength);
+        case KIND_GESTURECOLLECTINTERCEPTCALLBACK: return deserializeAndCallSyncGestureCollectInterceptCallback(vmContext, thisArray, thisLength);
         case KIND_GESTUREEVENTHANDLER: return deserializeAndCallSyncGestureEventHandler(vmContext, thisArray, thisLength);
         case KIND_GESTURERECOGNIZERJUDGEBEGINCALLBACK: return deserializeAndCallSyncGestureRecognizerJudgeBeginCallback(vmContext, thisArray, thisLength);
         case KIND_GESTURESWIPEHANDLER: return deserializeAndCallSyncGestureSwipeHandler(vmContext, thisArray, thisLength);

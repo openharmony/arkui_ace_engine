@@ -2493,14 +2493,6 @@ void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEv
     }
 #endif // WEB_SUPPORTED
 }
-void SetEnableDragImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetEnableDrag(frameNode, convValue);
-}
 void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
                                   const Opt_ScrollbarLayoutPolicy* value)
 {
@@ -3295,7 +3287,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
         WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
-        WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetKeyboardAppearanceImpl,
         WebAttributeModifier::SetOnInputmethodAttachedImpl,

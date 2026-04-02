@@ -284,6 +284,8 @@ typedef struct AnimationStartHandler AnimationStartHandler;
 typedef struct Opt_AnimationStartHandler Opt_AnimationStartHandler;
 typedef struct ArcScrollIndexHandler ArcScrollIndexHandler;
 typedef struct Opt_ArcScrollIndexHandler Opt_ArcScrollIndexHandler;
+typedef struct AreaChangeCallback AreaChangeCallback;
+typedef struct Opt_AreaChangeCallback Opt_AreaChangeCallback;
 typedef struct AccessibilityHoverEventPeer AccessibilityHoverEventPeer;
 typedef struct AccessibilityHoverEventPeer* Ark_AccessibilityHoverEvent;
 typedef struct Opt_AccessibilityHoverEvent Opt_AccessibilityHoverEvent;
@@ -961,8 +963,6 @@ typedef struct Opt_TextShadowStyle Opt_TextShadowStyle;
 typedef struct TextStylePeer TextStylePeer;
 typedef struct TextStylePeer* Ark_TextStyle;
 typedef struct Opt_TextStyle Opt_TextStyle;
-typedef struct Ark_TextTimerConfiguration Ark_TextTimerConfiguration;
-typedef struct Opt_TextTimerConfiguration Opt_TextTimerConfiguration;
 typedef struct TextTimerControllerPeer TextTimerControllerPeer;
 typedef struct TextTimerControllerPeer* Ark_TextTimerController;
 typedef struct Opt_TextTimerController Opt_TextTimerController;
@@ -1480,6 +1480,8 @@ typedef struct Callback_FormCallbackInfo_Void Callback_FormCallbackInfo_Void;
 typedef struct Opt_Callback_FormCallbackInfo_Void Opt_Callback_FormCallbackInfo_Void;
 typedef struct Callback_FullscreenInfo_Void Callback_FullscreenInfo_Void;
 typedef struct Opt_Callback_FullscreenInfo_Void Opt_Callback_FullscreenInfo_Void;
+typedef struct Callback_GestureCollectIntervention_Void Callback_GestureCollectIntervention_Void;
+typedef struct Opt_Callback_GestureCollectIntervention_Void Opt_Callback_GestureCollectIntervention_Void;
 typedef struct Callback_GestureEvent_Void Callback_GestureEvent_Void;
 typedef struct Opt_Callback_GestureEvent_Void Opt_Callback_GestureEvent_Void;
 typedef struct Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult;
@@ -1788,6 +1790,8 @@ typedef struct ErrorCallback_BusinessErrorInterface_Void ErrorCallback_BusinessE
 typedef struct Opt_ErrorCallback_BusinessErrorInterface_Void Opt_ErrorCallback_BusinessErrorInterface_Void;
 typedef struct GaugeModifierBuilder GaugeModifierBuilder;
 typedef struct Opt_GaugeModifierBuilder Opt_GaugeModifierBuilder;
+typedef struct GestureCollectInterceptCallback GestureCollectInterceptCallback;
+typedef struct Opt_GestureCollectInterceptCallback Opt_GestureCollectInterceptCallback;
 typedef struct GestureEventHandler GestureEventHandler;
 typedef struct Opt_GestureEventHandler Opt_GestureEventHandler;
 typedef struct GestureRecognizerJudgeBeginCallback GestureRecognizerJudgeBeginCallback;
@@ -2138,6 +2142,8 @@ typedef struct Ark_ArcScrollBarOptions Ark_ArcScrollBarOptions;
 typedef struct Opt_ArcScrollBarOptions Opt_ArcScrollBarOptions;
 typedef struct Ark_ArcSwiperContentAnimatedTransition Ark_ArcSwiperContentAnimatedTransition;
 typedef struct Opt_ArcSwiperContentAnimatedTransition Opt_ArcSwiperContentAnimatedTransition;
+typedef struct Ark_AreaChangeOptions Ark_AreaChangeOptions;
+typedef struct Opt_AreaChangeOptions Opt_AreaChangeOptions;
 typedef struct Ark_ArkListOptions Ark_ArkListOptions;
 typedef struct Opt_ArkListOptions Opt_ArkListOptions;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
@@ -2682,6 +2688,8 @@ typedef struct Ark_TextOverflowOptions Ark_TextOverflowOptions;
 typedef struct Opt_TextOverflowOptions Opt_TextOverflowOptions;
 typedef struct Ark_TextRange Ark_TextRange;
 typedef struct Opt_TextRange Opt_TextRange;
+typedef struct Ark_TextTimerConfiguration Ark_TextTimerConfiguration;
+typedef struct Opt_TextTimerConfiguration Opt_TextTimerConfiguration;
 typedef struct Ark_TextTimerOptions Ark_TextTimerOptions;
 typedef struct Opt_TextTimerOptions Opt_TextTimerOptions;
 typedef struct Ark_TipsMessageType Ark_TipsMessageType;
@@ -5024,6 +5032,17 @@ typedef struct Opt_GestureActionPhase {
     Ark_Tag tag;
     Ark_GestureActionPhase value;
 } Opt_GestureActionPhase;
+typedef enum Ark_GestureCollectIntervention {
+    ARK_GESTURE_COLLECT_INTERVENTION_CONTINUE = 0,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER = 1,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER = 2,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_SELF = 3,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS = 4,
+} Ark_GestureCollectIntervention;
+typedef struct Opt_GestureCollectIntervention {
+    Ark_Tag tag;
+    Ark_GestureCollectIntervention value;
+} Opt_GestureCollectIntervention;
 typedef enum Ark_GestureControl_GestureType {
     ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE = 0,
     ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE = 1,
@@ -6342,6 +6361,14 @@ typedef struct Opt_RadioIndicatorType {
     Ark_Tag tag;
     Ark_RadioIndicatorType value;
 } Opt_RadioIndicatorType;
+typedef enum Ark_RawInputEventType {
+    ARK_RAW_INPUT_EVENT_TYPE_TOUCH = 0,
+    ARK_RAW_INPUT_EVENT_TYPE_MOUSE = 1,
+} Ark_RawInputEventType;
+typedef struct Opt_RawInputEventType {
+    Ark_Tag tag;
+    Ark_RawInputEventType value;
+} Opt_RawInputEventType;
 typedef enum Ark_RefreshStatus {
     ARK_REFRESH_STATUS_INACTIVE = 0,
     ARK_REFRESH_STATUS_DRAG = 1,
@@ -7967,6 +7994,16 @@ typedef struct Opt_ArcScrollIndexHandler {
     Ark_Tag tag;
     ArcScrollIndexHandler value;
 } Opt_ArcScrollIndexHandler;
+typedef struct AreaChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue);
+} AreaChangeCallback;
+typedef struct Opt_AreaChangeCallback {
+    Ark_Tag tag;
+    AreaChangeCallback value;
+} Opt_AreaChangeCallback;
 typedef struct Opt_AccessibilityHoverEvent {
     Ark_Tag tag;
     Ark_AccessibilityHoverEvent value;
@@ -9349,19 +9386,6 @@ typedef struct Opt_TextStyle {
     Ark_Tag tag;
     Ark_TextStyle value;
 } Opt_TextStyle;
-typedef struct Ark_TextTimerConfiguration {
-    /* kind: Interface */
-    Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
-    Ark_Int64 count;
-    Ark_Boolean isCountDown;
-    Ark_Boolean started;
-    Ark_Int64 elapsedTime;
-} Ark_TextTimerConfiguration;
-typedef struct Opt_TextTimerConfiguration {
-    Ark_Tag tag;
-    Ark_TextTimerConfiguration value;
-} Opt_TextTimerConfiguration;
 typedef struct Opt_TextTimerController {
     Ark_Tag tag;
     Ark_TextTimerController value;
@@ -11582,6 +11606,16 @@ typedef struct Opt_Callback_FullscreenInfo_Void {
     Ark_Tag tag;
     Callback_FullscreenInfo_Void value;
 } Opt_Callback_FullscreenInfo_Void;
+typedef struct Callback_GestureCollectIntervention_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_GestureCollectIntervention value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_GestureCollectIntervention value);
+} Callback_GestureCollectIntervention_Void;
+typedef struct Opt_Callback_GestureCollectIntervention_Void {
+    Ark_Tag tag;
+    Callback_GestureCollectIntervention_Void value;
+} Opt_Callback_GestureCollectIntervention_Void;
 typedef struct Callback_GestureEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13122,6 +13156,16 @@ typedef struct Opt_GaugeModifierBuilder {
     Ark_Tag tag;
     GaugeModifierBuilder value;
 } Opt_GaugeModifierBuilder;
+typedef struct GestureCollectInterceptCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation);
+} GestureCollectInterceptCallback;
+typedef struct Opt_GestureCollectInterceptCallback {
+    Ark_Tag tag;
+    GestureCollectInterceptCallback value;
+} Opt_GestureCollectInterceptCallback;
 typedef struct GestureEventHandler {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14864,6 +14908,14 @@ typedef struct Opt_ArcSwiperContentAnimatedTransition {
     Ark_Tag tag;
     Ark_ArcSwiperContentAnimatedTransition value;
 } Opt_ArcSwiperContentAnimatedTransition;
+typedef struct Ark_AreaChangeOptions {
+    /* kind: Interface */
+    Opt_Int32 expectedUpdateInterval;
+} Ark_AreaChangeOptions;
+typedef struct Opt_AreaChangeOptions {
+    Ark_Tag tag;
+    Ark_AreaChangeOptions value;
+} Opt_AreaChangeOptions;
 typedef struct Ark_ArkListOptions {
     /* kind: Interface */
     Opt_Int32 initialIndex;
@@ -17636,11 +17688,26 @@ typedef struct Opt_TextRange {
     Ark_Tag tag;
     Ark_TextRange value;
 } Opt_TextRange;
+typedef struct Ark_TextTimerConfiguration {
+    /* kind: Interface */
+    Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
+    Ark_Int64 count;
+    Ark_Boolean isCountDown;
+    Ark_Boolean started;
+    Ark_Int64 elapsedTime;
+    Opt_Int32 startTime;
+} Ark_TextTimerConfiguration;
+typedef struct Opt_TextTimerConfiguration {
+    Ark_Tag tag;
+    Ark_TextTimerConfiguration value;
+} Opt_TextTimerConfiguration;
 typedef struct Ark_TextTimerOptions {
     /* kind: Interface */
     Opt_Boolean isCountDown;
     Opt_Int64 count;
     Opt_TextTimerController controller;
+    Opt_Int32 startTime;
 } Ark_TextTimerOptions;
 typedef struct Opt_TextTimerOptions {
     Ark_Tag tag;
@@ -22617,7 +22684,6 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;
-    Opt_uiMaterial_Material systemMaterial;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -24202,8 +24268,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                         const Opt_VoidCallback* value);
     void (*setOnDetach)(Ark_NativePointer node,
                         const Opt_VoidCallback* value);
-    void (*setOnAreaChange)(Ark_NativePointer node,
-                            const Opt_Callback_Area_Area_Void* value);
+    void (*setOnAreaChange0)(Ark_NativePointer node,
+                             const Opt_Callback_Area_Area_Void* value);
     void (*setVisibility)(Ark_NativePointer node,
                           const Opt_Visibility* value);
     void (*setFlexGrow)(Ark_NativePointer node,
@@ -24342,6 +24408,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                            const Opt_FocusDrawLevel* value);
     void (*setOnTouchTestDone)(Ark_NativePointer node,
                                const Opt_TouchTestDoneCallback* value);
+    void (*setOnGestureCollectIntercept)(Ark_NativePointer node,
+                                         const GestureCollectInterceptCallback* value);
     void (*setSystemMaterial)(Ark_NativePointer node,
                               const Opt_uiMaterial_Material* value);
     void (*setOnNeedSoftkeyboard)(Ark_NativePointer node,
@@ -24407,6 +24475,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                             const Opt_Float64* radius,
                             const Opt_BlurOptions* options,
                             const Opt_SystemAdaptiveOptions* sysOptions);
+    void (*setOnAreaChange1)(Ark_NativePointer node,
+                             const AreaChangeCallback* event,
+                             const Opt_AreaChangeOptions* options);
     void (*setSharedTransition)(Ark_NativePointer node,
                                 const Opt_String* id,
                                 const Opt_sharedTransitionOptions* options);
@@ -26085,7 +26156,7 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
     void (*setAlignRules)(Ark_NativePointer node,
                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* alignRule);
     void (*setId)(Ark_NativePointer node,
-                  const Opt_String* description);
+                  const Opt_String* id);
     void (*setChainMode)(Ark_NativePointer node,
                          const Opt_Axis* direction,
                          const Opt_ChainStyle* style);
@@ -27634,8 +27705,6 @@ typedef struct GENERATED_ArkUIWebModifier {
                           const Opt_Boolean* value);
     void (*setAiSessionOptions)(Ark_NativePointer node,
                                 const Opt_Array_AISessionEvent* value);
-    void (*setEnableDrag)(Ark_NativePointer node,
-                          const Opt_Boolean* value);
     void (*setScrollbarLayoutPolicy)(Ark_NativePointer node,
                                      const Opt_ScrollbarLayoutPolicy* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
@@ -28868,6 +28937,7 @@ typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
     Ark_EventTargetInfo (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getId)(Ark_EventTargetInfo peer);
+    Ark_Int32 (*getUniqueId)(Ark_EventTargetInfo peer);
 } GENERATED_ArkUIEventTargetInfoAccessor;
 
 typedef struct GENERATED_ArkUIFileSelectorParamAccessor {
@@ -29169,6 +29239,8 @@ typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     Ark_Int32 (*getFingerCount)(Ark_GestureRecognizer peer);
     Ark_Boolean (*isFingerCountLimit)(Ark_GestureRecognizer peer);
     void (*preventBegin)(Ark_GestureRecognizer peer);
+    Ark_Boolean (*isHostBelongsTo)(Ark_GestureRecognizer peer,
+                                   Ark_Int32 uniqueId);
 } GENERATED_ArkUIGestureRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIGestureStyleAccessor {
@@ -31265,6 +31337,8 @@ typedef struct GENERATED_ArkUITouchRecognizerAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_EventTargetInfo (*getEventTargetInfo)(Ark_TouchRecognizer peer);
     void (*cancelTouch)(Ark_TouchRecognizer peer);
+    Ark_Boolean (*isHostBelongsTo)(Ark_TouchRecognizer peer,
+                                   Ark_Int32 uniqueId);
 } GENERATED_ArkUITouchRecognizerAccessor;
 
 typedef struct GENERATED_ArkUITransitionEffectAccessor {

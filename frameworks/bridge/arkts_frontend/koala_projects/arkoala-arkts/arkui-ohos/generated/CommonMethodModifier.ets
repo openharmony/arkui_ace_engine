@@ -1864,7 +1864,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[89] != 0) {
             switch (flagArray[89]) {
                 case 1: {
-                    peer.setOnAreaChangeAttribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    peer.setOnAreaChange0Attribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
                     flagArray[89] = 2;
                     break;
                 }
@@ -1874,7 +1874,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[89] = 0;
-                    peer.setOnAreaChangeAttribute(undefined);
+                    peer.setOnAreaChange0Attribute(undefined);
                 }
             }
         }

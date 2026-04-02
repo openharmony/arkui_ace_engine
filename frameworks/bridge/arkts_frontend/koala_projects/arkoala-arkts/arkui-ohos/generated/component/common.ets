@@ -4021,7 +4021,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAreaChangeAttribute(value: ((oldValue: Area,newValue: Area) => void) | undefined): void {
+    setOnAreaChange0Attribute(value: ((oldValue: Area,newValue: Area) => void) | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4030,7 +4030,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVisibilityAttribute(value: Visibility | undefined): void {
@@ -5475,6 +5475,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBackdropBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(event)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSharedTransitionAttribute(id: string | undefined, options?: sharedTransitionOptions): void {
@@ -10128,6 +10141,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method backdropBlur')
     }
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method onAreaChange')
+    }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10542,6 +10567,10 @@ export interface RectResult {
     width: double;
     height: double;
 }
+export interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
+export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export interface CaretOffset {
     index: int32;
     x: int32;
@@ -11213,7 +11242,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
         const value_casted = value as (((oldValue: Area,newValue: Area) => void) | undefined)
-        this.getPeer()?.setOnAreaChangeAttribute(value_casted)
+        this.getPeer()?.setOnAreaChange0Attribute(value_casted)
         return this
     }
     public visibility(value: Visibility | undefined): this {
@@ -11719,6 +11748,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         const options_casted = options as (BlurOptions | undefined)
         const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
         this.getPeer()?.setBackdropBlurAttribute(radius_casted, options_casted, sysOptions_casted)
+        return this
+    }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const event_casted = event as (AreaChangeCallback)
+        const options_casted = options as (AreaChangeOptions | undefined)
+        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -12621,6 +12656,30 @@ export class VerticalAlignParam_serializer {
         const anchorTmpResult: string = (valueDeserializer.readString() as string)
         const alignTmpResult: VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
         let value: VerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as VerticalAlignParam)
+        return value
+    }
+}
+export class AreaChangeOptions_serializer {
+    public static write(buffer: SerializerBase, value: AreaChangeOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForExpectedUpdateInterval = value.expectedUpdateInterval
+        if (valueHolderForExpectedUpdateInterval !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForExpectedUpdateIntervalTmpValue = valueHolderForExpectedUpdateInterval!
+            valueSerializer.writeInt32(valueHolderForExpectedUpdateIntervalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AreaChangeOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const expectedUpdateIntervalTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let expectedUpdateIntervalTmpBuf: int32 | undefined = undefined
+        if ((expectedUpdateIntervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
+        }
+        const expectedUpdateIntervalTmpResult: int32 | undefined = expectedUpdateIntervalTmpBuf
+        let value: AreaChangeOptions = ({expectedUpdateInterval: expectedUpdateIntervalTmpResult} as AreaChangeOptions)
         return value
     }
 }

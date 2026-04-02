@@ -6612,9 +6612,6 @@ export declare interface WebAttribute extends CommonMethod {
      * @since 24
      */
     default enableDefaultContextMenu(enable: boolean | undefined): this;
-    // instructive change start
-    default aiSessionOptions(value: Array<AISessionEvent> | undefined): this;
-    // instructive change end
     /**
      * Enables or disables dragging for this component.
      *
@@ -6626,6 +6623,9 @@ export declare interface WebAttribute extends CommonMethod {
      * @since 26.0.0
      */
     default enableDrag(value: boolean | undefined): this;
+    // instructive change start
+    default aiSessionOptions(value: Array<AISessionEvent> | undefined): this;
+    // instructive change end
     /**
      * Sets the scrollbar layout policy.
      *
