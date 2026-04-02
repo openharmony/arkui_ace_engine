@@ -5504,7 +5504,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}u, needKeyboard:%{public}d"
+        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}zu, needKeyboard:%{public}d"
         " sourceType:%{public}u, placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
         textConfig.inputAttribute.enterKeyType, textConfig.inputAttribute.extraConfig.customSettings.size(),
