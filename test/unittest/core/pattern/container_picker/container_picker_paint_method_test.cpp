@@ -71,6 +71,7 @@ void ContainerPickerPaintMethodTest::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerPaintMethodTest::TearDownTestSuite()

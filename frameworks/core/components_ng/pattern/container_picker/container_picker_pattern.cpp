@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
@@ -347,9 +348,7 @@ void ContainerPickerPattern::SetDefaultTextStyle(bool isUpdateTextStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<ContainerPickerTheme>();
+    auto theme = host->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     Color defaultColor = theme->GetFontColor();
     for (const auto& item : itemPosition_) {
@@ -377,6 +376,11 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node, Color d
             textLayoutProperty->UpdateTextColor(defaultColor);
             isModified_ = true;
             isUseDefaultFontColor_ = true;
+        } else if (textLayoutProperty->GetTextColor().value() != defaultColor && isUseDefaultFontColor_) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textLayoutProperty->UpdateTextColor(defaultColor);
+                isModified_ = true;
+            }
         }
 
         if (isModified_) {
@@ -1368,6 +1372,69 @@ void ContainerPickerPattern::OnColorConfigurationUpdate()
     }
 }
 
+void ContainerPickerPattern::SyncSelectionIndicatorWithTheme(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto theme = host->GetTheme<ContainerPickerTheme>(true);
+    CHECK_NULL_VOID(theme);
+
+    const auto& style = indicatorStyle_;
+    const auto indicatorType = layoutProperty->GetIndicatorType().value_or(
+        static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+
+    if (indicatorType == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.isDefaultDividerColor) {
+            layoutProperty->UpdateIndicatorDividerColor(theme->GetIndicatorDividerColor());
+        }
+    } else {
+        if (style.isDefaultBackgroundColor) {
+            layoutProperty->UpdateIndicatorBackgroundColor(theme->GetIndicatorBackgroundColor());
+        }
+    }
+}
+
+bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->SetNeedCallChildrenUpdate(false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    bool result = false;
+    auto layoutProperty = host->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+
+    const auto& style = indicatorStyle_;
+    const auto indicatorType = layoutProperty->GetIndicatorType().value_or(
+        static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+    // Re-sync when a color property is unset, or divider/background color still follows theme (isDefault*) but layout
+    // holds a stale snapshot—WithTheme default colors must refresh. Non-color indicator attrs are not considered here.
+    bool needThemeResync = !layoutProperty->HasIndicatorDividerColor() ||
+                           !layoutProperty->HasIndicatorBackgroundColor();
+    if (indicatorType == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.isDefaultDividerColor && layoutProperty->HasIndicatorDividerColor()) {
+            needThemeResync = true;
+        }
+    } else {
+        if (style.isDefaultBackgroundColor && layoutProperty->HasIndicatorBackgroundColor()) {
+            needThemeResync = true;
+        }
+    }
+
+    if (needThemeResync) {
+        SyncSelectionIndicatorWithTheme(themeScopeId);
+        result = true;
+        host->SetNeedCallChildrenUpdate(true);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    return result;
+}
+
 void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj)
 {
     auto pickerNode = GetHost();
@@ -1379,9 +1446,7 @@ void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceO
     if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, strokeWidth)) {
         property->UpdateIndicatorDividerWidth(strokeWidth);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorDividerWidth(theme->GetStrokeWidth());
     }
@@ -1398,9 +1463,7 @@ void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceO
     if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
         property->UpdateIndicatorDividerColor(color);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorDividerColor(theme->GetIndicatorDividerColor());
     }
@@ -1447,9 +1510,7 @@ void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<Resour
     if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
         property->UpdateIndicatorBackgroundColor(color);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorBackgroundColor(theme->GetIndicatorBackgroundColor());
     }

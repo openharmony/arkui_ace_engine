@@ -84,9 +84,7 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     CHECK_NULL_VOID(renderContext);
     auto pickerNode = renderContext->GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto pipelineContext = pickerNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ContainerPickerTheme>();
+    auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     auto layoutProperty = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -143,9 +141,7 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     CHECK_NULL_VOID(renderContext);
     auto pickerNode = renderContext->GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto pipelineContext = pickerNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ContainerPickerTheme>();
+    auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     auto layoutProperty = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -225,9 +221,7 @@ void ContainerPickerPaintMethod::SetDefaultIndicatorBackground(
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    auto pipelineContext = pickerNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ContainerPickerTheme>();
+    auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     PickerIndicatorStyle style = pickerPattern->GetIndicatorStyleVal();
     if (style.isDefaultBackgroundColor) {
@@ -244,9 +238,7 @@ void ContainerPickerPaintMethod::SetDefaultIndicatorDivider(RefPtr<FrameNode> pi
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    auto pipelineContext = pickerNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ContainerPickerTheme>();
+    auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     PickerIndicatorStyle style = pickerPattern->GetIndicatorStyleVal();
     if (style.isDefaultDividerWidth) {
