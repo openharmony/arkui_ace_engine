@@ -37,12 +37,12 @@ ani_object CreateError(ani_env* env, const std::string &msg)
         return nullptr;
     }
     ani_class cls {};
-    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method method {};
     if ((status = env->Class_FindMethod(
-        cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) != ANI_OK) {
+        cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &method)) != ANI_OK) {
         return nullptr;
     }
     ani_object obj = nullptr;
@@ -62,7 +62,7 @@ ani_object CreateBusinessError(ani_env* env, int32_t code, const std::string& me
         return nullptr;
     }
     ani_method method {};
-    status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", "iC{std.core.Error}:", &method);
     if (status != ANI_OK) {
         return nullptr;
     }
