@@ -111,7 +111,7 @@ action("idlize_gen") {
   script = "deploy.py"
   args = [
     "--source",
-    rebase_path("./out"),
+    rebase_path(idlize_gen_output_path),
     "--destination",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
     "--config",

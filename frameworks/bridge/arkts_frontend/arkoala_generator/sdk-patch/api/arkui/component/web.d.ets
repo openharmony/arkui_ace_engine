@@ -4091,7 +4091,7 @@ export declare enum NavigationPolicy {
  */
 export declare interface WindowFeatures {
     /**
-     * The requested height of the containing window.
+     * The requested height of the containing window. Unit:pixels.
      *
      * @type { double }
      * @syscap SystemCapability.Web.Webview.Core
@@ -4099,7 +4099,7 @@ export declare interface WindowFeatures {
      */
     height: double;
     /**
-     * The requested width of the containing window.
+     * The requested width of the containing window. Unit:pixels.
      *
      * @type { double }
      * @syscap SystemCapability.Web.Webview.Core
@@ -4107,7 +4107,7 @@ export declare interface WindowFeatures {
      */
     width: double;
     /**
-     * The requested x-coordinate of the containing window.
+     * The requested x-coordinate of the containing window. Unit:pixels.
      *
      * @type { double }
      * @syscap SystemCapability.Web.Webview.Core
@@ -4115,7 +4115,7 @@ export declare interface WindowFeatures {
      */
     x: double;
     /**
-     * The requested y-coordinate of the containing window.
+     * The requested y-coordinate of the containing window. Unit:pixels.
      *
      * @type { double }
      * @syscap SystemCapability.Web.Webview.Core
@@ -6623,9 +6623,6 @@ export declare interface WebAttribute extends CommonMethod {
      * @since 26.0.0
      */
     default enableDrag(value: boolean | undefined): this;
-    // instructive change start
-    default aiSessionOptions(value: Array<AISessionEvent> | undefined): this;
-    // instructive change end
     /**
      * Sets the scrollbar layout policy.
      *
@@ -6636,6 +6633,9 @@ export declare interface WebAttribute extends CommonMethod {
      * @since 26.0.0
      */
     default scrollbarLayoutPolicy(policy: ScrollbarLayoutPolicy | undefined): this;
+    // instructive change start
+    default aiSessionOptions(value: Array<AISessionEvent> | undefined): this;
+    // instructive change end
     /**
      * Enables or disables directional lock for scroll gestures in the WebView component.
      *

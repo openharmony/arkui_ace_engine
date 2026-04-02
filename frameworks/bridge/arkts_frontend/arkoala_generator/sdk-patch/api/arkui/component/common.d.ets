@@ -11251,9 +11251,6 @@ export declare interface CommonMethod {
      * @since 23
      */
     default onPreDrag(callback: Callback<PreDragStatus> | undefined): this;
-    // instructive change start
-    default toolbar(value: CustomBuilder | undefined): this;
-    // instructive change end
     /**
      * Add mask text to the current component. The layout is the same as that of the current component.
      *
@@ -11274,6 +11271,16 @@ export declare interface CommonMethod {
      * @since 26.0.0
      */
     default overlay(value: string | CustomBuilder | ComponentContent<Object> | undefined, options?: OverlayOptions): this;
+    /**
+     * Config toolbar for current component.
+     *
+     * @param { CustomBuilder | undefined } value
+     * @returns { this }
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @stagemodelonly
+     * @since 24
+     */
+    default toolbar(value: CustomBuilder | undefined): this;
     /**
      * Linear Gradient
      * angle: Angle of Linear Gradient. The default value is 180;

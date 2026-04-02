@@ -2505,14 +2505,6 @@ void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEv
     }
 #endif // WEB_SUPPORTED
 }
-void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
-                                  const Opt_ScrollbarLayoutPolicy* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetScrollbarLayoutPolicy(frameNode, convValue);
-}
 void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                const Opt_WebKeyboardAppearanceMode* value)
 {
@@ -3300,7 +3292,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
-        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetKeyboardAppearanceImpl,
         WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,

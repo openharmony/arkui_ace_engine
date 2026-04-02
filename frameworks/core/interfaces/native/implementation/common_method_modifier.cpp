@@ -5763,16 +5763,6 @@ void SetBackdropBlurImpl(Ark_NativePointer node,
     auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions).value_or(SysOptions());
     ViewAbstractModelStatic::SetBackdropBlur(frameNode, Dimension(radiusValue, DimensionUnit::PX), optOption, sysOpts);
 }
-void SetOnAreaChange1Impl(Ark_NativePointer node,
-                          const AreaChangeCallback* event,
-                          const Opt_AreaChangeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(event);
-    //auto convValue = Converter::OptConvert<type>(event); // for enums
-    // CommonMethodModelNG::SetSetOnAreaChange1(frameNode, convValue);
-}
 void SetSharedTransitionImpl(Ark_NativePointer node,
                              const Opt_String* id,
                              const Opt_sharedTransitionOptions* options)
@@ -6989,7 +6979,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
-        CommonMethodModifier::SetOnAreaChange1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }
