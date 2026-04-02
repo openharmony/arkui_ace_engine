@@ -16,7 +16,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include <cinttypes>
 #include <unordered_set>
+#if defined(OHOS_PLATFORM)
+#include <unistd.h>
+#endif
 
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/ui_node.h"
@@ -563,6 +567,10 @@ FrameNode::FrameNode(
 
     if (IsThreadSafeNode()) {
         MultiThreadBuildManager::CheckTag(tag);
+    } else if (tag == V2::CANVAS_ETS_TAG) {
+#if defined(OHOS_PLATFORM)
+        ownedTid_ = static_cast<uint64_t>(gettid());
+#endif
     }
 }
 
@@ -3303,17 +3311,19 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        auto pattern = AceType::DynamicCast<CanvasPattern>(GetPattern());
-        if (pattern) {
-            int32_t id = pattern->GetPatternInstanceId();
-            int32_t contextInstanceId = context->GetInstanceId();
-            if (id != INSTANCE_ID_UNDEFINED && id != contextInstanceId) {
+#if defined(OHOS_PLATFORM)
+        if (ownedTid_ != 0) {
+            uint64_t currentTid = static_cast<uint64_t>(gettid());
+            if (ownedTid_ != currentTid) {
+                int32_t contextInstanceId = context->GetInstanceId();
                 TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN,
-                    "MarkNeedRender GetPatternInstanceId:%{public}d, ContextInstanceId:%{public}d"
-                    "FrameNodeInstanceId:%{public}d", id, contextInstanceId, GetInstanceId());
+                    "MarkNeedRender OwnedTid:%{public}" PRIu64 " ContextInstanceId:%{public}d "
+                    "FrameNodeInstanceId:%{public}d",
+                    ownedTid_, contextInstanceId, GetInstanceId());
                 LogBacktrace();
             }
         }
+#endif
         context->AddDirtyRenderNode(Claim(this));
         return;
     }

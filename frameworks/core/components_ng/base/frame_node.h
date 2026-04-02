@@ -1853,6 +1853,7 @@ private:
     std::shared_ptr<AICallerHelper> aiCallerHelper_;
 
     std::unordered_set<LpxAttribute> lpxAttributes_;
+    uint64_t ownedTid_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
