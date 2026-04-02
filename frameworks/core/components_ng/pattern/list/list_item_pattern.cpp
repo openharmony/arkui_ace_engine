@@ -19,13 +19,20 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/animation/spring_motion.h"
+#include "core/components/list/list_item_theme.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -44,9 +51,55 @@ constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
+ListItemPattern::~ListItemPattern() = default;
+
+void ListItemPattern::BeforeCreateLayoutWrapper()
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+}
+
+void ListItemPattern::OnCollectRemoved()
+{
+    shallowBuilder_.Reset();
+}
+
+RefPtr<LayoutProperty> ListItemPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<ListItemLayoutProperty>();
+}
+
+RefPtr<EventHub> ListItemPattern::CreateEventHub()
+{
+    return MakeRefPtr<ListItemEventHub>();
+}
+
+RefPtr<AccessibilityProperty> ListItemPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<ListItemAccessibilityProperty>();
+}
+
 void ListItemPattern::SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder)
 {
     shallowBuilder_ = std::move(shallowBuilder);
+}
+
+void ListItemPattern::InitDragManager(RefPtr<ForEachBaseNode> forEach)
+{
+    if (!dragManager_) {
+        dragManager_ = MakeRefPtr<ListItemDragManager>(GetHost(), forEach);
+        dragManager_->InitDragDropEvent();
+    }
+}
+
+void ListItemPattern::DeInitDragManager()
+{
+    if (dragManager_) {
+        dragManager_->DeInitDragDropEvent();
+        dragManager_ = nullptr;
+    }
 }
 
 void ListItemPattern::OnAttachToFrameNode()

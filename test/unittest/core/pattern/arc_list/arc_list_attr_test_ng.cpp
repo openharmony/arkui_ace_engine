@@ -15,6 +15,8 @@
 
 #include "arc_list_test_ng.h"
 
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
