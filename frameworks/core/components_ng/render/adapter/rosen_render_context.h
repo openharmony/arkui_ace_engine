@@ -52,6 +52,7 @@
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 
 namespace OHOS::Ace::NG {
 class BackgroundModifier;
@@ -572,6 +573,10 @@ public:
     void UpdateCustomBackground() override;
 
     void UpdateOverlayText() override;
+
+    void UpdateDistortionParam(const DistortionParam& param) override;
+
+    void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

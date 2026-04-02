@@ -119,6 +119,8 @@ build_component_ng("pattern_ng") {
     "dialog/dialog_pattern.cpp",
     "dialog/dialog_pattern_multi_thread.cpp",
     "dialog/dialog_view.cpp",
+    "distortion_component/distortion_component_model_ng.cpp",
+    "distortion_component/distortion_component_pattern.cpp",
     "divider/divider_layout_algorithm.cpp",
     "divider/divider_model_ng.cpp",
     "divider/divider_model_ng_static.cpp",

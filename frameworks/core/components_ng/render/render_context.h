@@ -80,7 +80,7 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 class PipelineContext;
-
+struct DistortionParam;
 struct PaintFocusExtraInfo final {
     PaintFocusExtraInfo() = default;
     PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
@@ -883,7 +883,9 @@ public:
     {
         isFree_ = isFree;
     }
+    virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
+    virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
