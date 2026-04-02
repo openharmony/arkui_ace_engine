@@ -201,6 +201,7 @@ private:
     void OnModifyDone() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void InitDateIndex();
     void InitClickEvent();
     void InitOnKeyEvent();
@@ -227,6 +228,7 @@ private:
     void FireChangeEvents(const std::string& info);
     void UpdateEntryButtonColor();
     void UpdateEntryButtonBorderWidth();
+    void UpdateHostEntryBorderColor();
     void UpdateEdgeAlign();
     void UpdateAccessibilityText();
     void FlushAddAndSubButton();

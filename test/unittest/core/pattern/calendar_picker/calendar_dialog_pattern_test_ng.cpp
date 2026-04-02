@@ -96,7 +96,7 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -106,7 +106,13 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1879,6 +1885,12 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogViewTest0050, TestSize.Level
     auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
     ASSERT_NE(calendarTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([calendarTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return calendarTheme;
+        });
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;

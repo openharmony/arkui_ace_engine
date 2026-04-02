@@ -93,7 +93,7 @@ void CalendarPickerTestUpdate::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -103,7 +103,13 @@ void CalendarPickerTestUpdate::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -184,6 +190,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles002, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     
     size_t sizet = 0;
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
@@ -236,6 +248,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles003, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetFontSizeValue();
@@ -280,6 +298,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles004, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
 
@@ -325,6 +349,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles005, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     
@@ -371,6 +401,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles006, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     
@@ -416,6 +452,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles007, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     
@@ -461,6 +503,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles008, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     
@@ -508,6 +556,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles009, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetButtonRoleValue();
@@ -560,6 +614,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles010, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetButtonStyleValue();
@@ -612,6 +672,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles011, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetTypeValue();
@@ -664,6 +730,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles012, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetFontStyleValue();
@@ -715,6 +787,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles013, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetFontStyleValue();
@@ -766,6 +844,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles014, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetTypeValue();
@@ -816,6 +900,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles015, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -861,6 +951,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles016, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -907,6 +1003,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles017, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -956,6 +1058,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles018, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -1014,6 +1122,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles019, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -1073,6 +1187,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles020, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -1124,6 +1244,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles021, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -1175,6 +1301,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles022, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
 
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
@@ -1226,6 +1358,12 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles023, TestSize
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetFontSizeValue();
