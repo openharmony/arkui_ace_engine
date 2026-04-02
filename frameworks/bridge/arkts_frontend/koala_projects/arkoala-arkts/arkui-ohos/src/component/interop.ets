@@ -1011,7 +1011,7 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {
+function createCompatibleStaticState<T>(dynamicValue: Object): IDecoratedV1Variable<T> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
@@ -1036,7 +1036,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedV
         return stateVar;
     }
     else {
-        return getProxy as ProvideDecoratedVariable<T>;
+        return getProxy as IDecoratedV1Variable<T>;
     }
 }
 
