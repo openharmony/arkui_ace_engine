@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
 #include <cinttypes>

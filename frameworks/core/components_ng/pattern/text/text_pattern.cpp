@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cstdint>
 #include <iterator>

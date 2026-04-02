@@ -15,6 +15,7 @@
 
 #include <unordered_set>
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/ui_node.h"
@@ -64,6 +65,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"

@@ -19,6 +19,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #define private public
 #define protected public

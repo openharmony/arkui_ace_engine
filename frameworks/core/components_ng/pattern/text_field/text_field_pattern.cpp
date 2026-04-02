@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
 #include <array>

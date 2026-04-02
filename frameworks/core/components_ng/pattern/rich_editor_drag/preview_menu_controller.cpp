@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cstddef>
 #include <optional>

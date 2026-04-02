@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
