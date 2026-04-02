@@ -1661,6 +1661,18 @@ void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShap
     rsNode_->SetSDFShape(shape);
 }
 
+void RosenRenderContext::SetShadowPath(const std::string path)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowPath(Rosen::RSPath::CreateRSPath(path));
+}
+
+void RosenRenderContext::ResetShadowPath()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowPath(nullptr);
+}
+
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
 {
     bool flag = false;
