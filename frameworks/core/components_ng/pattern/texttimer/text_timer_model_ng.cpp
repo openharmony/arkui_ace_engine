@@ -69,6 +69,11 @@ void TextTimerModelNG::SetInputCount(double count)
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count);
 }
 
+void TextTimerModelNG::SetStartTime(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value);
+}
+
 void TextTimerModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value);
@@ -216,6 +221,11 @@ void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, bool isCountDown)
 void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count, frameNode);
+}
+
+void TextTimerModelNG::SetStartTime(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value, frameNode);
 }
 
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)

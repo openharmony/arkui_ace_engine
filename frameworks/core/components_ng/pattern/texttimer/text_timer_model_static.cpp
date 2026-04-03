@@ -37,6 +37,15 @@ void TextTimerModelStatic::SetInputCount(FrameNode* frameNode, const std::option
     }
 }
 
+void TextTimerModelStatic::SetStartTime(FrameNode* frameNode, const std::optional<int32_t>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, frameNode);
+    }
+}
+
 void TextTimerModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);

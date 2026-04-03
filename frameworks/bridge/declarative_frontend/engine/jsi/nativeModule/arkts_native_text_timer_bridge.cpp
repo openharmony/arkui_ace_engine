@@ -337,13 +337,13 @@ ArkUINativeModuleValue TextTimerBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
-            const char* keysOfTextTimer[] = { "count", "isCountDown", "started", "enabled", "elapsedTime"};
-            Local<JSValueRef> valuesOfTextTimer[] = {
-                panda::NumberRef::New(vm, config.count_),
-                panda::BooleanRef::New(vm, config.isCountDown_),
-                panda::BooleanRef::New(vm, config.started_),
+            const char* keysOfTextTimer[] = { "count", "isCountDown", "started", "enabled", "elapsedTime",
+                "startTime" };
+            Local<JSValueRef> valuesOfTextTimer[] = { panda::NumberRef::New(vm, config.count_),
+                panda::BooleanRef::New(vm, config.isCountDown_), panda::BooleanRef::New(vm, config.started_),
                 panda::BooleanRef::New(vm, config.enabled_),
-                panda::NumberRef::New(vm, static_cast<int64_t>(config.elapsedTime_))};
+                panda::NumberRef::New(vm, static_cast<int64_t>(config.elapsedTime_)),
+                panda::NumberRef::New(vm, config.startTime_) };
             auto textTimer = panda::ObjectRef::NewWithNamedProperties(vm,
                 ArraySize(keysOfTextTimer), keysOfTextTimer, valuesOfTextTimer);
             textTimer->SetNativePointerFieldCount(vm, 1);
@@ -376,39 +376,37 @@ ArkUINativeModuleValue TextTimerBridge::SetTextTimerOptions(ArkUIRuntimeCallInfo
     Local<JSValueRef> isCountDownVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> countVal = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> startTimeVal = runtimeCallInfo->GetCallArgRef(NUM_4);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
-    bool isCountDown = DEFAULT_COUNT_DOWN;
+    bool isCountDown = isCountDownVal->IsBoolean() ? isCountDownVal->BooleaValue(vm) : DEFAULT_COUNT_DOWN;
     double count = TIME_DEFAULT_COUNT;
-    if (isCountDownVal->IsBoolean()) {
-        isCountDown = isCountDownVal->BooleaValue(vm);
-        if (isCountDown && countVal->IsNumber()) {
-            auto tempCount = countVal->ToNumber(vm)->Value();
-            if (tempCount > 0 && tempCount < MAX_COUNT_DOWN) {
-                count = tempCount;
-            }
+    if (isCountDown && countVal->IsNumber()) {
+        auto tempCount = countVal->ToNumber(vm)->Value();
+        if (tempCount > 0 && tempCount < MAX_COUNT_DOWN) {
+            count = tempCount;
         }
     }
+    int32_t startTime = startTimeVal->IsNumber() ? startTimeVal->ToNumber(vm)->Value() : 0;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextTimerModifier()->setTextTimerOptions(nativeNode, isCountDown, count);
+    nodeModifiers->getTextTimerModifier()->setTextTimerOptions(nativeNode, isCountDown, count, startTime);
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (controllerVal->IsObject(vm)) {
         auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
                                  ->Unwrap<Framework::JSTextTimerController>();
-        if (jsController) {
-            auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
-            auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
-            if (preController) {
-                preController->SetController(nullptr);
-            }
-            TextTimerModelNG::SetJSTextTimerController(
-                frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
-            auto controller = TextTimerModelNG::InitTextController(frameNode);
-            jsController->SetInstanceId(Container::CurrentId());
-            jsController->SetController(controller);
+        CHECK_NULL_RETURN(jsController, panda::JSValueRef::Undefined(vm));
+        auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
+        auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
+        if (preController) {
+            preController->SetController(nullptr);
         }
+        TextTimerModelNG::SetJSTextTimerController(
+            frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
+        auto controller = TextTimerModelNG::InitTextController(frameNode);
+        jsController->SetInstanceId(Container::CurrentId());
+        jsController->SetController(controller);
     } else {
         auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
         auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));

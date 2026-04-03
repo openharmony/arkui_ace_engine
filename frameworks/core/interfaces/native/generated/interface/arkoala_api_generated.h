@@ -9326,6 +9326,7 @@ typedef struct Ark_TextTimerConfiguration {
     Ark_Boolean isCountDown;
     Ark_Boolean started;
     Ark_Int64 elapsedTime;
+    Opt_Int32 startTime;
 } Ark_TextTimerConfiguration;
 typedef struct Opt_TextTimerConfiguration {
     Ark_Tag tag;
@@ -17597,6 +17598,7 @@ typedef struct Ark_TextTimerOptions {
     Opt_Boolean isCountDown;
     Opt_Int64 count;
     Opt_TextTimerController controller;
+    Opt_Int32 startTime;
 } Ark_TextTimerOptions;
 typedef struct Opt_TextTimerOptions {
     Ark_Tag tag;
