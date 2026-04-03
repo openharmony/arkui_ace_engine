@@ -23,9 +23,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
 
