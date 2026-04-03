@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
 
 #undef private
 #undef protected
@@ -1980,6 +1981,92 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithExactlyLimitC
 
     algorithm_->RetainDisplayItems(false);
     EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+}
+
+/**
+ * @tc.name: SetLazyLoadWithLazyNode
+ * @tc.desc: Test SetLazyLoad method with lazyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, SetLazyLoadWithLazyNode, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with a child node
+     */
+    CreateContainerPickerNode(1);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. get ContainerPickerLayoutProperty and set contentConstraint_ = layoutConstraintF.
+     */
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step3. set totalItemCount_ = 5.
+     */
+    algorithm_->totalItemCount_ = 5;
+
+    /**
+     * @tc.steps: step4. set itemPosition_ values.
+     */
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, nullptr };
+    algorithm_->itemPosition_[1] = { 150.0f, 200.0f, nullptr };
+    algorithm_->itemPosition_[2] = { 200.0f, 250.0f, nullptr };
+
+    /**
+     * @tc.steps: step5. set prevItemPosition_ values.
+     */
+    algorithm_->prevItemPosition_[1] = { 100.0f, 150.0f, nullptr };
+
+    /**
+     * @tc.steps: step6. Create LazyForEachNode and mount to pickerNode.
+     */
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(20, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto targetNode = AceType::DynamicCast<UINode>(lazyForEachNode);
+    ASSERT_NE(targetNode, nullptr);
+    lazyForEachNode->MountToParent(frameNode_);
+
+    /**
+     * @tc.steps: step7. Call algorithm_ isLoop_ = true.
+     */
+    algorithm_->isLoop_ = true;
+    /**
+     * @tc.steps: step8. Call SetLazyLoad
+     */
+    algorithm_->SetLazyLoad(layoutWrapper);
+
+    /**
+     * @tc.steps: step9. Call algorithm_ isLoop_ = false.
+     */
+    algorithm_->isLoop_ = false;
+    /**
+     * @tc.steps: step10. Call SetLazyLoad
+     */
+    algorithm_->SetLazyLoad(layoutWrapper);
+
+    auto hostNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+
+    /**
+     * @tc.steps: step11. Check if the targetNode is in the list
+     */
+    auto activeList = hostNode->children_;
+    auto res = std::find(activeList.begin(), activeList.end(), targetNode) != activeList.end();
+
+    /**
+     * @tc.expected: targetNode in hostNode's children list.
+     */
+    EXPECT_TRUE(res);
+
+    algorithm_->totalItemCount_ = 0;
+    algorithm_->SetLazyLoad(layoutWrapper);
 }
 
 /**
