@@ -782,7 +782,6 @@ frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkuieco3
-frameworks/bridge/declarative_frontend/engine/arkModifier.js @arkuieco3
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/bindings_defines.h @arkui_statemgmt
@@ -1075,7 +1074,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_stage_utils.cpp @ark
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_stage_utils.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
-frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js @arkuieco3
 frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsShape.js
 frameworks/bridge/declarative_frontend/engine/jsStateManagement.js @arkui_statemgmt
