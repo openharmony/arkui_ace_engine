@@ -1569,7 +1569,8 @@ HWTEST_F(MenuItemPatternBasicTestNg, DoCloseSubMenu002, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
-    menuItemPattern->detachedProxy_ = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 5, AceType::MakeRefPtr<MenuPattern>(1, "", TYPE));
+    menuItemPattern->detachedProxy_ = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 5,
+        AceType::MakeRefPtr<MenuPattern>(1, "", TYPE));
     menuItemPattern->DoCloseSubMenu();
     EXPECT_FALSE(menuItemPattern->isSubMenuShowed_);
     EXPECT_EQ(menuItemPattern->subMenuId_, -1);

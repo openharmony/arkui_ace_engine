@@ -740,7 +740,8 @@ HWTEST_F(MenuPattern2TwoTestNg, DoCloseSubMenus002, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     auto subMenuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3,
+            AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
     ASSERT_NE(subMenuNode, nullptr);
     subMenuNode->MountToParent(wrapperNode);
     menuPattern->showedSubMenu_ = subMenuNode;
