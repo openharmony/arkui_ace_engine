@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
@@ -34,6 +35,10 @@
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -646,6 +651,393 @@ HWTEST_F(ContainerPickerPatternTestTwo, GetEnableHapticFeedbackTest, TestSize.Le
     EXPECT_NE(node, nullptr);
     picker.SetEnableHapticFeedback(AceType::RawPtr(node), 1);
     EXPECT_EQ(picker.GetEnableHapticFeedback(AceType::RawPtr(node)), 1);
+}
+
+/**
+ * @tc.name: GetRealTotalItemCountTest
+ * @tc.desc: Test GetRealTotalItemCount function with normal item count
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, GetRealTotalItemCountTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto pickerNode = picker.CreateFrameNode(1);
+    EXPECT_NE(pickerNode, nullptr);
+    auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Create textNode and mount to pickerNode.
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    textNode->MountToParent(pickerNode);
+
+    /**
+     * @tc.expected: Get RealTotalItem Count is 1.
+     */
+    auto realTotalItemCount = pickerPattern->GetRealTotalItemCount();
+    EXPECT_EQ(realTotalItemCount, 1);
+
+    /**
+     * @tc.steps: step3. Create LazyForEachNode and mount to pickerNode.
+     */
+    auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+
+    /**
+     * @tc.steps: step4. Create textNode and mount to LazyForEachNode.
+     */
+    auto textPattern2 = AceType::MakeRefPtr<TextPattern>();
+    auto textNode2 = CreateChildNode(V2::TEXT_ETS_TAG, textPattern2);
+
+    lazyBuilder->cachedItems_[0] = LazyForEachChild("mock_id", textNode2);
+    auto lazyForEachNode = AceType::MakeRefPtr<LazyForEachNode>(20, lazyBuilder);
+    lazyForEachNode->MountToParent(pickerNode);
+
+    /**
+     * @tc.expected: Get RealTotalItem Count is 1.
+     */
+    realTotalItemCount = pickerPattern->GetRealTotalItemCount();
+    EXPECT_EQ(realTotalItemCount, 1);
+}
+
+/**
+ * @tc.name: SetLazyForEachLongPredictTest
+ * @tc.desc: Test SetLazyForEachLongPredict function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, SetLazyForEachLongPredictTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pickerNode.
+     */
+    ContainerPickerModel picker;
+    auto pickerNode = picker.CreateFrameNode(1);
+    EXPECT_NE(pickerNode, nullptr);
+    auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Set lazy for each long predict.
+     */
+    pickerPattern->SetLazyForEachLongPredict(true);
+
+    /**
+     * @tc.steps: step3. Create LazyForEachNode and mount to pickerNode.
+     */
+    auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+
+    /**
+     * @tc.steps: step4. Create textNode and mount to LazyForEachNode.
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+
+    lazyBuilder->cachedItems_[0] = LazyForEachChild("mock_id", textNode);
+    auto lazyForEachNode = AceType::MakeRefPtr<LazyForEachNode>(20, lazyBuilder);
+
+    lazyForEachNode->MountToParent(pickerNode);
+
+    /**
+     * @tc.steps: step5. Set lazy for each long predict.
+     */
+    pickerPattern->SetLazyForEachLongPredict(true);
+    /**
+     * @tc.expected: lazyForEachNode requestLongPredict_ is true.
+     */
+    EXPECT_EQ(lazyForEachNode->requestLongPredict_, true);
+}
+
+/**
+ * @tc.name: SetLazyLoadIsLoopLazyForEachTest
+ * @tc.desc: Test SetLazyLoadIsLoop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, SetLazyLoadIsLoopLazyForEachTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto nodePicker = picker.CreateFrameNode(1);
+    EXPECT_NE(nodePicker, nullptr);
+    auto pickerPattern = nodePicker->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.steps: step2. Create LazyForEachNode and mount to pickerNode.
+     */
+    auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+
+    /**
+     * @tc.steps: step3. Create textNode and mount to LazyForEachNode.
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+
+    lazyBuilder->cachedItems_[0] = LazyForEachChild("mock_id", textNode);
+    auto lazyForEachNode = AceType::MakeRefPtr<LazyForEachNode>(20, lazyBuilder);
+
+    lazyForEachNode->MountToParent(nodePicker);
+
+    /**
+     * @tc.steps: step3. get ContainerPickerLayoutProperty and update canLoop true.
+     */
+    auto layoutProperty = nodePicker->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(true);
+
+    /**
+     * @tc.steps: step4. set displayCount_ and totalItemCount_.
+     */
+    pickerPattern->displayCount_ = 7;
+    pickerPattern->totalItemCount_ = 10;
+
+    /**
+     * @tc.steps: step5. Set LazyLoadIsLoop.
+     */
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: lazyForEachNode isLoop_ is true.
+     */
+    EXPECT_EQ(lazyForEachNode->isLoop_, true);
+
+    /**
+     * @tc.steps: step6. update canLoop false.
+     */
+    layoutProperty->UpdateCanLoop(false);
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: lazyForEachNode isLoop_ is false.
+     */
+    EXPECT_EQ(lazyForEachNode->isLoop_, false);
+}
+
+/**
+ * @tc.name: SetLazyLoadIsLoopRepeatVirtualScroll2Test
+ * @tc.desc: Test SetLazyLoadIsLoop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, SetLazyLoadIsLoopRepeatVirtualScroll2Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get nodePicker.
+     */
+    ContainerPickerModel picker;
+    auto nodePicker = picker.CreateFrameNode(1);
+    EXPECT_NE(nodePicker, nullptr);
+    auto pickerPattern = nodePicker->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Create RepeatVirtualScroll2 and mount to pickerNode.
+     */
+    auto RepeatVirtualScroll2 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), 10, 10, [](int32_t, bool) { return std::make_pair(0, 0); },
+        [](int32_t, int32_t) {}, [](int32_t, int32_t, int32_t, int32_t, bool, bool) {}, [](int32_t, int32_t) {},
+        []() {}, []() {});
+    ASSERT_NE(RepeatVirtualScroll2, nullptr);
+    RepeatVirtualScroll2->MountToParent(nodePicker);
+
+    /**
+     * @tc.steps: step3. get ContainerPickerLayoutProperty and update canLoop true.
+     */
+    auto layoutProperty = nodePicker->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(true);
+
+    /**
+     * @tc.steps: step4. set displayCount_ and totalItemCount_.
+     */
+    pickerPattern->displayCount_ = 7;
+    pickerPattern->totalItemCount_ = 10;
+
+    /**
+     * @tc.steps: step5. Set LazyLoadIsLoop.
+     */
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: RepeatVirtualScroll2 isLoop_ is true.
+     */
+    EXPECT_EQ(RepeatVirtualScroll2->isLoop_, true);
+
+    /**
+     * @tc.steps: step6. update canLoop false.
+     */
+    layoutProperty->UpdateCanLoop(false);
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: RepeatVirtualScroll2 isLoop_ is false.
+     */
+    EXPECT_EQ(RepeatVirtualScroll2->isLoop_, false);
+}
+
+/**
+ * @tc.name: SetLazyLoadIsLoopRepeatVirtualScrollTest
+ * @tc.desc: Test SetLazyLoadIsLoop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, SetLazyLoadIsLoopRepeatVirtualScrollTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get nodePicker.
+     */
+    ContainerPickerModel picker;
+    auto nodePicker = picker.CreateFrameNode(1);
+    EXPECT_NE(nodePicker, nullptr);
+    auto pickerPattern = nodePicker->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Create RepeatVirtualScrollNode and mount to pickerNode.
+     */
+    std::map<std::string, std::pair<bool, uint32_t>> cachedCountMap = { { "0", std::make_pair(false, 0u) } };
+    auto RepeatVirtualScrollNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), 10, cachedCountMap, [](uint32_t) {},
+        [](const std::string&, uint32_t) {}, [](uint32_t, uint32_t) -> std::list<std::string> { return {}; },
+        [](uint32_t, uint32_t) -> std::list<std::string> { return {}; }, [](int32_t, int32_t) {});
+    ASSERT_NE(RepeatVirtualScrollNode, nullptr);
+    RepeatVirtualScrollNode->MountToParent(nodePicker);
+
+    /**
+     * @tc.steps: step3. get ContainerPickerLayoutProperty and update canLoop true.
+     */
+    auto layoutProperty = nodePicker->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(true);
+
+    /**
+     * @tc.steps: step4. set displayCount_ and totalItemCount_.
+     */
+    pickerPattern->displayCount_ = 7;
+    pickerPattern->totalItemCount_ = 10;
+
+    /**
+     * @tc.steps: step5. Set LazyLoadIsLoop.
+     */
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: RepeatVirtualScrollNode isLoop_ is true.
+     */
+    EXPECT_EQ(RepeatVirtualScrollNode->isLoop_, true);
+
+    /**
+     * @tc.steps: step6. update canLoop false.
+     */
+    layoutProperty->UpdateCanLoop(false);
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: RepeatVirtualScrollNode isLoop_ is false.
+     */
+    EXPECT_EQ(RepeatVirtualScrollNode->isLoop_, false);
+}
+
+/**
+ * @tc.name: SetArkoalaLazyNodeTest
+ * @tc.desc: Test SetLazyLoadIsLoop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, SetArkoalaLazyNodeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get nodePicker.
+     */
+    ContainerPickerModel picker;
+    auto nodePicker = picker.CreateFrameNode(1);
+    EXPECT_NE(nodePicker, nullptr);
+    auto pickerPattern = nodePicker->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Create ArkoalaLazyNode and mount to pickerNode.
+     */
+    auto ArkoalaLazy = AceType::MakeRefPtr<ArkoalaLazyNode>(20);
+
+    ASSERT_NE(ArkoalaLazy, nullptr);
+    ArkoalaLazy->MountToParent(nodePicker);
+
+    /**
+     * @tc.steps: step3. get ContainerPickerLayoutProperty and update canLoop true.
+     */
+    auto layoutProperty = nodePicker->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCanLoop(true);
+
+    /**
+     * @tc.steps: step4. set displayCount_ and totalItemCount_.
+     */
+    pickerPattern->displayCount_ = 7;
+    pickerPattern->totalItemCount_ = 10;
+
+    /**
+     * @tc.steps: step5. Set LazyLoadIsLoop.
+     */
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: ArkoalaLazy isLoop_ is true.
+     */
+    EXPECT_EQ(ArkoalaLazy->isLoop_, true);
+
+    /**
+     * @tc.steps: step6. update canLoop false.
+     */
+    layoutProperty->UpdateCanLoop(false);
+    pickerPattern->SetLazyLoadIsLoop();
+
+    /**
+     * @tc.expected: ArkoalaLazy isLoop_ is false.
+     */
+    EXPECT_EQ(ArkoalaLazy->isLoop_, false);
+}
+
+/**
+ * @tc.name: OnModifyDoneTest
+ * @tc.desc: Test OnModifyDone function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, OnModifyDoneTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto pickerNode = picker.CreateFrameNode(1);
+    EXPECT_NE(pickerNode, nullptr);
+    auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    /**
+     * @tc.steps: step2. Create LazyForEachNode and mount to pickerNode.
+     */
+    auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+
+    /**
+     * @tc.steps: step3. Create textNode and mount to LazyForEachNode.
+     */
+    auto textPattern2 = AceType::MakeRefPtr<TextPattern>();
+    auto textNode2 = CreateChildNode(V2::TEXT_ETS_TAG, textPattern2);
+
+    lazyBuilder->cachedItems_[0] = LazyForEachChild("mock_id", textNode2);
+    auto lazyForEachNode = AceType::MakeRefPtr<LazyForEachNode>(20, lazyBuilder);
+    lazyForEachNode->MountToParent(pickerNode);
+
+    /**
+     * @tc.expected: Get totalItemCount_ is 1.
+     */
+    pickerPattern->OnModifyDone();
+    EXPECT_EQ(pickerPattern->totalItemCount_, 1);
 }
 
 /**

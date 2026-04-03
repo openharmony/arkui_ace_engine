@@ -185,6 +185,8 @@ public:
     }
     void ProcessScrollMotion(double position);
     void ProcessScrollMotionStart();
+    std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    void SetLazyLoadIsLoop() const;
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -213,7 +215,7 @@ protected:
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
     void FireAnimationEndEvent();
-
+    
 private:
     Axis GetAxis() const override
     {
@@ -286,6 +288,10 @@ private:
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
+
+    int32_t GetRealTotalItemCount() const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
+    
 
     bool IsEnableHaptic() const;
     void InitOrRefreshHapticController();
