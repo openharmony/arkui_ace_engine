@@ -92,6 +92,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
@@ -12071,6 +12072,16 @@ void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
     bool useUnion = false;
     if (argUnion->IsBoolean()) {
         useUnion = argUnion->ToBoolean();
+    }
+    JSRef<JSVal> jsVal = info[1];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+        NG::CenterGravityOptions param;
+        auto intensity = 0.0;
+        ParseJsBool(jsObj->GetProperty("gravityCenter"), param.gravityCenter);
+        ParseJsDouble(jsObj->GetProperty("gravityIntensity"), intensity);
+        param.gravityIntensity = intensity;
+        ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     }
     ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }

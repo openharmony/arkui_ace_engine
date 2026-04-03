@@ -333,6 +333,7 @@ public:
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
     virtual void SetUseUnion(bool useUnion) {}
+    virtual void SetCenterGravityOptions(const NG::CenterGravityOptions& centerGravityOptions) {}
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,

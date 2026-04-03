@@ -170,6 +170,7 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
 const int FACTOR_TWO = 2;
 constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 constexpr size_t MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC = 200;
+constexpr float HOT_ZONE = 150.0f;
 
 static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
 {
@@ -3428,6 +3429,26 @@ void RosenRenderContext::OnUseUnionEffectUpdate(bool useUnion)
     FREE_RS_CONTEXT_CHECK(OnUseUnionEffectUpdate, useUnion);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetUseUnion(useUnion);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnUnionModeUpdate(UnionMode unionMode)
+{
+    FREE_RS_CONTEXT_CHECK(OnUnionModeUpdate, unionMode);
+    CHECK_NULL_VOID(rsNode_);
+    auto unionNode = rsNode_->ReinterpretCastTo<Rosen::RSUnionNode>();
+    CHECK_NULL_VOID(unionNode);
+    unionNode->SetUnionMode(static_cast<int>(unionMode));
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnCenterGravityOptionsUpdate(const CenterGravityOptions& centerGravityOptions)
+{
+    FREE_RS_CONTEXT_CHECK(OnCenterGravityOptionsUpdate, centerGravityOptions);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetGravityHotZone(HOT_ZONE);
+    rsNode_->SetGravityPullCenterFlag(centerGravityOptions.gravityCenter);
+    rsNode_->SetGravityPullStrength(centerGravityOptions.gravityIntensity);
     RequestNextFrame();
 }
 
