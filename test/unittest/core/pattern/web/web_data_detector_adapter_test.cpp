@@ -19,6 +19,7 @@
 #define protected public
 #include "frameworks/core/pipeline/pipeline_base.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components/text_overlay/text_overlay_theme.h"

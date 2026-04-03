@@ -24,6 +24,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
+#include "bridge/common/utils/utils.h"
 #include "frameworks/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {

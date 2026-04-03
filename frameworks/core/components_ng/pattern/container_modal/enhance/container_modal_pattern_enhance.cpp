@@ -26,6 +26,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
+#include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"

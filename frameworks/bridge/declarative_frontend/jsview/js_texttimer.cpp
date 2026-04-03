@@ -88,6 +88,12 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
             }
         }
     }
+    int32_t startTime = 0;
+    auto startTimeObj = paramObject->GetProperty("startTime");
+    if (startTimeObj->IsNumber()) {
+        startTime = startTimeObj->ToNumber<int32_t>();
+    }
+    TextTimerModel::GetInstance()->SetStartTime(startTime);
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (controllerObj->IsObject()) {

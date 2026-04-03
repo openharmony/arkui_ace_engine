@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"

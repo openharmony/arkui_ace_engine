@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"

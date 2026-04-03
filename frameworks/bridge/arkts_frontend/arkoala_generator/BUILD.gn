@@ -18,6 +18,14 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
+if (ohos_indep_compiler_enable) {
+  libarkts_path = "//binarys/developtools/ace_ets2bundle/innerapis/ohos_ets_libarkts_pack_prebuilt/clang_x64/libs/libarkts.tgz"
+  pandasdk_path = "//binarys/developtools/ace_ets2bundle/innerapis/panda_sdk/clang_x64/libs/panda_sdk.tgz"
+} else {
+  libarkts_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
+  pandasdk_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts/panda-sdk/panda_sdk.tgz"
+}
+
 template("scan_sources") {
   action(target_name) {
     script = "./scan_sources.py"
@@ -58,19 +66,15 @@ action("runner_gen_code") {
     "--output",
     rebase_path(idlize_gen_output_path),
     "--output-sdk-patched-path",
-    rebase_path("./sdk-patched/"),
-    "--arkgen-options-file",
-    rebase_path("./generation_config/arkgen-config.json"),
-    "--scraper-options-file",
-    rebase_path("./generation_config/scraper-config.json"),
-    "--etsgen-options-file",
-    rebase_path("./generation_config/etsgen-config.json"),
+    rebase_path("$target_gen_dir/sdk-patched"),
     "--arkgen-interop-types",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
     "--panda-sdk-path",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/arkoala_generator/node_modules/@koalaui/libarkts/sdk"),
     "--node-bin-path",
     rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    "--libarkts-path",
+    rebase_path("${libarkts_path}"),
     "--idl-files",
     rebase_path("./arkui_extra_idl/"),
   ]

@@ -13,7 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef ACE_STATIC
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #endif

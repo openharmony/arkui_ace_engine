@@ -71,6 +71,7 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+struct TextDetectConfig;
 }
 
 namespace OHOS::NWeb {
@@ -932,7 +933,7 @@ public:
     void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
-
+    std::string GetLayoutModeStr();
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void AddExtraInfoWithParamConfig(

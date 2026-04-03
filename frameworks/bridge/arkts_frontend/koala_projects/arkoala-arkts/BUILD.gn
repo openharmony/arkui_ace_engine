@@ -153,11 +153,7 @@ action("arkoala_annotate") {
     rebase_path("annotate-config.json"),
   ]
 
-  deps = []
-  # Ensure idlize_gen completes before processing, as it generates files in arkui-ohos/generated/
-  if (!ohos_indep_compiler_enable) {
-    deps += [ "../../arkoala_generator:idlize_gen" ]
-  }
+  deps = [ "../../arkoala_generator:idlize_gen" ]
 }
 
 action("arkoala_process") {

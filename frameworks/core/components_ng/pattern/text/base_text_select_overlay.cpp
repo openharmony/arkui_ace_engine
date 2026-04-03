@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"

@@ -64,6 +64,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -180,7 +181,8 @@ public:
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister)
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister),
+      safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
     if (navigationMgr_) {
@@ -210,7 +212,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId),
+      safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
     if (navigationMgr_) {
@@ -239,6 +242,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 }
 
 PipelineContext::PipelineContext()
+    : safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));

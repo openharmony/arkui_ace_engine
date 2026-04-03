@@ -17,6 +17,11 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/select/select_model.h"
+
+namespace OHOS::Ace::NG {
+struct OptionParam;
+}
+
 namespace OHOS::Ace::Framework {
 class JSViewPopups {
 public:

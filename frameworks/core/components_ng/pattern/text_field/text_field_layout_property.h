@@ -18,7 +18,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/text_input_type.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"

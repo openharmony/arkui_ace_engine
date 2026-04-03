@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/log/jank_frame_report.h"
 #include "base/perfmonitor/perf_constants.h"

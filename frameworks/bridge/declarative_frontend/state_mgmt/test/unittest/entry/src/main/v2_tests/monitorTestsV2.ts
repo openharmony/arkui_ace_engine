@@ -25,6 +25,13 @@ interface IMonitor {
   value<T>(key?: string): IMonitorValue<T> | undefined;
 }
 
+declare enum MonitorType {
+  MONITOR_DECORATOR = '@Monitor',
+  SYNC_MONITOR_DECORATOR = '@SyncMonitor',
+  MONITOR_WITH_OPTIONS_DECORATOR = '@MonitorWithOptions',
+  ADD_MONITOR_API = 'AddMonitor API'
+}
+
 declare class MonitorPathHelper {
   static hasWildcardEnding(path: string): boolean;
   static isWildcardSubPath(path: string): boolean;
@@ -55,35 +62,37 @@ declare class MonitorValueV2<T> {
 }
 
 declare class MonitorV2 {
-  static readonly WATCH_PREFIX: string;
-  static readonly WATCH_INSTANCE_PREFIX: string;
+  static readonly MONITOR_ORIG_PREFIX: string;
+  static readonly MONITOR_WITH_OPTIONS_PREFIX: string;
   static readonly SYNC_MONITOR_PREFIX: string;
   static readonly OB_ANY: string;
   static readonly LSV_PREFIX: string;
 
-  static readonly MIN_WATCH_ID: number;
-  static readonly MIN_WATCH_FROM_API_ID: number;
-  static readonly MIN_SYNC_WATCH_FROM_API_ID: number;
-  static nextWatchId_: number;
-  static nextWatchApiId_: number;
-  static nextSyncWatchApiId_: number;
+  static readonly MIN_MONITOR_ORIG_ID: number;
+  static readonly MIN_MONITOR_WITH_OPTIONS_OR_ASYNC_API_ID: number;
+  static readonly MIN_SYNC_MONITOR_OR_SYNC_API_ID: number;
+  static nextMonitorId_: number;
+  static nextMonitorWithOptionsOrAsyncApiId_: number;
+  static nextSyncMonitorOrSyncApiId_: number;
   static runningCount: number;
 
   constructor(
     target: object,
     pathsString: string,
     func: (m: IMonitor) => void,
-    isDecorator: boolean,
-    isSync?: boolean
+    type: MonitorType,
+    isSync?: boolean,
+    wildcardEnabled?: boolean
   );
 
   getTarget(): Object;
   isSync(): boolean;
   addPath(path: string, lsv?: boolean): MonitorValueV2<unknown> | undefined;
   removePath(path: string): boolean;
-  isSyncDecorator(): boolean;
+  isSyncMonitorDecorator(): boolean;
   isMonitorDecorator(): boolean;
-  getWatchId(): number;
+  isMonitorWithOptionsdDecorator(): boolean;
+  getMonitorId(): number;
   getMonitorFuncName(): string;
   getValues(): Map<string, MonitorValueV2<unknown>>;
   get dirty(): Array<string>;
@@ -155,16 +164,16 @@ export class MonitorTestsV2 implements ITestFile {
   */
   public testBasicMonitorCreation(): void {
     let testClass = new TestClass();
-    const watchIdBegin = MonitorV2.nextWatchId_;
+    const watchIdBegin = MonitorV2.nextMonitorId_;
     console.log(`testClass before monitor: ${JSON.stringify(testClass)}`)
 
     let monitor = new MonitorV2(testClass, 'testVar1 testVar2 testVar3', (m: IMonitor) => {
-    }, true, false)
-    console.log(`Num monitored props ${monitor.values_.size} + Watch Id ${MonitorV2.nextWatchId_}`);
+    }, MonitorType.MONITOR_DECORATOR, false, false)
+    console.log(`Num monitored props ${monitor.values_.size} + Watch Id ${MonitorV2.nextMonitorId_}`);
     console.log(`testClass after monitor: ${JSON.stringify(testClass)}`)
     // 3 because of these (testVar1 testVar2 testVar3)
     eq(monitor.values_.size, 3, "added three monitor values");
-    eq(MonitorV2.nextWatchId_ - watchIdBegin, 1, "watch id increased by one");
+    eq(MonitorV2.nextMonitorId_ - watchIdBegin, 1, "watch id increased by one");
   }
 }
 
@@ -1324,7 +1333,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
     let testClass = new TestClass();
 
     // Capture starting watch ID
-    const watchIdBegin = MonitorV2.nextSyncWatchApiId_;
+    const watchIdBegin = MonitorV2.nextSyncMonitorOrSyncApiId_;
 
     // Create monitor with multiple paths including duplicates
     let monitor = new MonitorV2(
@@ -1333,6 +1342,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
       (m: IMonitor) => {
         // Callback handler
       },
+      MonitorType.SYNC_MONITOR_DECORATOR,
       true,
       true
     );
@@ -1346,14 +1356,14 @@ export class SyncMonitorTestsV2 implements ITestFile {
 
     // Verify watch ID incremented correctly (5 values + 1 monitor)
     eq(
-      MonitorV2.nextSyncWatchApiId_ - watchIdBegin,
+      MonitorV2.nextSyncMonitorOrSyncApiId_ - watchIdBegin,
       6,
       "watch id increased by six, 5 values + Monitor"
     );
 
     // Verify decorator type identification
     eq(
-      monitor.isSyncDecorator(),
+      monitor.isSyncMonitorDecorator(),
       true,
       "check for SyncMonitor true"
     );
@@ -1385,6 +1395,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
       (m: IMonitor) => {
         // Callback handler
       },
+      MonitorType.SYNC_MONITOR_DECORATOR,
       true,
       true
     );
@@ -1549,7 +1560,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
     );
 
     // Capture watch ID before adding path
-    const watchIdBefore = MonitorV2.nextSyncWatchApiId_;
+    const watchIdBefore = MonitorV2.nextSyncMonitorOrSyncApiId_;
 
     // Dynamically add wildcard path
     const result = monitor.addPath('config.settings.*');
@@ -1570,7 +1581,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
 
     // Verify watch ID incremented for both paths
     eq(
-      MonitorV2.nextSyncWatchApiId_ - watchIdBefore,
+      MonitorV2.nextSyncMonitorOrSyncApiId_ - watchIdBefore,
       2,
       "should increment watch ID twice"
     );
@@ -1771,7 +1782,7 @@ export class SyncMonitorTestsV2 implements ITestFile {
     let testClass = new TestClass();
 
     // Capture watch ID before creation
-    const watchIdBefore = MonitorV2.nextSyncWatchApiId_;
+    const watchIdBefore = MonitorV2.nextSyncMonitorOrSyncApiId_;
 
     // Create monitor with wildcard path
     let monitor = new MonitorV2(
@@ -1780,16 +1791,17 @@ export class SyncMonitorTestsV2 implements ITestFile {
       (m: IMonitor) => {
         // Callback handler
       },
+      MonitorType.SYNC_MONITOR_DECORATOR,
       true,
       true
     );
 
     // Get assigned watch ID
-    const watchId = monitor.getWatchId();
+    const watchId = monitor.getMonitorId();
 
     // Verify ID is in sync range
     eq(
-      watchId >= MonitorV2.MIN_SYNC_WATCH_FROM_API_ID,
+      watchId >= MonitorV2.MIN_SYNC_MONITOR_OR_SYNC_API_ID,
       true,
       "watch ID should be in sync range"
     );
@@ -1803,9 +1815,9 @@ export class SyncMonitorTestsV2 implements ITestFile {
 
     // Verify ID is within expected bounds
     eq(
-      monitor.getWatchId() < MonitorV2.MIN_WATCH_FROM_API_ID + 0x1000000000000,
+      monitor.getMonitorId() >= MonitorV2.MIN_MONITOR_ORIG_ID && monitor.getMonitorId() < MonitorV2.MIN_MONITOR_WITH_OPTIONS_OR_ASYNC_API_ID,
       true,
-      "watch ID in expected range"
+      "watch ID in expected range for @Monitor decorator"
     );
   }
 

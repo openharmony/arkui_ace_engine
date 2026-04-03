@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "frameworks/core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::Framework {
 

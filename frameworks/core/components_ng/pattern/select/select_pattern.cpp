@@ -31,7 +31,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"

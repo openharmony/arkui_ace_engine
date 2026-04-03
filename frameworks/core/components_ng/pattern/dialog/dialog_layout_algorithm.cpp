@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"

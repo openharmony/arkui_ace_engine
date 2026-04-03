@@ -19,6 +19,7 @@
 #define private public
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #undef private

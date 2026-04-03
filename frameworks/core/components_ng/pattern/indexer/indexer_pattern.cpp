@@ -42,7 +42,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"

@@ -20,7 +20,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,7 +31,6 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
 #include "frameworks/core/common/ime/text_range.h"
 

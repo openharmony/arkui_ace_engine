@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include <list>
 #include <regex>
+#include <sstream>
 
+#include "base/utils/string_utils.h"
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {

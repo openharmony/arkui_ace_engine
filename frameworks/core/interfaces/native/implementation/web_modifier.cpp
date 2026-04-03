@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/text_model.h"
 
 #ifdef WEB_SUPPORTED
 #include "arkweb_utils.h"

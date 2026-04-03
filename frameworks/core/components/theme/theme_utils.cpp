@@ -18,6 +18,7 @@
 #include <regex>
 
 #include "core/common/container.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 

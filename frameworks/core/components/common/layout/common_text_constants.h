@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace {
 

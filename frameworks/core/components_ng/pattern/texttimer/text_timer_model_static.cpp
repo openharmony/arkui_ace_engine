@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
@@ -34,6 +34,15 @@ void TextTimerModelStatic::SetInputCount(FrameNode* frameNode, const std::option
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, frameNode);
+    }
+}
+
+void TextTimerModelStatic::SetStartTime(FrameNode* frameNode, const std::optional<int32_t>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, frameNode);
     }
 }
 

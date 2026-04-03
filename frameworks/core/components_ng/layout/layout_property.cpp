@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/flex_property.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "base/utils/string_expression.h"

@@ -24,8 +24,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/property/flex_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

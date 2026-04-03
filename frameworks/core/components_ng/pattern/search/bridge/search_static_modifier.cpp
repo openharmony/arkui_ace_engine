@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/ime_client_peer.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"

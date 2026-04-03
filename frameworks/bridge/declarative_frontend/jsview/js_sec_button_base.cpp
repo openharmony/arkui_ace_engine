@@ -20,7 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 

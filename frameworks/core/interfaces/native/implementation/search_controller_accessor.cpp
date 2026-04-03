@@ -15,6 +15,7 @@
 
 #include "search_controller_accessor_peer.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {

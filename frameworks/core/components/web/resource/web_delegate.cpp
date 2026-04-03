@@ -9989,7 +9989,7 @@ void WebDelegate::OnMediaCastEnter()
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);
-    nweb_->SetForceEnableZoom(isEnabled);
+    nweb_->SetForceEnableZoomPublic(isEnabled);
 }
 
 void WebDelegate::OnExtensionDisconnect(int32_t connectId)

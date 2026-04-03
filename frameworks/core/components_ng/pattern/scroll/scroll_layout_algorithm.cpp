@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"

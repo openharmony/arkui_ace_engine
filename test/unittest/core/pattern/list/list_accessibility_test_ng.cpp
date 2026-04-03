@@ -15,6 +15,9 @@
 
 #include "list_test_ng.h"
 
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+
 namespace OHOS::Ace::NG {
 class ListAccessibilityTestNg : public ListTestNg {
 protected:

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 

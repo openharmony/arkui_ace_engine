@@ -26,7 +26,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
