@@ -444,6 +444,15 @@ const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreen
     return inspectorOffscreenNodesMgr_;
 }
 
+void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId) {}
+
+void PipelineContext::UpdateIdUpdateZOrderIndex() {}
+
+size_t PipelineContext::GetIdUpdateZOrderIndex() const
+{
+    return 0;
+}
+
 void PipelineContext::Destroy()
 {
     dragDropManager_.Reset();

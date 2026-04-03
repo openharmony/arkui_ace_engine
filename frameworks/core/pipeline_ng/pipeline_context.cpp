@@ -907,6 +907,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (frameCount != UINT64_MAX) {
         DispatchDisplaySync(nanoTimestamp);
     }
+    FlushZindexUpdate();
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
@@ -1560,6 +1561,48 @@ void PipelineContext::FlushFocusScroll()
     if (!lastFocusStateNode->TriggerFocusScroll()) {
         focusManager_->SetNeedTriggerScroll(false);
     }
+}
+
+void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId)
+{
+    // need to create vector with frameNode update order.
+    idUpdateZOrder_[nodeId] = idUpdateZOrderIndex_++;
+}
+
+void PipelineContext::UpdateIdUpdateZOrderIndex()
+{
+    idUpdateZOrderIndex_++;
+}
+
+size_t PipelineContext::GetIdUpdateZOrderIndex() const
+{
+    return idUpdateZOrderIndex_;
+}
+
+void PipelineContext::FlushZindexUpdate()
+{
+    std::vector<std::pair<int32_t, size_t>> pairs;
+    pairs.reserve(idUpdateZOrder_.size());
+    // create with [nodeA, 1], [nodeA, 2], [nodeB, 3], [nodeC, 4], [nodeA, 5], then update with order B C A.
+    for (const auto& pair : idUpdateZOrder_) {
+        pairs.push_back(pair);
+    }
+    std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
+        return a.second < b.second;
+    });
+    for (const auto& pair : pairs) {
+        std::unordered_set<int32_t> frameNodes;
+        frameNodes.emplace(pair.first);
+        auto nodes = FrameNode::GetNodesById(frameNodes);
+        for (const auto& frameNode : nodes) {
+            if (frameNode) {
+                frameNode->MarkNeedSyncRenderTree();
+                frameNode->RebuildRenderContextTree();
+            }
+        }
+    }
+    idUpdateZOrderIndex_ = 0;
+    idUpdateZOrder_.clear();
 }
 
 void PipelineContext::FlushPipelineImmediately()
