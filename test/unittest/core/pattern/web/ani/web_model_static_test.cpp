@@ -713,6 +713,7 @@ HWTEST_F(WebModelStaticTest, SetMinFontSize001, TestSize.Level1)
 
     WebModelStatic::SetMinFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_MINFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckMinFontSize(DEFAULT_MINFONT_SIZE), true);
+    EXPECT_EQ(webPatternStatic->HasMinFontSize(), true);
 #endif
 }
 
@@ -734,6 +735,7 @@ HWTEST_F(WebModelStaticTest, SetDefaultFontSize001, TestSize.Level1)
 
     WebModelStatic::SetDefaultFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckDefaultFontSize(DEFAULT_DEFAULTFONT_SIZE), true);
+    EXPECT_EQ(webPatternStatic->HasDefaultFontSize(), true);
 #endif
 }
 
@@ -756,6 +758,7 @@ HWTEST_F(WebModelStaticTest, SetDefaultFixedFontSize001, TestSize.Level1)
     WebModelStatic::SetDefaultFixedFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFIXEDFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckDefaultFixedFontSize(DEFAULT_DEFAULTFIXEDFONT_SIZE),
               true);
+    EXPECT_EQ(webPatternStatic->HasDefaultFixedFontSize(), true);
 #endif
 }
 
@@ -777,6 +780,7 @@ HWTEST_F(WebModelStaticTest, SetWebSansSerifFont001, TestSize.Level1)
 
     WebModelStatic::SetWebSansSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebSansSerifFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebSansSerifFont(), true);
 #endif
 }
 
@@ -798,6 +802,7 @@ HWTEST_F(WebModelStaticTest, SetWebSerifFont001, TestSize.Level1)
 
     WebModelStatic::SetWebSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebSerifFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebSerifFont(), true);
 #endif
 }
 
@@ -819,6 +824,7 @@ HWTEST_F(WebModelStaticTest, SetWebStandardFont001, TestSize.Level1)
 
     WebModelStatic::SetWebStandardFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebStandardFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebStandardFont(), true);
 #endif
 }
 
@@ -861,6 +867,7 @@ HWTEST_F(WebModelStaticTest, SetWebCursiveFont001, TestSize.Level1)
 
     WebModelStatic::SetWebCursiveFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebCursiveFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebCursiveFont(), true);
 #endif
 }
 
@@ -882,6 +889,7 @@ HWTEST_F(WebModelStaticTest, SetWebFantasyFont001, TestSize.Level1)
 
     WebModelStatic::SetWebFantasyFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebFantasyFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebFantasyFont(), true);
 #endif
 }
 
@@ -904,6 +912,7 @@ HWTEST_F(WebModelStaticTest, SetWebFixedFont001, TestSize.Level1)
 
     WebModelStatic::SetWebFixedFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebFixedFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebFixedFont(), true);
 #endif
 }
 
