@@ -4415,6 +4415,9 @@ struct ArkUIListModifier {
     ArkUI_Bool (*getSupportEmptyBranchInLazyLoading)(ArkUINodeHandle node);
     void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     ArkUINodeHandle (*getController)(ArkUINodeHandle node);
+    void (*setBackPressCloseSwipeAction)(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction);
+    void (*resetBackPressCloseSwipeAction)(ArkUINodeHandle node);
+    ArkUI_Bool (*getBackPressCloseSwipeAction)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {

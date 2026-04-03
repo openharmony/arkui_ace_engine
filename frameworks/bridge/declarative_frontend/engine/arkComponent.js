@@ -29185,6 +29185,21 @@ class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
 }
 ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
 
+class ListBackPressCloseSwipeActionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+    }
+    else {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+    }
+  }
+}
+ListBackPressCloseSwipeActionModifier.identity = Symbol('listBackPressCloseSwipeAction');
+
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -29400,6 +29415,11 @@ class ArkListComponent extends ArkScrollable {
   }
   supportEmptyBranchInLazyLoading(value) {
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
+    return this;
+  }
+  backPressCloseSwipeAction(value) {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
+      ListBackPressCloseSwipeActionModifier, value);
     return this;
   }
 }

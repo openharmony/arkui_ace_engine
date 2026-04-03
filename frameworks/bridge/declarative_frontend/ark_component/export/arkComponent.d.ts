@@ -1925,6 +1925,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollStop(event: () => void): this;
     fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     childrenMainSize(value: ChildrenMainSize): this;
+    backPressCloseSwipeAction(value: boolean): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

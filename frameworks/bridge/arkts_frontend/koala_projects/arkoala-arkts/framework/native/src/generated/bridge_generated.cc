@@ -9806,6 +9806,19 @@ void impl_ListAttribute_setScrollSnapAnimationSpeed(Ark_NativePointer thisPtr, K
         GetNodeModifiers()->getListModifier()->setScrollSnapAnimationSpeed(self, static_cast<Opt_ScrollSnapAnimationSpeed*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ListAttribute_setScrollSnapAnimationSpeed, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ListAttribute_setBackPressBehavior(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ListBackPressBehavior valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = ListBackPressBehavior_serializer::read(thisDeserializer);
+        }
+        Opt_ListBackPressBehavior valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getListModifier()->setBackPressBehavior(self, static_cast<Opt_ListBackPressBehavior*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ListAttribute_setBackPressBehavior, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ListAttribute_setOnScrollIndex(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

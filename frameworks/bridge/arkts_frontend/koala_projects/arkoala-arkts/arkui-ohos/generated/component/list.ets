@@ -288,6 +288,18 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_setScrollSnapAnimationSpeed(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setBackPressBehaviorAttribute(value: ListBackPressBehavior | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            ListBackPressBehavior_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setBackPressBehavior(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnScrollIndexAttribute(value: ((start: int32,end: int32,center: int32) => void) | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -540,6 +552,9 @@ export interface VisibleListContentInfo {
     itemGroupArea?: ListItemGroupArea;
     itemIndexInGroup?: int32;
 }
+export interface ListBackPressBehavior {
+    closeSwipeAction?: boolean;
+}
 export type OnScrollVisibleContentChangeCallback = (start: VisibleListContentInfo, end: VisibleListContentInfo) => void;
 export type OnListScrollIndexCallback = (start: int32, end: int32, center: int32) => void;
 export interface ListOptions {
@@ -613,6 +628,9 @@ export interface ListAttribute extends ScrollableCommonMethod {
     }
     scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
         throw new Error('Unimplemented method scrollSnapAnimationSpeed')
+    }
+    backPressBehavior(value: ListBackPressBehavior | undefined): this {
+        throw new Error('Unimplemented method backPressBehavior')
     }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         throw new Error('Unimplemented method onScrollIndex')
@@ -762,6 +780,11 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         this.getPeer()?.setScrollSnapAnimationSpeedAttribute(value_casted)
         return this
     }
+    public backPressBehavior(value: ListBackPressBehavior | undefined): this {
+        const value_casted = value as (ListBackPressBehavior | undefined)
+        this.getPeer()?.setBackPressBehaviorAttribute(value_casted)
+        return this
+    }
     public onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         const value_casted = value as (((start: int32,end: int32,center: int32) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
@@ -880,6 +903,30 @@ export class UIListEvent_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return UIListEventInternal.fromPtr(ptr)
+    }
+}
+export class ListBackPressBehavior_serializer {
+    public static write(buffer: SerializerBase, value: ListBackPressBehavior): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForCloseSwipeAction = value.closeSwipeAction
+        if (valueHolderForCloseSwipeAction !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCloseSwipeActionTmpValue = valueHolderForCloseSwipeAction!
+            valueSerializer.writeBoolean(valueHolderForCloseSwipeActionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ListBackPressBehavior {
+        let valueDeserializer: DeserializerBase = buffer
+        const closeSwipeActionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let closeSwipeActionTmpBuf: boolean | undefined = undefined
+        if ((closeSwipeActionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            closeSwipeActionTmpBuf = valueDeserializer.readBoolean()
+        }
+        const closeSwipeActionTmpResult: boolean | undefined = closeSwipeActionTmpBuf
+        let value: ListBackPressBehavior = ({closeSwipeAction: closeSwipeActionTmpResult} as ListBackPressBehavior)
+        return value
     }
 }
 export class ListOptions_serializer {

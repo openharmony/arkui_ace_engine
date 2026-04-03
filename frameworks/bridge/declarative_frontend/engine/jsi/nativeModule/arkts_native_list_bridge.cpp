@@ -1795,4 +1795,23 @@ ArkUINativeModuleValue ListBridge::SetSupportEmptyBranchInLazyLoading(ArkUIRunti
 
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ListBridge::SetBackPressCloseSwipeAction(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> argCloseSwipeAction = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativePointer = node->ToNativePointer(vm);
+    CHECK_NULL_RETURN(!nativePointer.IsEmpty(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nativePointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    GetArkUINodeModifiers()->getListModifier()->setBackPressCloseSwipeAction(
+        nativeNode, argCloseSwipeAction->IsBoolean() ? argCloseSwipeAction->ToBoolean(vm)->Value() : true);
+
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
