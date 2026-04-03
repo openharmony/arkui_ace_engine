@@ -27,7 +27,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 

@@ -21,7 +21,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "core/common/clipboard/clipboard.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
@@ -33,6 +32,7 @@
 namespace OHOS::Ace {
 class UnifiedData;
 class GridColumnInfo;
+class Clipboard;
 }
 namespace OHOS::Rosen {
 class RSSyncTransactionController;

@@ -11030,6 +11030,18 @@ void TextFieldPattern::SetThemeAttr()
     inlineFocusState_ = false;
 }
 
+RefPtr<Clipboard> TextFieldPattern::GetClipboard()
+{
+    if (!clipboard_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, clipboard_);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, clipboard_);
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    }
+    return clipboard_;
+}
+
 const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
 {
     auto textfieldTheme = GetTheme();

@@ -57,7 +57,6 @@
 #include "core/event/multimodal/multimodal_manager.h"
 #include "core/event/multimodal/multimodal_subscriber.h"
 #endif
-#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Rosen {
 class RSUIDirector;

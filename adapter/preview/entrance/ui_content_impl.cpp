@@ -28,6 +28,7 @@
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 #include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "frameworks/core/common/clipboard/clipboard_proxy.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/multimodalinput/axis_event.h"

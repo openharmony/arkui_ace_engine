@@ -23,7 +23,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 

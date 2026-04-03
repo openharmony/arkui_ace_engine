@@ -17,7 +17,6 @@
 
 #include "base/geometry/dimension.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"

@@ -17,7 +17,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
-#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -167,8 +166,8 @@ static void ParseStyleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptio
     }
     if (!styleArg.IsNull() && !styleArg->IsUndefined() && styleArg->IsNumber()) {
         auto tempStyle = styleArg->Int32Value(vm);
-        if (tempStyle >= static_cast<int32_t>(SliderMode::OUTSET) &&
-            tempStyle <= static_cast<int32_t>(SliderMode::CAPSULE)) {
+        if (tempStyle >= static_cast<int32_t>(SliderModel::SliderMode::OUTSET) &&
+            tempStyle <= static_cast<int32_t>(SliderModel::SliderMode::CAPSULE)) {
             options.style = tempStyle;
         }
     }

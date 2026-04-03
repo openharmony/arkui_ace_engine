@@ -37,7 +37,6 @@
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
@@ -98,6 +97,7 @@ constexpr int32_t DEFAULT_DELAY_THP = 300; // 300ms
 struct FontInfo;
 struct FontConfigJsonInfo;
 struct FrameMetrics;
+class Clipboard;
 class Frontend;
 class OffscreenCanvas;
 class Window;

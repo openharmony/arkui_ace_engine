@@ -24,7 +24,6 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"

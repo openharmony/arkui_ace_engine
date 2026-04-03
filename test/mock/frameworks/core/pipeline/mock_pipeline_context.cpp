@@ -18,6 +18,7 @@
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/ressched/ressched_click_optimizer.h"

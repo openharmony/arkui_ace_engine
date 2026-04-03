@@ -91,6 +91,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
