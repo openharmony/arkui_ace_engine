@@ -990,6 +990,58 @@ HWTEST_F(BubbleFiveTestNg, OnWindowSizeChangedTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TestCreateBubbleNodeColorMode001
+ * @tc.desc: Test CreateBubbleNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, TestCreateBubbleNodeColorMode001, TestSize.Level0)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetColorMode(true);
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(targetNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    EXPECT_NE(popupNode, nullptr);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->isColorModeFollowTarget_, true);
+    container->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: TestCreateBubbleNodeColorMode002
+ * @tc.desc: Test CreateBubbleNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, TestCreateBubbleNodeColorMode002, TestSize.Level0)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetColorMode(false);
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(targetNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    EXPECT_NE(popupNode, nullptr);
+    EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->isColorModeFollowTarget_, false);
+    container->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
  * @tc.name: RegisterButtonOnHover001
  * @tc.desc: Test RegisterButtonOnHover when mouseEventInitFlag_ is true
  * @tc.type: FUNC

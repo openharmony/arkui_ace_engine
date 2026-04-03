@@ -1081,7 +1081,7 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
                 targetId = targetComponentIdNode->GetId();
                 return ERROR_CODE_NO_ERROR;
             }
-            auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+            auto targetNode = NG::FrameNode::FindChildByNameUINode(targetComponentIdNode, targetIdString);
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         } else {

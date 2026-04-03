@@ -514,6 +514,13 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (followTransformOfTargetValue->IsBoolean()) {
         popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
     }
+    auto colorModeValue = popupObj->GetProperty("colorMode");
+    if (colorModeValue->IsNumber()) {
+        auto colorMode = colorModeValue->ToNumber<int32_t>();
+        if (colorMode == static_cast<int>(AnchoredColorMode::FOLLOW_SYSTEM)) {
+            popupParam->SetColorMode(false);
+        }
+    }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     bool maskValueBool = false;

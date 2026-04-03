@@ -128,6 +128,20 @@ void BubbleTipsTestNg::SetUpTestCase()
             return BubbleTipsTestNg::popupTheme;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+    .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == HyperlinkTheme::TypeId()) {
+            return AceType::MakeRefPtr<HyperlinkTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == ShadowTheme::TypeId()) {
+            return AceType::MakeRefPtr<ShadowTheme>();
+        } else {
+            return BubbleTipsTestNg::popupTheme;
+        }
+    });
     childLayoutConstraint.maxSize = MAX_SIZE;
 }
 void BubbleTipsTestNg::TearDownTestCase()

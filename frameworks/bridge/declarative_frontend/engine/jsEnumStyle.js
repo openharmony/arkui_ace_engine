@@ -1873,6 +1873,12 @@ let ThemeColorMode;
   ThemeColorMode[ThemeColorMode.DARK = 2] = 'DARK';
 })(ThemeColorMode || (ThemeColorMode = {}));
 
+let AnchoredColorMode;
+(function (AnchoredColorMode) {
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_SYSTEM = 0] = 'FOLLOW_SYSTEM';
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_TARGET = 1] = 'FOLLOW_TARGET';
+})(AnchoredColorMode || (AnchoredColorMode = {}));
+
 let AdaptiveColor;
 (function (AdaptiveColor) {
   AdaptiveColor[AdaptiveColor.Default = 0] = 'Default';

@@ -100,6 +100,7 @@
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
+#include "core/components_ng/pattern/bubble/popup_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
@@ -207,6 +208,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
+        { PopupTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PopupThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
         { NG::ContainerPickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ContainerPickerThemeWrapper::WrapperBuilder> },
         { ProgressTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ProgressThemeWrapper::WrapperBuilder> },

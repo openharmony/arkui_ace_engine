@@ -53,6 +53,11 @@ struct PopupGradientColor {
     RefPtr<ResourceObject> gradientColorObj;
 };
 
+enum class AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1
+};
+
 struct PopupLinearGradientProperties {
     GradientDirection popupDirection = GradientDirection::BOTTOM;
     std::vector<PopupGradientColor> gradientColors;
@@ -799,6 +804,16 @@ public:
         return isWithTheme_;
     }
 
+    void SetColorMode(bool colorMode)
+    {
+        isColorModeFollowTarget_ = colorMode;
+    }
+
+    bool GetColorMode()
+    {
+        return isColorModeFollowTarget_;
+    }
+
     void SetSystemMaterial(RefPtr<UiMaterial> systemMaterial)
     {
         systemMaterial_ = systemMaterial;
@@ -829,6 +844,7 @@ private:
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
     bool isWithTheme_ = false;
+    bool isColorModeFollowTarget_ = true;
     bool isShadowStyle_ = false;
     TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
