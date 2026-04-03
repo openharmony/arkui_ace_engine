@@ -149,6 +149,7 @@ public:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     // Event firing methods
     void FireChangeEvent();
@@ -318,6 +319,7 @@ private:
 
     void InitDisabled();
     void InitAreaChangeEvent();
+    void SyncSelectionIndicatorWithTheme(int32_t themeScopeId);
 
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;

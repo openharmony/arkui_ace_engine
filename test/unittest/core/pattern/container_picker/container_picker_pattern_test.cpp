@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -59,6 +60,7 @@ void ContainerPickerPatternTest::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerPatternTest::TearDownTestSuite()
@@ -1689,6 +1691,95 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnColorConfigura
     pattern->OnColorConfigurationUpdate();
     EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
     EXPECT_FALSE(textLayoutProperty->GetTextColor().value() == textColor);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate001
+ * @tc.desc: Verify OnThemeScopeUpdate triggers refresh on API 26+ when theme attributes are not user configured.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->ResetIndicatorDividerColor();
+    layoutProperty->ResetIndicatorBackgroundColor();
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate002
+ * @tc.desc: Verify OnThemeScopeUpdate returns false when API is below 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate002, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->ResetIndicatorDividerColor();
+    layoutProperty->ResetIndicatorBackgroundColor();
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(updateResult);
+    EXPECT_FALSE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate003
+ * @tc.desc: Verify OnThemeScopeUpdate keeps no-refresh on API 26+ when user configured theme attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate003, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+    PickerIndicatorStyle indicatorStyle = pattern->GetIndicatorStyleVal();
+    indicatorStyle.isDefaultDividerColor = false;
+    indicatorStyle.isDefaultBackgroundColor = false;
+    indicatorStyle.isDefaultBorderRadius = false;
+    pattern->SetIndicatorStyleVal(indicatorStyle);
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(updateResult);
+    EXPECT_FALSE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

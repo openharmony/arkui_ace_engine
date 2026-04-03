@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme_wrapper.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
@@ -207,6 +208,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
+        { NG::ContainerPickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ContainerPickerThemeWrapper::WrapperBuilder> },
         { ProgressTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ProgressThemeWrapper::WrapperBuilder> },
         { QrcodeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::QRCodeThemeWrapper::WrapperBuilder> },
         { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> },
