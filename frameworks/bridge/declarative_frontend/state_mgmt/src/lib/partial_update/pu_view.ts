@@ -158,7 +158,9 @@ abstract class ViewPU extends PUV2ViewBase
         // do not include backing store, and ObserveV2/MonitorV2/ComputedV2 meta data objects
         return (propName.startsWith('__') &&
           !propName.startsWith(ObserveV2.OB_PREFIX) &&
-          !propName.startsWith(MonitorV2.WATCH_PREFIX) &&
+          !propName.startsWith(MonitorV2.MONITOR_ORIG_PREFIX) &&
+          !propName.startsWith(MonitorV2.MONITOR_WITH_OPTIONS_PREFIX) &&
+          !propName.startsWith(MonitorV2.SYNC_MONITOR_PREFIX) &&
           !propName.startsWith(ComputedV2.COMPUTED_PREFIX));
       })
       .forEach((propName) => {

@@ -78,7 +78,7 @@ class UIUtilsImpl {
         stateMgmtConsole.applicationError(message);
         throw new BusinessError(ADD_MONITOR_FAIL_FUNC_ILLEGAL, message);
       }
-      ObserveV2.getObserve().AddMonitorPath(target, path, monitorFunc, options);
+      ObserveV2.getObserve().AddMonitorPath(target, path, monitorFunc, options?.isSynchronous === true, options?.enableWildcard === true);
     }
         
     public clearMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback): void {
