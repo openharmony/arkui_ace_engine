@@ -700,7 +700,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     ChangePlayerStatus(status);
 
     SaveCurrentPlaybackStatus(status);
-    ReportChangeEvent(status, progressRate_, currentPos_);
+    ReportChangeEvent(status, lastProgressRate_, currentPos_);
 }
 
 void VideoPattern::OnError(const std::string& errorId)
@@ -935,26 +935,60 @@ void VideoPattern::UpdateSpeed()
             auto pattern = weakThis.Upgrade();
             CHECK_NULL_VOID(pattern);
             double lastSpeed = pattern->GetLastProgressRate();
+            double lastSetSpeed = pattern->GetLastSetProgressRate();
 
             if (pattern->GetsIsProgressInjectCmd()) {
                 pattern->SetIsProgressInjectCmd(false);
-                pattern->ReportCommandResult(
+                pattern->ReportCommandResultOnUIThread(
                     "setVideoPlaybackSpeed",
                     ret == 0 ? "success" : "fail",
                     ret == 0 ? "" : "SetSpeed operation execution failed");
             }
 
-            if (NearEqual(lastSpeed, progress)) {
-                return;
-            }
-            if (ret == 0) {
+            auto reportProgressRate = lastSpeed;
+            if (ret == 0 || (ret != 0 && lastSpeed == 0)) {
+                reportProgressRate = progress;
                 pattern->SetLastProgressRate(progress);
             }
-            pattern->ReportChangeEvent(
-                pattern->GetCurrentPlaybackStatus(),
-                ret == 0 ? progress : lastSpeed, pattern->GetCurrentPos());
+            if (NearEqual(lastSetSpeed, progress)) {
+                return;
+            }
+            pattern->SetLastSetProgressRate(progress);
+            pattern->ReportChangeEventOnUIThread(
+                pattern->GetCurrentPlaybackStatus(), reportProgressRate, pattern->GetCurrentPos());
             }, "ArkUIVideoUpdateSpeed");
     }
+}
+
+void VideoPattern::ReportChangeEventOnUIThread(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weakPattern = WeakClaim(this), status, playbackSpeed, currentPos] {
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->ReportChangeEvent(status, playbackSpeed, currentPos);
+            }
+        }, "ArkUIVideoReportChangeEvent");
+}
+
+void VideoPattern::ReportCommandResultOnUIThread(
+    const std::string& event, const std::string& result, const std::string& reason)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weakPattern = WeakClaim(this), event, result, reason] {
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->ReportCommandResult(event, result, reason);
+            }
+        }, "ArkUIVideoReportCommandResult");
 }
 
 void VideoPattern::UpdateMuted()
@@ -1917,13 +1951,14 @@ void VideoPattern::Start()
             auto currentStatus = pattern->GetCurrentPlaybackStatus();
             if (pattern->currentInjectedStatusCmd_ == "play") {
                 pattern->currentInjectedStatusCmd_.clear();
-                pattern->ReportCommandResult(
+                pattern->ReportCommandResultOnUIThread(
                     "setVideoPlayerStatusPlay",
                     ret == 0 ? "success" : "fail",
                     ret == 0 ? "" : "Play operation execution failed");
             }
             if (currentStatus != PlaybackStatus::STARTED && ret != 0) {
-                pattern->ReportChangeEvent(currentStatus, pattern->GetProgressRate(), pattern->GetCurrentPos());
+                pattern->ReportChangeEventOnUIThread(
+                    currentStatus, pattern->GetLastProgressRate(), pattern->GetCurrentPos());
             }
         },
         "ArkUIVideoPlay");
@@ -1947,7 +1982,7 @@ void VideoPattern::Pause()
     }
 
     if (currentStatus != PlaybackStatus::PAUSED && ret != 0) {
-        ReportChangeEvent(currentStatus, progressRate_, currentPos_);
+        ReportChangeEvent(currentStatus, lastProgressRate_, currentPos_);
     }
 
     if (ret != -1 && !isPaused_) {
@@ -2573,7 +2608,7 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
     }
 
     auto currentSpeed = pattern->GetProgressRate();
-    pattern->SetLastProgressRate(currentSpeed);
+    pattern->SetLastSetProgressRate(currentSpeed);
     if (NearEqual(currentSpeed, playbackSpeed)) {
         TAG_LOGD(AceLogTag::ACE_VIDEO, "OnInjectionEvent: Speed unchanged (%{public}.3f), "
             "skip injection, command=%{public}s", currentSpeed, command.c_str());
