@@ -14,7 +14,9 @@
  */
 
 #include "patternlock_test_ng.h"
+#include "core/components_ng/pattern/patternlock/patternlock_theme_wrapper.h"
 
+namespace OHOS::Ace::NG {
 void PatternLockTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -27,6 +29,8 @@ void PatternLockTestNg::SetUpTestSuite()
     auto patternLockThemeConstants = CreateThemeConstants(THEME_PATTERN_PATTERN_LOCK);
     auto patternLockTheme = V2::PatternLockTheme::Builder().Build(patternLockThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(V2::PatternLockTheme::TypeId())).WillRepeatedly(Return(patternLockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(V2::PatternLockTheme::TypeId(), _))
+        .WillRepeatedly(Return(PatternLockThemeWrapper::WrapperBuilder().BuildWrapper(patternLockThemeConstants)));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
@@ -313,6 +317,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest005, TestSize.Level0)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
 
     /**
      * @tc.cases: when distance is unvalid, Point(x, y) will not AddChoosePoint.
@@ -534,6 +539,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest011, TestSize.Level0)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and Init FocusHub.
      */
@@ -723,6 +729,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest014, TestSize.Level0)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     pattern_->InitMouseEvent();
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     ASSERT_FALSE(inputEventHub->mouseEventActuator_->inputEvents_.empty());
@@ -973,6 +980,51 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest019, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PatternLockPaintMethodTest003
+ * @tc.desc: Test PatternLockPaintMethod GetThemeProp and UpdateContentModifier Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create patternLock PaintMethod and PatternLockTheme.
+     */
+    std::vector<PatternLockCell> vecCell;
+    auto modifier = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
+    PatternLockPaintMethod paintMethod(OffsetF(), false, vecCell, modifier);
+    auto paintProperty_ = AceType::MakeRefPtr<PatternLockPaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF());
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    patternlockTheme->regularColor_ = REGULAR_COLOR;
+    patternlockTheme->selectedColor_ = SELECTED_COLOR;
+    patternlockTheme->activeColor_ = ACTIVE_COLOR;
+    patternlockTheme->pathColor_ = PATH_COLOR;
+    patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
+    patternlockTheme->pathStrokeWidth_ = PATH_STROKE_WIDTH;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
+
+    /**
+     * @tc.case: case1. call GetThemeProp with PatternLockTheme.
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    paintMethod.GetThemeProp(frameNode);
+    EXPECT_EQ(paintMethod.sideLength_, .0f);
+    EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
+    EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
+    EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
+    EXPECT_EQ(paintMethod.selectedColor_, SELECTED_COLOR);
+    EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
+    EXPECT_EQ(paintMethod.pathColor_, PATH_COLOR);
+}
+/**
  * @tc.name: PatternLockPaintMethodTest001
  * @tc.desc: Test PatternLockPaintMethod GetThemeProp and UpdateContentModifier Function.
  * @tc.type: FUNC
@@ -1000,21 +1052,20 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest001, TestSize.Level1)
     patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
     patternlockTheme->pathStrokeWidth_ = PATH_STROKE_WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
-    /**
-     * @tc.case: case1. call GetThemeProp with PatternLockTheme.
-     */
-    paintMethod.GetThemeProp();
-    EXPECT_EQ(paintMethod.sideLength_, .0f);
-    EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
-    EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
-    EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
-    EXPECT_EQ(paintMethod.selectedColor_, SELECTED_COLOR);
-    EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
-    EXPECT_EQ(paintMethod.pathColor_, PATH_COLOR);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
+
     /**
      * @tc.case: case2. call UpdateContentModifier with unvalid PatternLockPaintProperty.
      */
-    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    WeakPtr<FrameNode> host(frameNode);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->SetHostNode(host);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty_);
     paintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(paintMethod.sideLength_, paintWrapper.GetContentSize().Width());
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
@@ -1068,10 +1119,14 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest002, TestSize.Level0)
     patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
     patternlockTheme->backgroundCircleRadius_ = ACTIVE_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     /**
      * @tc.case: case1. call GetThemeProp with PatternLockTheme.
      */
-    paintMethod.GetThemeProp();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    paintMethod.GetThemeProp(frameNode);
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
     EXPECT_EQ(paintMethod.pathColor_, PATH_COLOR);
@@ -1079,7 +1134,13 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest002, TestSize.Level0)
     /**
      * @tc.case: case2. call UpdateContentModifier with unvalid PatternLockPaintProperty.
      */
-    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    WeakPtr<FrameNode> host(frameNode);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->SetHostNode(host);
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty_);
     paintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
@@ -1108,9 +1169,10 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest002, TestSize.Level0)
  */
 HWTEST_F(PatternLockTestNg, PatternLockLayoutAlgorithmTest001, TestSize.Level0)
 {
+    Create([](PatternLockModelNG model) {});
     PatternLockLayoutAlgorithm layoutAlgorithm;
     auto layoutProperty = AceType::MakeRefPtr<PatternLockLayoutProperty>();
-    LayoutWrapperNode layoutWrapper(nullptr, nullptr, layoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode_, nullptr, layoutProperty);
     /**
      * @tc.case: case1.
      */

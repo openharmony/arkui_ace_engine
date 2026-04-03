@@ -521,4 +521,3 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest014, TestSize.Level1)
 }
 
 }
-}
