@@ -25,6 +25,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/list/list_item_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -999,5 +1000,1055 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, NotifyButtonsRectChangeTest001, Tes
     containerPattern->AddButtonsRectChangeListener(std::move(callback2));
     containerPattern->NotifyButtonsRectChange(containerModalRect, buttonsRect);
     EXPECT_TRUE(callbackTriggered);
+}
+
+/**
+ * @tc.name: OnMaxButtonClick_WindowIsMoving
+ * @tc.desc: Test OnMaxButtonClick does nothing when window is moving
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxButtonClick_WindowIsMoving, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowMode = WindowMode::WINDOW_MODE_FLOATING;
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    windowManager->SetWindowIsStartMovingCallBack([]() { return true; });
+    bool isMaximizeCalled = false;
+    windowManager->SetWindowMaximizeCallBack([&isMaximizeCalled]() { isMaximizeCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    GestureEvent info;
+    containerModalPatternEnhance->OnMaxButtonClick(info);
+    EXPECT_FALSE(isMaximizeCalled);
+}
+
+/**
+ * @tc.name: OnMinButtonClick_NotMoving
+ * @tc.desc: Test OnMinButtonClick triggers WindowMinimize when window is not moving
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMinButtonClick_NotMoving, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowMode = WindowMode::WINDOW_MODE_FLOATING;
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    windowManager->SetWindowIsStartMovingCallBack([]() { return false; });
+    bool isMinimizeCalled = false;
+    windowManager->SetWindowMinimizeCallBack([&isMinimizeCalled]() { isMinimizeCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    GestureEvent info;
+    containerModalPatternEnhance->OnMinButtonClick(info);
+    EXPECT_TRUE(isMinimizeCalled);
+}
+
+/**
+ * @tc.name: OnMinButtonClickNoArg_NotMoving
+ * @tc.desc: Test no-arg OnMinButtonClick triggers WindowMinimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMinButtonClickNoArg_NotMoving, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowIsStartMovingCallBack([]() { return false; });
+    bool isMinimizeCalled = false;
+    windowManager->SetWindowMinimizeCallBack([&isMinimizeCalled]() { isMinimizeCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    containerModalPatternEnhance->OnMinButtonClick();
+    EXPECT_TRUE(isMinimizeCalled);
+}
+
+/**
+ * @tc.name: OnCloseButtonClick_NotMoving
+ * @tc.desc: Test OnCloseButtonClick triggers WindowClose when window is not moving
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnCloseButtonClick_NotMoving, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowIsStartMovingCallBack([]() { return false; });
+    bool isCloseCalled = false;
+    windowManager->SetWindowCloseCallBack([&isCloseCalled]() { isCloseCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    GestureEvent info;
+    containerModalPatternEnhance->OnCloseButtonClick(info);
+    EXPECT_TRUE(isCloseCalled);
+}
+
+/**
+ * @tc.name: OnCloseButtonClickNoArg_NotMoving
+ * @tc.desc: Test no-arg OnCloseButtonClick triggers WindowClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnCloseButtonClickNoArg_NotMoving, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowIsStartMovingCallBack([]() { return false; });
+    bool isCloseCalled = false;
+    windowManager->SetWindowCloseCallBack([&isCloseCalled]() { isCloseCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    containerModalPatternEnhance->OnCloseButtonClick();
+    EXPECT_TRUE(isCloseCalled);
+}
+
+/**
+ * @tc.name: OnMaxBtnInputEvent_LeftButton
+ * @tc.desc: Test OnMaxBtnInputEvent sets isForbidMenuEvent_ to true when left button is pressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnInputEvent_LeftButton, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isForbidMenuEvent_ = false;
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetScreenLocation(Offset(100, 100));
+    containerModalPatternEnhance->OnMaxBtnInputEvent(info);
+    EXPECT_TRUE(containerModalPatternEnhance->isForbidMenuEvent_);
+}
+
+/**
+ * @tc.name: OnMaxBtnInputEvent_RightButton
+ * @tc.desc: Test OnMaxBtnInputEvent does not set isForbidMenuEvent_ when right button is pressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnInputEvent_RightButton, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isForbidMenuEvent_ = false;
+
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetScreenLocation(Offset(100, 100));
+    containerModalPatternEnhance->OnMaxBtnInputEvent(info);
+    EXPECT_FALSE(containerModalPatternEnhance->isForbidMenuEvent_);
+}
+
+/**
+ * @tc.name: OnMaxBtnInputEvent_ZeroScreenLocation
+ * @tc.desc: Test OnMaxBtnInputEvent sets isForbidMenuEvent_ to true when screen location is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnInputEvent_ZeroScreenLocation, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isForbidMenuEvent_ = false;
+
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetScreenLocation(Offset(0, 0));
+    containerModalPatternEnhance->OnMaxBtnInputEvent(info);
+    EXPECT_TRUE(containerModalPatternEnhance->isForbidMenuEvent_);
+}
+
+/**
+ * @tc.name: OnMaxBtnHoverEvent_HoverFalse
+ * @tc.desc: Test OnMaxBtnHoverEvent resets hover timer when hover is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnHoverEvent_HoverFalse, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isMenuPending_ = true;
+
+    RefPtr<FrameNode> btnNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    WeakPtr<FrameNode> weakBtn = btnNode;
+
+    containerModalPatternEnhance->OnMaxBtnHoverEvent(false, weakBtn);
+    EXPECT_FALSE(containerModalPatternEnhance->isMenuPending_);
+}
+
+/**
+ * @tc.name: OnMaxBtnHoverEvent_HoverTrueMenuPending
+ * @tc.desc: Test OnMaxBtnHoverEvent does nothing when isMenuPending_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnHoverEvent_HoverTrueMenuPending, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isMenuPending_ = true;
+
+    RefPtr<FrameNode> btnNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    WeakPtr<FrameNode> weakBtn = btnNode;
+
+    containerModalPatternEnhance->OnMaxBtnHoverEvent(true, weakBtn);
+    EXPECT_TRUE(containerModalPatternEnhance->isMenuPending_);
+}
+
+/**
+ * @tc.name: OnMaxBtnHoverEvent_HoverTrueForbidMenuEvent
+ * @tc.desc: Test OnMaxBtnHoverEvent does nothing when isForbidMenuEvent_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnHoverEvent_HoverTrueForbidMenuEvent, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isForbidMenuEvent_ = true;
+
+    RefPtr<FrameNode> btnNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    WeakPtr<FrameNode> weakBtn = btnNode;
+
+    containerModalPatternEnhance->OnMaxBtnHoverEvent(true, weakBtn);
+    EXPECT_FALSE(containerModalPatternEnhance->isMenuPending_);
+}
+
+/**
+ * @tc.name: OnMaxBtnHoverEvent_HoverTrueNotFocus
+ * @tc.desc: Test OnMaxBtnHoverEvent does nothing when window is not focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMaxBtnHoverEvent_HoverTrueNotFocus, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isFocus_ = false;
+
+    RefPtr<FrameNode> btnNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    WeakPtr<FrameNode> weakBtn = btnNode;
+
+    containerModalPatternEnhance->OnMaxBtnHoverEvent(true, weakBtn);
+    EXPECT_FALSE(containerModalPatternEnhance->isMenuPending_);
+}
+
+/**
+ * @tc.name: OnMenuItemClickGesture_LeftSplit
+ * @tc.desc: Test OnMenuItemClickGesture fires split left callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemClickGesture_LeftSplit, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    bool isSplitLeftCalled = false;
+    windowManager->SetWindowSplitPrimaryCallBack([&isSplitLeftCalled]() { isSplitLeftCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    containerModalPatternEnhance->OnMenuItemClickGesture(true);
+    EXPECT_TRUE(isSplitLeftCalled);
+}
+
+/**
+ * @tc.name: OnMenuItemClickGesture_RightSplit
+ * @tc.desc: Test OnMenuItemClickGesture fires split right callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemClickGesture_RightSplit, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    bool isSplitRightCalled = false;
+    windowManager->SetWindowSplitSecondaryCallBack([&isSplitRightCalled]() { isSplitRightCalled = true; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    containerModalPatternEnhance->OnMenuItemClickGesture(false);
+    EXPECT_TRUE(isSplitRightCalled);
+}
+
+/**
+ * @tc.name: OnMenuItemClickEvent_PressAction
+ * @tc.desc: Test OnMenuItemClickEvent updates background color on press action
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemClickEvent_PressAction, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listItemTheme));
+
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    itemNode->AttachContext(AceType::RawPtr(pipeline));
+
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    ContainerModalPatternEnhance::OnMenuItemClickEvent(itemNode, info);
+
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+}
+
+/**
+ * @tc.name: OnMenuItemClickEvent_ReleaseAction
+ * @tc.desc: Test OnMenuItemClickEvent does not update background color on release action
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemClickEvent_ReleaseAction, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listItemTheme));
+
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    itemNode->AttachContext(AceType::RawPtr(pipeline));
+
+    auto renderContext = itemNode->GetRenderContext();
+    Color originalColor(Color::WHITE);
+    renderContext->UpdateBackgroundColor(originalColor);
+
+    MouseInfo info;
+    info.SetAction(MouseAction::RELEASE);
+    ContainerModalPatternEnhance::OnMenuItemClickEvent(itemNode, info);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), originalColor);
+}
+
+/**
+ * @tc.name: OnMenuItemHoverEvent_HoverTrue
+ * @tc.desc: Test OnMenuItemHoverEvent updates background color when hovered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemHoverEvent_HoverTrue, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(listItemTheme));
+
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    itemNode->AttachContext(AceType::RawPtr(pipeline));
+
+    ContainerModalPatternEnhance::OnMenuItemHoverEvent(itemNode, true);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+}
+
+/**
+ * @tc.name: OnMenuItemHoverEvent_HoverFalse
+ * @tc.desc: Test OnMenuItemHoverEvent resets background color when not hovered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnMenuItemHoverEvent_HoverFalse, TestSize.Level1)
+{
+    constexpr uint32_t COLOR_WHITE_VALUE = 0xffffff;
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    ContainerModalPatternEnhance::OnMenuItemHoverEvent(itemNode, false);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color(COLOR_WHITE_VALUE));
+}
+
+/**
+ * @tc.name: SetTapGestureEvent_AddsGesture
+ * @tc.desc: Test SetTapGestureEvent adds a tap gesture to the node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetTapGestureEvent_AddsGesture, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalPatternEnhance->SetTapGestureEvent(targetNode);
+
+    auto eventHub = targetNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_GT(eventHub->gestures_.size(), static_cast<size_t>(0));
+}
+
+/**
+ * @tc.name: ClearTapGestureEvent_ClearsGesture
+ * @tc.desc: Test ClearTapGestureEvent clears gestures from the node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ClearTapGestureEvent_ClearsGesture, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    containerModalPatternEnhance->ClearTapGestureEvent(targetNode);
+
+    auto eventHub = targetNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->gestures_.size(), static_cast<size_t>(0));
+}
+
+/**
+ * @tc.name: EnablePanEventOnNode_NullNode
+ * @tc.desc: Test EnablePanEventOnNode does nothing when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, EnablePanEventOnNode_NullNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    RefPtr<FrameNode> nullNode = nullptr;
+    containerModalPatternEnhance->EnablePanEventOnNode(nullNode, true, "testRow");
+    // Should not crash
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: EnablePanEventOnNode_Enable
+ * @tc.desc: Test EnablePanEventOnNode adds pan event when enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, EnablePanEventOnNode_Enable, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalPatternEnhance->EnablePanEventOnNode(targetNode, true, "testRow");
+    EXPECT_NE(containerModalPatternEnhance->panEvent_, nullptr);
+}
+
+/**
+ * @tc.name: EnableTapGestureOnNode_NullNode
+ * @tc.desc: Test EnableTapGestureOnNode does nothing when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, EnableTapGestureOnNode_NullNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    RefPtr<FrameNode> nullNode = nullptr;
+    containerModalPatternEnhance->EnableTapGestureOnNode(nullNode, true, "testRow");
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: EnableTapGestureOnNode_Enable
+ * @tc.desc: Test EnableTapGestureOnNode adds tap gesture when enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, EnableTapGestureOnNode_Enable, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalPatternEnhance->EnableTapGestureOnNode(targetNode, true, "testRow");
+
+    auto eventHub = targetNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_GT(eventHub->gestures_.size(), static_cast<size_t>(0));
+}
+
+/**
+ * @tc.name: EnableTapGestureOnNode_Disable
+ * @tc.desc: Test EnableTapGestureOnNode clears tap gesture when disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, EnableTapGestureOnNode_Disable, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true)));
+    containerModalPatternEnhance->AttachToFrameNode(containerModalNode);
+
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalPatternEnhance->EnableTapGestureOnNode(targetNode, true, "testRow");
+
+    containerModalPatternEnhance->EnableTapGestureOnNode(targetNode, false, "testRow");
+    auto eventHub = targetNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->gestures_.size(), static_cast<size_t>(0));
+}
+
+/**
+ * @tc.name: GetFloatingTitleVisible_NullNode
+ * @tc.desc: Test GetFloatingTitleVisible returns false when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetFloatingTitleVisible_NullNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto result = containerModalPatternEnhance->GetFloatingTitleVisible();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetFloatingTitleVisible_Visible
+ * @tc.desc: Test GetFloatingTitleVisible returns true when floating title is visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetFloatingTitleVisible_Visible, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto floatingTitleRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalNode->AddChild(floatingTitleRow);
+    floatingTitleRow->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto result = containerPattern->GetFloatingTitleVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetFloatingTitleVisible_Gone
+ * @tc.desc: Test GetFloatingTitleVisible returns false when floating title is gone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetFloatingTitleVisible_Gone, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto floatingTitleRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalNode->AddChild(floatingTitleRow);
+    floatingTitleRow->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto result = containerPattern->GetFloatingTitleVisible();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetCustomTitleVisible_NullNode
+ * @tc.desc: Test GetCustomTitleVisible returns false when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetCustomTitleVisible_NullNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto result = containerModalPatternEnhance->GetCustomTitleVisible();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetCustomTitleVisible_Visible
+ * @tc.desc: Test GetCustomTitleVisible returns true when custom title is visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetCustomTitleVisible_Visible, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto customTitleRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    column->AddChild(customTitleRow);
+    customTitleRow->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto result = containerPattern->GetCustomTitleVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetControlButtonVisible_NullNode
+ * @tc.desc: Test GetControlButtonVisible returns false when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetControlButtonVisible_NullNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto result = containerModalPatternEnhance->GetControlButtonVisible();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetControlButtonVisible_Visible
+ * @tc.desc: Test GetControlButtonVisible returns true when control buttons are visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetControlButtonVisible_Visible, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    controlButtonRow->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto result = containerPattern->GetControlButtonVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ShowMaxMenu_NullTargetNode
+ * @tc.desc: Test ShowMaxMenu returns null when target node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ShowMaxMenu_NullTargetNode, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto result = containerModalPatternEnhance->ShowMaxMenu(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: ShowMaxMenu_SplitDisabled
+ * @tc.desc: Test ShowMaxMenu returns null when enableSplit_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ShowMaxMenu_SplitDisabled, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->enableSplit_ = false;
+
+    auto targetNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    auto result = containerModalPatternEnhance->ShowMaxMenu(targetNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetTitleItemByIndex_ValidIndex
+ * @tc.desc: Test GetTitleItemByIndex returns child at given index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetTitleItemByIndex_ValidIndex, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto controlButtonsNode =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child1 =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, AceType::MakeRefPtr<TextPattern>());
+    auto child2 =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    controlButtonsNode->AddChild(child1);
+    controlButtonsNode->AddChild(child2);
+
+    auto result = containerModalPatternEnhance->GetTitleItemByIndex(controlButtonsNode, 1);
+    EXPECT_EQ(result, child2);
+}
+
+/**
+ * @tc.name: ChangeControlButtons_Focus
+ * @tc.desc: Test ChangeControlButtons fires focused callback when isFocus is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ChangeControlButtons_Focus, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    bool isFocusCalled = false;
+    customButtonNode->SetOnWindowFocusedCallback([&isFocusCalled]() { isFocusCalled = true; });
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->ChangeControlButtons(true);
+    EXPECT_TRUE(isFocusCalled);
+}
+
+/**
+ * @tc.name: ChangeControlButtons_Unfocus
+ * @tc.desc: Test ChangeControlButtons fires unfocused callback when isFocus is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ChangeControlButtons_Unfocus, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    bool isUnfocusCalled = false;
+    customButtonNode->SetOnWindowUnfocusedCallback([&isUnfocusCalled]() { isUnfocusCalled = true; });
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->ChangeControlButtons(false);
+    EXPECT_TRUE(isUnfocusCalled);
+}
+
+/**
+ * @tc.name: SetCloseButtonStatus_Enabled
+ * @tc.desc: Test SetCloseButtonStatus fires callback with enabled=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetCloseButtonStatus_Enabled, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    std::string receivedEvent;
+    std::string receivedParam;
+    auto callback = [&receivedEvent, &receivedParam](const std::string& eventName, const std::string& param) {
+        receivedEvent = eventName;
+        receivedParam = param;
+    };
+    customButtonNode->SetCustomCallback(callback);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->SetCloseButtonStatus(true);
+    EXPECT_EQ(receivedEvent, "arkui_close_status");
+    EXPECT_EQ(receivedParam, "true");
+}
+
+/**
+ * @tc.name: SetCloseButtonStatus_Disabled
+ * @tc.desc: Test SetCloseButtonStatus fires callback with enabled=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetCloseButtonStatus_Disabled, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    std::string receivedParam;
+    auto callback = [&receivedParam](const std::string& eventName, const std::string& param) {
+        receivedParam = param;
+    };
+    customButtonNode->SetCustomCallback(callback);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->SetCloseButtonStatus(false);
+    EXPECT_EQ(receivedParam, "false");
+}
+
+/**
+ * @tc.name: SetMaximizeIconIsRecover_FullscreenMode
+ * @tc.desc: Test SetMaximizeIconIsRecover fires callback with true when window is fullscreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetMaximizeIconIsRecover_FullscreenMode, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    std::string receivedParam;
+    auto callback = [&receivedParam](const std::string& eventName, const std::string& param) {
+        receivedParam = param;
+    };
+    customButtonNode->SetCustomCallback(callback);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->SetMaximizeIconIsRecover();
+    EXPECT_EQ(receivedParam, "true");
+}
+
+/**
+ * @tc.name: SetMaximizeIconIsRecover_FloatingMode
+ * @tc.desc: Test SetMaximizeIconIsRecover fires callback with false when window is floating
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetMaximizeIconIsRecover_FloatingMode, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowMode = WindowMode::WINDOW_MODE_FLOATING;
+    windowManager->SetWindowGetModeCallBack([windowMode]() { return windowMode; });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+
+    std::string receivedParam;
+    auto callback = [&receivedParam](const std::string& eventName, const std::string& param) {
+        receivedParam = param;
+    };
+    customButtonNode->SetCustomCallback(callback);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->SetMaximizeIconIsRecover();
+    EXPECT_EQ(receivedParam, "false");
+}
+
+/**
+ * @tc.name: AddButtonsRectChangeListener_ReturnsId
+ * @tc.desc: Test AddButtonsRectChangeListener returns a non-zero listener id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, AddButtonsRectChangeListener_ReturnsId, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto callback = [](const RectF&, const RectF&) {};
+    auto id1 = containerModalPatternEnhance->AddButtonsRectChangeListener(std::move(callback));
+    EXPECT_GT(id1, 0);
+
+    auto id2 = containerModalPatternEnhance->AddButtonsRectChangeListener([](const RectF&, const RectF&) {});
+    EXPECT_GT(id2, id1);
+}
+
+/**
+ * @tc.name: RemoveButtonsRectChangeListener_ExistingId
+ * @tc.desc: Test RemoveButtonsRectChangeListener removes existing listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, RemoveButtonsRectChangeListener_ExistingId, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    bool callbackTriggered = false;
+    auto id = containerModalPatternEnhance->AddButtonsRectChangeListener(
+        [&callbackTriggered](const RectF&, const RectF&) { callbackTriggered = true; });
+
+    containerModalPatternEnhance->RemoveButtonsRectChangeListener(id);
+
+    RectF r1, r2;
+    containerModalPatternEnhance->NotifyButtonsRectChange(r1, r2);
+    EXPECT_FALSE(callbackTriggered);
+}
+
+/**
+ * @tc.name: RemoveButtonsRectChangeListener_NonExistingId
+ * @tc.desc: Test RemoveButtonsRectChangeListener does not crash with non-existing id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, RemoveButtonsRectChangeListener_NonExistingId, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->RemoveButtonsRectChangeListener(99999);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetColorConfigurationUpdate_LightMode
+ * @tc.desc: Test SetColorConfigurationUpdate fires callback with light mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, SetColorConfigurationUpdate_LightMode, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    containerModalNode->AddChild(column);
+    auto controlButtonRow =
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(controlButtonRow);
+    auto customButtonNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    controlButtonRow->AddChild(customButtonNode);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->colorMode_ = ColorMode::LIGHT;
+
+    std::string receivedParam;
+    auto callback = [&receivedParam](const std::string& eventName, const std::string& param) {
+        receivedParam = param;
+    };
+    customButtonNode->SetCustomCallback(callback);
+
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->SetColorConfigurationUpdate();
+    EXPECT_EQ(receivedParam, "false");
+}
+
+/**
+ * @tc.name: AddPointLight_NoOp
+ * @tc.desc: Test AddPointLight does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, AddPointLight_NoOp, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->AddPointLight();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitButtonsLayoutProperty_NoOp
+ * @tc.desc: Test InitButtonsLayoutProperty does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, InitButtonsLayoutProperty_NoOp, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->InitButtonsLayoutProperty();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ResetHoverTimer_ResetsState
+ * @tc.desc: Test ResetHoverTimer sets isMenuPending_ to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ResetHoverTimer_ResetsState, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isMenuPending_ = true;
+    containerModalPatternEnhance->ResetHoverTimer();
+    EXPECT_FALSE(containerModalPatternEnhance->isMenuPending_);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap_ReturnsFalse
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnDirtyLayoutWrapperSwap_ReturnsFalse, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    DirtySwapConfig config;
+    auto result = containerModalPatternEnhance->OnDirtyLayoutWrapperSwap(nullptr, config);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnWindowForceUnfocused_WhenFocused
+ * @tc.desc: Test OnWindowForceUnfocused does nothing when window is focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, OnWindowForceUnfocused_WhenFocused, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    containerModalPatternEnhance->isFocus_ = true;
+    containerModalPatternEnhance->isHoveredMenu_ = true;
+    containerModalPatternEnhance->OnWindowForceUnfocused();
+    EXPECT_TRUE(containerModalPatternEnhance->isHoveredMenu_);
 }
 } // namespace OHOS::Ace::NG
