@@ -70,7 +70,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     public _enableDragBar_0_0value?: boolean | undefined
     public _divider_0_0value: NavigationDividerStyle | null = null
     public _enableModeChangeAnimation_0_0value?: boolean | undefined
-    public _splitPlaceholder_0_0value?: ComponentContent<object>
+    public _splitPlaceholder_0_0value?: ComponentContent<Object>
     public _enableVisibilityLifecycleWithContentCover_0_0value?: boolean | undefined
     public _backButtonIcon_0_0value?: string | PixelMap | global_resource_Resource | SymbolGlyphModifier | undefined
     public _backButtonIcon_0_1value?: ResourceStr | undefined
@@ -456,7 +456,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         if (flagArray[21] != 0) {
             switch (flagArray[21]) {
                 case 1: {
-                    hookSplitPlaceholder(peer, (this._splitPlaceholder_0_0value as ComponentContent<object>));
+                    hookSplitPlaceholder(peer, (this._splitPlaceholder_0_0value as ComponentContent<Object>));
                     flagArray[21] = 2;
                     break;
                 }
@@ -871,7 +871,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             switch (flagArray[21]) {
                 case 1:
                 case 3: {
-                    this.splitPlaceholder((modifier._splitPlaceholder_0_0value as ComponentContent<object>));
+                    this.splitPlaceholder((modifier._splitPlaceholder_0_0value as ComponentContent<Object>));
                     break;
                 }
                 default: {
@@ -1185,7 +1185,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         }
         return this
     }
-    splitPlaceholder(value: ComponentContent<object>): this {
+    splitPlaceholder(value: ComponentContent<Object>): this {
         if (((this._flagArray[21]) == (0)) || (true)) {
             this._flagArray[21] = 1
             this._splitPlaceholder_0_0value = value
