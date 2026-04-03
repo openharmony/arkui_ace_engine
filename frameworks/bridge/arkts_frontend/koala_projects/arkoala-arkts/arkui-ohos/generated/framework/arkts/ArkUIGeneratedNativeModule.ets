@@ -2193,18 +2193,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _StackAttribute_setPointLight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _Root_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _ComponentRoot_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _CustomBuilderRoot_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _CustomLayoutRoot_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _CustomLayoutRoot_setSubscribeOnMeasureSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _CustomLayoutRoot_setSubscribeOnPlaceChildren(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _Swiper_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _SwiperInterface_setSwiperOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2277,6 +2265,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperAttribute_setNextMargin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SymbolSpan_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _SymbolSpanInterface_setSymbolSpanOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setFontSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _SymbolSpanAttribute_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SymbolGlyph_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _SymbolGlyphInterface_setSymbolGlyphOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2304,26 +2312,6 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolEffect2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpan_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _SymbolSpanInterface_setSymbolSpanOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setFontSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _SymbolSpanAttribute_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TabContent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3436,6 +3424,18 @@ export class ArkUIGeneratedNativeModule {
     native static _XComponentAttribute_setHdrBrightness0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _XComponentAttribute_setHdrBrightness1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _Root_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ComponentRoot_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _CustomBuilderRoot_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _CustomLayoutRoot_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _CustomLayoutRoot_setSubscribeOnMeasureSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _CustomLayoutRoot_setSubscribeOnPlaceChildren(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _AccessibilityHoverEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -7021,8 +7021,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _XComponentController_setOnSurfaceDestroyed(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _XComponentControllerExtender_startImageAnalyzer(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _GlobalScope_getRectangleById(id: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScope_postCardAction(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
@@ -7033,6 +7031,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_animateToImmediately(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _GlobalScope_setAppBgColor(value: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _GlobalScope_getRectangleById(id: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScope_Profiler_registerVsyncCallback(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

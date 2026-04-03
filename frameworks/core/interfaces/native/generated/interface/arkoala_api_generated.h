@@ -4352,6 +4352,7 @@ typedef struct Opt_ColoringStrategy {
 typedef enum Ark_ColorSpace {
     ARK_COLOR_SPACE_SRGB = 0,
     ARK_COLOR_SPACE_DISPLAY_P3 = 1,
+    ARK_COLOR_SPACE_BT2020 = 2,
 } Ark_ColorSpace;
 typedef struct Opt_ColorSpace {
     Ark_Tag tag;
@@ -5711,7 +5712,6 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
-    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;

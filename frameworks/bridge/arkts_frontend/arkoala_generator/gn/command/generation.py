@@ -19,6 +19,7 @@ import sys
 import glob
 import os
 import time
+import tarfile
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -48,19 +49,20 @@ def main():
     args = parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.join(script_dir, "../../")
 
     arkts_sdk_path = args.arkts_sdk_path
     arkts_sdk_patch_path = args.arkts_sdk_patch_path
     output_dir = args.output
     output_sdk_patched_path = args.output_sdk_patched_path
-    arkgen_options_file = os.path.join(script_dir, "../../generation_config/arkgen-config.json")
-    scraper_options_file = os.path.join(script_dir, "../../generation_config/scraper-config.json")
-    etsgen_options_file = os.path.join(script_dir, "../../generation_config/etsgen-config.json")
+    arkgen_options_file = os.path.join(base_dir, "generation_config/arkgen-config.json")
+    scraper_options_file = os.path.join(base_dir, "generation_config/scraper-config.json")
+    etsgen_options_file = os.path.join(base_dir, "generation_config/etsgen-config.json")
     arkgen_interop_types = args.arkgen_interop_types
     panda_sdk_path = args.panda_sdk_path
     node_bin_path = args.node_bin_path
     libarkts_path = args.libarkts_path
-    idl_pattern = os.path.join(script_dir, "arkui_extra_idl")
+    idl_pattern = os.path.join(base_dir, "arkui_extra_idl")
 
     node = os.path.join(node_bin_path, "node")
     npm = os.path.join(node_bin_path, "npm")
@@ -75,9 +77,9 @@ def main():
     env["PANDA_SDK_PATH"] = panda_sdk_dest
 
     # step0 clean previous build artifacts
-    print(f"Step0: Running npm run clean in {script_dir}...")
+    print(f"Step0: Running npm run clean in {base_dir}...")
     try:
-        subprocess.run([npm, "run", "clean"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
+        subprocess.run([npm, "run", "clean"], env=env, cwd=base_dir, check=True, capture_output=True, text=True)
         print("npm run clean completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error: npm run clean failed with exit code {e.returncode}")
@@ -120,9 +122,9 @@ def main():
         print("Step1: Skipped panda_sdk extraction (panda_sdk_path is empty).")
 
     # step2 install arkui_idlize and libarkts
-    print(f"Step2: Running npm install in {script_dir}...")
+    print(f"Step2: Running npm install in {base_dir}...")
     try:
-        subprocess.run([npm, "install", "--no-package-lock"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
+        subprocess.run([npm, "install", "--no-package-lock"], env=env, cwd=base_dir, check=True, capture_output=True, text=True)
         print("npm install completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error: npm install failed with exit code {e.returncode}")
@@ -171,7 +173,7 @@ def main():
     print(f"Step 4: Generation. Running command: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(cmd, env=env, check=True, cwd=script_dir, capture_output=True, text=True)
+        result = subprocess.run(cmd, env=env, check=True, cwd=base_dir, capture_output=True, text=True)
         elapsed_time = time.time() - start_time
         seconds = int(elapsed_time)
         milliseconds = int((elapsed_time - seconds) * 1000)
