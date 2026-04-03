@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"

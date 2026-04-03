@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"

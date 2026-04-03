@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/lifecycle_checkable.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

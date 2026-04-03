@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #include "core/common/event_dump.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

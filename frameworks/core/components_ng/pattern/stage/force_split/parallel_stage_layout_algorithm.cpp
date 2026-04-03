@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"

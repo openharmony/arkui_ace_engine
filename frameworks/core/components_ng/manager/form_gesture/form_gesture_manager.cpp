@@ -14,6 +14,7 @@
 */
 
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

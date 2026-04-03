@@ -783,8 +783,26 @@ void EventManager::GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std
     }
 }
 
-void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList)
+struct RectCallback final {
+    RectCallback(std::function<void(std::vector<Rect>&)> rectGetCallback,
+        std::function<void()> touchCallback, std::function<void()> mouseCallback)
+        : rectGetCallback(std::move(rectGetCallback)), touchCallback(std::move(touchCallback)),
+          mouseCallback(std::move(mouseCallback))
+    {}
+    ~RectCallback() = default;
+    std::function<void(std::vector<Rect>&)> rectGetCallback;
+    std::function<void()> touchCallback;
+    std::function<void()> mouseCallback;
+};
+
+struct RectCallbackListImpl {
+    std::vector<RectCallback> callbacks;
+};
+
+void EventManager::HandleOutOfRectCallbacks(const Point& point)
 {
+    CHECK_NULL_VOID(rectCallbackListImpl_);
+    auto& rectCallbackList = rectCallbackListImpl_->callbacks;
     for (auto iter = rectCallbackList.begin(); iter != rectCallbackList.end();) {
         auto rectCallback = *iter;
         auto rectGetCallback = rectCallback.rectGetCallback;
@@ -794,8 +812,8 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
         }
         std::vector<Rect> rectList;
         rectGetCallback(rectList);
-        if (std::any_of(
-                rectList.begin(), rectList.end(), [point](const Rect& rect) { return rect.IsInRegion(point); })) {
+        if (std::any_of(rectList.begin(), rectList.end(),
+            [point](const Rect& rect) { return rect.IsInRegion(point); })) {
             ++iter;
             continue;
         }
@@ -1503,7 +1521,7 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
 {
     CHECK_NULL_VOID(renderNode);
     const Point point { event.x, event.y };
-    MouseHoverTestList hitTestResult;
+    std::list<WeakPtr<RenderNode>> hitTestResult;
     WeakPtr<RenderNode> hoverNode = nullptr;
     renderNode->MouseDetect(point, point, hitTestResult, hoverNode);
 
@@ -2226,6 +2244,7 @@ void EventManager::ClearResults()
 }
 
 EventManager::EventManager()
+    : rectCallbackListImpl_(std::make_unique<RectCallbackListImpl>())
 {
     refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
@@ -2280,6 +2299,22 @@ EventManager::EventManager()
         }
     };
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
+}
+
+EventManager::~EventManager() = default;
+
+void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
+    std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)
+{
+    CHECK_NULL_VOID(rectCallbackListImpl_);
+    rectCallbackListImpl_->callbacks.emplace_back(
+        RectCallback(std::move(getRectCallback), std::move(touchCallback), std::move(mouseCallback)));
+}
+
+void EventManager::ClearRectCallbacks()
+{
+    CHECK_NULL_VOID(rectCallbackListImpl_);
+    rectCallbackListImpl_->callbacks.clear();
 }
 
 void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)

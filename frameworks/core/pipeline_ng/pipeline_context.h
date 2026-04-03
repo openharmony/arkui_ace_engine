@@ -40,10 +40,6 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "core/components_ng/manager/force_split/force_split_manager.h"
-#include "core/components_ng/manager/form_event/form_event_manager.h"
-#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
-#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
@@ -95,6 +91,11 @@ class InspectorOffscreenNodesMgr;
 class SafeAreaManager;
 class SelectOverlayManager;
 class UIExtensionManager;
+class ForceSplitManager;
+class FormVisibleManager;
+class FormEventManager;
+class FormGestureManager;
+class RecycleManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -148,6 +149,8 @@ public:
     void SetupRootElement() override;
 
     void SetupSubRootElement();
+
+    void InitManagers();
 
     bool NeedSoftKeyboard() override;
 
@@ -573,11 +576,7 @@ public:
 
     bool HasDifferentDirectionGesture() const;
 
-    bool IsKeyInPressed(KeyCode tarCode) const
-    {
-        CHECK_NULL_RETURN(eventManager_, false);
-        return eventManager_->IsKeyInPressed(tarCode);
-    }
+    bool IsKeyInPressed(KeyCode tarCode) const;
 
     bool GetIsFocusingByTab() const
     {
@@ -600,10 +599,7 @@ public:
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
 
-    bool IsTabJustTriggerOnKeyEvent() const
-    {
-        return eventManager_->IsTabJustTriggerOnKeyEvent();
-    }
+    bool IsTabJustTriggerOnKeyEvent() const;
 
     bool GetOnShow() const override
     {
@@ -778,35 +774,9 @@ public:
         transformHintChangedCallbackMap_.erase(callbackId);
     }
 
-    bool SetMouseStyleHoldNode(int32_t id)
-    {
-        CHECK_NULL_RETURN(eventManager_, false);
-        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
-        if (mouseStyleManager) {
-            return mouseStyleManager->SetMouseStyleHoldNode(id);
-        }
-        return false;
-    }
-
-    bool FreeMouseStyleHoldNode(int32_t id)
-    {
-        CHECK_NULL_RETURN(eventManager_, false);
-        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
-        if (mouseStyleManager) {
-            return mouseStyleManager->FreeMouseStyleHoldNode(id);
-        }
-        return false;
-    }
-
-    bool FreeMouseStyleHoldNode()
-    {
-        CHECK_NULL_RETURN(eventManager_, false);
-        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
-        if (mouseStyleManager) {
-            return mouseStyleManager->FreeMouseStyleHoldNode();
-        }
-        return false;
-    }
+    bool SetMouseStyleHoldNode(int32_t id);
+    bool FreeMouseStyleHoldNode(int32_t id);
+    bool FreeMouseStyleHoldNode();
 
     void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
     {
@@ -979,35 +949,20 @@ public:
         return navigationMgr_;
     }
 
-    const RefPtr<ForceSplitManager>& GetForceSplitManager() const
-    {
-        return forceSplitMgr_;
-    }
+    const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
-    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
-    {
-        return formVisibleMgr_;
-    }
+    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
 
-    const RefPtr<FormEventManager>& GetFormEventManager() const
-    {
-        return formEventMgr_;
-    }
+    const RefPtr<FormEventManager>& GetFormEventManager() const;
 
-    const RefPtr<FormGestureManager>& GetFormGestureManager() const
-    {
-        return formGestureMgr_;
-    }
+    const RefPtr<FormGestureManager>& GetFormGestureManager() const;
 
     const RefPtr<AvoidInfoManager>& GetAvoidInfoManager() const
     {
         return avoidInfoMgr_;
     }
 
-    const std::unique_ptr<RecycleManager>& GetRecycleManager() const
-    {
-        return recycleManager_;
-    }
+    const std::unique_ptr<RecycleManager>& GetRecycleManager() const;
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
     {
@@ -1732,10 +1687,10 @@ private:
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
-    RefPtr<ForceSplitManager> forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
-    RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
-    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
-    RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    RefPtr<ForceSplitManager> forceSplitMgr_;
+    RefPtr<FormVisibleManager> formVisibleMgr_;
+    RefPtr<FormEventManager> formEventMgr_;
+    RefPtr<FormGestureManager> formGestureMgr_;
     std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);

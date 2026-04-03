@@ -38,6 +38,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
