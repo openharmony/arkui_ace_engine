@@ -26,6 +26,9 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interfaces/inner_api/ace/serialized_gesture.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
+
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/resource/asset_manager.h"
@@ -49,20 +52,18 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/pointer_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
-#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
-#include "interfaces/inner_api/ace/serialized_gesture.h"
-#include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -93,7 +94,7 @@ enum class ThpNotifyState {
     ROUTER_TRANSITION,
     SCROLL_MOVING,
 };
-constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
+constexpr int32_t DEFAULT_DELAY_THP = 300; // 300ms
 
 struct FontInfo;
 struct FontConfigJsonInfo;
@@ -201,8 +202,7 @@ public:
     virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false)
-    {}
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -236,8 +236,8 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
-        const RefPtr<NG::FrameNode>& node = nullptr) = 0;
+    virtual void OnDragEvent(
+        const DragPointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -711,7 +711,8 @@ public:
         themeManager_ = std::move(theme);
     }
 
-    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter) {
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter)
+    {
         std::unique_lock<std::shared_mutex> lock(themeMtx_);
         CHECK_NULL_VOID(themeManager_);
         auto themeConstants = themeManager_->GetThemeConstants();
@@ -1011,12 +1012,10 @@ public:
 
     void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo);
 
-    void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
-
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
 
-    void PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name,
-        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(
+        TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     void PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name,
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
@@ -1140,24 +1139,29 @@ public:
 
     virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
-    virtual void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
-        bool checkSceneBoardWindow = false) {}
+    virtual void UpdateSystemSafeAreaWithoutAnimation(
+        const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false)
+    {}
 
-    virtual void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
-        bool checkSceneBoardWindow = false) {}
+    virtual void UpdateCutoutSafeAreaWithoutAnimation(
+        const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false)
+    {}
 
-    virtual void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
-        bool checkSceneBoardWindow = false) {}
+    virtual void UpdateNavSafeAreaWithoutAnimation(
+        const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false)
+    {}
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
     virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
 
-    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode()
+    {
         return KeyBoardAvoidMode::OFFSET;
     }
 
-    virtual bool IsEnableKeyBoardAvoidMode() {
+    virtual bool IsEnableKeyBoardAvoidMode()
+    {
         return false;
     }
 
@@ -1403,7 +1407,10 @@ public:
 
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
-    virtual std::string GetCurrentExtraInfo() { return ""; }
+    virtual std::string GetCurrentExtraInfo()
+    {
+        return "";
+    }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
     virtual void SetCursor(int32_t cursorValue) {}
@@ -1530,8 +1537,8 @@ public:
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Called by hittest to find touch node is equal target.
-    virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
-        const std::string& target = "") = 0;
+    virtual bool OnTouchTargetHitTest(
+        const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") = 0;
 #endif
     virtual bool IsWindowFocused() const
     {
@@ -1863,6 +1870,7 @@ protected:
     int32_t dvsyncTimeUseCount_ = 0;
     // add for arkola frontend loops, called at the tail of vsync
     std::function<void()> asyncEventsHookListener_;
+
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

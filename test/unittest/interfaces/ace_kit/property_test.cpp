@@ -18,8 +18,8 @@
 #define private public
 #define protected public
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_pattern.h"
 #include "ui/properties/property.h"
 #include "ui/view/frame_node.h"

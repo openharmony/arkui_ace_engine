@@ -37,9 +37,8 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components/list/list_item_theme.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/base/mock_system_properties.h"
-#undef private
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #undef protected
 
 namespace OHOS::Ace::NG {

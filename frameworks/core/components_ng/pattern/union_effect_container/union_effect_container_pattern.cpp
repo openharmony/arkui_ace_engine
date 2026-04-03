@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/union_effect_container/union_effect_container_pattern.h"
 
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-
 namespace OHOS::Ace::NG {
 void UnionEffectContainerPattern::SetSpacing(const float& spacing)
 {
@@ -30,8 +28,6 @@ void UnionEffectContainerPattern::SetSpacing(const float& spacing)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
-    CHECK_NULL_VOID(rosenRenderContext);
-    rosenRenderContext->SetUnionSpacing(spacing_);
+    renderContext->SetUnionSpacing(spacing_);
 }
 } // namespace OHOS::Ace::NG

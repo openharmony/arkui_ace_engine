@@ -15,10 +15,10 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
-#include "test/mock/base/mock_drag_window.h"
-#include "test/mock/base/mock_subwindow.h"
+#include "test/mock/frameworks/base/window/mock_drag_window.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"

@@ -18,8 +18,10 @@
 
 #include <functional>
 #include <list>
-#include <utility>
 #include <mutex>
+#include <utility>
+
+#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -44,14 +46,10 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-
-#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -81,14 +79,15 @@ class DragDropRelatedConfigurations;
 class ExtensionHandler;
 class PaintWrapper;
 class SamplerManager;
+class AccessibilityProperty;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
     OffsetF innerWindowOffset = OffsetF();
     RectF visibleRect = RectF();
     RectF innerVisibleRect = RectF();
-    VectorF cumulativeScale = {1.0f, 1.0f};
-    VectorF innerCumulativeScale = {1.0f, 1.0f};
+    VectorF cumulativeScale = { 1.0f, 1.0f };
+    VectorF innerCumulativeScale = { 1.0f, 1.0f };
     RectF frameRect = RectF();
     RectF innerFrameRect = RectF();
     RectF innerBoundaryRect = RectF();
@@ -132,8 +131,8 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
-    static RefPtr<FrameNode> CreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
-        const RefPtr<Pattern>& pattern, bool isRoot = false);
+    static RefPtr<FrameNode> CreateCommonNode(
+        const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
@@ -143,8 +142,8 @@ public:
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
-        bool isRoot = false, bool isLayoutNode = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false,
+        bool isLayoutNode = false);
 
     ~FrameNode() override;
 
@@ -284,8 +283,8 @@ public:
 
     void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
-        bool isCalculateInnerClip = false)
+    void SetVisibleAreaInnerCallback(
+        const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         CreateEventHubInner();
@@ -334,11 +333,8 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
-        if (ACE_UNLIKELY(pattern_ &&
-            SystemProperties::DetectAceObjTypeConvertion() &&
-            !DynamicCast<T>(pattern_))) {
-            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
-                GetPatternTypeName(), T::TypeName());
+        if (ACE_UNLIKELY(pattern_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(pattern_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]", GetPatternTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(pattern_));
     }
@@ -358,11 +354,10 @@ public:
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
-        if (ACE_UNLIKELY(layoutProperty_ &&
-            SystemProperties::DetectAceObjTypeConvertion() &&
-            !DynamicCast<T>(layoutProperty_))) {
-            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
-                GetLayoutPropertyTypeName(), T::TypeName());
+        if (ACE_UNLIKELY(layoutProperty_ && SystemProperties::DetectAceObjTypeConvertion() &&
+                         !DynamicCast<T>(layoutProperty_))) {
+            LOGF_ABORT(
+                "bad type conversion: from [%{public}s] to [%{public}s]", GetLayoutPropertyTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(layoutProperty_));
     }
@@ -376,11 +371,10 @@ public:
     template<typename T>
     T* GetPaintPropertyPtr() const
     {
-        if (ACE_UNLIKELY(paintProperty_ &&
-            SystemProperties::DetectAceObjTypeConvertion() &&
-            !DynamicCast<T>(paintProperty_))) {
-            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
-                GetPaintPropertyTypeName(), T::TypeName());
+        if (ACE_UNLIKELY(
+                paintProperty_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(paintProperty_))) {
+            LOGF_ABORT(
+                "bad type conversion: from [%{public}s] to [%{public}s]", GetPaintPropertyTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
@@ -423,13 +417,7 @@ public:
 
     const RefPtr<FocusHub>& GetFocusHub() const;
 
-    bool HasVirtualNodeAccessibilityProperty() override
-    {
-        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNode()) {
-            return true;
-        }
-        return false;
-    }
+    bool HasVirtualNodeAccessibilityProperty() override;
 
     FocusType GetFocusType() const;
 
@@ -445,8 +433,8 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
-    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
-        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+    HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& axisResult) override;
     ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
         TouchRestrict& touchRestrict, bool blockHierarchy);
@@ -608,15 +596,13 @@ public:
 
     int32_t GetAllDepthChildrenCount();
 
-    void OnAccessibilityEvent(
-        AccessibilityEventType eventType,
+    void OnAccessibilityEvent(AccessibilityEventType eventType,
         WindowsContentChangeTypes windowsContentChangeType = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID,
         bool sendByNode = false);
 
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
-    void OnAccessibilityEvent(
-        AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
+    void OnAccessibilityEvent(AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent);
@@ -624,8 +610,7 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
-    void OnAccessibilityEvent(
-        AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
+    void OnAccessibilityEvent(AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -672,8 +657,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect);
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
-        std::vector<RectF>* regionList = nullptr);
+    virtual bool IsOutOfTouchTestRegion(
+        const PointF& parentLocalPoint, const TouchEvent& touchEvent, std::vector<RectF>* regionList = nullptr);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -1021,8 +1006,8 @@ public:
     void ForceSyncGeometryNode();
     bool IsGeometrySizeChange() const;
 
-    void ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty,
-        const RectF& rect, std::vector<RectF>& responseRegionResult);
+    void ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty, const RectF& rect,
+        std::vector<RectF>& responseRegionResult);
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool);
 
     virtual std::vector<RectF> GetResponseRegionListRaw(const RectF& rect, int32_t sourceType);
@@ -1053,9 +1038,8 @@ public:
 
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
-    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
-        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();
@@ -1076,8 +1060,8 @@ public:
 
     void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect);
 
-    bool InResponseRegionList(const PointF& parentLocalPoint,
-        const std::vector<RectF>& responseRegionList, bool needForCheckTransformValid = true);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList,
+        bool needForCheckTransformValid = true);
 
     bool GetMonopolizeEvents() const;
 
@@ -1110,12 +1094,12 @@ public:
             removeCustomProperties_ = func;
         }
     }
-    void SetCustomPropertyCallback(
-        std::function<void()>&& func, std::function<std::string(const std::string&)>&& getFunc,
+    void SetCustomPropertyCallback(std::function<void()>&& func,
+        std::function<std::string(const std::string&)>&& getFunc,
         std::function<std::string()>&& getAllCustomPropertiesFunc);
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
-                                bool withClip = false) const;
+    void GetVisibleRectWithClip(
+        RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect, bool withClip = false) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1152,7 +1136,8 @@ public:
         predictLayoutNode_.emplace_back(node);
     }
 
-    bool CheckAccessibilityLevelNo() const {
+    bool CheckAccessibilityLevelNo() const
+    {
         return false;
     }
 
@@ -1218,19 +1203,23 @@ public:
         return changeInfoFlag_;
     }
 
-    void SetDeleteRsNode(bool isDelete) {
+    void SetDeleteRsNode(bool isDelete)
+    {
         isDeleteRsNode_ = isDelete;
     }
 
-    bool GetIsDelete() const {
+    bool GetIsDelete() const
+    {
         return isDeleteRsNode_;
     }
 
-    void SetPositionZ(bool hasPositionZ) {
+    void SetPositionZ(bool hasPositionZ)
+    {
         hasPositionZ_ = hasPositionZ;
     }
 
-    bool HasPositionZ() const {
+    bool HasPositionZ() const
+    {
         return hasPositionZ_;
     }
 
@@ -1534,8 +1523,7 @@ private:
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
-    void OnGenerateOneDepthVisibleFrameWithOffset(
-        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
+    void OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
@@ -1562,14 +1550,13 @@ private:
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json);
-    void DumpSimplifyCommonInfoOnlyForParamConfig(
-        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+    void DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
-    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
-        std::unique_ptr<JsonValue>& json);
-    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
-        std::unique_ptr<JsonValue>& json);
+    void DumpBorder(
+        const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label, std::unique_ptr<JsonValue>& json);
+    void DumpPadding(
+        const std::unique_ptr<NG::PaddingProperty>& border, std::string label, std::unique_ptr<JsonValue>& json);
     void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpDragInfo(std::unique_ptr<JsonValue>& json);
     void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
@@ -1660,11 +1647,11 @@ private:
 
     bool AllowVisibleAreaCheck() const;
 
-    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
-    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint, TouchRestrict& touchRestrict,
+        TouchTestResult& newComingTargets);
 
-    bool ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+    bool ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint, TouchRestrict& touchRestrict,
+        TouchTestResult& newComingTargets);
 
     void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);

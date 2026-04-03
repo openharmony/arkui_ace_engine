@@ -18,8 +18,8 @@
 #include "native_node.h"
 #include "native_type.h"
 #include "node_component_snapshot.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "node/node_model.h"

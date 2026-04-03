@@ -21,7 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
 

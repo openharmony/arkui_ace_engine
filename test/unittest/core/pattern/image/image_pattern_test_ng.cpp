@@ -15,8 +15,8 @@
 #define private public
 #define protected public
 #include "image_base.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
 
 #include "base/image/image_defines.h"
 

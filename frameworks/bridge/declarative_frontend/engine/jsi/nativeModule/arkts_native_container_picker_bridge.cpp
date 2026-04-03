@@ -267,9 +267,7 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     auto context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
-    auto pickerTheme = themeManager->GetTheme<ContainerPickerTheme>();
+    auto pickerTheme = frameNode->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_RETURN(pickerTheme, panda::NativePointerRef::New(vm, nullptr));
 
     RefPtr<ResourceObject> strokeWidthResObj;

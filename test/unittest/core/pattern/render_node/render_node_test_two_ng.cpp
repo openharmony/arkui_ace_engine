@@ -19,14 +19,14 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/theme/corner_mark_theme.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_layout_property.h"
@@ -227,13 +227,13 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutAlgorithmTest007, TestSize.Level1)
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
-    
+
     SizeF frameSize(TEST_FRAME_WIDTH, TEST_FRAME_HEIGHT);
     geometryNode->SetFrameSize(frameSize);
-    
+
     layoutWrapper->GetLayoutProperty()->positionProperty_ = nullptr;
     layoutWrapper->GetGeometryNode()->content_ = nullptr;
-    
+
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetFrameSize(), frameSize);
 }
@@ -252,19 +252,19 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutAlgorithmTest008, TestSize.Level1)
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
-    
+
     SizeF frameSize(TEST_FRAME_WIDTH, TEST_FRAME_HEIGHT);
     geometryNode->SetFrameSize(frameSize);
-    
+
     layoutWrapper->GetLayoutProperty()->positionProperty_ = nullptr;
-    
+
     auto content = std::make_unique<GeometryProperty>();
     SizeF contentSize(TEST_CONTENT_WIDTH, TEST_CONTENT_HEIGHT);
     content->SetSize(contentSize);
     layoutWrapper->GetGeometryNode()->content_ = std::move(content);
-    
+
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    
+
     auto contentOffset = geometryNode->GetContentOffset();
     EXPECT_EQ(contentOffset, OffsetF(0, 0));
 }
@@ -280,7 +280,7 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutPropertyTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<RenderNodeLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    
+
     InspectorFilter filter;
     filter.AddFilterAttr("id");
     auto json = JsonUtil::Create(true);
@@ -299,9 +299,9 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutPropertyTest002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<RenderNodeLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    
+
     layoutProperty->positionProperty_ = nullptr;
-    
+
     InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
@@ -321,12 +321,12 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutPropertyTest003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<RenderNodeLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    
+
     layoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
     Alignment align;
     align.horizontal_ = ALIGNMENT_CENTER_HORIZONTAL;
     layoutProperty->positionProperty_->UpdateAlignment(align);
-    
+
     InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
@@ -346,11 +346,11 @@ HWTEST_F(RenderNodeTestTwoNg, RenderNodeLayoutPropertyTest004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<RenderNodeLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    
+
     auto json = JsonUtil::Create(true);
     json->Put("alignContent", "Alignment.TopStart");
     layoutProperty->FromJson(json);
-    
+
     ASSERT_NE(layoutProperty->positionProperty_, nullptr);
     auto alignment = layoutProperty->positionProperty_->GetAlignment();
     ASSERT_TRUE(alignment.has_value());

@@ -8040,4 +8040,64 @@ void OverlayManager::ResetDetachedFreeRootProxy(int32_t targetId)
         detachedProxyMap_.erase(iter);
     }
 }
+
+PopupInfo OverlayManager::GetPopupInfo(int32_t targetId) const
+{
+    auto it = popupMap_.find(targetId);
+    if (it == popupMap_.end()) {
+        return {};
+    }
+    return it->second;
+}
+
+void OverlayManager::ErasePopupInfo(int32_t targetId)
+{
+    if (popupMap_.find(targetId) != popupMap_.end()) {
+        popupMap_.erase(targetId);
+    }
+}
+
+void OverlayManager::CallOnHideDialogCallback()
+{
+    if (onHideDialogCallback_) {
+        onHideDialogCallback_();
+    }
+}
+
+bool OverlayManager::FireBackPressEvent() const
+{
+    if (backPressEvent_) {
+        return backPressEvent_();
+    }
+    return false;
+}
+
+void OverlayManager::ResetContextMenuDragHideFinished()
+{
+    isContextMenuDragHideFinished_ = false;
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::ResetContextMenuRestartDragVector()
+{
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::UpdateDragMoveVector(const NG::OffsetF& offset)
+{
+    lastDragMoveVector_ = dragMoveVector_;
+    dragMoveVector_ = offset;
+}
+
+bool OverlayManager::SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+{
+    if (overlayInfo_.has_value()) {
+        return false;
+    }
+    overlayInfo_ = overlayInfo;
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

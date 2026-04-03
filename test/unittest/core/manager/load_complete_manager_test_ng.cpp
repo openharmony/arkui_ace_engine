@@ -14,8 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #define private public
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 

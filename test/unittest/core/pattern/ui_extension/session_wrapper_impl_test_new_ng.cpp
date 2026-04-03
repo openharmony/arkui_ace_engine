@@ -49,12 +49,12 @@
 #include "core/components_ng/pattern/pattern.h"
 
 #include "mock/mock_accessibility_child_tree_callback.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
 
@@ -125,14 +125,14 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitForegroundCallback();
     EXPECT_EQ(sessionWrapper->foregroundCallback_, nullptr);
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_NE(sessionWrapper->session_, nullptr);
     EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
     sessionWrapper->hostPattern_ = nullptr;
-    
+
     sessionWrapper->InitForegroundCallback();
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->foregroundCallback_(errcode);
@@ -160,7 +160,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     sessionWrapper->InitForegroundCallback();
     sessionWrapper->foregroundCallback_(errcode);
     EXPECT_NE(sessionWrapper->foregroundCallback_, nullptr);
-    
+
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitForegroundCallback();
     sessionWrapper->foregroundCallback_(errcode);
@@ -179,14 +179,14 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitBackgroundCallback();
     EXPECT_EQ(sessionWrapper->backgroundCallback_, nullptr);
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_NE(sessionWrapper->session_, nullptr);
     EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
     sessionWrapper->hostPattern_ = nullptr;
-    
+
     sessionWrapper->InitBackgroundCallback();
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->backgroundCallback_(errcode);
@@ -214,7 +214,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     sessionWrapper->InitBackgroundCallback();
     sessionWrapper->backgroundCallback_(errcode);
     EXPECT_NE(sessionWrapper->backgroundCallback_, nullptr);
-    
+
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitBackgroundCallback();
     sessionWrapper->backgroundCallback_(errcode);
@@ -233,14 +233,14 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitDestructionCallback();
     EXPECT_EQ(sessionWrapper->destructionCallback_, nullptr);
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_NE(sessionWrapper->session_, nullptr);
     EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
     sessionWrapper->hostPattern_ = nullptr;
-    
+
     sessionWrapper->InitDestructionCallback();
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->destructionCallback_(errcode);
@@ -268,7 +268,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     sessionWrapper->InitDestructionCallback();
     sessionWrapper->destructionCallback_(errcode);
     EXPECT_NE(sessionWrapper->destructionCallback_, nullptr);
-    
+
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitDestructionCallback();
     sessionWrapper->destructionCallback_(errcode);
@@ -286,7 +286,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg004, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitTransferAbilityResultFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -309,7 +309,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg004, TestSize.L
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
     EXPECT_NE(sessionCallbacks->transferAbilityResultFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
@@ -336,7 +336,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg005, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitTransferExtensionDataFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -358,7 +358,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg005, TestSize.L
     sessionWrapper->InitTransferExtensionDataFunc();
     sessionCallbacks->transferExtensionDataFunc_(params);
     EXPECT_NE(sessionCallbacks->transferExtensionDataFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitTransferExtensionDataFunc();
     sessionCallbacks->transferExtensionDataFunc_(params);
@@ -380,7 +380,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg006, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifyRemoteReadyFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -400,7 +400,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg006, TestSize.L
     sessionWrapper->InitNotifyRemoteReadyFunc();
     sessionCallbacks->notifyRemoteReadyFunc_();
     EXPECT_NE(sessionCallbacks->notifyRemoteReadyFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitNotifyRemoteReadyFunc();
     sessionCallbacks->notifyRemoteReadyFunc_();
@@ -422,7 +422,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg007, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifySyncOnFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -442,7 +442,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg007, TestSize.L
     sessionWrapper->InitNotifySyncOnFunc();
     sessionCallbacks->notifySyncOnFunc_();
     EXPECT_NE(sessionCallbacks->notifySyncOnFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitNotifySyncOnFunc();
     sessionCallbacks->notifySyncOnFunc_();
@@ -464,7 +464,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg008, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifyAsyncOnFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -484,7 +484,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg008, TestSize.L
     sessionWrapper->InitNotifyAsyncOnFunc();
     sessionCallbacks->notifyAsyncOnFunc_();
     EXPECT_NE(sessionCallbacks->notifyAsyncOnFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitNotifyAsyncOnFunc();
     sessionCallbacks->notifyAsyncOnFunc_();
@@ -506,7 +506,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg009, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifyBindModalFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -526,7 +526,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg009, TestSize.L
     sessionWrapper->InitNotifyBindModalFunc();
     sessionCallbacks->notifyBindModalFunc_();
     EXPECT_NE(sessionCallbacks->notifyBindModalFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitNotifyBindModalFunc();
     sessionCallbacks->notifyBindModalFunc_();
@@ -548,7 +548,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg010, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifyGetAvoidAreaByTypeFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     EXPECT_NE(sessionWrapper->session_, nullptr);
@@ -577,7 +577,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg011, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitNotifyExtensionEventFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -598,7 +598,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg011, TestSize.L
     sessionWrapper->InitNotifyExtensionEventFunc();
     sessionCallbacks->notifyExtensionEventFunc_(eventId);
     EXPECT_NE(sessionCallbacks->notifyExtensionEventFunc_, nullptr);
-    
+
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitNotifyExtensionEventFunc();
     sessionCallbacks->notifyExtensionEventFunc_(eventId);
@@ -620,7 +620,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg012, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitGetStatusBarHeightFunc();
-    
+
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     EXPECT_NE(sessionWrapper->session_, nullptr);
@@ -648,7 +648,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg013, TestSize.L
     sessionWrapper->instanceId_ = 100;
 
     sessionWrapper->UpdateInstanceId(instanceId);
-    
+
     instanceId = 100;
     sessionWrapper->instanceId_ = 200;
     auto container = Container::GetContainer(instanceId);
@@ -684,7 +684,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg014, TestSize.L
     EXPECT_TRUE(container->IsUIExtensionSubWindow());
     sessionWrapper->CreateSession(want, config);
     EXPECT_EQ(parentWindowType, container->GetParentWindowType());
-    
+
     sessionWrapper->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
     sessionWrapper->CreateSession(want, config);
 
@@ -853,7 +853,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg021, TestSize.L
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->NotifyBackground(isHandleError);
-    
+
     isHandleError = false;
     sessionWrapper->NotifyBackground(isHandleError);
     EXPECT_NE(sessionWrapper->session_, nullptr);
@@ -871,7 +871,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg022, TestSize.L
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     sessionWrapper->NotifyDestroy(isHandleError);
-    
+
     isHandleError = false;
     sessionWrapper->NotifyDestroy(isHandleError);
     EXPECT_NE(sessionWrapper->session_, nullptr);
@@ -885,7 +885,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg022, TestSize.L
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg023, TestSize.Level1)
 {
     auto sessionWrapper = GenerateSessionWrapperImpl();
-    
+
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -911,7 +911,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg024, TestSize.L
 {
     auto sessionWrapper = GenerateSessionWrapperImpl();
     bool isAbnormal = false;
-    
+
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -942,7 +942,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg025, TestSize.L
 {
     auto sessionWrapper = GenerateSessionWrapperImpl();
     int32_t errorCode = 1;
-    
+
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -967,7 +967,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg025, TestSize.L
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg026, TestSize.Level1)
 {
     auto sessionWrapper = GenerateSessionWrapperImpl();
-    
+
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -1091,7 +1091,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg030, TestSize.L
     code = UIContentBusinessCode::UNDEFINED;
     bool ret = sessionWrapper->SendBusinessDataSyncReply(code, data, reply, RSSubsystemId::WM_UIEXT);
     EXPECT_FALSE(ret);
-    
+
     code = UIContentBusinessCode::EVENT_PROXY;
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
@@ -1256,7 +1256,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.L
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(displayArea);
     EXPECT_EQ(transaction, transactionController->GetRSTransaction());
-    
+
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
     sessionWrapper->NotifyDisplayArea(displayArea);
     EXPECT_EQ(transaction, transactionController->GetRSTransaction());
@@ -1370,7 +1370,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.L
     platformContainerHandler->allowCrossProcessNesting_ = true;
     sessionWrapper->UpdateWantPtr(wantPtr);
     EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
-    
+
     auto uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
     auto windowMode = uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000);
     EXPECT_EQ(windowMode, 0);

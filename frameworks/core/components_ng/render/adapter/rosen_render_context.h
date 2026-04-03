@@ -331,7 +331,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
-    void SetUnionSpacing(float spacing);
+    void SetUnionSpacing(float spacing) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -788,8 +788,7 @@ protected:
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint16_t flag);
-    void OnePixelRounding();
-    void OnePixelRounding(uint16_t flag = 0);
+    void OnePixelRounding(uint16_t flag);
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();

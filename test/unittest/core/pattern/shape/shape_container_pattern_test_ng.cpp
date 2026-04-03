@@ -15,7 +15,7 @@
 
 #include <vector>
 
-#include "foundation/arkui/ace_engine/test/mock/core/rosen/mock_canvas.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #define private public
@@ -42,7 +42,7 @@
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_static.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
-#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -17,7 +17,7 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/render/mock_animation_utils.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_animation_utils.h"
 
 #include "gmock/gmock.h"
 

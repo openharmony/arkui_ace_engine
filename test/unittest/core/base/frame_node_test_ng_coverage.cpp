@@ -21,9 +21,10 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/grid_property.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_canvas_image.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
 
 using namespace testing;
 using namespace testing::ext;

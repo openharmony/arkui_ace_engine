@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <chrono>
 
+#include "core/event/focus_axis_event.h"
+
 namespace OHOS::Ace {
 namespace {
 template<typename EventT>

@@ -23,6 +23,8 @@
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 
+#include <optional>
+
 namespace OHOS::Ace::NG {
 
 class FocusView;

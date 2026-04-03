@@ -52,6 +52,12 @@ std::string NGGestureRecognizer::GetGestureInfoString() const
     return {};
 }
 
+
+RefPtr<Gesture> NGGestureRecognizer::CreateGestureFromRecognizer() const
+{
+    return nullptr;
+}
+
 RefereeState RecognizerGroup::CheckStates(size_t touchId)
 {
     (void)touchId;

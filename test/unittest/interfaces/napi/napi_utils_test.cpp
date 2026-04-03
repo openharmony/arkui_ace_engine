@@ -20,7 +20,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/i18n/localization.h"
-#include "test/mock/base/mock_localization.cpp"
+#include "test/mock/frameworks/base/i18n/mock_localization.cpp"
 
 using namespace testing;
 using namespace testing::ext;

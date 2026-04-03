@@ -14,8 +14,8 @@
  */
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/unittest/capi/stubs/mock_time_picker_dialog_view.h"
 
 #include "core/interfaces/native/utility/converter.h"

@@ -20,7 +20,6 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
 struct CreateWithPara {

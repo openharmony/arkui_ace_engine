@@ -18,9 +18,9 @@
 #define private public
 #define protected public
 #include "adapter/ohos/entrance/ace_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 using namespace testing;

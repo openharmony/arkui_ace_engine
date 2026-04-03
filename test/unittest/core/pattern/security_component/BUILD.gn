@@ -46,7 +46,7 @@ ohos_unittest("security_component_test_ng") {
       "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_handler.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_probe.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
-      "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+      "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_container.cpp",
     ]
     external_deps += [
       "ability_runtime:abilitykit_native",

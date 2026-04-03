@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 

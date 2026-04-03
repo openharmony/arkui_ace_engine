@@ -22,6 +22,7 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/utils/utils.h"

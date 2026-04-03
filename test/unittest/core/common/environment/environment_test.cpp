@@ -19,7 +19,7 @@
 #include "core/common/environment/environment.h"
 #include "core/common/environment/environment_interface.h"
 #include "core/common/environment/environment_proxy.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;

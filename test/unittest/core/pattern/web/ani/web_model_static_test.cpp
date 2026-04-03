@@ -24,7 +24,7 @@
 #define protected public
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #undef protected
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"

@@ -163,6 +163,7 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 const int FACTOR_TWO = 2;
 constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
+constexpr size_t MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC = 200;
 
 static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
 {
@@ -4110,60 +4111,6 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
     }
 }
 
-void RosenRenderContext::OnePixelRounding()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto geometryNode = frameNode->GetGeometryNode();
-    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
-    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
-    float nodeWidth = geometryNode->GetFrameSize().Width();
-    float nodeHeight = geometryNode->GetFrameSize().Height();
-    float roundToPixelErrorX = 0.0f;
-    float roundToPixelErrorY = 0.0f;
-    float absoluteRight = relativeLeft + nodeWidth;
-    float absoluteBottom = relativeTop + nodeHeight;
-
-    float nodeLeftI = OnePixelValueRounding(relativeLeft);
-    float nodeTopI = OnePixelValueRounding(relativeTop);
-    roundToPixelErrorX += nodeLeftI - relativeLeft;
-    roundToPixelErrorY += nodeTopI - relativeTop;
-    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
-
-    float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
-    float nodeWidthTemp = OnePixelValueRounding(nodeWidth);
-    roundToPixelErrorX += nodeWidthI - nodeWidth;
-    if (roundToPixelErrorX > 0.5f) {
-        nodeWidthI -= 1.0f;
-        roundToPixelErrorX -= 1.0f;
-    }
-    if (roundToPixelErrorX < -0.5f) {
-        nodeWidthI += 1.0f;
-        roundToPixelErrorX += 1.0f;
-    }
-    if (nodeWidthI < nodeWidthTemp) {
-        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
-        nodeWidthI = nodeWidthTemp;
-    }
-
-    float nodeHeightI = OnePixelValueRounding(absoluteBottom) - nodeTopI;
-    float nodeHeightTemp = OnePixelValueRounding(nodeHeight);
-    roundToPixelErrorY += nodeHeightI - nodeHeight;
-    if (roundToPixelErrorY > 0.5f) {
-        nodeHeightI -= 1.0f;
-        roundToPixelErrorY -= 1.0f;
-    }
-    if (roundToPixelErrorY < -0.5f) {
-        nodeHeightI += 1.0f;
-        roundToPixelErrorY += 1.0f;
-    }
-    if (nodeHeightI < nodeHeightTemp) {
-        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
-        nodeHeightI = nodeHeightTemp;
-    }
-    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-}
-
 void RosenRenderContext::OnePixelRounding(uint16_t flag)
 {
     auto frameNode = GetHost();
@@ -4404,6 +4351,18 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     CHECK_NULL_VOID(uiNode);
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
+    auto pipeline = parent->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    int32_t idUpdateZOrderIndex = pipeline->GetIdUpdateZOrderIndex();
+    if (idUpdateZOrderIndex >= MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC) {
+        if (idUpdateZOrderIndex == MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "OnZIndexUpdate in one vsync over MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC");
+        }
+        pipeline->SetAfterRenderZindexRebuild(parent->GetId());
+        RequestNextFrame();
+        return;
+    }
+    pipeline->UpdateIdUpdateZOrderIndex();
     parent->MarkNeedSyncRenderTree();
     FREE_NODE_CHECK(uiNode, OnZIndexUpdate, parent);
     auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
@@ -4411,8 +4370,6 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
         CHECK_NULL_VOID(parent);
         parent->RebuildRenderContextTree();
     };
-    auto pipeline = parent->GetContext();
-    CHECK_NULL_VOID(pipeline);
     if (pipeline->IsLayouting()) {
         pipeline->AddAfterLayoutTask(std::move(task));
         return;
@@ -6613,7 +6570,7 @@ void RosenRenderContext::DumpInfo()
                     std::string("blendMode has difference,arkui:") + std::to_string(blendMode));
             }
         }
-        
+
         auto rsBlendApplyType = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
         if (GetBackBlendApplyType().has_value() || rsBlendApplyType) {
             DumpLog::GetInstance().AddDesc(
