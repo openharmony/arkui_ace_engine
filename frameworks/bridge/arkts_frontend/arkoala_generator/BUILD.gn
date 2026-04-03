@@ -49,7 +49,7 @@ scan_sources("arkui_extra_idl") {
 }
 
 action("runner_gen_code") {
-  script = "generation.py"
+  script = "gn/command/generation.py"
   args = [
     "--arkts-sdk-path",
     rebase_path("${ohos_ets_api_path}/.."),
@@ -108,7 +108,7 @@ action("runner_gen_code") {
 }
 
 action("idlize_gen") {
-  script = "deploy.py"
+  script = "gn/command/deploy.py"
   args = [
     "--source",
     rebase_path(idlize_gen_output_path),
