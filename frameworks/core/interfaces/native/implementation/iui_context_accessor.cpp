@@ -15,6 +15,8 @@
 
 #include "arkoala_api_generated.h"
 
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
@@ -492,6 +494,28 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
+void EnableEventPassthroughImpl(const Opt_Boolean* enabled, Ark_RawInputEventType eventType)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto enabledVal = Converter::OptConvertPtr<bool>(enabled).value_or(false);
+    auto bundleName = container->GetBundleName();
+    switch (eventType) {
+        case ARK_RAW_INPUT_EVENT_TYPE_TOUCH:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabledVal, bundleName);
+            break;
+        case ARK_RAW_INPUT_EVENT_TYPE_MOUSE:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabledVal, bundleName);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "EnableEventPassthroughImpl: unknown eventType=%{public}d",
+                static_cast<int32_t>(eventType));
+            break;
+    }
+}
 } // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -507,6 +531,7 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+        IUIContextAccessor::EnableEventPassthroughImpl,
     };
     return &IUIContextAccessorImpl;
 }

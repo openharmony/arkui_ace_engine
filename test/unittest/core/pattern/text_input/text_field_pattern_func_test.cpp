@@ -14,8 +14,8 @@
  */
 
 #include "text_input_base.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
@@ -977,7 +977,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay005, TestSize.Level1)
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty, nullptr);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay006
  * @tc.desc: test base_text_select_overlay.cpp GetVisibleContentRect
@@ -1039,7 +1039,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay007, TestSize.Level1)
     EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), 0);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay008
  * @tc.desc: test base_text_select_overlay.cpp GetLocalPointWithTransform
@@ -1126,7 +1126,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay010, TestSize.Level1)
     EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), 0);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay011
  * @tc.desc: test base_text_select_overlay.cpp UpdateMenuWhileAncestorNodeChanged
@@ -1156,7 +1156,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay011, TestSize.Level1)
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty, nullptr);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay012
  * @tc.desc: test base_text_select_overlay.cpp RegisterScrollingListener
@@ -1488,7 +1488,7 @@ HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize
     manager->shareOverlayInfo_ = shareOverlayInfo;
     pattern->selectOverlay_->OnBind(manager);
     manager->SetHolder(pattern->selectOverlay_);
-    
+
     /**
      * @tc.steps: step3. Enable transform and set up test rectangles.
      */
@@ -1496,12 +1496,12 @@ HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize
     pattern->contentRect_ = RectF(0, 0, 300, 100);
     pattern->textRect_ = RectF(10, 10, 290, 90);
     pattern->selectController_->caretInfo_.rect.SetRect(50, 30, 100, 40);
-    
+
     /**
      * @tc.steps: step4. Call GetSelectAreaFromRects with LEFT_TOP_POINT.
      */
     auto result = pattern->selectOverlay_->GetSelectAreaFromRects(SelectRectsType::LEFT_TOP_POINT);
-    
+
     /**
      * @tc.expected: The result should be constrained within content rect.
      */

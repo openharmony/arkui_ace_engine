@@ -36,17 +36,29 @@ function startStaticHook(source: Object, addRef: () => void): Object | undefined
 * @returns  Creates a dynamic builder function that wraps a static builder
 */
 function createDynamicBuilder(
-  staticBuilder: (...args: any[]) => number
+  staticBuilder: (...args: any[]) => number | [number, ()=>void],
 ): (...args: any[]) => void {
   let func = function (...args: any[]): void {
-      this.observeComponentCreation2((elmtId: number, isInitialRender: boolean) => {
-          ObserveV2.getObserve().__interopInStaticRendering_internal_ = true;
-          if (isInitialRender) {
-              let pointer = staticBuilder(...args);
-              ViewStackProcessor.push(pointer);
-              ViewStackProcessor.pop();
+    let result;
+    this.observeComponentCreation2(
+      (elmtId: number, isInitialRender: boolean) => {
+        ObserveV2.getObserve().__interopInStaticRendering_internal_ = true;
+        if (isInitialRender) {
+          result = staticBuilder(...args);
+          let ptr = typeof result === 'number' ? result : result[0];
+          ViewStackProcessor.push(ptr);
+          ViewStackProcessor.pop();
+        } else {
+          args.forEach((arg) => {
+            if (arg && typeof arg === 'object' && 'value' in arg) {
+              arg.value;
+            }
+          });
+          if (result[1]) {
+            result[1]();
           }
-          ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;
+        }
+        ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;
       }, {});
   };
   return func;
@@ -117,4 +129,13 @@ function getBuilderParamProxyEntries(value: Object): any[] {
         }
     }
     return res;
+}
+
+function staticBuilderUpdate(builderViewV2: BuilderViewV2) {
+  for (let i = 1; i <= 10; i++) {
+    if (('arg' + i) in builderViewV2 && (builderViewV2['arg' + i] instanceof MutableBinding || builderViewV2['arg' + i] instanceof Binding)) {
+      invokeObserveFireChange(builderViewV2['arg' + i], 'value');
+    }
+  }
+  runPendingJobs();
 }

@@ -22,10 +22,10 @@
 #define protected public
 
 #include "base/utils/system_properties.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/force_split/force_split_utils.h"
 
@@ -336,6 +336,25 @@ HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable002, TestSize.Level1)
     EXPECT_TRUE(manager->delayedIsForceSplitEnable_.has_value());
     EXPECT_FALSE(manager->delayedIsForceSplitEnable_.value());
     EXPECT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+}
+
+/**
+ * @tc.name: SetForceSplitEnable003
+ * @tc.desc: Branch: if (needUpdateViewport) { => false
+ *                   if (delayedIsForceSplitEnable_.has_value()) { => true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable003, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedIsForceSplitEnable_ = true;
+    manager->SetForceSplitEnable(false, false);
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
 }
 
 /**

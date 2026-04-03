@@ -31,6 +31,8 @@ namespace {
 const auto ATTRIBUTE_TEXT_SHADOW_NAME = "textShadow";
 const auto ATTRIBUTE_IS_COUNT_DOWN_NAME = "isCountDown";
 const auto ATTRIBUTE_IS_COUNT_DOWN_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_START_TIME_NAME = "startTime";
+const auto ATTRIBUTE_START_TIME_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_FORMAT_NAME = "format";
 const auto ATTRIBUTE_FORMAT_DEFAULT_VALUE = "HH:mm:ss.SS";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
@@ -84,6 +86,10 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestDefaultValues, TestSize.L
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_COUNT_DOWN_NAME);
     EXPECT_THAT(resultStr, Optional(ATTRIBUTE_IS_COUNT_DOWN_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.isCountDown'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_TIME_NAME);
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_START_TIME_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.startTime'";
 }
 
 /*

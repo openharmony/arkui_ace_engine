@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace::NG {
 struct SecurityComponentElementStyle {

@@ -17,8 +17,8 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/unittest/capi/stubs/mock_text_picker_dialog_view.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 

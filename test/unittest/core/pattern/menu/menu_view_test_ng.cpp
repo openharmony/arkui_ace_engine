@@ -20,13 +20,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
@@ -1478,5 +1478,282 @@ HWTEST_F(MenuViewTestNg, Create003, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: ShowPixelMapAnimation001
+ * @tc.desc: Test ShowPixelMapAnimation with menuNode nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapAnimation001, TestSize.Level1)
+{
+    RefPtr<FrameNode> menuNode = nullptr;
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_EQ(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapAnimation002
+ * @tc.desc: Test ShowPixelMapAnimation with normal menuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapAnimation002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto preview = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(preview, nullptr);
+    preview->MountToParent(menuWrapperNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsShowHoverImage(false);
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapAnimation003
+ * @tc.desc: Test ShowPixelMapAnimation with FLEX_ETS_TAG preview
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapAnimation003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto flexNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<FlexLayoutPattern>(false));
+    ASSERT_NE(flexNode, nullptr);
+    flexNode->MountToParent(menuWrapperNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsShowHoverImage(false);
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapAnimation004
+ * @tc.desc: Test ShowPixelMapAnimation with HasPreviewTransitionEffect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapAnimation004, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasPreviewTransitionEffect(true);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto preview = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(preview, nullptr);
+    preview->MountToParent(menuWrapperNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsShowHoverImage(false);
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapScaleAnimationProc001
+ * @tc.desc: Test ShowPixelMapScaleAnimationProc with scaleBefore and scaleAfter valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapScaleAnimationProc001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewBeforeAnimationScale(0.5f);
+    menuPattern->SetPreviewAfterAnimationScale(1.0f);
+
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto geometryNode = imageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapScaleAnimationProc002
+ * @tc.desc: Test ShowPixelMapScaleAnimationProc with scaleBefore and scaleAfter negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapScaleAnimationProc002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewBeforeAnimationScale(-1.0f);
+    menuPattern->SetPreviewAfterAnimationScale(-1.0f);
+
+    auto preview = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(preview, nullptr);
+    preview->MountToParent(menuWrapperNode);
+
+    auto geometryNode = preview->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowPixelMapScaleAnimationProc003
+ * @tc.desc: Test ShowPixelMapScaleAnimationProc with geometrySize positive
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShowPixelMapScaleAnimationProc003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewBeforeAnimationScale(1.0f);
+    menuPattern->SetPreviewAfterAnimationScale(1.2f);
+
+    auto preview = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(preview, nullptr);
+    preview->MountToParent(menuWrapperNode);
+
+    auto geometryNode = preview->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    MenuView::ShowPixelMapAnimation(menuNode);
+    EXPECT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: GetMenuPixelMap002
+ * @tc.desc: Test GetMenuPixelMap function
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, GetMenuPixelMap002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    MenuParam menuParam;
+    MenuView::GetMenuPixelMap(targetNode, menuParam, menuWrapperNode);
+    EXPECT_NE(menuWrapperNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

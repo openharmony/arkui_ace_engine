@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cstddef>
 #include <optional>
@@ -28,7 +29,6 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/icon_theme.h"

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class VideoModifier extends ArkVideoComponent implements AttributeModifier<VideoAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

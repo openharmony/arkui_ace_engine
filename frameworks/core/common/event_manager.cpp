@@ -1836,6 +1836,8 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     if (validAction.find(event.action) == validAction.end()) {
         return false;
     }
+    ACE_SCOPED_TRACE("DispatchMouseEventNG type:%d button:%d", static_cast<int32_t>(event.action),
+        static_cast<int32_t>(event.button));
     NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     lastMouseEvent_ = event;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {

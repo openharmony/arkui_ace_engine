@@ -14,7 +14,7 @@
  */
 #include "test/unittest/core/pattern/grid_row/grid_row_base_test_ng.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class GridContainerUtilsTestNG : public GridRowBaseTestNG {

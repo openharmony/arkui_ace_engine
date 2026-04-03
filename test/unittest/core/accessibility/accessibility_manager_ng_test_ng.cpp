@@ -19,7 +19,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"

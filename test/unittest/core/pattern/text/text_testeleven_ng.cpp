@@ -23,7 +23,7 @@
 #define private public
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #undef private
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
 namespace OHOS::Ace::NG {
 

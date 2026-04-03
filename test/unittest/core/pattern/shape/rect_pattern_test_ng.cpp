@@ -19,7 +19,7 @@
 #define protected public
 
 #include "base_shape_pattern_test_ng.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"

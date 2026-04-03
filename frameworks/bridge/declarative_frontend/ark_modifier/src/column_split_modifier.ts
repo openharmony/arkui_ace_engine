@@ -13,16 +13,49 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class ColumnSplitModifier extends ArkColumnSplitComponent implements AttributeModifier<ColumnSplitAttribute> {
+class LazyArkColumnSplitComponent extends ArkComponent {
+  static module: ColumnSplitComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkColumnSplitComponent.module === undefined) {
+      LazyArkColumnSplitComponent.module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
+    }
+
+    this.lazyComponent = LazyArkColumnSplitComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  resizeable(value: boolean): this {
+    this.lazyComponent.resizeable(value);
+    return this;
+  }
+
+  divider(value: ColumnSplitDividerStyle | null): this {
+    this.lazyComponent.divider(value);
+    return this;
+  }
+
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    this.lazyComponent.clip(value);
+    return this;
+  }
+}
+
+class ColumnSplitModifier extends LazyArkColumnSplitComponent implements AttributeModifier<ColumnSplitAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: ColumnSplitAttribute): void {
     ModifierUtils.applySetOnChange(this);
+    // @ts-ignore
     ModifierUtils.applyAndMergeModifier<ColumnSplitAttribute, ArkColumnSplitComponent, ArkComponent>(instance, this);
   }
 }

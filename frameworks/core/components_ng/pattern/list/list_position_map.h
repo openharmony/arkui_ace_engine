@@ -16,28 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_POSITION_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_POSITION_MAP_H
 
-
-#include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <optional>
-#include <tuple>
-#include <queue>
+#include <utility>
 
-#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/property/measure_property.h"
 
 
 namespace OHOS::Ace::NG {
-class ListItemGroupPattern;
+class FrameNode;
+class LayoutWrapper;
+class UINode;
 
 struct ListPositionInfo {
     float mainPos;

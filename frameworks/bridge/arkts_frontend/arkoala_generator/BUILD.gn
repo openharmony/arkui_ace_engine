@@ -18,19 +18,30 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
+if (ohos_indep_compiler_enable) {
+  libarkts_path = "//binarys/developtools/ace_ets2bundle/innerapis/ohos_ets_libarkts_pack_prebuilt/clang_x64/libs/libarkts.tgz"
+  pandasdk_path = "//binarys/developtools/ace_ets2bundle/innerapis/panda_sdk/clang_x64/libs/panda_sdk.tgz"
+} else {
+  libarkts_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
+  pandasdk_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts/panda-sdk/panda_sdk.tgz"
+}
+
 
 action("runner_gen_code") {
-  script = "generation.py"
+  script = "gn/command/generation.py"
   args = [
+    "--arkts_sdk_path",
     rebase_path("${ohos_ets_api_path}"),
-    rebase_path("./out/"),
-    rebase_path("./generation_config/arkgen-config.json"),
-    rebase_path("./generation_config/scraper-config.json"),
-    rebase_path("./generation_config/etsgen-config.json"),
+    "--base_dir",
+    rebase_path("."),
+    "--arkgen_interop_types",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
-    rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/arkoala_generator/node_modules/@koalaui/libarkts/sdk"),
+    "--panda_sdk_path",
+    rebase_path("${pandasdk_path}"),
+    "--node_bin_path",
     rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-    rebase_path("./arkui_extra_idl/"),
+    "--libarkts_path",
+    rebase_path("${libarkts_path}"),
   ]
   external_deps = [
     ohos_ets_api_deps,
@@ -42,7 +53,7 @@ action("runner_gen_code") {
 }
 
 action("idlize_gen") {
-  script = "deploy.py"
+  script = "gn/command/deploy.py"
   args = [
     "--source",
     rebase_path("./out/sig/arkoala-arkts/arkui/generated"),

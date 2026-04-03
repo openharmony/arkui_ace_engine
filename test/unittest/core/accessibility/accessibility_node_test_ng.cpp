@@ -21,8 +21,8 @@
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "core/common/container.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 using namespace testing;
 using namespace testing::ext;
 

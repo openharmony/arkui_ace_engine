@@ -14,7 +14,7 @@
  */
 
 #include "tabs_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
 

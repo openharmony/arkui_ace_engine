@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_COMPONENT_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/sole_child_component.h"
 

@@ -99,6 +99,15 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 }
 } // namespace
 
+int32_t GetMainInstanceId(int32_t instanceId)
+{
+    if (instanceId >= MIN_SUBCONTAINER_ID && instanceId < MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto manager = SubwindowManager::GetInstance();
+        return manager ? manager->GetParentContainerId(instanceId) : instanceId;
+    }
+    return instanceId;
+}
+
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
 static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
@@ -1125,23 +1134,27 @@ ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
 }
 void GetCallingScopeUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::CurrentId();
+    instanceId = GetMainInstanceId(ContainerScope::CurrentId());
 }
 
 void GetLastFocusedUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::RecentActiveId();
+    instanceId = GetMainInstanceId(ContainerScope::RecentActiveId());
 }
 
 void GetLastForegroundUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::RecentForegroundId();
+    instanceId = GetMainInstanceId(ContainerScope::RecentForegroundId());
 }
 
 void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 {
     const auto allIds = ContainerScope::GetAllUIContexts();
+    std::set<int32_t> idSet;
     for (const auto& id : allIds) {
+        idSet.emplace(GetMainInstanceId(id));
+    }
+    for (const auto& id : idSet) {
         instanceIds.push_back(id);
     }
 }
@@ -1149,7 +1162,7 @@ void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
     auto currnetId = ContainerScope::CurrentIdWithReason();
-    instnace.push_back(currnetId.first);
+    instnace.push_back(GetMainInstanceId(currnetId.first));
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
 

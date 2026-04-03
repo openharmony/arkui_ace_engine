@@ -419,6 +419,8 @@ public:
 
     void JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info);
 
+    void RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc);
+
     void SetLatestInstanceId(const int32_t instanceId);
 
     JSRef<JSVal> GetJsContext();

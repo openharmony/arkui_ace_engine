@@ -22,7 +22,6 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/i18n/localization.h"
-#include "core/components/common/properties/text_style.h"
 #include "frameworks/core/components/font/constants_converter.h"
 #include "frameworks/core/components/font/rosen_font_collection.h"
 #include "frameworks/core/components/text/text_theme.h"

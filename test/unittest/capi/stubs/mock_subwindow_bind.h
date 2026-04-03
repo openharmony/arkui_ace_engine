@@ -21,7 +21,7 @@
 #include "modifiers_test_utils.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/capi/stubs/mock_subwindow_bind.h"
 
 namespace OHOS::Ace::NG {

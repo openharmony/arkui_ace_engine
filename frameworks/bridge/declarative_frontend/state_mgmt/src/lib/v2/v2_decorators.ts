@@ -253,14 +253,57 @@ const Consumer = (aliasName?: string) => {
  * part of SDK
  * @since 12
  */
-const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
-  const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
+
+type MonitorFunctionInfo = [(m: IMonitor) => void, boolean]; // Function, wildcard
+
+function Monitor(optionsOrFirstPath : MonitorDecoratorOptions | string, path?: string, ...pathN: string[]): (target: Object, _: string, descriptor: PropertyDescriptor) => void {
+  let monitorWithOptionsMode = false;
+  let enableWildcard = false;
+  if (typeof optionsOrFirstPath === 'string') {
+    // Original @Monitor without options
+    if (path) {
+      pathN.unshift(optionsOrFirstPath, path);
+    } else {
+      pathN.unshift(optionsOrFirstPath);
+    }
+  } else {
+    // @Monitor with options
+    monitorWithOptionsMode = true;
+    if (path != null) {
+      pathN.unshift(path);
+    }
+    // enableWildcard - default value is true
+    enableWildcard = (optionsOrFirstPath as MonitorDecoratorOptions).enableWildcard ?? true;
+  }
+
+  const pathsUniqueString = pathN.join(' ');
   return function (target, _, descriptor): void {
     ObserveV2.addMethodDecoMeta(target, descriptor.value.name, '@Monitor');
     stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
-    let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
+    // @Monitor with options uses different code paths than original @Monitor without options.
+    // @Monitor with options relies on the same code path that used by Add/ClearMonitor
+    // API implementation.
+    //
+    // @Monitor with options - supports wildcard in the path and correctly handles cases when
+    // attribute on the path becomes undefined and then back to valid reference.
+    //
+    // @Monitor without options
+    // - does not fire correctly when attribute on the path triggers
+    //   between undefined and valid reference
+    // - can trigger erroneously for properties not decorated with @Trace
+    //
+    const symbolName = monitorWithOptionsMode
+      ? MonitorV2.MONITOR_WITH_OPTIONS_PREFIX + target.constructor.name
+      : MonitorV2.MONITOR_ORIG_PREFIX + target.constructor.name;
+    let watchProp = Symbol.for(symbolName);
     const monitorFunc = descriptor.value;
-    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+    let info = monitorWithOptionsMode
+      ? [monitorFunc, enableWildcard] as MonitorFunctionInfo
+      : monitorFunc;
+
+    target[watchProp]
+      ? target[watchProp][pathsUniqueString] = info
+      : target[watchProp] = { [pathsUniqueString]: info };
   };
 };
 
@@ -269,6 +312,7 @@ const SyncMonitor = function (key : string, ...keys: string[]): (target: Object,
   const isValidPath = (typeof key === 'string') && keys.every(item => typeof item === 'string');
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
+    ObserveV2.addMethodDecoMeta(target, descriptor.value.name, '@SyncMonitor');
     const monitorFunc = descriptor.value;
     if (!isValidPath) {
       const message = `@SyncMonitor '${monitorFunc.name}' owned by '${target.constructor.name}' - failed to initialize, path type not valid, path(s) must be of type string`;

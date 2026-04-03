@@ -26,8 +26,8 @@ ohos_unittest("ui_content_stub_unittest") {
   sources = [
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
-    "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
-    "$ace_root/test/mock/adapter/mock_ui_session_manager_ohos.cpp",
+    "$ace_root/test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/ui_session/mock_ui_session_manager_ohos.cpp",
 
     # mocker
     "accesstoken_kit.cpp",

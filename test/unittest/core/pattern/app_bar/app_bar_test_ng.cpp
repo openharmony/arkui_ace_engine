@@ -22,9 +22,9 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -1061,7 +1061,7 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
     bool callbackCalled = false;
     std::string callbackName;
     std::string callbackValue;
-    
+
     auto callback =
         [&callbackCalled, &callbackName, &callbackValue](const std::string& name, const std::string& value) mutable {
         callbackCalled = true;

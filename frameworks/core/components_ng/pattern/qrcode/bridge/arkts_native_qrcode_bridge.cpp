@@ -14,7 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/qrcode/bridge/arkts_native_qrcode_bridge.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_qrcode_theme.h"
@@ -95,9 +95,6 @@ ArkUINativeModuleValue QRCodeBridge::SetQRColor(ArkUIRuntimeCallInfo* runtimeCal
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-
-    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
-
     if (!ArkTSUtils::ParseJsColorAlpha(vm, qrColorArg, color, colorResObj, nodeInfo) &&
         (IsJsView(firstArg, vm) || !Framework::JSQRCodeTheme::ObtainQRCodeColor(color))) {
         GetArkUINodeModifiers()->getQRCodeModifier()->resetQRColor(nativeNode);

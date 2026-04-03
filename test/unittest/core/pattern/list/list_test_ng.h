@@ -21,15 +21,24 @@
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/base/mock_system_properties.h"
-#undef private
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components/list/list_item_theme.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #undef protected
 
 namespace OHOS::Ace::NG {

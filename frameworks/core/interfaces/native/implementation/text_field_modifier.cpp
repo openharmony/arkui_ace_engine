@@ -16,7 +16,6 @@
 // SORTED_SECTION
 #include "core/common/container.h"
 #include "core/components/common/properties/text_layout_info.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"

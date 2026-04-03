@@ -50,7 +50,6 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -58,7 +57,6 @@
 #include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -67,16 +65,20 @@ namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
 using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
-}
+} // namespace OHOS::Ace::Kit
 
 namespace OHOS::Rosen {
-  class RSUIDirector;
+class RSUIDirector;
+}
+
+namespace OHOS::Ace::NG {
+    class RecycleManager;
 }
 
 namespace OHOS::Ace {
-    class ResSchedClickOptimizer;
-    class ResSchedTouchOptimizer;
-}
+class ResSchedClickOptimizer;
+class ResSchedTouchOptimizer;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 
@@ -90,6 +92,7 @@ class LoadCompleteManager;
 class PageInfo;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
+class SafeAreaManager;
 class SelectOverlayManager;
 class UIExtensionManager;
 
@@ -132,7 +135,6 @@ public:
 
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
-
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);
@@ -156,8 +158,8 @@ public:
         return focusOnNodeCallback_;
     }
 
-    void SetSizeChangeByRotateCallback(const std::function<void(bool isRotate,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    void SetSizeChangeByRotateCallback(
+        const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
     {
         sizeChangeByRotateCallback_ = callback;
     }
@@ -177,8 +179,7 @@ public:
         return linkJumpCallback_ != nullptr;
     }
 
-    void FireSizeChangeByRotateCallback(bool isRotate,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    void FireSizeChangeByRotateCallback(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
     {
         if (sizeChangeByRotateCallback_) {
             sizeChangeByRotateCallback_(isRotate, rsTransaction);
@@ -262,24 +263,17 @@ public:
     void SetIsTransFlag(bool result);
 
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
-    void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
-        const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
-    void DispatchMouseEvent(
-        std::unordered_map<int, MouseEvent>& idToMousePoints,
-        std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
-        const std::list<MouseEvent> &mouseEvents,
-        TouchRestrict& touchRestrict,
-        const RefPtr<FrameNode> &node);
+    void OnFlushMouseEvent(
+        const RefPtr<FrameNode>& node, const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
+    void DispatchMouseEvent(std::unordered_map<int, MouseEvent>& idToMousePoints,
+        std::unordered_map<int32_t, MouseEvent>& newIdMousePoints, const std::list<MouseEvent>& mouseEvents,
+        TouchRestrict& touchRestrict, const RefPtr<FrameNode>& node);
     void FlushDragEvents();
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager, const std::string& extraInfo,
+        const RefPtr<FrameNode>& node, const std::list<DragPointerEvent>& pointEvent);
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        const std::string& extraInfo,
-        const RefPtr<FrameNode>& node,
-        const std::list<DragPointerEvent>& pointEvent);
-    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        const std::unordered_map<int32_t, DragPointerEvent>& newIdPoints,
-        const std::string& extraInfo,
-        const std::unordered_map<int, DragPointerEvent>& idToPoints,
-        const RefPtr<FrameNode>& node);
+        const std::unordered_map<int32_t, DragPointerEvent>& newIdPoints, const std::string& extraInfo,
+        const std::unordered_map<int, DragPointerEvent>& idToPoints, const RefPtr<FrameNode>& node);
     void FlushDragEventVoluntarily();
 
     // Called by view when axis event received.
@@ -325,9 +319,8 @@ public:
     // Just register notification, no need to update callback.
     void AddVisibleAreaChangeNode(const int32_t nodeId);
 
-    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true,
-        bool isCalculateInnerClip = false);
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
+        const VisibleRatioCallback& callback, bool isUserCallback = true, bool isCalculateInnerClip = false);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
@@ -457,14 +450,14 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
 
-    void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
-        bool checkSceneBoardWindow = false) override;
+    void UpdateSystemSafeAreaWithoutAnimation(
+        const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) override;
 
-    void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
-        bool checkSceneBoardWindow = false) override;
+    void UpdateCutoutSafeAreaWithoutAnimation(
+        const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false) override;
 
-    void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
-        bool checkSceneBoardWindow = false) override;
+    void UpdateNavSafeAreaWithoutAnimation(
+        const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) override;
 
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
@@ -496,12 +489,10 @@ public:
 
     void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
-    void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
-        bool keyboardHeightChanged);
-    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF& rootSize, bool isInline = false);
-    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
-        float height, SizeF rootSize);
+    void DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height, bool keyboardHeightChanged);
+    float CalcNewKeyboardOffset(
+        float keyboardHeight, float positionYWithOffset, float height, SizeF& rootSize, bool isInline = false);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset, float height, SizeF rootSize);
 
     bool IsEnableKeyBoardAvoidMode() override;
 
@@ -517,8 +508,7 @@ public:
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
 
-    void SendEventToAccessibilityWithNode(
-        const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node);
+    void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node);
 
     const RefPtr<StageManager>& GetStageManager();
 
@@ -604,8 +594,8 @@ public:
         return focusManager_ ? focusManager_->GetIsFocusActive() : false;
     }
 
-    bool SetIsFocusActive(bool isFocusActive,
-        FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
+    bool SetIsFocusActive(
+        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -858,8 +848,8 @@ public:
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap,
         AceAutoFillTriggerType triggerType, RefPtr<FrameNode> requestNode);
-    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
-        const std::string& fillContent = "", bool isPopup = false);
+    void NotifyFillRequestFailed(
+        RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
@@ -974,7 +964,8 @@ public:
         onceVsyncListener_ = std::move(vsync);
     }
 
-    bool HasOnceVsyncListener() {
+    bool HasOnceVsyncListener()
+    {
         return onceVsyncListener_ != nullptr;
     }
 
@@ -1045,8 +1036,7 @@ public:
 
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
-    void RegisterOverlayNodePositionsUpdateCallback(
-        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+    void RegisterOverlayNodePositionsUpdateCallback(const std::function<void(std::vector<Ace::RectF>)>&& callback);
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
@@ -1109,8 +1099,8 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
-        int64_t delayMillis);
+    void AddFrameCallback(
+        FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc, int64_t delayMillis);
 
     void FlushFrameCallback(uint64_t nanoTimestamp, uint64_t frameCount);
     void TriggerIdleCallback(int64_t deadline);
@@ -1153,8 +1143,7 @@ public:
 
     bool IsTagInOverlay(const std::string& tag) const;
 
-    void GetComponentOverlayInspector(
-        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+    void GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
         ParamConfig config, bool isInSubWindow) const;
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
@@ -1475,9 +1464,8 @@ private:
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
-    void ConsumeTouchEventsInterpolation(
-        const std::unordered_set<int32_t>& ids, const std::map<int32_t, int32_t>& timestampToIds,
-        std::unordered_map<int32_t, TouchEvent>& newIdTouchPoints,
+    void ConsumeTouchEventsInterpolation(const std::unordered_set<int32_t>& ids,
+        const std::map<int32_t, int32_t>& timestampToIds, std::unordered_map<int32_t, TouchEvent>& newIdTouchPoints,
         const std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void AccelerateConsumeTouchEvents(
         std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
@@ -1488,6 +1476,10 @@ private:
     void SetTouchPassThrough(bool isEnable) override
     {
         isEventsPassThrough_ = isEnable;
+    }
+    void SetMousePassThrough(bool isEnable) override
+    {
+        isMousePassThrough_ = isEnable;
     }
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
@@ -1526,8 +1518,8 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
-        SerializedGesture& etsSerializedGesture);
+    void DispatchAxisEventToDragDropManager(
+        const AxisEvent& event, const RefPtr<FrameNode>& node, SerializedGesture& etsSerializedGesture);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1653,7 +1645,7 @@ private:
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
-    RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
+    RefPtr<SafeAreaManager> safeAreaManager_;
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();
@@ -1667,6 +1659,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
+    bool isMousePassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
@@ -1689,8 +1682,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
-    std::function<void(bool isRotate,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
+    std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>
+        sizeChangeByRotateCallback_;
     std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
     std::function<bool(int32_t)> flushTSUpdatesCb_;
@@ -1737,7 +1730,7 @@ private:
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
-    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
+    std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;

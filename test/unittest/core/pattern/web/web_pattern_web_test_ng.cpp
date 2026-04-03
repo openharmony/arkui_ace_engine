@@ -24,7 +24,7 @@
 #define private public
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -1659,6 +1659,34 @@ HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     webPattern->delegate_ = nullptr;
     webPattern->OnForceEnableZoomUpdate(value);
+#endif
+}
+
+/**
+ * @tc.name: OnScrollbarLayoutPolicyUpdate
+ * @tc.desc: OnScrollbarLayoutPolicyUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::CONTENT);
+
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

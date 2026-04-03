@@ -13,12 +13,87 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class TextClockModifier extends ArkTextClockComponent implements AttributeModifier<TextClockAttribute> {
+class LazyArkTextClockComponent extends ArkComponent {
+  static module: TextClockComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkTextClockComponent.module === undefined) {
+     LazyArkTextClockComponent.module = globalThis.requireNapi('arkui.components.arktextclock');
+   }
+
+   this.lazyComponent = LazyArkTextClockComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  value(value: number): this {
+   this.lazyComponent.value(value);
+   return this;
+  }
+
+  format(value: ResourceStr): this {
+   this.lazyComponent.format(value);
+   return this;
+  }
+
+  onDateChange(event: (value: number) => void): this {
+   this.lazyComponent.onDateChange(event);
+   return this;
+  }
+
+  fontColor(value: ResourceColor): this {
+   this.lazyComponent.fontColor(value);
+   return this;
+  }
+
+  fontSize(value: Length): this {
+   this.lazyComponent.fontSize(value);
+   return this;
+  }
+
+  fontStyle(value: FontStyle): this {
+   this.lazyComponent.fontStyle(value);
+   return this;
+  }
+
+  fontWeight(value: number | FontWeight | string): this {
+   this.lazyComponent.fontWeight(value);
+   return this;
+  }
+
+  fontFamily(value: ResourceStr): this {
+   this.lazyComponent.fontFamily(value);
+   return this;
+  }
+
+  textShadow(value: ShadowOptions | Array<ShadowOptions>): this {
+   this.lazyComponent.textShadow(value);
+   return this;
+  }
+
+  fontFeature(value: string): this {
+   this.lazyComponent.fontFeature(value);
+   return this;
+  }
+
+  contentModifier(modifier: ContentModifier<TextClockConfiguration>): this {
+   this.lazyComponent.contentModifier(modifier);
+   return this;
+  }
+
+  dateTimeOptions(dateTimeOptions: DateTimeOptions): this {
+   this.lazyComponent.dateTimeOptions(dateTimeOptions);
+   return this;
+  }
+}
+class TextClockModifier extends LazyArkTextClockComponent implements AttributeModifier<TextClockAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: TextClockAttribute): void {

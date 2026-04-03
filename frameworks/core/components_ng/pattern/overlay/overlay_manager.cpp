@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <string>
 #include <utility>

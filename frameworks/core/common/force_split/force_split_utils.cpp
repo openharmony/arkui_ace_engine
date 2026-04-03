@@ -522,11 +522,14 @@ void ForceSplitUtils::LogSystemForceSplitConfig(
         AceLogTag::ACE_NAVIGATION,
         "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
         "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
         isRouter, homePage.c_str(), FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
         (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
 }
 
 void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
@@ -534,11 +537,14 @@ void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConf
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
         "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
-        "disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        "disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
         isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
         FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
 }
 } // namespace OHOS::Ace::NG
 

@@ -39,6 +39,7 @@ class NWebAccessibilityNodeInfo;
 
 namespace OHOS::Ace::NG {
     class TransitionalNodeInfo;
+    struct WindowSceneInfo;
 }
 
 namespace OHOS::Accessibility {

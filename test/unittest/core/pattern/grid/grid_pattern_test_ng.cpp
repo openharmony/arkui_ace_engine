@@ -14,7 +14,7 @@
  */
 #include "grid_test_ng.h"
 
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
 #include "core/components_ng/base/simplified_inspector.h"

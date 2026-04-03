@@ -380,7 +380,13 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // API 10 code path
   private deepCopyObject(obj: C, variable?: string): C {
-    let copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
+    let copy: C | undefined = undefined;
+    try {
+      copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo()}: deepCopyObject failed.`);
+      throw error;
+    }
 
     // this subscribe to the top level object/array of the copy
     // same as shallowCopy does

@@ -1722,6 +1722,20 @@ class WebEnableDragModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webScrollbarLayoutPolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2324,6 +2338,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   enableWebAVSession(enabled: boolean): this {
       modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
       return this;
+  }
+  scrollbarLayoutPolicy(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
   }
 }
 

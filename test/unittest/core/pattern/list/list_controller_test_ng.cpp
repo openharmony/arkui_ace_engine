@@ -14,7 +14,7 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
 

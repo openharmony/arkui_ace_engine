@@ -20,7 +20,7 @@
 #include "core/interfaces/native/node/node_content_modifier.h"
 #define private public
 #include "interfaces/native/native_node.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"

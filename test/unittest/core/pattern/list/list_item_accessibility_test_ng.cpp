@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

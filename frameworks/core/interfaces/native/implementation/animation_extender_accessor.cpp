@@ -15,6 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"

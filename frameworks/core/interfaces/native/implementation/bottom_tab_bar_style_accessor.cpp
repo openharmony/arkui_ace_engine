@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"

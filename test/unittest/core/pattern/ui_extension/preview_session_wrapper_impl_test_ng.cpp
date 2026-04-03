@@ -21,10 +21,10 @@
 #define protected public
 #include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/pattern/ui_extension/mock/mock_data_handler.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
 #include "ui/rs_surface_node.h"

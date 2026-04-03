@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
 
@@ -1312,12 +1313,14 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    auto mousePassMode = AceApplicationInfo::GetInstance().GetMouseEventPassMode();
     int32_t debugMode = SystemProperties::GetTouchAccelarate();
     if (debugMode != static_cast<int32_t>(touchPassMode)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
         touchPassMode = static_cast<TouchPassMode>(debugMode);
         AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
     }
+    pipelineContext_->SetMousePassThrough(mousePassMode == MousePassMode::PASS_THROUGH);
     pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
@@ -3041,9 +3044,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
             jsEngine->JsSetAceDebugMode();
-            if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
-                jsEngine->JsEnableSwitchInstance();
-            }
         }
     }
 

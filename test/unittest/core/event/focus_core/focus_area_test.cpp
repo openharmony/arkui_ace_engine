@@ -17,10 +17,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_resource_adapter.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/event/focus_core/focus_area_test.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"

@@ -251,6 +251,8 @@ public:
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
+    void SetShadowPath(const std::string path) override;
+    void ResetShadowPath() override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -329,7 +331,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
-    void SetUnionSpacing(float spacing);
+    void SetUnionSpacing(float spacing) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -786,8 +788,7 @@ protected:
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint16_t flag);
-    void OnePixelRounding();
-    void OnePixelRounding(uint16_t flag = 0);
+    void OnePixelRounding(uint16_t flag);
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();

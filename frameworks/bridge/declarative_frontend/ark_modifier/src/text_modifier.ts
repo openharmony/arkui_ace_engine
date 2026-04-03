@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class TextModifier extends ArkTextComponent implements AttributeModifier<TextAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

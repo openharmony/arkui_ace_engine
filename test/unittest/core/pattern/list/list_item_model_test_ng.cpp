@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_model_static.h"

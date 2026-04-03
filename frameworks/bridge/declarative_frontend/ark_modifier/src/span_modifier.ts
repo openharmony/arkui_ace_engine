@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SpanModifier extends ArkSpanComponent implements AttributeModifier<SpanAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

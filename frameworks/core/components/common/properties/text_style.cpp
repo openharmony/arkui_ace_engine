@@ -15,32 +15,105 @@
 
 #include "core/components/common/properties/text_style.h"
 
+#include "ui/base/utils/utils.h"
+
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace StringUtils {
-std::string ToString(const TextFlipDirection& textFlipDirection)
+
+std::pair<bool, FontWeight> ParseFontWeight(const std::string& weight, FontWeight defaultFontWeight)
 {
-    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
-        { TextFlipDirection::DOWN, "down" },
-        { TextFlipDirection::UP, "up" },
+    static const LinearMapNode<FontWeight> fontWeightTable[] = {
+        { "100", FontWeight::W100 },
+        { "200", FontWeight::W200 },
+        { "300", FontWeight::W300 },
+        { "400", FontWeight::W400 },
+        { "500", FontWeight::W500 },
+        { "600", FontWeight::W600 },
+        { "700", FontWeight::W700 },
+        { "800", FontWeight::W800 },
+        { "900", FontWeight::W900 },
+        { "bold", FontWeight::BOLD },
+        { "bolder", FontWeight::BOLDER },
+        { "lighter", FontWeight::LIGHTER },
+        { "medium", FontWeight::MEDIUM },
+        { "normal", FontWeight::NORMAL },
+        { "regular", FontWeight::REGULAR },
     };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
-    return iter != -1 ? table[iter].value : "";
+    auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
+    return weightIter != -1 ? std::make_pair(true, fontWeightTable[weightIter].value)
+                            : std::make_pair(false, defaultFontWeight);
 }
 
-std::string ToString(const TextDirection& textDirection)
+FontWeight StringToFontWeight(const std::string& weight, FontWeight defaultFontWeight)
 {
-    static const LinearEnumMapNode<TextDirection, std::string> table[] = {
-        { TextDirection::LTR, "LTR" },
-        { TextDirection::RTL, "RTL" },
-        { TextDirection::INHERIT, "DEFAULT" },
-        { TextDirection::AUTO, "AUTO" },
+    return ParseFontWeight(weight, defaultFontWeight).second;
+}
+
+WordBreak StringToWordBreak(const std::string& wordBreak)
+{
+    static const LinearMapNode<WordBreak> wordBreakTable[] = {
+        { "hyphenation", WordBreak::HYPHENATION },
+        { "break-all", WordBreak::BREAK_ALL },
+        { "break-word", WordBreak::BREAK_WORD },
+        { "normal", WordBreak::NORMAL },
     };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
-    return iter != -1 ? table[iter].value : "";
+    auto wordBreakIter = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak.c_str());
+    return wordBreakIter != -1 ? wordBreakTable[wordBreakIter].value : WordBreak::BREAK_WORD;
+}
+
+int32_t GetFontWeightNumericValue(FontWeight fontWeight)
+{
+    FontWeight converted = ConvertFontWeight(fontWeight);
+    int32_t index = static_cast<int32_t>(converted);
+    int32_t result = DEFAULT_FONT_WEIGHT_INT32;
+    if (index >= 0 && index <= static_cast<int32_t>(FontWeight::W900)) {
+        result = (index + 1) * DEFAULT_MULTIPLE;
+    }
+    return result;
+}
+
+std::string FontWeightToString(const FontWeight& fontWeight)
+{
+    static const std::unordered_map<FontWeight, std::string> fontWeightTable = {
+        { FontWeight::W100, "100" },
+        { FontWeight::W200, "200" },
+        { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" },
+        { FontWeight::W500, "500" },
+        { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" },
+        { FontWeight::W800, "800" },
+        { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "bold" },
+        { FontWeight::BOLDER, "bolder" },
+        { FontWeight::LIGHTER, "lighter" },
+        { FontWeight::MEDIUM, "medium" },
+        { FontWeight::NORMAL, "normal" },
+        { FontWeight::REGULAR, "regular" },
+    };
+    auto weightIter = fontWeightTable.find(fontWeight);
+    return weightIter != fontWeightTable.end() ? weightIter->second : "";
+}
+
+std::string ToString(const FontWeight& fontWeight)
+{
+    return FontWeightToString(fontWeight);
+}
+
+std::string SymbolColorListToString(const std::vector<Color>& colorList)
+{
+    std::string symbolColorList = "";
+    if (!colorList.empty()) {
+        symbolColorList = colorList[0].ColorToString();
+        for (uint32_t i = 1; i < colorList.size(); ++i) {
+            symbolColorList += ", " + colorList[i].ColorToString();
+        }
+    }
+    return symbolColorList;
 }
 
 std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList)
@@ -57,10 +130,36 @@ std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorLis
     return symbolColorList;
 }
 } // namespace StringUtils
+
+FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    static const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
+        FontWeight::W100,
+        FontWeight::W200,
+        FontWeight::W300,
+        FontWeight::W400,
+        FontWeight::W500,
+        FontWeight::W600,
+        FontWeight::W700,
+        FontWeight::W800,
+        FontWeight::W900,
+        FontWeight::W700,
+        FontWeight::W400,
+        FontWeight::W900,
+        FontWeight::W100,
+        FontWeight::W500,
+        FontWeight::W400,
+    };
+    int index = static_cast<int>(fontWeight);
+    if (index >= 0 && index < static_cast<int>(sizeof(FONT_WEIGHT_CONVERT_MAP) / sizeof(FontWeight))) {
+        return FONT_WEIGHT_CONVERT_MAP[index];
+    }
+    return FontWeight::W400;
+}
+
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)
-    : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor),
-      fontWeight_(fontWeight)
+    : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor), fontWeight_(fontWeight)
 {
     SetFontSize(Dimension(fontSize));
 }
@@ -88,10 +187,8 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propOrphanCharOptimization_ == rhs.propOrphanCharOptimization_ &&
            propCompressLeadingPunctuation_ == rhs.propCompressLeadingPunctuation_ &&
            propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
-           propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ &&
-           propStrokeWidth_ == rhs.propStrokeWidth_ &&
-           propStrokeColor_ == rhs.propStrokeColor_ &&
-           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
+           propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ && propStrokeWidth_ == rhs.propStrokeWidth_ &&
+           propStrokeColor_ == rhs.propStrokeColor_ && NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const
@@ -126,8 +223,8 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const st
     json->PutExtAttr("textBackgroundStyle", styleJson, filter);
 }
 
-void TextStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
-                            const NG::InspectorFilter& filter)
+void TextStyle::ToJsonValue(
+    std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style, const NG::InspectorFilter& filter)
 {
     CHECK_NULL_VOID(json);
     CHECK_NULL_VOID(style);
@@ -135,29 +232,28 @@ void TextStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optiona
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("decoration", GetDeclarationString(style->GetTextDecorationColor(), style->GetTextDecoration(),
-        style->GetTextDecorationStyle(), style->GetLineThicknessScale()).c_str(), filter);
+    json->PutExtAttr("decoration",
+        GetDeclarationString(style->GetTextDecorationColor(), style->GetTextDecoration(),
+            style->GetTextDecorationStyle(), style->GetLineThicknessScale())
+            .c_str(),
+        filter);
 }
 
-std::string TextStyle::GetDeclarationString(
-    const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
-    const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale)
+std::string TextStyle::GetDeclarationString(const std::optional<Color>& color,
+    const std::vector<TextDecoration>& textDecorations, const std::optional<TextDecorationStyle>& textDecorationStyle,
+    const std::optional<float>& lineThicknessScale)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
-    jsonSpanDeclaration->Put(
-        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
+    jsonSpanDeclaration->Put("type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
-    jsonSpanDeclaration->Put("style", V2::ConvertWrapTextDecorationStyleToString(
-        textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
-    jsonSpanDeclaration->Put("thicknessScale",
-        StringUtils::DoubleToString(static_cast<double>(lineThicknessScale.value_or(1.0f))).c_str());
+    jsonSpanDeclaration->Put("style",
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
+    jsonSpanDeclaration->Put(
+        "thicknessScale", StringUtils::DoubleToString(static_cast<double>(lineThicknessScale.value_or(1.0f))).c_str());
     return jsonSpanDeclaration->ToString();
 }
 
-
-void TextStyle::AddResource(
-    const std::string& key,
-    const RefPtr<ResourceObject>& resObj,
+void TextStyle::AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
     std::function<void(const RefPtr<ResourceObject>&, TextStyle&)>&& updateFunc)
 {
     CHECK_NULL_VOID(resObj && updateFunc);
@@ -225,8 +321,7 @@ std::string TextStyle::ToString() const
     JSON_STRING_PUT_INT(jsonValue, propTextVerticalAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecorationStyle_);
-    JSON_STRING_PUT_INT(
-        jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
+    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
     JSON_STRING_PUT_INT(jsonValue, propLineThicknessScale_);
     JSON_STRING_PUT_INT(jsonValue, propWhiteSpace_);
     JSON_STRING_PUT_INT(jsonValue, propWordBreak_);
@@ -245,8 +340,8 @@ std::string TextStyle::ToString() const
     return jsonValue->ToString();
 }
 
-void TextStyle::CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
-    const std::optional<NG::SymbolEffectOptions>& oldOptions)
+void TextStyle::CompareCommonSubType(
+    const std::optional<NG::SymbolEffectOptions>& options, const std::optional<NG::SymbolEffectOptions>& oldOptions)
 {
     auto newOpts = options.value();
     auto oldOpts = oldOptions.value();
@@ -264,9 +359,9 @@ void TextStyle::CompareCommonSubType(const std::optional<NG::SymbolEffectOptions
         }
     }
 }
- 
-void TextStyle::CompareAnimationMode(const std::optional<NG::SymbolEffectOptions>& options,
-    const std::optional<NG::SymbolEffectOptions>& oldOptions)
+
+void TextStyle::CompareAnimationMode(
+    const std::optional<NG::SymbolEffectOptions>& options, const std::optional<NG::SymbolEffectOptions>& oldOptions)
 {
     auto newOpts = options.value();
     auto oldOpts = oldOptions.value();
@@ -345,4 +440,4 @@ void TextStyle::UpdateFontSizeOrColorChanged()
     }
     isFontSizeOrColorChanged_ &= (reLayoutTextStyleBitmap_ & allowedMask).any();
 }
-}  // namespace OHOS::Ace
+} // namespace OHOS::Ace

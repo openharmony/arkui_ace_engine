@@ -2198,7 +2198,11 @@ class OnAreaChangeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -4955,9 +4959,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
   visibility(value) {
@@ -10863,7 +10868,7 @@ class ArkSpanComponent {
   onDetach(event) {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
@@ -17848,6 +17853,17 @@ class ArkOnVisibleAreaChange {
   }
   isEqual(another) {
     return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
+  }
+}
+class ArkOnAreaChange {
+  constructor(event, expectedUpdateInterval, hasOptionsArg = false) {
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.hasOptionsArg = hasOptionsArg;
+  }
+  isEqual(another) {
+    return this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval &&
+      this.hasOptionsArg === another.hasOptionsArg;
   }
 }
 
@@ -24904,25 +24920,28 @@ class TextTimerOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c;
+    let _a, _b, _c, _d;
     if (reset) {
-      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().textTimer.setTextTimerOptions(node,
         (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
         (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
-        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.startTime);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
         (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
-        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.startTime,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.startTime);
   }
 }
 TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
@@ -25666,6 +25685,10 @@ class ArkWebComponent extends ArkComponent {
   }
   enableDrag(value) {
     modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+  scrollbarLayoutPolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
     return this;
   }
 }
@@ -27449,6 +27472,20 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey {
   }
 }
 WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+WebScrollbarLayoutPolicyModifier.identity = Symbol('webScrollbarLayoutPolicyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

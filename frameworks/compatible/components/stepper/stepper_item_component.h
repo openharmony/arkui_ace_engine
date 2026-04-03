@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_STEPPER_STEPPER_ITEM_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_STEPPER_STEPPER_ITEM_COMPONENT_H
 
+#include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"

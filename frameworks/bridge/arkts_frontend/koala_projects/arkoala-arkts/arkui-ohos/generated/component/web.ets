@@ -3247,6 +3247,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setScrollbarLayoutPolicyAttribute(value: ScrollbarLayoutPolicy | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as ScrollbarLayoutPolicy)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setScrollbarLayoutPolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAiSessionOptionsAttribute(value: Array<AISessionEvent> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4333,6 +4345,9 @@ export interface WebAttribute extends CommonMethod {
     enableDrag(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDrag')
     }
+    scrollbarLayoutPolicy(value: ScrollbarLayoutPolicy | undefined): this {
+        throw new Error('Unimplemented method scrollbarLayoutPolicy')
+    }
     aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
         throw new Error('Unimplemented method aiSessionOptions')
     }
@@ -4408,6 +4423,10 @@ export enum MicrophoneCaptureState {
     NONE = 0,
     PAUSED = 1,
     ACTIVE = 2
+}
+export enum ScrollbarLayoutPolicy {
+    CONTENT = 0,
+    SYSTEM = 1
 }
 export type OnCreateAISession = (id: string, params: string, result: OnAISessionCallback) => boolean;
 export type OnExecuteAIAction = (id: string, params: string, result: OnAISessionCallback) => void;
@@ -5172,6 +5191,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public enableDrag(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setEnableDragAttribute(value_casted)
+        return this
+    }
+    public scrollbarLayoutPolicy(value: ScrollbarLayoutPolicy | undefined): this {
+        const value_casted = value as (ScrollbarLayoutPolicy | undefined)
+        this.getPeer()?.setScrollbarLayoutPolicyAttribute(value_casted)
         return this
     }
     public aiSessionOptions(value: Array<AISessionEvent> | undefined): this {

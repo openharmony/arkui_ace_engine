@@ -13,12 +13,70 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class MarqueeModifier extends ArkMarqueeComponent implements AttributeModifier<MarqueeAttribute> {
+class LazyArkMarqueeComponent extends ArkComponent {
+  static module: MarqueeComponentModule | undefined = undefined;
+  	constructor(nativePtr: KNode, classType: ModifierType) {
+  	  super(nativePtr, classType);
+  	  if (LazyArkMarqueeComponent.module === undefined) {
+  	    LazyArkMarqueeComponent.module = globalThis.requireNapi('arkui.components.arkmarquee');
+  	  }
+  	  this.lazyComponent = LazyArkMarqueeComponent.module.createComponent(nativePtr, classType);
+  	}
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  fontSize(value: Length): LazyArkMarqueeComponent {
+   this.lazyComponent.fontSize(value);
+   return this;
+  }
+
+  fontColor(value: ResourceColor): LazyArkMarqueeComponent {
+   this.lazyComponent.fontColor(value);
+   return this;
+  }
+
+  allowScale(value: boolean): LazyArkMarqueeComponent {
+   this.lazyComponent.allowScale(value);
+   return this;
+  }
+
+  fontWeight(value: number | FontWeight | string): LazyArkMarqueeComponent {
+   this.lazyComponent.fontWeight(value);
+   return this;
+  }
+
+  fontFamily(value: string | Resource): LazyArkMarqueeComponent {
+   this.lazyComponent.fontFamily(value);
+   return this;
+  }
+
+  onStart(event: () => void): LazyArkMarqueeComponent {
+   this.lazyComponent.onStart(event);
+   return this;
+  }
+
+  onBounce(event: () => void): LazyArkMarqueeComponent {
+   this.lazyComponent.onBounce(event);
+   return this;
+  }
+
+  onFinish(event: () => void): LazyArkMarqueeComponent {
+   this.lazyComponent.onFinish(event);
+   return this;
+  }
+
+  marqueeUpdateStrategy(value: MarqueeUpdateStrategy): LazyArkMarqueeComponent {
+   this.lazyComponent.marqueeUpdateStrategy(value);
+   return this;
+  }
+}
+class MarqueeModifier extends LazyArkMarqueeComponent implements AttributeModifier<MarqueeAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: MarqueeAttribute): void {

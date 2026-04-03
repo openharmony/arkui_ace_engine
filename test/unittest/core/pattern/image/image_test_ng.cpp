@@ -14,9 +14,9 @@
  */
 
 #include "image_base.h"
-#include "test/mock/base/mock_image_perf.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/base/image/mock_image_perf.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
 
 #include "base/image/image_defines.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"

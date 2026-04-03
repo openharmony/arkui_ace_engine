@@ -9766,6 +9766,18 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
         borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
 }
 
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetScrollbarLayoutPolicy(static_cast<int32_t>(policy));
+}
+
+void WebDelegate::SetIsSystemRtlEnable(bool enable)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetIsSystemRtlEnable(enable);
+}
+
 void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
@@ -9977,7 +9989,7 @@ void WebDelegate::OnMediaCastEnter()
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);
-    nweb_->SetForceEnableZoom(isEnabled);
+    nweb_->SetForceEnableZoomPublic(isEnabled);
 }
 
 void WebDelegate::OnExtensionDisconnect(int32_t connectId)

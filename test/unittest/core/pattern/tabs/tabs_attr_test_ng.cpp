@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {

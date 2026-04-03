@@ -394,6 +394,21 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
 int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
 
+/**
+ * @brief Enables or disables event passthrough. Event passthrough indicates that an event is directly delivered to a
+ * component without resampling during event distribution.
+ *
+ * @param uiContext UIContext object used to bind the instance.
+ * @param enabled Whether to enable event passthrough. true: enable ; false (default value): disable
+ * @param type Raw input event type {@link ArkUI_RawInputEventType} for enabling or disabling event passthrough.
+ * @return Result code. \n
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful. \n
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the UIContext object is invalid.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_EnableEventPassthrough(ArkUI_ContextHandle uiContext, bool enabled,
+    ArkUI_RawInputEventType type);
+
 #ifdef __cplusplus
 };
 #endif

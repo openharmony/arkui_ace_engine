@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/text_model.h"
 
 #ifdef WEB_SUPPORTED
 #include "arkweb_utils.h"
@@ -2427,7 +2428,19 @@ void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
-
+void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                  const Opt_ScrollbarLayoutPolicy* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<ScrollbarLayoutPolicy>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetScrollbarLayoutPolicy(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
 void SetEnableDragImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
@@ -3262,6 +3275,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
         WebAttributeModifier::SetEnableDragImpl,
+        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,

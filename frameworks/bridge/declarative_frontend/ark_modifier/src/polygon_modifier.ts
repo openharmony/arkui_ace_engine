@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class PolygonModifier extends ArkPolygonComponent implements AttributeModifier<PolygonAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

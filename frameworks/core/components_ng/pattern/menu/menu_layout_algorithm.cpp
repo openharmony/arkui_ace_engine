@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"

@@ -12,20 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path='./import.ts' />
 
 const overrideMap = new Map<string, Map<string,
   new (value: string | number | boolean | object) => ModifierWithKey<string | number | boolean | object>>>();
 
 
-overrideMap.set('ArkCheckboxComponent', new Map([
-  ['Symbol(width)', CheckboxWidthModifier],
-  ['Symbol(height)', CheckboxHeightModifier]
-]));
+overrideMap.set(
+  'ArkCheckboxComponent',
+  new Map([
+    ['Symbol(width)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.getCheckboxWidthModifier();
+    })()],
+    ['Symbol(height)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.getCheckboxHeightModifier();
+    })()],
+  ])
+);
 
-overrideMap.set('ArkTextComponent', new Map([
-  ['Symbol(foregroundColor)', TextForegroundColorModifier]
-]));
+overrideMap.set(
+  'ArkTextComponent',
+  new Map([
+    ['Symbol(foregroundColor)', TextForegroundColorModifier]
+  ])
+);
 
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
@@ -38,22 +49,11 @@ function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent
   mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
 }
 
-function copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
-  let newObj: ModifierWithKey<string | number | boolean | object> = {
-    ...obj,
-    applyStage: function (node: number): boolean {
-      throw new Error('Function not implemented.');
-    },
-    applyPeer: function (node: number, reset: boolean): void {
-      throw new Error('Function not implemented.');
-    },
-    checkObjectDiff: function (): boolean {
-      throw new Error('Function not implemented.');
-    }
-  };
-  newObj.applyStage = obj?.applyStage;
-  newObj.applyPeer = obj?.applyPeer;
-  newObj.checkObjectDiff = obj?.checkObjectDiff;
+function copyModifierWithKey(obj) {
+  let newObj = { ...obj };
+  newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
+  newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
+  newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
   return newObj;
 }
 
@@ -67,26 +67,15 @@ function mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
 }
 
 class ModifierUtils {
-  static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent> = new Set();
-  static dirtyFlag = false;
-  static timeoutId = -1;
+  declare static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent>;
+  declare static dirtyFlag: boolean;
+  declare static timeoutId: Timeout | number;
 
-  static copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
-    let newObj: ModifierWithKey<string | number | boolean | object> = {
-      ...obj,
-      applyStage: function (node: number): boolean {
-        throw new Error('Function not implemented.');
-      },
-      applyPeer: function (node: number, reset: boolean): void {
-        throw new Error('Function not implemented.');
-      },
-      checkObjectDiff: function (): boolean {
-        throw new Error('Function not implemented.');
-      }
-    };
-    newObj.applyStage = obj?.applyStage;
-    newObj.applyPeer = obj?.applyPeer;
-    newObj.checkObjectDiff = obj?.checkObjectDiff;
+  static copyModifierWithKey(obj) {
+    let newObj = { ...obj };
+    newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
+    newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
+    newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
     return newObj;
   }
 
@@ -103,7 +92,7 @@ class ModifierUtils {
     componentOverrideMap: Map<string, new (value: T0) => M0>): void {
       newMap.forEach((value, key) => {
         if (!key) {
-          ArkLogConsole.info('key of modifier map is undefined, ModifierWithKey is ' +
+          ArkLogConsole.debug('key of modifier map is undefined, ModifierWithKey is ' +
             (value ? value.constructor.name.toString() : 'undefined'));
         } else {
           if (componentOverrideMap.has(key.toString())) {
@@ -135,7 +124,7 @@ class ModifierUtils {
     modifier._changed;
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
-      const nativePtrValid = !modifier._weakPtr.invalid();
+      const nativePtrValid = modifier._weakPtr && (!modifier._weakPtr.invalid());
       const hostInstanceId = nativePtrValid ? getUINativeModule().frameNode.getNodeInstanceId(modifier.nativePtr) : -1;
       myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
         this.putDirtyModifier(modifier, value, hostInstanceId);
@@ -151,11 +140,11 @@ class ModifierUtils {
     arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>,
     hostInstanceId: number): void {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {
+    if (arkModifier._weakPtr && (!arkModifier._weakPtr.invalid())) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
     } else {
-      ArkLogConsole.info('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
+      ArkLogConsole.debug('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
         arkModifier.constructor.name.toString() : 'undefined') + ' of ' + (attributeModifierWithKey ?
         attributeModifierWithKey.constructor.name.toString() : 'undefined'));
     }
@@ -172,7 +161,7 @@ class ModifierUtils {
         clearTimeout(this.timeoutId);
       }
       this.dirtyComponentSet.forEach(item => {
-        const nativePtrValid = !item._weakPtr.invalid();
+        const nativePtrValid = item._weakPtr && (!item._weakPtr.invalid());
         if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
             value.applyPeer(item.nativePtr,
@@ -191,7 +180,7 @@ class ModifierUtils {
     if (this.timeoutId !== -1) {
       clearTimeout(this.timeoutId);
     }
-    this.timeoutId = setTimeout(frameCallback, 100);
+    this.timeoutId = setTimeout(frameCallback, 100) as unknown as number;
     if (hostInstanceId > -1) {
         __JSScopeUtil__.syncInstanceId(hostInstanceId);
         getUINativeModule().frameNode.registerFrameCallback(frameCallback);
@@ -215,9 +204,13 @@ class ModifierUtils {
   }
 }
 
+ModifierUtils.dirtyComponentSet = new Set();
+ModifierUtils.dirtyFlag = false;
+ModifierUtils.timeoutId = -1;
+
 class ModifierMap {
-  private map_: Map<Symbol, AttributeModifierWithKey>;
-  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+  declare private map_: Map<Symbol, AttributeModifierWithKey>;
+  declare private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
 
   constructor() {
     this.map_ = new Map();
@@ -244,7 +237,7 @@ class ModifierMap {
   public set(key: Symbol, value: AttributeModifierWithKey): this {
     const _a = this.changeCallback;
     this.map_.set(key, value);
-    _a?.call(this, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
     return this;
   }
   public get size(): number {
@@ -271,14 +264,11 @@ class ModifierMap {
 }
 
 class AttributeUpdater {
-  private _state: number;
-  private _attribute: ArkComponent;
-  private _isAttributeUpdater: boolean;
+  declare private _state: number;
+  declare private _attribute: ArkComponent;
+  declare private _isAttributeUpdater: boolean;
 
-  static StateEnum = {
-    INIT: 0,
-    UPDATE: 1
-  };
+  declare static StateEnum;
 
   constructor() {
     this._state = AttributeUpdater.StateEnum.INIT;
@@ -310,11 +300,17 @@ class AttributeUpdater {
 
   initializeModifier(instance: ArkComponent): void {}
 
+  onComponentChanged(instance: ArkComponent): void {}
+
   updateConstructorParams(...args: Object[]): void {
     if (!this.attribute) {
-      ArkLogConsole.info('AttributeUpdater has not been initialized before updateConstructorParams.');
+      ArkLogConsole.debug('AttributeUpdater has not been initialized before updateConstructorParams.');
       return;
     }
     this.attribute.initialize(args);
   }
 }
+AttributeUpdater.StateEnum = {
+  INIT: 0,
+  UPDATE: 1,
+};

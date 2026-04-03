@@ -1543,21 +1543,20 @@ void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
 }
 
 bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
-    OHOS::NWeb::SslError error,
-    const std::string& url,
-    const std::string& originalUrl,
-    const std::string& referrer,
-    bool isFatalError,
-    bool isMainFrame,
-    const std::vector<std::string>& certChainData)
+    std::shared_ptr<NWeb::NWebAllSslErrorInfo> nwebAllSslError)
 {
+    if (nwebAllSslError == nullptr) {
+        return false;
+    }
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
 
     bool jsResult = false;
     auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
-        static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame, certChainData);
+        static_cast<int32_t>(nwebAllSslError->GetError()), nwebAllSslError->GetUrl(),
+        nwebAllSslError->GetOriginalUrl(), nwebAllSslError->GetReferrer(), nwebAllSslError->GetIsFatalError(),
+        nwebAllSslError->GetIsMainFrame(), nwebAllSslError->GetCertChainData());
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;

@@ -16,7 +16,6 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_FRAME_NODE_PEER_IMPL_H
 
 #include <mutex>
-#include <vector>
 
 #include "ui/base/referenced.h"
 #include "core/components_ng/base/frame_node.h"

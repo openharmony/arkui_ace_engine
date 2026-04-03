@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class TextTimerModifier extends ArkTextTimerComponent implements AttributeModifier<TextTimerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

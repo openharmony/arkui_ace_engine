@@ -21,6 +21,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+namespace OHOS::Ace {
+struct Font;
+}
+
 namespace OHOS::Ace::Framework {
 
 class JSSpan : public JSContainerBase {

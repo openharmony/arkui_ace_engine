@@ -19,6 +19,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double DEFAULT_COUNT = 60000.0;
+inline constexpr int32_t DEFAULT_START_TIME = 0;
 inline const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 {
@@ -90,6 +91,7 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str(), filter);
     json->PutExtAttr("fontFamily",
         ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str(), filter);
+    json->PutExtAttr("startTime", std::to_string(propStartTime_.value_or(DEFAULT_START_TIME)).c_str(), filter);
 
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows

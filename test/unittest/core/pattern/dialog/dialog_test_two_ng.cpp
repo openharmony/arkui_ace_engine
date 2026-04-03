@@ -17,11 +17,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/common/recorder/event_recorder.h"
 
 #include "core/components/button/button_theme.h"
@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 
@@ -922,5 +923,89 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest035, TestSize.Level1)
     pattern->OnDetachFromMainTreeImpl();
     auto masknode = parentOverlayManager->GetDialog(mask->GetId());
     EXPECT_EQ(masknode, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternThemeScopeTest001
+ * @tc.desc: Test DialogView::CreateDialogNode with themeScopeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTwoTestNg, DialogPatternThemeScopeTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<MockDialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dialogTheme));
+
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttons = btnItems;
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto dialog = DialogView::CreateDialogNode(props, nullptr, textNode);
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->dialogThemeNode_ != nullptr);
+    EXPECT_TRUE(pattern->dialogTheme_ != nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternThemeScopeTest002
+ * @tc.desc: Test DialogView::CreateDialogNode without themeScopeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTwoTestNg, DialogPatternThemeScopeTest002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<MockDialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dialogTheme));
+
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttons = btnItems;
+
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->dialogThemeNode_ == nullptr);
+    EXPECT_TRUE(pattern->dialogTheme_ != nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternThemeScopeTest003
+ * @tc.desc: Test DialogPattern::OnThemeScopeUpdate branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTwoTestNg, DialogPatternThemeScopeTest003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<MockDialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dialogTheme));
+
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttons = btnItems;
+
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_TRUE(pattern->dialogTheme_ != nullptr);
 }
 } // namespace OHOS::Ace::NG

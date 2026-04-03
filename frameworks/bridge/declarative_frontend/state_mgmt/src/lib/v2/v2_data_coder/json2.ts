@@ -21,8 +21,8 @@ class JSON2 {
     // visited objects along with their assigned refIDs
     const visited = new Map<object, string>();
 
-    const serialize = (value: unknown): string => {
-      const root = value;
+    const serialize = (value: unknown, isRoot: boolean = true): string => {
+      const root = isRoot ? value : undefined;
       return JSON.stringify(value, function(key: string, value: unknown) {
         return replace.call(this, key, value, root);
       });
@@ -39,10 +39,11 @@ class JSON2 {
       // don't trust JSON replacer's arg 'val' (it turns Date objects into strings)
       const value = this[key];
 
+      if (value === null) { throw new TypeError('Cannot read property __proto__ of null'); }
       if (typeof value === 'string') { return `st????${value}`; }
       if (typeof value === 'bigint') { return `bi????${value.toString()}`; }
       if (typeof value === 'undefined') { return `re????`; }
-      if (typeof value !== 'object' || value === null) {
+      if (typeof value !== 'object') {
         return value;
       }
 
@@ -66,14 +67,14 @@ class JSON2 {
 
       if (value instanceof Array) {
         // serialize each item separately, then put them back together
-        const items = value.map(item => JSON.parse(serialize(item)));
+        const items = value.map(item => JSON.parse(serialize(item, false)));
         // and stringify
         return `Ar${refId}${JSON.stringify(items)}`;
       }
 
       if (value instanceof Map) {
         // serialize each item separately, keep keys unchanged
-        const items = [...value].map(([key, val]) => [key, serialize(val)]);
+        const items = [...value].map(([key, val]) => [key, serialize(val, false)]);
         // and stringify
         return `Ma${refId}${JSON.stringify(items)}`;
       }
@@ -161,14 +162,7 @@ class JSON2 {
     const result: any = {};
 
     Object.keys(value).forEach(key => {
-      let baseKey = key;
-      if (baseKey.startsWith(ComputedV2.COMPUTED_PREFIX)) {
-        return;
-      }
-      if (baseKey.startsWith(ObserveV2.OB_PREFIX)) {
-        baseKey = baseKey.substring(ObserveV2.OB_PREFIX.length)
-      }
-
+      const baseKey = key.replace(new RegExp('^' + V2_STATE_PREFIX), '');
       const options = meta?.[baseKey];
       if (options?.disabled) { return; }
       result[options?.alias || baseKey] = (value as Record<string, unknown>)[baseKey];

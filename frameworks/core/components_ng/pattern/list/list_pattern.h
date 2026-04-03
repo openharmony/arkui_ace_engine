@@ -19,25 +19,23 @@
 #include <tuple>
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_paint_method.h"
-#include "core/components_ng/pattern/list/list_position_map.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class ListAccessibilityProperty;
+class ListEventHub;
+class ListItemPattern;
+class ListLayoutProperty;
+class ListPositionMap;
 
 struct ListItemGroupPara {
     int32_t lanes = -1;
@@ -67,20 +65,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<ListLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<ListEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ListAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     bool UsResRegion() override
     {
@@ -268,40 +257,10 @@ public:
     }
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
-    WeakPtr<ListItemPattern> GetSwiperItem()
-    {
-        if (!swiperItem_.Upgrade()) {
-            return nullptr;
-        }
-        return swiperItem_;
-    }
-    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
-    {
-        if (swiperItem == swiperItem_) {
-            canReplaceSwiperItem_ = true;
-        }
-    }
-    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
-    {
-        if (!swiperItem_.Upgrade()) {
-            return true;
-        }
-        return swiperItem == swiperItem_;
-    }
-    bool CanReplaceSwiperItem()
-    {
-        auto listItemPattern = swiperItem_.Upgrade();
-        if (!listItemPattern) {
-            canReplaceSwiperItem_ = true;
-            return canReplaceSwiperItem_;
-        }
-        auto host = listItemPattern->GetHost();
-        if (!host || !host->IsOnMainTree()) {
-            canReplaceSwiperItem_ = true;
-            return canReplaceSwiperItem_;
-        }
-        return canReplaceSwiperItem_;
-    }
+    WeakPtr<ListItemPattern> GetSwiperItem();
+    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem);
+    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    bool CanReplaceSwiperItem();
 
     void SetPredictSnapOffset(float predictSnapOffset)
     {

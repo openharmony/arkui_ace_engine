@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_COMPONENTS_FOR_EACH_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_COMPONENTS_FOR_EACH_ELEMENT_H
 
-#include <string>
-
 #include "base/utils/macros.h"
 #include "frameworks/core/pipeline/base/multi_composed_element.h"
 

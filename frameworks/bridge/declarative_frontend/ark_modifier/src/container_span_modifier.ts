@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ContainerSpanModifier extends ArkContainerSpanComponent implements AttributeModifier<ContainerSpanAttribute> {
     constructor(nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);
       this._modifiersWithKeys = new ModifierMap();
     }
-  
+
     applyNormalAttribute(instance: ContainerSpanAttribute): void {
       ModifierUtils.applySetOnChange(this);
       ModifierUtils.applyAndMergeModifier<ContainerSpanAttribute, ArkContainerSpanComponent, ArkComponent>(instance, this);

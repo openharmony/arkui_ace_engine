@@ -199,6 +199,7 @@ private:
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
     void UpdateFadeItems(RefPtr<FrameNode> node, std::pair<int32_t, PickerItemInfo> pos);
     void RetainDisplayItems(bool atTop);
+    void SetLazyLoad(LayoutWrapper* layoutWrapper);
 
     LayoutConstraintF childLayoutConstraint_;
     ContainerPickerUtils::PositionMap itemPosition_;

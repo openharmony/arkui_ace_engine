@@ -216,6 +216,30 @@ void CallManagedArcScrollIndexHandlerSync(Ark_VMContext vmContext, Ark_Int32 res
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void CallManagedAreaChangeCallback(Ark_Int32 resourceId, Ark_Area oldValue, Ark_Area newValue)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_AREACHANGECALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    Area_serializer::write(argsSerializer, oldValue);
+    Area_serializer::write(argsSerializer, newValue);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedAreaChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Area oldValue, Ark_Area newValue)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_AREACHANGECALLBACK);
+    argsSerializer.writeInt32(resourceId);
+    Area_serializer::write(argsSerializer, oldValue);
+    Area_serializer::write(argsSerializer, newValue);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void CallManagedButtonModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode,
                                       Ark_ButtonConfiguration config, Callback_Pointer_Void continuation)
 {
@@ -11313,6 +11337,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedAnimationStartHandler);
     case KIND_ARCSCROLLINDEXHANDLER:
         return reinterpret_cast<Ark_NativePointer>(CallManagedArcScrollIndexHandler);
+    case KIND_AREACHANGECALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedAreaChangeCallback);
     case KIND_BUTTONMODIFIERBUILDER:
         return reinterpret_cast<Ark_NativePointer>(CallManagedButtonModifierBuilder);
     case KIND_BUTTONTRIGGERCLICKCALLBACK:
@@ -12045,6 +12071,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedAnimationStartHandlerSync);
     case KIND_ARCSCROLLINDEXHANDLER:
         return reinterpret_cast<Ark_NativePointer>(CallManagedArcScrollIndexHandlerSync);
+    case KIND_AREACHANGECALLBACK:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedAreaChangeCallbackSync);
     case KIND_BUTTONMODIFIERBUILDER:
         return reinterpret_cast<Ark_NativePointer>(CallManagedButtonModifierBuilderSync);
     case KIND_BUTTONTRIGGERCLICKCALLBACK:

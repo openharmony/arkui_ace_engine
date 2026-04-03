@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <string>
 
 #include "core/components_ng/pattern/button/button_pattern.h"

@@ -16,7 +16,7 @@
 
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {

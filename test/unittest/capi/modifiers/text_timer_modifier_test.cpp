@@ -36,6 +36,8 @@ const auto ATTRIBUTE_IS_COUNT_DOWN_NAME = "isCountDown";
 const auto ATTRIBUTE_IS_COUNT_DOWN_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_COUNT_NAME = "count";
 const auto ATTRIBUTE_COUNT_DEFAULT_VALUE = "60000.000000";
+const auto ATTRIBUTE_START_TIME_NAME = "startTime";
+const auto ATTRIBUTE_START_TIME_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_CONTROLLER_NAME = "controller";
 const auto ATTRIBUTE_CONTROLLER_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_FORMAT_NAME = "format";
@@ -73,6 +75,16 @@ std::vector<std::tuple<std::string, Ark_Int64>> testFixtureTimerInputCountInvali
     { "0", Converter::ArkValue<Ark_Int64>(0) },
     { "-5", Converter::ArkValue<Ark_Int64>(-5.0) },
     { "86400001", Converter::ArkValue<Ark_Int64>(86400001) },
+};
+
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureTimerStartTimeValidValues = {
+    { "0", Converter::ArkValue<Ark_Int32>(0), "0.000000" },
+    { "15", Converter::ArkValue<Ark_Int32>(15), "15.000000" },
+    { "86300000", Converter::ArkValue<Ark_Int32>(86300000), "86300000.000000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Int32>> testFixtureTimerInitialValueInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Int32>(-1.0) },
 };
 
 std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureShadowRadiusNumberValidValues = {
@@ -145,6 +157,10 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestDefaultValues, TestSize.L
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
     EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COUNT_DEFAULT_VALUE)) << "Default value for attribute 'options.count'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_TIME_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_START_TIME_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.startTime'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROLLER_NAME);
     EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROLLER_DEFAULT_VALUE)) <<
@@ -243,6 +259,56 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountInvalidValues, 
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
     EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COUNT_DEFAULT_VALUE))
         << "Input value is: false, method: setTextTimerOptions, attribute: isCountDown";
+}
+
+/*
+ * @tc.name: setTextTimerOptionsTestStartTimeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestStartTimeValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const Opt_Int32& value, const std::string& expectedStr) {
+        Ark_TextTimerOptions options {};
+        options.isCountDown = Converter::ArkValue<Opt_Boolean>(false);
+        options.startTime = value;
+        auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
+        modifier_->setTextTimerOptions(node_, &inputValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_TIME_NAME);
+        EXPECT_THAT(resultStr, Eq(expectedStr))
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: startTime";
+    };
+
+    for (auto& [input, value, expected] : testFixtureTimerStartTimeValidValues) {
+        checkValue(input, Converter::ArkValue<Opt_Int32>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setTextTimerOptionsTestStartTimeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestStartTimeInvalidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const Opt_Int32& value) {
+        Ark_TextTimerOptions options {};
+        options.isCountDown = Converter::ArkValue<Opt_Boolean>(false);
+        options.startTime = value;
+        auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
+        modifier_->setTextTimerOptions(node_, &inputValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_TIME_NAME);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_START_TIME_DEFAULT_VALUE))
+            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: startTime";
+    };
+
+    for (auto& [input, value] : testFixtureTimerInitialValueInvalidValues) {
+        checkValue(input, Converter::ArkValue<Opt_Int32>(value));
+    }
+
+    checkValue("undefined", Converter::ArkValue<Opt_Int32>());
 }
 
 /*

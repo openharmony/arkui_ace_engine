@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "text_input_base.h"
 
 namespace OHOS::Ace::NG {

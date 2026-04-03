@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
 #include "text_input_base.h"
-
 #include "base/json/json_util.h"
+
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"

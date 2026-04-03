@@ -18,6 +18,9 @@
 #include <securec.h>
 #include <vector>
 
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -2081,6 +2084,36 @@ ArkUI_Int32 CheckUIContextInvalid(ArkUI_Int32 instanceId)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 EnableEventPassthrough(ArkUI_Int32 instanceId, ArkUI_Bool enabled, ArkUI_Int32 type)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        TAG_LOGW(
+            AceLogTag::ACE_INPUTKEYFLOW, "Cannot find pipeline context by contextHandle ID %{public}d", instanceId);
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto container = Container::GetContainer(instanceId);
+    std::string bundleName = container ? container->GetBundleName() : "";
+    bool enabledValue = (enabled != 0);
+
+    switch (type) {
+        case 0:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabledValue, bundleName);
+            break;
+        case 1:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabledValue, bundleName);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "EnableEventPassthrough: unknown eventType=%{public}d", type);
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2116,6 +2149,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
         .checkUIContextInvalid = CheckUIContextInvalid,
+        .enableEventPassthrough = EnableEventPassthrough,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;

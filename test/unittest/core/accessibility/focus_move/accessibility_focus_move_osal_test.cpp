@@ -19,9 +19,9 @@
 #define private public
 #define protected public
 #include "accessibility_system_ability_client.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
 
 #include "base/log/dump_log.h"

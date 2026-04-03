@@ -46,13 +46,9 @@ void QRCodeModelStatic::SetQRBackgroundColor(FrameNode* frameNode, const std::op
         ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, *color, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
     } else {
-        auto context = frameNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto themeManager = context->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto qrcodeTheme = themeManager->GetTheme<QrcodeTheme>();
-        CHECK_NULL_VOID(qrcodeTheme);
-        auto defaultQrcodeBackgroundColor = qrcodeTheme->GetBackgroundColor();
+        auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_VOID(qrCodeTheme);
+        auto defaultQrcodeBackgroundColor = qrCodeTheme->GetBackgroundColor();
         ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, defaultQrcodeBackgroundColor, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, defaultQrcodeBackgroundColor, frameNode);
     }

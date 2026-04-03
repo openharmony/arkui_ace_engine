@@ -1661,6 +1661,18 @@ void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShap
     rsNode_->SetSDFShape(shape);
 }
 
+void RosenRenderContext::SetShadowPath(const std::string path)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowPath(Rosen::RSPath::CreateRSPath(path));
+}
+
+void RosenRenderContext::ResetShadowPath()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowPath(nullptr);
+}
+
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
 {
     bool flag = false;
@@ -4096,60 +4108,6 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
         borderWidthPropertyF.bottomDimen = borderBottomI;
         UpdateBorderWidthF(borderWidthPropertyF);
     }
-}
-
-void RosenRenderContext::OnePixelRounding()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto geometryNode = frameNode->GetGeometryNode();
-    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
-    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
-    float nodeWidth = geometryNode->GetFrameSize().Width();
-    float nodeHeight = geometryNode->GetFrameSize().Height();
-    float roundToPixelErrorX = 0.0f;
-    float roundToPixelErrorY = 0.0f;
-    float absoluteRight = relativeLeft + nodeWidth;
-    float absoluteBottom = relativeTop + nodeHeight;
-
-    float nodeLeftI = OnePixelValueRounding(relativeLeft);
-    float nodeTopI = OnePixelValueRounding(relativeTop);
-    roundToPixelErrorX += nodeLeftI - relativeLeft;
-    roundToPixelErrorY += nodeTopI - relativeTop;
-    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
-
-    float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
-    float nodeWidthTemp = OnePixelValueRounding(nodeWidth);
-    roundToPixelErrorX += nodeWidthI - nodeWidth;
-    if (roundToPixelErrorX > 0.5f) {
-        nodeWidthI -= 1.0f;
-        roundToPixelErrorX -= 1.0f;
-    }
-    if (roundToPixelErrorX < -0.5f) {
-        nodeWidthI += 1.0f;
-        roundToPixelErrorX += 1.0f;
-    }
-    if (nodeWidthI < nodeWidthTemp) {
-        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
-        nodeWidthI = nodeWidthTemp;
-    }
-
-    float nodeHeightI = OnePixelValueRounding(absoluteBottom) - nodeTopI;
-    float nodeHeightTemp = OnePixelValueRounding(nodeHeight);
-    roundToPixelErrorY += nodeHeightI - nodeHeight;
-    if (roundToPixelErrorY > 0.5f) {
-        nodeHeightI -= 1.0f;
-        roundToPixelErrorY -= 1.0f;
-    }
-    if (roundToPixelErrorY < -0.5f) {
-        nodeHeightI += 1.0f;
-        roundToPixelErrorY += 1.0f;
-    }
-    if (nodeHeightI < nodeHeightTemp) {
-        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
-        nodeHeightI = nodeHeightTemp;
-    }
-    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
 }
 
 void RosenRenderContext::OnePixelRounding(uint16_t flag)
@@ -6601,7 +6559,7 @@ void RosenRenderContext::DumpInfo()
                     std::string("blendMode has difference,arkui:") + std::to_string(blendMode));
             }
         }
-        
+
         auto rsBlendApplyType = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
         if (GetBackBlendApplyType().has_value() || rsBlendApplyType) {
             DumpLog::GetInstance().AddDesc(

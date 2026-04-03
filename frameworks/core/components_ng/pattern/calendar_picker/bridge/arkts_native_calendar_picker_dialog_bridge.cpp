@@ -27,7 +27,7 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/calendar/calendar_theme.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"

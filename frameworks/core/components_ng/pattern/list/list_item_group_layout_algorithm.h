@@ -20,6 +20,7 @@
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_info.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 
@@ -27,44 +28,12 @@ namespace OHOS::Ace::NG {
 class ListPositionMap;
 class ListChildrenMainSize;
 struct ListItemGroupLayoutInfo;
-struct LayoutedItemInfo {
-    int32_t startIndex = 0;
-    float startPos = 0.0f;
-    int32_t endIndex = 0;
-    float endPos = 0.0f;
-};
-
-struct ListItemGroupInfo {
-    int32_t id = -1;
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    bool isPressed = false;
-};
-
-struct ListItemGroupCacheParam {
-    bool forward = true;
-    bool backward = false;
-    bool show = false;
-    int32_t cacheCountForward = 0;
-    int32_t cacheCountBackward = 0;
-    int32_t forwardCachedIndex = -1;
-    int32_t backwardCachedIndex = INT_MAX;
-    int64_t deadline = 0;
-};
-
-struct CachedIndexInfo {
-    int32_t forwardCachedCount = 0;
-    int32_t backwardCachedCount = 0;
-    int32_t forwardCacheMax = 0;
-    int32_t backwardCacheMax = 0;
-    bool needPredict = false;
-};
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListItemGroupLayoutAlgorithm, LayoutAlgorithm);
 public:
-    using PositionMap = std::map<int32_t, ListItemGroupInfo>;
+    using PositionMap = ListItemGroupPositionMap;
 
     static const int32_t LAST_ITEM = -1;
 

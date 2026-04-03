@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAYOUT_INFO_INTERFACE_H
  
 #include "core/components/common/properties/text_layout_info.h"
-#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
