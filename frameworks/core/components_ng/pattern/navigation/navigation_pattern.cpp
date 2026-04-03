@@ -178,7 +178,7 @@ void CollectJsViewName(const RefPtr<UINode>& uiNode, std::string& jsViewNames)
         return;
     }
     if (!jsViewNames.empty()) {
-        jsViewNames += "_";
+        jsViewNames += "/";
     }
     jsViewNames += jsViewName;
 }
@@ -3901,6 +3901,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         fromPathInfo += ", navDesitinationName: " + fromNavDestinationName;
     } else {
         fromPathInfo = hostNode->GetNavigationPathInfo();
+        fromNavDestinationName = "navBar";
     }
     if (topDestination) {
         toPathInfo = topDestination->GetNavDestinationPathInfo();
@@ -3913,6 +3914,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         toPathInfo += ", navDesitinationName: " + toNavDestinationName;
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
+        toNavDestinationName = "navBar";
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
@@ -6633,8 +6635,6 @@ void NavigationPattern::FireRelatedDestinationLifecycleInner(bool isOnShow, bool
 
 std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode)
 {
-    CHECK_NULL_RETURN(uiNode, "");
-
     std::string jsViewName{};
     while (uiNode) {
         if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {

@@ -908,7 +908,7 @@ HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg006, Tes
     customNode2->AddChild(navDestination);
     
     auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(customNode1);
-    EXPECT_EQ(jsViewNames, "CustomView1_CustomView2");
+    EXPECT_EQ(jsViewNames, "CustomView1/CustomView2");
 }
 
 /**
