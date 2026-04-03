@@ -105,7 +105,7 @@ def main():
         sys.exit(1)
 
     if panda_sdk_path:
-        print(f"Step1: Extracting {panda_sdk_path} to {libarkts_dest}...")
+        print(f"Step2: Extracting {panda_sdk_path} to {libarkts_dest}...")
         try:
             if os.path.isfile(panda_sdk_path):
                 os.makedirs(libarkts_dest, exist_ok=True)
@@ -121,8 +121,8 @@ def main():
     else:
         print("Step1: Skipped panda_sdk extraction (panda_sdk_path is empty).")
 
-    # step2 install arkui_idlize and libarkts
-    print(f"Step2: Running npm install in {base_dir}...")
+    # step3 install arkui_idlize and libarkts
+    print(f"Step3: Running npm install in {base_dir}...")
     try:
         subprocess.run([npm, "install", "--no-package-lock"], env=env, cwd=base_dir, check=True, capture_output=True, text=True)
         print("npm install completed successfully.")
@@ -136,7 +136,7 @@ def main():
         sys.exit(1)
 
     # step3 patch SDK
-    print(f"Step 3: Patching SDK from {arkts_sdk_patch_path} to {output_sdk_patched_path}...")
+    print(f"Step 4: Patching SDK from {arkts_sdk_patch_path} to {output_sdk_patched_path}...")
     try:
         shutil.rmtree(output_sdk_patched_path, ignore_errors=True)
         shutil.copytree(arkts_sdk_path, output_sdk_patched_path)
@@ -154,7 +154,7 @@ def main():
         print(f"Error: SDK patching failed - {e}")
         sys.exit(1)
 
-    # step4 generate code
+    # step5 generate code
     cmd = [
         npx, "@idlizer/runner", "m3", output_sdk_patched_path,
         idl_pattern,
@@ -170,7 +170,7 @@ def main():
         "--output", output_dir
     ]
 
-    print(f"Step 4: Generation. Running command: {' '.join(cmd)}")
+    print(f"Step 5: Generation. Running command: {' '.join(cmd)}")
 
     try:
         result = subprocess.run(cmd, env=env, check=True, cwd=base_dir, capture_output=True, text=True)
