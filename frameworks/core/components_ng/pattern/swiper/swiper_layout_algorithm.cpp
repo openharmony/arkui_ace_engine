@@ -649,6 +649,12 @@ void SwiperLayoutAlgorithm::MeasureSwiperOnJump(
 
 void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
+    auto hostNode = layoutWrapper->GetHostNode();
+    if (hostNode) {
+        auto pipeline = hostNode->GetContext();
+        isPixelRoundAfterMeasure_ =
+            pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
+    }
     if (isFakeDragging_ && !hasCachedCapture_) {
         MeasureSwiperInFakeDrag(layoutWrapper, layoutConstraint);
         return;
@@ -883,7 +889,8 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
 
-    float mainAxisSize = GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
+    float mainAxisSize = isPixelRoundAfterMeasure_ ? GetMainAxisSize(geometryNode->GetMarginPreFrameSize(), axis_) :
+        GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
     if (!placeItemWidth_.has_value()) {
         placeItemWidth_ = mainAxisSize;
     }
