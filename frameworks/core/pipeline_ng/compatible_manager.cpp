@@ -81,6 +81,7 @@ std::optional<TouchEvent> CompatibleManager::IdleState::EventGenerate()
 
 void CompatibleManager::IdleState::start()
 {
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "IdleState start");
     manager_.ClearAllState();
 }
 
