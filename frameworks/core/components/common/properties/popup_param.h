@@ -27,6 +27,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/tips_anchor_type.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
@@ -60,11 +61,6 @@ struct PopupLinearGradientProperties {
 enum class PopupKeyboardAvoidMode {
     DEFAULT,
     NONE
-};
-
-enum class TipsAnchorType {
-    TARGET = 0, // anchor to target node
-    CURSOR = 1  // anchor to cursor position
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;
