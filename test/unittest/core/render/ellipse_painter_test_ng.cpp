@@ -19,7 +19,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/render/canvas_image.h"

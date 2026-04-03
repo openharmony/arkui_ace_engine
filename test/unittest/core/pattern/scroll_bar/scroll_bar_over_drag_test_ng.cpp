@@ -16,8 +16,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "scroll_bar_test_ng.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"

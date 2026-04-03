@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

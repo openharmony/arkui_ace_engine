@@ -31,10 +31,11 @@
 #include "text_native_impl.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/event_converter.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,7 +58,7 @@ public:
         MockContainer::TearDown();
     }
 };
- 
+
 /**
  * @tc.name: CreateTextStyle001
  * @tc.desc: Test the fontSize.
@@ -90,7 +91,7 @@ HWTEST_F(NativeStyledStringTest, CreateTextStyle001, TestSize.Level1)
 
     OH_ArkUI_TextStyle_Destroy(textStyle);
 }
- 
+
 /**
  * @tc.name: CreateTextStyle002
  * @tc.desc: Test the fontColor.

@@ -20,8 +20,8 @@
 
 #include "base/json/json_util.h"
 #include "core/common/force_split/force_split_utils.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #undef private
 #undef protected

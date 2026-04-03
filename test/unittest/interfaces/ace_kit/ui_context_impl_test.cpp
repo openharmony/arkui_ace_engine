@@ -18,8 +18,8 @@
 #define private public
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #undef private
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/interfaces/ipc_single/iremote_object.h"
 #include "ui/base/ace_type.h"
 

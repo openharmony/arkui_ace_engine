@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
-#include "test/mock/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2017,6 +2017,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
      * Test the parameters frameCallbackFunc and idleCallbackFunc are not nullptr, and delayMillis is granter than 0.
      * @tc.expected: The member frameCallbackFuncs_ is not empty
      */
+    frameCallbackFunc = [](uint64_t nanoTimestamp) {
+        return;
+    };
+    idleCallbackFunc = [](uint64_t nanoTimestamp, uint32_t frameCount) {
+        return;
+    };
     context_->frameCallbackFuncs_.clear();
     context_->AddFrameCallback(std::move(frameCallbackFunc), std::move(idleCallbackFunc), delayMillis);
     EXPECT_FALSE(context_->frameCallbackFuncs_.empty());
@@ -2191,7 +2197,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
      * @tc.steps2: Call function FlushWindowActivateChangedCallback;
      * @tc.expected: The onWindowActivateChangedCallbacks_ is empty
      */
-    context_->onWindowActivateChangedCallbacks_.insert(10);
+    auto emptyNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    context_->onWindowActivateChangedCallbacks_.insert(emptyNodeId);
     context_->FlushWindowActivateChangedCallback(isActivate);
     EXPECT_TRUE(context_->onWindowActivateChangedCallbacks_.empty());
 
@@ -2199,9 +2206,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
      * @tc.steps3: Call function FlushWindowActivateChangedCallback;
      * @tc.expected: The onWindowActivateChangedCallbacks_ is not empty
      */
-    context_->onWindowActivateChangedCallbacks_.insert(10);
-    ElementIdType elmtId = 10;
-    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+    auto activeNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    context_->onWindowActivateChangedCallbacks_.insert(activeNodeId);
+    ElementIdType elmtId = activeNodeId;
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>(
+        "test3", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     WeakPtr<FrameNode> referenced = AceType::WeakClaim(AceType::RawPtr(rootNode));
     ElementRegister::GetInstance()->AddReferenced(elmtId, referenced);
     context_->FlushWindowActivateChangedCallback(isActivate);
@@ -2214,6 +2223,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
     isActivate = true;
     context_->FlushWindowActivateChangedCallback(isActivate);
     EXPECT_TRUE(!context_->onWindowActivateChangedCallbacks_.empty());
+    ElementRegister::GetInstance()->RemoveItemSilently(elmtId);
 }
 
 /**

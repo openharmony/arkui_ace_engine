@@ -18,7 +18,7 @@ ace_unittest("video_test_ng") {
   type = "new"
 
   sources = [
-    "$ace_root/test/mock/base/mock_background_task_helper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_background_task_helper.cpp",
     "video_property_test_ng.cpp",
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",

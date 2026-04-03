@@ -5,6 +5,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_detector.h"
 
 namespace OHOS::Ace::NG {

@@ -32,7 +32,7 @@ ace_unittest("form_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_container.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_form_manager_delegate.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rs_surface_mode.cpp",
@@ -99,7 +99,7 @@ ace_unittest("form_node_test") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_container.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_form_manager_delegate.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rs_surface_mode.cpp",
@@ -166,7 +166,7 @@ ace_unittest("form_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_container.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_form_manager_delegate.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rs_surface_mode.cpp",
@@ -221,7 +221,7 @@ ohos_unittest("form_special_style_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "form_special_style_test.cpp",
   ]
 
@@ -239,7 +239,7 @@ ohos_unittest("form_snapshot_util_test") {
   module_out_path = "ace_engine/form_fwk"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/form/form_snapshot_util.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "form_snapshot_util_test.cpp",
@@ -267,8 +267,8 @@ ohos_unittest("form_scoped_rs_transaction_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
     "form_scoped_rs_transaction_test.cpp",
   ]
 

@@ -19,6 +19,7 @@
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"

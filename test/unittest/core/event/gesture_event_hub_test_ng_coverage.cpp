@@ -15,8 +15,8 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"

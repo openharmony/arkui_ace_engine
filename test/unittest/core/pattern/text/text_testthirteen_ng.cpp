@@ -15,10 +15,10 @@
 
 #include <memory>
 
-#include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "text_base.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"

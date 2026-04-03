@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
@@ -91,7 +92,7 @@ public:
     }
 
     void SetEnableSwipeBack(bool isEnable) {}
-    
+
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
     bool ReachResponseDeadline() const override

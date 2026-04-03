@@ -49,12 +49,12 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_task_executor.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+
 #include "transaction/rs_transaction.h"
 #include "accessibility_event_info.h"
 
@@ -112,7 +112,7 @@ public:
         auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
         auto placeholderNode = FrameNode::GetOrCreateFrameNode(
             "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
-        
+
         NG::UIExtensionConfig config;
         config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
         config.placeholderNode = placeholderNode;

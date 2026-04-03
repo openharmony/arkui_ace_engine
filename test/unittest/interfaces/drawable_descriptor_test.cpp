@@ -22,7 +22,7 @@
 #include "native_drawable_descriptor.h"
 #include "node_extened.h"
 #include "resource_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

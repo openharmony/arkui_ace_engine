@@ -14,9 +14,9 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/focus_hub_test_ng.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"

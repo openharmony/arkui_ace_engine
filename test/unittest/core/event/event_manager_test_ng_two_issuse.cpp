@@ -14,10 +14,10 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/patternlock/patternlock_modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

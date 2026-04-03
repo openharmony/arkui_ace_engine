@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/rosen/testing_canvas.h"
 #include "gmock/gmock.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_base.h"
 
 #include "core/components_ng/layout/layout_property.h"

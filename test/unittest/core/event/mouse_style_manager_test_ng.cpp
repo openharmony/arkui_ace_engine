@@ -16,7 +16,7 @@
 #include "test/unittest/core/event/mouse_style_manager_test_ng.h"
 #include <optional>
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

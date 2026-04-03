@@ -22,7 +22,7 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"

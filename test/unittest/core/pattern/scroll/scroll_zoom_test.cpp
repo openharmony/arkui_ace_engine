@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 
 #include "core/components_ng/pattern/scroll/zoom_controller.h"

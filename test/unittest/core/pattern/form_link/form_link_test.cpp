@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/form_link/form_link_model_ng.h"
 #include "frameworks/core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"

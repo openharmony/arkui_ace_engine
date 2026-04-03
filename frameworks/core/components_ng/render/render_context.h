@@ -853,6 +853,7 @@ public:
     }
 
     virtual void SetDrawNode() {}
+    virtual void SetUnionSpacing(float spacing) {}
 
     static void SetNeedCallbackNodeChange(bool needCallback);
 

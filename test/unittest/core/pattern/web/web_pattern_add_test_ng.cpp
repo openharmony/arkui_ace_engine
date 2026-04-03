@@ -23,10 +23,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
@@ -35,7 +35,7 @@
 #include "core/event/touch_event.h"
 #undef protected
 #undef private
-#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
 
 #include "nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"

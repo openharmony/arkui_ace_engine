@@ -3,6 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 
 namespace OHOS::Ace::NG {

@@ -15,7 +15,7 @@
 
 #include <utility>
 
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 #include "water_flow_test_ng.h"
 

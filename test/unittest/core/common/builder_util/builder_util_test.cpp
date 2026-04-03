@@ -18,8 +18,8 @@
 #define private public
 #define protected public
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
-#include "test/mock/core/common/mock_frontend.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/builder_util.h"
 #include "core/components_ng/base/frame_node.h"

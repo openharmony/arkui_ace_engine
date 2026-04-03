@@ -22,5 +22,5 @@ ohos_source_set("mock_ipc_single") {
   sources = [ "$ace_root/test/mock/ohos_mock/ipc_single/ipc_skeleton.cpp" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   public_configs = [ ":mock_ipc_config" ]
-  deps = [ "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils" ]
+  public_deps = [ "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils" ]
 }

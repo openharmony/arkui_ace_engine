@@ -17,8 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
