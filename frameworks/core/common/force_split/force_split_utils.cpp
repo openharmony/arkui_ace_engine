@@ -596,7 +596,7 @@ void ForceSplitUtils::LogSystemForceSplitConfig(
         (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
         config.navigationDisablePlaceholder, config.navigationDisableDivider,
         (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
-        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA")，
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
         (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
         (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"));
 }
