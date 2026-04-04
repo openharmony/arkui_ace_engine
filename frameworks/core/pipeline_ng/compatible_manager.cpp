@@ -14,7 +14,7 @@
  */
 
 #include <cmath>
-#inlude <cinttypes>
+#include <cinttypes>
 #include "core/pipeline_ng/compatible_manager.h"
 #include "base/log/log_wrapper.h"
 

@@ -1601,7 +1601,6 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    std::list<TouchEvent> compatibleTouchEvents_;
 
     std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
@@ -1791,6 +1790,7 @@ private:
     OnDrawChildrenInfoMap onDrawChildrenInfoMap_;
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
     CompatibleManager compatibleManager_;
+    std::list<TouchEvent> compatibleTouchEvents_;
 };
 
 /**
