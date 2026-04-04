@@ -36,7 +36,7 @@ export default {
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     getNodePtrValue, nodeDeref, edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
     typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr, ReactiveBuilderNode, ReactiveComponentContent, CompetitionStrategy,
-    createComponentContentByTrans
+    createComponentContentByTrans, createReactiveComponentContentByTrans
 };
 `;
     AddExportToDistFile(distFileName, exportContent);

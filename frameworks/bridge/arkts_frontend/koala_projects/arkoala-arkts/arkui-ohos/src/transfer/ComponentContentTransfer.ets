@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer';
-import { ComponentContent } from '../ComponentContent';
+import { ComponentContent, ReactiveComponentContent } from '../ComponentContent';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
@@ -98,22 +98,120 @@ export class TransComponentContent<T = undefined> extends ComponentContent<T> {
     }
 
     update(params: T): void {
-        const error = Error('componentContent created by transferStatic not support update');
-        throw new BusinessError(100021, error);
+        const error = Error('ComponentContent created by transferStatic not support update');
+        throw new BusinessError(100031, error);
     }
 
     reuse(param?: RecordData): void {
-        const error = Error('componentContent created by transferStatic not support reuse');
-        throw new BusinessError(100021, error);
+        const error = Error('ComponentContent created by transferStatic not support reuse');
+        throw new BusinessError(100031, error);
     }
 
     recycle(): void {
-        const error = Error('componentContent created by transferStatic not support recycle');
-        throw new BusinessError(100021, error);
+        const error = Error('ComponentContent created by transferStatic not support recycle');
+        throw new BusinessError(100031, error);
     }
 
     updateConfiguration(): void {
-        const error = Error('componentContent created by transferStatic not support updateConfiguration');
-        throw new BusinessError(100021, error);
+        const error = Error('ComponentContent created by transferStatic not support updateConfiguration');
+        throw new BusinessError(100031, error);
+    }
+}
+
+export class ReactiveComponentContentTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            throw new BusinessError(401, 'The ReactiveComponentContent is not object convert fail.');
+        }
+        if (input === null) {
+            throw new BusinessError(401, 'The ReactiveComponentContent is null convert fail.');
+        }
+        let isDisposed = ESValue.wrap(input).invokeMethod('isDisposed').toBoolean();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ReactiveComponentContent has been disposed convert fail');
+        }
+        let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
+
+        let frameNodeDyn = ESValue.wrap(input).invokeMethod('getFrameNodePtr');
+        if (typeof (frameNodeDyn) !== 'object') {
+            throw Error('The ReactiveComponentContent transferStatic failed: frameNode is not object.');
+        }
+        let getFrameNodeRawPtr = arkUINode.getProperty('getFrameNodeRawPtr');
+        let frameNodeRawPtr = getFrameNodeRawPtr.invoke(frameNodeDyn! as Object).toNumber();
+        let frameNodePeer = FrameNodeExtender.createByRawPtr(Double.toLong(frameNodeRawPtr));
+
+        let nodePtrDyn = ESValue.wrap(input).invokeMethod('getNodePtr');
+        if (typeof (nodePtrDyn) !== 'object') {
+            throw Error('The ReactiveComponentContent transferStatic failed: get NodePtr failed.');
+        }
+        let nodeRawPtr = getFrameNodeRawPtr.invoke(nodePtrDyn as Object).toNumber();
+
+        let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
+        let uiContextSta = new UIContext(instanceId as int32);
+        return new TransReactiveComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
+    }
+
+    static transferDynamic(input: Object): Any {
+        if (typeof (input) !== 'object') {
+            throw new BusinessError(401, 'The ReactiveComponentContent is not object convert fail.');
+        }
+        if (input === null) {
+            throw new BusinessError(401, 'The ReactiveComponentContent is null convert fail.');
+        }
+        let componentContentSta = input as ReactiveComponentContent;
+        let isDisposed = componentContentSta.isDisposed();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ReactiveComponentContent has been disposed convert fail');
+        }
+        const instanceId = componentContentSta.getInstanceId();
+        let uiContext = UIContextTransfer.createDynamic(instanceId);
+
+        let rootPtr = componentContentSta.getBuilderRootNode();
+        if (rootPtr === undefined) {
+            throw Error('The ReactiveComponentContent transferDynamic failed: get root node failed.');
+        }
+
+        let frameNodeSta = componentContentSta!.getFrameNode();
+        if (frameNodeSta === null || frameNodeSta === undefined || frameNodeSta!.nodePtr_ === null) {
+            throw Error('The ReactiveComponentContent transferDynamic failed: get frameNode failed.');
+        }
+        let frameNodeStaPtr = frameNodeSta!.nodePtr_;
+        let frameNodeRawPtr = FrameNodeExtender.unWrapRawPtr(frameNodeStaPtr!);
+
+        let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
+        let createReactiveComponentContentByTrans = arkUINode.getProperty('createReactiveComponentContentByTrans');
+        let componentContentWrapper =
+            createReactiveComponentContentByTrans.invoke(uiContext as Object, rootPtr, frameNodeRawPtr);
+        return componentContentWrapper.unwrap();
+    }
+}
+
+export class TransReactiveComponentContent extends ReactiveComponentContent {
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        super(uiContext, nodePtr, frameNodePtr);
+    }
+
+    isTransferred(): boolean {
+        return true;
+    }
+
+    updateConfiguration(): void {
+        const error = Error('ReactiveComponentContent created by transferStatic not support updateConfiguration');
+        throw new BusinessError(100031, error);
+    }
+
+    reuse(param?: RecordData): void {
+        const error = Error('ReactiveComponentContent created by transferStatic not support reuse');
+        throw new BusinessError(100031, error);
+    }
+
+    recycle(): void {
+        const error = Error('ReactiveComponentContent created by transferStatic not support recycle');
+        throw new BusinessError(100031, error);
+    }
+
+    flushState(): void {
+        const error = Error('ReactiveComponentContent created by transferStatic not support flushState');
+        throw new BusinessError(100031, error);
     }
 }

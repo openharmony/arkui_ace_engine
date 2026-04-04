@@ -603,13 +603,16 @@ class JSBuilderNode extends BaseNode {
 }
 
 class ReactiveBuilderNode extends BuilderNodeCommonBase {
-  constructor(uiContext: UIContext, options: RenderOptions) {
+  constructor(uiContext: UIContext, options: RenderOptions, jsBuilderNode?: JSBuilderNode) {
     super();
-    let jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
-    this._JSBuilderNode = jsBuilderNode;
+    if (jsBuilderNode === null || jsBuilderNode === undefined) {
+      this._JSBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
+    } else {
+      this._JSBuilderNode = jsBuilderNode;
+    }
     let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(
-      id, new WeakRef<JSBuilderNode>(jsBuilderNode));
+      id, new WeakRef<JSBuilderNode>(this._JSBuilderNode));
     BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
   }
   public build(builder: WrappedBuilder<Object[]>, options?: BuildOptions, ...params: Object[]): void {

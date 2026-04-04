@@ -17,9 +17,13 @@ function createComponentContentByTrans(uiContext: UIContext, nodePtr: number, fr
     return new TransComponentContent(uiContext, nodePtr, frameNodePtr);
 }
 
+function createReactiveComponentContentByTrans(uiContext: UIContext, nodePtr: number, frameNodePtr: number): TransReactiveComponentContent {
+    return new TransReactiveComponentContent(uiContext, nodePtr, frameNodePtr);
+}
+
 class TransComponentContent extends ComponentContent {
     constructor(uiContext: UIContext, nodePtr: number, frameNodePtr: number) {
-        super(uiContext, undefined, undefined, undefined);
+        super(uiContext, undefined);
         this.createBuilderNode(uiContext, nodePtr, frameNodePtr);
     }
 
@@ -28,22 +32,54 @@ class TransComponentContent extends ComponentContent {
     }
 
     public reuse(param: Object): void {
-        throw new BusinessError(100031, 'componentContent created by transferDynamic not support reuse');
+        throw new BusinessError(100031, 'ComponentContent created by transferDynamic not support reuse');
     }
 
     public update(params: Object): void {
-        throw new BusinessError(100031, 'componentContent created by transferDynamic not support update');
+        throw new BusinessError(100031, 'ComponentContent created by transferDynamic not support update');
     }
 
     public recycle(): void {
-        throw new BusinessError(100031, 'componentContent created by transferDynamic not support recycle');
+        throw new BusinessError(100031, 'ComponentContent created by transferDynamic not support recycle');
     }
 
     public updateConfiguration(): void {
-        throw new BusinessError(100031, 'componentContent created by transferDynamic not support updateConfiguration');
+        throw new BusinessError(100031, 'ComponentContent created by transferDynamic not support updateConfiguration');
     }
 
     public inheritFreezeOptions(enable: boolean): void {
-        throw new BusinessError(100031, 'componentContent created by transferDynamic not support inheritFreezeOptions');
+        throw new BusinessError(100031, 'ComponentContent created by transferDynamic not support inheritFreezeOptions');
+    }
+}
+
+class TransReactiveComponentContent extends ReactiveComponentContent {
+
+    constructor(uiContext: UIContext, nodePtr: number, frameNodePtr: number) {
+        super(uiContext, undefined, undefined);
+        this.createReactiveBuilderNode(uiContext, nodePtr, frameNodePtr);
+    }
+
+    public isTransferred(): boolean {
+        return true;
+    }
+
+    public reuse(_param: Object): void {
+        throw new BusinessError(100031, 'ReactiveComponentContent created by transferDynamic not support reuse');
+    }
+
+    public recycle(): void {
+        throw new BusinessError(100031, 'ReactiveComponentContent created by transferDynamic not support recycle');
+    }
+
+    public flushState(): void {
+        throw new BusinessError(100031, 'ReactiveComponentContent created by transferDynamic not support flushState');
+    }
+
+    public updateConfiguration(): void {
+        throw new BusinessError(100031, 'ReactiveComponentContent created by transferDynamic not support updateConfiguration');
+    }
+
+    public inheritFreezeOptions(enable: boolean): void {
+        throw new BusinessError(100031, 'ReactiveComponentContent created by transferDynamic not support inheritFreezeOptions');
     }
 }
