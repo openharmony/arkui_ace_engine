@@ -5934,9 +5934,8 @@ void RosenRenderContext::PaintOverlayText()
         std::shared_ptr<Rosen::RectF> overlayRect;
         if (overlayTextModifier_) {
             overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
+            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
             auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffsetWithDirection(
-                SizeF(paintRect.Width(), paintRect.Height()), paragraphSize);
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
@@ -5946,9 +5945,8 @@ void RosenRenderContext::PaintOverlayText()
             overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
             rsNode_->AddModifier(overlayTextModifier_);
             overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
+            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
             auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffsetWithDirection(
-                SizeF(paintRect.Width(), paintRect.Height()), paragraphSize);
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
