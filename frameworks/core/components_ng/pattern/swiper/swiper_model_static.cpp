@@ -147,6 +147,9 @@ RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
     swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
     swiperNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperNode);
+    pattern->SetIsPureSwiper(true);
     return swiperNode;
 }
 

@@ -1625,6 +1625,27 @@ export class UIObserver {
         }
     }
 
+    public onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(callback);
+        }
+    }
+    public offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(callback);
+        }
+    }
+    public onSwiperContentUpdate(config: uiObserver.ObserverOptions, callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(config, callback);
+        }
+    }
+    public offSwiperContentUpdate(config: uiObserver.ObserverOptions, callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(config, callback);
+        }
+    }
+
     public onBeforePanStart(callback: PanListenerCallback): void {
         let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_.toInt(), callback);
         ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanStart', callback);
@@ -1724,6 +1745,28 @@ export interface PageInfo {
         navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 export interface ContentCoverController {}
+
+export interface SwiperContentInfo {
+    id: string;
+    uniqueId: int;
+    swiperItemInfos: Array<SwiperItemInfo>;
+}
+
+export interface SwiperItemInfo {
+    uniqueId: int;
+    index: int;
+}
+
+export class SwiperContentInfoImpl implements SwiperContentInfo {
+    id: string = '';
+    uniqueId: int = -1;
+    swiperItemInfos: Array<SwiperItemInfo> = new Array<SwiperItemInfo>();
+}
+
+export class SwiperItemInfoImpl implements SwiperItemInfo {
+    uniqueId: int = -1;
+    index: int = -1;
+}
 
 export class Magnifier {
     bind(id: string): void {}

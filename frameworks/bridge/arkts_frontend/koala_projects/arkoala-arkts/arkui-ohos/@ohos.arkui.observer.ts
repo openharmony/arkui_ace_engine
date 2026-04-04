@@ -1,6 +1,6 @@
 import { ResourceStr } from '/arkui/component/units';
 import { NavPathStack, NavigationOperation, NavBar } from 'arkui/framework'
-import { UIContext } from '@ohos/arkui/UIContext';
+import { UIContext, SwiperContentInfo } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
 import { HeightBreakpoint, WidthBreakpoint } from '/arkui/component/enums';
@@ -87,6 +87,10 @@ declare namespace uiObserver {
         offTextChange(callback?: Callback_<TextChangeEventInfo>): void;
         onTextChange(identity: ObserverOptions, callback: Callback_<TextChangeEventInfo>): void;
         offTextChange(identity: ObserverOptions, callback?: Callback_<TextChangeEventInfo>): void;
+        onSwiperContentUpdate(callback: Callback_<SwiperContentInfo>): void;
+        offSwiperContentUpdate(callback?: Callback_<SwiperContentInfo>): void;
+        onSwiperContentUpdate(config: ObserverOptions, callback: Callback_<SwiperContentInfo>): void;
+        offSwiperContentUpdate(config: ObserverOptions, callback?: Callback_<SwiperContentInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
