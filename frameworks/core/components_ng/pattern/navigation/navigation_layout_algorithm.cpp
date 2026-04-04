@@ -664,15 +664,20 @@ void NavigationLayoutAlgorithm::SizeCalculationForForceSplit(
     LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
 {
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    auto detailPageRatio = forceSplitMgr->GetSplitRatio();
     auto dividerWidth = IsDividerDisabled(hostNode) ? 0.0f : static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    auto rightWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
+    auto leftWidth = frameSize.Width() - rightWidth - dividerWidth;
     dividerSize_ = SizeF(dividerWidth, frameSize.Height());
-    auto halfWidth = (frameSize.Width() - dividerWidth) / 2.0f;
-    navBarSize_ = SizeF(halfWidth, frameSize.Height());
-    primaryNodeSize_ = SizeF(halfWidth, frameSize.Height());
-    contentSize_ = SizeF(halfWidth, frameSize.Height());
-    realNavBarWidth_ = halfWidth;
-    realContentWidth_ = halfWidth;
-    realDividerWidth_ = halfWidth;
+    navBarSize_ = SizeF(leftWidth, frameSize.Height());
+    primaryNodeSize_ = SizeF(leftWidth, frameSize.Height());
+    contentSize_ = SizeF(rightWidth, frameSize.Height());
+    realNavBarWidth_ = leftWidth;
+    realContentWidth_ = rightWidth;
+    realDividerWidth_ = dividerWidth;
 }
 
 void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
@@ -724,10 +729,16 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGrou
     bool isHideNavbar = navigationLayoutProperty->GetHideNavBar().value_or(false);
     if (pattern->IsForceSplitSuccess() && pattern->IsForceSplitUseNavBar()) {
         dividerSize_.SetWidth(dividerWidth);
-        auto halfWidth = (frameSize.Width() - dividerWidth) / 2.0f;
-        navBarSize_.SetWidth(halfWidth);
-        realNavBarWidth_ = halfWidth;
-        realContentWidth_ = halfWidth;
+        auto pipeline = hostNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto forceSplitMgr = pipeline->GetForceSplitManager();
+        auto detailPageRatio = forceSplitMgr->GetSplitRatio();
+        auto rightWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
+        auto leftWidth = frameSize.Width() - rightWidth - dividerWidth;
+        navBarSize_.SetWidth(leftWidth);
+        primaryNodeSize_ = navBarSize_;
+        realNavBarWidth_ = leftWidth;
+        realContentWidth_ = rightWidth;
     } else if (isHideNavbar) {
         CHECK_NULL_VOID(hostNode);
         auto targetNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());

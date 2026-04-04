@@ -60,22 +60,22 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureDetailPage(layoutWrapper->GetOrCreateChildByIndex(stageSize - 1));
         return;
     }
+    SizeCalculationForForceSplit(hostNode, size);
     auto primaryPageWrapper = layoutWrapper->GetOrCreateChildByIndex(primaryIndex_);
-    MeasureSplitPage(primaryPageWrapper, size);
+    MeasurePage(primaryPageWrapper, leftSize_);
     // layout divider node
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(dividerWrapper);
     auto dividerProperty = dividerWrapper->GetLayoutProperty();
     auto dividerConstraint = dividerProperty->CreateChildConstraint();
-    dividerConstraint.selfIdealSize.SetWidth(DIVIDER_WIDTH.ConvertToPx());
-    dividerConstraint.selfIdealSize.SetHeight(size.Height());
+    dividerConstraint.selfIdealSize.SetSize(dividerSize_);
     dividerWrapper->Measure(dividerConstraint);
     auto detailWrapper = layoutWrapper->GetOrCreateChildByIndex(stageSize - 1);
     // If failed to load relatedPage, the primaryPage and the last child of stage might be the same page.
     if (detailWrapper == primaryPageWrapper) {
         return;
     }
-    MeasureSplitPage(detailWrapper, size);
+    MeasurePage(detailWrapper, rightSize_);
 }
 
 void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -119,9 +119,8 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     auto primaryGeometryNode = primaryPageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(primaryGeometryNode);
     auto primaryPageWidth = primaryGeometryNode->GetFrameSize().Width();
-    constexpr int32_t PAGE_NUMBER = 2;
-    auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
-    auto dividerOffset = (stageWidth - dividerWidth) / PAGE_NUMBER;
+    auto dividerWidth = dividerSize_.Width();
+    auto dividerOffset = leftSize_.Width();
     auto primaryOffset = std::max(0.0f, (float)(dividerOffset - primaryPageWidth));
     OffsetF offset;
     offset.SetX(primaryOffset);
@@ -178,7 +177,7 @@ void ParallelStageLayoutAlgorithm::MeasureDetailPage(const RefPtr<LayoutWrapper>
     layoutWrapper->Measure(constraint);
 }
 
-void ParallelStageLayoutAlgorithm::MeasureSplitPage(const RefPtr<LayoutWrapper>& layoutWrapper, const SizeF& size)
+void ParallelStageLayoutAlgorithm::MeasurePage(const RefPtr<LayoutWrapper>& layoutWrapper, const SizeF& size)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
@@ -193,9 +192,21 @@ void ParallelStageLayoutAlgorithm::MeasureSplitPage(const RefPtr<LayoutWrapper>&
     if (forceSplitMgr->IsForceSplitSupported(true)) {
         constraint.scaleProperty = ScaleProperty::CreateScaleProperty(pipelineContext);
     }
-    const int32_t halfContent = 2;
-    constraint.selfIdealSize.SetWidth((size.Width() - DIVIDER_WIDTH.ConvertToPx()) / halfContent);
-    constraint.selfIdealSize.SetHeight(size.Height());
+    constraint.selfIdealSize.UpdateSizeWithCheck(size);
     layoutWrapper->Measure(constraint);
+}
+
+void ParallelStageLayoutAlgorithm::SizeCalculationForForceSplit(const RefPtr<FrameNode>& hostNode, const SizeF& size)
+{
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    auto detailPageRatio = forceSplitMgr->GetSplitRatio();
+    auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
+    auto rightWidth = (size.Width() - dividerWidth) * detailPageRatio;
+    auto leftWidth = size.Width() - rightWidth - dividerWidth;
+    dividerSize_ = SizeF(dividerWidth, size.Height());
+    leftSize_ = SizeF(leftWidth, size.Height());
+    rightSize_ = SizeF(rightWidth, size.Height());
 }
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,15 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float DEFAULT_SPLIT_RATIO = 0.5f;
+}
+
+ForceSplitManager::ForceSplitManager()
+    : splitRatio_(DEFAULT_SPLIT_RATIO), mode_(ForceSplitMode::NOT_SPLIT)
+{
+}
+
 void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
 {
     if (surfaceChangeCallbackId_.has_value()) {
@@ -46,9 +55,11 @@ void ForceSplitManager::ChangeForceSplitModeIfNeeded()
         return;
     }
     bool isEnable = delayedIsForceSplitEnable_.value();
+    auto mode = delayedMode_.value();
     delayedIsForceSplitEnable_ = std::nullopt;
+    delayedMode_ = std::nullopt;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "delayed %{public}s forceSplit", (isEnable ? "enable" : "disable"));
-    SetForceSplitEnable(isEnable, false);
+    SetForceSplitEnable(isEnable, mode, false);
 }
 
 bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
@@ -59,10 +70,10 @@ bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
     return isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_;
 }
 
-void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, needUpdateViewport:%{public}d",
-        (isForceSplit ? "enable" : "disable"), needUpdateViewport);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}u, needUpdateViewport:%{public}d",
+        (isForceSplit ? "enable" : "disable"), static_cast<int32_t>(mode), needUpdateViewport);
     /**
      * As long as the application supports force split, regardless of whether it is enabled or not,
      * the SetForceSplitEnable interface will be called.
@@ -70,6 +81,7 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
     isForceSplitSupported_ = true;
     if (needUpdateViewport) {
         delayedIsForceSplitEnable_ = isForceSplit;
+        delayedMode_ = mode;
         RegisterSurfaceChangeCallbackIfNeeded();
         return;
     }
@@ -78,6 +90,12 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
             delayedIsForceSplitEnable_.value());
         delayedIsForceSplitEnable_ = std::nullopt;
     }
+    if (delayedMode_.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed mode:%{public}d", delayedMode_.value());
+        delayedMode_ = std::nullopt;
+    }
+    mode_ = mode;
+    UpdateForceSplitRatio();
     if (isForceSplitEnable_ == isForceSplit) {
         return;
     }
@@ -87,9 +105,15 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
 
 void ForceSplitManager::OnForceSplitEnableChange()
 {
+    UpdateIsInForceSplitMode();
+    FlushArkUIHook();
+    NotifyForceSplitStateChange();
+}
+
+void ForceSplitManager::FlushArkUIHook()
+{
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
-    UpdateIsInForceSplitMode();
     auto width = context->GetWindowOriginalWidth();
     if (width > 0) {
         context->ForceUpdateDesignWidthScale(width);
@@ -100,7 +124,6 @@ void ForceSplitManager::OnForceSplitEnableChange()
         geometryNode->ResetParentLayoutConstraint();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    NotifyForceSplitStateChange();
 }
 
 void ForceSplitManager::SetNavigationForceSplitEnableInternal(bool enableSplit)
@@ -235,5 +258,74 @@ void ForceSplitManager::NotifyForceSplitStateChange()
             pair.second();
         }
     }
+}
+
+float ForceSplitManager::CalcCurrentSplitRatio()
+{
+    if (mode_ == ForceSplitMode::NOT_SPLIT) {
+        return DEFAULT_SPLIT_RATIO;
+    }
+    if (mode_ == ForceSplitMode::WIDE_SPLIT) {
+        return wideSplitRatio_.has_value() ? wideSplitRatio_.value() : DEFAULT_SPLIT_RATIO;
+    }
+    return squareSplitRatio_.has_value() ? squareSplitRatio_.value() : DEFAULT_SPLIT_RATIO;
+}
+
+void ForceSplitManager::AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener)
+{
+    forceSplitRatioListeners_[nodeId] = std::move(listener);
+}
+
+void ForceSplitManager::RemoveForceSplitRatioListener(int32_t nodeId)
+{
+    auto it = forceSplitRatioListeners_.find(nodeId);
+    if (it != forceSplitRatioListeners_.end()) {
+        forceSplitRatioListeners_.erase(it);
+    }
+}
+
+void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    FlushArkUIHook();
+    auto winMgr = context->GetWindowManager();
+    if (winMgr) {
+        winMgr->UpdateForceSplitRatio(ratio);
+    }
+    // Update Dialog ratio
+    auto listeners = forceSplitRatioListeners_;
+    for (auto pair : listeners) {
+        if (pair.second) {
+            pair.second(ratio);
+        }
+    }
+    if (isRouter_) {
+        auto stageMgr = context->GetStageManager();
+        CHECK_NULL_VOID(stageMgr);
+        auto stageNode = stageMgr->GetStageNode();
+        CHECK_NULL_VOID(stageNode);
+        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
+    if (!existForceSplitNav.first) {
+        return;
+    }
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
+    CHECK_NULL_VOID(navNode);
+    navNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ForceSplitManager::UpdateForceSplitRatio()
+{
+    auto splitRatio = CalcCurrentSplitRatio();
+    if (NearEqual(splitRatio, splitRatio_)) {
+        return;
+    }
+    splitRatio_ = splitRatio;
+    OnForceSplitRatioUpdate(splitRatio_);
 }
 } // namespace OHOS::Ace::NG

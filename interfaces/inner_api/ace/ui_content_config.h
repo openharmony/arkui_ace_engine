@@ -53,6 +53,12 @@ struct AppForceSplitConfig {
     std::string configJsonStr;
 };
 
+enum class ForceSplitMode {
+    NOT_SPLIT,
+    WIDE_SPLIT,
+    SQUARE_SPLIT
+};
+
 struct FrameMetrics {
     bool firstDrawFrame = false; // Indicates whether the first frame of the window.
     uint64_t vsyncTimestamp = 0; // Indicates the timestamp of the actual vaync for this frame. The value is expressed

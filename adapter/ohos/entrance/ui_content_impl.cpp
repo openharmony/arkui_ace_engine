@@ -5645,10 +5645,11 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit:%{public}d "
-        "needUpdateViewport:%{public}d", isForceSplit, needUpdateViewport);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}u needUpdateViewport:%{public}d",
+             isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5656,12 +5657,12 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewpo
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, needUpdateViewport]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, mode, needUpdateViewport]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, needUpdateViewport);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, mode, needUpdateViewport);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
@@ -5700,6 +5701,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+        forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
         forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
             config.splitDividerColorDark);
         if (!(appConfig->isRouter)) {
@@ -5727,6 +5730,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+    forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
     forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
         config.splitDividerColorDark);
     if (!(systemConfig->isRouter)) {

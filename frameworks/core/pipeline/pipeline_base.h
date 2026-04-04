@@ -934,7 +934,7 @@ public:
         return IsCurrentInForceSplitMode();
     }
 
-    double CalcPageWidth(double rootWidth) const;
+    virtual double CalcPageWidth(double rootWidth) const;
 
     double GetPageWidth() const;
 

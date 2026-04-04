@@ -984,6 +984,8 @@ public:
         return forceSplitMgr_;
     }
 
+    double CalcPageWidth(double rootWidth) const override;
+
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
