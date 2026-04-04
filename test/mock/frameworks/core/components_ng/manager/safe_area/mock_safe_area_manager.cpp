@@ -66,6 +66,11 @@ float SafeAreaManager::GetKeyboardOffset(bool withoutProcess) const
     return keyboardOffset_;
 }
 
+SafeAreaInsets SafeAreaManager::GetFloatNavSafeArea() const
+{
+    return {};
+}
+
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     auto keyboard = static_cast<uint32_t>(std::max(0.0f, keyboardHeight));
@@ -96,6 +101,20 @@ bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     navSafeArea_ = safeArea;
+    return true;
+}
+
+bool SafeAreaManager::CheckFloatNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    return floatNavSafeArea_ != safeArea;
+}
+
+bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (floatNavSafeArea_ == safeArea) {
+        return false;
+    }
+    floatNavSafeArea_ = safeArea;
     return true;
 }
 

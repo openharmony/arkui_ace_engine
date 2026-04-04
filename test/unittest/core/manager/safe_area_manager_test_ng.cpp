@@ -43,18 +43,22 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level0)
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), true);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
+
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
+
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), false);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), false);

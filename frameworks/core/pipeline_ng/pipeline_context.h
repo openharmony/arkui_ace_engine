@@ -452,6 +452,7 @@ public:
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSystemWindow = false) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
+    void UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea) override;
 
     void UpdateSystemSafeAreaWithoutAnimation(
         const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) override;
@@ -461,6 +462,8 @@ public:
 
     void UpdateNavSafeAreaWithoutAnimation(
         const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) override;
+    
+    void UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) override;
 
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 

@@ -994,6 +994,8 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
+void PipelineContext::UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea) {}
+
 void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(
     const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {
@@ -1023,6 +1025,8 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
     }
     safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
+
+void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) {}
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
