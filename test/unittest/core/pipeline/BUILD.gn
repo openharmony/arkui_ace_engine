@@ -175,9 +175,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/mock_app_bar_view.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
-    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
-
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_five.cpp",
     "pipeline_context_test_ng_four.cpp",
@@ -185,6 +182,9 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
 
+    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
   ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
   extra_deps = []
