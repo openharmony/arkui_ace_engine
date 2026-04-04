@@ -57,6 +57,8 @@ void SheetPresentationTestFourNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {

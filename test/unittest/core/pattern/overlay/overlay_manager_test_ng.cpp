@@ -1307,6 +1307,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::MEDIUM);

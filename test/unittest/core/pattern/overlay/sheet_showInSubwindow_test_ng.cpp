@@ -96,6 +96,8 @@ void SheetShowInSubwindowTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SheetShowInSubwindowTestNg::lastPlatformVersion_ = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
 }
