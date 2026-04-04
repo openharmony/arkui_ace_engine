@@ -132,10 +132,8 @@ void EventManager::ProcessTouchTestWithReferee(const TouchEvent& touchPoint, con
 {
     auto currentReferee = refereeNG_;
     int32_t eventHandleId = touchPoint.eventHandleId;
-    if (eventHandleId / EVENT_HANDLE > 0) {
-        currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
-        CHECK_NULL_VOID(currentReferee);
-    }
+    currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
+    CHECK_NULL_VOID(currentReferee);
     currentReferee->AddGestureToScope(touchPoint.id, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 
@@ -507,7 +505,7 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
         currentReferee = postEventRefereeWithStrategyNG_[key];
     } else {
         // Post once use referee with refereeNG_, use upper-level referee more than once.
-        if (key == POST_ONCE) {
+        if (key == POST_ONCE || key == 0) {
             postEventRefereeWithStrategyNG_[key] = refereeNG_;
         } else {
             currentReferee = postEventRefereeWithStrategyNG_[key - 1];
