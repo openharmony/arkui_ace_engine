@@ -30,7 +30,6 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/animation/gradient_arithmetic.h"
 #include "core/components_ng/base/linear_vector.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
@@ -193,7 +192,6 @@ DECLARE_PROP_TYPED_CLASS(PropertyU16String, NormalProperty, std::u16string);
 DECLARE_PROP_TYPED_CLASS(PropertyColor, NormalProperty, Color);
 DECLARE_PROP_TYPED_CLASS(PropertyRectF, NormalProperty, RectF);
 DECLARE_PROP_TYPED_CLASS(PropertyVectorFloat, NormalProperty, LinearVector<float>);
-DECLARE_PROP_TYPED_CLASS(PropertyCanvasImageModifierWrapper, NormalProperty, CanvasImageModifierWrapper);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyUint8, AnimatableProperty, uint8_t);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);

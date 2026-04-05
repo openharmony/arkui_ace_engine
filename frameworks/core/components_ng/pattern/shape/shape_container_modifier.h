@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_SHAPE_CONTAINER_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_SHAPE_CONTAINER_MODIFIER_H
 
+#include "base/image/pixel_map.h"
 #include "base/geometry/ng/image_mesh.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/modifier.h"

@@ -21,6 +21,9 @@
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
+
+DECLARE_PROP_TYPED_CLASS(PropertyCanvasImageModifierWrapper, NormalProperty, CanvasImageModifierWrapper);
+
 class ImagePattern;
 class ImageContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ImageContentModifier, ContentModifier);
