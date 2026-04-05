@@ -14,7 +14,9 @@
  */
 #include "core/components_ng/pattern/toast/toast_view.h"
 
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -113,6 +115,43 @@ void ToastView::UpdateTextLayoutProperty(
     }
 }
 
+void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo)
+{
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        return;
+    }
+    CHECK_NULL_VOID(toastNode);
+    auto renderContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    // Check if user has explicitly set systemMaterial
+    if (toastInfo.systemMaterial &&
+        toastInfo.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+        toastInfo.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
+        return;
+    }
+
+    // Apply default MATERIAL_TYPE_THICK when user hasn't set backgroundColor,
+    // backgroundBlurStyle, shadow, and systemMaterial (API 26+)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        bool hasCustomStyle = toastInfo.backgroundColor.has_value() ||
+                              toastInfo.backgroundBlurStyle.has_value() ||
+                              toastInfo.shadow.has_value() ||
+                              toastInfo.systemMaterial;
+        if (!hasCustomStyle) {
+            auto defaultMaterial = AceType::MakeRefPtr<UiMaterial>();
+            defaultMaterial->SetType(static_cast<int32_t>(Ace::MaterialType::IMMERSIVE));
+            ImmersiveOptions options {};
+            options.style = UiMaterialStyle::THICK;
+            defaultMaterial->SetImmersiveOptions(options);
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
+        }
+    }
+}
+
 void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
 {
     ACE_UINODE_TRACE(toastNode);
@@ -164,8 +203,19 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    auto shadowStyle = toastTheme->GetToastShadowStyle();
-    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(shadowStyle));
+
+    // Get shadow from theme if user hasn't set it
+    Shadow shadow;
+    if (toastInfo.shadow.has_value()) {
+        shadow = toastInfo.shadow.value();
+    } else {
+        auto shadowStyle = toastTheme->GetToastShadowStyle();
+        auto colorMode = pipelineContext->GetColorMode();
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+    }
 
     if (toastInfo.isTypeStyleShadow) {
         auto colorMode = pipelineContext->GetColorMode();
@@ -190,5 +240,6 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();
         toastContext->UpdateBackgroundColor(toastBackgroundColor);
     }
+    SetToastSystemMaterial(toastNode, toastInfo);
 }
 } // namespace OHOS::Ace::NG

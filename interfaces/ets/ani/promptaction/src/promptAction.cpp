@@ -67,7 +67,7 @@ bool ContainerIsScenceBoard()
 }
 } // OHOS::Ace::NG
 
-static void ShowToast(ani_env* env, ani_object options)
+static void ShowToast(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showToast enter.");
     auto toastInfo = OHOS::Ace::NG::ToastInfo {
@@ -78,6 +78,7 @@ static void ShowToast(ani_env* env, ani_object options)
     if (!GetShowToastOptions(env, options, toastInfo)) {
         return;
     }
+    GetShowToastOptionsInternal(env, optionsInternal, toastInfo);
 
     std::function<void(int32_t)> toastCallback = nullptr;
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
@@ -88,7 +89,7 @@ static void ShowToast(ani_env* env, ani_object options)
     }
 }
 
-static ani_object OpenToast(ani_env* env, ani_object options)
+static ani_object OpenToast(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openToast enter.");
     auto toastInfo =
@@ -96,6 +97,7 @@ static ani_object OpenToast(ani_env* env, ani_object options)
     if (!GetShowToastOptions(env, options, toastInfo)) {
         return nullptr;
     }
+    GetShowToastOptionsInternal(env, optionsInternal, toastInfo);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     ani_status status = env->GetVM(&asyncContext->vm);

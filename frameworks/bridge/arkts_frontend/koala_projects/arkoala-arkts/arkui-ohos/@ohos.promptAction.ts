@@ -80,12 +80,17 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
+        systemMaterial?: uiMaterial.Material;
     }
 
     export enum ToastShowMode {
         DEFAULT = 0,
         TOP_MOST = 1,
         SYSTEM_TOP_MOST = 2
+    }
+
+    export interface ShowToastOptionsInternal {
+        systemMaterial?: KPointer;
     }
 
     export interface Button {
@@ -240,9 +245,9 @@ declare namespace promptAction {
         shadow?: DialogOptionsShadow;
     }
 
-    export function showToast(options: ShowToastOptions): void;
+    export function showToast(options: ShowToastOptions, optionsInternal?: ShowToastOptionsInternal): void;
 
-    export function openToast(options: ShowToastOptions): Promise<int32>;
+    export function openToast(options: ShowToastOptions, optionsInternal?: ShowToastOptionsInternal): Promise<int32>;
 
     export function closeToast(toastId: int32): void;
 

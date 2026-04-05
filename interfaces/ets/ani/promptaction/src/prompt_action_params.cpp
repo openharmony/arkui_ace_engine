@@ -1557,3 +1557,13 @@ bool GetOffsetParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace:
     result = std::make_optional<OHOS::Ace::DimensionOffset>(offset);
     return true;
 }
+
+bool GetSystemMaterial(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& result)
+{
+    int64_t ptrValue;
+    if (!GetInt64Param(env, object, "systemMaterial", ptrValue)) {
+        return false;
+    }
+    result = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::UiMaterial*>(ptrValue));
+    return true;
+}

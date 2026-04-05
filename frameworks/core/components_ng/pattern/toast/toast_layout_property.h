@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOAST_TOAST_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
@@ -41,6 +42,7 @@ struct ToastInfo {
     bool enableHoverMode = false;
     HoverModeAreaType hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     bool isTypeStyleShadow = true;
+    RefPtr<UiMaterial> systemMaterial;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);

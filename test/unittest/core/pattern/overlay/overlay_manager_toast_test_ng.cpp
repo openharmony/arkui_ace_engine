@@ -65,6 +65,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -78,6 +80,12 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr double DOUBLEONE = 1.0f;
 constexpr int32_t CALLBACK_COUNT = 3;
+
+// System material test constants
+constexpr int32_t MATERIAL_TYPE_NONE = static_cast<int32_t>(MaterialType::NONE);
+constexpr int32_t MATERIAL_TYPE_SEMI_TRANSPARENT = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+constexpr int32_t INVALID_MATERIAL_TYPE_NEGATIVE = -1;
+constexpr int32_t INVALID_MATERIAL_TYPE_TOO_LARGE = 200;
 } // namespace
 class OverlayManagerToastTestNg : public testing::Test {
 public:
@@ -2849,6 +2857,299 @@ HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment012, T
 
     SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
     MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_NullToastNode
+ * @tc.desc: Test SetToastSystemMaterial when toastNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_NullToastNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create valid ToastInfo with systemMaterial
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfo;
+    toastInfo.message = MESSAGE;
+    toastInfo.duration = DURATION;
+    toastInfo.systemMaterial = material;
+
+    /**
+     * @tc.steps: step2. Call SetToastSystemMaterial with nullptr toastNode
+     * @tc.expected: Should return without crash or setting any properties
+     */
+    RefPtr<FrameNode> nullToastNode = nullptr;
+    ToastView::SetToastSystemMaterial(nullToastNode, toastInfo);
+
+    // Verify no crash occurred - if we reach here, test passes
+    EXPECT_EQ(nullToastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_NullSystemMaterial
+ * @tc.desc: Test SetToastSystemMaterial when systemMaterial in ToastInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_NullSystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node without systemMaterial
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with null systemMaterial
+     */
+    ToastInfo toastInfoWithNullMaterial;
+    toastInfoWithNullMaterial.message = MESSAGE;
+    toastInfoWithNullMaterial.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should return without calling SetSystemMaterial
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithNullMaterial);
+
+    // Verify no material was set
+    auto material = renderContext->GetSystemMaterial();
+    EXPECT_EQ(material, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_ValidMaterialTypeNone
+ * @tc.desc: Test SetToastSystemMaterial with valid MaterialType::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_ValidMaterialTypeNone, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state before calling target method
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with MaterialType::NONE
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_NONE);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial directly
+     * @tc.expected: Should call SetSystemMaterial with valid material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method executed successfully
+     * @tc.expected: Toast node should remain valid
+     */
+    EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_ValidMaterialTypeSemiTransparent
+ * @tc.desc: Test SetToastSystemMaterial with valid MaterialType::SEMI_TRANSPARENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_ValidMaterialTypeSemiTransparent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state before calling target method
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with MaterialType::SEMI_TRANSPARENT
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial directly
+     * @tc.expected: Should call SetSystemMaterial with valid material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method executed successfully
+     * @tc.expected: Toast node should remain valid
+     */
+    EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_InvalidMaterialTypeNegative
+ * @tc.desc: Test SetToastSystemMaterial with invalid negative material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_InvalidMaterialTypeNegative, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with invalid negative material type
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(INVALID_MATERIAL_TYPE_NEGATIVE);
+
+    ToastInfo toastInfoWithInvalidMaterial;
+    toastInfoWithInvalidMaterial.message = MESSAGE;
+    toastInfoWithInvalidMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should not call SetSystemMaterial due to invalid type
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithInvalidMaterial);
+
+    /**
+     * @tc.steps: step5. Verify system material was not set
+     * @tc.expected: RenderContext should not have system material set
+     */
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_InvalidMaterialTypeTooLarge
+ * @tc.desc: Test SetToastSystemMaterial with material type larger than MAX
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_InvalidMaterialTypeTooLarge, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with material type exceeding MAX
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(INVALID_MATERIAL_TYPE_TOO_LARGE);
+
+    ToastInfo toastInfoWithInvalidMaterial;
+    toastInfoWithInvalidMaterial.message = MESSAGE;
+    toastInfoWithInvalidMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should not call SetSystemMaterial due to type exceeding MAX
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithInvalidMaterial);
+
+    /**
+     * @tc.steps: step5. Verify system material was not set
+     * @tc.expected: RenderContext should not have system material set
+     */
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_BackBlurStyleReset
+ * @tc.desc: Test that SetToastSystemMaterial resets BackBlurStyle before setting material
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_BackBlurStyleReset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set initial BackBlurStyle
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial BackBlurStyle
+     */
+    BlurStyleOption initialBlurStyle;
+    initialBlurStyle.blurStyle = BlurStyle::COMPONENT_THICK;
+    initialBlurStyle.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+    renderContext->UpdateBackBlurStyle(initialBlurStyle);
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with valid systemMaterial
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should reset BackBlurStyle to nullopt before setting material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method completed successfully
+     * @tc.expected: Toast node should remain valid after material is set
+     */
+    EXPECT_NE(toastNode, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

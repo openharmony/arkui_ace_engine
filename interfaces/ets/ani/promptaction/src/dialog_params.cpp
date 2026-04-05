@@ -333,16 +333,6 @@ bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode&
     return true;
 }
 
-bool GetSystemMaterial(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& result)
-{
-    int64_t ptrValue;
-    if (!GetInt64Param(env, object, "systemMaterial", ptrValue)) {
-        return false;
-    }
-    result = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::UiMaterial*>(ptrValue));
-    return true;
-}
-
 void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment)
 {
     bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();

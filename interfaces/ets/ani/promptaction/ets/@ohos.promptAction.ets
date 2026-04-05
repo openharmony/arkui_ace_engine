@@ -93,6 +93,10 @@ export default namespace promptAction {
         hoverModeArea?: HoverModeAreaType;
     }
 
+    export interface ShowToastOptionsInternal {
+        systemMaterial?: long;
+    }
+
     export interface Button {
         text: string | Resource;
         color: string | Resource;
@@ -290,9 +294,9 @@ export default namespace promptAction {
         shadow?: DialogOptionsShadow;
     }
 
-    export native function showToast(options: ShowToastOptions): void;
+    export native function showToast(options: ShowToastOptions, optionsInternal?: ShowToastOptionsInternal): void;
 
-    export native function openToast(options: ShowToastOptions): Promise<int>;
+    export native function openToast(options: ShowToastOptions, optionsInternal?: ShowToastOptionsInternal): Promise<int>;
 
     export native function closeToast(toastId: int): void;
 

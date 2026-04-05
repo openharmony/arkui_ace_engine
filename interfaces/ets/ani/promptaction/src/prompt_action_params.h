@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/common/resource/resource_manager.h"
 #include "frameworks/base/log/log_wrapper.h"
 
@@ -190,5 +191,8 @@ bool GetHoverModeAreaParam(ani_env* env, ani_object object, OHOS::Ace::HoverMode
 bool GetHoverModeAreaParamOpt(ani_env* env, ani_object object, std::optional<OHOS::Ace::HoverModeAreaType>& result);
 bool GetOffsetParam(ani_env *env, ani_object object, OHOS::Ace::DimensionOffset& result);
 bool GetOffsetParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace::DimensionOffset>& result);
+
+// Common material parameter parsing
+bool GetSystemMaterial(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& result);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_PROMPT_ACTION_PARAMS_H
