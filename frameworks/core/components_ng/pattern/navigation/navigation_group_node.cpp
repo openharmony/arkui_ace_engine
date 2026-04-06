@@ -383,6 +383,7 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+        titleBarNode->UpdateJsonValue(json, filter);
     }
     auto navBarPattern = navBarOrHomeDestNode->GetPattern<NavDestinationPatternBase>();
     if (navBarPattern) {
