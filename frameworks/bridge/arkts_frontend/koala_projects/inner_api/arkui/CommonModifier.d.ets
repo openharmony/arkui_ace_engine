@@ -38,4 +38,8 @@ export declare interface IModifierState {
 export declare class ModifierState implements IModifierState {
     public addRef(): void;
     public fireChange(): void;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 6138a84b841 (Add AttributeModifier in inner_api for ArkTS 1.2)
