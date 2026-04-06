@@ -18,8 +18,4 @@ import { CommonMethod } from  'arkui.component.common'
 export declare class CommonMethodModifier implements CommonMethod {
     public applyModifierPatch(node: object): void
     public mergeModifier(modifier: CommonMethodModifier): void
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 6138a84b841 (Add AttributeModifier in inner_api for ArkTS 1.2)
