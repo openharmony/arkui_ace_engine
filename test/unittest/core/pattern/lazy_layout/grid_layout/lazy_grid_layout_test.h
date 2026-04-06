@@ -23,6 +23,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 
@@ -45,6 +46,8 @@ public:
     void CreateLazyGridLayout(Axis axis = Axis::VERTICAL);
     void CreateContent(int32_t count = 20);
     void CreateWaterFlow(WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN);
+    void CreateList();
+    void CreateScroll();
     void AddChild();
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
     void FlushIdleTask(const RefPtr<LazyGridLayoutPattern>& pattern);
@@ -54,6 +57,8 @@ public:
     RefPtr<LazyGridLayoutProperty> layoutProperty_;
     RefPtr<ScrollablePattern> scrollablePattern_;
     RefPtr<FrameNode> scrollableFrameNode_;
+    RefPtr<FrameNode> listFrameNode_;
+    RefPtr<ListPattern> listPattern_;
 };
 } // namespace OHOS::Ace::NG
 
