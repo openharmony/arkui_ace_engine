@@ -510,6 +510,7 @@ bool NavigationModelNG::ParseCommonTitle(
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
             textLayoutProperty->UpdateContent(title);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             break;
         }
         // create and init main title

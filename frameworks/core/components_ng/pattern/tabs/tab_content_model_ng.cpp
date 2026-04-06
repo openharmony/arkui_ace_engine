@@ -426,6 +426,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    InitTabText(textLayoutProperty);
     auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {
@@ -1413,5 +1414,23 @@ void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<v
     auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->SetOnWillHide(onWillHide);
+}
+
+void TabContentModelNG::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto hostNode = textLayoutProperty->GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 } // namespace OHOS::Ace::NG

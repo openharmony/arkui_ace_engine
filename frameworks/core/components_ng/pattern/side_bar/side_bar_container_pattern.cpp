@@ -1440,6 +1440,20 @@ void SideBarContainerPattern::ShowDialogWithNode()
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto text = accessibilityProperty->GetAccessibilityText();
+    do {
+        if (!text.empty()) {
+            break;
+        }
+        auto context = host->GetContext();
+        CHECK_NULL_BREAK(context);
+        auto sideBarTheme = context->GetTheme<SideBarTheme>();
+        CHECK_NULL_BREAK(sideBarTheme);
+        if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+            text = sideBarTheme->GetSideBarHidden();
+        } else {
+            text = sideBarTheme->GetSideBarShown();
+        }
+    } while (0);
 
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_, host->GetThemeScopeId());
 
