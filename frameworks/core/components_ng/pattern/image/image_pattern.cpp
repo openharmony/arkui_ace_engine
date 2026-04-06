@@ -2527,6 +2527,11 @@ bool ImagePattern::hasSceneChanged()
     return true;
 }
 
+void ImagePattern::TriggerThemeUpdate(int32_t themeScopeId)
+{
+    OnThemeScopeUpdate(themeScopeId);
+}
+
 void ImagePattern::SetOnProgressCallback(
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
 {
