@@ -180,6 +180,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    pipeline_->InitManagers();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -1280,6 +1281,75 @@ void PipelineContext::FlushAsyncLoadTask()
         task();
     }
 }
+
+bool PipelineContext::IsTabJustTriggerOnKeyEvent() const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->IsTabJustTriggerOnKeyEvent();
+}
+
+bool PipelineContext::SetMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->SetMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode()
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode();
+    }
+    return false;
+}
+
+const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
+{
+    return forceSplitMgr_;
+}
+
+const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
+{
+    return formVisibleMgr_;
+}
+
+const RefPtr<FormEventManager>& PipelineContext::GetFormEventManager() const
+{
+    return formEventMgr_;
+}
+
+const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
+{
+    return formGestureMgr_;
+}
+
+const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
+{
+    return recycleManager_;
+}
+
+void PipelineContext::InitManagers()
+{
+    forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    formEventMgr_ = MakeRefPtr<FormEventManager>();
+    formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1753,6 +1823,16 @@ void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
+
+void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
+{
+    eventManager_ = eventManager;
+}
+
+RefPtr<EventManager> PipelineBase::GetEventManager() const
+{
+    return eventManager_;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 
