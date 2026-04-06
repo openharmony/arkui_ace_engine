@@ -23,6 +23,8 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/NativePeerNode.d.ets",
     "./arkui/PeerNode.d.ets",
     "./arkui/ReusablePool.d.ets",
+    "./arkui/CommonModifier.d.ets",
+    "./arkui/CommonMethodModifier.d.ets",
   ]
   sources += [
     "./arkui/base/UIContextUtil.d.ets",
@@ -58,6 +60,7 @@ ohos_copy("copy_arkui_ets") {
   sources += [
     "./@ohos/router.d.ets",
     "./arkui/handwritten/Router.ts",
+    "./arkui/hooks/modifiers/ArkCommonModifier.d.ets",
   ]
   outputs = [ "$ohos_ets_inner_path/{{source_target_relative}}" ]
   part_name = ace_engine_part
