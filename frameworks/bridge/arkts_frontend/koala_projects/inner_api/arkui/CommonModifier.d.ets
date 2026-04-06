@@ -16,7 +16,8 @@
 import { CommonAttribute, AttributeModifier } from  'arkui.component.common'
 import { CommonMethodModifier } from 'arkui/CommonMethodModifier'
 
-export declare class CommonModifier extends CommonMethodModifier implements CommonAttribute, AttributeModifier<CommonAttribute> {
+export declare class CommonModifier extends CommonMethodModifier implements CommonAttribute,
+    AttributeModifier<CommonAttribute> {
     applyNormalAttribute(instance: CommonAttribute): void;
     applyPressedAttribute(instance: CommonAttribute): void;
     applyFocusedAttribute(instance: CommonAttribute): void;
@@ -25,7 +26,7 @@ export declare class CommonModifier extends CommonMethodModifier implements Comm
 }
 
 export declare class ModifierStateManager {
-    static INSTANCE: ModifierStateManager;
+    public static INSTANCE: ModifierStateManager;
     public isEnable(): boolean;
     public scope(f: () => void): void;
 }

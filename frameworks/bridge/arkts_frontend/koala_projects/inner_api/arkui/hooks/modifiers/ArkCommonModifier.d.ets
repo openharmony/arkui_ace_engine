@@ -17,9 +17,10 @@ import { CommonMethod, AttributeModifier } from  'arkui.component.common'
 import { ArkCommonMethodPeer, ArkCommonMethodComponent } from  'arkui/component/common'
 import { CommonMethodModifier } from 'arkui/CommonMethodModifier'
 
-export declare function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier, MethodComponent extends ArkCommonMethodComponent>
-    (modifier: AttributeModifier<T>, attributeSet: () => MethodSet,
-    func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer,
-    isStateStyle: boolean = true): void;
+export declare function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier,
+    MethodComponent extends ArkCommonMethodComponent>(modifier: AttributeModifier<T>, attributeSet: () => MethodSet,
+    func: (component: MethodComponent, ...params: FixedArray<Object>) => void,
+    updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer, isStateStyle: boolean = true): void;
 
-export declare function applyCommonModifier(peerNode: ArkCommonMethodPeer, modifier: AttributeModifier<CommonMethod>): void
+export declare function applyCommonModifier(peerNode: ArkCommonMethodPeer,
+    modifier: AttributeModifier<CommonMethod>): void
