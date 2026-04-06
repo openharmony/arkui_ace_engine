@@ -413,4 +413,8 @@ WebPattern::OnControllerAttachedCallback WebPattern::GetOnControllerAttachedCall
 {
     return onControllerAttachedCallback_;
 }
+
+void WebPattern::EnableScrollDirectionalLock(bool enabled, ScrollDirectionalLockType type)
+{
+}
 } // namespace OHOS::Ace::NG

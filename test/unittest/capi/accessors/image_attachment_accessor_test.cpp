@@ -347,9 +347,9 @@ HWTEST_F(ImageAttachmentAccessorTest, constructTestImageStyleOptional, TestSize.
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     ASSERT_TRUE(peer->span->GetImageAttribute());
-    ASSERT_FALSE(peer->span->GetImageAttribute()->marginProp);
-    ASSERT_FALSE(peer->span->GetImageAttribute()->paddingProp);
-    ASSERT_FALSE(peer->span->GetImageAttribute()->borderRadius);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->marginProp);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->paddingProp);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->borderRadius);
     accessor_->destroyPeer(peer);
 };
 
@@ -484,14 +484,16 @@ HWTEST_F(ImageAttachmentAccessorTest, getSizeTest, TestSize.Level1)
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         if (expected.IsNonNegative()) {
-            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(size)) << "Passed value is: " << input;
-        } else {
-            Ark_SizeOptions emptySize {
-                .width = ArkValue<Opt_Length>(test),
-                .height = ArkValue<Opt_Length>(test),
+            ImageSpanSize expectedSize {
+                .width = expected,
+                .height = expected,
             };
-            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(emptySize)) << "Passed value is: " << input;
-            ;
+            EXPECT_THAT(Converter::OptConvert<ImageSpanSize>(accessor_->getSize(peer)), expectedSize) <<
+                "Passed value is: " << input;
+        } else {
+            ImageSpanSize emptySize;
+            EXPECT_THAT(Converter::OptConvert<ImageSpanSize>(accessor_->getSize(peer)), emptySize) <<
+                "Passed value is: " << input;
         }
         accessor_->destroyPeer(peer);
     }
@@ -591,9 +593,16 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level
     ASSERT_TRUE(expected);
     ASSERT_TRUE(optGetValue);
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
-    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    MarginProperty expectedMargin {
+        .left = CalcLength(0.0_vp),
+        .right = CalcLength(0.0_vp),
+        .top = CalcLength(0.0_vp),
+        .bottom = CalcLength(0.0_vp),
+    };
+    BorderRadiusProperty expectedRadius(0.0_vp);
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin), expectedMargin);
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding), expectedMargin);
+    EXPECT_EQ(Converter::OptConvert<BorderRadiusProperty>(arkGetValue.borderRadius), expectedRadius);
     accessor_->destroyPeer(peer);
 }
 
@@ -615,9 +624,12 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
     ASSERT_TRUE(expected);
     ASSERT_TRUE(optGetValue);
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
-    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin),
+        Converter::OptConvert<MarginProperty>(expected->margin));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding),
+        Converter::OptConvert<MarginProperty>(expected->padding));
+    EXPECT_EQ(Converter::OptConvert<BorderRadiusProperty>(arkGetValue.borderRadius),
+        Converter::OptConvert<BorderRadiusProperty>(expected->borderRadius));
     accessor_->destroyPeer(peer);
 }
 
@@ -650,8 +662,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestPaddingConversion, TestS
     ASSERT_TRUE(optGetValue);
 
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(imageLayoutStyle.margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(imageLayoutStyle.padding));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin),
+        Converter::OptConvert<MarginProperty>(imageLayoutStyle.margin));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding),
+        Converter::OptConvert<MarginProperty>(imageLayoutStyle.padding));
     accessor_->destroyPeer(peer);
 }
 

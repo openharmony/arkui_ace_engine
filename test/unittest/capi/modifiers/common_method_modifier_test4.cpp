@@ -777,6 +777,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::optional<std::string> resultStr;
     auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 
@@ -821,6 +822,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestInvalidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::optional<std::string> resultStr;
     auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 

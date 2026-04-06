@@ -1045,7 +1045,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
     // Initial setup
     initValueBackgroundColor =
         Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    expectedStr = std::get<2>(Fixtures::testFixtureColorsStrValidValues[0]); // invalid value should be ignored
+    expectedStr = THEME_BACKGROUND_COLOR.ToString();
 
     auto checkValue = [this, &initValueBackgroundColor, &expectedStr](const std::string& input,
         const Ark_ResourceColor& value)

@@ -293,6 +293,9 @@ PipelineContext::PipelineContext()
     if (!contentChangeMgr_) {
         contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
     }
+    if (!recycleManager_) {
+        recycleManager_ = std::make_unique<RecycleManager>();
+    }
 }
 
 float PipelineContext::GetCurrentRootWidth()
