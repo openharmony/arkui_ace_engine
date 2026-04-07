@@ -232,6 +232,7 @@ public:
     void IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode);
     void SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode);
     void RemoveForceSplitNavStateIfNeed(int32_t nodeId);
+    bool IsTopFullScreenPage();
     void SetExistForceSplitNav(bool isTargetForceSplitNav, int32_t id)
     {
         existForceSplitNav_ = {isTargetForceSplitNav, id};
