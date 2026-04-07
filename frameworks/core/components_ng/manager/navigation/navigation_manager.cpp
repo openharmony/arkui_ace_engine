@@ -891,5 +891,6 @@ bool NavigationManager::IsTopFullScreenPage()
     auto navPattern = navNode->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navPattern, false);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, nav:%{public}d", navPattern->IsTopFullScreenPage());
+    return navPattern->IsTopFullScreenPage();
 }
 } // namespace OHOS::Ace::NG
