@@ -23,6 +23,7 @@
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
@@ -2389,6 +2390,14 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
             DumpLog::GetInstance().Print(item.first, item.second);
         }
     }
+}
+
+const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
+{
+    if (!gestureDebugBoundaryManager_) {
+        gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
+    }
+    return gestureDebugBoundaryManager_;
 }
 
 void EventManager::AddGestureSnapshot(

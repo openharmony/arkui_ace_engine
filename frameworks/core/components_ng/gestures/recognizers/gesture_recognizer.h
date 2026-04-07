@@ -458,6 +458,7 @@ protected:
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
     void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType);
+    void ReportToGestureDebugManager(GestureCallbackType type, GestureListenerType listenerType);
     virtual bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         return false;

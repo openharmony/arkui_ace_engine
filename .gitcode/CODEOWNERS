@@ -2439,6 +2439,7 @@ frameworks/core/components_ng/manager/focus/ @ArkUI_Event
 frameworks/core/components_ng/manager/force_split/ @arkui_navigation
 frameworks/core/components_ng/manager/frame_rate/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/full_screen/ @arkuilayout1
+frameworks/core/components_ng/manager/gesture_debug/ @ArkUI_Event
 frameworks/core/components_ng/manager/memory/ @arkui001
 frameworks/core/components_ng/manager/navigation/ @arkui_navigation
 frameworks/core/components_ng/manager/post_event/ @ArkUI_Event
@@ -2680,6 +2681,7 @@ frameworks/core/components_ng/render/adapter/focus_state_modifier.cpp @ArkUI_Eve
 frameworks/core/components_ng/render/adapter/focus_state_modifier.h @ArkUI_Event
 frameworks/core/components_ng/render/adapter/form_render_window.cpp @form_framework
 frameworks/core/components_ng/render/adapter/form_render_window.h @form_framework
+frameworks/core/components_ng/render/adapter/gesture_debug_boundary_modifier.h @ArkUI_Event
 frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/gradient_style_modifier.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/graphic_modifier.cpp @arkuicodepulse
@@ -2770,6 +2772,8 @@ frameworks/core/components_ng/render/ellipse_painter.cpp @arkuilayout1
 frameworks/core/components_ng/render/ellipse_painter.h @arkuilayout1
 frameworks/core/components_ng/render/ext_surface_callback_interface.h @arkuilayout1
 frameworks/core/components_ng/render/font_collection.h @huawei_g_five
+frameworks/core/components_ng/render/gesture_debug_boundary_painter.cpp @ArkUI_Event
+frameworks/core/components_ng/render/gesture_debug_boundary_painter.h @ArkUI_Event
 frameworks/core/components_ng/render/image_painter.cpp @arkui001
 frameworks/core/components_ng/render/image_painter.h @arkui001
 frameworks/core/components_ng/render/line_painter.cpp @arkuilayout1

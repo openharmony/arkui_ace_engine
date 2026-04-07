@@ -45,6 +45,7 @@
 namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
+class GestureDebugBoundaryManager;
 class SelectOverlayManager;
 class ResponseCtrl;
 class TouchDelegate : public virtual AceType {
@@ -211,6 +212,8 @@ public:
     {
         return mouseStyleManager_;
     }
+
+    const RefPtr<NG::GestureDebugBoundaryManager>& GetGestureDebugBoundaryManager();
 
     void FlushCursorStyleRequests()
     {
@@ -555,6 +558,7 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
+    RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
