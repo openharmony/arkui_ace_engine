@@ -93,6 +93,10 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
 bool PostEventManager::PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
     if (touchEvent.eventHandleId < 0 || touchEvent.eventHandleId > INT_MAX) {
         return false;
     }
@@ -122,7 +126,9 @@ bool PostEventManager::PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNo
         // Normal touch event processing: dispatch the touch event through the pipeline context
         // for standard event handling and gesture recognition
         targetNode_ = frameNode;
+        targetNodes_.insert(uiNode->GetId());
         pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+        targetNodes_.erase(uiNode->GetId());
         targetNode_.Reset();
     } else {
         // Abnormal state handling: when drag cancel is pending, use specialized event validation
@@ -177,6 +183,10 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
 bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
     if (mouseEvent.eventHandleId < 0 || mouseEvent.eventHandleId > INT_MAX) {
         return false;
     }
@@ -207,7 +217,9 @@ bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNo
         postMouseEventWindowAction_.push_back({ uiNode, mouseEvent });
     }
     if (!eventManager->IsDragCancelPending()) {
+        targetNodes_.insert(uiNode->GetId());
         pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+        targetNodes_.erase(uiNode->GetId());
     }
     mouseEvent.passThrough = false;
     targetNode_.Reset();
@@ -258,6 +270,10 @@ bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent
 bool PostEventManager::PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
     axisEvent.id += PASS_THROUGH_EVENT_ID;
     axisEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
@@ -274,7 +290,9 @@ bool PostEventManager::PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNod
     if (axisEvent.action != AxisAction::UPDATE) {
         postAxisEventAction_.push_back({ uiNode, axisEvent });
     }
+    targetNodes_.insert(uiNode->GetId());
     pipelineContext->OnAxisEvent(axisEvent, frameNode);
+    targetNodes_.erase(uiNode->GetId());
     axisEvent.passThrough = false;
     if (axisEvent.action == AxisAction::END || axisEvent.action == AxisAction::CANCEL) {
         ClearPostInputActions(uiNode, axisEvent.id, PostInputEventType::AXIS);

@@ -519,6 +519,9 @@ private:
     void ProcessTouchTestWithReferee(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
       TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend,
       const TouchTestResult& hitTestResult);
+    void AxisTouchTestResultsClear(int32_t eventHandleId);
+    void TouchTestResultsClear(int32_t eventHandleId);
+    void DownFingerIdsClear(int32_t eventHandleId);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;

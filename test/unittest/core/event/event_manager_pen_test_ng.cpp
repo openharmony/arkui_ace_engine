@@ -411,4 +411,31 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode012, TestSize.Level1)
     EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].front(), eventTarget);
     EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].front(), newTarget);
 }
+
+/**
+ * @tc.name: PenHoverTest0021
+ * @tc.desc: Test PenHoverTest function.
+ */
+HWTEST_F(EventManagerTestNg, PenHoverTest0021, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    TouchRestrict touchRestrict;
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+    touchEvent.sourceTool = SourceTool::PEN;
+
+    touchEvent.SetType(TouchType::PROXIMITY_OUT);
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(hoverEventTarget);
+    eventManager->PenHoverTest(touchEvent, frameNode, touchRestrict);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
+}
+
 } // namespace OHOS::Ace::NG
