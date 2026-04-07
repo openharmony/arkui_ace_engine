@@ -1438,4 +1438,57 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest033, TestSize.Level1)
     video.SetPosterSourceByPixelMap(pixelMap);
     EXPECT_EQ(videoPatternTemp->showImagePreview_, true);
 }
+
+/**
+ * @tc.name: VideoPatternTest034
+ * @tc.desc: Test reset-related callback order, update should be fired before prepared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get videoPattern.
+     * @tc.expected: step1. Create successfully.
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+    auto videoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Register onUpdate and onPrepared callbacks, then initialize the video state.
+     * @tc.expected: step2. The test can record the callback firing order during reset-related status changes.
+     */
+    std::vector<std::string> callbackOrder;
+    video.SetOnUpdate([&callbackOrder](const std::string& /*event*/) {
+        callbackOrder.emplace_back("update");
+    });
+    video.SetOnPrepared([&callbackOrder](const std::string& /*event*/) {
+        callbackOrder.emplace_back("prepared");
+    });
+
+    videoPattern->currentPos_ = VIDEO_CURRENT_TIME;
+    videoPattern->duration_ = VIDEO_DURATION;
+    videoPattern->isStop_ = false;
+    videoPattern->isPrepared_ = true;
+
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), GetDuration(_))
+        .WillOnce(DoAll(SetArgReferee<0>(VIDEO_DURATION * MILLISECONDS_TO_SECONDS), Return(0)));
+
+    /**
+     * @tc.steps: step3. Trigger the shared-layer reset callback sequence.
+     * @tc.expected: step3. onUpdate is fired before onPrepared.
+     */
+    videoPattern->OnCurrentTimeChange(0);
+    videoPattern->OnPlayerStatus(PlaybackStatus::PREPARED);
+
+    ASSERT_EQ(callbackOrder.size(), 2u);
+    EXPECT_EQ(callbackOrder[0], "update");
+    EXPECT_EQ(callbackOrder[1], "prepared");
+}
 } // namespace OHOS::Ace::NG
