@@ -112,6 +112,14 @@ void DialogPatternAdditionalTwoTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -295,6 +303,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet001, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     theme->expandDisplay_ = true;
@@ -351,6 +360,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet002, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
@@ -447,6 +457,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet003, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
