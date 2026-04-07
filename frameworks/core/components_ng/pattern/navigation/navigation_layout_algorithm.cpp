@@ -667,6 +667,7 @@ void NavigationLayoutAlgorithm::SizeCalculationForForceSplit(
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
     auto detailPageRatio = forceSplitMgr->GetSplitRatio();
     auto dividerWidth = IsDividerDisabled(hostNode) ? 0.0f : static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     auto rightWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
@@ -732,6 +733,7 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGrou
         auto pipeline = hostNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto forceSplitMgr = pipeline->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
         auto detailPageRatio = forceSplitMgr->GetSplitRatio();
         auto rightWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
         auto leftWidth = frameSize.Width() - rightWidth - dividerWidth;
