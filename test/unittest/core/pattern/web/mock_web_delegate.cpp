@@ -1199,6 +1199,10 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
 {
     return false;
 }
+bool WebDelegate::OnNestedScrollV2(float& x, float& y)
+{
+    return false;
+}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {

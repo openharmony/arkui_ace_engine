@@ -2527,6 +2527,74 @@ HWTEST_F(WebPatternTestNgSupplement, OnNestedScroll_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnNestedScrollV2_001
+ * @tc.desc: OnNestedScrollV2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedScrollV2_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    webPattern->isScrollStarted_ = true;
+    float x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(x == 0.0f);
+    webPattern->isScrollStarted_ = false;
+    x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(x == 1.0f);
+#endif
+}
+
+/**
+ * @tc.name: OnNestedScrollV2_002
+ * @tc.desc: OnNestedScrollV2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedScrollV2_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::VERTICAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    webPattern->isScrollStarted_ = true;
+    float x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(y == 0.0f);
+    webPattern->isScrollStarted_ = false;
+    x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(y == 0.5f);
+#endif
+}
+
+/**
  * @tc.name: IsRtl_001
  * @tc.desc: IsRtl.
  * @tc.type: FUNC
