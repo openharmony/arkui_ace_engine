@@ -96,9 +96,9 @@ def copy_modifier_files(src_dir, dst_dir, ignore_list):
         print(f"Creating destination directory: {dst_path}")
         dst_path.mkdir(parents=True, exist_ok=True)
 
-    # Find all Modifier.ets files in source directory (including subdirectories)
-    modifier_pattern = str(src_path / "**" / "*Modifier.ets")
-    modifier_files = glob.glob(modifier_pattern, recursive=True)
+    # Find Modifier.ets files in source directory (first layer only, no subdirectories)
+    modifier_pattern = str(src_path / "*Modifier.ets")
+    modifier_files = glob.glob(modifier_pattern)
 
     if not modifier_files:
         print(f"No *Modifier.ets files found in {src_path}")
