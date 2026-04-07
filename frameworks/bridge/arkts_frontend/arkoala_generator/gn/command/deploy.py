@@ -173,8 +173,9 @@ def generate_gitignore(dst_dir, ignore_list):
         dst_path.mkdir(parents=True, exist_ok=True)
         gitignore_path.write_text(content, encoding="utf-8")
         print(f"Generated .gitignore: {gitignore_path}")
-    except Exception as e:
-        print(f"Warning: Failed to generate .gitignore: {e}")
+    except OSError as e:
+        print(f"Error: Failed to generate .gitignore: {e}")
+        raise
 
 
 def main():
