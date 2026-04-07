@@ -62,7 +62,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     SizeCalculationForForceSplit(hostNode, size);
     auto primaryPageWrapper = layoutWrapper->GetOrCreateChildByIndex(primaryIndex_);
-    MeasurePage(primaryPageWrapper, leftSize_);
+    MeasurePage(primaryPageWrapper, primarySize_);
     // layout divider node
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(dividerWrapper);
@@ -75,7 +75,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (detailWrapper == primaryPageWrapper) {
         return;
     }
-    MeasurePage(detailWrapper, rightSize_);
+    MeasurePage(detailWrapper, secondarySize_);
 }
 
 void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -120,7 +120,7 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     CHECK_NULL_VOID(primaryGeometryNode);
     auto primaryPageWidth = primaryGeometryNode->GetFrameSize().Width();
     auto dividerWidth = dividerSize_.Width();
-    auto dividerOffset = leftSize_.Width();
+    auto dividerOffset = primarySize_.Width();
     auto primaryOffset = std::max(0.0f, (float)(dividerOffset - primaryPageWidth));
     OffsetF offset;
     offset.SetX(primaryOffset);
@@ -203,10 +203,10 @@ void ParallelStageLayoutAlgorithm::SizeCalculationForForceSplit(const RefPtr<Fra
     auto forceSplitMgr = pipeline->GetForceSplitManager();
     auto detailPageRatio = forceSplitMgr->GetSplitRatio();
     auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
-    auto rightWidth = (size.Width() - dividerWidth) * detailPageRatio;
-    auto leftWidth = size.Width() - rightWidth - dividerWidth;
+    auto secondaryWidth = (size.Width() - dividerWidth) * detailPageRatio;
+    auto primaryWidth = size.Width() - secondaryWidth - dividerWidth;
     dividerSize_ = SizeF(dividerWidth, size.Height());
-    leftSize_ = SizeF(leftWidth, size.Height());
-    rightSize_ = SizeF(rightWidth, size.Height());
+    primarySize_ = SizeF(primaryWidth, size.Height());
+    secondarySize_ = SizeF(secondaryWidth, size.Height());
 }
 } // namespace OHOS::Ace::NG

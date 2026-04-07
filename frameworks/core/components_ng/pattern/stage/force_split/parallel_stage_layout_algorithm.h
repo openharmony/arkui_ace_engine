@@ -37,8 +37,8 @@ private:
     void SizeCalculationForForceSplit(const RefPtr<FrameNode>& hostNode, const SizeF& size);
 
     SizeF dividerSize_ = SizeF(0.0f, 0.0f);
-    SizeF leftSize_ = SizeF(0.0f, 0.0f);
-    SizeF rightSize_ = SizeF(0.0f, 0.0f);
+    SizeF primarySize_ = SizeF(0.0f, 0.0f);
+    SizeF secondarySize_ = SizeF(0.0f, 0.0f);
     int32_t primaryIndex_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelStageLayoutAlgorithm);

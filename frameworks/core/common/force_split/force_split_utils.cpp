@@ -429,15 +429,15 @@ bool ForceSplitUtils::ParseSplitParam(
             "\"<integer number> | <integer number>\"", RATIO_KEY, ratioStr.c_str());
         return false;
     }
-    auto leftStr = ratioStr.substr(0, pos);
-    auto rightStr = ratioStr.substr(pos + 1);
-    auto leftValue = StringUtils::StringToInt(leftStr);
-    auto rightValue = StringUtils::StringToInt(rightStr);
-    if (leftValue <= 0 || rightValue <= 0 || (leftValue + rightValue <= 0)) {
+    auto primaryStr = ratioStr.substr(0, pos);
+    auto secondaryStr = ratioStr.substr(pos + 1);
+    auto primaryValue = StringUtils::StringToInt(primaryStr);
+    auto secondaryValue = StringUtils::StringToInt(secondaryStr);
+    if (primaryValue <= 0 || secondaryValue <= 0 || (primaryValue + secondaryValue <= 0)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s value: %{public}s", RATIO_KEY, ratioStr.c_str());
         return false;
     }
-    auto ratio = 1.0f * rightValue / (leftValue + rightValue);
+    auto ratio = 1.0f * secondaryValue / (primaryValue + secondaryValue);
     if (ratio < MIN_SPLIT_RATIO || ratio > MAX_SPLIT_RATIO) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "%{public}s: %{public}f must belong to range[1/3, 2/3]", RATIO_KEY, ratio);
     }
