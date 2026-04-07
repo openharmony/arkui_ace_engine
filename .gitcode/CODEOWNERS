@@ -21,9 +21,7 @@ OAT.xml @arkui_architecture
 README.md @arkui_architecture
 README_zh.md @arkui_architecture
 .gitcode/ @arkui_architecture
-.gitcode/CODEOWNERS @liyujie43
-.gitcode/owner_config.json @liyujie43
-.gitcode/multi_thread_mapping.json @liyujie43
+.claude/ @arkui_architecture
 
 [OpenHarmony adapter]
 adapter/ohos/build/ @arkui_architecture
@@ -277,19 +275,21 @@ component_ext/movingphoto/ @arkuiadvancedcomponent
 component_ext/movingphoto_ani/ @arkuiadvancedcomponent
 
 [Examples]
-examples/ @arkuipopupwindow_all
 examples/AdvancedBlendMode @arkuicodepulse
 examples/Navigation/ @arkui_navigation
 examples/BindSheet/ @arkuicodepulse
 examples/BindSheet_DragBar/ @arkuicodepulse
 examples/LuminanceSampling @arkuicodepulse
-examples/Image/ @arkui001
-examples/Image_C/ @arkui001
-examples/Reusable/ @arkui001
 examples/DrawableDescriptor/ @arkui001
-examples/Dialog_C/ @arkui001
-examples/Info/ @arkui001
+examples/DrawableDescriptorCapiExample @arkui001
+examples/Image/ @arkui001
 examples/ImageAnimator/ @arkui001
+examples/ImageAnimatorCapiExample/ @arkui001
+examples/ImageCapiExample/ @arkui001
+examples/ImagStatic/ @arkui001
+examples/Reusable/ @arkui001
+examples/Dialog_C/ @arkui001
+examples/Info/ @huawei_g_five
 examples/Picker/ @arkui001
 examples/PickDialog/ @arkui001
 examples/ScrollableComponentTest/ @arkuiscroll
