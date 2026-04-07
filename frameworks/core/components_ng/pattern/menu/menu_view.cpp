@@ -1124,15 +1124,17 @@ MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
 void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(menuNode);
+    bool isSetMenuSystemMaterial = false;
     if (menuParam.systemMaterial && MaterialUtils::CheckMaterialValid(menuParam.systemMaterial->GetType())) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, true, menuNode);
+        isSetMenuSystemMaterial = true;
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
-    } else {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, false, menuNode);
     }
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIsUserSetMaterial(isSetMenuSystemMaterial);
 }
 
 void MenuView::ShowMenuTargetScaleToOrigin(
