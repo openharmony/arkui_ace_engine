@@ -33,6 +33,12 @@ enum class RouterPageType : int32_t {
     RELATED_PAGE = 3
 };
 
+enum class SplitTransitionPhase : int32_t {
+    NONE = 0,
+    START,
+    END,
+};
+
 // ParallelPagePattern is the base class for page root render node.
 class ParallelPagePattern : public PagePattern {
     DECLARE_ACE_TYPE(ParallelPagePattern, PagePattern);
@@ -87,7 +93,28 @@ public:
 
     void RemoveOnTouchEvent();
 
+    void PrepareSplitTransition(int32_t animationId, PageTransitionType type);
+    void UpdateSplitTransitionState(PageTransitionType type, SplitTransitionPhase phase);
+
+    void OnSplitTransitionStart(PageTransitionType type);
+
+    void OnSplitTransitionEnd(PageTransitionType type);
+
+    bool OnSplitTransitionFinish(int32_t animationId, PageTransitionType type);
+
+    void AbortSplitTransition();
+
     void NotifyAboutToDisappear();
+    bool IsInSplitTransitionLayout() const;
+    PageTransitionType GetSplitTransitionType() const
+    {
+        return splitTransitionType_;
+    }
+    SplitTransitionPhase GetSplitTransitionPhase() const
+    {
+        return splitTransitionPhase_;
+    }
+    ForceSplitPageColumnType GetSplitTransitionColumnType() const;
     void SetNeedNotifyRelatedPageAboutToDisappear(bool need)
     {
         needNotifyRelatedPageAboutToDisappear_ = need;
@@ -95,6 +122,8 @@ public:
 
 private:
     bool IsShowOrHideAllowed();
+    void HandleSplitTransitionStage(PageTransitionType type, bool isStart);
+    void CaptureSplitTransitionVisualState();
     void BeforeCreateLayoutWrapper() override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
@@ -105,6 +134,10 @@ private:
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     bool needNotifyRelatedPageAboutToAppear_ = true;
     bool needNotifyRelatedPageAboutToDisappear_ = false;
+    OffsetF splitTransitionVisualOffset_;
+    bool hasSplitTransitionVisualOffset_ = false;
+    PageTransitionType splitTransitionType_ = PageTransitionType::NONE;
+    SplitTransitionPhase splitTransitionPhase_ = SplitTransitionPhase::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPagePattern);
 };

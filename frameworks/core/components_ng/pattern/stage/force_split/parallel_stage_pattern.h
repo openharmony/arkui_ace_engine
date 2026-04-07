@@ -110,6 +110,10 @@ private:
     bool CalculateMode();
     void OnDirectionConfigurationUpdate() override;
     Color GetDividerNodeColor(RefPtr<FrameNode> hostNode);
+    bool IsVirtualStackBasedSplit() const;
+    void UpdateDividerNodeIfNeeded(const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect = true);
+    void UpdateDividerNode(const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect = true);
+    void UpdateDividerNodeInVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode);
 
     WeakPtr<FrameNode> homePageNode_;
     RefPtr<FrameNode> dividerNode_;

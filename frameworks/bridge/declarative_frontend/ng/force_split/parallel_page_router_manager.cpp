@@ -472,8 +472,15 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
     if (preTopPage) {
         auto preTopPagePattern = preTopPage->GetPattern<ParallelPagePattern>();
         CHECK_NULL_RETURN(preTopPagePattern, false);
-        auto needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType()
-            && stageManager->GetHomePageTouched();
+        auto forceSplitMgr = pipelineContext->GetForceSplitManager();
+        auto needClearSecondaryPage = false;
+        if (forceSplitMgr && forceSplitMgr->CanPushPageToPrimary()) {
+            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+                stageManager->GetTouchedPrimaryColumnPage() != nullptr;
+        } else {
+            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+                stageManager->GetHomePageTouched();
+        }
         stageManager->SetNeedClearSecondaryPage(needClearSecondaryPage);
         return needClearSecondaryPage;
     }
