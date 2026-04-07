@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -32,6 +33,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -40,6 +42,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -1671,5 +1674,193 @@ HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation006, TestSize.Level1)
     bubblePattern->StartAlphaEnteringAnimation(nullptr);
     // Animation executes synchronously in test, so status is NORMAL after completion
     EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
+
+/**
+ * @tc.name: GetWindowButtonRect001
+ * @tc.desc: Test GetWindowButtonRect when container is not subContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, GetWindowButtonRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get bubblePattern.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto bubbleNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(bubbleNode, nullptr);
+    auto pattern = bubbleNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add container.
+     */
+    auto pipelineContext = bubbleNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    AceEngine::Get().AddContainer(containerId, container);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    ASSERT_NE(avoidInfoMgr, nullptr);
+
+    /**
+     * @tc.steps: step3. set needAvoid to false.
+     * @tc.expected: step3. the height of the WindowButtonRect is 0.
+     */
+    ContainerModalAvoidInfo info;
+    info.needAvoid = false;
+    info.controlBottonsRect = RectF(SIZE_TWO_HUNDRED, 0.0f, SIZE_TWO_HUNDRED, SIZE_FORTY);
+    avoidInfoMgr->SetAvoidInfo(info);
+    auto result = pattern->GetWindowButtonRect(bubbleNode);
+    EXPECT_FLOAT_EQ(result.Height(), 0);
+
+    /**
+     * @tc.steps: step4. set needAvoid to true.
+     * @tc.expected: step4. the height of the WindowButtonRect is correct.
+     */
+    info.needAvoid = true;
+    avoidInfoMgr->SetAvoidInfo(info);
+    result = pattern->GetWindowButtonRect(bubbleNode);
+    EXPECT_FLOAT_EQ(result.Height(), SIZE_FORTY);
+
+    ContainerModalAvoidInfo emptyInfo;
+    avoidInfoMgr->SetAvoidInfo(emptyInfo);
+    AceEngine::Get().RemoveContainer(containerId);
+}
+
+/**
+ * @tc.name: GetWindowButtonRect002
+ * @tc.desc: Test GetWindowButtonRect subContainer path when subwindow position differs from parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, GetWindowButtonRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get bubblePattern.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto bubbleNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(bubbleNode, nullptr);
+    auto pattern = bubbleNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add container, then create and register mock subwindow.
+     */
+    auto pipelineContext = bubbleNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    AceEngine::Get().AddContainer(containerId, container);
+    container->isSubContainer_ = true;
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, mockSubwindow);
+
+    /**
+     * @tc.steps: step3. add parent container.
+     */
+    const int32_t parentContainerId = 100200;
+    SubwindowManager::GetInstance()->parentContainerMap_[containerId] = parentContainerId;
+    auto parentContainer = AceType::MakeRefPtr<MockContainer>();
+    AceEngine::Get().AddContainer(parentContainerId, parentContainer);
+    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step4. subwindow position differs from parent.
+     * @tc.expected: step4. return empty rect.
+     */
+    NG::RectF subwindowRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    Rect parentWindowRect(10.0f, 10.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillOnce(Return(subwindowRect));
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillOnce(Return(parentWindowRect));
+    auto result = pattern->GetWindowButtonRect(bubbleNode);
+    EXPECT_FLOAT_EQ(result.Height(), 0);
+
+    AceEngine::Get().RemoveContainer(containerId);
+    AceEngine::Get().RemoveContainer(parentContainerId);
+    SubwindowManager::GetInstance()->parentContainerMap_.erase(containerId);
+    SubwindowManager::GetInstance()->subwindowMap_.clear();
+    SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
+}
+
+/**
+ * @tc.name: GetWindowButtonRect003
+ * @tc.desc: Test GetWindowButtonRect subContainer path when subwindow position matches parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, GetWindowButtonRect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get bubblePattern.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto bubbleNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(bubbleNode, nullptr);
+    auto pattern = bubbleNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add container, then create and register mock subwindow.
+     */
+    auto pipelineContext = bubbleNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    AceEngine::Get().AddContainer(containerId, container);
+    container->isSubContainer_ = true;
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, mockSubwindow);
+
+    /**
+     * @tc.steps: step3. add parent container.
+     */
+    const int32_t parentContainerId = 100300;
+    SubwindowManager::GetInstance()->parentContainerMap_[containerId] = parentContainerId;
+    auto parentContainer = AceType::MakeRefPtr<MockContainer>();
+    AceEngine::Get().AddContainer(parentContainerId, parentContainer);
+    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step4. set avoid info on parent pipeline.
+     */
+    auto parentPipeline = AceType::DynamicCast<PipelineContext>(parentContainer->pipelineContext_);
+    ASSERT_NE(parentPipeline, nullptr);
+    auto avoidInfoMgr = parentPipeline->GetAvoidInfoManager();
+    ASSERT_NE(avoidInfoMgr, nullptr);
+    ContainerModalAvoidInfo info;
+    info.needAvoid = true;
+    info.controlBottonsRect = RectF(SIZE_TWO_HUNDRED, 0.0f, SIZE_TWO_HUNDRED, SIZE_FORTY);
+    avoidInfoMgr->SetAvoidInfo(info);
+
+    /**
+     * @tc.steps: step5. subwindow position matches parent.
+     * @tc.expected: step5. return correct rect.
+     */
+    NG::RectF subwindowRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    Rect parentWindowRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillOnce(Return(subwindowRect));
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillOnce(Return(parentWindowRect));
+    auto result = pattern->GetWindowButtonRect(bubbleNode);
+    EXPECT_FLOAT_EQ(result.Height(), SIZE_FORTY);
+
+    AceEngine::Get().RemoveContainer(containerId);
+    AceEngine::Get().RemoveContainer(parentContainerId);
+    SubwindowManager::GetInstance()->parentContainerMap_.erase(containerId);
+    SubwindowManager::GetInstance()->subwindowMap_.clear();
+    SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
@@ -50,8 +51,9 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
+class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder,
+                      public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     BubblePattern() = default;
@@ -429,6 +431,7 @@ public:
     void UpdatePopupTheme(bool colorMode);
     RefPtr<PopupTheme> GetPopupTheme();
     ThemeColorMode GetStyleOptionColorMode();
+    NG::RectF GetWindowButtonRect(const RefPtr<FrameNode>& frameNode);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -448,6 +451,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<PipelineContext>& pipeline);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;

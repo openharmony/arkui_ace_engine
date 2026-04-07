@@ -709,7 +709,12 @@ void BubbleView::GetPopupMaxWidthAndHeight(
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto top = static_cast<float>(safeAreaManager->GetSystemSafeArea().top_.Length());
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    if (bubblePattern) {
+        auto floatButtonsRect = bubblePattern->GetWindowButtonRect(popupNode);
+        top = std::max(top, floatButtonsRect.Height());
+    }
     auto maxHeight = windowGlobalRect.Height();
     auto theme = popupTheme ? popupTheme : GetPopupTheme();
     CHECK_NULL_VOID(theme);
