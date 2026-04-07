@@ -47,6 +47,9 @@ export class InteropAppStorageV2 {
     public BindDynamicStorageV2(): void {
         // call ArkTS1.1 Storage to bind static Storage.
         const global = ESValue.getGlobal();
+        if (!global) {
+ 	        StateMgmtConsole.log('BindDynamicStorageV2: fail to get global ESValue');
+ 	    }        
         const bindFunc = global.getProperty('bindStaticAppStorageV2');
         if (bindFunc.isNull() || bindFunc.isUndefined()) {
             StateMgmtConsole.log('fail to find bindStaticAppStorageV2');
