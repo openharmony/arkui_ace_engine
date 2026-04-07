@@ -433,7 +433,7 @@ bool ForceSplitUtils::ParseSplitParam(
     auto rightStr = ratioStr.substr(pos + 1);
     auto leftValue = StringUtils::StringToInt(leftStr);
     auto rightValue = StringUtils::StringToInt(rightStr);
-    if (leftValue <= 0 || rightValue <= 0) {
+    if (leftValue <= 0 || rightValue <= 0 || (leftValue + rightStr <= 0)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s value: %{public}s", RATIO_KEY, ratioStr.c_str());
         return false;
     }

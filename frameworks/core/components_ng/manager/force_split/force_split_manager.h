@@ -23,7 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
-#include "interfaces/inner_api/ace/ui_content_config.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS::Ace::NG {
 

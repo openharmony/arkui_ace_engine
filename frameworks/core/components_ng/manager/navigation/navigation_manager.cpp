@@ -878,4 +878,18 @@ void NavigationManager::FireNavigateChangeCallback(
         callback.second(from, to, isRouter);
     }
 }
+
+bool NavigationManager::IsTopFullScreenPage()
+{
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (!existForceSplitNav.first) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, no force split nav");
+        return false;
+    }
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
+    CHECK_NULL_RETURN(navNode, false);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, false);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, nav:%{public}d", navPattern->IsTopFullScreenPage());
+}
 } // namespace OHOS::Ace::NG

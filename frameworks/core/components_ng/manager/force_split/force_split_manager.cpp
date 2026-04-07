@@ -165,17 +165,7 @@ bool ForceSplitManager::IsTopFullScreenPage()
     }
     auto navMgr = context->GetNavigationManager();
     CHECK_NULL_RETURN(navMgr, false);
-    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
-    if (!existForceSplitNav.first) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, no force split nav");
-        return false;
-    }
-    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
-    CHECK_NULL_RETURN(navNode, false);
-    auto navPattern = navNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(navPattern, false);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, nav:%{public}d", navPattern->IsTopFullScreenPage());
-    return navPattern->IsTopFullScreenPage();
+    return navMgr->IsTopFullScreenPage();
 }
 
 bool ForceSplitManager::IsWindowConditionMatched()
