@@ -625,7 +625,7 @@ void AppBarView::SetStatusBarItemColor(bool isLight)
     pattern->ColorConfigurationCallBack();
 }
 
-void AppBarView::OnMenuClick(std::map<std::string, std::string>& params)
+void AppBarView::OnMenuClick(std::map<std::string, std::string>&& params)
 {
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
