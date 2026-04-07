@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
+class BaseExecutor;
 class ExecutorGenerator;
 class ExecutorChoreographer;
 class PipelineContext;
@@ -43,6 +44,10 @@ public:
     void Clear();
 
 private:
+    ExecutionState DoExecuteNextStep();
+    std::string ExecutionStateToString(ExecutionState state);
+    std::string ExecutorsToString(const std::vector<std::unique_ptr<BaseExecutor>>& executors);
+
     WeakPtr<PipelineContext> context_;
     std::unique_ptr<ExecutorGenerator> executorGenerator_;
     std::unique_ptr<ExecutorChoreographer> choreographer_;

@@ -26,7 +26,11 @@ inline constexpr char FALLBACK_CMD_KEY[] = "fallback_cmd";
 inline constexpr char CMD_KEY[] = "cmd";
 inline constexpr char TYPE_KEY[] = "type";
 
-inline constexpr char BACKPRESS_PARSER[] = "backpress";
+inline constexpr char BACKPRESS[] = "backpress";
+inline constexpr char CONTENT_SWITCH[] = "content_switch";
+inline constexpr char FALLBACK[] = "fallback";
+inline constexpr char CLICK[] = "click";
+inline constexpr char SCROLL[] = "scroll";
 
 // Return status of ExecuteNextStep.
 enum class ExecutionState {
@@ -63,6 +67,21 @@ struct Coordinates {
     float y1 = 0.0f;
     float x2 = 0.0f;
     float y2 = 0.0f;
+};
+
+enum class RelaxedScrollDirection { FORWARD, BACKWARD, LEFT, RIGHT, DOWN, UP };
+
+struct ScrollActionInfo {
+    RelaxedScrollDirection direction;
+    float distance;
+    Coordinates coordinates;
+};
+
+struct Command {
+    std::string type;
+    ExecuteMode mode;
+    ScrollActionInfo actionInfo;
+    bool isY2Set = false;
 };
 
 } // namespace OHOS::Ace::NG

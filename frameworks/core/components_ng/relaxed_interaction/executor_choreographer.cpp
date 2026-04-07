@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/relaxed_interaction/executor_choreographer.h"
+#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,8 @@ ExecutorResult ExecutorChoreographer::ExecuteNext()
     }
 
     ExecutorResult result = currentExecutor_->ExecuteStep();
+    WorkflowDumper::GetInstance().AddLog("Executor '" + currentExecutor_->GetDescription() + "' execution result: " +
+        ExecutorResultToString(result));
     if (result != ExecutorResult::PENDING) {
         currentExecutor_.reset();
     }
@@ -56,6 +59,20 @@ bool ExecutorChoreographer::MoveToNext()
     currentExecutor_ = std::move(executorQueue_.front());
     executorQueue_.pop_front();
     return true;
+}
+
+std::string ExecutorChoreographer::ExecutorResultToString(ExecutorResult result)
+{
+    switch (result) {
+        case ExecutorResult::SUCCESS:
+            return "SUCCESS";
+        case ExecutorResult::FAILED:
+            return "FAILED";
+        case ExecutorResult::PENDING:
+            return "PENDING";
+        default:
+            return "UNKNOWN";
+    }
 }
 
 } // namespace OHOS::Ace::NG

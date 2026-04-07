@@ -13,38 +13,42 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SIMULATE_TOUCH_EXECUTOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SIMULATE_TOUCH_EXECUTOR_H
 
+#include "base/geometry/ng/point_t.h"
 #include "core/components_ng/relaxed_interaction/base_executor.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
-class BackpressExecutor : public BaseExecutor {
+class SimulateTouchExecutor : public BaseExecutor {
 public:
-    explicit BackpressExecutor(WeakPtr<PipelineContext> context);
-    ~BackpressExecutor() override = default;
+    explicit SimulateTouchExecutor(WeakPtr<PipelineContext> context, const PointF& coordinates);
+    ~SimulateTouchExecutor() override = default;
 
     ExecutorResult ExecuteStep() override;
 
-    std::string GetType() const override
+    virtual std::string GetType() const override
     {
-        return BACKPRESS;
+        return "simulate_touch";
     }
 
-    std::string GetDescription() const override
+    virtual std::string GetDescription() const override
     {
         return BaseExecutor::GetDescription();
     }
 
-    bool IsSingleStep() const override
+    virtual bool IsSingleStep() const override
     {
         return true;
     }
+
+private:
+    PointF coordinates_;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SIMULATE_TOUCH_EXECUTOR_H

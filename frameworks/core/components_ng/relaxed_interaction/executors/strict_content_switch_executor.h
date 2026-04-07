@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CONTENT_SWITCH_EXECUTOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CONTENT_SWITCH_EXECUTOR_H
 
+#include "base/geometry/ng/point_t.h"
 #include "core/components_ng/relaxed_interaction/base_executor.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
+class ComponentFinder;
 
-class BackpressExecutor : public BaseExecutor {
+class StrictContentSwitchExecutor : public BaseExecutor {
 public:
-    explicit BackpressExecutor(WeakPtr<PipelineContext> context);
-    ~BackpressExecutor() override = default;
+    explicit StrictContentSwitchExecutor(WeakPtr<PipelineContext> context, const std::string mode,
+        const std::string direction, const uint32_t count, const PointF& coordinates);
+    ~StrictContentSwitchExecutor() override = default;
 
     ExecutorResult ExecuteStep() override;
 
     std::string GetType() const override
     {
-        return BACKPRESS;
+        return "strict_content_switch";
     }
 
     std::string GetDescription() const override
@@ -43,8 +46,16 @@ public:
     {
         return true;
     }
+
+private:
+    ExecutorResult TriggerContentSwitch(const RefPtr<FrameNode> frameNode);
+
+    std::string mode_;
+    std::string direction_;
+    uint32_t count_;
+    PointF coordinates_;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CONTENT_SWITCH_EXECUTOR_H
