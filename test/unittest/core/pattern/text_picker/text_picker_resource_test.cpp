@@ -1008,6 +1008,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle001, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;
@@ -1077,6 +1078,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle002, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;
@@ -1145,6 +1147,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle003, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;

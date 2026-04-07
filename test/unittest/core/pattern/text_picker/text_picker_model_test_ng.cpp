@@ -850,10 +850,35 @@ HWTEST_F(TextPickerModelTestNg, SetNormalTextStyle001, TestSize.Level1)
     textStyle.fontSize = Dimension(0);
     TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
 }
+
+/**
+ * @tc.name: SetNormalTextStyle002
+ * @tc.desc: Test TextPickerModelNG SetNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetNormalTextStyle002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    PickerTextStyle textStyle;
+    textStyle.fontSize = Dimension(0);
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+ 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+ 
 
 /**
  * @tc.name: SetSelectedTextStyle001
@@ -873,6 +898,35 @@ HWTEST_F(TextPickerModelTestNg, SetSelectedTextStyle001, TestSize.Level1)
     textStyle.fontSize = Dimension(0);
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+ 
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_FALSE(pickerProperty->HasFontSize());
+}
+ 
+/**
+ * @tc.name: SetSelectedTextStyle002
+ * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetSelectedTextStyle002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    PickerTextStyle textStyle;
+    textStyle.fontSize = Dimension(0);
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+ 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+ 
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_FALSE(pickerProperty->HasFontSize());
@@ -894,8 +948,39 @@ HWTEST_F(TextPickerModelTestNg, SetDisappearTextStyle001, TestSize.Level1)
 
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(0);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+ 
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_FALSE(pickerProperty->HasFontSize());
+}
+ 
+/**
+ * @tc.name: SetDisappearTextStyle002
+ * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDisappearTextStyle002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    PickerTextStyle textStyle;
+    textStyle.fontSize = Dimension(0);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+ 
+    textStyle.textColor = Color::RED;
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+ 
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_FALSE(pickerProperty->HasFontSize());
@@ -1122,6 +1207,7 @@ HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle001, TestSize.Level1)
     PickerBackgroundStyle result2;
     pickerBgStyle.color = Color(0x00000000);
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
     result1.color = layoutProperty->GetSelectedBackgroundColorValue();
     result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
@@ -1151,6 +1237,7 @@ HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle002, TestSize.Level1)
     PickerBackgroundStyle result2;
     pickerBgStyle.color = Color(0x00000000);
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
     result1.color = layoutProperty->GetSelectedBackgroundColorValue();
     result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
@@ -1204,5 +1291,21 @@ HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle004, TestSize.Level1)
     result1.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
     EXPECT_EQ(theme->GetSelectedBackgroundColor(), result1.color);
     EXPECT_EQ(theme->GetSelectedBorderRadius(), result1.borderRadius);
+}
+
+/**
+ * @tc.name: SetDefaultAttributes001
+ * @tc.desc: Test TextPickerModelNG SetDefaultAttributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultAttributes001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = TextPickerModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDefaultAttributes(frameNode, theme);
 }
 } // namespace OHOS::Ace::NG

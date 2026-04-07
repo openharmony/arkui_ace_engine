@@ -832,6 +832,16 @@ public:
         return pickerMaxSlidingDistance_;
     }
 
+    void SetDividerColor(const Color& color)
+    {
+        dividerColor_ = color;
+    }
+
+    void SetSelectedBackgroundColor(const Color& color)
+    {
+        selectedBackgroundColor_ = color;
+    }
+
 private:
 
     Color focusColor_;

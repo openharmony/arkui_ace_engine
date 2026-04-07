@@ -1151,6 +1151,7 @@ class ArkThemeWhiteList {
 ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
+    'DatePicker',
     'JSAlphabetIndexer',
     'JSDataPanel',
     'JSMenu',
@@ -1159,9 +1160,11 @@ ArkThemeWhiteList.whiteList = [
     'JSQRCode',
     'JSRadio',
     'JSTextClock',
+    'JSTimePicker',
     'Scroll',
     'Swiper',
     'Text',
+    'TextPicker',
 ];
 
 export default { ArkThemeScopeManager };

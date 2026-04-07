@@ -985,6 +985,7 @@ void TextPickerDialogView::SetSelectedBackgroundStyle(const RefPtr<PickerTheme>&
         pickerBgStyle.color.value_or(pickerTheme->GetSelectedBackgroundColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
         pickerBgStyle.borderRadius.value_or(pickerTheme->GetSelectedBorderRadius()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColorSetByUser, true);
 }
 
 void TextPickerDialogView::SetTextProperties(
