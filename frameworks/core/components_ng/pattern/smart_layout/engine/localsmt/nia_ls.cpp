@@ -23,10 +23,10 @@ namespace niaOverall {
 void LsSolver::UpdateClauseWeight()
 {
     for (int i = 0; i < unsatClauses->GetSize(); i++) {
-        clause* unsatCl = &(_clauses[unsatClauses->GetElementByIndex(i)]);
+        Clause* unsatCl = &(clauses[unsatClauses->GetElementByIndex(i)]);
         unsatCl->weight++;
         for (int lSignIdx : unsatCl->boolLiterals) {
-            _vars[_lits[std::abs(lSignIdx)].delta.ToInt()].score++;
+            vars[lits[std::abs(lSignIdx)].delta.ToInt()].score++;
         }
     }
     totalClauseWeight += unsatClauses->GetSize();
@@ -35,12 +35,12 @@ void LsSolver::UpdateClauseWeight()
 void LsSolver::SmoothClauseWeight()
 {
     for (int i = 0; i < numClauses; i++) {
-        if (_clauses[i].weight > 1 && !unsatClauses->IsInArray(i)) {
-            _clauses[i].weight--;
+        if (clauses[i].weight > 1 && !unsatClauses->IsInArray(i)) {
+            clauses[i].weight--;
             totalClauseWeight--;
-            if (_clauses[i].satCount == 1 && !_lits[std::abs(_clauses[i].watchLitIdx)].isNiaLit) {
-                __int128_t watchLitIdx = _lits[std::abs(_clauses[i].watchLitIdx)].delta.ToInt();
-                _vars[watchLitIdx].score++;
+            if (clauses[i].satCount == 1 && !lits[std::abs(clauses[i].watchLitIdx)].isNiaLit) {
+                int64_t watchLitIdx = lits[std::abs(clauses[i].watchLitIdx)].delta.ToInt();
+                vars[watchLitIdx].score++;
             }
         }
     }
@@ -49,10 +49,10 @@ void LsSolver::SmoothClauseWeight()
 // when there is no operation, simply find a lit in a random false clause, pick a random var with coff!=0, set it to 0
 void LsSolver::NoOperationRandomWalk()
 {
-    clause* cp =
-        &(_clauses[unsatClauses->GetElementByIndex(mt() % unsatClauses->GetSize())]); // choose a random unsat clause
+    Clause* cp =
+        &(clauses[unsatClauses->GetElementByIndex(mt() % unsatClauses->GetSize())]); // choose a random unsat clause
     int litIdx = cp->literals[mt() % cp->literals.size()];
-    lit* l = &(_lits[std::abs(litIdx)]);
+    Lit* l = &(lits[std::abs(litIdx)]);
     if (!l->isNiaLit) {
         CriticalMove(l->delta.ToInt(), RationNum(0));
         return;
@@ -66,13 +66,13 @@ void LsSolver::NoOperationRandomWalk()
         return;
     }
     RationNum futureSolution = RationNum(0);
-    variable* var = &(_vars[varIdxCurr]);
+    Variable* var = &(vars[varIdxCurr]);
     if (var->lowBound > 0) {
         futureSolution = var->lowBound;
-    } else if (var->upper_bound < 0) {
-        futureSolution = var->upper_bound;
+    } else if (var->upperBound < 0) {
+        futureSolution = var->upperBound;
     }
-    CriticalMove(varIdxCurr, futureSolution - _solution[varIdxCurr]); // move a random var with coff!=0 to 0
+    CriticalMove(varIdxCurr, futureSolution - solution[varIdxCurr]); // move a random var with coff!=0 to 0
 }
 
 void LsSolver::RandomWalk()
@@ -80,11 +80,11 @@ void LsSolver::RandomWalk()
     int operationIdx(0);
     int operationIdxBool(0);
     int clauseIdx;
-    clause* cp;
+    Clause* cp;
     // determine the operations
     for (int i = 0; i < K_RAND_WALK_ITER && operationIdx + operationIdxBool < K_RAND_WALK_MAX_OPS; i++) {
         clauseIdx = unsatClauses->GetElementByIndex(mt() % unsatClauses->GetSize());
-        cp = &(_clauses[clauseIdx]);
+        cp = &(clauses[clauseIdx]);
         for (int lIdx : cp->niaLiterals) {
             AddOperationFromFalseLit(false, lIdx, operationIdx);
         }
@@ -140,7 +140,7 @@ int LsSolver::PickCriticalMoveBool()
     int operationIdx = 0;
     for (int i = 0; i < containBoolUnsatClauses->GetSize(); i++) {
         int clauseIdx = containBoolUnsatClauses->GetElementByIndex(i);
-        clause* cl = &(_clauses[clauseIdx]);
+        Clause* cl = &(clauses[clauseIdx]);
         for (int lSignIdx : cl->boolLiterals) {
             AddBoolOperation(true, lSignIdx, operationIdx);
         }
@@ -165,12 +165,12 @@ int LsSolver::PickCriticalMoveBool()
 
 void LsSolver::AddBoolOperation(bool useTabu, int litIdx, int& operationIdxBool)
 {
-    __int128_t boolVarIdx = _lits[std::abs(litIdx)].delta.ToInt();
+    int64_t boolVarIdx = lits[std::abs(litIdx)].delta.ToInt();
     if (isChosenBoolVar[boolVarIdx]) {
         return; // operations will not be inserted repeatedly
     }
     if (!useTabu || (useTabu && outerLayerStep > tabulist[K_DIR_COUNT * boolVarIdx])) { // tabu mechanism
-        operationVarIdxBoolVec[operationIdxBool++] = (int)boolVarIdx;
+        operationVarIdxBoolVec[operationIdxBool++] = static_cast<int>(boolVarIdx);
         isChosenBoolVar[boolVarIdx] = true;
     }
 }
@@ -181,7 +181,7 @@ void LsSolver::AddCoff(uint64_t varIdxCurr, bool useTabu, int litIdx, int& opera
     if (coff1 == 0) {
         return;
     }
-    lit* l = &(_lits[std::abs(litIdx)]);
+    Lit* l = &(lits[std::abs(litIdx)]);
     RationNum litDelta = l->delta;
     if (l->isEqual) {
         if (litIdx > 0) {
@@ -208,7 +208,7 @@ void LsSolver::AddOperationFromFalseLit(bool useTabu, int litIdx, int& operation
     // if the false lit has been considered, then the lit will not be considered repeatedly
     falseLitOccur->InsertElement(std::abs(litIdx));
     // go through the coffVars and insert critical move for each var
-    for (const auto& cv : _lits[std::abs(litIdx)].coffVars) {
+    for (const auto& cv : lits[std::abs(litIdx)].coffVars) {
         AddCoff(cv.varIdx, useTabu, litIdx, operationIdx, cv.coff);
     }
 }
@@ -236,7 +236,7 @@ void LsSolver::SelectBestOperationFromBoolVec(int operationIdxBool, int& bestSco
         } else {
             varIdx = operationVarIdxBoolVec[i];
         }
-        score = _vars[varIdx].score;
+        score = vars[varIdx].score;
         uint64_t lastMoveStep = lastMove[K_DIR_COUNT * varIdx];
         if (score > bestScoreBool || (score == bestScoreBool && lastMoveStep < bestLastMove)) {
             bestScoreBool = score;
@@ -274,7 +274,7 @@ void LsSolver::SelectBestOperationFromVec(int operationIdx, int& bestScore, int&
             operationChangeValue = operationChangeValueVec[i];
             operationVarIdx = operationVarIdxVec[i];
         }
-        futureAbsValue = (_solution[operationVarIdx] + operationChangeValue).Abs();
+        futureAbsValue = (solution[operationVarIdx] + operationChangeValue).Abs();
         score = CriticalScore(operationVarIdx, operationChangeValue);
         int oppositeDirection =
             (operationChangeValue > 0) ? 1 : 0; // if the change value is >0, then means it is moving forward, the
@@ -298,7 +298,7 @@ int LsSolver::PickCriticalMove(RationNum& bestValue)
     int operationIdx(0);
     // determine the critical value from unsat sat, using tabu
     for (int i = 0; i < unsatClauses->GetSize(); i++) {
-        clause* cl = &(_clauses[unsatClauses->GetElementByIndex(i)]);
+        Clause* cl = &(clauses[unsatClauses->GetElementByIndex(i)]);
         for (int lIdx : cl->niaLiterals) {
             AddOperationFromFalseLit(true, lIdx, operationIdx);
         }
@@ -336,20 +336,20 @@ int LsSolver::PickCriticalMove(RationNum& bestValue)
 void LsSolver::CriticalMove(uint64_t varIdx, RationNum changeValue)
 {
     int direction = (changeValue > 0) ? 0 : 1;
-    if (_vars[varIdx].isNia) {
+    if (vars[varIdx].isNia) {
         lastOpValue = changeValue;
         lastOpVar = varIdx;
         MoveUpdate(varIdx, changeValue);
-        _solution[varIdx] += changeValue;
+        solution[varIdx] += changeValue;
     } else {
         lastOpVar = UINT64_MAX; // if last operation is boolean operation, the var should no longer be banned
-        int originScore = _vars[varIdx].score;
+        int originScore = vars[varIdx].score;
         MoveUpdate(varIdx);
-        _solution[varIdx] *= -1;
-        _vars[varIdx].score = -originScore;
+        solution[varIdx] *= -1;
+        vars[varIdx].score = -originScore;
     }
     // step
-    if (_vars[varIdx].isNia) {
+    if (vars[varIdx].isNia) {
         lastMove[K_DIR_COUNT * varIdx + direction] = step;
         tabulist[varIdx * K_DIR_COUNT + (direction + 1) % K_DIR_COUNT] =
             step + K_TABU_BASE_NIA + mt() % K_TABU_RAND_NIA;
@@ -360,7 +360,7 @@ void LsSolver::CriticalMove(uint64_t varIdx, RationNum changeValue)
     }
 }
 // transfer the ">" to "<="
-void LsSolver::InvertLit(lit& l)
+void LsSolver::InvertLit(Lit& l)
 {
     l.key = 1 - l.key;
     for (int i = 0; i < l.coffVars.size(); i++) {
@@ -368,11 +368,11 @@ void LsSolver::InvertLit(lit& l)
     }
 }
 // all coffs are positive, go through all vars of the literal
-RationNum LsSolver::DeltaLit(lit& l)
+RationNum LsSolver::DeltaLit(Lit& l)
 {
     RationNum delta = l.key;
     for (const auto& cv : l.coffVars) {
-        delta += (cv.coff * _solution[cv.varIdx]);
+        delta += (cv.coff * solution[cv.varIdx]);
     }
     return delta;
 }
@@ -396,26 +396,26 @@ void LsSolver::InsertOperation(uint64_t varIdx, RationNum changeValue, int& oper
     if (useTabu && step < tabulist[K_DIR_COUNT * varIdx + direction]) {
         return;
     } // the operation is now tabued
-    RationNum futureSolution = _solution[varIdx] + changeValue;
+    RationNum futureSolution = solution[varIdx] + changeValue;
     if (futureSolution > K_SOLUTION_LIMIT || futureSolution < -K_SOLUTION_LIMIT) {
         return;
     }
-    bool noPreValue = (_preValue1[varIdx] == INT32_MAX && _preValue2[varIdx] == INT32_MAX &&
-                       futureSolution >= _vars[varIdx].lowBound && futureSolution <= _vars[varIdx].upper_bound);
+    bool noPreValue = (preValue1[varIdx] == INT32_MAX && preValue2[varIdx] == INT32_MAX &&
+                       futureSolution >= vars[varIdx].lowBound && futureSolution <= vars[varIdx].upperBound);
     bool hasPreValue1 =
-        (_preValue1[varIdx] != INT32_MAX && _preValue2[varIdx] == INT32_MAX && futureSolution == _preValue1[varIdx]);
-    bool hasPreValue2 = (_preValue1[varIdx] != INT32_MAX && _preValue2[varIdx] != INT32_MAX &&
-                         (futureSolution == _preValue1[varIdx] || futureSolution == _preValue2[varIdx]));
+        (preValue1[varIdx] != INT32_MAX && preValue2[varIdx] == INT32_MAX && futureSolution == preValue1[varIdx]);
+    bool hasPreValue2 = (preValue1[varIdx] != INT32_MAX && preValue2[varIdx] != INT32_MAX &&
+                         (futureSolution == preValue1[varIdx] || futureSolution == preValue2[varIdx]));
     if (noPreValue || hasPreValue1 || hasPreValue2) {
         operationVarIdxVec[operationIdx] = varIdx;
         operationChangeValueVec[operationIdx++] = changeValue;
     }
 }
 
-void LsSolver::ProcessClauseNiaLiterals(clause* cl, int& operationIdx)
+void LsSolver::ProcessClauseNiaLiterals(Clause* cl, int& operationIdx)
 {
     for (int lIdx : cl->niaLiterals) {
-        if ((_lits[std::abs(lIdx)].isTrue ^ lIdx) < 0) {
+        if ((lits[std::abs(lIdx)].isTrue ^ lIdx) < 0) {
             AddOperationFromFalseLit(true, lIdx, operationIdx);
         } // determine a false lit, and add operation from it
     }
@@ -424,17 +424,17 @@ void LsSolver::ProcessClauseNiaLiterals(clause* cl, int& operationIdx)
 void LsSolver::AddSwapOperation(int& operationIdx)
 {
     int clauseIdx;
-    clause* cl;
+    Clause* cl;
     if (satClauseWithFalseLiteral->GetSize() < K_SWAP_SMALL_THRESHOLD) {
         for (int i = 0; i < satClauseWithFalseLiteral->GetSize(); i++) {
             clauseIdx = satClauseWithFalseLiteral->GetElementByIndex(i);
-            cl = &(_clauses[clauseIdx]);
+            cl = &(clauses[clauseIdx]);
             ProcessClauseNiaLiterals(cl, operationIdx);
         }
     } else {
         for (int i = 0; operationIdx < K_SWAP_SMALL_THRESHOLD && i < K_SWAP_MAX_ITER; i++) {
             clauseIdx = satClauseWithFalseLiteral->GetElementByIndex(mt() % satClauseWithFalseLiteral->GetSize());
-            cl = &(_clauses[clauseIdx]);
+            cl = &(clauses[clauseIdx]);
             ProcessClauseNiaLiterals(cl, operationIdx);
         }
     }
@@ -446,7 +446,7 @@ void LsSolver::SetLitMakeBreak(const std::vector<VarLit>& varLits, int vlIdx, ui
     auto& vl = varLits[vlIdx];
     if (currLitIdx != vl.litIdx) {
         currLitIdx = vl.litIdx;
-        currLitDeltaNew = _lits[currLitIdx].delta;
+        currLitDeltaNew = lits[currLitIdx].delta;
     } // enter a new lit
     currLitDeltaNew += vl.coff * changeValue;
     bool isLastVlOfLit = (vlIdx == varLits.size() - 1) || (currLitIdx != varLits[vlIdx + 1].litIdx);
@@ -454,17 +454,17 @@ void LsSolver::SetLitMakeBreak(const std::vector<VarLit>& varLits, int vlIdx, ui
         return;
     }
     // the last vlt of the var or the last vlt of current lit
-    if (_lits[currLitIdx].isEqual) {
-        if (_lits[currLitIdx].delta == 0 && currLitDeltaNew != 0) {
-            _litMakeBreak[currLitIdx] = -1;
-        } else if (_lits[currLitIdx].delta != 0 && currLitDeltaNew == 0) {
-            _litMakeBreak[currLitIdx] = 1;
+    if (lits[currLitIdx].isEqual) {
+        if (lits[currLitIdx].delta == 0 && currLitDeltaNew != 0) {
+            litMakeBreak[currLitIdx] = -1;
+        } else if (lits[currLitIdx].delta != 0 && currLitDeltaNew == 0) {
+            litMakeBreak[currLitIdx] = 1;
         }
     } else {
-        if (_lits[currLitIdx].delta <= 0 && currLitDeltaNew > 0) {
-            _litMakeBreak[currLitIdx] = -1;
-        } else if (_lits[currLitIdx].delta > 0 && currLitDeltaNew <= 0) {
-            _litMakeBreak[currLitIdx] = 1;
+        if (lits[currLitIdx].delta <= 0 && currLitDeltaNew > 0) {
+            litMakeBreak[currLitIdx] = -1;
+        } else if (lits[currLitIdx].delta > 0 && currLitDeltaNew <= 0) {
+            litMakeBreak[currLitIdx] = 1;
         }
     } // nia <= lit
 }
@@ -473,20 +473,20 @@ void LsSolver::SetLitMakeBreak(const std::vector<VarLit>& varLits, int vlIdx, ui
 int LsSolver::CriticalScore(uint64_t varIdx, RationNum changeValue)
 {
     int criticalScore = 0;
-    variable* var = &(_vars[varIdx]);
+    Variable* var = &(vars[varIdx]);
     uint64_t currLitIdx = var->varLits[0].litIdx;
-    RationNum currLitDeltaNew = _lits[currLitIdx].delta;
+    RationNum currLitDeltaNew = lits[currLitIdx].delta;
     // determine the litMakeBreak by going through the vlt of var
     for (int vlIdx = 0; vlIdx < var->varLits.size(); vlIdx++) {
         SetLitMakeBreak(var->varLits, vlIdx, currLitIdx, currLitDeltaNew, changeValue);
     }
     // determine the score by going through the clauses of var
-    clause* c;
+    Clause* c;
     for (int clsIdx : var->clauseIdxs) {
-        c = &(_clauses[clsIdx]);
+        c = &(clauses[clsIdx]);
         int clauseSatCountNew = c->satCount;
         for (int vLit : c->literals) {
-            clauseSatCountNew += (vLit > 0) ? _litMakeBreak[vLit] : (-_litMakeBreak[-vLit]);
+            clauseSatCountNew += (vLit > 0) ? litMakeBreak[vLit] : (-litMakeBreak[-vLit]);
         }
         if (c->satCount > 0 && clauseSatCountNew == 0) {
             criticalScore -= c->weight;
@@ -496,7 +496,7 @@ int LsSolver::CriticalScore(uint64_t varIdx, RationNum changeValue)
     }
     // recover the litMakeBreak
     for (uint64_t lIdx : var->literalIdxs) {
-        _litMakeBreak[lIdx] = 0;
+        litMakeBreak[lIdx] = 0;
     }
     return criticalScore;
 }
@@ -504,65 +504,65 @@ int LsSolver::CriticalScore(uint64_t varIdx, RationNum changeValue)
 // 更新单个 literal 的 delta 值
 void LsSolver::UpdateSingleLitDelta(uint64_t litIdx, RationNum currLitDeltaNew)
 {
-    if (_lits[litIdx].isEqual) {
-        if (_lits[litIdx].delta == 0 && currLitDeltaNew != 0) {
-            _lits[litIdx].isTrue = -1;
+    if (lits[litIdx].isEqual) {
+        if (lits[litIdx].delta == 0 && currLitDeltaNew != 0) {
+            lits[litIdx].isTrue = -1;
             return;
         }
-        if (_lits[litIdx].delta != 0 && currLitDeltaNew == 0) {
-            _lits[litIdx].isTrue = 1;
+        if (lits[litIdx].delta != 0 && currLitDeltaNew == 0) {
+            lits[litIdx].isTrue = 1;
             return;
         }
     } else {
-        if (_lits[litIdx].delta <= 0 && currLitDeltaNew > 0) {
-            _lits[litIdx].isTrue = -1;
+        if (lits[litIdx].delta <= 0 && currLitDeltaNew > 0) {
+            lits[litIdx].isTrue = -1;
             return;
         }
-        if (_lits[litIdx].delta > 0 && currLitDeltaNew <= 0) {
-            _lits[litIdx].isTrue = 1;
+        if (lits[litIdx].delta > 0 && currLitDeltaNew <= 0) {
+            lits[litIdx].isTrue = 1;
             return;
         }
     }
-    _lits[litIdx].delta = currLitDeltaNew;
+    lits[litIdx].delta = currLitDeltaNew;
 }
 
 void LsSolver::UpdateBooleanVarScoreInClause(
     int clauseIdx, int clauseSatCountOld, int clauseSatCountNew, int watchLitIdxOld)
 {
-    clause* c = &(_clauses[clauseIdx]);
-    lit* l;
+    Clause* c = &(clauses[clauseIdx]);
+    Lit* l;
     if (clauseSatCountOld == 0 && clauseSatCountNew > 0) {
         for (int lSignIdx : c->boolLiterals) {
-            l = &(_lits[std::abs(lSignIdx)]);
-            _vars[l->delta.ToInt()].score -= c->weight;
+            l = &(lits[std::abs(lSignIdx)]);
+            vars[l->delta.ToInt()].score -= c->weight;
         }
     } else if (clauseSatCountOld == 1 && clauseSatCountNew > 1) {
-        l = &(_lits[std::abs(watchLitIdxOld)]);
+        l = &(lits[std::abs(watchLitIdxOld)]);
         if (!l->isNiaLit) {
-            _vars[l->delta.ToInt()].score += c->weight;
+            vars[l->delta.ToInt()].score += c->weight;
         }
     } else if (clauseSatCountOld > 0 && clauseSatCountNew == 0) {
         for (int lSignIdx : c->boolLiterals) {
-            l = &(_lits[std::abs(lSignIdx)]);
-            _vars[l->delta.ToInt()].score += c->weight;
+            l = &(lits[std::abs(lSignIdx)]);
+            vars[l->delta.ToInt()].score += c->weight;
         }
     } else if (clauseSatCountOld > 1 && clauseSatCountNew == 1) {
-        l = &(_lits[std::abs(c->watchLitIdx)]);
+        l = &(lits[std::abs(c->watchLitIdx)]);
         if (!l->isNiaLit) {
-            _vars[l->delta.ToInt()].score -= c->weight;
+            vars[l->delta.ToInt()].score -= c->weight;
         }
     }
 }
 
 void LsSolver::UpdateClauseSatCountInVar(uint64_t varIdx)
 {
-    for (int clsIdx : _vars[varIdx].clauseIdxs) {
-        clause* c = &(_clauses[clsIdx]);
+    for (int clsIdx : vars[varIdx].clauseIdxs) {
+        Clause* c = &(clauses[clsIdx]);
         int clauseSatCountOld = c->satCount;
         int watchLitIdxOld = c->watchLitIdx;
         c->satCount = 0;
         for (int lIdx : c->literals) {
-            if ((lIdx ^ _lits[std::abs(lIdx)].isTrue) >= 0) {
+            if ((lIdx ^ lits[std::abs(lIdx)].isTrue) >= 0) {
                 c->satCount++;
                 c->watchLitIdx = lIdx;
             }
@@ -587,16 +587,16 @@ void LsSolver::UpdateClauseSatCountInVar(uint64_t varIdx)
 
 void LsSolver::MoveUpdate(uint64_t varIdx, RationNum changeValue)
 {
-    variable* var = &(_vars[varIdx]);
+    Variable* var = &(vars[varIdx]);
     VarLit* vl;
     uint64_t currLitIdx = var->varLits[0].litIdx;
-    RationNum currLitDeltaNew = _lits[currLitIdx].delta;
+    RationNum currLitDeltaNew = lits[currLitIdx].delta;
     int varLitsSize = var->varLits.size();
     for (int vlIdx = 0; vlIdx < varLitsSize; vlIdx++) {
         vl = &(var->varLits[vlIdx]);
         if (currLitIdx != vl->litIdx) {
             currLitIdx = vl->litIdx;
-            currLitDeltaNew = _lits[currLitIdx].delta;
+            currLitDeltaNew = lits[currLitIdx].delta;
         }
         currLitDeltaNew += vl->coff * changeValue;
         bool isLastVlOfLit = (vlIdx == varLitsSize - 1) || (currLitIdx != var->varLits[vlIdx + 1].litIdx);
@@ -611,7 +611,7 @@ void LsSolver::MoveUpdate(uint64_t varIdx, RationNum changeValue)
 // dedicated for boolean var
 void LsSolver::UpdateClauseSatCountBool(int clauseIdx, int makeBreakInClause)
 {
-    clause* cp = &(_clauses[clauseIdx]);
+    Clause* cp = &(clauses[clauseIdx]);
     if (cp->satCount > 0 && cp->satCount + makeBreakInClause == 0) {
         UnsatAClause(clauseIdx);
         litInUnsatClauseNum += cp->literals.size();
@@ -631,11 +631,11 @@ void LsSolver::UpdateClauseSatCountBool(int clauseIdx, int makeBreakInClause)
 
 void LsSolver::UpdateWatchLitBool(int clauseIdx, int vLitIdx, int clSignIdx, int originSatCount)
 {
-    clause* cp = &(_clauses[clauseIdx]);
+    Clause* cp = &(clauses[clauseIdx]);
     int originWatchLit = cp->watchLitIdx;
     if (std::abs(originWatchLit) == vLitIdx && cp->satCount > 0) {
         for (int lIdx : cp->literals) {
-            if ((lIdx ^ _lits[std::abs(lIdx)].isTrue) >= 0) {
+            if ((lIdx ^ lits[std::abs(lIdx)].isTrue) >= 0) {
                 cp->watchLitIdx = lIdx;
                 break;
             }
@@ -647,30 +647,30 @@ void LsSolver::UpdateWatchLitBool(int clauseIdx, int vLitIdx, int clSignIdx, int
 
 void LsSolver::UpdateBooleanVarScoreInClauseBool(int clauseIdx, int makeBreakInClause, int originSatCount)
 {
-    clause* cp = &(_clauses[clauseIdx]);
-    lit* l;
+    Clause* cp = &(clauses[clauseIdx]);
+    Lit* l;
     if (makeBreakInClause > 0) {
         if (originSatCount == 0) {
             for (int bl : cp->boolLiterals) {
-                l = &(_lits[std::abs(bl)]);
-                _vars[l->delta.ToInt()].score -= cp->weight;
+                l = &(lits[std::abs(bl)]);
+                vars[l->delta.ToInt()].score -= cp->weight;
             }
         } else if (originSatCount == 1) {
-            l = &(_lits[std::abs(cp->watchLitIdx)]);
+            l = &(lits[std::abs(cp->watchLitIdx)]);
             if (!l->isNiaLit) {
-                _vars[l->delta.ToInt()].score += cp->weight;
+                vars[l->delta.ToInt()].score += cp->weight;
             }
         }
     } else if (makeBreakInClause < 0) {
         if (cp->satCount == 0) {
             for (int bl : cp->boolLiterals) {
-                l = &(_lits[std::abs(bl)]);
-                _vars[l->delta.ToInt()].score += cp->weight;
+                l = &(lits[std::abs(bl)]);
+                vars[l->delta.ToInt()].score += cp->weight;
             }
         } else if (cp->satCount == 1) {
-            l = &(_lits[std::abs(cp->watchLitIdx)]);
+            l = &(lits[std::abs(cp->watchLitIdx)]);
             if (!l->isNiaLit) {
-                _vars[l->delta.ToInt()].score -= cp->weight;
+                vars[l->delta.ToInt()].score -= cp->weight;
             }
         }
     }
@@ -678,19 +678,19 @@ void LsSolver::UpdateBooleanVarScoreInClauseBool(int clauseIdx, int makeBreakInC
 
 void LsSolver::MoveUpdate(uint64_t varIdx)
 {
-    variable* var = &(_vars[varIdx]);
+    Variable* var = &(vars[varIdx]);
     int vLitIdx = static_cast<int>(var->literalIdxs[0]);
-    _lits[vLitIdx].isTrue *= -1;
+    lits[vLitIdx].isTrue *= -1;
     int varClauseIdxsSize = var->clauseIdxs.size();
     for (int i = 0; i < varClauseIdxsSize; i++) {
         int clSignIdx = var->clauseIdxs[i];
         int makeBreakInClause = 1;
-        if ((_solution[varIdx] > 0 && var->boolVarInPosClause[i]) ||
-            (_solution[varIdx] < 0 && !var->boolVarInPosClause[i])) {
+        if ((solution[varIdx] > 0 && var->boolVarInPosClause[i]) ||
+            (solution[varIdx] < 0 && !var->boolVarInPosClause[i])) {
             makeBreakInClause = -1;
         }
         int clauseIdx = std::abs(clSignIdx);
-        int originSatCount = _clauses[clauseIdx].satCount;
+        int originSatCount = clauses[clauseIdx].satCount;
         UpdateClauseSatCountBool(clauseIdx, makeBreakInClause);
         UpdateWatchLitBool(clauseIdx, vLitIdx, clSignIdx, originSatCount);
         UpdateBooleanVarScoreInClauseBool(clauseIdx, makeBreakInClause, originSatCount);
@@ -698,15 +698,15 @@ void LsSolver::MoveUpdate(uint64_t varIdx)
 }
 
 // check
-int LsSolver::CheckSingleClause(clause* cp)
+int LsSolver::CheckSingleClause(Clause* cp)
 {
     int satCount = 0;
     for (int litIdx : cp->literals) {
-        RationNum delta = _lits[std::abs(litIdx)].delta;
-        bool isEqual = _lits[std::abs(litIdx)].isEqual;
-        if (!_lits[std::abs(litIdx)].isNiaLit) {
-            __int128_t varIdx = _lits[std::abs(litIdx)].delta.ToInt();
-            if ((_solution[varIdx] > 0 && litIdx > 0) || (_solution[varIdx] < 0 && litIdx < 0)) {
+        RationNum delta = lits[std::abs(litIdx)].delta;
+        bool isEqual = lits[std::abs(litIdx)].isEqual;
+        if (!lits[std::abs(litIdx)].isNiaLit) {
+            int64_t varIdx = lits[std::abs(litIdx)].delta.ToInt();
+            if ((solution[varIdx] > 0 && litIdx > 0) || (solution[varIdx] < 0 && litIdx < 0)) {
                 satCount++;
             }
         } else if ((!isEqual && ((delta <= 0 && litIdx > 0) || (delta > 0 && litIdx < 0))) ||
@@ -719,29 +719,29 @@ int LsSolver::CheckSingleClause(clause* cp)
 
 bool LsSolver::CheckSolution()
 {
-    clause* cp;
+    Clause* cp;
     int unsatNum = 0;
-    for (int litIdx = 0; litIdx < _lits.size(); litIdx++) {
-        if (!litAppear[litIdx] || !_lits[litIdx].isNiaLit) {
+    for (int litIdx = 0; litIdx < lits.size(); litIdx++) {
+        if (!litAppear[litIdx] || !lits[litIdx].isNiaLit) {
             continue;
         }
-        RationNum delta = DeltaLit(_lits[litIdx]);
-        if (delta != _lits[litIdx].delta) {
-            std::cout << "lit delta wrong: " << litIdx << "\n";
+        RationNum delta = DeltaLit(lits[litIdx]);
+        if (delta != lits[litIdx].delta) {
+            std::cout << "Lit delta wrong: " << litIdx << "\n";
         }
-    } // check lit delta
+    } // check Lit delta
     for (uint64_t i = 0; i < numClauses; i++) {
-        cp = &(_clauses[i]);
+        cp = &(clauses[i]);
         int satCount = CheckSingleClause(cp);
         if (satCount != cp->satCount) {
-            std::cout << "sat count wrong at clause " << i << "\n";
+            std::cout << "sat count wrong at Clause " << i << "\n";
         }
         if (satCount == 0) {
             unsatNum++;
         }
     }
-    for (int varIdx = 0; varIdx < _vars.size(); varIdx++) {
-        if (_solution[varIdx] > _vars[varIdx].upper_bound || _solution[varIdx] < _vars[varIdx].lowBound) {
+    for (int varIdx = 0; varIdx < vars.size(); varIdx++) {
+        if (solution[varIdx] > vars[varIdx].upperBound || solution[varIdx] < vars[varIdx].lowBound) {
             std::cout << "var " << varIdx << " out of range\n";
         }
     }
@@ -831,6 +831,80 @@ bool LsSolver::LocalSearch(const std::map<std::string, double>& varInitial)
         noImproveCnt = (UpdateBestSolution()) ? 0 : (noImproveCnt + 1);
     }
     return false;
+}
+
+void LsSolver::UpdateNiaVar(size_t vIdx)
+{
+    if (!varAppear[vIdx]) {
+        if (vars[vIdx].isNia) {
+            int rootIdx = fa[vIdx];
+            if (rootIdx != vIdx) {
+                solution[vIdx] = solution[rootIdx] * faCoff[vIdx] + faConst[vIdx];
+            }
+        } else if (upValueVars[vIdx] == 0) {
+            solution[vIdx] = -1;
+        }
+    }
+}
+
+bool LsSolver::EvaluateNiaLiteral(Lit* l, int lIdx, RationNum delta)
+{
+    if (!l->isEqual) {
+        if ((delta <= 0 && lIdx > 0) || (delta > 0 && lIdx < 0)) {
+            return true;
+        }
+    } else if ((delta == 0 && lIdx > 0) || (delta != 0 && lIdx < 0)) {
+        return true;
+    }
+    return false;
+}
+
+bool LsSolver::CheckNiaLiteralSatisfaction(Lit* l, int lIdx, std::vector<bool>& litAppearTmp)
+{
+    if (!litAppearTmp[std::abs(lIdx)]) {
+        RationNum delta = DeltaLit(lits[std::abs(lIdx)]);
+        l->delta = delta;
+        litAppearTmp[std::abs(lIdx)] = true;
+        return EvaluateNiaLiteral(l, lIdx, delta);
+    }
+    return EvaluateNiaLiteral(l, lIdx, l->delta);
+}
+
+bool LsSolver::CheckLiteralSatisfaction(int lIdx, std::vector<bool>& litAppearTmp)
+{
+    Lit* l = &(lits[std::abs(lIdx)]);
+    if (lIdx > 0 && l->litsIndex == 0) {
+        return true;
+    } else if (l->isNiaLit) {
+        return CheckNiaLiteralSatisfaction(l, lIdx, litAppearTmp);
+    } else if ((solution[l->delta.ToInt()] > 0 && lIdx > 0) ||
+               (solution[l->delta.ToInt()] < 0 && lIdx < 0)) {
+        return true;
+    }
+    return false;
+}
+
+void LsSolver::UpBoolVars()
+{
+    for (size_t vIdx = 0; vIdx < numVars; vIdx++) {
+        UpdateNiaVar(vIdx);
+    }
+
+    std::vector<bool> litAppearTmp = litAppear;
+    for (int idx = static_cast<int>(reconstructStack.size()) - 1; idx >= 0; idx--) {
+        Clause cl = reconstructStack[idx];
+        bool satFlag = false;
+        for (int lIdx : cl.literals) {
+            satFlag = CheckLiteralSatisfaction(lIdx, litAppearTmp);
+            if (satFlag) {
+                break;
+            }
+        }
+        if (!satFlag) {
+            Lit* l = &(lits[std::abs(cl.literals[0])]);
+            solution[l->delta.ToInt()] = 1;
+        }
+    }
 }
 
 } // namespace niaOverall
