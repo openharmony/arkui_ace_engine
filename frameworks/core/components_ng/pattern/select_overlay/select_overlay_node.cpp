@@ -1257,7 +1257,7 @@ RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<Fram
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     UpdateMenuTextNodeProperty(textProperty, cfg, theme);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    auto textOverlayTheme = parent->GetTheme<TextOverlayTheme>(true);
     if (isAIMenuEnabled == true && textOverlayTheme) {
         TextStyle textStyle;
         textStyle.SetFontSize(theme->GetMenuFontSize());
@@ -2099,6 +2099,10 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(
     }
     auto selectOverlayNode = AceType::MakeRefPtr<SelectOverlayNode>(selectOverlayPattern);
     selectOverlayNode->InitializePatternAndContext();
+    auto caller = info->callerFrameNode.Upgrade();
+    if (caller) {
+        selectOverlayNode->SetThemeScopeId(caller->GetThemeScopeId());
+    }
     ElementRegister::GetInstance()->AddUINode(selectOverlayNode);
     selectOverlayNode->CreateToolBar();
     selectOverlayNode->UpdateToolBar(true);
@@ -3500,6 +3504,29 @@ void SelectOverlayNode::HideMenuOnlyImmediately()
     ProcessSubMenuOnHide();
 }
 
+void SelectOverlayNode::UpdateExtensionMenuVisibility(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    if (!isExtensionMenu_ || !extensionMenu_) {
+        return;
+    }
+    auto nodeTrigger = FrameNodeTrigger::SHOW;
+    if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
+        nodeTrigger = FrameNodeTrigger::HIDE;
+        if (backButton_) {
+            backButton_->RemoveChild(moreOrBackSymbol_);
+            moreOrBackSymbol_.Reset();
+        }
+    }
+    ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, nodeTrigger);
+    if (backButton_) {
+        ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, nodeTrigger);
+    }
+    extensionMenu_->MarkModifyDone();
+    if (backButton_) {
+        backButton_->MarkModifyDone();
+    }
+}
+
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
 {
     auto pattern = GetPattern<SelectOverlayPattern>();
@@ -3510,7 +3537,22 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
         return;
     }
     auto info = pattern->GetSelectOverlayInfo();
-    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
+    auto caller = info->callerFrameNode.Upgrade();
+    bool needRebuildMenu = menuItemChanged;
+    if (caller && caller->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto newThemeScopeId = caller->GetThemeScopeId();
+        if (newThemeScopeId != cachedThemeScopeId_) {
+            cachedThemeScopeId_ = newThemeScopeId;
+            needRebuildMenu = true;
+        } else if (newThemeScopeId != 0) {
+            needRebuildMenu = true;
+        }
+        selectMenu_->SetThemeScopeId(newThemeScopeId);
+        if (selectMenuInner_) {
+            selectMenuInner_->SetThemeScopeId(newThemeScopeId);
+        }
+    }
+    if (needRebuildMenu && info->menuInfo.menuBuilder == nullptr) {
         UpdateMenuInner(info, noAnimation, false);
     }
     selectMenu_->MarkModifyDone();
@@ -3532,25 +3574,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
         ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
         FireCustomMenuChangeEvent(true);
     }
-
-    if (isExtensionMenu_ && extensionMenu_) {
-        auto nodeTrigger = FrameNodeTrigger::SHOW;
-        if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
-            nodeTrigger = FrameNodeTrigger::HIDE;
-            if (backButton_) {
-                backButton_->RemoveChild(moreOrBackSymbol_);
-                moreOrBackSymbol_.Reset();
-            }
-        }
-        ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, nodeTrigger);
-        if (backButton_) {
-            ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, nodeTrigger);
-        }
-        extensionMenu_->MarkModifyDone();
-        if (backButton_) {
-            backButton_->MarkModifyDone();
-        }
-    }
+    UpdateExtensionMenuVisibility(info);
 }
 
 void SelectOverlayNode::AddSubMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info,

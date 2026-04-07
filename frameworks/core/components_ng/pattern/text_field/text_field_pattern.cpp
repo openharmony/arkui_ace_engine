@@ -6191,6 +6191,12 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
             area->OnThemeScopeUpdate(textFieldTheme);
         }
     }
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (selectOverlay_) {
+            selectOverlay_->UpdateHandleColor();
+        }
+    }
     return updateFlag;
 }
 

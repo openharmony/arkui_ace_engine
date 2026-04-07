@@ -233,6 +233,7 @@ private:
 
     void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation);
     void SetSelectMenuInnerSize();
+    void UpdateExtensionMenuVisibility(const std::shared_ptr<SelectOverlayInfo>& info);
     void ShowAskCelia(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     std::optional<float> GetParentWidth();
@@ -274,7 +275,7 @@ private:
 
     // Marks whether it is currently in the animated state.
     bool isDoingAnimation_ = false;
-
+    int32_t cachedThemeScopeId_ = 0;
     // Controls that only default menus can be converted to extended menus, and extended menus can be converted to
     // default menus.
     bool isExtensionMenu_ = false;
