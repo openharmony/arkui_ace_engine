@@ -2276,6 +2276,14 @@ typedef struct Ark_DateRange Ark_DateRange;
 typedef struct Opt_DateRange Opt_DateRange;
 typedef struct Ark_DeleteValue Ark_DeleteValue;
 typedef struct Opt_DeleteValue Opt_DeleteValue;
+typedef struct Ark_DepthColorRGB Ark_DepthColorRGB;
+typedef struct Opt_DepthColorRGB Opt_DepthColorRGB;
+typedef struct Ark_DepthComponentOptions Ark_DepthComponentOptions;
+typedef struct Opt_DepthComponentOptions Opt_DepthComponentOptions;
+typedef struct Ark_DepthVector3 Ark_DepthVector3;
+typedef struct Opt_DepthVector3 Opt_DepthVector3;
+typedef struct Ark_DepthVector4 Ark_DepthVector4;
+typedef struct Opt_DepthVector4 Opt_DepthVector4;
 typedef struct Ark_DirectionalEdgesT_F64 Ark_DirectionalEdgesT_F64;
 typedef struct Opt_DirectionalEdgesT_F64 Opt_DirectionalEdgesT_F64;
 typedef struct Ark_DisturbanceFieldOptionsInner Ark_DisturbanceFieldOptionsInner;
@@ -2970,6 +2978,10 @@ typedef struct Ark_DecorationStyleInterface Ark_DecorationStyleInterface;
 typedef struct Opt_DecorationStyleInterface Opt_DecorationStyleInterface;
 typedef struct Ark_DecorationStyleResult Ark_DecorationStyleResult;
 typedef struct Opt_DecorationStyleResult Opt_DecorationStyleResult;
+typedef struct Ark_DepthCameraParams Ark_DepthCameraParams;
+typedef struct Opt_DepthCameraParams Opt_DepthCameraParams;
+typedef struct Ark_DepthLightParams Ark_DepthLightParams;
+typedef struct Opt_DepthLightParams Opt_DepthLightParams;
 typedef struct Ark_Dimension Ark_Dimension;
 typedef struct Opt_Dimension Opt_Dimension;
 typedef struct Ark_DividerStyleOptions Ark_DividerStyleOptions;
@@ -4574,6 +4586,14 @@ typedef struct Opt_DatePickerMode {
     Ark_Tag tag;
     Ark_DatePickerMode value;
 } Opt_DatePickerMode;
+typedef enum Ark_DepthSpaceType {
+    ARK_DEPTH_SPACE_TYPE_INSTANCE = 0,
+    ARK_DEPTH_SPACE_TYPE_GLOBAL = 1,
+} Ark_DepthSpaceType;
+typedef struct Opt_DepthSpaceType {
+    Ark_Tag tag;
+    Ark_DepthSpaceType value;
+} Opt_DepthSpaceType;
 typedef enum Ark_DetectedBlankScreenReason {
     ARK_DETECTED_BLANK_SCREEN_REASON_NO_CONTENTFUL_NODES = 0,
     ARK_DETECTED_BLANK_SCREEN_REASON_SUB_THRESHOLD_CONTENTFUL_NODES = 1,
@@ -5714,6 +5734,7 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
+    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
@@ -15560,6 +15581,45 @@ typedef struct Opt_DeleteValue {
     Ark_Tag tag;
     Ark_DeleteValue value;
 } Opt_DeleteValue;
+typedef struct Ark_DepthColorRGB {
+    /* kind: Interface */
+    Ark_Int32 red;
+    Ark_Int32 green;
+    Ark_Int32 blue;
+} Ark_DepthColorRGB;
+typedef struct Opt_DepthColorRGB {
+    Ark_Tag tag;
+    Ark_DepthColorRGB value;
+} Opt_DepthColorRGB;
+typedef struct Ark_DepthComponentOptions {
+    /* kind: Interface */
+    Opt_DepthSpaceType depthSpace;
+} Ark_DepthComponentOptions;
+typedef struct Opt_DepthComponentOptions {
+    Ark_Tag tag;
+    Ark_DepthComponentOptions value;
+} Opt_DepthComponentOptions;
+typedef struct Ark_DepthVector3 {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 z;
+} Ark_DepthVector3;
+typedef struct Opt_DepthVector3 {
+    Ark_Tag tag;
+    Ark_DepthVector3 value;
+} Opt_DepthVector3;
+typedef struct Ark_DepthVector4 {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 z;
+    Ark_Float64 w;
+} Ark_DepthVector4;
+typedef struct Opt_DepthVector4 {
+    Ark_Tag tag;
+    Ark_DepthVector4 value;
+} Opt_DepthVector4;
 typedef struct Ark_DirectionalEdgesT_F64 {
     /* kind: Interface */
     Ark_Float64 start;
@@ -19367,6 +19427,28 @@ typedef struct Opt_DecorationStyleResult {
     Ark_Tag tag;
     Ark_DecorationStyleResult value;
 } Opt_DecorationStyleResult;
+typedef struct Ark_DepthCameraParams {
+    /* kind: Interface */
+    Ark_DepthVector3 position;
+    Ark_DepthVector4 quaternion;
+    Ark_Number yFov;
+    Ark_Number zNear;
+    Ark_Number zFar;
+} Ark_DepthCameraParams;
+typedef struct Opt_DepthCameraParams {
+    Ark_Tag tag;
+    Ark_DepthCameraParams value;
+} Opt_DepthCameraParams;
+typedef struct Ark_DepthLightParams {
+    /* kind: Interface */
+    Ark_DepthVector3 direction;
+    Ark_DepthColorRGB color;
+    Ark_Number intensity;
+} Ark_DepthLightParams;
+typedef struct Opt_DepthLightParams {
+    Ark_Tag tag;
+    Ark_DepthLightParams value;
+} Opt_DepthLightParams;
 typedef struct Ark_Dimension {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -24705,6 +24787,24 @@ typedef struct GENERATED_ArkUIDatePickerModifier {
     void (*setCanLoop)(Ark_NativePointer node,
                        const Opt_Boolean* value);
 } GENERATED_ArkUIDatePickerModifier;
+
+typedef struct GENERATED_ArkUIDepthComponentModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setDepthComponentOptions)(Ark_NativePointer node,
+                                     const Ark_ResourceStr* background,
+                                     const Opt_DepthComponentOptions* options);
+    void (*setDepthMap)(Ark_NativePointer node,
+                        const Ark_Union_ResourceStr_image_PixelMap* value);
+    void (*setCamera)(Ark_NativePointer node,
+                      const Ark_DepthCameraParams* value);
+    void (*setLight)(Ark_NativePointer node,
+                     const Ark_DepthLightParams* value);
+    void (*setBackgroundOffset)(Ark_NativePointer node,
+                                const Ark_Union_Position_Edges_LocalizedEdges* value);
+    void (*setBackgroundScale)(Ark_NativePointer node,
+                               const Ark_ScaleOptions* value);
+} GENERATED_ArkUIDepthComponentModifier;
 
 typedef struct GENERATED_ArkUIDividerModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -31748,6 +31848,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUICustomLayoutRootModifier* (*getCustomLayoutRootModifier)();
     const GENERATED_ArkUIDataPanelModifier* (*getDataPanelModifier)();
     const GENERATED_ArkUIDatePickerModifier* (*getDatePickerModifier)();
+    const GENERATED_ArkUIDepthComponentModifier* (*getDepthComponentModifier)();
     const GENERATED_ArkUIDividerModifier* (*getDividerModifier)();
     const GENERATED_ArkUIEffectComponentModifier* (*getEffectComponentModifier)();
     const GENERATED_ArkUIEllipseModifier* (*getEllipseModifier)();
@@ -32096,6 +32197,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_CUSTOM_LAYOUT_ROOT,
     GENERATED_ARKUI_DATA_PANEL,
     GENERATED_ARKUI_DATE_PICKER,
+    GENERATED_ARKUI_DEPTH_COMPONENT,
     GENERATED_ARKUI_DIVIDER,
     GENERATED_ARKUI_EFFECT_COMPONENT,
     GENERATED_ARKUI_ELLIPSE,

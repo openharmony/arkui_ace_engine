@@ -1,5 +1,5 @@
 diff --git a/api/arkui/component/common.d.ets b/api/arkui/component/common.d.ets
-index 75cd168..980c5a2 100644
+index 0123491..00ccef0 100644
 --- a/api/arkui/component/common.d.ets
 +++ b/api/arkui/component/common.d.ets
 @@ -4892,17 +4892,6 @@ export declare interface TouchObject {
@@ -20,3 +20,13 @@ index 75cd168..980c5a2 100644
  }
  /**
   * TouchObject getHistoricalPoints Function Parameters
+@@ -12026,7 +12015,8 @@ export declare interface CommonMethod {
+      * @stagemodelonly
+      * @since 26.0.0
+      */
+-    default spatialEffect(params: SpatialEffectParams | undefined): this;
++    // not implemented in arkui
++    // default spatialEffect(params: SpatialEffectParams | undefined): this;
+ 
+     /**
+      * Applies a pixel stretch effect to the component.

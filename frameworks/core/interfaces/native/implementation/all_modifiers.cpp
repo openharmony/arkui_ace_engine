@@ -105,6 +105,7 @@ const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
+const GENERATED_ArkUIDepthComponentModifier* GetDepthComponentModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier();
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
@@ -445,6 +446,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetCustomLayoutRootModifier,
         GetDataPanelModifier,
         GetDatePickerModifier,
+        GetDepthComponentModifier,
         GetDividerModifier,
         GetEffectComponentModifier,
         GetEllipseModifier,
