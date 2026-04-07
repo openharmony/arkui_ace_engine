@@ -1059,7 +1059,11 @@ void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateClipShape(path);
+    if (IsUserSetMaterial()) {
+        renderContext->SetShadowPath(clipPath_);
+    } else {
+        renderContext->UpdateClipShape(path);
+    }
 }
 
 } // namespace OHOS::Ace::NG

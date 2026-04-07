@@ -58,6 +58,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float ZERO = 0.0f;
+constexpr float MESSAGE_OFFSET_X = 6.0f;
+constexpr float MESSAGE_OFFSET_Y = 16.0f;
+constexpr float EXPECTED_OFFSET_VALUE_ZERO = 0.0f;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE = true;
@@ -84,7 +87,7 @@ const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
 const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
-const OffsetF MESSAGE_OFFSET = OffsetF(6, 16);
+const OffsetF MESSAGE_OFFSET = OffsetF(MESSAGE_OFFSET_X, MESSAGE_OFFSET_Y);
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color(0XFFFF0000);
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 const Color BUBBLE_PAINT_PROPERTY_TEXT_COLOR = Color(0XFFFF0000);
@@ -788,8 +791,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
     OffsetT<Dimension> offset;
     pattern->arrowPlacement_.reset();
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
     pattern->arrowPlacement_ = Placement::LEFT;
     offset = pattern->GetInvisibleOffset();
     EXPECT_GT(offset.GetX().Value(), 0);
@@ -828,8 +831,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
     EXPECT_LT(offset.GetY().Value(), 0);
     pattern->arrowPlacement_ = Placement::NONE;
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
 }
 
 /**
