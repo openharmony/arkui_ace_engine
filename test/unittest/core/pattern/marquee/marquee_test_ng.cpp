@@ -975,6 +975,12 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
     OffsetF offTemp = textLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(offTemp.GetX(), 0);
     EXPECT_EQ(offTemp.GetY(), 0);
+
+    /**
+     * @tc.steps: step9. check if positionOffTemp is not (1,1)
+     */
+    EXPECT_NE(offTemp.GetX(), 1);
+    EXPECT_NE(offTemp.GetY(), 1);
 }
 
 /**

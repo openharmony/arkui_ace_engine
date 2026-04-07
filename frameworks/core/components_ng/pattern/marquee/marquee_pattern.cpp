@@ -244,6 +244,7 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         "duration is %{public}d.",
         host->GetId(), textNode->GetId(), textWidth, duration);
     UpdateTextTranslateXY(calculateStart);
+    lastAnimationStart_ = start;
     ActionAnimation(option, calculateEnd, playCount, needSecondPlay);
 }
 
@@ -330,11 +331,15 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
         cancelAnimationCallbacl();
-        bool isSyncSuc = AnimationUtils::CloseImplicitCancelAnimation();
-        if (!isSyncSuc) {
+        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus();
+        if (status != CancelAnimationStatus::SUCCESS &&
+            status != CancelAnimationStatus::EMPTY_PENDING_SYNC_LIST) {
             ACE_SCOPED_TRACE("Marquee stop property sync failed");
             //sync cancel animation filed, stop animation.
+            TAG_LOGI(AceLogTag::ACE_MARQUEE, "Marquee stop property sync failed %{public}d", (int)status);
             StopAndResetAnimation();
+            lastAnimationOffset_ = OffsetF(lastAnimationStart_, 0.0);
+            secondChildLastAnimationOffset_ = OffsetF(lastSecondAnimationStart_, 0.0);
         } else {
             PropertyCancelAnimationFinish();
             animation_.reset();
@@ -396,12 +401,22 @@ void MarqueePattern::PropertyCancelAnimationFinish()
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     lastAnimationOffset_ = renderContext->GetTranslateXYProperty();
-
+    if (!NeedSecondChild()) {
+        return;
+    }
     auto secondTextNode = DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_VOID(secondTextNode);
     auto secondRenderContext = secondTextNode->GetRenderContext();
+    CHECK_NULL_VOID(secondRenderContext);
     secondChildLastAnimationOffset_ = secondRenderContext->GetTranslateXYProperty();
+    if (lastAnimationOffset_.has_value() && secondChildLastAnimationOffset_.has_value() &&
+        NearEqual(lastAnimationOffset_.value().GetX(), secondChildLastAnimationOffset_.value().GetX())) {
+        TAG_LOGI(AceLogTag::ACE_MARQUEE, "Marquee cancel animation failed, set offset to last animation start");
+        lastAnimationOffset_.value().SetX(lastAnimationStart_);
+        secondChildLastAnimationOffset_.value().SetX(lastSecondAnimationStart_);
+    }
 }
 
 void MarqueePattern::FireStartEvent() const
@@ -1175,6 +1190,11 @@ std::shared_ptr<AnimationUtils::Animation> MarqueePattern::ActionDoubleAnimation
         pattern->FireBounceEvent();
     };
 
+    if (isFirst) {
+        lastAnimationStart_ = param.start;
+    } else {
+        lastSecondAnimationStart_ = param.start;
+    }
     return AnimationUtils::StartAnimation(option, buildKeyframes, finishCallback, bounceCallback);
 }
 

@@ -201,6 +201,8 @@ private:
     int32_t secondAnimationId_ = 0;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::shared_ptr<AnimationUtils::Animation> secondAnimation_;
+    double lastAnimationStart_ = 0.0;
+    double lastSecondAnimationStart_ = 0.0;
     bool playStatus_ = false;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
