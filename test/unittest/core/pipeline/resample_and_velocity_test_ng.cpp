@@ -21,6 +21,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_v2/inspector/inspector_constants.h"

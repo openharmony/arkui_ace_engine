@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
+#include "core/common/event_manager.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"

@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
+#include "core/common/event_manager.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "frameworks/core/common/asset_manager_impl.h"

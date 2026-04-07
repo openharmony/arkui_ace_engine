@@ -565,8 +565,8 @@ public:
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
-    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
-        WeakPtr<RenderNode>& hoverNode);
+    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint,
+        std::list<WeakPtr<RenderNode>>& result, WeakPtr<RenderNode>& hoverNode);
 
     virtual bool AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
         const AxisDirection direction);

@@ -23,6 +23,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
 #include "core/common/statistic_event_reporter.h"
@@ -1204,4 +1205,15 @@ void PipelineBase::FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info)
         frameMetricsCallBack_(info);
     }
 }
+
+void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
+{
+    eventManager_ = eventManager;
+}
+
+RefPtr<EventManager> PipelineBase::GetEventManager() const
+{
+    return eventManager_;
+}
+
 } // namespace OHOS::Ace

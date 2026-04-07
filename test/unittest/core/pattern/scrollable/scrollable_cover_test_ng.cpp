@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #define protected public
 #define private public
+#include "core/common/event_manager.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
