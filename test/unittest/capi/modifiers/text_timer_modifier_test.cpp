@@ -45,7 +45,7 @@ const auto ATTRIBUTE_FORMAT_DEFAULT_VALUE = "HH:mm:ss.SS";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
-const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "14.00px";
 const auto ATTRIBUTE_FONT_STYLE_NAME = "fontStyle";
 const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
@@ -78,9 +78,9 @@ std::vector<std::tuple<std::string, Ark_Int64>> testFixtureTimerInputCountInvali
 };
 
 std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureTimerStartTimeValidValues = {
-    { "0", Converter::ArkValue<Ark_Int32>(0), "0.000000" },
-    { "15", Converter::ArkValue<Ark_Int32>(15), "15.000000" },
-    { "86300000", Converter::ArkValue<Ark_Int32>(86300000), "86300000.000000" },
+    { "0", Converter::ArkValue<Ark_Int32>(0), "0" },
+    { "15", Converter::ArkValue<Ark_Int32>(15), "15" },
+    { "86300000", Converter::ArkValue<Ark_Int32>(86300000), "86300000" },
 };
 
 std::vector<std::tuple<std::string, Ark_Int32>> testFixtureTimerInitialValueInvalidValues = {
@@ -133,6 +133,8 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+
+        SetupTheme<TextTheme>();
 
         for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
             AddResource(id, res);

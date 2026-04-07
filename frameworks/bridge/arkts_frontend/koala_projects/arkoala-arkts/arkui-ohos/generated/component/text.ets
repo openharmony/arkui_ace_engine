@@ -98,6 +98,7 @@ export class TextController implements MaterializedBase {
             buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
         }
         const returnResult: LayoutManager | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTextSelection_serialize(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {

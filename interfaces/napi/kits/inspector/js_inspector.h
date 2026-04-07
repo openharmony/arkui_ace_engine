@@ -43,7 +43,7 @@ public:
 
     void Initialize(napi_env env, napi_value thisVar);
     void callUserFunction(napi_env env, std::list<napi_ref>& cbList);
-    void callUserFunction(napi_env env, std::list<napi_ref>& cbList, napi_value arg);
+    void callUserFunction(napi_env env, std::list<napi_ref>& cbList, const std::vector<int32_t>& childIds);
     std::list<napi_ref>::iterator FindCbList(napi_env env, napi_value cb, CalloutType calloutType);
     void NapiSerializer(napi_env& env, napi_value& result);
     void AddCallbackToList(

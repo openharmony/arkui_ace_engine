@@ -289,6 +289,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const retval = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: EventTarget = EventTarget_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTarget_serialize(target: EventTarget): void {
@@ -320,6 +321,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisHorizontal_serialize(axisHorizontal: double | undefined): void {
@@ -343,6 +345,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisVertical_serialize(axisVertical: double | undefined): void {
@@ -387,6 +390,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRollAngle_serialize(rollAngle: double | undefined): void {
@@ -429,6 +433,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDeviceId_serialize(deviceId: int32 | undefined): void {
@@ -452,6 +457,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTargetDisplayId_serialize(targetDisplayId: int32 | undefined): void {
@@ -475,6 +481,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisPinch_serialize(axisPinch: double | undefined): void {
@@ -881,6 +888,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             buffer = (unifiedDataChannel_UnifiedData_serializer.read(retvalDeserializer) as unifiedDataChannel.UnifiedData)
         }
         const returnResult: UnifiedData | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
@@ -894,6 +902,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Rectangle = Rectangle_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getVelocityX_serialize(): double {
@@ -922,6 +931,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getDragSource(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isRemote_serialize(): boolean {
@@ -972,6 +982,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             buffer = (bufferOpt as int32 | Array<int32>)
         }
         const returnResult: int32 | Array<int32> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
@@ -1224,6 +1235,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const retval = ArkUIGeneratedNativeModule._KeyEvent_getKeyText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setKeyText_serialize(keyText: string): void {
@@ -1285,6 +1297,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readInt64()
         }
         const returnResult: int64 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUnicode_serialize(unicode: int64 | undefined): void {
@@ -1308,6 +1321,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsNumLockOn_serialize(isNumLockOn: boolean | undefined): void {
@@ -1331,6 +1345,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsCapsLockOn_serialize(isCapsLockOn: boolean | undefined): void {
@@ -1354,6 +1369,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsScrollLockOn_serialize(isScrollLockOn: boolean | undefined): void {
@@ -1455,6 +1471,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1466,6 +1483,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1477,12 +1495,14 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMeasureResult_serialize(): MeasureResult {
         const retval = ArkUIGeneratedNativeModule._Layoutable_getMeasureResult(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: MeasureResult = MeasureResult_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setMeasureResult_serialize(measureResult: MeasureResult): void {
@@ -1500,6 +1520,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUniqueId_serialize(uniqueId: int32 | undefined): void {
@@ -1636,6 +1657,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = MeasureResult_serializer.read(retvalDeserializer)
         }
         const returnResult: MeasureResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMargin_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1647,6 +1669,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1658,6 +1681,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1669,6 +1693,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getUniqueId_serialize(): int32 | undefined {
@@ -1680,6 +1705,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUniqueId_serialize(uniqueId: int32 | undefined): void {
@@ -1998,6 +2024,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = CaretOffset_serializer.read(retvalDeserializer)
         }
         const returnResult: CaretOffset | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextContentRect_serialize(): RectResult | undefined {
@@ -2009,6 +2036,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = RectResult_serializer.read(retvalDeserializer)
         }
         const returnResult: RectResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextContentLineCount_serialize(): int32 | undefined {
@@ -2020,6 +2048,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
@@ -2040,6 +2069,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setStyledPlaceholder_serialize(styledString: StyledString): void {
@@ -2066,6 +2096,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = TextRange_serializer.read(retvalDeserializer)
         }
         const returnResult: TextRange | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private clearPreviewText_serialize(): void {
@@ -2089,6 +2120,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = retvalDeserializer.readString()
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private deleteBackward_serialize(): void {
@@ -25650,6 +25682,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -25673,6 +25706,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -25926,6 +25960,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScrollStep_serialize(scrollStep: int32 | undefined): void {
@@ -25949,6 +25984,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -25972,6 +26008,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26175,6 +26212,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = InteractionHand.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: InteractionHand | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setHand_serialize(hand: InteractionHand | undefined): void {
@@ -26198,6 +26236,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -26221,6 +26260,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26287,6 +26327,7 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
             buffer.set(bufferKeyVar, bufferValueVar)
         }
         const returnResult: Map<AxisModel, double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisMap_serialize(axisMap: Map<AxisModel, double>): void {
@@ -26434,6 +26475,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setX_serialize(x: double | undefined): void {
@@ -26457,6 +26499,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setY_serialize(y: double | undefined): void {
@@ -26480,6 +26523,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setWindowX_serialize(windowX: double | undefined): void {
@@ -26503,6 +26547,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setWindowY_serialize(windowY: double | undefined): void {
@@ -26526,6 +26571,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDisplayX_serialize(displayX: double | undefined): void {
@@ -26549,6 +26595,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDisplayY_serialize(displayY: double | undefined): void {
@@ -26572,6 +26619,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -26595,6 +26643,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26810,6 +26859,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = bufferOpt
         }
         const returnResult: Array<MouseHistoricalPoint> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getButton_serialize(): MouseButton {
@@ -26877,6 +26927,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRawDeltaX_serialize(rawDeltaX: double | undefined): void {
@@ -26900,6 +26951,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRawDeltaY_serialize(rawDeltaY: double | undefined): void {
@@ -26927,6 +26979,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = bufferOpt
         }
         const returnResult: Array<MouseButton> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setPressedButtons_serialize(pressedButtons: Array<MouseButton> | undefined): void {
@@ -26954,6 +27007,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -26977,6 +27031,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {

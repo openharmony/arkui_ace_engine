@@ -319,13 +319,21 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
-            for (auto&& observer : iter->second) {
+            auto childrenCallbacks = iter->second;
+            for (auto&& observer : childrenCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)();
             }
         }
         auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
         if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
-            for (auto&& observer : iterWithParameter->second) {
+            auto childrenWithParameterCallbacks = iterWithParameter->second;
+            for (auto&& observer : childrenWithParameterCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)(childIds);
             }
         }

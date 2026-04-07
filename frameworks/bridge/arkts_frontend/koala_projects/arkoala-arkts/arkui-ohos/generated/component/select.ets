@@ -174,6 +174,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
         const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setContentModifier_serialize(contentModifier: ContentModifier<MenuItemConfiguration>): void {
@@ -195,6 +196,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             throw new Error('One of the branches for buffer has to be chosen through deserialisation.')
         }
         const returnResult: ResourceStr = (buffer as string | arkui_component_units_Resource)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
@@ -229,6 +231,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             buffer = (bufferOpt as string | arkui_component_units_Resource)
         }
         const returnResult: ResourceStr | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIcon_serialize(icon: ResourceStr | undefined): void {
@@ -260,6 +263,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
         }
         const returnResult: SymbolGlyphModifier | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setSymbolIcon_serialize(symbolIcon: SymbolGlyphModifier | undefined): void {

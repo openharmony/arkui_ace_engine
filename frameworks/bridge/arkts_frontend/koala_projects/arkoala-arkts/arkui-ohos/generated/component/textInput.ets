@@ -91,6 +91,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
         const retval = ArkUIGeneratedNativeModule._SubmitEvent_getText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setText_serialize(text: string): void {
