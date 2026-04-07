@@ -53,7 +53,7 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void OnMenuClick(std::map<std::string, std::string>& params);
+    void OnMenuClick(std::map<std::string, std::string>&& params);
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
     void SetOnBackPressedConsumed();
