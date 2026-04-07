@@ -73,6 +73,10 @@ void StopPropagationImpl(Ark_MouseEvent peer)
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(true);
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
 Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -373,6 +377,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
         MouseEventAccessor::StopPropagationImpl,
+        MouseEventAccessor::GetCurrentLocalPositionImpl,
         MouseEventAccessor::GetHistoricalPointsImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,

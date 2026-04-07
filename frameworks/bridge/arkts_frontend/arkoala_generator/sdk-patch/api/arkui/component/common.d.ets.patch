@@ -1,0 +1,22 @@
+diff --git a/api/arkui/component/common.d.ets b/api/arkui/component/common.d.ets
+index 75cd168..980c5a2 100644
+--- a/api/arkui/component/common.d.ets
++++ b/api/arkui/component/common.d.ets
+@@ -4892,17 +4892,6 @@ export declare interface TouchObject {
+      * @since 24
+      */
+     globalDisplayY?: double;
+-
+- 	/**
+- 	 * Gets the coordinates of the top-left corner of the current component based on its real-time position.
+- 	 *
+- 	 * @returns { Coordinate2D } - return the coordinates of the top-left corner of the current component based on its
+- 	 * real-time position.
+- 	 * @syscap SystemCapability.ArkUI.ArkUI.Full
+- 	 * @stagemodelonly
+- 	 * @since 26.0.0
+- 	 */
+- 	default getCurrentLocalPosition(): Coordinate2D;
+ }
+ /**
+  * TouchObject getHistoricalPoints Function Parameters

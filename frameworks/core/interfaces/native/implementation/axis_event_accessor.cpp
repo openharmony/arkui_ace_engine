@@ -83,6 +83,10 @@ Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
     CHECK_NULL_RETURN(event, false);
     return Converter::ArkValue<Ark_Boolean>(event->HasAxis(static_cast<AxisType>(axisType)));
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_AxisAction>(AxisAction::NONE);
@@ -326,6 +330,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::GetVerticalAxisValueImpl,
         AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::HasAxisImpl,
+        AxisEventAccessor::GetCurrentLocalPositionImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,

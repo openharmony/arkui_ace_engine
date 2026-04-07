@@ -3660,6 +3660,8 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getPinchAxisScaleValue(ptr: KPointer): KDouble
     @ani.unsafe.Direct
     native static _AxisEvent_hasAxis(ptr: KPointer, axisType: KInt): boolean
+    @ani.unsafe.Quick
+    native static _AxisEvent_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_getAction(ptr: KPointer): KInt
     @ani.unsafe.Direct
@@ -4105,6 +4107,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ClickEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _ClickEvent_preventDefault(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _ClickEvent_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ClickEvent_getDisplayX(ptr: KPointer): KDouble
     @ani.unsafe.Direct
@@ -5371,6 +5375,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _MouseEvent_stopPropagation(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _MouseEvent_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _MouseEvent_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct

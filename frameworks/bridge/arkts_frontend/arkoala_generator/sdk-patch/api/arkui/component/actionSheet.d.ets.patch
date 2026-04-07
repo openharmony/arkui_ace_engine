@@ -1,0 +1,22 @@
+diff --git a/api/arkui/component/actionSheet.d.ets b/api/arkui/component/actionSheet.d.ets
+index a25ab1b..da6ee2a 100644
+--- a/api/arkui/component/actionSheet.d.ets
++++ b/api/arkui/component/actionSheet.d.ets
+@@ -24,6 +24,9 @@ import { DialogButtonStyle, BorderStyle } from './enums';
+ import { DialogAlignment } from './alertDialog';
+ import { LevelOrder, LevelMode, ImmersiveMode } from '../../@ohos.promptAction';
+ import { AttributeModifier, CommonMethod } from './common';
++// instructive change start
++import { SystemUiMaterial } from './common';
++// instructive change end
+ /**
+  * The information of sheet.
+  *
+@@ -533,4 +536,7 @@ export interface ActionSheetOptions {
+      * @since 23
+      */
+     levelOrder?: LevelOrder;
++    // instructive change start
++    systemMaterial?: SystemUiMaterial;
++    // instructive change end
+ }

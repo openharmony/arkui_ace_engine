@@ -27,12 +27,8 @@ def parse_args():
     )
     parser.add_argument("--arkts-sdk-path", required=True,
                         help="Path to the ArkTS 1.2 SDK")
-    parser.add_argument("--arkts-sdk-patch-path", required=True,
-                        help="Path to the ArkTS 1.2 SDK patches")
     parser.add_argument("--output", required=True,
                         help="Directory to install generated files")
-    parser.add_argument("--output-sdk-patched-path", required=True,
-                        help="Directory to save patched SDK files")
     parser.add_argument("--arkgen-interop-types", required=True,
                         help="Path to arkgen interop types header")
     parser.add_argument("--panda-sdk-path", required=True,
@@ -52,9 +48,7 @@ def main():
     base_dir = os.path.join(script_dir, "../../")
 
     arkts_sdk_path = args.arkts_sdk_path
-    arkts_sdk_patch_path = args.arkts_sdk_patch_path
     output_dir = args.output
-    output_sdk_patched_path = args.output_sdk_patched_path
     arkgen_options_file = os.path.join(base_dir, "generation_config/arkgen-config.json")
     scraper_options_file = os.path.join(base_dir, "generation_config/scraper-config.json")
     etsgen_options_file = os.path.join(base_dir, "generation_config/etsgen-config.json")
@@ -135,28 +129,9 @@ def main():
         print("Error: 'npm' command not found. Please ensure Node.js and npm are installed and in PATH.")
         sys.exit(1)
 
-    # step3 patch SDK
-    print(f"Step 4: Patching SDK from {arkts_sdk_patch_path} to {output_sdk_patched_path}...")
-    try:
-        shutil.rmtree(output_sdk_patched_path, ignore_errors=True)
-        shutil.copytree(arkts_sdk_path, output_sdk_patched_path)
-        for root, dirs, files in os.walk(arkts_sdk_patch_path):
-            for file in files:
-                if not file.endswith(".d.ets"):
-                    continue
-                rel_file = os.path.relpath(os.path.join(root, file), arkts_sdk_patch_path)
-                print(f"Applying file: {rel_file}")
-                shutil.copy2(
-                    os.path.join(arkts_sdk_patch_path, rel_file),
-                    os.path.join(output_sdk_patched_path, rel_file))
-        print("SDK patching completed successfully.")
-    except Exception as e:
-        print(f"Error: SDK patching failed - {e}")
-        sys.exit(1)
-
     # step5 generate code
     cmd = [
-        npx, "@idlizer/runner", "m3", output_sdk_patched_path,
+        npx, "@idlizer/runner", "m3", arkts_sdk_path,
         idl_pattern,
         "--sdk-stage", "prepared",
         "--arkgen-options-file", arkgen_options_file,

@@ -52,21 +52,47 @@ template("scan_sources") {
   }
 }
 
+scan_sources("arkui_sdk_patch_files") {
+  input_dir = "sdk-patch"
+}
+
 scan_sources("arkui_extra_idl") {
   input_dir = "arkui_extra_idl"
+}
+
+patched_sdk_path = "$target_gen_dir/sdk-patched"
+
+action("patch_sdk") {
+  script = "gn/command/patch.py"
+  args = [
+    "apply",
+    "--input",
+    rebase_path("${ohos_ets_api_path}/.."),
+    "--output",
+    rebase_path(patched_sdk_path),
+    "--patch",
+    rebase_path("./sdk-patch"),
+    "--stamp",
+    rebase_path("$target_out_dir/patch_sdk_stamp"),
+  ]
+  outputs = [
+    "$target_out_dir/patch_sdk_stamp",
+  ]
+  deps = [
+    ":arkui_sdk_patch_files",
+  ]
+  external_deps = [
+    ohos_ets_api_deps,
+  ]
 }
 
 action("runner_gen_code") {
   script = "gn/command/generation.py"
   args = [
     "--arkts-sdk-path",
-    rebase_path("${ohos_ets_api_path}/.."),
-    "--arkts-sdk-patch-path",
-    rebase_path("./sdk-patch"),
+    rebase_path(patched_sdk_path),
     "--output",
     rebase_path(idlize_gen_output_path),
-    "--output-sdk-patched-path",
-    rebase_path("$target_gen_dir/sdk-patched"),
     "--arkgen-interop-types",
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
     "--panda-sdk-path",
@@ -92,9 +118,9 @@ action("runner_gen_code") {
   ]
   deps = [
     ":arkui_extra_idl",
+    ":patch_sdk",
   ]
   external_deps = [
-    ohos_ets_api_deps,
     ohos_ets_libarkts_deps,
   ]
   outputs = [

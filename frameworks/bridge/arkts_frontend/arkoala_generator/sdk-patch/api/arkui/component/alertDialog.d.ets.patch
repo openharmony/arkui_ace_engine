@@ -1,0 +1,24 @@
+diff --git a/api/arkui/component/alertDialog.d.ets b/api/arkui/component/alertDialog.d.ets
+index 9f5ff87..f2e539e 100644
+--- a/api/arkui/component/alertDialog.d.ets
++++ b/api/arkui/component/alertDialog.d.ets
+@@ -23,6 +23,9 @@ import { Rectangle, BlurStyle, Callback, TransitionEffect, ShadowOptions, Shadow
+ import { LevelOrder, ImmersiveMode, LevelMode } from '../../@ohos.promptAction';
+ import { DismissDialogAction } from './actionSheet';
+ import { AttributeModifier, CommonMethod } from './common';
++// instructive change start
++import { SystemUiMaterial } from './common';
++// instructive change end
+ /**
+  * The alignment of dialog,
+  *
+@@ -539,6 +542,9 @@ export declare interface AlertDialogParam {
+      * @since 23
+      */
+     levelOrder?: LevelOrder;
++    // instructive change start
++    systemMaterial?: SystemUiMaterial;
++    // instructive change end
+ }
+ /**
+  * Defines the AlertDialog with confirm button.

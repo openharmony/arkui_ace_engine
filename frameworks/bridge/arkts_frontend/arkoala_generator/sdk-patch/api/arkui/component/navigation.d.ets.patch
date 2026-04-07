@@ -1,0 +1,30 @@
+diff --git a/api/arkui/component/navigation.d.ets b/api/arkui/component/navigation.d.ets
+index 4f49a85..86f9669 100644
+--- a/api/arkui/component/navigation.d.ets
++++ b/api/arkui/component/navigation.d.ets
+@@ -1380,6 +1380,14 @@ export declare interface MoreButtonOptions {
+     backgroundEffect?: BackgroundEffectOptions;
+ }
+ 
++// instructive change start
++export declare interface NavigationModuleInfo {
++    moduleName: string;
++    pagePath: string;
++    isUserCreateStack?: boolean;
++}
++// instructive change end
++
+ /**
+  * Declare Navigation view properties.
+  *
+@@ -1389,6 +1397,10 @@ export declare interface MoreButtonOptions {
+  * @noninterop
+  */
+ export declare interface NavigationAttribute extends CommonMethod {
++    // instructive change start
++    setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this;
++    setNavigationOptions(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): this;
++    // instructive change end
+     /**
+      * Sets the width of navigation bar.
+      *

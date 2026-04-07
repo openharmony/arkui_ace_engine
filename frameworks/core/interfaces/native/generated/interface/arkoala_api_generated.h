@@ -2248,6 +2248,8 @@ typedef struct Ark_common2D_Rect Ark_common2D_Rect;
 typedef struct Opt_common2D_Rect Opt_common2D_Rect;
 typedef struct Ark_ComputedBarAttribute Ark_ComputedBarAttribute;
 typedef struct Opt_ComputedBarAttribute Opt_ComputedBarAttribute;
+typedef struct Ark_Coordinate2D Ark_Coordinate2D;
+typedef struct Opt_Coordinate2D Opt_Coordinate2D;
 typedef struct Ark_Corners_Vector2 Ark_Corners_Vector2;
 typedef struct Opt_Corners_Vector2 Opt_Corners_Vector2;
 typedef struct Ark_CrownEvent Ark_CrownEvent;
@@ -15421,6 +15423,15 @@ typedef struct Opt_ComputedBarAttribute {
     Ark_Tag tag;
     Ark_ComputedBarAttribute value;
 } Opt_ComputedBarAttribute;
+typedef struct Ark_Coordinate2D {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+} Ark_Coordinate2D;
+typedef struct Opt_Coordinate2D {
+    Ark_Tag tag;
+    Ark_Coordinate2D value;
+} Opt_Coordinate2D;
 typedef struct Ark_Corners_Vector2 {
     /* kind: Interface */
     Ark_Vector2 topLeft;
@@ -28008,6 +28019,7 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Ark_Float64 (*getPinchAxisScaleValue)(Ark_AxisEvent peer);
     Ark_Boolean (*hasAxis)(Ark_AxisEvent peer,
                            Ark_AxisType axisType);
+    Ark_Coordinate2D (*getCurrentLocalPosition)(Ark_AxisEvent peer);
     Ark_AxisAction (*getAction)(Ark_AxisEvent peer);
     void (*setAction)(Ark_AxisEvent peer,
                       Ark_AxisAction action);
@@ -28521,6 +28533,7 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
     Ark_ClickEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*preventDefault)(Ark_ClickEvent peer);
+    Ark_Coordinate2D (*getCurrentLocalPosition)(Ark_ClickEvent peer);
     Ark_Float64 (*getDisplayX)(Ark_ClickEvent peer);
     void (*setDisplayX)(Ark_ClickEvent peer,
                         Ark_Float64 displayX);
@@ -29783,6 +29796,7 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Ark_MouseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*stopPropagation)(Ark_MouseEvent peer);
+    Ark_Coordinate2D (*getCurrentLocalPosition)(Ark_MouseEvent peer);
     Opt_Array_MouseHistoricalPoint (*getHistoricalPoints)(Ark_MouseEvent peer);
     Ark_MouseButton (*getButton)(Ark_MouseEvent peer);
     void (*setButton)(Ark_MouseEvent peer,
