@@ -53,7 +53,7 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void OnMenuClick();
+    void OnMenuClick(std::map<std::string, std::string>& params);
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
     void SetOnBackPressedConsumed();
@@ -109,7 +109,7 @@ private:
     void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    void CreateServicePanel(bool firstTry);
+    void CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params = {});
     void DestroyServicePanel();
     void FireExtensionHostParams();
     void InitAbilityContextCallback();
