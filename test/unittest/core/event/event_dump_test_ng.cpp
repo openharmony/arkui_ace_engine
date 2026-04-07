@@ -879,4 +879,137 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg023, TestSize.Level1)
     eventTreeRecord->Dump(dumpJson, depth, startNumber);
     EXPECT_FALSE(dumpJson->Contains(header));
 }
+
+/**
+ * @tc.name: EventDumpTestNg024
+ * @tc.desc: Test EventTreeRecord BuildTouchPoints function
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg024, TestSize.Level1)
+{
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+ 
+    TouchEvent event;
+    event.type = Ace::TouchType::DOWN;
+    event.id = 0;
+    eventTreeRecord->AddTouchPoint(event);
+ 
+    std::list<TouchPointSnapshot> touchPoints = eventTreeRecord->eventTreeList.back().touchPoints;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    eventTreeRecord->BuildTouchPoints(touchPoints, json);
+    EXPECT_TRUE(json->Contains("touch points"));
+}
+ 
+/**
+ * @tc.name: EventDumpTestNg025
+ * @tc.desc: Test EventTreeRecord BuildAxis function
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg025, TestSize.Level1)
+{
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+ 
+    AxisEvent event;
+    event.action = Ace::AxisAction::BEGIN;
+    event.id = 0;
+    eventTreeRecord->AddAxis(event);
+ 
+    std::list<AxisSnapshot> axis = eventTreeRecord->eventTreeList.back().axis;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    eventTreeRecord->BuildAxis(axis, json);
+    EXPECT_TRUE(json->Contains("axis"));
+}
+
+/**
+ * @tc.name: EventDumpTestNg026
+ * @tc.desc: Test EventTouchInfoRecord AddTouchPoint function
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg026, TestSize.Level1)
+{
+    EventTouchInfoRecord touchInfoRecord;
+    TouchEvent event;
+    event.touchEventId = 1;
+    event.processTime = TimeStamp(std::chrono::nanoseconds(1000));
+    TimeStamp dispatchTime = TimeStamp(std::chrono::nanoseconds(2000));
+    touchInfoRecord.AddTouchPoint(event, dispatchTime);
+    EXPECT_FALSE(touchInfoRecord.touchHistory_.empty());
+}
+ 
+/**
+ * @tc.name: EventDumpTestNg027
+ * @tc.desc: Test EventTouchInfoRecord ClearDumpDeque function
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg027, TestSize.Level1)
+{
+    EventTouchInfoRecord touchInfoRecord;
+    TouchEvent event;
+    event.touchEventId = 1;
+    TimeStamp dispatchTime;
+    touchInfoRecord.AddTouchPoint(event, dispatchTime);
+    EXPECT_FALSE(touchInfoRecord.touchHistory_.empty());
+ 
+    touchInfoRecord.ClearDumpDeque();
+    EXPECT_TRUE(touchInfoRecord.touchHistory_.empty());
+    EXPECT_EQ(touchInfoRecord.dequeMaxCnt_, 0);
+}
+ 
+/**
+ * @tc.name: EventDumpTestNg028
+ * @tc.desc: Test EventTouchInfoRecord DumpAndClear function (list version)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg028, TestSize.Level1)
+{
+    EventTouchInfoRecord touchInfoRecord;
+    TouchEvent event;
+    event.touchEventId = 1;
+    event.processTime = TimeStamp(std::chrono::nanoseconds(1000));
+    TimeStamp dispatchTime = TimeStamp(std::chrono::nanoseconds(2000));
+    touchInfoRecord.AddTouchPoint(event, dispatchTime);
+ 
+    std::list<std::string> dumpList;
+    touchInfoRecord.DumpAndClear(dumpList);
+    EXPECT_FALSE(dumpList.empty());
+    EXPECT_TRUE(touchInfoRecord.touchHistory_.empty());
+}
+ 
+/**
+ * @tc.name: EventDumpTestNg029
+ * @tc.desc: Test EventTouchInfoRecord DumpAndClear function (Json version)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg029, TestSize.Level1)
+{
+    EventTouchInfoRecord touchInfoRecord;
+    TouchEvent event;
+    event.touchEventId = 1;
+    event.processTime = TimeStamp(std::chrono::nanoseconds(1000));
+    TimeStamp dispatchTime = TimeStamp(std::chrono::nanoseconds(2000));
+    touchInfoRecord.AddTouchPoint(event, dispatchTime);
+ 
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    touchInfoRecord.DumpAndClear(json);
+    EXPECT_TRUE(touchInfoRecord.touchHistory_.empty());
+}
+ 
+/**
+ * @tc.name: EventDumpTestNg030
+ * @tc.desc: Test FrameNodeSnapshot Dump function (Json version) with comId
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg030, TestSize.Level1)
+{
+    auto frameNodeSnapshot = CreateFrameNodeSnapshotWithInitValue();
+    ASSERT_NE(frameNodeSnapshot, nullptr);
+    frameNodeSnapshot->comId = "testComId";
+ 
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNodeSnapshot->Dump(json);
+    EXPECT_TRUE(json->Contains("nodeId"));
+    EXPECT_TRUE(json->Contains("comId"));
+}
 } // namespace OHOS::Ace::NG
