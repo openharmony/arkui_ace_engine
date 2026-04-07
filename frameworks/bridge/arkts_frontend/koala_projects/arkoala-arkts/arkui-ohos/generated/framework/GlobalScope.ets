@@ -38,6 +38,7 @@ export class GlobalScope {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_getRectangleById(id)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: ComponentInfo = ComponentInfo_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     public static postCardAction(component: Object, action: Object): void {
@@ -75,6 +76,7 @@ export class GlobalScope {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     public static $rawfile(value: string): global_resource_Resource {
@@ -85,6 +87,7 @@ export class GlobalScope {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_$rawfile(value)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     public static animateToImmediately(value: AnimateParam, processor: VoidCallback): void {

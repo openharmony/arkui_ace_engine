@@ -135,6 +135,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = RouteMapConfig_serializer.read(retvalDeserializer)
         }
         const returnResult: RouteMapConfig | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPathInfo_serialize(): NavPathInfo {
@@ -162,6 +163,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setNavDestinationId_serialize(navDestinationId: string | undefined): void {
@@ -185,6 +187,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = NavDestinationMode.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: NavDestinationMode | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setMode_serialize(mode: NavDestinationMode | undefined): void {

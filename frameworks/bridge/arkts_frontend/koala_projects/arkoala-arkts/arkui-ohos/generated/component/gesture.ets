@@ -58,6 +58,7 @@ export class EventTargetInfo implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._EventTargetInfo_getId(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -124,6 +125,7 @@ export class GestureRecognizer implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getTag(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getType_serialize(): GestureControl.GestureType {
@@ -982,6 +984,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
             return FingerInfo_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<FingerInfo> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
@@ -1007,6 +1010,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
             buffer = bufferOpt
         }
         const returnResult: Array<FingerInfo> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setFingerInfos_serialize(fingerInfos: Array<FingerInfo> | undefined): void {
@@ -1228,6 +1232,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
             return FingerInfo_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<FingerInfo> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
@@ -1253,6 +1258,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
             buffer = bufferOpt
         }
         const returnResult: Array<FingerInfo> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setFingerInfos_serialize(fingerInfos: Array<FingerInfo> | undefined): void {
@@ -1350,6 +1356,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
             buffer = EventLocationInfo_serializer.read(retvalDeserializer)
         }
         const returnResult: EventLocationInfo | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTapLocation_serialize(tapLocation: EventLocationInfo | undefined): void {
@@ -1462,6 +1469,7 @@ export class PanRecognizer extends GestureRecognizer implements MaterializedBase
             buffer.set(bufferKeyVar, bufferValueVar)
         }
         const returnResult: Map<SourceTool, double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -1982,6 +1990,7 @@ export class TapGestureEventInternal extends BaseGestureEventInternal implements
             buffer = EventLocationInfo_serializer.read(retvalDeserializer)
         }
         const returnResult: EventLocationInfo | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTapLocation_serialize(tapLocation: EventLocationInfo | undefined): void {
