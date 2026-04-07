@@ -1345,8 +1345,7 @@ export enum TextResponseType {
 export enum MarqueeState {
     START = 0,
     BOUNCE = 1,
-    FINISH = 2,
-    STOP = 3
+    FINISH = 2
 }
 export enum MarqueeStartPolicy {
     DEFAULT = 0,

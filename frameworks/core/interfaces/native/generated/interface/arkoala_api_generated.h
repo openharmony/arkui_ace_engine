@@ -5649,7 +5649,6 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
-    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
