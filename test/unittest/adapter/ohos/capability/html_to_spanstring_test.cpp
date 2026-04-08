@@ -2282,7 +2282,8 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertTestSuperscriptText, TestSize.Level1)
 
 /**
  * @tc.name: HtmlTagsConversionTest
- * @tc.desc: Verify the conversion of HTML tags <a>, <b>, <i>, <u>, <del>, <br>, <strong>, <s>, and <em> to SpanItems.
+ * @tc.desc: Verify the conversion of HTML tags <a>, <b>, <i>, <u>, <del>,
+ *     <br>, <strong>, <s>, <em>, <cite>, and <dfn> to SpanItems.
  * @tc.level: 1
  */
 HWTEST_F(HtmlConvertTestNg, HtmlTagsConversionTest, TestSize.Level1)
@@ -2302,6 +2303,8 @@ HWTEST_F(HtmlConvertTestNg, HtmlTagsConversionTest, TestSize.Level1)
                              "<strong>Strong Text</strong>"
                              "<s>Strikethrough Text</s>"
                              "<em>Emphasized Text</em>"
+                             "<cite>Cited Text</cite>"
+                             "<dfn>Definition Text</dfn>"
                              "</body>"
                              "</html>";
 
@@ -2310,7 +2313,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlTagsConversionTest, TestSize.Level1)
     EXPECT_NE(dstSpan, nullptr);
 
     std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
-    EXPECT_EQ(items.size(), 9);
+    EXPECT_EQ(items.size(), 11);
 
     auto it = items.begin();
 
@@ -2346,6 +2349,151 @@ HWTEST_F(HtmlConvertTestNg, HtmlTagsConversionTest, TestSize.Level1)
     // Verify <em> tag
     ++it;
     EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    // Verify <cite> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    // Verify <dfn> tag
+    ++it;
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: HtmlHeadingInlineStyleOverrideTest
+ * @tc.desc: Verify h1 default style keeps bold while inline font-size and line-height override heading defaults.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlHeadingInlineStyleOverrideTest, TestSize.Level1)
+{
+    const std::string html = "<html><body><h1 style=\"font-size:12fp; line-height:14fp;\">Heading</h1></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+    ASSERT_FALSE(items.empty());
+
+    auto item = items.front();
+    ASSERT_NE(item, nullptr);
+    ASSERT_NE(item->fontStyle, nullptr);
+    ASSERT_NE(item->textLineStyle, nullptr);
+
+    EXPECT_TRUE(item->fontStyle->GetFontWeight().has_value());
+    EXPECT_EQ(item->fontStyle->GetFontWeight().value(), FontWeight::BOLD);
+    EXPECT_TRUE(item->fontStyle->GetFontSize().has_value());
+    EXPECT_EQ(item->fontStyle->GetFontSize().value(), Dimension(12, DimensionUnit::FP));
+    EXPECT_TRUE(item->textLineStyle->GetLineHeight().has_value());
+    EXPECT_EQ(item->textLineStyle->GetLineHeight().value(), Dimension(14, DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: HtmlHeadingFontWeightOverrideTest
+ * @tc.desc: Verify inline font-weight overrides h1 default bold style.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlHeadingFontWeightOverrideTest, TestSize.Level1)
+{
+    const std::string html = "<html><body><h1 style=\"font-weight:normal;\">Heading</h1></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+    ASSERT_FALSE(items.empty());
+
+    auto item = items.front();
+    ASSERT_NE(item, nullptr);
+    ASSERT_NE(item->fontStyle, nullptr);
+
+    EXPECT_TRUE(item->fontStyle->GetFontWeight().has_value());
+    EXPECT_EQ(item->fontStyle->GetFontWeight().value(), FontWeight::NORMAL);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagSingle
+ * @tc.desc: Verify single <small> tag sets fontSizeScale = 0.8
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagSingle, TestSize.Level1)
+{
+    const std::string html = "<html><body><small>small text</small></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 1);
+
+    auto it = items.begin();
+    EXPECT_TRUE((*it)->fontStyle->GetFontSizeScale().has_value());
+    EXPECT_NEAR((*it)->fontStyle->GetFontSizeScale().value(), 0.8, 0.001);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagNested
+ * @tc.desc: Verify nested <small> tags produce cumulative fontSizeScale (0.8^depth)
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagNested, TestSize.Level1)
+{
+    const std::string html = "<html><body>"
+                             "<small>outer<small>inner</small></small>"
+                             "</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+
+    // Find span items and verify fontSizeScale values
+    bool foundInner = false;
+    bool foundOuter = false;
+    for (auto& item : items) {
+        if (!item->fontStyle || !item->fontStyle->GetFontSizeScale().has_value()) {
+            continue;
+        }
+        double scale = item->fontStyle->GetFontSizeScale().value();
+        if (std::abs(scale - 0.64) < 0.001) {
+            foundInner = true;  // 0.8 * 0.8 = 0.64
+        } else if (std::abs(scale - 0.8) < 0.001) {
+            foundOuter = true;
+        }
+    }
+    EXPECT_TRUE(foundInner);
+    EXPECT_TRUE(foundOuter);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagWithBold
+ * @tc.desc: Verify <small> combined with <b> produces both fontSizeScale and bold weight
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithBold, TestSize.Level1)
+{
+    const std::string html = "<html><body><small><b>bold small</b></small></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    EXPECT_NE(dstSpan, nullptr);
+
+    std::list<RefPtr<NG::SpanItem>> items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 1);
+
+    // The text should have both bold weight and fontSizeScale
+    bool hasBold = false;
+    bool hasScale = false;
+    for (auto& item : items) {
+        if (item->fontStyle && item->fontStyle->GetFontWeight().has_value() &&
+            item->fontStyle->GetFontWeight().value() == FontWeight::BOLD) {
+            hasBold = true;
+        }
+        if (item->fontStyle && item->fontStyle->GetFontSizeScale().has_value() &&
+            std::abs(item->fontStyle->GetFontSizeScale().value() - 0.8) < 0.001) {
+            hasScale = true;
+        }
+    }
+    EXPECT_TRUE(hasBold);
+    EXPECT_TRUE(hasScale);
 }
 
 } // namespace OHOS::Ace::NG

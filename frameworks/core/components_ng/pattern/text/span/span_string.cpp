@@ -1383,6 +1383,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.variableFontWeight = spanItem->fontStyle->GetVariableFontWeight();
     font.enableVariableFontWeight = spanItem->fontStyle->GetEnableVariableFontWeight();
     font.enableDeviceFontWeightCategory = spanItem->fontStyle->GetEnableDeviceFontWeightCategory();
+    font.fontSizeScale = spanItem->fontStyle->GetFontSizeScale();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
