@@ -889,8 +889,13 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
 
-    float mainAxisSize = isPixelRoundAfterMeasure_ ? GetMainAxisSize(geometryNode->GetMarginPreFrameSize(), axis_) :
-        GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
+    float mainAxisSize = GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
+    if (isPixelRoundAfterMeasure_) {
+        float mainPreAxisSize = GetMainAxisSize(geometryNode->GetMarginPreFrameSize(), axis_);
+        if (NearEqual(mainAxisSize, round(mainPreAxisSize))) {
+            mainAxisSize = mainPreAxisSize;
+        }
+    }
     if (!placeItemWidth_.has_value()) {
         placeItemWidth_ = mainAxisSize;
     }
