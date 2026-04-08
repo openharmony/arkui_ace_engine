@@ -28,7 +28,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -1525,10 +1524,6 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pageRouterStack_.empty() && pipelineContext) {
-        pipelineContext->GetLoadCompleteManager()->StartCollect(target.url);
-    }
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
@@ -2265,7 +2260,6 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
     UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
-        LoadCompleteManagerStopCollect();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER,
@@ -2278,7 +2272,6 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         if (pageInfo.second) {
             // find page in stack, move position and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
-            LoadCompleteManagerStopCollect();
             if (!pageRouterStack_.empty()) {
                 NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
             }
@@ -2288,13 +2281,11 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP, false);
-            LoadCompleteManagerStopCollect();
             return;
         }
     }
     auto preStackSize = pageRouterStack_.size();
     LoadPage(GenerateNextPageId(), info, false, false);
-    LoadCompleteManagerStopCollect();
     if (pageRouterStack_.size() > preStackSize) {
         NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
     }
@@ -2790,13 +2781,6 @@ void PageRouterManager::FireNavigateChangeCallback(const std::string& name)
     navigationManager->FireNavigateChangeCallback(from, to, true);
 }
 
-void PageRouterManager::LoadCompleteManagerStopCollect()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->GetLoadCompleteManager()->StopCollect();
-    }
-}
 
 std::string PageRouterManager::GetBackTargetName()
 {

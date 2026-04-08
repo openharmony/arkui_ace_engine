@@ -85,7 +85,6 @@ using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uin
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 class NodeRenderStatusMonitor;
 class MagnifierController;
-class LoadCompleteManager;
 class PageInfo;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
@@ -975,8 +974,6 @@ public:
         return toolbarManager_;
     }
 
-    const std::shared_ptr<LoadCompleteManager>& GetLoadCompleteManager() const;
-
     void ChangeSensitiveNodes(bool flag) override
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
@@ -1733,7 +1730,6 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
-    std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;

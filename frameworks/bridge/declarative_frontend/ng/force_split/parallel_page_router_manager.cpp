@@ -24,7 +24,6 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/view_advanced_register.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -75,7 +74,6 @@ void ParallelPageRouterManager::LoadPage(
         return;
     }
     NotifyForceFullScreenChangeIfNeeded(target.url, context);
-    LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
@@ -138,7 +136,6 @@ void ParallelPageRouterManager::LoadPageExtender(
         return;
     }
     NotifyForceFullScreenChangeIfNeeded(target.url, context);
-    LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePageExtender(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
@@ -517,11 +514,4 @@ bool ParallelPageRouterManager::StartPop()
     return PageRouterManager::StartPop();
 }
 
-void ParallelPageRouterManager::LoadCompleteManagerStartCollect(const std::string& url)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pageRouterStack_.empty() && pipelineContext) {
-        pipelineContext->GetLoadCompleteManager()->StartCollect(url);
-    }
-}
 } // namespace OHOS::Ace::NG

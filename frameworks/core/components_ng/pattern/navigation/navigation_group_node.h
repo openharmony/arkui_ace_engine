@@ -424,8 +424,6 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
     bool HandleBackForHomeOrRelatedDestination();
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
     void ContentChangeReport(RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
 

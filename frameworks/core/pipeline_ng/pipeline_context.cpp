@@ -66,7 +66,6 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
@@ -217,7 +216,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
@@ -249,7 +247,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
@@ -276,7 +273,6 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
@@ -7678,11 +7674,6 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
 const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
-}
-
-const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
-{
-    return loadCompleteMgr_;
 }
 
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)

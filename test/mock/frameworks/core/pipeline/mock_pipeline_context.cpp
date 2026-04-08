@@ -35,7 +35,6 @@
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -219,11 +218,6 @@ std::string PipelineContext::GetWindowName() const
     return "";
 }
 
-const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
-{
-    return loadCompleteMgr_;
-}
-
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
@@ -291,9 +285,6 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
-    }
-    if (!loadCompleteMgr_) {
-        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
     if (!contentChangeMgr_) {
         contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
