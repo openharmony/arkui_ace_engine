@@ -428,9 +428,7 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverNode013, TestSize.Level1)
     touchEvent.SetType(TouchType::HOVER_MOVE);
 
     TouchTestResult testResult;
-
     eventManager->UpdatePenHoverNode(touchEvent, testResult);
-
     EXPECT_FALSE(eventManager->lastPenHoverResultsMap_.empty());
     EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
 }
@@ -450,9 +448,7 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode014, TestSize.Level1)
     touchEvent.SetOriginalId(eventId).SetId(eventId);
 
     TouchTestResult testResult;
-
     eventManager->UpdatePenHoverMoveNode(touchEvent, testResult);
-
     EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_[eventId].empty());
 }
 
@@ -473,9 +469,7 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode015, TestSize.Level1)
     TouchTestResult testResult;
     auto mockTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
     testResult.push_back(mockTarget);
-
     eventManager->UpdatePenHoverMoveNode(touchEvent, testResult);
-
     EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_[eventId].empty());
 }
 
@@ -495,9 +489,7 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG016, TestSize.Level1)
 
     eventManager->lastPenHoverResultsMap_.clear();
     eventManager->curPenHoverResultsMap_.clear();
-
     eventManager->DispatchPenHoverEventNG(touchEvent);
-
     EXPECT_TRUE(eventManager->lastPenHoverDispatchLength_ == 0);
 }
 
@@ -528,9 +520,7 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG017, TestSize.Level1)
         hoverInfo.SetStopPropagation(false);
         ++callbackCount;
     };
-
     eventManager->DispatchPenHoverEventNG(touchEvent);
-
     EXPECT_EQ(callbackCount, 1);
 }
 
@@ -561,9 +551,7 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG018, TestSize.Level1)
         hoverInfo.SetStopPropagation(false);
         ++callbackCount;
     };
-
     eventManager->DispatchPenHoverEventNG(touchEvent);
-
     EXPECT_EQ(callbackCount, 1);
 }
 
@@ -580,11 +568,8 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG019, TestSize.Level1)
     TouchEvent touchEvent;
     int32_t eventId = 1;
     touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
-
     eventManager->curPenHoverMoveResultsMap_.clear();
-
     eventManager->DispatchPenHoverMoveEventNG(touchEvent);
-
     EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
 
@@ -609,11 +594,8 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG020, TestSize.Level1)
         return false;
     };
     hoverEventTarget->SetPenHoverMoveCallback(onHoverMove);
-
     eventManager->curPenHoverMoveResultsMap_[eventId].push_back(hoverEventTarget);
-
     eventManager->DispatchPenHoverMoveEventNG(touchEvent);
-
     EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
 } // namespace OHOS::Ace::NG
