@@ -1652,7 +1652,6 @@ HWTEST_F(EventManagerTestNg, UpdateDragInfo002, TestSize.Level1)
  
     TouchEvent touchEvent;
     touchEvent.type = TouchType::PULL_IN_WINDOW;
- 
     eventManager->UpdateDragInfo(touchEvent);
     EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
 }
@@ -1669,7 +1668,6 @@ HWTEST_F(EventManagerTestNg, UpdateDragInfo003, TestSize.Level1)
  
     TouchEvent touchEvent;
     touchEvent.type = TouchType::PULL_OUT_WINDOW;
- 
     eventManager->UpdateDragInfo(touchEvent);
     EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
 }
@@ -1686,7 +1684,6 @@ HWTEST_F(EventManagerTestNg, UpdateDragInfo004, TestSize.Level1)
  
     TouchEvent touchEvent;
     touchEvent.type = TouchType::PULL_UP;
- 
     eventManager->UpdateDragInfo(touchEvent);
     EXPECT_EQ(touchEvent.type, TouchType::UP);
 }
@@ -1703,7 +1700,6 @@ HWTEST_F(EventManagerTestNg, UpdateDragInfo005, TestSize.Level1)
  
     TouchEvent touchEvent;
     touchEvent.type = TouchType::UP;
- 
     eventManager->UpdateDragInfo(touchEvent);
     EXPECT_EQ(touchEvent.type, TouchType::UP);
 }
@@ -1725,7 +1721,6 @@ HWTEST_F(EventManagerTestNg, FalsifyCancelEventAndDispatch001, TestSize.Level1)
     touchEvent.id = 0;
     touchEvent.originalId = 0;
     eventManager->lastTouchEvent_ = touchEvent;
- 
     eventManager->FalsifyCancelEventAndDispatch(touchEvent, true);
 }
  
@@ -1748,7 +1743,6 @@ HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers001, TestSize.Level1)
  
     ResponseLinkResult responseLinkResult;
     bool isPostEvent = false;
- 
     eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
 }
  
@@ -1770,7 +1764,6 @@ HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers002, TestSize.Level1)
  
     ResponseLinkResult responseLinkResult;
     bool isPostEvent = true;
- 
     eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
 }
  
@@ -1839,7 +1832,6 @@ HWTEST_F(EventManagerTestNg, FlushTouchEventsBegin001, TestSize.Level1)
     TouchEvent event;
     event.id = 0;
     touchEvents.push_back(event);
- 
     eventManager->FlushTouchEventsBegin(touchEvents);
 }
  
@@ -1868,7 +1860,6 @@ HWTEST_F(EventManagerTestNg, FlushTouchEventsEnd001, TestSize.Level1)
     historyEvent.id = 0;
     event.history.push_back(historyEvent);
     touchEvents.push_back(event);
- 
     eventManager->FlushTouchEventsEnd(touchEvents);
 }
  
@@ -1927,9 +1918,7 @@ HWTEST_F(EventManagerTestNg, CleanResults001, TestSize.Level1)
     eventManager->touchTestResults_[0].emplace_back(panRecognizer);
     eventManager->postEventTouchTestResults_[0].emplace_back(panRecognizer);
     eventManager->axisTouchTestResults_[0].emplace_back(panRecognizer);
- 
     eventManager->ClearResults();
- 
     EXPECT_TRUE(eventManager->touchTestResults_.empty());
     EXPECT_TRUE(eventManager->postEventTouchTestResults_.empty());
     EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
