@@ -953,11 +953,6 @@ public:
 
     double CalcPageWidth(double rootWidth) const override;
 
-    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
-    {
-        return formVisibleMgr_;
-    }
-
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
 
     const RefPtr<FormEventManager>& GetFormEventManager() const;
