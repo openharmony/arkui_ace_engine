@@ -3728,7 +3728,6 @@ test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkui_framework_xnode
 test/unittest/core/property/templates_parser_test_ng.cpp @arkuiscroll
-test/unittest/core/manager/load_complete_manager_test_ng.cpp @arkui_framework_xnode
 test/unittest/core/property/accessibility_property_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_test_three_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_testtwo_ng.cpp @ArkUI_ability_group
@@ -4205,8 +4204,6 @@ frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp @Ark
 frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.h @ArkUI_Event
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp @form_framework
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.h @form_framework
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.cpp @arkui_framework_xnode
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.h @arkui_framework_xnode
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp @arkuiscroll
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h @arkuiscroll
 frameworks/core/components_ng/pattern/arc_scroll/ @arkuiscroll

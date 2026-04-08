@@ -1006,9 +1006,6 @@ private:
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
 
-    void LoadCompleteManagerStartCollect(const std::string& url) override;
-    void LoadCompleteManagerStopCollect() override;
-
     void InitForceSplitManager();
 
     int32_t instanceId_ = 0;

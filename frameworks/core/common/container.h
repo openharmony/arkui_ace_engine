@@ -833,8 +833,6 @@ public:
         return extensionHostParams_;
     }
 
-    virtual void LoadCompleteManagerStartCollect(const std::string& url) {};
-    virtual void LoadCompleteManagerStopCollect() {};
     virtual void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
     virtual void TerminateUIExtensionInner() {}
 
