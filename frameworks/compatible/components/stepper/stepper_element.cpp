@@ -228,7 +228,7 @@ bool StepperElement::OnKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::UP && keyEvent.action != KeyAction::CANCEL) {
         return false;
     }
 

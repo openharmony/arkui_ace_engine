@@ -452,6 +452,7 @@ enum class KeyAction : int32_t {
     UP = 1,
     LONG_PRESS = 2,
     CLICK = 3,
+    CANCEL = 4,
 };
 
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
@@ -589,6 +590,7 @@ struct KeyEvent final : public NonPointerEvent {
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
     bool isPreIme = false;
+    bool isFalsifyCancel = false;
     bool isRedispatch = false;
     bool numLock = false;
     bool scrollLock = false;
@@ -640,6 +642,10 @@ public:
     KeyAction GetKeyType() const
     {
         return keyType_;
+    }
+    int32_t GetJsKeyType() const
+    {
+        return keyType_ == KeyAction::CANCEL ? static_cast<int32_t>(KeyAction::CLICK) : static_cast<int32_t>(keyType_);
     }
     KeyCode GetKeyCode() const
     {

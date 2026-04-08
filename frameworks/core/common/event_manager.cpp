@@ -2320,6 +2320,7 @@ EventManager::EventManager()
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    inputMonitorManager_ = AceType::MakeRefPtr<InputEventMonitorManager>();
     InitCoastingAxisEventGenerator();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
@@ -2924,7 +2925,15 @@ void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoi
 bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
 {
     if (event.eventType == UIInputEventType::KEY) {
-        return OnKeyEvent(static_cast<const KeyEvent&>(event));
+        const auto& keyEvent = static_cast<const KeyEvent&>(event);
+        KeyEvent interceptEvent(keyEvent);
+        if (inputMonitorManager_ && inputMonitorManager_->ProcessKeyEvent(interceptEvent)) {
+            if (interceptEvent.isFalsifyCancel) {
+                return OnKeyEvent(interceptEvent);
+            }
+            return true;
+        }
+        return OnKeyEvent(keyEvent);
     } else if (event.eventType == UIInputEventType::FOCUS_AXIS) {
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     } else if (event.eventType == UIInputEventType::CROWN) {

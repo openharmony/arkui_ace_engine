@@ -971,6 +971,18 @@ class UIContext {
         });
     }
 
+    addLocalInputEventMonitor(eventMask, listener) {
+        return withInstanceId(this.instanceId_, () => {
+            return getUINativeModule().common.addLocalInputEventMonitor(eventMask, listener);
+        });
+    }
+
+    removeLocalInputEventMonitor(monitor) {
+        withInstanceId(this.instanceId_, () => {
+            getUINativeModule().common.removeLocalInputEventMonitor(monitor);
+        });
+    }
+
     getPageRootNode() {
         if (!this.isAvailable()) {
             throw new BusinessError(120007, 'The UIContext is not available');

@@ -564,6 +564,10 @@ typedef struct IndicatorComponentControllerPeer* Ark_IndicatorComponentControlle
 typedef struct Opt_IndicatorComponentController Opt_IndicatorComponentController;
 typedef struct Ark_InnerGestureTriggerInfo Ark_InnerGestureTriggerInfo;
 typedef struct Opt_InnerGestureTriggerInfo Opt_InnerGestureTriggerInfo;
+typedef struct Ark_InputEventInterceptResult Ark_InputEventInterceptResult;
+typedef struct Opt_InputEventInterceptResult Opt_InputEventInterceptResult;
+typedef struct Ark_InputEventMonitor Ark_InputEventMonitor;
+typedef struct Opt_InputEventMonitor Opt_InputEventMonitor;
 typedef struct InputMethodExtraConfigPeer InputMethodExtraConfigPeer;
 typedef struct InputMethodExtraConfigPeer* Ark_InputMethodExtraConfig;
 typedef struct Opt_InputMethodExtraConfig Opt_InputMethodExtraConfig;
@@ -773,6 +777,9 @@ typedef struct Opt_PulseSymbolEffect Opt_PulseSymbolEffect;
 typedef struct RadialGradientStylePeer RadialGradientStylePeer;
 typedef struct RadialGradientStylePeer* Ark_RadialGradientStyle;
 typedef struct Opt_RadialGradientStyle Opt_RadialGradientStyle;
+typedef struct RawInputEventWrapperPeer RawInputEventWrapperPeer;
+typedef struct RawInputEventWrapperPeer* Ark_RawInputEventWrapper;
+typedef struct Opt_RawInputEventWrapper Opt_RawInputEventWrapper;
 typedef struct Ark_RectResult Ark_RectResult;
 typedef struct Opt_RectResult Opt_RectResult;
 typedef struct RectShapePeer RectShapePeer;
@@ -1505,6 +1512,8 @@ typedef struct Callback_I32_Tuple_I32_I32_I32_I32 Callback_I32_Tuple_I32_I32_I32
 typedef struct Opt_Callback_I32_Tuple_I32_I32_I32_I32 Opt_Callback_I32_Tuple_I32_I32_I32_I32;
 typedef struct Callback_IMEClient_Void Callback_IMEClient_Void;
 typedef struct Opt_Callback_IMEClient_Void Opt_Callback_IMEClient_Void;
+typedef struct Callback_InputEventInterceptResult_Void Callback_InputEventInterceptResult_Void;
+typedef struct Opt_Callback_InputEventInterceptResult_Void Opt_Callback_InputEventInterceptResult_Void;
 typedef struct Callback_InsertValue_Boolean Callback_InsertValue_Boolean;
 typedef struct Opt_Callback_InsertValue_Boolean Opt_Callback_InsertValue_Boolean;
 typedef struct Callback_InsertValue_Void Callback_InsertValue_Void;
@@ -1803,6 +1812,8 @@ typedef struct ImageOnCompleteCallback ImageOnCompleteCallback;
 typedef struct Opt_ImageOnCompleteCallback Opt_ImageOnCompleteCallback;
 typedef struct Initializer Initializer;
 typedef struct Opt_Initializer Opt_Initializer;
+typedef struct InputEventListener InputEventListener;
+typedef struct Opt_InputEventListener Opt_InputEventListener;
 typedef struct InterceptionCallback InterceptionCallback;
 typedef struct Opt_InterceptionCallback Opt_InterceptionCallback;
 typedef struct InterceptionModeCallback InterceptionModeCallback;
@@ -3595,6 +3606,8 @@ typedef struct Ark_Union_Length_GutterOption Ark_Union_Length_GutterOption;
 typedef struct Opt_Union_Length_GutterOption Opt_Union_Length_GutterOption;
 typedef struct Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
 typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_Union_MouseEvent_TouchEventProxy_KeyEvent Ark_Union_MouseEvent_TouchEventProxy_KeyEvent;
+typedef struct Opt_Union_MouseEvent_TouchEventProxy_KeyEvent Opt_Union_MouseEvent_TouchEventProxy_KeyEvent;
 typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle Ark_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct Opt_Union_PickerTextStyle_TextPickerTextStyle Opt_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct Ark_CalendarDialogOptions Ark_CalendarDialogOptions;
@@ -5358,6 +5371,33 @@ typedef struct Opt_IndexerAlign {
     Ark_Tag tag;
     Ark_IndexerAlign value;
 } Opt_IndexerAlign;
+typedef enum Ark_InputEventInterceptAction {
+    ARK_INPUT_EVENT_INTERCEPT_ACTION_CONTINUE = 0,
+    ARK_INPUT_EVENT_INTERCEPT_ACTION_BLOCK = 1,
+} Ark_InputEventInterceptAction;
+typedef struct Opt_InputEventInterceptAction {
+    Ark_Tag tag;
+    Ark_InputEventInterceptAction value;
+} Opt_InputEventInterceptAction;
+typedef enum Ark_InputEventSubTypeMask {
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DOWN = 1 << 0,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_UP = 1 << 1,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DOWN = 1 << 2,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_UP = 1 << 3,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DOWN = 1 << 4,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_UP = 1 << 5,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DRAGGING = 1 << 6,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DRAGGING = 1 << 7,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DRAGGING = 1 << 8,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_DOWN = 1 << 9,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_UP = 1 << 10,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_DOWN = 1 << 11,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_UP = 1 << 12,
+} Ark_InputEventSubTypeMask;
+typedef struct Opt_InputEventSubTypeMask {
+    Ark_Tag tag;
+    Ark_InputEventSubTypeMask value;
+} Opt_InputEventSubTypeMask;
 typedef enum Ark_InputType {
     ARK_INPUT_TYPE_NORMAL = 0,
     ARK_INPUT_TYPE_NUMBER = 2,
@@ -5463,6 +5503,7 @@ typedef struct Opt_KeySource {
 typedef enum Ark_KeyType {
     ARK_KEY_TYPE_DOWN = 0,
     ARK_KEY_TYPE_UP = 1,
+    ARK_KEY_TYPE_CANCEL = 3,
 } Ark_KeyType;
 typedef struct Opt_KeyType {
     Ark_Tag tag;
@@ -8404,6 +8445,22 @@ typedef struct Opt_InnerGestureTriggerInfo {
     Ark_Tag tag;
     Ark_InnerGestureTriggerInfo value;
 } Opt_InnerGestureTriggerInfo;
+typedef struct Ark_InputEventInterceptResult {
+    /* kind: Interface */
+    Ark_InputEventInterceptAction action;
+} Ark_InputEventInterceptResult;
+typedef struct Opt_InputEventInterceptResult {
+    Ark_Tag tag;
+    Ark_InputEventInterceptResult value;
+} Opt_InputEventInterceptResult;
+typedef struct Ark_InputEventMonitor {
+    /* kind: Interface */
+    void *handle;
+} Ark_InputEventMonitor;
+typedef struct Opt_InputEventMonitor {
+    Ark_Tag tag;
+    Ark_InputEventMonitor value;
+} Opt_InputEventMonitor;
 typedef struct Opt_InputMethodExtraConfig {
     Ark_Tag tag;
     Ark_InputMethodExtraConfig value;
@@ -8917,6 +8974,10 @@ typedef struct Opt_RadialGradientStyle {
     Ark_Tag tag;
     Ark_RadialGradientStyle value;
 } Opt_RadialGradientStyle;
+typedef struct Opt_RawInputEventWrapper {
+    Ark_Tag tag;
+    Ark_RawInputEventWrapper value;
+} Opt_RawInputEventWrapper;
 typedef struct Ark_RectResult {
     /* kind: Interface */
     Ark_Float64 x;
@@ -11691,6 +11752,16 @@ typedef struct Opt_Callback_IMEClient_Void {
     Ark_Tag tag;
     Callback_IMEClient_Void value;
 } Opt_Callback_IMEClient_Void;
+typedef struct Callback_InputEventInterceptResult_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value);
+} Callback_InputEventInterceptResult_Void;
+typedef struct Opt_Callback_InputEventInterceptResult_Void {
+    Ark_Tag tag;
+    Callback_InputEventInterceptResult_Void value;
+} Opt_Callback_InputEventInterceptResult_Void;
 typedef struct Callback_InsertValue_Boolean {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13181,6 +13252,16 @@ typedef struct Opt_Initializer {
     Ark_Tag tag;
     Initializer value;
 } Opt_Initializer;
+typedef struct InputEventListener {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_RawInputEventWrapper event, const Callback_InputEventInterceptResult_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RawInputEventWrapper event, const Callback_InputEventInterceptResult_Void continuation);
+} InputEventListener;
+typedef struct Opt_InputEventListener {
+    Ark_Tag tag;
+    InputEventListener value;
+} Opt_InputEventListener;
 typedef struct InterceptionCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -23201,6 +23282,19 @@ typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions
     Ark_Tag tag;
     Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions value;
 } Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_Union_MouseEvent_TouchEventProxy_KeyEvent {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_MouseEvent value0;
+        Ark_TouchEventProxy value1;
+        Ark_KeyEvent value2;
+    };
+} Ark_Union_MouseEvent_TouchEventProxy_KeyEvent;
+typedef struct Opt_Union_MouseEvent_TouchEventProxy_KeyEvent {
+    Ark_Tag tag;
+    Ark_Union_MouseEvent_TouchEventProxy_KeyEvent value;
+} Opt_Union_MouseEvent_TouchEventProxy_KeyEvent;
 typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -29330,6 +29424,9 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
+    Ark_InputEventMonitor (*addLocalInputEventMonitor)(Ark_Int32 eventMask,
+                                                       const InputEventListener* listener);
+    void (*removeLocalInputEventMonitor)(const Ark_InputEventMonitor* monitor);
     void (*enableEventPassthrough)(const Opt_Boolean* enabled,
                                    Ark_RawInputEventType eventType);
     void (*setCustomCursor)(Ark_image_PixelMap value,
@@ -30261,6 +30358,18 @@ typedef struct GENERATED_ArkUIRadialGradientStyleAccessor {
     void (*setOptions)(Ark_RadialGradientStyle peer,
                        const Ark_RadialGradientOptions* options);
 } GENERATED_ArkUIRadialGradientStyleAccessor;
+
+typedef struct GENERATED_ArkUIRawInputEventWrapperAccessor {
+    void (*destroyPeer)(Ark_RawInputEventWrapper peer);
+    Ark_RawInputEventWrapper (*construct)(const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent* event);
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Boolean (*isMouseEvent)(Ark_RawInputEventWrapper peer);
+    Ark_Boolean (*isTouchEvent)(Ark_RawInputEventWrapper peer);
+    Ark_Boolean (*isKeyEvent)(Ark_RawInputEventWrapper peer);
+    Opt_MouseEvent (*asMouseEvent)(Ark_RawInputEventWrapper peer);
+    Opt_TouchEventProxy (*asTouchEvent)(Ark_RawInputEventWrapper peer);
+    Opt_KeyEvent (*asKeyEvent)(Ark_RawInputEventWrapper peer);
+} GENERATED_ArkUIRawInputEventWrapperAccessor;
 
 typedef struct GENERATED_ArkUIRenderingContextSettingsAccessor {
     void (*destroyPeer)(Ark_RenderingContextSettings peer);
@@ -31847,6 +31956,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPromptActionExtenderAccessor* (*getPromptActionExtenderAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUIRadialGradientStyleAccessor* (*getRadialGradientStyleAccessor)();
+    const GENERATED_ArkUIRawInputEventWrapperAccessor* (*getRawInputEventWrapperAccessor)();
     const GENERATED_ArkUIRenderingContextSettingsAccessor* (*getRenderingContextSettingsAccessor)();
     const GENERATED_ArkUIRenderNodeExtenderAccessor* (*getRenderNodeExtenderAccessor)();
     const GENERATED_ArkUIRenderServiceNodeAccessor* (*getRenderServiceNodeAccessor)();

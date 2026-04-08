@@ -7814,7 +7814,8 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 {
     bool hasKeyShift = keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT);
     auto action = keyEvent.action;
-    bool isShiftPressed = hasKeyShift && (action == KeyAction::DOWN || action == KeyAction::UP);
+    bool isShiftPressed = hasKeyShift &&
+        (action == KeyAction::DOWN || action == KeyAction::UP || action == KeyAction::CANCEL);
     if (isShiftPressed != shiftFlag_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
         shiftFlag_ = isShiftPressed;

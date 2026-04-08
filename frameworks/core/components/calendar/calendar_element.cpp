@@ -293,7 +293,7 @@ void CalendarMonthElement::Update()
 
 bool CalendarMonthElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::UP && keyEvent.action != KeyAction::CANCEL) {
         return false;
     }
 

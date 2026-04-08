@@ -61,6 +61,7 @@ import { int32, int64 } from "@koalaui/common";
 import { KPointer, KSerializerBuffer, KBuffer, DeserializerBase, nullptr, wrapSystemCallback } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { InputEventListener, InputEventMonitor } from 'arkui/component/common';
 import { TextLayoutOptions, Paragraph, StyledString, ContextMenu, FrameNodeExtender, AnimationExtender, AlertDialog, ActionSheet, DialogExtender } from 'arkui/framework';
 import { InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, UIContextGetInfo, SystemOps } from 'arkui/component/idlize';
 import { BusinessError } from "@ohos.base"
@@ -738,6 +739,18 @@ export class UIContext {
         // IUIContext.setCustomKeyboardContinueFeature(feature);
         // instructive change end
         ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    public addLocalInputEventMonitor(eventMask: int32, listener: InputEventListener): InputEventMonitor {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const monitor = IUIContext.addLocalInputEventMonitor(eventMask as int32, listener);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return monitor;
+    }
+
+    public removeLocalInputEventMonitor(monitor: InputEventMonitor): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.removeLocalInputEventMonitor(monitor);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
     public getMaxFontScale() : number {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
