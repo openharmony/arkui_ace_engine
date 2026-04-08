@@ -844,6 +844,11 @@ void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& ti
             tipsParam->SetAnchorType(type);
         }
     }
+    auto systemMaterialValue = tipsObj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        tipsParam->SetSystemMaterial(systemUiMaterial->Copy());
+    }
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
     tipsParam->SetShowInSubWindow(true);
