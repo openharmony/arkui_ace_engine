@@ -11,13 +11,4 @@ ForceSplitManager::ForceSplitManager()
 {
 }
 
-float ForceSplitManager::GetSplitRatio() const
-{
-    return splitRatio_;
-}
-
-bool ForceSplitManager::IsRouterForceSplit() const
-{
-    return isRouter_;
-}
 } // namespace OHOS::Ace::NG
