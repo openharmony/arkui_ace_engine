@@ -535,13 +535,29 @@ export class TipsDialog extends ViewPU {
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
                                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                    WithTheme.create({
-                                                        theme: this.theme,
-                                                        colorMode: this.themeColorMode
-                                                    });
-                                                }, WithTheme);
-                                                this.checkBoxPart.bind(this)();
-                                                WithTheme.pop();
+                                                    Column.create();
+                                                }, Column);
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    If.create();
+                                                    if (this.checkTips !== null && this.checkTips !== undefined) {
+                                                        this.ifElseBranchUpdateFunction(0, () => {
+                                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                WithTheme.create({
+                                                                    theme: this.theme,
+                                                                    colorMode: this.themeColorMode
+                                                                });
+                                                            }, WithTheme);
+                                                            this.checkBoxPart.bind(this)();
+                                                            WithTheme.pop();
+                                                        });
+                                                    }
+                                                    else {
+                                                        this.ifElseBranchUpdateFunction(1, () => {
+                                                        });
+                                                    }
+                                                }, If);
+                                                If.pop();
+                                                Column.pop();
                                             });
                                         }
                                     }, If);
@@ -591,13 +607,29 @@ export class TipsDialog extends ViewPU {
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        WithTheme.create({
-                                                            theme: this.theme,
-                                                            colorMode: this.themeColorMode
-                                                        });
-                                                    }, WithTheme);
-                                                    this.checkBoxPart.bind(this)();
-                                                    WithTheme.pop();
+                                                        Column.create();
+                                                    }, Column);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        If.create();
+                                                        if (this.checkTips !== null && this.checkTips !== undefined) {
+                                                            this.ifElseBranchUpdateFunction(0, () => {
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    WithTheme.create({
+                                                                        theme: this.theme,
+                                                                        colorMode: this.themeColorMode
+                                                                    });
+                                                                }, WithTheme);
+                                                                this.checkBoxPart.bind(this)();
+                                                                WithTheme.pop();
+                                                            });
+                                                        }
+                                                        else {
+                                                            this.ifElseBranchUpdateFunction(1, () => {
+                                                            });
+                                                        }
+                                                    }, If);
+                                                    If.pop();
+                                                    Column.pop();
                                                 });
                                             }
                                         }, If);
@@ -669,7 +701,7 @@ export class TipsDialog extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.checkTips !== null) {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Checkbox.create({ name: '', group: 'checkboxGroup' });
