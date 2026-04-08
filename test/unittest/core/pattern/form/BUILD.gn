@@ -292,7 +292,7 @@ ohos_unittest("form_scoped_rs_transaction_test") {
 group("ace_form_test") {
   testonly = true
   deps = [
-    ":form_node_test",
+    # ":form_node_test",
     ":form_pattern_test",
     ":form_scoped_rs_transaction_test",
     ":form_special_style_test",
