@@ -62,7 +62,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     public _Text_textCase_0_0value?: TextCase | undefined
     public _Text_baselineOffset_0_0value?: double | string | undefined
     public _Text_copyOption_0_0value?: CopyOptions | undefined
-    public _Text_draggable_0_0value?: boolean | undefined
+    // instructive change start
+    public _Text_draggable_0_0value?: boolean | undefined = undefined
+    // instructive change end
     public _Text_textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
     public _Text_heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     public _Text_textIndent_0_0value?: Length | undefined
