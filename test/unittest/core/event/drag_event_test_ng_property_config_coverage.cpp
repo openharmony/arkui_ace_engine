@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
+#include "core/common/event_manager.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #include "core/components_ng/base/inspector.h"

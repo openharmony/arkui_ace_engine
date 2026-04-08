@@ -161,6 +161,7 @@ export class Scroller implements MaterializedBase {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
         const returnResult: OffsetResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private offset_serialize(): OffsetResult | undefined {
@@ -172,6 +173,7 @@ export class Scroller implements MaterializedBase {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
         const returnResult: OffsetResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private scrollToIndex_serialize(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
@@ -239,6 +241,7 @@ export class Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getItemIndex_serialize(x: double, y: double): int32 {
@@ -249,6 +252,7 @@ export class Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeResult = SizeResult_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFrameNode_serialize(): FrameNode | undefined {
@@ -260,6 +264,7 @@ export class Scroller implements MaterializedBase {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
         const returnResult: FrameNode | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }

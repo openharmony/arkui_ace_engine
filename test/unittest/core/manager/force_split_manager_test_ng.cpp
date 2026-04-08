@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "base/utils/system_properties.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"

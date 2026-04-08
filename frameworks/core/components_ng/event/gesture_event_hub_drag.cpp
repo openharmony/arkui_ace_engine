@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/vibrator/vibrator_utils.h"

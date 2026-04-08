@@ -16,8 +16,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -184,6 +189,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
       safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -215,6 +221,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
       safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -243,6 +250,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 PipelineContext::PipelineContext()
     : safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -2090,8 +2098,9 @@ void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId, in
     if (frontend) {
         auto it = onDrawChildrenInfoMap_.find(parentId);
         if (it != onDrawChildrenInfoMap_.end()) {
-            frontend->OnDrawChildrenCompleted(componentId, it->second);
+            auto childIds = std::move(it->second);
             onDrawChildrenInfoMap_.erase(it);
+            frontend->OnDrawChildrenCompleted(componentId, childIds);
         }
     }
 }
@@ -2195,7 +2204,7 @@ void PipelineContext::SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId
 {
     auto iter = onDrawChildrenInfoMap_.find(parentId);
     if (iter != onDrawChildrenInfoMap_.end()) {
-        auto childIds = iter->second;
+        const auto& childIds = iter->second;
         if (std::find(childIds.begin(), childIds.end(), childId) == childIds.end()) {
             iter->second.push_back(childId);
         }
@@ -7758,4 +7767,80 @@ void PipelineContext::MarkLpxDirtyNodes()
         node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+bool PipelineContext::IsKeyInPressed(KeyCode tarCode) const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->IsKeyInPressed(tarCode);
+}
+
+bool PipelineContext::IsTabJustTriggerOnKeyEvent() const
+{
+    return eventManager_->IsTabJustTriggerOnKeyEvent();
+}
+
+bool PipelineContext::SetMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->SetMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode()
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode();
+    }
+    return false;
+}
+
+void PipelineContext::InitManagers()
+{
+    forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    formEventMgr_ = MakeRefPtr<FormEventManager>();
+    formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    recycleManager_ = std::make_unique<RecycleManager>();
+}
+
+const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
+{
+    return forceSplitMgr_;
+}
+
+const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
+{
+    return formVisibleMgr_;
+}
+
+const RefPtr<FormEventManager>& PipelineContext::GetFormEventManager() const
+{
+    return formEventMgr_;
+}
+
+const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
+{
+    return formGestureMgr_;
+}
+
+const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
+{
+    return recycleManager_;
+}
+
 } // namespace OHOS::Ace::NG

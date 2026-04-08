@@ -14,6 +14,7 @@
  */
 
 #include "parallel_page_router_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "bridge/declarative_frontend/ng/force_split/parallel_page_router_manager.h"
 
 #include <vector>

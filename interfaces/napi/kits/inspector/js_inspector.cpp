@@ -147,7 +147,8 @@ void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbLi
     napi_close_handle_scope(env, scope);
 }
 
-void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbList, napi_value arg)
+void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbList,
+    const std::vector<int32_t>& childIds)
 {
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
@@ -155,9 +156,16 @@ void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbLi
         return;
     }
 
-    napi_value arg0 = arg;
-    if (arg0 == nullptr) {
+    napi_value childIdsArray = nullptr;
+    napi_create_array_with_length(env, childIds.size(), &childIdsArray);
+    if (childIdsArray == nullptr) {
+        napi_close_handle_scope(env, scope);
         return;
+    }
+    for (size_t index = 0; index < childIds.size(); ++index) {
+        napi_value element = nullptr;
+        napi_create_int32(env, childIds[index], &element);
+        napi_set_element(env, childIdsArray, index, element);
     }
 
     std::list<napi_value> cbs;
@@ -170,7 +178,7 @@ void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbLi
     }
     for (auto& cb : cbs) {
         napi_value result = nullptr;
-        napi_call_function(env, nullptr, cb, 1, &arg0, &result);
+        napi_call_function(env, nullptr, cb, 1, &childIdsArray, &result);
     }
     napi_close_handle_scope(env, scope);
 }
@@ -386,7 +394,8 @@ void ComponentObserver::FunctionOnDrawChildren(napi_env& env, napi_value result)
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseDrawChildrenArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 1 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
+        NAPI_ASSERT_BASE(env, (argc == 1 && thisVar != nullptr && cb != nullptr), "Invalid arguments",
+            (napi_close_handle_scope(env, scope), nullptr));
         ComponentObserver* observer = GetObserver(env, thisVar);
         if (!observer) {
             napi_close_handle_scope(env, scope);
@@ -658,14 +667,7 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     observer->drawChildrenEvent_ =
         AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback), std::move(drawChildrenCallbackCounter));
     auto drawChildrenWithParameterCallback = [observer, env](std::vector<int32_t> childIds) {
-        napi_value childIdsArray = nullptr;
-        napi_create_array_with_length(env, childIds.size(), &childIdsArray);
-        for (size_t index = 0; index < childIds.size(); ++index) {
-            napi_value element = nullptr;
-            napi_create_int32(env, childIds[index], &element);
-            napi_set_element(env, childIdsArray, index, element);
-        }
-        observer->callUserFunction(env, observer->cbDrawChildrenWithParameterList_, childIdsArray);
+        observer->callUserFunction(env, observer->cbDrawChildrenWithParameterList_, childIds);
     };
     auto drawChildrenWithParameterCallbackCounter =
         [observer]() -> bool { return observer->cbDrawChildrenWithParameterList_.empty(); };

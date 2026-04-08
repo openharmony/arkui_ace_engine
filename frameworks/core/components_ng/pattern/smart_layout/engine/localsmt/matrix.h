@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_MATRIX_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_MATRIX_H
 
-#pragma once
+
 #include <iostream>
 #include <map>
 #include <vector>
@@ -40,3 +42,5 @@ bool ContainsShortRow(const std::vector<std::vector<RationNum>>& matrix);
 
 bool IsAllZeroRow(const std::vector<RationNum>& row);
 
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_MATRIX_H

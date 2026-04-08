@@ -541,4 +541,37 @@ HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest003, TestSize.Level1
     pattern_->RunAnimatorByStatus(12);
     EXPECT_EQ(pattern_->nowImageIndex_, 12);
 }
+
+/**
+ * @tc.name: ImageAnimatorPatternTestNg_OnThemeScopeUpdate001
+ * @tc.desc: Test OnThemeScopeUpdate with displaying children updates LocalColorMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator with displaying child.
+     * @tc.expected: step1. child exists with ImageSourceInfo.
+     */
+    CreateImageAnimator(3);
+
+    auto displayingImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(displayingImageNode, nullptr);
+
+    auto childLayoutProperty = displayingImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+
+    frameNode_->AddChild(displayingImageNode, -1);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+
+    /**
+     * @tc.steps: step2. call OnThemeScopeUpdate.
+     * @tc.expected: step2. child ImageSourceInfo updated with LocalColorMode.
+     */
+    int32_t themeScopeId = 100;
+    auto result = pattern_->OnThemeScopeUpdate(themeScopeId);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+}
 } // namespace OHOS::Ace::NG

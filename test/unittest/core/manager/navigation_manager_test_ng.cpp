@@ -22,6 +22,7 @@
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_container.h"

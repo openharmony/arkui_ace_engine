@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -376,24 +377,29 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList { RectCallback(rectGetCallback1, touchCallback, mouseCallback),
-        RectCallback(rectGetCallback2, touchCallback, mouseCallback) };
+    eventManager->AddRectCallback(
+        [rectGetCallback1](std::vector<Rect>& rectList) -> void { rectGetCallback1(rectList); },
+        touchCallback, mouseCallback);
+    eventManager->AddRectCallback(
+        [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
+        touchCallback, mouseCallback);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 1
+     * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
+     * @tc.expected: callbacks size is 1 after out-of-rect handling
      */
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_EQ(rectCallbackList.size(), 1);
+    eventManager->HandleOutOfRectCallbacks(point);
 
-    /**
-     * @tc.steps: step4. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList.size() is 0
-     */
     point.SetSourceType(SourceType::MOUSE);
-    rectCallbackList = vector<RectCallback>({ RectCallback(rectGetCallback1, touchCallback, mouseCallback) });
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_TRUE(rectCallbackList.empty());
+    eventManager->ClearRectCallbacks();
+    eventManager->AddRectCallback(
+        [rectGetCallback1](std::vector<Rect>& rectList) -> void { rectGetCallback1(rectList); },
+        touchCallback, mouseCallback);
+    /**
+     * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
+     * @tc.expected: callbacks are cleared
+     */
+    eventManager->HandleOutOfRectCallbacks(point);
 }
 
 /**

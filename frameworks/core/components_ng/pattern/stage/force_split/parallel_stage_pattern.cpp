@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
 #include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"

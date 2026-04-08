@@ -71,10 +71,22 @@ public:
     ~CoastingAxisEventGenerator() override = default;
 };
 
+struct RectCallbackListImpl {};
+
 EventManager::EventManager()
 {
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 }
+
+EventManager::~EventManager() = default;
+
+void EventManager::HandleOutOfRectCallbacks(const Point& point) {}
+
+void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
+    std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)
+{}
+
+void EventManager::ClearRectCallbacks() {}
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch)
 {

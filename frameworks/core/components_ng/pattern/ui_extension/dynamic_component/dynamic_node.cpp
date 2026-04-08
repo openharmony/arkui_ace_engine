@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.h"
+#include "core/common/event_manager.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"

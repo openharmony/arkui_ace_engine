@@ -17,6 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include <cstdio>
 #include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"

@@ -56,6 +56,7 @@ export class ImageAnalyzerController implements MaterializedBase {
             return ImageAnalyzerType.fromValue(retvalDeserializer.readInt32());
         })
         const returnResult: Array<ImageAnalyzerType> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }

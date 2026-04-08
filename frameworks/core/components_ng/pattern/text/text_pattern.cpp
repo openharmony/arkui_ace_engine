@@ -44,6 +44,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -6295,19 +6296,14 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (TextMarqueeState::STOP != state || hasStart_) {
-        eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
-    }
+    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
 
     if (TextMarqueeState::START == state) {
         CloseSelectOverlay();
         ResetSelection();
         isMarqueeRunning_ = true;
-        hasStart_ = true;
     } else if (TextMarqueeState::FINISH == state) {
         isMarqueeRunning_ = false;
-    } else if (TextMarqueeState::STOP == state) {
-        hasStart_ = false;
     }
 
     RecoverCopyOption();

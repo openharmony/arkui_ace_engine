@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"

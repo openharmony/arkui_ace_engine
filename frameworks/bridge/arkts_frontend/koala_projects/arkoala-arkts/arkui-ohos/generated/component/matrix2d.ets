@@ -241,6 +241,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScaleX_serialize(scaleX: double | undefined): void {
@@ -264,6 +265,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScaleY_serialize(scaleY: double | undefined): void {
@@ -287,6 +289,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRotateX_serialize(rotateX: double | undefined): void {
@@ -310,6 +313,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRotateY_serialize(rotateY: double | undefined): void {
@@ -333,6 +337,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTranslateX_serialize(translateX: double | undefined): void {
@@ -356,6 +361,7 @@ export class Matrix2D implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTranslateY_serialize(translateY: double | undefined): void {

@@ -17,6 +17,7 @@
 
 #include "ui/base/utils/utils.h"
 
+#include "core/common/event_manager.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 

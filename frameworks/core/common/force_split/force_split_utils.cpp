@@ -14,6 +14,7 @@
  */
 
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <string>
 #include <vector>

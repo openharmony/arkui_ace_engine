@@ -26,6 +26,7 @@
 
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/event_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"

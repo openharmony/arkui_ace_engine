@@ -3562,6 +3562,7 @@
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetAccessibilityManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
+      OHOS::Ace::PipelineBase::GetEventManager*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
       OHOS::Ace::PipelineBase::GetCurrentDensity*;
       OHOS::Ace::PipelineBase::GetImageCache*;

@@ -77,7 +77,9 @@
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/crown_event.h"
 #include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)

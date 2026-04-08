@@ -229,6 +229,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setCaretOffset_serialize(offset: int32): boolean | undefined {
@@ -240,6 +241,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private closeSelectionMenu_serialize(): void {
@@ -254,6 +256,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = RichEditorTextStyle_serializer.read(retvalDeserializer)
         }
         const returnResult: RichEditorTextStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTypingStyle_serialize(value: RichEditorTextStyle): void {
@@ -295,6 +298,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private stopEditing_serialize(): void {
@@ -309,6 +313,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
         }
         const returnResult: LayoutManager | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPreviewText_serialize(): PreviewText | undefined {
@@ -320,6 +325,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = PreviewText_serializer.read(retvalDeserializer)
         }
         const returnResult: PreviewText | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getCaretRect_serialize(): RectResult | undefined {
@@ -331,6 +337,7 @@ export class RichEditorBaseController implements MaterializedBase {
             buffer = RectResult_serializer.read(retvalDeserializer)
         }
         const returnResult: RectResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private deleteBackward_serialize(): void {
@@ -4365,6 +4372,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private addImageSpan_serialize(value: PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 | undefined {
@@ -4402,6 +4410,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private addBuilderSpan_serialize(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 | undefined {
@@ -4423,6 +4432,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private addSymbolSpan_serialize(value: global_resource_Resource, options?: RichEditorSymbolSpanOptions): int32 | undefined {
@@ -4444,6 +4454,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private updateSpanStyle_serialize(value: RichEditorUpdateTextSpanStyleOptions | RichEditorUpdateImageSpanStyleOptions | RichEditorUpdateSymbolSpanStyleOptions): void {
@@ -4513,6 +4524,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getParagraphs_serialize(value?: RichEditorRange): Array<RichEditorParagraphResult> | undefined {
@@ -4537,6 +4549,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorParagraphResult> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSelection_serialize(): RichEditorSelection | undefined {
@@ -4548,6 +4561,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = RichEditorSelection_serializer.read(retvalDeserializer)
         }
         const returnResult: RichEditorSelection | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> | undefined {
@@ -4572,6 +4586,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorSpan> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private toStyledString_serialize(value: RichEditorRange): StyledString | undefined {
@@ -4586,6 +4601,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
         }
         const returnResult: StyledString | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -4636,6 +4652,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
             buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
         }
         const returnResult: MutableStyledString | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSelection_serialize(): RichEditorRange | undefined {
@@ -4647,6 +4664,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
             buffer = RichEditorRange_serializer.read(retvalDeserializer)
         }
         const returnResult: RichEditorRange | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private onContentChanged_serialize(listener: StyledStringChangedListener): void {

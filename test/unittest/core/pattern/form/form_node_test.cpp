@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/common/event_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 using namespace testing;
