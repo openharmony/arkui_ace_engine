@@ -17,7 +17,6 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "drawing_rendering_context_peer_impl.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #ifdef WINDOWS_PLATFORM
@@ -73,7 +72,7 @@ SizeF DrawingRenderingContextPeerImpl::GetSize()
     auto height = size_.Height().value_or(0.0);
     return SizeF(width, height);
 }
-std::shared_ptr<drawing_CanvasPeer> DrawingRenderingContextPeerImpl::GetCanvas() const
+drawing_CanvasPeer* DrawingRenderingContextPeerImpl::GetCanvas() const
 {
     return rsCanvas_;
 }
@@ -91,9 +90,7 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(WeakPtr<AceType>& canv
         width /= density;
         context->size_.SetHeight(height);
         context->size_.SetWidth(width);
-#ifndef ACE_UNITTEST
-        context->rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas.get());
-#endif
+        context->rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas.get());
     };
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
