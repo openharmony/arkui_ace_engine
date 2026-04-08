@@ -138,6 +138,7 @@ public:
     static bool SetXComponentCompensationAngle(const std::string& configStr);
     static const std::string& GetXComponentCompensationAngle();
     virtual ~UIContent() = default;
+    virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;

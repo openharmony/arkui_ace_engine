@@ -6522,6 +6522,11 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
     return static_cast<int32_t>(windowId);
 }
 
+OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
+{
+    return window_;
+}
+
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]

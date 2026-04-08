@@ -28,6 +28,8 @@ interface EnvTypeMap {
   'system.window.size.px': WindowSizePxEnv;
   'system.window.avoidarea': WindowAvoidAreaVpEnv;
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
+  'system.window.systemdensity': SystemDensityEnv;
+  'system.window.displayid': DisplayIdEnv;
 }
 
 /**
@@ -91,5 +93,23 @@ const envFactoryMap: {
     }
     stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
     return new WindowAvoidAreaPxEnv(context);
+  },
+  'system.window.systemdensity': (context: UIContext) => {
+    const SystemDensityEnv = requireNapi('window.systemdensityenv').SystemDensityEnv;
+    if (typeof SystemDensityEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'SystemDensityEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create SystemDensityEnv.`);
+    return new SystemDensityEnv(context);
+  },
+  'system.window.displayid': (context: UIContext) => {
+    const DisplayIdEnv = requireNapi('window.displayidenv').DisplayIdEnv;
+    if (typeof DisplayIdEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'DisplayIdEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create DisplayIdEnv.`);
+    return new DisplayIdEnv(context);
   },
 };
