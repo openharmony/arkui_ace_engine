@@ -1353,6 +1353,7 @@ void SetTextCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetCopyOption(frameNode, static_cast<CopyOptions>(copyOption));
+    TextModelNG::SetCopyOptionFlagByUser(frameNode, true);
 }
 
 void ResetTextCopyOption(ArkUINodeHandle node)
@@ -1360,6 +1361,7 @@ void ResetTextCopyOption(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTION);
+    TextModelNG::SetCopyOptionFlagByUser(frameNode, false);
 }
 
 void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length,
@@ -1944,6 +1946,7 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
         }
     }
     TextModelNG::SetSelectedBackgroundColor(frameNode, result);
+    TextModelNG::SetSelectedBackgroundColorFlagByUser(frameNode, true);
 }
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
@@ -2205,14 +2208,14 @@ void SetTextEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+    TextModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value), true);
 }
 
 void ResetTextEnableHapticFeedback(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+    TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE, false);
 }
 
 void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value,

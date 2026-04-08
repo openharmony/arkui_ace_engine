@@ -249,8 +249,10 @@ void TextModelStatic::SetCopyOption(FrameNode* frameNode, const std::optional<Co
 {
     if (copyOption.has_value()) {
         TextModelNG::SetCopyOption(frameNode, copyOption.value());
+        TextModelNG::SetCopyOptionFlagByUser(frameNode, true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, frameNode);
+        TextModelNG::SetCopyOptionFlagByUser(frameNode, false);
     }
 }
 
@@ -369,8 +371,10 @@ void TextModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std
 {
     if (value.has_value()) {
         TextModelNG::SetSelectedBackgroundColor(frameNode, value.value());
+        TextModelNG::SetSelectedBackgroundColorFlagByUser(frameNode, true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, frameNode);
+        TextModelNG::SetSelectedBackgroundColorFlagByUser(frameNode, false);
     }
 }
 
@@ -429,7 +433,8 @@ void TextModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<b
 
 void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state)
 {
-    TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
+    bool flagByUser = state.has_value() ? true : false;
+    TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true), flagByUser);
 }
 
 void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)

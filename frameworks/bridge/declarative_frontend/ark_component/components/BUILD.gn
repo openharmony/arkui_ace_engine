@@ -42,7 +42,11 @@ template("arkui_components_abc") {
     part_name = ace_engine_part
   }
 }
-arkui_components_modules = ["containerreader",]
+
+arkui_components_modules = [
+  "containerreader",
+  "selectioncontainer",
+]
 
 arkui_modules = [
   "dynamiclayout",

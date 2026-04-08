@@ -224,6 +224,7 @@ public:
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void SetCopyOptionFlagByUser(bool flag) {};
     virtual void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
@@ -233,6 +234,7 @@ public:
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
     virtual void SetTextCaretColor(const Color& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
+    virtual void SetSelectedBackgroundColorFlagByUser(bool flag) {};
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
     virtual void BindPreviewMenu(NG::TextSpanType& spanType, std::function<void()>& buildFunc,
@@ -252,7 +254,7 @@ public:
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
-    virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void SetEnableHapticFeedback(bool state, bool flagByUser) = 0;
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
     virtual void SetOptimizeTrailingSpace(bool trim) = 0;

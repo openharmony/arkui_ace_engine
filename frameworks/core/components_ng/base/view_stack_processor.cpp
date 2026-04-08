@@ -91,10 +91,23 @@ void ViewStackProcessor::ApplyParentThemeScopeId(const RefPtr<UINode>& element)
     }
 }
 
+void ViewStackProcessor::ApplyParentSelectionContainerId(const RefPtr<UINode>& element)
+{
+    auto parent = GetMainElementNode();
+    int32_t elementSelectionContainerId = element->GetSelectionContainerId();
+    if (parent && elementSelectionContainerId == 0) {
+        int32_t selectionContainerId = parent->GetSelectionContainerId();
+        if (elementSelectionContainerId != selectionContainerId) {
+            element->SetSelectionContainerId(selectionContainerId);
+        }
+    }
+}
+
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
     CHECK_NULL_VOID(element);
     ApplyParentThemeScopeId(element);
+    ApplyParentSelectionContainerId(element);
 
     if (ShouldPopImmediately()) {
         Pop();

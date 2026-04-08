@@ -2231,6 +2231,7 @@
       "OHOS::Ace::NG::TextPattern::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextPattern::ToTreeJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorConfig const&) const";
       "OHOS::Ace::NG::TextPattern::UnRegisterResource(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::TextPattern::UnregisterSelectionContainerChild()";
       "OHOS::Ace::NG::TextPattern::UpdateAIMenuOptions()";
       "OHOS::Ace::NG::TextPattern::UpdateFontColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::NG::TextPattern::UpdatePropertyImpl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::PropertyValueBase>)";
