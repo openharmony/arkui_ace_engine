@@ -5971,7 +5971,7 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
                 [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender) {
                     LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrBrightnessBlender");
                 },
-                [frameNode]() {
+                [frameNode](const Ark_uiEffect_HdrDarkenBlender& blender) {
                     ViewAbstractModelStatic::SetBlendMode(frameNode, BlendMode::NONE);
                     ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
                 });
