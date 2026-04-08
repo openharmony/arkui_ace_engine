@@ -3118,6 +3118,9 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @ArkUI_Event
 interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
+interfaces/native/error_message_macros.h @arkui_framework_xnode
+interfaces/native/error_message_manager.h @arkui_framework_xnode
+interfaces/native/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/node/rich_editor_native_impl.h @arkui_rich_editor
 interfaces/native/node/rich_editor_native_impl.cpp @arkui_rich_editor
 interfaces/native/node/span_style_native_impl.h @arkui_rich_editor

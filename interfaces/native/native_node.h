@@ -12995,6 +12995,24 @@ int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
 
+/**
+ * @brief Retrieves the latest error message, which includes the error code, method name, and error cause.
+ * When other interfaces return an error code, they save the corresponding error message,
+ * and this interface can retrieve the currently stored error message.
+ * The information returned by this interface may evolve with versions and is intended solely for
+ * output to aid in analysis and troubleshooting. It should not be used for logical decisions.
+ *
+ * The returned string is a thread-local string created by the system. Different threads maintain
+ * independent error messages, and other threads do not overwrite the current thread's result.
+ * The pointer remains valid until the current thread records another error or exits. The caller must
+ * not modify its content. If any editing is required, create a copy of the string content yourself.
+ * No memory deallocation is required by the caller.
+ * 
+ * @return Returns the most recent error message.
+ * @since 26.0.0
+ */
+const char* OH_ArkUI_NativeModule_GetErrorMessage();
+
 #ifdef __cplusplus
 }
 #endif
