@@ -520,7 +520,7 @@ void AppBarView::CreateServicePanel(
 #endif
 }
 
-void AppBarView::CreateServicePanel(bool firstTry)
+void AppBarView::CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params)
 {
 #ifndef PREVIEW
     if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
@@ -540,7 +540,6 @@ void AppBarView::CreateServicePanel(bool firstTry)
         abilityName = theme->GetStageAbilityName();
     }
     std::string appGalleryBundleName;
-    std::map<std::string, std::string> params;
     AssembleUiExtensionParams(firstTry, appGalleryBundleName, params);
     auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
     wantWrap->SetWantParam(params);
@@ -626,7 +625,7 @@ void AppBarView::SetStatusBarItemColor(bool isLight)
     pattern->ColorConfigurationCallBack();
 }
 
-void AppBarView::OnMenuClick()
+void AppBarView::OnMenuClick(std::map<std::string, std::string>& params)
 {
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
@@ -639,7 +638,7 @@ void AppBarView::OnMenuClick()
             theme->GetAbilityName().c_str());
         pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
     } else {
-        CreateServicePanel(true);
+        CreateServicePanel(true, std::move(params));
     }
 }
 

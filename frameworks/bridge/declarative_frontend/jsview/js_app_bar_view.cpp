@@ -47,11 +47,32 @@ static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> na
 void JSAppBar::OnMenuClick(const JSCallbackInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar OnMenuClick");
+    if (info.Length() < SERVICE_PANEL_PARAM_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnMenuClick param erro");
+        return;
+    }
+    if (!info[PARAM_FIRST]->IsObject()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnMenuClick last param erro");
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(info[PARAM_FIRST]);
+    auto jsParams = jsObject->GetProperty("params");
+    if (!jsParams->IsArray()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar GetStringValueFromJSObject jsParams is error");
+        return;
+    }
+    JSRef<JSArray> jsParamsArray = JSRef<JSArray>::Cast(jsParams);
+    std::map<std::string, std::string> params;
+    GetParamsFromJSArray(jsParamsArray, params);
+    if (params.empty()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar GetStringValueFromJSObject paramsMap param is error");
+        return;
+    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
-    appBar->OnMenuClick();
+    appBar->OnMenuClick(params);
 }
 
 void JSAppBar::OnCloseClick(const JSCallbackInfo& info)
