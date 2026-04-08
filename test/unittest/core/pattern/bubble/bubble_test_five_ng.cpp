@@ -988,4 +988,636 @@ HWTEST_F(BubbleFiveTestNg, OnWindowSizeChangedTest001, TestSize.Level0)
     bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::AVOID_AREA_CHANGE);
     EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, true);
 }
+
+/**
+ * @tc.name: RegisterButtonOnHover001
+ * @tc.desc: Test RegisterButtonOnHover when mouseEventInitFlag_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnHover001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->mouseEventInitFlag_ = true;
+    bubblePattern->RegisterButtonOnHover();
+    EXPECT_TRUE(bubblePattern->mouseEventInitFlag_);
+}
+
+/**
+ * @tc.name: RegisterButtonOnHover002
+ * @tc.desc: Test RegisterButtonOnHover when useCustom is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnHover002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.useCustom = true;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->mouseEventInitFlag_ = false;
+    bubblePattern->RegisterButtonOnHover();
+    EXPECT_FALSE(bubblePattern->mouseEventInitFlag_);
+}
+
+/**
+ * @tc.name: RegisterButtonOnHover003
+ * @tc.desc: Test RegisterButtonOnHover when buttons not shown
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnHover003, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    renderProperty->UpdatePrimaryButtonShow(false);
+    renderProperty->UpdateSecondaryButtonShow(false);
+    renderProperty->UpdateUseCustom(false);
+    bubblePattern->mouseEventInitFlag_ = false;
+    bubblePattern->RegisterButtonOnHover();
+    EXPECT_FALSE(bubblePattern->mouseEventInitFlag_);
+}
+
+/**
+ * @tc.name: ButtonOnHover001
+ * @tc.desc: Test ButtonOnHover when isHover is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnHover001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    bool isHover = true;
+    bubblePattern->ButtonOnHover(isHover, buttonNode);
+    EXPECT_TRUE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: ButtonOnHover002
+ * @tc.desc: Test ButtonOnHover when isHover is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnHover002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    bool isHover = false;
+    bubblePattern->ButtonOnHover(isHover, buttonNode);
+    EXPECT_FALSE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: RegisterButtonOnTouch001
+ * @tc.desc: Test RegisterButtonOnTouch when touchEventInitFlag_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnTouch001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->touchEventInitFlag_ = true;
+    bubblePattern->RegisterButtonOnTouch();
+    EXPECT_TRUE(bubblePattern->touchEventInitFlag_);
+}
+
+/**
+ * @tc.name: RegisterButtonOnTouch002
+ * @tc.desc: Test RegisterButtonOnTouch when useCustom is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnTouch002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.useCustom = true;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->touchEventInitFlag_ = false;
+    bubblePattern->RegisterButtonOnTouch();
+    EXPECT_FALSE(bubblePattern->touchEventInitFlag_);
+}
+
+/**
+ * @tc.name: RegisterButtonOnTouch003
+ * @tc.desc: Test RegisterButtonOnTouch when buttons not shown
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, RegisterButtonOnTouch003, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    renderProperty->UpdatePrimaryButtonShow(false);
+    renderProperty->UpdateSecondaryButtonShow(false);
+    renderProperty->UpdateUseCustom(false);
+    bubblePattern->touchEventInitFlag_ = false;
+    bubblePattern->RegisterButtonOnTouch();
+    EXPECT_FALSE(bubblePattern->touchEventInitFlag_);
+}
+
+/**
+ * @tc.name: ButtonOnPress001
+ * @tc.desc: Test ButtonOnPress when touches is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnPress001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    TouchEventInfo touchEventInfo("touch");
+    bubblePattern->ButtonOnPress(touchEventInfo, buttonNode);
+    EXPECT_TRUE(touchEventInfo.GetTouches().empty());
+}
+
+/**
+ * @tc.name: ButtonOnPress002
+ * @tc.desc: Test ButtonOnPress when touchType is DOWN and isHover_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnPress002, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->isHover_ = true;
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchEventInfo.touches_.emplace_back(touchLocationInfo);
+    bubblePattern->ButtonOnPress(touchEventInfo, buttonNode);
+    EXPECT_TRUE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: ButtonOnPress003
+ * @tc.desc: Test ButtonOnPress when touchType is DOWN and isHover_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnPress003, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->isHover_ = false;
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchEventInfo.touches_.emplace_back(touchLocationInfo);
+    bubblePattern->ButtonOnPress(touchEventInfo, buttonNode);
+    EXPECT_FALSE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: ButtonOnPress004
+ * @tc.desc: Test ButtonOnPress when touchType is UP and isHover_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnPress004, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->isHover_ = true;
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UP;
+    touchEventInfo.touches_.emplace_back(touchLocationInfo);
+    bubblePattern->ButtonOnPress(touchEventInfo, buttonNode);
+    EXPECT_TRUE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: ButtonOnPress005
+ * @tc.desc: Test ButtonOnPress when touchType is UP and isHover_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, ButtonOnPress005, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->isHover_ = false;
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::UP;
+    touchEventInfo.touches_.emplace_back(touchLocationInfo);
+    bubblePattern->ButtonOnPress(touchEventInfo, buttonNode);
+    EXPECT_FALSE(bubblePattern->isHover_);
+}
+
+/**
+ * @tc.name: GetButtonRowNode001
+ * @tc.desc: Test GetButtonRowNode when host is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, GetButtonRowNode001, TestSize.Level1)
+{
+    auto bubblePattern = AceType::MakeRefPtr<BubblePattern>(0, "");
+    ASSERT_NE(bubblePattern, nullptr);
+    auto result = bubblePattern->GetButtonRowNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetButtonRowNode002
+ * @tc.desc: Test GetButtonRowNode with valid structure
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, GetButtonRowNode002, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto result = bubblePattern->GetButtonRowNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: UpdateShadow001
+ * @tc.desc: Test UpdateShadow when host is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateShadow001, TestSize.Level1)
+{
+    auto bubblePattern = AceType::MakeRefPtr<BubblePattern>(0, "");
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->UpdateShadow();
+    EXPECT_FALSE(bubblePattern->IsShadowStyle());
+}
+
+/**
+ * @tc.name: UpdateShadow002
+ * @tc.desc: Test UpdateShadow with valid host
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateShadow002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(childNode, nullptr);
+    frameNode->AddChild(childNode);
+    bubblePattern->UpdateShadow();
+    EXPECT_FALSE(bubblePattern->IsShadowStyle());
+}
+
+/**
+ * @tc.name: UpdateBubbleGradient001
+ * @tc.desc: Test UpdateBubbleGradient with isOutlineGradient true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateBubbleGradient001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    uint32_t index = 0;
+    Color result = Color::RED;
+    bool isOutlineGradient = true;
+    bubblePattern->outlineLinearGradient_.gradientColors.push_back({ Color::BLUE, 0.0f });
+    bubblePattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    EXPECT_EQ(bubblePattern->outlineLinearGradient_.gradientColors[0].gradientColor, result);
+}
+
+/**
+ * @tc.name: UpdateBubbleGradient002
+ * @tc.desc: Test UpdateBubbleGradient with isOutlineGradient false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateBubbleGradient002, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    uint32_t index = 0;
+    Color result = Color::GREEN;
+    bool isOutlineGradient = false;
+    bubblePattern->innerBorderLinearGradient_.gradientColors.push_back({ Color::BLUE, 0.0f });
+    bubblePattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    EXPECT_EQ(bubblePattern->innerBorderLinearGradient_.gradientColors[0].gradientColor, result);
+}
+
+/**
+ * @tc.name: UpdateBubbleGradient003
+ * @tc.desc: Test UpdateBubbleGradient with index out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateBubbleGradient003, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    uint32_t index = 10;
+    Color result = Color::RED;
+    bool isOutlineGradient = true;
+    bubblePattern->outlineLinearGradient_.gradientColors.push_back({ Color::BLUE, 0.0f });
+    bubblePattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    EXPECT_EQ(bubblePattern->outlineLinearGradient_.gradientColors[0].gradientColor, Color::BLUE);
+}
+
+/**
+ * @tc.name: UpdateRadius001
+ * @tc.desc: Test UpdateRadius with positive dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateRadius001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    CalcDimension dimension(10.0f);
+    bubblePattern->UpdateRadius(dimension);
+    auto bubbleLayout = frameNode->GetLayoutPropertyPtr<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayout, nullptr);
+    auto radiusValue = bubbleLayout->GetRadiusValue(Dimension(0.0f));
+    EXPECT_EQ(radiusValue, Dimension(10.0f));
+}
+
+/**
+ * @tc.name: UpdateRadius002
+ * @tc.desc: Test UpdateRadius with negative dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateRadius002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    CalcDimension dimension(-10.0f);
+    bubblePattern->UpdateRadius(dimension);
+    auto bubbleLayout = frameNode->GetLayoutPropertyPtr<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayout, nullptr);
+    EXPECT_FALSE(bubbleLayout->HasRadius());
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation001
+ * @tc.desc: Test StartAlphaEnteringAnimation with valid host
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(false);
+    bool finishCalled = false;
+    auto finishCallback = [&finishCalled]() { finishCalled = true; };
+    bubblePattern->StartAlphaEnteringAnimation(finishCallback);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+    EXPECT_TRUE(finishCalled);
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation002
+ * @tc.desc: Test StartAlphaEnteringAnimation with nullptr finish callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(false);
+    bubblePattern->StartAlphaEnteringAnimation(nullptr);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation003
+ * @tc.desc: Test StartAlphaEnteringAnimation with showInSubWindow true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.showInSubWindow = true;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    bubblePattern->StartAlphaEnteringAnimation(nullptr);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation004
+ * @tc.desc: Test StartAlphaEnteringAnimation transition status check
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation004, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(false);
+    bubblePattern->transitionStatus_ = TransitionStatus::NORMAL;
+    bubblePattern->StartAlphaEnteringAnimation(nullptr);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation005
+ * @tc.desc: Test StartAlphaEnteringAnimation with isTips true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation005, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(true);
+    layoutProp->UpdateIsTips(true);
+    bubblePattern->StartAlphaEnteringAnimation(nullptr);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
+
+/**
+ * @tc.name: StartAlphaEnteringAnimation006
+ * @tc.desc: Test StartAlphaEnteringAnimation with showInSubWindow true and isBlock true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, StartAlphaEnteringAnimation006, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(true);
+    layoutProp->UpdateIsTips(false);
+    layoutProp->UpdateBlockEvent(true);
+    bubblePattern->StartAlphaEnteringAnimation(nullptr);
+    // Animation executes synchronously in test, so status is NORMAL after completion
+    EXPECT_EQ(bubblePattern->GetTransitionStatus(), TransitionStatus::NORMAL);
+}
 } // namespace OHOS::Ace::NG
