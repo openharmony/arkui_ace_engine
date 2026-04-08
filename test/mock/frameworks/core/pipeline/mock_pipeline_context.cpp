@@ -45,7 +45,6 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
-#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_element_info.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace OHOS::Ace {
