@@ -129,6 +129,21 @@ RefPtr<Container> Container::GetFocused()
     return focusContainer;
 }
 
+RefPtr<Container> Container::GetNormalFocused()
+{
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
+        if (container->IsUIExtensionWindow() || container->IsDynamicRender()) {
+            return;
+        }
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->IsWindowFocused()) {
+            focusContainer = container;
+        }
+    });
+    return focusContainer;
+}
+
 RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
 {
     RefPtr<Container> windowContainer;
