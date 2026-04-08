@@ -1108,6 +1108,22 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.AddContent(elementInfo.GetContent());
     eventInfo.SetElementInfo(elementInfo);
 }
+
+uint64_t GetDisplayId(int windowId, const RefPtr<PipelineBase>& pipeline)
+{
+    // if not sceneboard, displayId get 0.
+    if (windowId != 1) {
+        return 0;
+    }
+
+    CHECK_NULL_RETURN(pipeline, 0);
+    RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, 0);
+    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, 0);
+    return container->GetCurrentDisplayId();
+}
+
 #ifdef WEB_SUPPORTED
 
 void FillWebElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
@@ -7874,12 +7890,18 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
         return 0;
     }
 
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "RegisterInteractionOperation windowId: %{public}u", windowId);
+    uint64_t displayId = GetDisplayId(windowId, context_.Upgrade());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "RegisterInteractionOperation windowId: %{public}u, displayId: %{public}" PRId64, windowId, displayId);
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, -1);
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
-    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation, displayId);
+    if (retReg != RET_OK) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "RegisterInteractionOperation failed, "
+            "windowId: %{public}u, displayId: %{public}" PRId64 ", result: %{public}d", windowId, displayId, retReg);
+    }
     RefPtr<PipelineBase> context;
     for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
@@ -7908,34 +7930,54 @@ void JsAccessibilityManager::RegisterSubWindowInteractionOperation(int windowId)
     CHECK_NULL_VOID(instance);
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
-    instance->RegisterElementOperator(windowId, interactionOperation);
+    uint64_t displayId = GetDisplayId(windowId, context_.Upgrade());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "RegisterSubWindowInteractionOperation windowId: %{public}u, displayId: %{public}" PRId64, windowId, displayId);
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation, displayId);
+    if (retReg != RET_OK) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "RegisterSubWindowInteractionOperation failed, "
+            "windowId: %{public}u, displayId: %{public}" PRId64 ", result: %{public}d", windowId, displayId, retReg);
+    }
 }
 
 void JsAccessibilityManager::DeregisterInteractionOperation()
 {
-    if (!IsRegister()) {
-        return;
-    }
+    CHECK_NE_VOID(IsRegister(), true);
     int windowId = static_cast<int>(GetWindowId());
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
     Register(false);
     ClearAccessibilityFocusState();
+    uint64_t displayId = GetDisplayId(windowId, context_.Upgrade());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "DeregisterInteractionOperation "
+        "windowId: %{public}u, displayId: %{public}" PRId64 ", parentWindowId: %{public}u, treeId: %{public}d",
+        windowId, displayId, parentWindowId_, treeId_);
+    Accessibility::RetError retDer;
     if (parentWindowId_ == 0) {
-        instance->DeregisterElementOperator(windowId);
+        retDer = instance->DeregisterElementOperator(windowId, displayId);
     } else {
-        instance->DeregisterElementOperator(windowId, treeId_);
+        retDer = instance->DeregisterElementOperator(windowId, treeId_);
         parentElementId_ = INVALID_PARENT_ID;
         parentTreeId_ = 0;
         parentWindowId_ = 0;
+    }
+    if (retDer != RET_OK) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "DeregisterInteractionOperation failed, "
+            "windowId: %{public}u, displayId: %{public}" PRId64 ", result: %{public}d", windowId, displayId, retDer);
     }
 
     RefPtr<PipelineBase> context;
     for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_CONTINUE(context);
-        instance->DeregisterElementOperator(context->GetWindowId());
+        auto subWindowId = context->GetWindowId();
+        uint64_t subDisplayId = GetDisplayId(subWindowId, context);
+        retDer = instance->DeregisterElementOperator(subWindowId, subDisplayId);
+        if (retDer != RET_OK) {
+            TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "DeregisterSubPipeline failed, subWindowId: %{public}u, "
+                "subDisplayId: %{public}" PRId64 ", result: %{public}d", subWindowId, subDisplayId, retDer);
+        }
     }
     NotifyChildTreeOnDeregister();
 
