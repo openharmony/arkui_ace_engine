@@ -351,6 +351,9 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle005, TestSize.Lev
  
     data.textColor = Color::RED;
     DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetDisappearColor().value());
 }
 
 /**
@@ -456,6 +459,9 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle005, TestSize.Level0
  
     data.textColor = Color::RED;
     DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetColor().value());
 }
 
 /**
@@ -561,6 +567,9 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle005, TestSize.Leve
  
     data.textColor = Color::RED;
     DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetSelectedColor().value());
 }
  
 /**
@@ -576,10 +585,14 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle006, TestSize.Leve
     PickerTextStyle data;
     data.fontSize = Dimension(TEST_FONT_SIZE);
     data.fontWeight = Ace::FontWeight::BOLD;
+    data.textColor = Color::RED;
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, data);
     ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetSelectedColor().value());
 }
  
 /**
@@ -598,6 +611,9 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDefaultAttributes001, TestSize.Leve
     auto frameNode = DatePickerModelNG::CreateFrameNode(0);
     ASSERT_NE(frameNode, nullptr);
     DatePickerModelNG::SetDefaultAttributes(frameNode, theme);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasFontSize());
 }
 
 /**
