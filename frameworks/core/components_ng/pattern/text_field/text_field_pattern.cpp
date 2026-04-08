@@ -2030,6 +2030,7 @@ void TextFieldPattern::HandleBlurEvent()
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
+    CloseVoiceKeyboardOpenedByButton();
     SetVoiceKBShown(false);
 }
 
@@ -2614,6 +2615,9 @@ void TextFieldPattern::SetVoiceKBShown(bool voiceKbShown)
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d Set VoiceKB to %{public}d", host->GetId(), voiceKbShown);
     voiceKbShown_ = voiceKbShown;
+    if (!voiceKbShown) {
+        voiceKbOpenedByButton_ = false;
+    }
     if (!IsShowVoiceButtonMode()) {
         return;
     }
@@ -2629,6 +2633,8 @@ void TextFieldPattern::HandleOnVoiceInput()
 {
     TextFieldRequestFocus(RequestFocusReason::VOICE_NODE);
     if (!voiceKbShown_) {
+        voiceKbOpenedByButton_ = true;
+        voiceButtonKeyboardOpened_ = true;
         HandleOnTextMethodInput(TEXT_INPUT_VOICE_INPUT, "HandleOnVoiceInput", nullptr);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB");
@@ -3567,6 +3573,21 @@ bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
     return false;
 }
 
+void TextFieldPattern::CloseVoiceKeyboardOpenedByButton()
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    if (!voiceKbShown_ || !voiceKbOpenedByButton_ || !IsShowVoiceButtonMode()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB opened by voice button");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+    }
+    SetVoiceKBShown(false);
+#endif
+}
+
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus)
 {
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
@@ -3578,6 +3599,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CloseVoiceKeyboardOpenedByButton();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     auto clickLocalOffset = GetCaretClickLocalOffset(info.GetLocalLocation());
@@ -8196,7 +8218,8 @@ bool TextFieldPattern::OnBackPressed()
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!(imeShown_ || voiceKbShown_) && !isCustomKeyboardAttached_) {
+    if (!(imeShown_ || voiceKbShown_ || (IsShowVoiceButtonMode() && voiceButtonKeyboardOpened_)) &&
+        !isCustomKeyboardAttached_) {
         return false;
     }
 #else

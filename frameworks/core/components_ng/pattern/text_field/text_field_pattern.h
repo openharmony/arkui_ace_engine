@@ -799,6 +799,9 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
+        if (keyboardShown && !voiceKbShown_) {
+            voiceButtonKeyboardOpened_ = false;
+        }
 #endif
     }
     void NotifyKeyboardClosedByUser() override;
@@ -1076,6 +1079,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    void CloseVoiceKeyboardOpenedByButton();
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
     void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
     void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
@@ -2352,6 +2356,8 @@ private:
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
     bool voiceKbShown_ = false;
+    bool voiceKbOpenedByButton_ = false;
+    bool voiceButtonKeyboardOpened_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
