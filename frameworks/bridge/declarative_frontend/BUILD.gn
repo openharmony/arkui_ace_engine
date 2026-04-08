@@ -353,6 +353,7 @@ template("declarative_js_engine") {
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_datepicker.cpp",
+      "jsview/js_distortion_component.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",

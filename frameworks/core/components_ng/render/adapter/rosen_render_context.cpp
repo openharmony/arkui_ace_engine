@@ -27,6 +27,7 @@
 #include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_base/include/common/rs_color.h"
 #include "render_service_client/core/ui/rs_root_node.h"
@@ -8496,5 +8497,76 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
     auto unionNode = rsNode_->ReinterpretCastTo<Rosen::RSUnionNode>();
     CHECK_NULL_VOID(unionNode);
     unionNode->SetUnionSpacing(spacing);
+}
+
+void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(rsNode_);
+    if (!paintRect_.IsValid()) {
+        ACE_SCOPED_TRACE("paintRect is not valid, updating DistortionParam is failed");
+        return;
+    }
+    float radius = 0.0f;
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        double width = paintRect_.Width();
+        radius = borderRadius->radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(width);
+    }
+
+    auto sdfShape = std::make_shared<Rosen::RSNGSDFRRectShape>();
+    Rosen::RRect rrect{{0, 0, paintRect_.Width(), paintRect_.Height()}, radius, radius};
+    sdfShape->Setter<Rosen::SDFRRectShapeRRectTag>(rrect);
+    auto rootShape = std::make_shared<Rosen::RSNGSDFDistortOpShape>();
+    auto convertFunc2 = [](VectorF vec)->Rosen::Vector2f {
+        return Rosen::Vector2f(vec.x, vec.y);
+    };
+    auto convertFunc4 = [](Vector4F vec)->Rosen::Vector4f {
+        return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w);
+    };
+    rootShape->Setter<Rosen::SDFDistortOpShapeLUCornerTag>(convertFunc2(param.luCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeRUCornerTag>(convertFunc2(param.ruCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeRBCornerTag>(convertFunc2(param.rbCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
+    rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
+    auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
+    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
+    auto host = GetHost();
+    if (host) {
+        ACE_SCOPED_TRACE("node setSDF-DistortionParam id:(%d) tag:(%s) rect:(%f,%f,%f,%f), radius:(%f) luCorner:(%f,%f)"
+            " ruCorner:(%f,%f) lbCorner:(%f,%f) rbCorner:(%f,%f) barrelDistortion:(%f,%f,%f,%f)",
+            host->GetId(), host->GetTag().c_str(), paintRect_.GetX(), paintRect_.GetY(),
+            paintRect_.Width(), paintRect_.Height(), radius, param.luCorner.x, param.luCorner.y,
+            param.ruCorner.x, param.ruCorner.y, param.lbCorner.x, param.lbCorner.y, param.rbCorner.x, param.rbCorner.y,
+            param.barrelDistortion.x, param.barrelDistortion.y, param.barrelDistortion.z, param.barrelDistortion.w);
+    }
+    rsNode_->SetSDFShape(rootShape);
+#endif
+}
+
+void RosenRenderContext::UpdateForegroundFilterDistortionParam(const DistortionParam& param)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto distortionFilter = std::make_shared<RSNGDistortionCollapseFilter>();
+    auto convertFunc2 = [](VectorF vec)->Rosen::Vector2f {
+        return Rosen::Vector2f(vec.x, vec.y);
+    };
+    auto convertFunc4 = [](Vector4F vec)->Rosen::Vector4f {
+        return Rosen::Vector4f(vec.x, vec.y, vec.z, vec.w);
+    };
+    distortionFilter->Setter<Rosen::DistortionCollapseLUCornerTag>(convertFunc2(param.luCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseRUCornerTag>(convertFunc2(param.ruCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseLBCornerTag>(convertFunc2(param.lbCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseRBCornerTag>(convertFunc2(param.rbCorner));
+    distortionFilter->Setter<Rosen::DistortionCollapseBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
+    auto host = GetHost();
+    if (host) {
+        ACE_SCOPED_TRACE("node setForegroundFilterDistortionParam id:(%d) tag:(%s)  luCorner:(%f, %f)"
+            " ruCorner:(%f,%f) lbCorner:(%f,%f) rbCorner:(%f,%f) barrelDistortion:(%f,%f,%f,%f)",
+            host->GetId(), host->GetTag().c_str(), param.luCorner.x, param.luCorner.y,
+            param.ruCorner.x, param.ruCorner.y, param.lbCorner.x, param.lbCorner.y, param.rbCorner.x, param.rbCorner.y,
+            param.barrelDistortion.x, param.barrelDistortion.y, param.barrelDistortion.z, param.barrelDistortion.w);
+    }
+    rsNode_->SetForegroundNGFilter(distortionFilter);
 }
 } // namespace OHOS::Ace::NG
