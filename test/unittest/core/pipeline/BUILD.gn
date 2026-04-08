@@ -184,6 +184,7 @@ ace_unittest("pipeline_context_test_ng") {
 
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
   ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
   extra_deps = []

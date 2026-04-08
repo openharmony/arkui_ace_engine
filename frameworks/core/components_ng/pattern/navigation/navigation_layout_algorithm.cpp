@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

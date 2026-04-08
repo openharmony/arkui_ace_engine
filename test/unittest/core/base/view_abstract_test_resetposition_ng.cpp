@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/common/event_manager.h"
 #include "core/components/select/select_theme.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components_ng/base/view_stack_processor.h"

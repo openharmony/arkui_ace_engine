@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"

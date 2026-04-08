@@ -29,6 +29,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"

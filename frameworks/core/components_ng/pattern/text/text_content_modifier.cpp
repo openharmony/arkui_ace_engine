@@ -1713,10 +1713,6 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option, fl
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
                     modifier->marqueeCount_++;
                 }
-                if (!modifier->AllowTextRace() &&
-                    NearEqual(modifier->GetTextRacePercent(), modifier->marqueeRaceMaxPercent_)) {
-                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::STOP);
-                }
                 if (!modifier->AllowTextRace()) {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
                 } else {

@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"

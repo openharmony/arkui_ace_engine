@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_ARRAY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_ARRAY_H
 
-#pragma once
+
 #include <cstring>
 #include <random>
 #include <vector>
@@ -37,12 +39,12 @@ public:
 
     Array& operator=(const Array& other)
     {
-        Array temp(other); // 拷贝构造
-        swap(*this, temp); // 交换（不抛出异常）
+        Array temp(other); // copy constructor
+        Swap(*this, temp); // swap (noexcept)
         return *this;
     }
 
-    void swap(Array& first, Array& second) noexcept
+    void Swap(Array& first, Array& second) noexcept
     {
         using std::swap;
         swap(first.array, second.array);
@@ -63,7 +65,7 @@ public:
 
     void InsertElement(int32_t e)
     {
-        if (IsInArray(e)) {
+        if (e < 0 || e >= indexInArray.size() || IsInArray(e)) {
             return;
         }
         if (arraySize < arrayCapacity) {
@@ -79,10 +81,10 @@ public:
             return;
         }
         arraySize--;
-        int32_t last_e = array[arraySize];
-        int32_t e_pos = indexInArray[e];
-        array[e_pos] = last_e;
-        indexInArray[last_e] = e_pos;
+        int32_t lastE = array[arraySize];
+        int32_t ePos = indexInArray[e];
+        array[ePos] = lastE;
+        indexInArray[lastE] = ePos;
         indexInArray[e] = -1;
     }
 
@@ -111,3 +113,5 @@ public:
         return arraySize;
     }
 };
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_ARRAY_H

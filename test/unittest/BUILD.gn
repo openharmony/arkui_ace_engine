@@ -447,7 +447,6 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/full_screen/full_screen_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/load_complete/load_complete_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/memory/memory_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/navigation/navigation_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
@@ -708,6 +707,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register_multi_thread.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/frame_node_impl.cpp",
@@ -1429,6 +1429,17 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_tip_modifier.cpp",
+
+    # Smart layout engine
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_constraints.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/localsmt.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_build_instance.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_initialize.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_ls.cpp",
+
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_pattern.cpp",
@@ -1685,6 +1696,7 @@ ohos_source_set("ace_components_pattern") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
+    "hilog:libhilog",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
     "skia:skia_canvaskit",

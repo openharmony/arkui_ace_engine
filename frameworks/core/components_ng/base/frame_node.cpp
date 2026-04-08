@@ -57,6 +57,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -6950,6 +6951,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     event.SetTarget(eventTarget);
     event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
     event.SetTargetDisplayId(touchEvent.targetDisplayId);
+    event.SetEventHandleId(touchEvent.eventHandleId);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;

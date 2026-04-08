@@ -226,12 +226,12 @@ advanced_ui_component/arcslider/
 advanced_ui_component/atomicservicenavigation/ @giteewzp
 advanced_ui_component/atomicservicetabs/ @giteewzp
 advanced_ui_component/atomicserviceweb/ @giteewzp
-advanced_ui_component/BUILD.gn @arkui_statemgmt
-advanced_ui_component/chipgroup/ @arkui_statemgmt
-advanced_ui_component/chip/ @arkui_statemgmt
+advanced_ui_component/BUILD.gn @arkuitoolchain
+advanced_ui_component/chipgroup/ @arkuitoolchain
+advanced_ui_component/chip/ @arkuitoolchain
 advanced_ui_component/composelistitem/ @arkuiadvancedcomponent
 advanced_ui_component/composetitlebar/ @arkuiadvancedcomponent
-advanced_ui_component/counter/ @arkui_statemgmt
+advanced_ui_component/counter/ @arkuitoolchain
 advanced_ui_component/dialog/ @arkuiadvancedcomponent
 advanced_ui_component/dialogv2/ @arkuiadvancedcomponent
 advanced_ui_component/downloadfilebutton/
@@ -246,8 +246,8 @@ advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow_all
 advanced_ui_component/progressbutton/ @arkuiadvancedcomponent
 advanced_ui_component/progressbuttonv2/ @arkuiadvancedcomponent
-advanced_ui_component/segmentbutton/ @arkui_statemgmt
-advanced_ui_component/segmentbuttonv2/ @arkui_statemgmt
+advanced_ui_component/segmentbutton/ @arkuitoolchain
+advanced_ui_component/segmentbuttonv2/@arkuitoolchain
 advanced_ui_component/selectionmenu/ @huawei_g_five
 advanced_ui_component_static/selectionmenu/ @huawei_g_five
 advanced_ui_component/selecttitlebar/ @arkuiadvancedcomponent
@@ -302,9 +302,9 @@ examples/Layout/ @arkuilayout1
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkui_framework_xnode
-frameworks/base/base64/base64_util.cpp @arkui_statemgmt
-frameworks/base/base64/base64_util.h @arkui_statemgmt
-frameworks/base/base64/BUILD.gn @arkui_statemgmt
+frameworks/base/base64/base64_util.cpp @arkuilayout1
+frameworks/base/base64/base64_util.h @arkuilayout1
+frameworks/base/base64/BUILD.gn @arkuilayout1
 frameworks/base/BUILD.gn @arkui_architecture
 frameworks/base/display_manager/display_manager.h @arkuilayout1
 frameworks/base/error/error_code.h @arkui_framework_xnode
@@ -853,11 +853,11 @@ frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_funct
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.cpp @arkweb-committer-group
 frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h @arkweb-committer-group
-frameworks/bridge/declarative_frontend/engine/js_converter.h @arkui_statemgmt
+frameworks/bridge/declarative_frontend/engine/js_converter.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js
 frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsi/BUILD.gn @arkui_architecture
-frameworks/bridge/declarative_frontend/engine/jsi/js_converter.cpp @arkui_statemgmt
+frameworks/bridge/declarative_frontend/engine/jsi/js_converter.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_build_impl.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_impl.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.h @arkui_statemgmt
@@ -3118,6 +3118,9 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @ArkUI_Event
 interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
+interfaces/native/error_message_macros.h @arkui_framework_xnode
+interfaces/native/error_message_manager.h @arkui_framework_xnode
+interfaces/native/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/node/rich_editor_native_impl.h @arkui_rich_editor
 interfaces/native/node/rich_editor_native_impl.cpp @arkui_rich_editor
 interfaces/native/node/span_style_native_impl.h @arkui_rich_editor
@@ -3699,6 +3702,7 @@ test/unittest/core/pattern/select_overlay/ @huawei_g_five
 test/unittest/core/pattern/shape/ @arkuilayout1
 test/unittest/core/pattern/side_bar/ @arkui_navigation
 test/unittest/core/pattern/slider/ @arkuipopupwindow_all
+test/unittest/core/pattern/smart_layout/ @arkuilayout1
 test/unittest/core/pattern/stack/ @arkuilayout1
 test/unittest/core/pattern/stage/ @arkui_navigation
 test/unittest/core/pattern/stepper/ @arkui_navigation
@@ -3727,7 +3731,6 @@ test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkui_framework_xnode
 test/unittest/core/property/templates_parser_test_ng.cpp @arkuiscroll
-test/unittest/core/manager/load_complete_manager_test_ng.cpp @arkui_framework_xnode
 test/unittest/core/property/accessibility_property_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_test_three_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_testtwo_ng.cpp @ArkUI_ability_group
@@ -3758,6 +3761,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkoala_generator/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkui_idlize/ @arkui-idlize
 
 [UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
@@ -4021,24 +4026,24 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/s
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.cc @arkuicodepulse
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.h @arkuicodepulse
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/vsync.cc @huawei_g_five
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ani/convertors-ani.cc @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ani/convertors-ani.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/callback-resource.cc @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/callback-resource.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/common-interop.cc @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/common-interop.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/DeserializerBase.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/dynamic-loader.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-logging.cc @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-logging.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-utils.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ohos/hilog/log.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ohos/oh_sk_log.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/SerializerBase.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/koala-types.h @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/signatures.cc @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/signatures.h @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ani/convertors-ani.cc @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ani/convertors-ani.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/callback-resource.cc @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/callback-resource.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/common-interop.cc @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/common-interop.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/DeserializerBase.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/dynamic-loader.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-logging.cc @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-logging.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-utils.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ohos/hilog/log.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/ohos/oh_sk_log.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/SerializerBase.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/koala-types.h @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/signatures.cc @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/types/signatures.h @arkui_framework_xnode
 frameworks/bridge/common/dom/dom_configs.h @arkui_framework_xnode
 frameworks/bridge/common/dom/dom_proxy.cpp @arkui_framework_xnode
 frameworks/bridge/common/dom/dom_proxy.h @arkui_framework_xnode
@@ -4204,8 +4209,6 @@ frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp @Ark
 frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.h @ArkUI_Event
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp @form_framework
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.h @form_framework
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.cpp @arkui_framework_xnode
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.h @arkui_framework_xnode
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp @arkuiscroll
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h @arkuiscroll
 frameworks/core/components_ng/pattern/arc_scroll/ @arkuiscroll

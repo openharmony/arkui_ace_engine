@@ -104,7 +104,6 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
-int32_t SystemProperties::pageLoadTimethreshold_ = 1000;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
@@ -162,16 +161,6 @@ float SystemProperties::GetAnimationScale()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
-}
-
-int32_t SystemProperties::GetComponentLoadNumber()
-{
-    return 1;
-}
-
-int32_t SystemProperties::GetStopCollectTimeWait()
-{
-    return 800; // 800 : Stop collecting asynchronous task waiting time.
 }
 
 bool SystemProperties::GetMultiInstanceEnabled()
@@ -379,11 +368,6 @@ bool SystemProperties::ConfigChangePerform()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
-}
-
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::GetContainerDeleteFlag()

@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
@@ -239,25 +240,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest067, TestSize.Level2)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList {
-        RectCallback(rectGetCallback, touchCallback, nullptr),
-        RectCallback(rectGetCallback, nullptr, mouseCallback)
-    };
+    eventManager->AddRectCallback(
+        [rectGetCallback](std::vector<Rect>& rectList) -> void { rectGetCallback(rectList); },
+        touchCallback, nullptr);
+    eventManager->AddRectCallback(
+        [rectGetCallback](std::vector<Rect>& rectList) -> void { rectGetCallback(rectList); },
+        nullptr, mouseCallback);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 1
+     * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
+     * @tc.expected: one callback processed for touch
      */
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_EQ(rectCallbackList.size(), 1);
+    eventManager->HandleOutOfRectCallbacks(point);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList is empty
+     * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
+     * @tc.expected: remaining callback processed for mouse
      */
     point.SetSourceType(SourceType::MOUSE);
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_TRUE(rectCallbackList.empty());
+    eventManager->HandleOutOfRectCallbacks(point);
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.h"
+#include "core/common/event_manager.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"

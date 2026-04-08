@@ -46,7 +46,7 @@ void LsSolver::Initialize(const std::map<std::string, double>& varInitial)
 void LsSolver::ClearPrevData()
 {
     for (int v : boolVarVec) {
-        _vars[v].score = 0;
+        vars[v].score = 0;
     }
     bestFoundHardCostThisBool = INT32_MAX;
     bestFoundHardCostThisNia = INT32_MAX;
@@ -54,7 +54,7 @@ void LsSolver::ClearPrevData()
     noImproveCntNia = 0;
     unsatClauses->Clear();
     std::fill(tabulist.begin(), tabulist.end(), 0);
-    std::fill(_litMakeBreak.begin(), _litMakeBreak.end(), 0);
+    std::fill(litMakeBreak.begin(), litMakeBreak.end(), 0);
     std::fill(isInUnsatClause.begin(), isInUnsatClause.end(), false);
     std::fill(lastMove.begin(), lastMove.end(), 0);
     std::fill(isChosenBoolVar.begin(), isChosenBoolVar.end(), false);
@@ -72,22 +72,22 @@ void LsSolver::ConstructSolution(const std::map<std::string, double>& varInitial
         }
     }
     for (int i = 0; i < numVars; i++) {
-        RationNum varValue = (_vars[i].isNia) ? RationNum::FromDouble(initValues[i]) :
+        RationNum varValue = (vars[i].isNia) ? RationNum::FromDouble(initValues[i]) :
             (initValues[i] < 0.5 ? RationNum(-1) : RationNum(1));
-        if (!_vars[i].isNia) {
+        if (!vars[i].isNia) {
             if (upValueVars[i] != 0) {
-                _solution[i] = upValueVars[i];
+                solution[i] = upValueVars[i];
             } else {
-                _solution[i] = varValue;
+                solution[i] = varValue;
             }
             continue;
         }
-        if (_vars[i].lowBound > varValue) {
-            _solution[i] = _vars[i].lowBound;
-        } else if (_vars[i].upper_bound < varValue) {
-            _solution[i] = _vars[i].upper_bound;
+        if (vars[i].lowBound > varValue) {
+            solution[i] = vars[i].lowBound;
+        } else if (vars[i].upperBound < varValue) {
+            solution[i] = vars[i].upperBound;
         } else {
-            _solution[i] = varValue;
+            solution[i] = varValue;
         }
     }
     InitializeLitDatas();
@@ -104,11 +104,11 @@ void LsSolver::ReadModel()
         std::cin >> inString2;
         if (name2var.find(inString) != name2var.end()) {
             if (inString2 == "false") {
-                _solution[name2var[inString]] = -1;
+                solution[name2var[inString]] = -1;
             } else if (inString2 == "true") {
-                _solution[name2var[inString]] = 1;
+                solution[name2var[inString]] = 1;
             } else {
-                _solution[name2var[inString]] = atoi(inString2.c_str());
+                solution[name2var[inString]] = atoi(inString2.c_str());
             }
         }
     }
@@ -119,7 +119,7 @@ void LsSolver::InitializeVariableDatas() {}
 // initialize the delta of each literal by DeltaLit operation
 void LsSolver::InitializeLitDatas()
 {
-    for (lit& l : _lits) {
+    for (Lit& l : lits) {
         if (l.isNiaLit) {
             if (l.litsIndex == 0) {
                 l.isTrue = true;
@@ -130,7 +130,7 @@ void LsSolver::InitializeLitDatas()
             continue; // even when a nia lit is not appeared, it can still be determined
         } else {
             if (l.litsIndex != 0 && litAppear[l.litsIndex]) {
-                l.isTrue = (_solution[l.delta.ToInt()] > 0) ? 1 : -1;
+                l.isTrue = (solution[l.delta.ToInt()] > 0) ? 1 : -1;
             } else {
                 l.isTrue = 1;
             } // the boolean lit does not appear, assuming it is true
@@ -143,32 +143,32 @@ void LsSolver::InitializeClauseDatas()
     litInUnsatClauseNum = 0;
     boolLitInUnsatClauseNum = 0;
     for (uint64_t c = 0; c < numClauses; c++) {
-        clause* cl = &(_clauses[c]);
+        Clause* cl = &(clauses[c]);
         cl->satCount = 0;
         cl->weight = 1;
         for (int lIdx : cl->literals) {
-            if (lIdx * _lits[std::abs(lIdx)].isTrue > 0) {
+            if (lIdx * lits[std::abs(lIdx)].isTrue > 0) {
                 cl->satCount++;
                 cl->watchLitIdx = lIdx;
             } // determine the sat count and watch lit
         }
         if (cl->satCount == 0) {
             UnsatAClause(c);
-            litInUnsatClauseNum += _clauses[c].literals.size();
-            boolLitInUnsatClauseNum += _clauses[c].boolLiterals.size();
+            litInUnsatClauseNum += clauses[c].literals.size();
+            boolLitInUnsatClauseNum += clauses[c].boolLiterals.size();
             for (int lSignIdx : cl->boolLiterals) {
-                _vars[_lits[std::abs(lSignIdx)].delta.ToInt()].score++;
+                vars[lits[std::abs(lSignIdx)].delta.ToInt()].score++;
             }
         } else {
             SatAClause(c);
         }
         if (cl->satCount > 0 && cl->satCount < cl->literals.size()) {
-            satClauseWithFalseLiteral->InsertElement((int)c);
+            satClauseWithFalseLiteral->InsertElement(static_cast<int>(c));
         }
         if (cl->satCount == 1) {
-            lit* l = &(_lits[std::abs(cl->watchLitIdx)]);
+            Lit* l = &(lits[std::abs(cl->watchLitIdx)]);
             if (!l->isNiaLit) {
-                _vars[l->delta.ToInt()].score--;
+                vars[l->delta.ToInt()].score--;
             }
         }
     }

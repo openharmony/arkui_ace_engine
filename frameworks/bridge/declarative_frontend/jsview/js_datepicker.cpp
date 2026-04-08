@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
 #include "compatible/components/component_loader.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
@@ -534,6 +535,9 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        JSDatePickerTheme::ObtainTextStyle(textStyle);
+    }
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
@@ -545,6 +549,9 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        JSDatePickerTheme::ObtainTextStyle(textStyle);
+    }
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -565,6 +572,11 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (!theme->IsCircleDial()) {
+            JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
+        }
+    }
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -757,16 +769,25 @@ void JSDatePicker::SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = selectedStyle.GetTextColor();
+    }
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = disappearStyle.GetTextColor();
+    }
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = normalStyle.GetTextColor();
+    }
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);

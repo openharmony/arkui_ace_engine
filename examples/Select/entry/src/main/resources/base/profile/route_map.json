@@ -616,6 +616,31 @@
       "buildFunction": "RadioLevel5Builder"
     },
     {
+      "name": "RadioWithTheme1",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme1.ets",
+      "buildFunction": "RadioWithTheme1Builder"
+    },
+    {
+      "name": "RadioWithTheme2",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme2.ets",
+      "buildFunction": "RadioWithTheme2Builder"
+    },
+    {
+      "name": "RadioWithTheme3",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme3.ets",
+      "buildFunction": "RadioWithTheme3Builder"
+    },
+    {
+      "name": "RadioWithTheme4",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme4.ets",
+      "buildFunction": "RadioWithTheme4Builder"
+    },
+    {
+      "name": "RadioWithTheme5",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme5.ets",
+      "buildFunction": "RadioWithTheme5Builder"
+    },
+    {
       "name": "FormIndex",
       "pageSourceFile": "src/main/ets/pages/components/form.ets",
       "buildFunction": "FormIndexBuilder"

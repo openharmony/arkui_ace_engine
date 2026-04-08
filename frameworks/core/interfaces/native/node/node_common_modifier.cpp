@@ -9339,8 +9339,8 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
         TouchPoint point;
         point.id = touchPointes[index].id;
-        point.x = touchPointes[index].nodeX;
-        point.y = touchPointes[index].nodeY;
+        point.x = touchPointes[index].windowX;
+        point.y = touchPointes[index].windowY;
         point.screenX = touchPointes[index].screenX * density;
         point.screenY = touchPointes[index].screenY * density;
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
@@ -9353,8 +9353,8 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         touchEvent.pointers.emplace_back(point);
     }
     touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
-    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
-    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.windowX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.windowY;
     touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
     touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
     touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
@@ -9386,8 +9386,8 @@ ArkUI_Int32 PostMouseEventWithStrategy(
     mouseEvent.time = time;
     mouseEvent.deviceId = arkUIMouseEvent->deviceId;
     mouseEvent.targetDisplayId = arkUIMouseEvent->targetDisplayId;
-    mouseEvent.x = arkUIMouseEvent->actionTouchPoint.nodeX;
-    mouseEvent.y = arkUIMouseEvent->actionTouchPoint.nodeY;
+    mouseEvent.x = arkUIMouseEvent->actionTouchPoint.windowX;
+    mouseEvent.y = arkUIMouseEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();
     mouseEvent.globalDisplayX = arkUIMouseEvent->actionTouchPoint.globalDisplayX * density;
     mouseEvent.globalDisplayY = arkUIMouseEvent->actionTouchPoint.globalDisplayY * density;
@@ -9430,8 +9430,8 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.deviceId = arkUIAxisEvent->deviceId;
     axisEvent.targetDisplayId = arkUIAxisEvent->targetDisplayId;
     axisEvent.action = static_cast<AxisAction>(arkUIAxisEvent->action);
-    axisEvent.x = arkUIAxisEvent->actionTouchPoint.nodeX;
-    axisEvent.y = arkUIAxisEvent->actionTouchPoint.nodeY;
+    axisEvent.x = arkUIAxisEvent->actionTouchPoint.windowX;
+    axisEvent.y = arkUIAxisEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();
     axisEvent.globalDisplayX = arkUIAxisEvent->actionTouchPoint.globalDisplayX * density;
     axisEvent.globalDisplayY = arkUIAxisEvent->actionTouchPoint.globalDisplayY * density;
@@ -9519,6 +9519,10 @@ void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
 {
     CHECK_NULL_VOID(arkUITouchEvent);
     NG::DestroyRawPointerEvent(arkUITouchEvent);
+    if (arkUITouchEvent->touchPointes) {
+        delete[] arkUITouchEvent->touchPointes;
+        arkUITouchEvent->touchPointes = nullptr;
+    }
     delete arkUITouchEvent;
     arkUITouchEvent = nullptr;
 }
@@ -9542,12 +9546,11 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
     arkUITouchEventCloned->deviceId = arkUITouchEvent->deviceId;
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
     NG::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
-    std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
     if (arkUITouchEvent->touchPointSize > 0) {
-        for (size_t i = 0; i < arkUITouchEvent->touchPointSize; i++) {
-            touchPoints[i] = arkUITouchEvent->touchPointes[i];
+        arkUITouchEventCloned->touchPointes = new ArkUITouchPoint[arkUITouchEvent->touchPointSize];
+        for (uint32_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+            arkUITouchEventCloned->touchPointes[index] = arkUITouchEvent->touchPointes[index];
         }
-        arkUITouchEventCloned->touchPointes = &touchPoints[0];
         arkUITouchEventCloned->touchPointSize = arkUITouchEvent->touchPointSize;
     } else {
         arkUITouchEventCloned->touchPointes = nullptr;

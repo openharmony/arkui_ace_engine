@@ -25,6 +25,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #undef protected
 #undef private

@@ -20,6 +20,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 

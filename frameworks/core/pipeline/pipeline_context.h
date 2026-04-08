@@ -38,7 +38,6 @@
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
 #include "core/components/box/drag_drop_event.h"
@@ -65,9 +64,11 @@ class RSUIDirector;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+struct CrownEvent;
 
 class CardTransitionController;
 class ComposedElement;
+class FocusNode;
 class FontManager;
 class OverlayElement;
 class RenderNode;
@@ -797,11 +798,8 @@ public:
         return onShow_;
     }
 
-    void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
-        OutOfRectMouseCallback& mouseCallback)
-    {
-        rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
-    }
+    void AddRectCallback(std::function<void(std::vector<Rect>&)>& getRectCallback,
+        std::function<void()>& touchCallback, std::function<void()>& mouseCallback);
 
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
@@ -1037,7 +1035,6 @@ private:
 
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
-    std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
     std::function<void()> vsyncListener_;
     std::function<bool(const std::string& args)> crownEventMonitorCallback_;

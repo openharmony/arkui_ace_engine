@@ -70,14 +70,15 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/crown_event.h"
 #include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -1756,16 +1757,11 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        auto result = front->RunPageByNamedRouter(content, params);
-        container->LoadCompleteManagerStopCollect();
-        return result;
+        return front->RunPageByNamedRouter(content, params);
     }
 
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1776,10 +1772,7 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    container->LoadCompleteManagerStartCollect(params);
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 bool AceContainer::RunDynamicPage(
@@ -5201,13 +5194,6 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     }
 }
 
-void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
-{
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
-}
-
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback)
 {
     if (!IsUIExtensionWindow()) {
@@ -5229,12 +5215,5 @@ void AceContainer::TerminateUIExtensionInner()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelfInner();
-}
-
-void AceContainer::LoadCompleteManagerStopCollect()
-{
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StopCollect();
 }
 } // namespace OHOS::Ace::Platform

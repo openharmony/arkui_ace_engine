@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/common/event_manager.h"
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
 #include "base/ressched/ressched_report.h"
 #include "core/components_ng/event/event_constants.h"

@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_interaction_interface.h"

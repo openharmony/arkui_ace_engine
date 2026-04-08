@@ -16,8 +16,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -61,7 +66,6 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
@@ -177,6 +181,12 @@ public:
 };
 } // namespace
 
+inline bool ConvertFromMouseAxis(const TouchEvent& event)
+{
+    return event.primitiveSourceTool == SourceTool::MOUSE &&
+        event.convertInfo.first == UIInputEventType::AXIS;
+}
+
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -184,6 +194,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
       safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -205,7 +216,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
@@ -215,6 +225,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
       safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     window_->OnHide();
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -236,13 +247,13 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
 PipelineContext::PipelineContext()
     : safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -262,7 +273,6 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
@@ -915,6 +925,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
     FlushTouchEvents();
+    std::optional<TouchEvent> generatedEvent = compatibleManager_.EventGenerate();
+    if (generatedEvent) {
+        OnTouchEvent(generatedEvent.value(), false);
+    }
+    FlushCompatibleTouchEvents();
     FlushDragEvents();
     int64_t endTimestamp = GetSysTimestamp();
     if (endTimestamp > startTimestamp) {
@@ -3431,6 +3446,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     CHECK_RUN_ON(UI);
     ACE_BENCH_MARK_TRACE("OnTouchEvent_start type:%d", static_cast<int32_t>(point.type));
 
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
+        static_cast<int32_t>(point.type), point.isGenerate);
+    if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        return;
+    }
+
     HandlePenHoverOut(point);
     if (CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
@@ -3507,7 +3528,14 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         SetTHPNotifyState(ThpNotifyState::DEFAULT);
         DisableNotifyResponseRegionChanged();
         SetUiDvsyncSwitch(false);
-        CompensateTouchMoveEventBeforeDown();
+        CompensateTouchMoveEventBeforeDown(touchEvents_);
+        if (!ConvertFromMouseAxis(point)) {
+            auto generatedEvent = compatibleManager_.BreakGenerate();
+            CompensateTouchMoveEventBeforeDown(compatibleTouchEvents_);
+            if (generatedEvent) {
+                OnTouchEvent(generatedEvent.value(), false);
+            }
+        }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -3603,6 +3631,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
+        std::reference_wrapper<std::list<TouchEvent>> touchEvents = touchEvents_;
+        if (ConvertFromMouseAxis(point)) {
+            touchEvents = compatibleTouchEvents_;
+        }
         if (isEventsPassThrough_ || point.passThrough) {
             scalePoint.isPassThroughMode = true;
             eventManager_->FlushTouchEventsEnd({ scalePoint });
@@ -3623,21 +3655,21 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         hasIdleTasks_ = true;
         if (touchOptimizer_) {
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
-            touchEvents_.push_back(pointWithReverseSignal);
-            touchOptimizer_->SetHisAvgPointTimeStamp(touchEvents_.back().id, historyPointsById_);
+            touchEvents.get().push_back(pointWithReverseSignal);
+            touchOptimizer_->SetHisAvgPointTimeStamp(touchEvents.get().back().id, historyPointsById_);
 
-            if (touchOptimizer_->NeedTpFlushVsync(touchEvents_.back())) {
-                // Fine-tuning fictional vsync timestamp
+            if (touchOptimizer_->NeedTpFlushVsync(touchEvents.get().back())) {
+                //Fine-tuning fictional vsync timestamp
                 uint64_t fictionalVsyncTime =
                     touchOptimizer_->FineTuneTimeStampDuringTpFlushPeriod(static_cast<uint64_t>(GetSysTimestamp()));
                 FlushVsync(fictionalVsyncTime, GetFrameCount());
             } else {
                 touchOptimizer_->FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(
-                    touchEvents_.back().id, historyPointsById_);
+                    touchEvents.get().back().id, historyPointsById_);
                 RequestFrame();
             }
         } else {
-            touchEvents_.push_back(point);
+            touchEvents.get().push_back(point);
             RequestFrame();
         }
         return;
@@ -3683,13 +3715,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 }
 
-void PipelineContext::CompensateTouchMoveEventBeforeDown()
+void PipelineContext::CompensateTouchMoveEventBeforeDown(std::list<TouchEvent>& touchEvents)
 {
-    if (touchEvents_.empty()) {
+    if (touchEvents.empty()) {
         return;
     }
     std::unordered_map<int32_t, TouchEvent> historyPointsById;
-    for (auto iter = touchEvents_.rbegin(); iter != touchEvents_.rend(); ++iter) {
+    for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
         historyPointsById.emplace(scalePoint.id, scalePoint);
         historyPointsById[scalePoint.id].history.insert(historyPointsById[scalePoint.id].history.begin(), scalePoint);
@@ -3697,7 +3729,7 @@ void PipelineContext::CompensateTouchMoveEventBeforeDown()
     for (const auto& item : historyPointsById) {
         eventManager_->DispatchTouchEvent(item.second);
     }
-    touchEvents_.clear();
+    touchEvents.clear();
 }
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
@@ -4352,6 +4384,32 @@ void PipelineContext::FlushTouchEvents()
             eventManager_->DispatchTouchEvent(*iter);
         }
         eventManager_->SetIdToTouchPoint(std::move(idToTouchPoints));
+    }
+}
+
+void PipelineContext::FlushCompatibleTouchEvents()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+    {
+        std::list<TouchEvent>&touchEvents = compatibleTouchEvents_;
+        if (touchEvents.empty()) {
+            return;
+        }
+
+        canUseLongPredictTask_ = false;
+        std::unordered_map<int, TouchEvent> idToTouchPoints;
+        ConsumeTouchEvents(touchEvents, idToTouchPoints);
+        auto maxSize = touchEvents.size();
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchEvents);
+            }
+            eventManager_->DispatchTouchEvent(*iter);
+        }
+        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoints));
+        touchEvents.clear();
     }
 }
 
@@ -7618,11 +7676,6 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
     return clickOptimizer_;
 }
 
-const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
-{
-    return loadCompleteMgr_;
-}
-
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)
 {
     PipelineBase::SetParentPipeline(weakPipeline);
@@ -7749,4 +7802,80 @@ void PipelineContext::MarkLpxDirtyNodes()
         node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
+
+bool PipelineContext::IsKeyInPressed(KeyCode tarCode) const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->IsKeyInPressed(tarCode);
+}
+
+bool PipelineContext::IsTabJustTriggerOnKeyEvent() const
+{
+    return eventManager_->IsTabJustTriggerOnKeyEvent();
+}
+
+bool PipelineContext::SetMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->SetMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode()
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode();
+    }
+    return false;
+}
+
+void PipelineContext::InitManagers()
+{
+    forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    formEventMgr_ = MakeRefPtr<FormEventManager>();
+    formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    recycleManager_ = std::make_unique<RecycleManager>();
+}
+
+const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
+{
+    return forceSplitMgr_;
+}
+
+const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
+{
+    return formVisibleMgr_;
+}
+
+const RefPtr<FormEventManager>& PipelineContext::GetFormEventManager() const
+{
+    return formEventMgr_;
+}
+
+const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
+{
+    return formGestureMgr_;
+}
+
+const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
+{
+    return recycleManager_;
+}
+
 } // namespace OHOS::Ace::NG

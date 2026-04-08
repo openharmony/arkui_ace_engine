@@ -73,10 +73,6 @@ namespace GeneratedApiImpl {
     void ShowCrash(Ark_CharPtr message);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
 } // namespace OHOS::Ace::NG::GeneratedApiImpl
-
-namespace GeneratedBridge {
-    Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
-}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -775,7 +771,7 @@ const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
 {
     static const GENERATED_ArkUIBasicNodeAPI basicNodeAPIImpl = {
         GENERATED_ARKUI_BASIC_NODE_API_VERSION, // version
-        OHOS::Ace::NG::GeneratedBridge::CreateNode,
+        nullptr,
         OHOS::Ace::NG::GeneratedApiImpl::GetNodeByViewStack,
         OHOS::Ace::NG::GeneratedApiImpl::DisposeNode,
         OHOS::Ace::NG::GeneratedApiImpl::DumpTreeNode,

@@ -38,11 +38,17 @@ constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 
 using TimePickerGetTextStyleFunc = const std::unique_ptr<FontStyle>& (TimePickerLayoutProperty::*)() const;
-void ResetTimePickerTextStyleColor(FrameNode* frameNode, TimePickerGetTextStyleFunc getTextStyleFunc)
+using TimePickerUpdateColorFunc = void (TimePickerLayoutProperty::*)(const Color& value);
+void ResetTimePickerTextStyleColor(FrameNode* frameNode, TimePickerGetTextStyleFunc getTextStyleFunc,
+    TimePickerUpdateColorFunc updateColorFunc, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutPropertyPtr<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(property);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        (property->*updateColorFunc)(color);
+        return;
+    }
     auto& textStyle = (property->*getTextStyleFunc)();
     CHECK_NULL_VOID(textStyle);
     if (textStyle->HasTextColor()) {
@@ -370,7 +376,8 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, value.textColor.value());
     } else {
-        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetDisappearTextStyle);
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetDisappearTextStyle,
+            &TimePickerLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
@@ -401,7 +408,8 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value());
     } else {
-        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetTextStyle);
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetTextStyle,
+            &TimePickerLayoutProperty::UpdateColor, normalStyle.GetTextColor());
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
@@ -432,7 +440,8 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value());
     } else {
-        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle);
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle,
+            &TimePickerLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
@@ -625,9 +634,12 @@ void TimePickerModelNG::SetDisappearTextStyle(
             TimePickerLayoutProperty, DisappearFontSize,
             ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, DisappearColor,
-        value.textColor.value_or(disappearStyle.GetTextColor()), frameNode);
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, value.textColor.value());
+    } else {
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetDisappearTextStyle,
+            &TimePickerLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearWeight,
         value.fontWeight.value_or(disappearStyle.GetFontWeight()), frameNode);
@@ -656,8 +668,12 @@ void TimePickerModelNG::SetNormalTextStyle(
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
             ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()), frameNode);
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value());
+    } else {
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetTextStyle,
+            &TimePickerLayoutProperty::UpdateColor, normalStyle.GetTextColor());
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -685,9 +701,12 @@ void TimePickerModelNG::SetSelectedTextStyle(
             TimePickerLayoutProperty, SelectedFontSize,
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, SelectedColor,
-        value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value());
+    } else {
+        ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle,
+            &TimePickerLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedWeight,
         value.fontWeight.value_or(selectedStyle.GetFontWeight()), frameNode);
@@ -706,7 +725,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
         ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetSelectedTextStyle);
+    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetSelectedTextStyle,
+        &TimePickerLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedFontFamily, selectedStyle.GetFontFamilies(), frameNode);
@@ -717,7 +737,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearFontSize,
         ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetDisappearTextStyle);
+    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetDisappearTextStyle,
+        &TimePickerLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -728,7 +749,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
         ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetTextStyle);
+    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetTextStyle,
+        &TimePickerLayoutProperty::UpdateColor, normalStyle.GetTextColor());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);

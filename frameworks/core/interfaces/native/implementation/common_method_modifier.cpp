@@ -99,6 +99,7 @@
 
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+#include "core/common/event_manager.h"
 
 using namespace OHOS::Ace::NG::Converter;
 

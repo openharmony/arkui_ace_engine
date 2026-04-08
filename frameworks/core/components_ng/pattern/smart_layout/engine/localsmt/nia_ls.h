@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_LS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_LS_H
 
-#ifndef NIA_LS_H
-#define NIA_LS_H
+
 #include <algorithm>
 #include <chrono>
 #include <csignal>
@@ -30,12 +31,13 @@
 #include <stack>
 #include <sys/types.h>
 #include <unistd.h>
+#include <unordered_map>
 
-#include "../utils/nia_Array.h"
-#include "../utils/ration_num.h"
+#include "nia_Array.h"
+#include "ration_num.h"
 
 namespace niaOverall {
-const int64_t MAX_INT = __int128_t(INT32_MAX);
+const int64_t MAX_INT = INT32_MAX;
 
 // ============================================================================
 // Solver constants (G.CNS.02)
@@ -105,8 +107,8 @@ struct CoffVar {
     CoffVar(int varIdx, RationNum coff) : varIdx(varIdx), coff(coff) {};
 };
 // if isNiaLit: \sum coff*var<=key
-// else:_vars[delta]
-struct lit {
+// else:vars[delta]
+struct Lit {
     std::vector<CoffVar> coffVars; // sort by var
     std::vector<VarLit> varLits;   // sort by var
     RationNum key;
@@ -117,14 +119,14 @@ struct lit {
     int isTrue; // 1 means the lit is true, -1 otherwise
 };
 
-struct variable {
+struct Variable {
     std::vector<int> clauseIdxs;
     std::vector<bool> boolVarInPosClause; // true means the boolean var is the pos form in corresponding clause
     std::vector<VarLit> varLits;          // sort by lit
     std::vector<uint64_t> literalIdxs;
     std::string varName;
-    RationNum lowBound = RationNum(-MAX_INT);
-    RationNum upper_bound = RationNum(MAX_INT);
+    RationNum lowBound = RationNum(-INT32_MAX);
+    RationNum upperBound = RationNum(INT32_MAX);
     bool isNia;
     bool isDelete = false;
     int score;      // if it is a bool var, then the score is calculated beforehand
@@ -152,9 +154,9 @@ struct ComponentPrintInfo {
     {}
 };
 
-struct clause {
+struct Clause {
     std::vector<int>
-        literals; // literals[i]=l means the ith literal of the clause if the pos(neg) of the _lits, it can be negative
+        literals; // literals[i]=l means the ith literal of the clause if the pos(neg) of the lits, it can be negative
     std::vector<int> niaLiterals;
     std::vector<int> boolLiterals;
     int weight = 1;
@@ -164,10 +166,10 @@ struct clause {
 };
 
 // used for restore and record info
-struct tmpInfo {
-    std::vector<variable> _varsInfo;
-    std::vector<clause> _clausesInfo;
-    std::vector<lit> _litsInfo;
+struct TmpInfo {
+    std::vector<Variable> varsInfo;
+    std::vector<Clause> clausesInfo;
+    std::vector<Lit> litsInfo;
     std::vector<int> faInfo;
     std::vector<RationNum> faCoffInfo;
     std::vector<RationNum> faConstInfo;
@@ -189,13 +191,13 @@ public:
     uint64_t unchangedVar2 = UINT32_MAX;
     std::string basicComponentName;
     size_t bWidthIdx = 0, bHightIdx = 0;
-    std::vector<variable> _vars;
+    std::vector<Variable> vars;
     std::vector<int> niaVarVec;
     std::vector<int> boolVarVec;
-    std::vector<lit> _lits;
-    std::vector<int> _litMakeBreak; // making a move will make or break the lit itself (1:make, -1:break, 0:no change)
-    std::vector<clause> _clauses;
-    std::vector<clause> _reconstructStack;
+    std::vector<Lit> lits;
+    std::vector<int> litMakeBreak; // making a move will make or break the lit itself (1:make, -1:break, 0:no change)
+    std::vector<Clause> clauses;
+    std::vector<Clause> reconstructStack;
     std::vector<bool> isInUnsatClause;
     std::vector<int> litsInUnsatClause;
     Array* unsatClauses = nullptr;
@@ -207,8 +209,8 @@ public:
     RationNum lastOpValue; // the last value and last var, x +1, at least at next step, x -1 is forbidden
     std::map<std::string, int> feasible2litidx;
     // solution
-    std::vector<RationNum> _solution;
-    std::vector<RationNum> _bestSolutin;
+    std::vector<RationNum> solution;
+    std::vector<RationNum> bestSolutin;
     int bestFoundCost;
     int bestFoundThisRestart;
     int noImproveCntBool = 0;
@@ -233,8 +235,8 @@ public:
     std::mt19937 mt;
     const uint64_t additionalLen;
     std::map<std::string, uint64_t> name2var; // map the name of a variable to its index
-    std::vector<RationNum> _preValue1; // the 1st pre-set value of a var, if the var is in the form of (a==0 OR a==1)
-    std::vector<RationNum> _preValue2;
+    std::vector<RationNum> preValue1; // the 1st pre-set value of a var, if the var is in the form of (a==0 OR a==1)
+    std::vector<RationNum> preValue2;
     bool useSwapFromFromSmallWeight;
     std::vector<bool> varAppear; // true means the var exists in the formula
     std::vector<bool> litAppear; // true means the lit exists in the formula
@@ -275,7 +277,7 @@ public:
     int bcHightIdx = 0;
     int bcXIdx = 0;
     int bcYIdx = 0;
-    bool HasSameCoffVars(const lit* l1, const lit* l2);
+    bool HasSameCoffVars(const Lit* l1, const Lit* l2);
     void EliminateMultipleInequalities(bool& modified); // a+b<=3 a+b<=2 -->a+b<=2
     bool ResolveMultipleEquals(const std::vector<int>& mLits);
     void UpdateByEquals(bool& modified);
@@ -283,7 +285,7 @@ public:
     std::vector<RationNum> presetValues;
     void DeleteRedundantClauses(std::vector<std::vector<int>>& clauseVec);
     int Find(int varIdx); // return the fa of varIdx
-    bool Merge(lit& l);   // l: a*x + b*y +c == 0
+    bool Merge(Lit& l);   // l: a*x + b*y +c == 0
     void UpdateBoundByMerge(int varIdx1, int varIdx2, RationNum coff, RationNum constTerm);
     void UpdateLitEqual(int litIdx);
     void UpdateLitPresetVar(int litIdx);
@@ -297,17 +299,17 @@ public:
     void MakeSpace();
     void RecordInfoAfterReadFile();
     void RestoreInforBeforeBuildOrigin();
-    std::vector<variable> _varsAfterReadFile;
-    std::vector<lit> _litsAfterReadFile;
+    std::vector<Variable> varsAfterReadFile;
+    std::vector<Lit> litsAfterReadFile;
     std::vector<std::vector<int>> originalVec;
-    void RecordInfo(tmpInfo& info);
-    void RestoreInfo(const tmpInfo& info);
-    tmpInfo infoBeforeTrial;
-    tmpInfo infoAfterOrigin;
+    void RecordInfo(TmpInfo& info);
+    void RestoreInfo(const TmpInfo& info);
+    TmpInfo infoBeforeTrial;
+    TmpInfo infoAfterOrigin;
     void MakeLitsSpace(uint64_t newNumLits)
     {
         numLits = newNumLits;
-        _lits.resize(numLits + additionalLen);
+        lits.resize(numLits + additionalLen);
     };
     void Initialize(const std::map<std::string, double>& varInitial = {});
     void InitializeVariableDatas();
@@ -326,32 +328,32 @@ public:
     int CountTautology(uint64_t boolVarIdx, const ResolveContext& ctx);
     int CountNegClauseTautology(uint64_t posClauseIdx, uint64_t negClauseIdx, uint64_t boolVarIdx);
     void DeleteClausesOfVar(uint64_t clauseIdx, uint64_t boolVarIdx);
-    void ResolveClauses(uint64_t boolVarIdx, ResolveContext& ctx, std::map<__int128_t, int>& clauselitMap,
-        std::vector<__int128_t>& clauselit);
+    void ResolveClauses(uint64_t boolVarIdx, ResolveContext& ctx, std::unordered_map<uint64_t, int>& clauselitMap,
+        std::vector<uint64_t>& clauselit);
     void ResolvePosAndNegClause(uint64_t posClauseIdx, uint64_t negClauseIdx, uint64_t boolVarIdx,
-        std::map<__int128_t, int>& clauselitMap, std::vector<__int128_t>& clauselit);
-    void AddClauseToData(const clause& newClause, __int128_t clauseLitHash, std::map<__int128_t, int>& clauselitMap,
-        std::vector<__int128_t>& clauselit);
+        std::unordered_map<uint64_t, int>& clauselitMap, std::vector<uint64_t>& clauselit);
+    void AddClauseToData(const Clause& newClause, uint64_t clauseLitHash, std::unordered_map<uint64_t,
+        int>& clauselitMap, std::vector<uint64_t>& clauselit);
     void PushClausesToReconstructStack(uint64_t boolVarIdx, const ResolveContext& ctx);
     std::vector<int> upValueVars;
     void PrepareUpValueVars();
-    __int128_t HashLitsToNum(std::vector<int>& lits);
+    uint64_t HashLitsToNum(const std::vector<int>& litIndices);
     void ReduceDuplicatedLits(bool& modified); // return true if found duplicated lits
     bool litsBeenModified = true;              // whether these lits have modified since last removing duplicated lits
-    void GcdForLit(lit& l);
+    void GcdForLit(Lit& l);
     void ReduceClause(bool& modified);
-    bool IsClauseTautology(const clause& c);
-    void ReduceDuplicatedLitsInClause(clause& c, bool& modified);
-    RationNum CalculateLitUpBound(const lit& l);
-    RationNum CalculateLitLowBound(const lit& l);
-    void HandleNonEqualCase(lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified);
-    void HandleEqualCase(lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified);
+    bool IsClauseTautology(const Clause& c);
+    void ReduceDuplicatedLitsInClause(Clause& c, bool& modified);
+    RationNum CalculateLitUpBound(const Lit& l);
+    RationNum CalculateLitLowBound(const Lit& l);
+    void HandleNonEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified);
+    void HandleEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified);
     void DetermineLitsByBound(bool& modified);
     void SetPreValue();
     void ReadModel();
     bool IsSameLits(std::vector<int>& lits1, std::vector<int>& lits2); // deterine whether 2 cls are the same
-    bool IsSameLit(const lit& l1, const lit& l2);
-    bool IsNegLit(const lit& l1, const lit& l2);
+    bool IsSameLit(const Lit& l1, const Lit& l2);
+    bool IsNegLit(const Lit& l1, const Lit& l2);
     bool buildUnsat = false;
 
     // random walk
@@ -365,20 +367,20 @@ public:
     void ConstructSolution(const std::map<std::string, double>& varInitial = {});
     inline bool IsSignedLitTrue(int lIdx)
     {
-        return (lIdx ^ _lits[std::abs(lIdx)].isTrue) >= 0;
+        return (lIdx ^ lits[std::abs(lIdx)].isTrue) >= 0;
     };
 
     // basic operations
     inline void SatAClause(uint64_t clauseIdx)
     {
-        unsatClauses->DeleteElement((int)clauseIdx);
-        containBoolUnsatClauses->DeleteElement((int)clauseIdx);
+        unsatClauses->DeleteElement(static_cast<int>(clauseIdx));
+        containBoolUnsatClauses->DeleteElement(static_cast<int>(clauseIdx));
     };
     inline void UnsatAClause(uint64_t clauseIdx)
     {
-        unsatClauses->InsertElement((int)clauseIdx);
-        if (_clauses[clauseIdx].boolLiterals.size() > 0) {
-            containBoolUnsatClauses->InsertElement((int)clauseIdx);
+        unsatClauses->InsertElement(static_cast<int>(clauseIdx));
+        if (clauses[clauseIdx].boolLiterals.size() > 0) {
+            containBoolUnsatClauses->InsertElement(static_cast<int>(clauseIdx));
         }
     };
     bool UpdateBestSolution();
@@ -393,8 +395,8 @@ public:
     void UpdateClauseSatCountBool(int clauseIdx, int makeBreakInClause);
     void UpdateWatchLitBool(int clauseIdx, int vLitIdx, int clSignIdx, int originSatCount);
     void UpdateBooleanVarScoreInClauseBool(int clauseIdx, int makeBreakInClause, int originSatCount);
-    void InvertLit(lit& l);
-    RationNum DeltaLit(lit& l);
+    void InvertLit(Lit& l);
+    RationNum DeltaLit(Lit& l);
     void AddCoff(uint64_t varIdxCurr, bool useTabu, int litIdx, int& operationIdx, RationNum coff1);
     double TimeElapsed();
     void ClearPrevData();
@@ -405,7 +407,7 @@ public:
         bool useTabu, int litIdx, int& operationIdx); // given a false lit(litIdx<0 means it is the neg form)
     void SelectBestOperationFromVec(int operationIdx, int& bestScore, int& bestVarIdx, RationNum& bestValue);
     void SelectBestOperationFromBoolVec(int operationIdxBool, int& bestScoreBool, int& bestVarIdxBool);
-    void ProcessClauseNiaLiterals(clause* cl, int& operationIdx);
+    void ProcessClauseNiaLiterals(Clause* cl, int& operationIdx);
     void AddSwapOperation(int& operationIdx);
     void EnterNiaMode();
     void EnterBoolMode();
@@ -413,7 +415,7 @@ public:
     bool UpdateOuterBestSolution();
     // print
     void PrintFormula();
-    void PrintLiteral(lit& l);
+    void PrintLiteral(Lit& l);
     void PrintFormulaSmt();
     void PrintLitSmt(int litIdx);
     void PrintMv();
@@ -432,21 +434,20 @@ public:
     void AddComponent(const std::string& cName);
     void PrepareSoftComponentsIdx(const std::vector<std::string>& softCNames);
     void UpBoolVars();
+    void UpdateNiaVar(size_t vIdx);
+    bool CheckLiteralSatisfaction(int lIdx, std::vector<bool>& litAppearTmp);
+    bool CheckNiaLiteralSatisfaction(Lit* l, int lIdx, std::vector<bool>& litAppearTmp);
+    bool EvaluateNiaLiteral(Lit* l, int lIdx, RationNum delta);
     bool GetLitsValue(uint64_t litIdx, const std::string& str);
     // calculate score
     void SetLitMakeBreak(const std::vector<VarLit>& varLits, int clIdx, uint64_t& currLitIdx,
         RationNum& currLitDeltaNew, const RationNum& changeValue);
     int CriticalScore(uint64_t varIdx, RationNum changeValue);
-    __int128_t CriticalSubscore(uint64_t varIdx, RationNum changeValue);
+
     // check
-    int CheckSingleClause(clause* cp);
+    int CheckSingleClause(Clause* cp);
     bool CheckSolution();
-    // handle 128
-    inline __int128_t Abs128(__int128_t n)
-    {
-        return n >= 0 ? n : -n;
-    }
-    std::string Print128(__int128 n);
+
     // local search
     bool AssumeOneLiteral(int litIdx, const std::map<std::string, double>& varInitial = {});
     bool AssumeOneLiteral(const std::map<std::string, double>& varInitial = {});
@@ -459,13 +460,13 @@ public:
 
 private:
     void ClearPreparedClauseLitVarState();
-    void RecordNiaLiteralInClause(int clauseIdx, int litSignIdx, lit& currentLit);
-    void RecordBoolLiteralInClause(int clauseIdx, int litSignIdx, lit& currentLit);
+    void RecordNiaLiteralInClause(int clauseIdx, int litSignIdx, Lit& currentLit);
+    void RecordBoolLiteralInClause(int clauseIdx, int litSignIdx, Lit& currentLit);
     void RecordClauseLiteralRelations();
-    void DeduplicateClauseIdxs(variable& currentVar);
+    void DeduplicateClauseIdxs(Variable& currentVar);
     void BuildPreparedVarLitRelations();
-    void CollectUniqueLiteralIdxs(variable& currentVar);
+    void CollectUniqueLiteralIdxs(Variable& currentVar);
 };
 } // namespace niaOverall
 
-#endif // NIA_LS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_NIA_LS_H

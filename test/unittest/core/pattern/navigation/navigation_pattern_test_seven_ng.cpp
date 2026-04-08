@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"

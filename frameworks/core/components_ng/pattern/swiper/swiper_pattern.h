@@ -1391,8 +1391,6 @@ private:
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
     friend class SwiperUISessionAdapter;
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect(bool needSwiperChangeEnd = true);
 
     bool FakeDragCheckAtStart(float& offset);
     bool FakeDragCheckAtEnd(float& offset);

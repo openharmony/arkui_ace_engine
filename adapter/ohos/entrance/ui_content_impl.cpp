@@ -56,6 +56,8 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"

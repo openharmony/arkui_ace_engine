@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -470,6 +471,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     } else {
         CreateMulti(theme, optionsAttr, param);
     }
+    theme = GetTheme<PickerTheme>();
     TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
@@ -1236,6 +1238,9 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        JSTextPickerTheme::ObtainTextStyle(textStyle);
+    }
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
@@ -1247,6 +1252,9 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
+    }
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
@@ -1419,6 +1427,7 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         defaultColor = pickerTheme->GetDividerColor();
         divider.strokeWidth = defaultStrokeWidth;
         divider.color = defaultColor;
+        divider.isDefaultColor = true;
     }
 
     if (info.Length() >= 1 && info[0]->IsObject()) {
@@ -1553,8 +1562,6 @@ void JSTextPicker::SetSelectedBackgroundStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerBackgroundStyle backgroundStyle;
-    backgroundStyle.color = theme->GetSelectedBackgroundColor();
-    backgroundStyle.borderRadius = theme->GetSelectedBorderRadius();
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParsePickerBackgroundStyle(info[0], backgroundStyle);
     }

@@ -91,6 +91,7 @@ struct TouchEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
+    SourceTool primitiveSourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
     // Coordinates relative to the upper-left corner of the current component
@@ -114,6 +115,7 @@ struct TouchEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isPassThroughMode = false;
+    bool isGenerate = false;
     int32_t xReverse = 0;
     int32_t yReverse = 0;
     int32_t eventHandleId = 0;

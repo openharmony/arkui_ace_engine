@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -1785,4 +1786,17 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions()
     CHECK_NULL_VOID(frameNode);
     ResetAccessibilityActionOptions(frameNode);
 }
+void ViewAbstractModelNG::ResetKeyboardShortcutAll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearSingleKeyboardShortcutAll();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+}
+
 } // namespace OHOS::Ace::NG

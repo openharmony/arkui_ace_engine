@@ -191,8 +191,6 @@ public:
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
     MOCK_METHOD(bool, IsSubWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
-    MOCK_METHOD(void, LoadCompleteManagerStartCollect, (const std::string& url), (override));
-    MOCK_METHOD(void, LoadCompleteManagerStopCollect, (), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
     static bool mockIsNeedModifySize_;
