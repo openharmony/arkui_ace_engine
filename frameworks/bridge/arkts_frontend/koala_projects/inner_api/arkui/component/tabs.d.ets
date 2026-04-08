@@ -56,37 +56,37 @@ export declare class ArkTabsPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkTabsPeer;
     public setTabsOptionsAttribute(options?: TabsOptions): void;
-    public verticalAttribute(value: boolean | undefined): void;
-    public barPositionAttribute(value: BarPosition | undefined): void;
-    public scrollableAttribute(value: boolean | undefined): void;
-    public barMode0Attribute(value: BarMode | undefined): void;
-    public barMode1Attribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void;
-    public barWidthAttribute(value: Length | undefined): void;
-    public barHeightAttribute(value: Length | undefined): void;
-    public animationDurationAttribute(value: number | undefined): void;
+    public setVerticalAttribute(value: boolean | undefined): void;
+    public setBarPositionAttribute(value: BarPosition | undefined): void;
+    public setScrollableAttribute(value: boolean | undefined): void;
+    public setBarModeAttribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void;
+    public setBarWidthAttribute(value: Length | undefined): void;
+    public setBarHeight0Attribute(value: Length | undefined): void;
+    public setBarHeight1Attribute(value: Length | undefined, noMinHeightLimit: boolean | undefined): void;
+    public setAnimationDurationAttribute(value: int32 | undefined): void;
     public animationModeAttribute(value: AnimationMode | undefined): void;
     public edgeEffectAttribute(value: EdgeEffect | undefined): void;
-    public onChangeAttribute(value: ((index: number) => void) | undefined): void;
+    public setOnChangeAttribute(value: ((index: number) => void) | undefined): void;
     public onSelectedAttribute(value: ((index: number) => void) | undefined): void;
-    public onTabBarClickAttribute(value: ((index: number) => void) | undefined): void;
+    public setOnTabBarClickAttribute(value: ((index: number) => void) | undefined): void;
     public onUnselectedAttribute(value: ((index: number) => void) | undefined): void;
-    public onAnimationStartAttribute(value: OnTabsAnimationStartCallback | undefined): void;
+    public setOnAnimationStartAttribute(value: OnTabsAnimationStartCallback | undefined): void;
     public onAnimationEndAttribute(value: OnTabsAnimationEndCallback | undefined): void;
     public onGestureSwipeAttribute(value: OnTabsGestureSwipeCallback | undefined): void;
     public fadingEdgeAttribute(value: boolean | undefined): void;
-    public dividerAttribute(value: DividerStyle | undefined): void;
-    public barOverlapAttribute(value: boolean | undefined): void;
-    public barBackgroundColorAttribute(value: ResourceColor | undefined): void;
+    public setDividerAttribute(value: DividerStyle | undefined): void;
+    public setBarOverlapAttribute(value: boolean | undefined): void;
+    public setBarBackgroundColorAttribute(value: ResourceColor | undefined): void;
     public barGridAlignAttribute(value: BarGridColumnOptions | undefined): void;
     public customContentTransitionAttribute(value: TabsCustomContentTransitionCallback | undefined): void;
-    public barBackgroundBlurStyle0Attribute(value: BlurStyle | undefined): void;
-    public barBackgroundBlurStyle1Attribute(
+    public setBarBackgroundBlurStyle0Attribute(value: BlurStyle | undefined): void;
+    public setBarBackgroundBlurStyle1Attribute(
         style: BlurStyle | undefined,
         options: BackgroundBlurStyleOptions | undefined
     ): void;
-    public barBackgroundEffectAttribute(value: BackgroundEffectOptions | undefined): void;
+    public setBarBackgroundEffectAttribute(value: BackgroundEffectOptions | undefined): void;
     public pageFlipModeAttribute(value: PageFlipMode | undefined): void;
-    public onContentWillChangeAttribute(value: OnTabsContentWillChangeCallback | undefined): void;
+    public setOnContentWillChangeAttribute(value: OnTabsContentWillChangeCallback | undefined): void;
     public barModeScrollableAttribute(options: ScrollableBarModeOptions | undefined): void;
     public cachedMaxCountAttribute(count: number | undefined, mode: TabsCacheMode | undefined): void;
     public _onChangeEvent_indexAttribute(callback: (index: number) => void): void;
