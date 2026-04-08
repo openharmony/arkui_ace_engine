@@ -164,7 +164,7 @@ public:
     }
 
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override {}
-    void TerminateUIExtensionInner() override {}
+    void TerminateUIExtensionInner(int32_t code) override {}
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));

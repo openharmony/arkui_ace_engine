@@ -105,5 +105,5 @@ void AceContainer::LoadCompleteManagerStopCollect() {}
 
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
 
-void AceContainer::TerminateUIExtensionInner() {}
+void AceContainer::TerminateUIExtensionInner(int32_t code) {}
 } // namespace OHOS::Ace::Platform

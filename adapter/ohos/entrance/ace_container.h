@@ -954,7 +954,7 @@ public:
         }
     }
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
-    void TerminateUIExtensionInner() override;
+    void TerminateUIExtensionInner(int32_t code) override;
 
 private:
     virtual bool MaybeRelease() override;

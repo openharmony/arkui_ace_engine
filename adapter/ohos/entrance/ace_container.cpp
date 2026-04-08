@@ -5217,10 +5217,10 @@ void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& 
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "RegisterTerminateUIExtension success");
-    uiExtensionContext->TerminateSelfWithAnimation(std::move(callback));
+    uiExtensionContext->RegisterTerminateSelfWithAnimation(std::move(callback));
 }
 
-void AceContainer::TerminateUIExtensionInner()
+void AceContainer::TerminateUIExtensionInner(int32_t code)
 {
     if (!IsUIExtensionWindow()) {
         return;
@@ -5228,7 +5228,7 @@ void AceContainer::TerminateUIExtensionInner()
     auto sharedContext = runtimeContext_.lock();
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
-    uiExtensionContext->TerminateSelfInner();
+    uiExtensionContext->TerminateSelfInner(code);
 }
 
 void AceContainer::LoadCompleteManagerStopCollect()

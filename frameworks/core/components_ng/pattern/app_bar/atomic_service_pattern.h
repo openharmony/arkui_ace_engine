@@ -78,7 +78,7 @@ public:
     {
         customAppBarNodeNode_ = customAppBarNode;
     }
-    void FireAbilityCloseEvent();
+    void FireAbilityCloseEvent(int32_t code);
 private:
     void UpdateLayoutMargin();
     void UpdateOverlayLayout();

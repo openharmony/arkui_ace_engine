@@ -20,6 +20,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/common/ace_engine.h"
@@ -40,6 +41,7 @@ const std::string EVENT_NAME_CUSTOM_APP_BAR_THIRD_CLOSE = "arkui_custom_app_bar_
 
 constexpr int32_t SERVICE_PANEL_PARAM_COUNT = 2;
 constexpr int32_t PARAM_FIRST = 1;
+constexpr int32_t PARAM_ERROR = -1;
 
 static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> nativeFucMap_;
 } // namespace
@@ -171,11 +173,25 @@ void JSAppBar::GetParamsFromJSArray(const JSRef<JSArray>& jsArray, std::map<std:
 void JSAppBar::OnThirdClickCloseEvent(const JSCallbackInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar OnThirdClickCloseEvent");
+    if (info.Length() < SERVICE_PANEL_PARAM_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent param erro");
+        return;
+    }
+    std::string codeStr;
+    if (!ParseJsString(info[PARAM_FIRST], codeStr)) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent code param erro");
+        return;
+    }
+    int32_t code = StringUtils::StringToInt(codeStr, PARAM_ERROR);
+    if (code == PARAM_ERROR) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent code param is not a valid integer");
+        return;
+    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
-    appBar->OnThirdCloseEvent();
+    appBar->OnThirdCloseEvent(code);
 }
 
 void JSAppBar::CallNative(const JSCallbackInfo& info)

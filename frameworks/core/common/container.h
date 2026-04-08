@@ -77,7 +77,7 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
-using AbilityRuntimeContextCallback = std::function<void()>;
+using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 
 class PipelineBase;
 
@@ -836,7 +836,7 @@ public:
     virtual void LoadCompleteManagerStartCollect(const std::string& url) {};
     virtual void LoadCompleteManagerStopCollect() {};
     virtual void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
-    virtual void TerminateUIExtensionInner() {}
+    virtual void TerminateUIExtensionInner(int32_t code) {}
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
