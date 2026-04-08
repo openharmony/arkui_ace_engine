@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/compatible_manager.h"
 namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
@@ -1442,6 +1443,7 @@ private:
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) override;
 
     void FlushTouchEvents();
+    void FlushCompatibleTouchEvents();
     void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
@@ -1463,7 +1465,7 @@ private:
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
-    void CompensateTouchMoveEventBeforeDown();
+    void CompensateTouchMoveEventBeforeDown(std::list<TouchEvent>& touchEvents);
 
     void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
@@ -1742,6 +1744,8 @@ private:
     bool xComponentDisplayConstraintEnabled_ = false;
     OnDrawChildrenInfoMap onDrawChildrenInfoMap_;
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
+    CompatibleManager compatibleManager_;
+    std::list<TouchEvent> compatibleTouchEvents_;
 };
 
 /**

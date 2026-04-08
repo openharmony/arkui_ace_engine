@@ -708,6 +708,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register_multi_thread.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/frame_node_impl.cpp",
