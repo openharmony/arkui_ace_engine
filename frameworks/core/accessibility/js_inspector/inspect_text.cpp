@@ -14,6 +14,7 @@
  */
 
 #include "inspect_text.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectText::InspectText(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}

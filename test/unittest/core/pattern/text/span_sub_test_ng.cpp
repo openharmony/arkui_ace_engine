@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"

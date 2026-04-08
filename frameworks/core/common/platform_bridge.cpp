@@ -15,6 +15,7 @@
 
 #include "core/common/platform_bridge.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
 

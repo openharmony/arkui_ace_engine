@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
+
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 
 namespace OHOS::Ace::Framework {
 JSStateMgmtProfiler::JSStateMgmtProfiler(std::string profilerPackage) : profilerPackage_(std::move(profilerPackage))

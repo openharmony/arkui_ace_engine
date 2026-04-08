@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "adapter/ohos/osal/ime_extra_config_ohos.h"
+
+#include "base/log/log_wrapper.h"
+
+namespace OHOS::Ace {
+void* IMEExtraConfigOHOS::GetRawExtraConfig() const
+{
+    return extraConfig_.get();
+}
+
+RefPtr<IMEExtraConfig> IMEExtraConfig::CreateFromNative(void* nativeConfig)
+{
+    auto* shareConfigPtr = reinterpret_cast<std::shared_ptr<OHOS::MiscServices::ExtraConfig>*>(nativeConfig);
+    if (shareConfigPtr == nullptr || *shareConfigPtr == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "IME extra config ptr is nullptr");
+        return nullptr;
+    }
+
+    return AceType::MakeRefPtr<IMEExtraConfigOHOS>(*shareConfigPtr);
+}
+} // namespace OHOS::Ace

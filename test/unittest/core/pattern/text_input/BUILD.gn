@@ -14,10 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_input_test") {
-  module_name = "DrawingSet-Line"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_area_decoration_test.cpp",
     "text_area_menu_test.cpp",
@@ -28,7 +27,9 @@ ace_unittest("text_input_test") {
     "text_field_content_modifier_test.cpp",
     "text_field_keyevent_test.cpp",
     "text_field_manager_test_ng.cpp",
+    "text_field_manager_test_ng_two.cpp",
     "text_field_model_static_test.cpp",
+    "text_field_model_static_test_two.cpp",
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
     "text_field_pattern_onwill.cpp",
@@ -69,7 +70,8 @@ ace_unittest("text_field_test_ng") {
   module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "text_field_layout_algorithm_test.cpp",
+    "text_field_layout_algorithm_test_two.cpp",
     "text_field_pattern_func_test_two.cpp",
     "text_field_pattern_func_test_three.cpp",
     "text_field_test_ng_five.cpp",
@@ -89,7 +91,6 @@ ace_unittest("text_input_pattern_test") {
   module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_field_pattern_test.cpp",
     "text_field_pattern_testeight.cpp",
@@ -142,11 +143,10 @@ ace_unittest("text_emoji_test") {
 }
 
 ace_unittest("text_input_listener_test") {
-  module_name = "TextSet-InputListener"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "on_text_changed_listener_impl_test.cpp",
     "text_field_pattern_multi_thread_test.cpp",
     "text_input_base.cpp",
@@ -159,6 +159,6 @@ ace_unittest("text_input_listener_test") {
     "hilog:libhilog",
   ]
   if (defined(global_parts_info.inputmethod_imf)) {
-    external_deps += [ "imf:inputmethod_client" ]
+    external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
   }
 }

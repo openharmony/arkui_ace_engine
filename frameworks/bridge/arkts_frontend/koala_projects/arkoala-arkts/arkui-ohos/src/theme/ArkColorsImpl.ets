@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -423,19 +423,19 @@ export class ArkColorsImpl implements Colors {
                 result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1) as Resource;
                 result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05) as Resource;
             } else {
-                const brandColorValue = brandColor as int32 | string;
-                let argbColor = 0xff000000 as int32;
+                const brandColorValue = brandColor;
+                let argbColor = (0xff000000).toInt();
                 if (brandColorValue instanceof int32) {
-                    argbColor = brandColorValue as int32;
+                    argbColor = brandColorValue.toInt();
                 } else if (brandColorValue instanceof string) {
-                    argbColor = ArkUIAniModule._GetStringColorValue(brandColorValue) as int32;
+                    argbColor = ArkUIAniModule._GetStringColorValue(brandColorValue).toInt();
                 }
                 result.primary = argbColor;
-                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6) as int32;
-                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4) as int32;
-                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2) as int32;
-                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1) as int32;
-                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05) as int32;
+                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6).toInt();
+                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4).toInt();
+                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2).toInt();
+                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1).toInt();
+                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05).toInt();
             }
         }
         return result;

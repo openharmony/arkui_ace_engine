@@ -51,6 +51,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -2498,6 +2499,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
+    JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
+    JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
+    JSClass<JSWeb>::StaticMethod("scrollbarLayoutPolicy", &JSWeb::ScrollbarLayoutPolicy);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3193,6 +3197,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 if (!eventInfo) {
                     return;
                 }
+
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                auto napi_status = napi_open_handle_scope(env, &scope);
+                if (napi_status != napi_ok) {
+                    return;
+                }
+
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
                 auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
@@ -3207,6 +3222,8 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 obj->SetPropertyObject("fileresult", resultObj);
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
                 auto result = func->Call(webviewController, 1, argv);
+
+                napi_close_handle_scope(env, scope);
             };
     }
 
@@ -3917,7 +3934,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(keyEventInfo);
+        func->Execute(execCtx.vm_, keyEventInfo);
     };
     WebModel::GetInstance()->SetOnKeyEvent(jsCallback);
 }
@@ -4296,7 +4313,7 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
         auto adapter = runtime->NewFunction(
             [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                     const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
-                if (argc > 0) {
+                if (argc == 2) {
                     auto state = args[0]->ToInt32(runtime);
                     auto content = args[1]->ToString(runtime);
                     callback(state, content);
@@ -4906,7 +4923,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
     };
     WebModel::GetInstance()->SetOnMouseEvent(jsCallback);
 }
@@ -5725,7 +5742,7 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+        JSRef<JSVal> obj = func->ExecuteWithValue(execCtx.vm_, keyEventInfo);
         if (obj->IsBoolean()) {
             result = obj->ToBoolean();
         }
@@ -7776,6 +7793,42 @@ void JSWeb::EnableDefaultContextMenu(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableDefaultContextMenu(isEnabled);
+}
+
+void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
+{
+    if (args.Length() < PARAM_TWO) {
+        return;
+    }
+
+    JSRef<JSVal> objFirst = args[0];
+    JSRef<JSVal> objSecond = args[1];
+    if (!objFirst->IsBoolean() || !objSecond->IsNumber()) {
+        return;
+    }
+
+    bool isEnabled = objFirst->ToBoolean();
+    int32_t type = objSecond->ToNumber<int32_t>();
+    WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
+}
+
+void JSWeb::EnableDrag(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableDrag(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDrag(isEnabled);
+}
+
+void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
+    WebModel::GetInstance()->SetScrollbarLayoutPolicy(layoutPolicy);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

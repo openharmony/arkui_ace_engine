@@ -401,6 +401,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetHostContext)
         },
         ani_native_function {
+            "_Common_IsEasySplit",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::IsEasySplit)
+        },
+        ani_native_function {
             "_Common_SetFrameRateRange",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetFrameRateRange)
@@ -1373,17 +1378,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CanvasRenderer_GetImageData",
-            "ldddd:C{escompat.Uint8ClampedArray}",
+            "ldddd:C{std.core.Uint8ClampedArray}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetImageData)
         },
         ani_native_function {
             "_CanvasRenderer_PutImageData0",
-            "lC{escompat.Uint8ClampedArray}ddii:",
+            "lC{std.core.Uint8ClampedArray}ddii:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData0)
         },
         ani_native_function {
             "_CanvasRenderer_PutImageData1",
-            "lC{escompat.Uint8ClampedArray}ddiidddd:",
+            "lC{std.core.Uint8ClampedArray}ddiidddd:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
         },
         ani_native_function {
@@ -1809,6 +1814,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetCustomCallbackWithCheck",
             "lC{arkui.FrameNode.FrameNode}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
+        },
+        ani_native_function {
+            "_SetCustomCallbackWithCheckForFrameNodes",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheckForFrameNodes)
         },
         ani_native_function {
             "_GetCallingScopeUIContext",

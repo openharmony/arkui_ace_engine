@@ -16,8 +16,6 @@
 #include "condition_scope.h"
 #include "load.h"
 
-#include <memory>
-
 namespace OHOS::Ace::Ani {
 
 ani_long ConstructConditionScope(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)

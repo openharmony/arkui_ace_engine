@@ -17,6 +17,9 @@
 
 #include "base/log/event_report.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -533,6 +536,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
                 predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1, forceCache });
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
+            } else if (res.needPredict) {
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1, forceCache });
             }
             currCache = std::max(res.forwardCacheMax, 1);
         } else if (cnt <= 0) {
@@ -599,6 +604,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
                 predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount, forceCache });
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
+            } else if (res.needPredict) {
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount, forceCache });
             }
             currCache = std::max(res.backwardCacheMax, 1);
         } else if (cnt <= 0) {

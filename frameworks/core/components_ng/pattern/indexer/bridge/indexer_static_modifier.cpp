@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/callback_keeper.h"
 #include "core/interfaces/native/utility/converter.h"

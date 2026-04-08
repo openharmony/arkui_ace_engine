@@ -25,6 +25,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -41,6 +42,7 @@
 #endif
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -172,7 +174,20 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(fontWeight, variableFontWeight);
+    if (fontWeight->IsNumber()) {
+        variableFontWeight = fontWeight->ToNumber<int32_t>();
+    } else {
+        std::string weight;
+        JSContainerBase::ParseJsString(fontWeight, weight);
+        auto parseResult = ParseFontWeight(weight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 }
 
@@ -279,7 +294,18 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(args, variableFontWeight);
+    if (args->IsNumber()) {
+        variableFontWeight = args->ToNumber<int32_t>();
+    } else {
+        auto parseResult = ParseFontWeight(fontWeight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     ProcessFontWeightConfigObject(paramObject);
@@ -468,7 +494,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             JSInteractableView::ReportClickEvent(node);
 #endif
@@ -585,7 +611,7 @@ void JSSpan::SetOnHover(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
         PipelineContext::SetCallBackNode(node);
-        func->HoverExecute(isHover, hoverInfo);
+        func->HoverExecute(execCtx.vm_, isHover, hoverInfo);
     };
     SpanModel::GetInstance()->SetOnHover(std::move(onHover));
 }

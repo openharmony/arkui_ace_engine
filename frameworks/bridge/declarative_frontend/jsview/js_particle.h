@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 class JSParticle : public JSViewAbstract, public JSInteractableView {

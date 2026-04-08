@@ -956,7 +956,9 @@ void TextSelectController::AdjustHandleOffsetWithBoundary(RectF& handleRect)
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     if (textField->IsTextArea()) {
-        AdjustHandleInBoundary(handleRect);
+        if (!textField->IsHorizontalScrollEnabled()) {
+            AdjustHandleInBoundary(handleRect);
+        }
         return;
     }
     auto textRect = textField->GetTextRect();

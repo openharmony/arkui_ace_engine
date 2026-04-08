@@ -223,9 +223,15 @@ shared_ptr<JsValue> RequireNativeModuleForCustomRuntime(const shared_ptr<JsRunti
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(CROSS_PLATFORM)
     std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
+#elif defined(PREVIEW)
+    return runtime->ExecuteJsBinForAOT("./module/arkui/jsEnumStyle.abc");
+#else
+    return runtime->ExecuteJsBinForAOT("/etc/abc/framework/jsEnumStyle.abc");
+#endif
 }
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
@@ -269,9 +275,15 @@ inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(CROSS_PLATFORM)
     std::string str("arkui_binary_arkComponent_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
+#elif defined(PREVIEW)
+    return runtime->ExecuteJsBinForAOT("./module/arkui/arkComponent.abc");
+#else
+    return runtime->ExecuteJsBinForAOT("/etc/abc/framework/arkComponent.abc");
+#endif
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -3529,29 +3541,6 @@ void JsiDeclarativeEngine::JsSetAceDebugMode()
         return;
     }
     const auto func = JSRef<JSFunc>::Cast(setAceDebugMode);
-    ContainerScope scope(instanceId_);
-    func->Call(globalObject);
-#endif
-}
-
-void JsiDeclarativeEngine::JsEnableSwitchInstance()
-{
-#if defined(PREVIEW)
-    return;
-#else
-    CHECK_NULL_VOID(runtime_);
-    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
-    CHECK_NULL_VOID(engine);
-    auto vm = engine->GetEcmaVm();
-    CHECK_NULL_VOID(vm);
-    LocalScope jsScope(vm);
-    auto globalObj = JSNApi::GetGlobalObject(vm);
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> enableSwitchInstance = globalObject->GetProperty("enableSwitchInstance");
-    if (!enableSwitchInstance->IsFunction()) {
-        return;
-    }
-    const auto func = JSRef<JSFunc>::Cast(enableSwitchInstance);
     ContainerScope scope(instanceId_);
     func->Call(globalObject);
 #endif

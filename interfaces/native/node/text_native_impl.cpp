@@ -682,7 +682,8 @@ void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option)
     delete option;
 }
 
-void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
+    OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
 {
     CHECK_NULL_VOID(option);
     option->fontWeightConfigs = fontWeightConfigs;
@@ -692,6 +693,27 @@ OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontConfigs_GetFontWeightConfigs(OH_ArkUI_F
 {
     CHECK_NULL_RETURN(option, nullptr);
     return option->fontWeightConfigs;
+}
+
+OH_ArkUI_TextController* OH_ArkUI_TextController_Create()
+{
+    return new OH_ArkUI_TextController();
+}
+
+void OH_ArkUI_TextController_Destroy(OH_ArkUI_TextController* controller)
+{
+    delete controller;
+    controller = nullptr;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
+    OH_ArkUI_TextController* controller, ArkUI_StyledString_Descriptor* descriptor)
+{
+    CHECK_NULL_RETURN(controller && controller->node && descriptor,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getTextModifier()->setStyledString(controller->node->uiNodeHandle, descriptor);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

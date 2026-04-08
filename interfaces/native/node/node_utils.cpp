@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-
 #include <cstdlib>
-#include "node_model.h"
-#include "node_extened.h"
 
-#include "base/utils/utils.h"
+#include "node_extened.h"
+#include "node_model.h"
+
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -34,7 +35,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Int32 tempSize[2];
-    impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, tempSize);
+    impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, &tempSize);
     size->width = tempSize[0];
     size->height = tempSize[1];
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -806,6 +807,34 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
     }
     impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnVisibleAreaApproximateChangeEvent(
         node->uiNodeHandle);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node,
+    float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event))
+{
+    if (!node || !callback) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE, userData, callback)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->setCommonOnAreaApproximateChangeEvent(
+        node->uiNodeHandle, node, expectedUpdateInterval);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnAreaApproximateChangeEvent(node->uiNodeHandle);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

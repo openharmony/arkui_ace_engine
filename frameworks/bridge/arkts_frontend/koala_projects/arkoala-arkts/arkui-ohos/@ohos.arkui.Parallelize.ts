@@ -7,7 +7,8 @@ import { ArkContentSlotPeer } from "arkui/component/contentSlot"
 import { ArkListPeer } from "arkui/component/list";
 import { ArkGridPeer } from "arkui/component/grid";
 import { SerializerBase } from "@koalaui/interop"
-import { UIContextImpl, ContextRecord } from "arkui/base/UIContextImpl"
+import { ContextRecord } from "arkui/base/UIContextImpl"
+import { UIContext } from '@ohos/arkui/UIContext';
 import { ArkUIAniModule } from "arkui.ani"
 import { setNeedCreate } from "arkui/ArkComponentRoot"
 import { TaskScheduler } from "arkui/TaskScheduler"
@@ -46,7 +47,7 @@ export class ParallelNode<T> {
     private peerNode: PeerNode | undefined = undefined
     private options?: ParallelOption
     private instanceId: int32 = 0
-    private uiContext: UIContextImpl
+    private uiContext: UIContext
     _args: T | undefined = undefined
     private get needAttach(): boolean {
         return this.__needAttach!.value
@@ -55,7 +56,7 @@ export class ParallelNode<T> {
         this.__needAttach!.value = value
     }
 
-    constructor(uiContext: UIContextImpl, options?: ParallelOption) {
+    constructor(uiContext: UIContext, options?: ParallelOption) {
         this.uiContext = uiContext
         this.options = options
     }
@@ -239,7 +240,7 @@ export function ParallelizeUI<T>(
     }
     SerializerBase.setMultithreadMode()
     const data: ContextRecord | undefined = (__context() as StateManager)?.contextData as ContextRecord
-    let uiContext = data?.uiContext as UIContextImpl
+    let uiContext = data?.uiContext as UIContext
     const receiver = rememberDisposable<ParallelNode<T>>(() => {
         return new ParallelNode<T>(uiContext!, options)
     }, (parallelNode: ParallelNode<T> | undefined) => {
@@ -264,7 +265,7 @@ export function ParallelizeUI(
         return
     }
     const data: ContextRecord | undefined = (__context() as StateManager)?.contextData as ContextRecord
-    let uiContext = data?.uiContext as UIContextImpl
+    let uiContext = data?.uiContext as UIContext
     SerializerBase.setMultithreadMode()
     const receiver = rememberDisposable<ParallelNode<undefined>>(() => {
         return new ParallelNode<undefined>(uiContext!, options)
@@ -358,7 +359,7 @@ class ParallelizeUIAdapterNode<V, T> implements AdapterNode {
             OBSERVE.renderingComponent = this.renderingComponent
             SerializerBase.setMultithreadMode()
             const data: ContextRecord | undefined = (__context() as StateManager)?.contextData as ContextRecord
-            let uiContext = data?.uiContext as UIContextImpl
+            let uiContext = data?.uiContext as UIContext
             const receiver = rememberDisposable<ParallelNode<T>>(() => {
                 return new ParallelNode<T>(uiContext!,
                     { completed: () => { this.onCreateComplete() } } as ParallelOption)
@@ -431,7 +432,7 @@ export function ParallelizeUI<V, T>(
         isLazy = true
     }
     const data: ContextRecord | undefined = (__context() as StateManager)?.contextData as ContextRecord
-    let uiContext = data?.uiContext as UIContextImpl
+    let uiContext = data?.uiContext as UIContext
     if (!isLazy) {
         arr.forEach((value, index) => {
             const receiver = rememberDisposable<ParallelNode<T>>(() => {
@@ -445,7 +446,7 @@ export function ParallelizeUI<V, T>(
         })
     } else {
         const data: ContextRecord | undefined = (__context() as StateManager)?.contextData as ContextRecord
-        let uiContext = data?.uiContext as UIContextImpl
+        let uiContext = data?.uiContext as UIContext
         uiContext.updateParallelizeItemNodeCallback_ = adapterUpdateCallback
         let adapterNode = rememberDisposable(() => new ParallelizeUIAdapterNode<V, T>(), (adapter?: ParallelizeUIAdapterNode<V, T>) => {
             adapter?.dispose()

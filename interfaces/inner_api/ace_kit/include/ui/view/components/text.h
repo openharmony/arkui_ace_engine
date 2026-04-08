@@ -51,6 +51,9 @@ public:
     void SetDrawCallback(DrawCallback&& drawCallback);
     std::u16string GetContent();
     void MarkRedraw();
+
+private:
+    bool hasDrawCallback_ = false;
 };
 
 } // namespace OHOS::Ace::Kit

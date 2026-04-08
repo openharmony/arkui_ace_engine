@@ -31,7 +31,7 @@ public:
     SwiperUISessionAdapter() = delete;
     explicit SwiperUISessionAdapter(RefPtr<OHOS::Ace::NG::SwiperPattern> pattern) : pattern_(pattern) {};
 
-    int32_t OnInjectionEvent(const std::string& command);
+    int32_t OnInjectionEvent(int32_t nodeId, const std::string& command);
 
     const char* GetScrollAbility();
 
@@ -39,6 +39,7 @@ private:
     SwiperCommand ParseCommand(const std::string& command);
     int32_t ParseIndexFromCommand(const std::string& command);
     void ReportComponentChangeEvent(bool result, SwiperCommand type);
+    void ReportSelectChangeData(int nodeId, int index);
 
     RefPtr<OHOS::Ace::NG::SwiperPattern> pattern_ = nullptr;
 };

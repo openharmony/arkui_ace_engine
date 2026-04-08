@@ -69,6 +69,7 @@ export enum OperationType {
 }
 
 export declare class OperationOption {
+  public id?: string;
   public value: ResourceStr;
   public action?: () => void;
   public accessibilityLevel?: string;
@@ -78,6 +79,7 @@ export declare class OperationOption {
 }
 
 export declare class SelectOptions {
+  public id?: string;
   public options: Array<SelectOption>;
   public selected?: number;
   public value?: ResourceStr;
@@ -99,6 +101,7 @@ class IconOptions {
 }
 
 class ContentIconOption {
+  public id?: string;
   public content?: ResourceStr;
   public subContent?: ResourceStr;
   public iconOptions?: IconOptions;
@@ -288,6 +291,7 @@ export struct SubHeader {
   @Prop contentMargin: LocalizedMargin;
   @Prop contentPadding: LocalizedPadding;
   @Prop titleAccessibilityText: ResourceStr;
+  @Prop titleId?: string;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
     end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
@@ -446,7 +450,8 @@ export struct SubHeader {
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
-        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -468,7 +473,8 @@ export struct SubHeader {
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
-        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -594,6 +600,7 @@ export struct SubHeader {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItem?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -815,6 +822,7 @@ export struct SubHeader {
   @Builder
   SelectStyle(selectParam: SelectOptions): void {
     Select(selectParam.options)
+      .id(selectParam?.id)
       .height('auto')
       .width('auto')
       .selected(this.selectedIndex)
@@ -861,6 +869,7 @@ export struct SubHeader {
           .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
+      .id(this.operationType === undefined ? button?.id : undefined)
       .focusable(true)
       .focusBox({
         margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
@@ -1078,6 +1087,7 @@ export struct SubHeader {
             getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
         })
       }
+      .id(textArrow?.id)
       .margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom')})
       .focusable(true)
       .constraintSize({ minWidth: this.getRightAreaMinWidth() })
@@ -1097,6 +1107,7 @@ export struct SubHeader {
                 symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
                 this.operationSymbolOptions[index] : null,
               },
+              id: item.id,
               action: item.action,
               defaultFocus: item.defaultFocus,
               accessibilityLevel: item.accessibilityLevel,
@@ -1182,6 +1193,7 @@ struct SingleIconStyle {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.IconZone();
       }
+      .id(this.item?.id)
       .focusable(true)
       .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE())

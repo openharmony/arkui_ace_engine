@@ -119,6 +119,11 @@ public:
         return needRebuild_;
     }
 
+    void ResetNeedRebuild()
+    {
+        needRebuild_ = false;
+    }
+
     enum LifeCycleEvent {
         ON_APPEAR = 0,
         ON_BUILD = 1,

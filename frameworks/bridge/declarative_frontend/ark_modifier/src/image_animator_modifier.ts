@@ -13,32 +13,17 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-
-function copyImageAnimatorModifierWithKey(obj: ModifierWithKey<string | number | boolean | object> | ImageAnimatorImagesModifier):
-  ModifierWithKey<string | number | boolean | object> {
-
-  let newObj: ModifierWithKey<string | number | boolean | object> | ImageAnimatorImagesModifier = {
-    ...obj,
-    applyStage: function (node: number): boolean {
-      throw new Error('Function not implemented.');
-    },
-    applyPeer: function (node: number, reset: boolean): void {
-      throw new Error('Function not implemented.');
-    },
-    checkObjectDiff: function (): boolean {
-      throw new Error('Function not implemented.');
-    },
-  };
-
-  if ((obj as ImageAnimatorImagesModifier)!.convertImageFrames !== undefined) {
-    (newObj as ImageAnimatorImagesModifier).convertImageFrames = (obj as ImageAnimatorImagesModifier)?.convertImageFrames;
-    (newObj as ImageAnimatorImagesModifier).isEqual = (obj as ImageAnimatorImagesModifier)?.isEqual;
+function copyImageAnimatorModifierWithKey(obj) {
+  let _a;
+  let _b;
+  let newObj = { ...obj };
+  if (obj.convertImageFrames !== undefined) {
+    newObj.convertImageFrames = (_a = obj) === null || _a === void 0 ? void 0 : _a.convertImageFrames;
+    newObj.isEqual = (_b = obj) === null || _b === void 0 ? void 0 : _b.isEqual;
   }
-
-  newObj.applyStage = obj?.applyStage;
-  newObj.applyPeer = obj?.applyPeer;
-  newObj.checkObjectDiff = obj?.checkObjectDiff;
+  newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
+  newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
+  newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
   return newObj;
 }
 

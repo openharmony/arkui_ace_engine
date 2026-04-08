@@ -69,26 +69,11 @@ public:
     void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     bool IsRightButtonCustomMenuShow();
-    bool IsRegisterTouchCallback() override
-    {
-        return true;
-    }
-    bool GetIsHandleMoving()
-    {
-        return isHandleMoving_;
-    }
-    bool GetIsHandleHidden()
-    {
-        return handleIsHidden_;
-    }
-    bool IsSingleHandleMoving()
-    {
-        return isHandleMoving_ && IsSingleHandle();
-    }
-    bool NeedRefreshMenu()
-    {
-        return needRefreshMenu_;
-    }
+    bool IsRegisterTouchCallback() override;
+    bool GetIsHandleMoving();
+    bool GetIsHandleHidden();
+    bool IsSingleHandleMoving();
+    bool NeedRefreshMenu();
     float GetHandleHotZoneRadius();
     RectF GetHandleRectWithTransform(const RectF& handleRect);
     RectF GetVisibleRect();

@@ -14,11 +14,11 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
@@ -505,6 +505,73 @@ HWTEST_F(TextTestNgThree, TextCreateParagraph002, TestSize.Level1)
 
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: TextOrphanCharOptimizationTest001
+ * @tc.desc: Test TextModelNGOrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, TextOrphanCharOptimizationTest001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetOrphanCharOptimization(frameNode, false);
+    EXPECT_EQ(textModelNG.GetOrphanCharOptimization(frameNode), false);
+    textModelNG.SetOrphanCharOptimization(false);
+    EXPECT_EQ(textLayoutProperty->GetOrphanCharOptimizationValue(true), false);
+}
+
+/**
+ * @tc.name: TextOrphanCharOptimizationTest002
+ * @tc.desc: Test TextModelNGOrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, TextOrphanCharOptimizationTest002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetOrphanCharOptimization(frameNode, true);
+    EXPECT_EQ(textModelNG.GetOrphanCharOptimization(frameNode), true);
+    textModelNG.SetOrphanCharOptimization(true);
+    EXPECT_EQ(textLayoutProperty->GetOrphanCharOptimizationValue(false), true);
+}
+
+/**
+ * @tc.name: TextOrphanCharOptimizationTest003
+ * @tc.desc: Test TextModelNGOrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, TextOrphanCharOptimizationTest003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textModelNG.GetOrphanCharOptimization(frameNode), false);
+    EXPECT_EQ(textLayoutProperty->GetOrphanCharOptimizationValue(false), false);
 }
 
 /**

@@ -15,7 +15,6 @@
 
 import { int32 } from "@koalaui/common"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIContextImpl } from "./UIContextImpl";
 import { ArkUIAniModule } from "arkui.ani";
 
 export class UIContextUtil {
@@ -34,13 +33,14 @@ export class UIContextUtil {
     static getOrCreateUIContextById(instanceId: int32): UIContext {
         let context = UIContextUtil.getUIContextById(instanceId);
         if (context === undefined) {
-            context = new UIContextImpl(instanceId);
+            context = new UIContext(instanceId);
             UIContextUtil.addUIContext(instanceId, context);
         }
         return context;
     }
 
     static isAvailableCountMap_: Map<int32, int32> = new Map<int32, int32>();
+    static availableInstanceIds_: Set<int32> = new Set<int32>();
 
     static addAvailableInstanceId(instanceId: int32): void {
         if (!UIContextUtil.isAvailableCountMap_.has(instanceId)) {
@@ -51,7 +51,7 @@ export class UIContextUtil {
         if (value === 1){
             if (instanceId >= 0) {
                 UIContextUtil.isAvailableCountMap_.set(instanceId, 0);
-                UIContextImpl.availableInstanceIds_.add(instanceId);
+                UIContextUtil.availableInstanceIds_.add(instanceId);
             }
         } else if (value === 0) {
             UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
@@ -63,7 +63,7 @@ export class UIContextUtil {
         if (value === 0){
             if (instanceId >= 0) {
                 UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
-                UIContextImpl.availableInstanceIds_.delete(instanceId);
+                UIContextUtil.availableInstanceIds_.delete(instanceId);
             }
         } else if (value === 1) {
             UIContextUtil.isAvailableCountMap_.set(instanceId, 0);

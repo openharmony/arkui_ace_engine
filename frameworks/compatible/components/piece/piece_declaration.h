@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_DECLARATION_H
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/declaration/common/declaration.h"
 #include "bridge/common/dom/dom_type.h"
 #include "compatible/components/piece/piece_theme.h"

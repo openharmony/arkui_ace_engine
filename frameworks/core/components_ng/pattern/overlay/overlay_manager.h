@@ -168,26 +168,14 @@ public:
     bool GetTipsStatus(int32_t targetId);
     bool TipsInfoListIsEmpty(int32_t targetId);
 
-    PopupInfo GetPopupInfo(int32_t targetId) const
-    {
-        auto it = popupMap_.find(targetId);
-        if (it == popupMap_.end()) {
-            return {};
-        }
-        return it->second;
-    }
+    PopupInfo GetPopupInfo(int32_t targetId) const;
 
     bool HasPopupInfo(int32_t targetId) const
     {
         return popupMap_.find(targetId) != popupMap_.end();
     }
 
-    void ErasePopupInfo(int32_t targetId)
-    {
-        if (popupMap_.find(targetId) != popupMap_.end()) {
-            popupMap_.erase(targetId);
-        }
-    }
+    void ErasePopupInfo(int32_t targetId);
 
     void SetDismissDialogId(int32_t id)
     {
@@ -198,7 +186,7 @@ public:
     {
         return dismissDialogId_;
     }
-
+    RefPtr<FrameNode> GetFirstFrameNodeOfModalBuilder(const RefPtr<FrameNode>& topModalNode) const;
     void RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node);
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,
@@ -315,25 +303,14 @@ public:
         onHideDialogCallback_ = callback;
     }
 
-    void CallOnHideDialogCallback()
-    {
-        if (onHideDialogCallback_) {
-            onHideDialogCallback_();
-        }
-    }
+    void CallOnHideDialogCallback();
 
     void SetBackPressEvent(std::function<bool()> event)
     {
         backPressEvent_ = event;
     }
 
-    bool FireBackPressEvent() const
-    {
-        if (backPressEvent_) {
-            return backPressEvent_();
-        }
-        return false;
-    }
+    bool FireBackPressEvent() const;
 
     bool GetHasPixelMap()
     {
@@ -442,18 +419,9 @@ public:
         const NG::OffsetF& offset);
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
 
-    void ResetContextMenuDragHideFinished()
-    {
-        isContextMenuDragHideFinished_ = false;
-        dragMoveVector_ = OffsetF(0.0f, 0.0f);
-        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuDragHideFinished();
 
-    void ResetContextMenuRestartDragVector()
-    {
-        dragMoveVector_ = OffsetF(0.0f, 0.0f);
-        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuRestartDragVector();
 
     void SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
     {
@@ -475,11 +443,7 @@ public:
         return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
     }
 
-    void UpdateDragMoveVector(const NG::OffsetF& offset)
-    {
-        lastDragMoveVector_ = dragMoveVector_;
-        dragMoveVector_ = offset;
-    }
+    void UpdateDragMoveVector(const NG::OffsetF& offset);
 
     OffsetF GetUpdateDragMoveVector() const
     {
@@ -727,14 +691,7 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
-    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
-    {
-        if (overlayInfo_.has_value()) {
-            return false;
-        }
-        overlayInfo_ = overlayInfo;
-        return true;
-    }
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo);
     std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
     {
         return overlayInfo_;
@@ -974,6 +931,10 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
+
+    void SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId);
+    void ResetDetachedFreeRootProxy(int32_t targetId);
+
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
@@ -1058,6 +1019,7 @@ private:
     std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 
     RefPtr<AceType> menuManager_ = nullptr;
+    std::unordered_map<int32_t, RefPtr<UINode>> detachedProxyMap_;
 };
 } // namespace OHOS::Ace::NG
 

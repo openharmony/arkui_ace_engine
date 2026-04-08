@@ -34,9 +34,10 @@ import {
     LocalStorage
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
-import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
+import { IDecoratedV1Variable, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
+import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
 import { CustomComponent, CustomDelegate, BaseCustomComponent } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
@@ -53,6 +54,7 @@ import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
 import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
+import { InteropTransferMutableBinding, InteropTransferBinding } from '../stateManagement/interop/interopBinding';
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -130,7 +132,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
 
-    const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+    const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
     const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
@@ -160,7 +162,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
             ArkThemeScopeManager.getInstance().executeReload(node);
             (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
             },
-            peerNode.getPeerPtr() as number,
+            peerNode.getPeerPtr().toDouble(),
         ];
 }
 
@@ -299,6 +301,12 @@ export function getObservedObject<T>(value: T): T {
     return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
+export function getV2ObservedObject<T>(value: T): T {
+    const global = ESValue.getGlobal();
+    const createObservedObject = global.getProperty('createV2ObservedObject');
+    return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
+}
+
 export function registerCreateWatchFuncCallback(): void {
     const createWatchFuncCallback = (callback: WatchFuncType, value: Object): InteropWatchFunc => {
         const watchFunc = new InteropWatchFunc(callback);
@@ -344,7 +352,7 @@ export function registerTransferCompatibleBuilderCallback(): void {
 export function registerTransferCompatibleUpdatableBuilderCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder(builder).unwrap()!};
+    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Object>(builder).unwrap()!};
     registerCallback.invoke(callback);
 }
 
@@ -485,13 +493,28 @@ export function transferCompatibleBuilder<T extends Function>(
     /** @memo */
     builder: T
 ): ESValue {
-    const staticBuilderFunc = (...params: FixedArray<Any>): number => {
+    const staticBuilderFunc = (...params: FixedArray<Any>): Any => {
+        let state: MutableState<int32> | undefined = undefined;
+        for (let i = 0; i < params.length; i++) {
+            if (params[i] instanceof InteropTransferMutableBinding) {
+                if (state === undefined) {
+                    state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                }
+                (params[i] as InteropTransferMutableBinding<Object>).interopAddState(state);
+            } else if (params[i] instanceof InteropTransferBinding) {
+                if (state === undefined) {
+                    state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                }
+                (params[i] as InteropTransferBinding<Object>).interopAddState(state);
+            }
+        }
+        
         /** @memo */
         const func = () => {
             builder.unsafeCall(...[__context(), __id(), ...params]);
         };
 
-        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
@@ -504,7 +527,10 @@ export function transferCompatibleBuilder<T extends Function>(
 
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
-        return ptr as number;
+        if (state === undefined) {
+            return ptr as number;
+        }
+        return [ptr as number, ()=>{ if (state) { state.value++; } }]
     }
     const createDynamicBuilder = ESValue.getGlobal().getProperty('createDynamicBuilder');
     const dynamicBuilder = createDynamicBuilder.invoke(ESValue.wrap(staticBuilderFunc));
@@ -517,7 +543,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
     builder: (args: T) => void
 ): ESValue {
     const staticBuilderFunc = (args: T): [number, ()=>void] => {
-        let state: MutableState<int32> | undefined;
+        let state: MutableState<int32> | undefined = undefined;
         if (isDynamicObject(args)) {
             state = updateDynamicObjectForInterop(args);
         } else {
@@ -526,9 +552,12 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
                 if (handler instanceof InteropBuilderLiteralProxyHandler) {
                     state = handler!.state;
                 }
+            } else if (args instanceof InteropTransferMutableBinding || args instanceof InteropTransferBinding) {
+                state = GlobalStateManager.instance.mutableState<int32>(0, true);
+                args.interopAddState(state);
             }
         }
-        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
@@ -540,7 +569,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
         });
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
-        return [ptr as number, ()=>{ if (state) { state.value++; } }];
+        return [ptr.toDouble(), ()=>{ if (state) { state.value++; } }];
     }
     const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
     const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));
@@ -1046,6 +1075,24 @@ export function enableCompatibleObservedV2ForStatic<T>(
     let updateStaticState = (value: MutableState<int32>) => {
         value.value++
         ESValue.getGlobal().getProperty('runPendingJobs').invoke();
+    }
+    method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
+        ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))
+    return value;
+}
+
+export function enableCompatibleObservedV2ForStaticMeta<T>(
+    value: T
+): T {
+    let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStaticMeta');
+    let createStaticState = () => {
+        return STATE_MGMT_FACTORY.makeMutableStateMeta();
+    }
+    let recordStaticState = (value: IMutableStateMeta) => {
+        value.addRef();
+    }
+    let updateStaticState = (value: IMutableStateMeta) => {
+        ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {value.fireChange()})
     }
     method.invoke(ESValue.wrap(value), ESValue.wrap(createStaticState),
         ESValue.wrap(recordStaticState), ESValue.wrap(updateStaticState))

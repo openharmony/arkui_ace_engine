@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/web_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -48,10 +49,13 @@ constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU = true;
+constexpr bool DEFAULT_DRAG_ENABLED = true;
+constexpr ScrollbarLayoutPolicy DEFAULT_SCROLLBAR_LAYOUT_POLICY = ScrollbarLayoutPolicy::CONTENT;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
 constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 0;
+constexpr int32_t DEFAULT_SCROLLDIRECTIONALLOCK_NESTED_SCROLL = 1;
 constexpr char DEFAULT_WEBSTANDARD_FONT[] = "sans serif";
 constexpr char DEFAULT_WEBSERIF_FONT[] = "serif";
 constexpr char DEFAULT_WEBSANSSERIF_FONT[] = "sans-serif";
@@ -74,6 +78,9 @@ constexpr WebRotateEffect DEFAULT_WEB_ROTATE_EFFECT = WebRotateEffect::TOPLEFT_E
 constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 constexpr bool DEFAULT_ENABLE_SELECTED_DATA_DETECTOR = true;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
+constexpr bool DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED = true;
+constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED = false;
+constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -958,7 +965,6 @@ void SetOnFullScreenExit(ArkUINodeHandle node, void* extraParam)
         WebModelNG::SetOnFullScreenExit(frameNode, nullptr);
     }
 }
-
 
 void ResetOnFullScreenExit(ArkUINodeHandle node)
 {
@@ -2508,6 +2514,64 @@ void ResetEnableDefaultContextMenu(ArkUINodeHandle node)
     WebModelNG::SetEnableDefaultContextMenu(frameNode, DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU);
 }
 
+void SetEnableScrollDirectionalLock(ArkUINodeHandle node, ArkUI_Bool enabled, ArkUI_Int32 type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableScrollDirectionalLock(frameNode, enabled, type);
+}
+
+void ResetEnableScrollDirectionalLock(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // Default: enabled=true, type=NESTED_SCROLL(1)
+    WebModelNG::SetEnableScrollDirectionalLock(frameNode, true, DEFAULT_SCROLLDIRECTIONALLOCK_NESTED_SCROLL);
+}
+
+void SetEnableNativeMediaPlayer(ArkUINodeHandle node, ArkUI_Bool enable, ArkUI_Bool shouldOverlay)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
+}
+
+void ResetEnableNativeMediaPlayer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode,
+        DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED, DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY);
+}
+
+void SetEnableWebAVSession(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaAVSessionEnabled(frameNode, value);
+}
+
+void ResetEnableWebAVSession(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaAVSessionEnabled(frameNode, DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED);
+}
+
+void SetEnableDrag(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDrag(frameNode, value);
+}
+
+void ResetEnableDrag(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDrag(frameNode, DEFAULT_DRAG_ENABLED);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2534,6 +2598,20 @@ void ResetBackToTop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
+}
+
+void SetScrollbarLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, static_cast<ScrollbarLayoutPolicy>(value));
+}
+
+void ResetScrollbarLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, DEFAULT_SCROLLBAR_LAYOUT_POLICY);
 }
 
 void SetOnCameraCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
@@ -2838,6 +2916,16 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
+        .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
+        .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
+        .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
+        .setEnableWebAVSession = SetEnableWebAVSession,
+        .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableDrag = SetEnableDrag,
+        .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3085,6 +3173,16 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
+        .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
+        .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
+        .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
+        .setEnableWebAVSession = SetEnableWebAVSession,
+        .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableDrag = SetEnableDrag,
+        .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

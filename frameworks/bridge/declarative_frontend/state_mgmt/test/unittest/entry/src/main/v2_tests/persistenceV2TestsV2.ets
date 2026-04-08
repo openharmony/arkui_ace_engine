@@ -195,8 +195,8 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultSubCreator: () => new CSimple<string>('')
     })!;
 
-    eq(arr1[0] instanceof CSimple, true);
-    eq(arr1[1] instanceof CSimple, true);
+    eq(arr2[0] instanceof CSimple, true);
+    eq(arr2[1] instanceof CSimple, true);
     eq(arr2[0].prop, 'a');
     eq(arr2[1].prop, 'b');
   }
@@ -599,19 +599,23 @@ export class PersistenceV2TestsV2 implements ITestFile {
     eq(data2.prop?.valueOf(), 'test');
   }
 
+  // Circular refs and shared objects
+  //
+
   testCircularRefs() {
     class A {
-      // We can't use @Type(B) here as B is not yet defined, use 'object' type instead.
-      refB?: object;
+      @Type(() => B)
+      refB?: B;
     }
     class B {
-      // Use type 'object' that can be reconstructed without the @Type annotation.
-      refA?: object;
+      @Type(A)
+      refA?: A;
     }
     class Data {
-      // Use type 'object' that can be reconstructed without the @Type annotation.
-      a?: object;
-      b?: object;
+      @Type(A)
+      a?: A;
+      @Type(B)
+      b?: B;
     }
 
     const data1: Data = PersistenceV2.globalConnect({
@@ -620,10 +624,10 @@ export class PersistenceV2TestsV2 implements ITestFile {
     })!;
 
     // update and save
-    data1.a = new A() as object;
-    data1.b = new B() as object;
-    (data1.a as A).refB = data1.b;
-    (data1.b as B).refA = data1.a;
+    data1.a = new A();
+    data1.b = new B();
+    data1.a.refB = data1.b;
+    data1.b.refA = data1.a;
     PersistenceV2.save(Data);
 
     // simulate app restart
@@ -634,8 +638,101 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultCreator: () => new Data()
     })!;
 
-    eq(data2.a, (data2.b as B).refA);
-    eq(data2.b, (data2.a as A).refB);
+    eq(data2.a instanceof A, true);
+    eq(data2.b instanceof B, true);
+    eq(data2.a, data2.b?.refA);
+    eq(data2.b, data2.a?.refB);
+  }
+
+  testSharedObjects() {
+    class Data {
+      @Type(CSimple<string>)
+      prop1: CSimple<string> | undefined;
+
+      @Type(CSimple<string>)
+      prop2: CSimple<string> | undefined;
+    }
+    const data1: Data = PersistenceV2.globalConnect({
+      type: Data,
+      defaultCreator: () => new Data()
+    })!;
+
+    const shared : CSimple<string> = new CSimple<string>('shared');
+    data1.prop1 = shared;
+    data1.prop2 = shared;
+    PersistenceV2.save(Data);
+
+    // simulate app restart
+    resetPersistenceV2();
+
+    const data2: Data = PersistenceV2.globalConnect({
+      type: Data,
+      defaultCreator: () => new Data()
+    })!;
+
+    eq(data2.prop1 instanceof CSimple, true);
+    eq(data2.prop2 instanceof CSimple, true);
+    eq(data2.prop1?.prop, 'shared');
+    eq(data2.prop2?.prop, 'shared');
+    eq(data2.prop1, data2.prop2);
+  }
+
+  testArrayOfSharedObjects() {
+    const arr1: Array<CSimple<string>> = PersistenceV2.globalConnect({
+      type: Array<CSimple<string>>,
+      defaultCreator: () => new Array<CSimple<string>>(),
+      defaultSubCreator: () => new CSimple<string>('')
+    })!;
+
+    const shared : CSimple<string> = new CSimple<string>('shared');
+    arr1.push(shared);
+    arr1.push(shared);
+    PersistenceV2.save(Array);
+
+    // simulate app restart
+    resetPersistenceV2();
+
+    const arr2: Array<CSimple<string>> = PersistenceV2.globalConnect({
+      type: Array<CSimple<string>>,
+      defaultCreator: () => new Array<CSimple<string>>(),
+      defaultSubCreator: () => new CSimple<string>('')  
+    })!;
+
+    eq(arr2[0] instanceof CSimple, true, '[0] is CSimple');
+    eq(arr2[1] instanceof CSimple, true, '[1] is CSimple');
+    eq(arr2[0]?.prop, 'shared');
+    eq(arr2[1]?.prop, 'shared');
+    eq(arr2[0], arr2[1], 'both refer to same object');
+  }
+
+  testMapOfSharedObjects() {
+     const map1: Map<string, CSimple<string>> = PersistenceV2.globalConnect({
+      type: Map<string, CSimple<string>>,
+      defaultCreator: () => new Map<string, CSimple<string>>(),
+      defaultSubCreator: () => new CSimple<string>('')
+    })!;
+
+    // update and save
+    const shared: CSimple<string> = new CSimple<string>('shared');
+    map1.set('key1', shared);
+    map1.set('key2', shared);
+    PersistenceV2.save(Map);
+
+    // simulate app restart
+    resetPersistenceV2();
+
+    const map2: Map<string, CSimple<string>> = PersistenceV2.globalConnect({
+      type: Map<string, CSimple<string>>,
+      defaultCreator: () => new Map<string, CSimple<string>>(),
+      defaultSubCreator: () => new CSimple<string>('')
+    })!;
+
+    eq(map2.size, 2);
+    eq(map2.get('key1') instanceof CSimple, true, 'value of key1 is CSimple');
+    eq(map2.get('key2') instanceof CSimple, true, 'value of key2 is CSimple');
+    eq(map2.get('key1')?.prop, 'shared');
+    eq(map2.get('key2')?.prop, 'shared');
+    eq(map2.get('key1'), map2.get('key2'), 'both refer to the same object');
   }
 
   // Union types and optional properties
@@ -817,31 +914,6 @@ export class PersistenceV2TestsV2 implements ITestFile {
   // Errors and special cases
   //
   
-  testErrorMismatchClasses() {
-    const data1: Array<string> = PersistenceV2.globalConnect({
-      type: Array<string>,
-      key: 'data',
-      defaultCreator: () => new Array<string>()
-    })!;
-    PersistenceV2.save('data');
-
-    // simulate app restart
-    resetPersistenceV2();
-
-    PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
-      // Expected BusinessError here (...The class of target (Set) mismatches 'Array'...)
-      eq(key, 'data');
-      eq(reason, 'serialization');
-    });
-
-    // Restore an Array as a Set - should cause error
-    const data2: Set<string> = PersistenceV2.globalConnect({
-      type: Set<string>,
-      key: 'data',
-      defaultCreator: () => new Set<string>()
-    })!;
-  }
-
   testExtendedArray() {
     class CArray extends Array<string> {
       notPersistValue?: string;
@@ -865,9 +937,10 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultCreator: () => new CArray()
     })!;
 
+    eq(arr2.length, 2)
     eq(arr2[0], 'a');
     eq(arr2[1], 'b');
-    // notPersistValue is non-persistent since it belongs to a Collection subclass
+    // notPersistValue belongs to a Collection subclass => won't be persisted
     eq(arr2.notPersistValue, undefined);
   }
 
@@ -895,9 +968,10 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultCreator: () => new CMap()
     })!;
 
+    eq(map2.size, 2)
     eq(map2.get('key1'), 'a');
     eq(map2.get('key2'), 'b');
-    // notPersistValue is non-persistent since it belongs to a Collection subclass
+    // notPersistValue belongs to a Collection subclass => won't be persisted
     eq(map2.notPersistValue, undefined);
   }
 
@@ -925,10 +999,38 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultCreator: () => new CSet()
     })!;
 
+    eq(set2.size, 2)
     eq(set2.has('a'), true);
     eq(set2.has('b'), true);
-    // notPersistValue is non-persistent since it belongs to a Collection subclass
+    // notPersistValue belongs to a Collection subclass => won't be persisted
     eq(set2.notPersistValue, undefined);
+  }
+
+  testErrorMismatchClasses() {
+    const data1: Array<string> = PersistenceV2.globalConnect({
+      type: Array<string>,
+      key: 'data',
+      defaultCreator: () => new Array<string>()
+    })!;
+    PersistenceV2.save('data');
+
+    // simulate app restart
+    resetPersistenceV2();
+
+    const errors: string[] = [];
+    PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
+      errors.push(reason);
+    });
+
+    // Restore an Array as a Set - should cause error
+    const data2: Set<string> = PersistenceV2.globalConnect({
+      type: Set<string>,
+      key: 'data',
+      defaultCreator: () => new Set<string>()
+    })!;
+
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (...The class of target (Set) mismatches Array...)')
   }
 
   testErrorArrayOfArrays() {
@@ -945,11 +1047,9 @@ export class PersistenceV2TestsV2 implements ITestFile {
 
     resetPersistenceV2();
 
+    const errors: string[] = [];
     PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
-      // Expected BusinessError here (Array, Map, Set, or collections.Array/Map/Set cannot be used as collection item)
-      // for the key 'Array'
-      eq(key, 'Array');
-      eq(reason, 'serialization');
+      errors.push(reason)
     });
 
     const arr2: Array<Array<string>> = PersistenceV2.globalConnect({
@@ -957,14 +1057,15 @@ export class PersistenceV2TestsV2 implements ITestFile {
       defaultCreator: () => new Array<Array<string>>(),
       defaultSubCreator: () => new Array<string>()
     })!;
+
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (Array, Map, Set, ... cannot be used as collection item)')
   }
 
   testErrorSendableAllowsOnlyPlainProps() {
+    const errors: string[] = [];
     PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
-      // Expected BusinessError here (...@Sendable only allows plain property types...)
-      // for the key 'CSendableWithDate'
-      eq(key, 'CSendableWithObject');
-      eq(reason, 'serialization');
+      errors.push(reason)
     });
 
     const data1: CSendableWithObject = PersistenceV2.globalConnect({
@@ -973,6 +1074,8 @@ export class PersistenceV2TestsV2 implements ITestFile {
     })!;
 
     PersistenceV2.save(CSendableWithObject);
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (...@Sendable only allows plain property types...)')
   }
 
   testErrorNullAndNoType() {
@@ -992,16 +1095,18 @@ export class PersistenceV2TestsV2 implements ITestFile {
     // simulate app restart
     resetPersistenceV2();
 
+    const errors: string[] = [];
     PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
-      // Expected BusinessError here (...Miss @Type in object defined...)
-      eq(key, 'A');
-      eq(reason, 'serialization');
+      errors.push(reason)
     });
 
     const data2: A = PersistenceV2.globalConnect({
       type: A,
       defaultCreator: () => new A()
     })!;
+
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (...Miss @Type in object defined...)')
   }
 
   testErrorInvalidDefaultSubCreator() {
@@ -1019,10 +1124,9 @@ export class PersistenceV2TestsV2 implements ITestFile {
     // simulate app restart
     resetPersistenceV2();
 
+    const errors: string[] = [];
     PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
-      // Expected BusinessError here (defaultSubCreator returned invalid type)
-      eq(key, 'Array');
-      eq(reason, 'serialization');
+      errors.push(reason)
     });
 
     const arr2: Array<CSimple<string>> = PersistenceV2.globalConnect({
@@ -1031,6 +1135,34 @@ export class PersistenceV2TestsV2 implements ITestFile {
       // Invalid defaultSubCreator returning wrong type
       defaultSubCreator: () => undefined
     })!;
+
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (defaultSubCreator returned invalid type)')
   }
 
+  testErrorIfNotSendable() {
+    const data: CSendable<string> = PersistenceV2.globalConnect({
+      type: CSendable<string>,
+      key: 'data',
+      defaultCreator: () => new CSendable<string>()
+    })!;
+    PersistenceV2.save('data');
+
+    // simulate app restart
+    resetPersistenceV2();
+
+    const errors: string[] = [];
+    PersistenceV2.notifyOnError((key: string, reason: string, msg: string) => {
+      errors.push(reason)
+    });
+
+    const data2: CSimple<string> = PersistenceV2.globalConnect({
+      type: CSimple<string>,
+      key: 'data',
+      defaultCreator: () => new CSimple<string>(),
+    })!;
+
+    eq(errors.length, 1, 'Expected ONE error')
+    eq(errors[0], 'serialization', 'Expected BusinessError here (The target is not @Sendable)')
+  }
 }

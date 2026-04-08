@@ -30,7 +30,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 // If a picture is a wide color gamut picture, its area value will be larger than this threshold.
 constexpr double SRGB_GAMUT_AREA = 0.104149;
 } // namespace
@@ -568,12 +567,13 @@ bool ImageProvider::IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpac
 
 RSBitmapFormat ImageProvider::MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
-    return { PixelFormatToDrawingColorType(pixmap), AlphaTypeToDrawingAlphaType(pixmap) };
+    return { static_cast<RSColorType>(PixelFormatToDrawingColorType(pixmap)),
+        static_cast<RSAlphaType>(AlphaTypeToDrawingAlphaType(pixmap)) };
 }
 RSImageInfo ImageProvider::MakeRSImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
-    RSColorType ct = PixelFormatToDrawingColorType(pixmap);
-    RSAlphaType at = AlphaTypeToDrawingAlphaType(pixmap);
+    RSColorType ct = static_cast<RSColorType>(PixelFormatToDrawingColorType(pixmap));
+    RSAlphaType at = static_cast<RSAlphaType>(AlphaTypeToDrawingAlphaType(pixmap));
     std::shared_ptr<RSColorSpace> cs = ColorSpaceToDrawingColorSpace(pixmap);
     return { pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs };
 }
@@ -583,37 +583,37 @@ std::shared_ptr<RSColorSpace> ImageProvider::ColorSpaceToDrawingColorSpace(const
     return RSColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
 }
 
-RSAlphaType ImageProvider::AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap)
+int32_t ImageProvider::AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetAlphaType()) {
         case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
-            return RSAlphaType::ALPHATYPE_UNKNOWN;
+            return static_cast<int32_t>(RSAlphaType::ALPHATYPE_UNKNOWN);
         case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
-            return RSAlphaType::ALPHATYPE_OPAQUE;
+            return static_cast<int32_t>(RSAlphaType::ALPHATYPE_OPAQUE);
         case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
-            return RSAlphaType::ALPHATYPE_PREMUL;
+            return static_cast<int32_t>(RSAlphaType::ALPHATYPE_PREMUL);
         case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
-            return RSAlphaType::ALPHATYPE_UNPREMUL;
+            return static_cast<int32_t>(RSAlphaType::ALPHATYPE_UNPREMUL);
         default:
-            return RSAlphaType::ALPHATYPE_UNKNOWN;
+            return static_cast<int32_t>(RSAlphaType::ALPHATYPE_UNKNOWN);
     }
 }
 
-RSColorType ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap)
+int32_t ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetPixelFormat()) {
         case PixelFormat::RGB_565:
-            return RSColorType::COLORTYPE_RGB_565;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_RGB_565);
         case PixelFormat::RGBA_8888:
-            return RSColorType::COLORTYPE_RGBA_8888;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_RGBA_8888);
         case PixelFormat::RGBA_1010102:
-            return RSColorType::COLORTYPE_RGBA_1010102;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_RGBA_1010102);
         case PixelFormat::BGRA_8888:
-            return RSColorType::COLORTYPE_BGRA_8888;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_BGRA_8888);
         case PixelFormat::ALPHA_8:
-            return RSColorType::COLORTYPE_ALPHA_8;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_ALPHA_8);
         case PixelFormat::RGBA_F16:
-            return RSColorType::COLORTYPE_RGBA_F16;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_RGBA_F16);
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -621,7 +621,7 @@ RSColorType ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>&
         case PixelFormat::NV12:
         case PixelFormat::CMYK:
         default:
-            return RSColorType::COLORTYPE_UNKNOWN;
+            return static_cast<int32_t>(RSColorType::COLORTYPE_UNKNOWN);
     }
 }
 

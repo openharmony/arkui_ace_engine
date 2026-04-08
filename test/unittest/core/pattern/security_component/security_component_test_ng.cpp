@@ -46,11 +46,11 @@
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "security_component_test_ng.h"
 #undef protected
 #undef private
@@ -695,6 +695,29 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, 
     pattern->OnModifyDone();
     EXPECT_TRUE(pattern->isAppearCallback_);
     EXPECT_NE(pattern->clickListener_, nullptr);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePatternTest003
+ * @tc.desc: Test security component without background keeps transparent after modifyDone
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest003, TestSize.Level0)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
 }
 
 /**

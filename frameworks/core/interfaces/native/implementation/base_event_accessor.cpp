@@ -16,10 +16,8 @@
 #include <optional>
 #include <vector>
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/event/ace_events.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"

@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "a2ui_library",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

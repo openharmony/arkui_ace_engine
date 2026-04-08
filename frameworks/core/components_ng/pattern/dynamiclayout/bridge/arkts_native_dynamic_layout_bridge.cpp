@@ -248,11 +248,10 @@ Local<panda::ObjectRef> GetFrameNode(int32_t nodeId, panda::ecmascript::EcmaVM* 
 
 std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
-    return [vm = vm, object = NG::JsWeak(panda::CopyableGlobal(vm, jsObj))]
+    return [vm = vm, obj = panda::CopyableGlobal(vm, jsObj)]
         (LayoutWrapper* layoutWrapper) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        auto obj = object.Lock();
         CHECK_NULL_VOID(!obj.IsEmpty());
         CHECK_NULL_VOID(obj->IsObject(vm));
         auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
@@ -276,11 +275,10 @@ std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Loc
 
 std::function<void(LayoutWrapper*)> PreparePlaceChildrenFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
-    return [vm = vm, object = NG::JsWeak(panda::CopyableGlobal(vm, jsObj))]
+    return [vm = vm, obj = panda::CopyableGlobal(vm, jsObj)]
         (LayoutWrapper* layoutWrapper) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        auto obj = object.Lock();
         CHECK_NULL_VOID(!obj.IsEmpty());
         CHECK_NULL_VOID(obj->IsObject(vm));
         auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onLayout"));
@@ -368,7 +366,7 @@ ArkUINativeModuleValue DynamicLayoutBridge::CreateDynamicLayout(ArkUIRuntimeCall
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject(vm)) {
+    if (firstArg.IsEmpty() || !firstArg->IsObject(vm)) {
         nodeModifiers->getDynamicLayoutModifier()->createDynamicLayout(
             nullptr, NG::DynamicLayoutType::DEFAULT_LAYOUT);
         return panda::JSValueRef::Undefined(vm);

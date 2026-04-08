@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 
+#include "core/common/event_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -357,6 +358,9 @@ void PostEventManager::PostAxisCancelEvent(
     auto lastAxisEvent = eventManager->GetLastAxisEvent();
     falsifyEvent.pointerEvent = lastAxisEvent.pointerEvent;
     falsifyEvent.isFalsifyCancel = true;
+    auto targetFrameNode = AceType::DynamicCast<FrameNode>(targetNode);
+    eventManager->AxisTest(falsifyEvent, targetFrameNode);
+    eventManager->DispatchAxisEventNG(falsifyEvent);
     eventManager->DispatchTouchEvent(falsifyEvent);
     ClearPostInputActions(targetNode, axisEvent.id, PostInputEventType::AXIS);
 }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
+#include "base/memory/referenced.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/property/measure_utils.h"

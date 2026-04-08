@@ -21,9 +21,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/dimension.h"
@@ -775,5 +775,44 @@ HWTEST_F(CounterTestNg, CounterModelNGUpdatesHeightForAllChildrenTest001, TestSi
     ASSERT_NE(contentNode, nullptr);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: CounterModelNGOnInjectionEventTest001
+ * @tc.desc: Test OnInjectionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::BackgroundColor;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    std::string jsonCommand = R"({"cmd":"setCounterOnInc"})";
+    int32_t result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounterOnDec"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounter"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = R"({")";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = "";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
 }
 } // namespace OHOS::Ace::NG

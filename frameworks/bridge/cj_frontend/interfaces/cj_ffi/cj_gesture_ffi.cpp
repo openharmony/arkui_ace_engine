@@ -30,6 +30,7 @@
 #include "frameworks/core/components_ng/gestures/pinch_gesture.h"
 #include "frameworks/core/components_ng/gestures/rotation_gesture.h"
 #include "frameworks/core/components_ng/gestures/swipe_gesture.h"
+#include "frameworks/core/components_ng/gestures/tap_gesture.h"
 #if defined(WINDOWS_PLATFORM)
 #include <windows.h>
 #else

@@ -15,9 +15,10 @@
 
 #include "arkoala_api_generated.h"
 #include "base/log/log_wrapper.h"
-#include "core/common/container.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::Converter {

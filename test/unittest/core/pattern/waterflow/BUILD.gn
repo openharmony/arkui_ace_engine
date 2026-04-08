@@ -75,6 +75,7 @@ ace_unittest("water_flow_test_sw") {
     "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
     "water_flow_sw_test.cpp",
+    "water_flow_layout_utils_test.cpp",
   ]
   sources += COMMON_SRC
 

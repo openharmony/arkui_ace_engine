@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-
 namespace OHOS::Ace::Framework {
 
 std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()

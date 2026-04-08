@@ -813,73 +813,15 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: AtomicServiceMenuBarSetVisibleTest001
- * @tc.desc: Test OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible with nullptr context.
+ * @tc.name: NativeNodeNapiTest012
+ * @tc.desc: Test OH_ArkUI_EnableEventPassthrough function.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeNapiTest, AtomicServiceMenuBarSetVisibleTest001, TestSize.Level1)
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest012, TestSize.Level1)
 {
-    auto ret = OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(nullptr, true);
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-}
-
-/**
- * @tc.name: AtomicServiceMenuBarSetVisibleTest002
- * @tc.desc: Test OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible with invalid context.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeNapiTest, AtomicServiceMenuBarSetVisibleTest002, TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_Context uiContext = { .id = 10000 };
-
-    auto ret = OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(&uiContext, true);
-
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-}
-
-/**
- * @tc.name: GetPageRootNodeHandleByContextTest001
- * @tc.desc: Test OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext with nullptr root node.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeNapiTest, GetPageRootNodeHandleByContextTest001, TestSize.Level1)
-{
-    ArkUI_Context uiContext = { .id = 10000 };
-
-    auto ret = OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(&uiContext, nullptr);
-
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-}
-
-/**
- * @tc.name: GetPageRootNodeHandleByContextTest002
- * @tc.desc: Test OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext with nullptr context.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeNapiTest, GetPageRootNodeHandleByContextTest002, TestSize.Level1)
-{
-    ArkUI_NodeHandle rootNode = nullptr;
-
-    auto ret = OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(nullptr, &rootNode);
-
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    EXPECT_EQ(rootNode, nullptr);
-}
-
-/**
- * @tc.name: GetPageRootNodeHandleByContextTest003
- * @tc.desc: Test OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext with invalid context.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeNapiTest, GetPageRootNodeHandleByContextTest003, TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_Context uiContext = { .id = 10000 };
-    ArkUI_NodeHandle rootNode = nullptr;
-
-    auto ret = OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(&uiContext, &rootNode);
-
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    EXPECT_EQ(rootNode, nullptr);
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 10000 });
+    bool enable = true;
+    ArkUI_RawInputEventType eventType = ArkUI_RawInputEventType::ARKUI_RAW_INPUT_EVENT_TYPE_MOUSE;
+    auto code = OH_ArkUI_EnableEventPassthrough(uiContext, enable, eventType);
+    EXPECT_EQ(code, ARKUI_ERROR_CODE_PARAM_INVALID);
 }

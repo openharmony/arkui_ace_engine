@@ -42,7 +42,7 @@ class JsAcePage;
 // Basic class of command from JS framework
 class ACE_EXPORT JsCommand : public Referenced {
 public:
-    JsCommand() : Referenced(false) {}
+    JsCommand() : Referenced() {}
     ~JsCommand() override = default;
 
     virtual void Execute(const RefPtr<JsAcePage>& page) const = 0;

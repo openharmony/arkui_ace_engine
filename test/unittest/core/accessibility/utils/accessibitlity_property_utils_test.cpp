@@ -18,12 +18,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "base/log/dump_log.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
-#include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
+#include "core/accessibility/utils/accessibility_property_utils.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -408,7 +409,7 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController004, TestSize
     ASSERT_EQ(frameNode2->IsVisible(), true);
     NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(frameNode2);
     ASSERT_EQ(frameNode2->GetAccessibilityVisible(), false);
-     
+
     /**
      * @tc.steps: step2. construct AccessibilityGroupOptions
      */

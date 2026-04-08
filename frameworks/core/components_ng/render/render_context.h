@@ -52,6 +52,7 @@ class VisualEffect;
 class Filter;
 enum class Gravity;
 class Blender;
+class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
@@ -358,6 +359,9 @@ public:
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
+    virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
+    virtual void SetShadowPath(const std::string path) {}
+    virtual void ResetShadowPath() {}
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
     RefPtr<UiMaterial> GetSystemMaterial() const;
 
@@ -849,6 +853,7 @@ public:
     }
 
     virtual void SetDrawNode() {}
+    virtual void SetUnionSpacing(float spacing) {}
 
     static void SetNeedCallbackNodeChange(bool needCallback);
 

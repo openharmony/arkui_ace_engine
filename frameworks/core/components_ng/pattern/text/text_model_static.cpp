@@ -18,7 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -397,6 +397,11 @@ void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::o
 void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetOrphanCharOptimization(frameNode, valueOpt.value_or(false));
 }
 
 void TextModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt)

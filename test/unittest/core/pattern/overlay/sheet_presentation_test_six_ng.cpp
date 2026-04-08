@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/mock_foldable_window.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -143,7 +145,7 @@ HWTEST_F(SheetPresentationTestSixNg, ComputeSheetTypeInSubWindow011, TestSize.Le
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. create sheetWrapperNode.
      */
@@ -229,7 +231,7 @@ HWTEST_F(SheetPresentationTestSixNg, ComputeSheetTypeInSubWindow012, TestSize.Le
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. create sheetWrapperNode.
      */
@@ -315,7 +317,7 @@ HWTEST_F(SheetPresentationTestSixNg, ComputeSheetTypeInSubWindow013, TestSize.Le
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. create sheetWrapperNode.
      */
@@ -401,7 +403,7 @@ HWTEST_F(SheetPresentationTestSixNg, ComputeSheetTypeInSubWindow014, TestSize.Le
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. create sheetWrapperNode.
      */
@@ -981,6 +983,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest001, TestSize.Leve
      */
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1049,6 +1056,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest002, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1125,6 +1137,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest003, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetAlgorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetAlgorithm, nullptr);
 
@@ -1195,6 +1212,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest004, TestSize.Leve
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(algorithm, nullptr);
 
@@ -1260,6 +1282,11 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest005, TestSize.Leve
      */
     auto pattern = sheet->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(algorithm, nullptr);
 

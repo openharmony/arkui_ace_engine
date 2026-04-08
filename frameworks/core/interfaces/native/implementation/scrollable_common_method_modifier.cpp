@@ -118,6 +118,14 @@ void SetScrollBarMarginImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<ScrollBarMargin>(value);
     ScrollableModelStatic::SetScrollBarMargin(frameNode, convValue.value_or(scrollBarMargin));
 }
+void SetAutoAdjustScrollBarMargin(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetAutoAdjustScrollBarMargin(frameNode, convValue);
+}
 void SetNestedScrollImpl(Ark_NativePointer node,
                          const Opt_NestedScrollOptions* value)
 {
@@ -253,6 +261,13 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
         arkCallback.Invoke();
     };
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
+}
+void SetEnableScrollWithMouse(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetEnableScrollWithMouse(frameNode, *convValue);
 }
 void SetOnReachStartImpl(Ark_NativePointer node,
                          const Opt_synthetic_Callback_Void* value)
@@ -408,6 +423,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetScrollBarColorImpl,
         ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
         ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
+        ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMargin,
         ScrollableCommonMethodModifier::SetNestedScrollImpl,
         ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::SetFrictionImpl,
@@ -418,6 +434,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
         ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
         ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
+        ScrollableCommonMethodModifier::SetEnableScrollWithMouse,
         ScrollableCommonMethodModifier::SetOnReachStartImpl,
         ScrollableCommonMethodModifier::SetOnReachEndImpl,
         ScrollableCommonMethodModifier::SetOnScrollStartImpl,

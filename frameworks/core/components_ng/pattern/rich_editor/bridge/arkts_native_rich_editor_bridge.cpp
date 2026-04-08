@@ -83,7 +83,7 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         "resetUndoStyle", "setScrollBarColor", "resetScrollBarColor", "setSelectedDragPreviewStyle",
         "resetSelectedDragPreviewStyle", "setSingleLine", "resetSingleLine", "setBindSelectionMenu",
         "setEnableSelectedDataDetector", "setClip", "setFocusable", "setSelectedDataDetectorConfig",
-        "setCustomKeyboardJS"
+        "setCustomKeyboardJS", "setOrphanCharOptimization", "resetOrphanCharOptimization"
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -176,6 +176,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFocusable),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectDetectConfig),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCustomKeyboardJS),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOrphanCharOptimization),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOrphanCharOptimization),
     };
 
     auto richEditor = panda::ObjectRef::NewWithNamedProperties(
@@ -488,7 +490,7 @@ ArkUINativeModuleValue RichEditorBridge::ResetEnableDataDetector(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& textStyleResult, bool isJsView)
+Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& textStyleResult)
 {
     auto leadingMarginArray = panda::ArrayRef::New(vm);
     panda::ArrayRef::SetValueAt(vm, leadingMarginArray, NUM_0,
@@ -504,15 +506,15 @@ Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& 
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "lineBreakStrategy"),
             panda::NumberRef::New(vm, textStyleResult.lineBreakStrategy));
     }
-    if (isJsView && textStyleResult.paragraphSpacing.has_value()) {
+    if (textStyleResult.paragraphSpacing.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphSpacing"),
             panda::NumberRef::New(vm, static_cast<double>(textStyleResult.paragraphSpacing.value().ConvertToFp())));
     }
-    if (isJsView && textStyleResult.textVerticalAlign.has_value()) {
+    if (textStyleResult.textVerticalAlign.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "textVerticalAlign"),
             panda::NumberRef::New(vm, static_cast<int32_t>(textStyleResult.textVerticalAlign.value())));
     }
-    if (isJsView && textStyleResult.textDirection.has_value()) {
+    if (textStyleResult.textDirection.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "textDirection"),
             panda::NumberRef::New(vm, static_cast<int32_t>(textStyleResult.textDirection.value())));
     }
@@ -720,63 +722,12 @@ Local<panda::ObjectRef> CreateAbstractSpanResult(EcmaVM *vm, RichEditorAbstractS
         spanPositionObj, panda::StringRef::NewFromUtf16(vm, event.GetValue().c_str()),
         panda::StringRef::NewFromUtf16(vm, event.GetPreviewText().c_str()),
         textStyleObj, offsetInSpan,
-        CreateParagraphStyle(vm, event.GetTextStyle(), true)
+        CreateParagraphStyle(vm, event.GetTextStyle())
     };
     auto returnObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(onIMEInputCompleteObjKeys),
         onIMEInputCompleteObjKeys, onIMEInputCompleteObjValues);
     SetJSUrlStyle(vm, event.GetUrlAddress(), returnObject);
     return returnObject;
-}
-
-Local<panda::ObjectRef> CreateAbstractSpanResult(EcmaVM *vm, RichEditorAbstractSpanResult& event, bool isJsView)
-{
-    if (isJsView) {
-        return CreateAbstractSpanResult(vm, event);
-    }
-    const char* spanPositionObjKeys[] = { "spanRange", "spanIndex" };
-    auto spanRange = panda::ArrayRef::New(vm);
-    panda::ArrayRef::SetValueAt(vm, spanRange, NUM_0, panda::NumberRef::New(vm, event.GetSpanRangeStart()));
-    panda::ArrayRef::SetValueAt(vm, spanRange, NUM_1, panda::NumberRef::New(vm, event.GetSpanRangeEnd()));
-    Local<JSValueRef> spanPositionObjValues[] = { spanRange, panda::NumberRef::New(vm, event.GetSpanIndex()) };
-    auto spanPositionObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(spanPositionObjKeys),
-        spanPositionObjKeys, spanPositionObjValues);
-    const char* decorationObjKeys[] = { "type", "color" };
-    Local<JSValueRef> decorationObjValues[] = {
-        panda::NumberRef::New(vm, static_cast<int32_t>(event.GetTextDecoration())),
-        panda::StringRef::NewFromUtf8(vm, event.GetColor().c_str())
-    };
-    auto decorationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(decorationObjKeys),
-        decorationObjKeys, decorationObjValues);
-
-    const char* textStyleObjKeys[] = { "fontColor", "fontFeature", "fontSize", "lineHeight",
-        "letterSpacing", "fontStyle", "fontWeight", "fontFamily", "decoration"};
-    Local<JSValueRef> textStyleObjValues[] = {
-        panda::StringRef::NewFromUtf8(vm, event.GetFontColor().c_str()),
-        panda::StringRef::NewFromUtf8(vm, UnParseFontFeatureSetting(event.GetFontFeatures()).c_str()),
-        panda::NumberRef::New(vm, event.GetFontSize()),
-        panda::NumberRef::New(vm, event.GetTextStyle().lineHeight),
-        panda::NumberRef::New(vm, event.GetTextStyle().letterSpacing),
-        panda::NumberRef::New(vm, static_cast<int32_t>(event.GetFontStyle())),
-        panda::NumberRef::New(vm, event.GetFontWeight()),
-        panda::StringRef::NewFromUtf8(vm, event.GetFontFamily().c_str()), decorationObj
-    };
-    auto textStyleObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(textStyleObjKeys),
-        textStyleObjKeys, textStyleObjValues);
-    auto offsetInSpan = panda::ArrayRef::New(vm);
-    panda::ArrayRef::SetValueAt(vm, offsetInSpan, NUM_0, panda::NumberRef::New(vm, event.OffsetInSpan()));
-    panda::ArrayRef::SetValueAt(vm, offsetInSpan, NUM_1,
-        panda::NumberRef::New(vm, event.OffsetInSpan() + event.GetEraseLength()));
-
-    const char* onIMEInputCompleteObjKeys[] = { "spanPosition", "value", "previewText", "textStyle",
-        "offsetInSpan", "paragraphStyle" };
-    Local<JSValueRef> onIMEInputCompleteObjValues[] = {
-        spanPositionObj, panda::StringRef::NewFromUtf16(vm, event.GetValue().c_str()),
-        panda::StringRef::NewFromUtf16(vm, event.GetPreviewText().c_str()),
-        textStyleObj, offsetInSpan,
-        CreateParagraphStyle(vm, event.GetTextStyle(), isJsView)
-    };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(onIMEInputCompleteObjKeys),
-        onIMEInputCompleteObjKeys, onIMEInputCompleteObjValues);
 }
 
 ArkUINativeModuleValue RichEditorBridge::SetOnIMEInputComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -805,7 +756,7 @@ ArkUINativeModuleValue RichEditorBridge::SetOnIMEInputComplete(ArkUIRuntimeCallI
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        auto onIMEInputCompleteObj = CreateAbstractSpanResult(vm, event, isJsView);
+        auto onIMEInputCompleteObj = CreateAbstractSpanResult(vm, event);
         onIMEInputCompleteObj->SetNativePointerFieldCount(vm, NUM_1);
         onIMEInputCompleteObj->SetNativePointerField(vm, NUM_0, static_cast<void*>(&event));
         panda::Local<panda::JSValueRef> params[NUM_1] = { onIMEInputCompleteObj };
@@ -869,43 +820,11 @@ void CreateTextStyleObj(
         panda::StringRef::NewFromUtf8(vm, spanResult.GetTextStyle().strokeColor.c_str()));
 }
 
-void CreateTextStyleObj(EcmaVM* vm, Local<panda::ObjectRef>& textStyleObj,
-    const NG::RichEditorAbstractSpanResult& spanResult, bool isJsView)
-{
-    if (isJsView) {
-        CreateTextStyleObj(vm, textStyleObj, spanResult);
-        return;
-    }
-    const char* decorationObjKeys[] = { "type", "color", "style" };
-    auto textDecoration = static_cast<int32_t>(spanResult.GetTextDecoration());
-    auto textDecorationStyle = static_cast<int32_t>(spanResult.GetTextDecorationStyle());
-    Local<JSValueRef> decorationObjValues[] = { panda::NumberRef::New(vm, textDecoration),
-        panda::StringRef::NewFromUtf8(vm, spanResult.GetColor().c_str()),
-        panda::NumberRef::New(vm, textDecorationStyle) };
-    auto decorationObj = panda::ObjectRef::NewWithNamedProperties(
-        vm, ArraySize(decorationObjKeys), decorationObjKeys, decorationObjValues);
-
-    auto textShadowObjectArray = CreateTextShadowObjectArray(vm, spanResult.GetTextStyle());
-
-    const char* textStyleObjKeys[] = { "fontColor", "fontFeature", "fontSize", "lineHeight", "letterSpacing",
-        "fontStyle", "fontWeight", "fontFamily", "decoration", "textShadow" };
-    Local<JSValueRef> textStyleObjValues[] = { panda::StringRef::NewFromUtf8(vm, spanResult.GetFontColor().c_str()),
-        panda::StringRef::NewFromUtf8(vm, UnParseFontFeatureSetting(spanResult.GetFontFeatures()).c_str()),
-        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetFontSize())),
-        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetTextStyle().lineHeight)),
-        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetTextStyle().letterSpacing)),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(spanResult.GetFontStyle()))),
-        panda::NumberRef::New(vm, static_cast<int32_t>(spanResult.GetFontWeight())),
-        panda::StringRef::NewFromUtf8(vm, spanResult.GetFontFamily().c_str()), decorationObj, textShadowObjectArray };
-    textStyleObj =
-        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(textStyleObjKeys), textStyleObjKeys, textStyleObjValues);
-}
-
 void SetTextChangeSpanResult(EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj,
-    const NG::RichEditorAbstractSpanResult& spanResult, bool isJsView)
+    const NG::RichEditorAbstractSpanResult& spanResult)
 {
     auto textStyleObj = panda::ObjectRef::New(vm);
-    CreateTextStyleObj(vm, textStyleObj, spanResult, isJsView);
+    CreateTextStyleObj(vm, textStyleObj, spanResult);
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
         panda::StringRef::NewFromUtf16(vm, spanResult.GetValue().c_str()));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewText"),
@@ -913,10 +832,8 @@ void SetTextChangeSpanResult(EcmaVM* vm, panda::Local<panda::ObjectRef>& resultO
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
         textStyleObj);
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
-        CreateParagraphStyle(vm, spanResult.GetTextStyle(), isJsView));
-    if (isJsView) {
-        SetJSUrlStyle(vm, spanResult.GetUrlAddress(), resultObj);
-    }
+        CreateParagraphStyle(vm, spanResult.GetTextStyle()));
+    SetJSUrlStyle(vm, spanResult.GetUrlAddress(), resultObj);
 }
 
 Local<panda::ObjectRef> CreateTextStyleResult(EcmaVM *vm, const TextStyleResult& textStyleResult)
@@ -965,42 +882,6 @@ Local<panda::ObjectRef> CreateTextStyleResult(EcmaVM *vm, const TextStyleResult&
     return textStyleObj;
 }
 
-Local<panda::ObjectRef> CreateTextStyleResult(EcmaVM *vm, const TextStyleResult& textStyleResult, bool isJsView)
-{
-    if (isJsView) {
-        return CreateTextStyleResult(vm, textStyleResult);
-    }
-    const char* decorationObjKeys[] = { "type", "color" };
-    Local<JSValueRef> decorationObjValues[] = {
-        panda::NumberRef::New(vm, static_cast<int32_t>(textStyleResult.decorationType)),
-        panda::StringRef::NewFromUtf8(vm, textStyleResult.decorationColor.c_str())
-    };
-    auto decorationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(decorationObjKeys),
-        decorationObjKeys, decorationObjValues);
-
-    auto leadingMarginArray = panda::ArrayRef::New(vm);
-    panda::ArrayRef::SetValueAt(vm, leadingMarginArray, NUM_0,
-        panda::StringRef::NewFromUtf8(vm, textStyleResult.leadingMarginSize[NUM_0].c_str()));
-    panda::ArrayRef::SetValueAt(vm, leadingMarginArray, NUM_1,
-        panda::StringRef::NewFromUtf8(vm, textStyleResult.leadingMarginSize[NUM_1].c_str()));
-
-    const char* textStyleObjKeys[] = { "fontColor", "fontFeature", "fontSize", "fontStyle",
-        "lineHeight", "letterSpacing", "fontWeight", "fontFamily", "decoration", "textAlign", "leadingMarginSize" };
-    Local<JSValueRef> textStyleObjValues[] = {
-        panda::StringRef::NewFromUtf8(vm, textStyleResult.fontColor.c_str()),
-        panda::StringRef::NewFromUtf8(vm, UnParseFontFeatureSetting(textStyleResult.fontFeature).c_str()),
-        panda::NumberRef::New(vm, textStyleResult.fontSize),
-        panda::NumberRef::New(vm, textStyleResult.fontStyle),
-        panda::NumberRef::New(vm, textStyleResult.lineHeight),
-        panda::NumberRef::New(vm, textStyleResult.letterSpacing),
-        panda::NumberRef::New(vm, textStyleResult.fontWeight),
-        panda::StringRef::NewFromUtf8(vm, textStyleResult.fontFamily.c_str()), decorationObj,
-        panda::NumberRef::New(vm, textStyleResult.textAlign), leadingMarginArray
-    };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(textStyleObjKeys),
-        textStyleObjKeys, textStyleObjValues);
-}
-
 Local<panda::ObjectRef> CreateSymbolSpanStyleResult(EcmaVM *vm, const SymbolSpanStyle& symbolSpanStyle)
 {
     auto resultObj = panda::ObjectRef::New(vm);
@@ -1019,27 +900,6 @@ Local<panda::ObjectRef> CreateSymbolSpanStyleResult(EcmaVM *vm, const SymbolSpan
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "effectStrategy"),
         panda::NumberRef::New(vm, symbolSpanStyle.effectStrategy));
     return resultObj;
-}
-
-Local<panda::ObjectRef> CreateSymbolSpanStyleResult(EcmaVM *vm, const SymbolSpanStyle& symbolSpanStyle, bool isJsView)
-{
-    if (isJsView) {
-        return CreateSymbolSpanStyleResult(vm, symbolSpanStyle);
-    }
-    const char* symbolSpanStyleObjKeys[] = { "fontColor", "fontFeature", "fontSize", "lineHeight",
-        "letterSpacing", "fontWeight", "renderingStrategy", "effectStrategy" };
-    Local<JSValueRef> symbolSpanStyleObjValues[] = {
-        panda::StringRef::NewFromUtf8(vm, symbolSpanStyle.symbolColor.c_str()),
-        panda::StringRef::NewFromUtf8(vm, UnParseFontFeatureSetting(symbolSpanStyle.fontFeature).c_str()),
-        panda::NumberRef::New(vm, symbolSpanStyle.fontSize),
-        panda::NumberRef::New(vm, symbolSpanStyle.lineHeight),
-        panda::NumberRef::New(vm, symbolSpanStyle.letterSpacing),
-        panda::NumberRef::New(vm, symbolSpanStyle.fontWeight),
-        panda::NumberRef::New(vm, symbolSpanStyle.renderingStrategy),
-        panda::NumberRef::New(vm, symbolSpanStyle.effectStrategy)
-    };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(symbolSpanStyleObjKeys),
-        symbolSpanStyleObjKeys, symbolSpanStyleObjValues);
 }
 
 Local<panda::ArrayRef> CreateResourceObjectParam(EcmaVM *vm, const std::vector<ResourceObjectParams>& params)
@@ -1145,24 +1005,23 @@ Local<panda::ObjectRef> CreateSpanResultObject(EcmaVM *vm, const ResultObject& r
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
             panda::StringRef::NewFromUtf16(vm, resultObject.valueString.c_str()));
-        if (isJsView) {
-            resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewText"),
-                panda::StringRef::NewFromUtf16(vm, resultObject.previewText.c_str()));
-        }
+        resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewText"),
+            panda::StringRef::NewFromUtf16(vm, resultObject.previewText.c_str()));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
-            CreateTextStyleResult(vm, resultObject.textStyle, isJsView));
+            CreateTextStyleResult(vm, resultObject.textStyle));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
-            CreateParagraphStyle(vm, resultObject.textStyle, isJsView));
+            CreateParagraphStyle(vm, resultObject.textStyle));
+        SetJSUrlStyle(vm, resultObject.urlAddress, resultObj);
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
             panda::StringRef::NewFromUtf16(vm, resultObject.valueString.c_str()));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
-            CreateSymbolSpanStyleResult(vm, resultObject.symbolSpanStyle, isJsView));
+            CreateSymbolSpanStyleResult(vm, resultObject.symbolSpanStyle));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResource"),
             CreateValueResource(vm, resultObject.valueResource, isJsView));
     } else if (resultObject.type == SelectSpanType::TYPEIMAGE) {
         if (resultObject.valuePixelMap) {
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined (PIXEL_MAP_SUPPORTED)
             ArkTSUtils::ConvertPixmap(resultObj, vm, resultObject.valuePixelMap);
 #endif
         } else {
@@ -1204,16 +1063,14 @@ void CreatSelectEvent(EcmaVM *vm, const BaseEventInfo* info, panda::Local<panda:
 void SetSymbolChangeSpanResult(EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj,
     const NG::RichEditorAbstractSpanResult& spanResult, bool isJsView)
 {
-    if (isJsView) {
-        resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
-            panda::StringRef::NewFromUtf8(vm, spanResult.GetValueString().c_str()));
-    }
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"), 
+        panda::StringRef::NewFromUtf8(vm, spanResult.GetValueString().c_str()));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
-        CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle(), isJsView));
+        CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle()));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResource"),
         CreateValueResource(vm, spanResult.GetValueResource(), isJsView));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
-        CreateParagraphStyle(vm, spanResult.GetTextStyle(), isJsView));
+        CreateParagraphStyle(vm, spanResult.GetTextStyle()));
 }
 
 void SetImageChangeSpanResult(
@@ -1265,7 +1122,7 @@ void SetChangeTextSpans(EcmaVM* vm, const std::vector<NG::RichEditorAbstractSpan
         spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "offsetInSpan"), offsetInSpanArray);
         switch (it.GetType()) {
             case NG::SpanResultType::TEXT:
-                SetTextChangeSpanResult(vm, spanResultObj, it, isJsView);
+                SetTextChangeSpanResult(vm, spanResultObj, it);
                 break;
             case NG::SpanResultType::IMAGE:
                 SetImageChangeSpanResult(vm, spanResultObj, it);
@@ -1298,10 +1155,8 @@ panda::Local<panda::ObjectRef> CreateOnWillChange(EcmaVM* vm, const NG::RichEdit
     auto replacedSymbolSpansArray = panda::ArrayRef::New(vm);
     SetChangeTextSpans(vm, changeValue.GetRichEditorReplacedSymbolSpans(), replacedSymbolSpansArray, isJsView);
     onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "replacedSymbolSpans"), replacedSymbolSpansArray);
-    if (isJsView) {
-        onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "changeReason"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(changeValue.GetChangeReason())));
-    }
+    onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "changeReason"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(changeValue.GetChangeReason())));
 
     return onWillChangeObj;
 }
@@ -1459,7 +1314,7 @@ void SetDeleteSpan(EcmaVM* vm, panda::Local<panda::ObjectRef>& spanResultObj,
     CHECK_NULL_VOID(vm);
     switch (spanResult.GetType()) {
         case NG::SpanResultType::TEXT: {
-            SetTextChangeSpanResult(vm, spanResultObj, spanResult, isJsView);
+            SetTextChangeSpanResult(vm, spanResultObj, spanResult);
             break;
         }
         case NG::SpanResultType::IMAGE: {
@@ -1477,7 +1332,7 @@ void SetDeleteSpan(EcmaVM* vm, panda::Local<panda::ObjectRef>& spanResultObj,
             spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
                 panda::StringRef::NewFromUtf8(vm, spanResult.GetValueString().c_str()));
             spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
-                CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle(), isJsView));
+                CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle()));
             spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResource"),
                 CreateValueResource(vm, spanResult.GetValueResource(), isJsView));
             break;
@@ -3222,6 +3077,38 @@ ArkUINativeModuleValue RichEditorBridge::ResetSingleLine(ArkUIRuntimeCallInfo* r
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorSingleLine(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorOrphanCharOptimization(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOrphanCharOptimization(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

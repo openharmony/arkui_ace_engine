@@ -16,7 +16,6 @@ import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer';
 import { ComponentContent } from '../ComponentContent';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { KPointer } from '@koalaui/interop';
-import { UIContextImpl } from '../base/UIContextImpl';
 import { int32 } from '@koalaui/compat';
 import { FrameNodeExtender } from '../framework';
 import { BusinessError } from '#external';
@@ -25,10 +24,14 @@ import { RecordData } from '@ohos.base';
 export class ComponentContentTransfer {
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
+        }
+        let isDisposed = ESValue.wrap(input).invokeMethod('isDisposed').toBoolean();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
         }
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
 
@@ -38,7 +41,7 @@ export class ComponentContentTransfer {
         }
         let getFrameNodeRawPtr = arkUINode.getProperty('getFrameNodeRawPtr');
         let frameNodeRawPtr = getFrameNodeRawPtr.invoke(frameNodeDyn! as Object).toNumber();
-        let frameNodePeer = FrameNodeExtender.createByRawPtr(frameNodeRawPtr as KPointer);
+        let frameNodePeer = FrameNodeExtender.createByRawPtr(Double.toLong(frameNodeRawPtr));
 
         let nodePtrDyn = ESValue.wrap(input).invokeMethod('getNodePtr');
         if (typeof(nodePtrDyn) !== 'object') {
@@ -47,18 +50,22 @@ export class ComponentContentTransfer {
         let nodeRawPtr = getFrameNodeRawPtr.invoke(nodePtrDyn as Object).toNumber();
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
-        let uiContextSta = new UIContextImpl(instanceId as int32);
-        return new TransComponentContent(uiContextSta as UIContext, nodeRawPtr as KPointer, frameNodePeer);
+        let uiContextSta = new UIContext(instanceId as int32);
+        return new TransComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
     }
 
     static transferDynamic(input: Object): Any {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
         }
         let componentContentSta = input as ComponentContent;
+        let isDisposed = componentContentSta.isDisposed();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
+        }
         const instanceId = componentContentSta.getInstanceId();
         let uiContext = UIContextTransfer.createDynamic(instanceId);
 

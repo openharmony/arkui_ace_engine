@@ -14,8 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "vector"
 
 #include "base/utils/time_util.h"

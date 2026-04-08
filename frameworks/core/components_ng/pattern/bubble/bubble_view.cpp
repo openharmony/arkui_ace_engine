@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -26,10 +27,12 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -169,6 +172,23 @@ int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode)
         paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
     }
     return paragLineHeight;
+}
+
+
+bool SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<PopupParam>& param)
+{
+    CHECK_NULL_RETURN(bubbleNode, false);
+    auto systemMaterial = param->GetSystemMaterial();
+    if (systemMaterial &&
+        systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+        systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        auto renderContext = bubbleNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(bubbleNode), AceType::RawPtr(systemMaterial));
+        return true;
+    }
+    return false;
 }
 
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int32_t targetId,
@@ -377,6 +397,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
                 renderContext->UpdateBackShadow(shadow);
             } while (false);
         }
+        bubblePattern->SetIsUserSetMaterial(SetBubbleSystemMaterial(child, param));
+        if (bubblePattern->IsUserSetMaterial()) {
+            renderContext->SetClipToBounds(true);
+        }
     }
     if (spanString) {
         auto messageNode = bubblePattern->GetMessageNode();
@@ -498,6 +522,10 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         }
         if (param->GetShadow().has_value()) {
             columnRenderContext->UpdateBackShadow(param->GetShadow().value());
+        }
+        popupPattern->SetIsUserSetMaterial(SetBubbleSystemMaterial(columnNode, param));
+        if (popupPattern->IsUserSetMaterial()) {
+            columnRenderContext->SetClipToBounds(true);
         }
     }
     popupPaintProps->UpdateAutoCancel(!param->HasAction());
@@ -825,6 +853,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     bubblePattern->SetHasPlacement(param->HasPlacement());
     bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
     bubblePattern->SetShadow(param->GetShadow());
+    bubblePattern->SetIsUserSetMaterial(SetBubbleSystemMaterial(childNode, param));
 
     if (!(param->GetIsPartialUpdate().has_value())) {
         bubblePattern->SetHasTransition(param->GetHasTransition());

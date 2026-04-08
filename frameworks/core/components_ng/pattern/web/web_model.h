@@ -23,6 +23,7 @@
 #include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
+struct TextDetectConfig;
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
@@ -242,6 +243,7 @@ public:
     virtual void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableImageAnalyzer(bool isEnabled) {}
     virtual void SetEnableAutoFill(bool isEnabled) {}
+    virtual void SetEnableDrag(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
@@ -254,6 +256,8 @@ public:
     virtual void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
     virtual void SetOnTextSelectionChange(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableDefaultContextMenu(bool isEnabled) {}
+    virtual void SetEnableScrollDirectionalLock(bool enabled, int32_t type) {}
+    virtual void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

@@ -21,6 +21,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -267,6 +268,7 @@ struct ArkUIDragControllerAsync {
     SharedPointerWrapper dataLoadParams;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
+    std::vector<int32_t> autoHideComponentUniqueIds;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     ani_fn_object asyncCallback = nullptr;
@@ -584,7 +586,7 @@ struct ArkUIAniCommonModifier {
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
     std::optional<std::string> (*getWindowName)(ani_int instanceId);
-    std::optional<std::uint32_t> (*getWindowId)(ani_int instanceId);
+    ani_int (*getWindowId)(ani_int instanceId);
     ani_int (*getWindowWidthBreakpoint)();
     ani_int (*getWindowHeightBreakpoint)();
     void* (*transferKeyEventPointer)(ani_long nativePtr);
@@ -635,6 +637,7 @@ struct ArkUIAniCommonModifier {
     void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
     ani_long (*getPageRootNode)();
+    ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

@@ -2198,7 +2198,11 @@ class OnAreaChangeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -4955,9 +4959,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
   visibility(value) {
@@ -7326,6 +7331,21 @@ class BackToTopModifier extends ModifierWithKey {
 }
 BackToTopModifier.identity = Symbol('backToTop');
 
+class EnableScrollWithMouseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetEnableScrollWithMouse(node);
+    }
+    else {
+      getUINativeModule().scrollable.setEnableScrollWithMouse(node, this.value);
+    }
+  }
+}
+EnableScrollWithMouseModifier.identity = Symbol('enableScrollWithMouse');
+
 class ScrollBarMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7339,6 +7359,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
   }
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
+
+class AutoAdjustScrollBarMarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetAutoAdjustScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setAutoAdjustScrollBarMargin(node, this.value);
+    }
+  }
+}
+AutoAdjustScrollBarMarginModifier.identity = Symbol('autoAdjustScrollBarMargin');
 
 class OnWillStopDraggingModifier extends ModifierWithKey {
   constructor(value) {
@@ -7480,8 +7514,16 @@ class ArkScrollable extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
     return this;
   }
+  enableScrollWithMouse(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
+    return this;
+  }
   scrollBarMargin(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, value);
+    return this;
+  }
+  autoAdjustScrollBarMargin(value) {
+    modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
     return this;
   }
   onWillStopDragging(value) {
@@ -10826,7 +10868,7 @@ class ArkSpanComponent {
   onDetach(event) {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
@@ -11717,6 +11759,24 @@ class TextLineSpacingModifier extends ModifierWithKey {
 }
 TextLineSpacingModifier.identity = Symbol('textLineSpacing');
 
+class TextOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    }
+    else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOrphanCharOptimizationModifier.identity = Symbol('textOrphanCharOptimization');
+
 class TextCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12077,6 +12137,19 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
+class TextOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextOnWillCopyModifier.identity = Symbol('textOnWillCopy');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12526,6 +12599,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
+    return this;
+  }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity,
       TextCompressLeadingPunctuationModifier, value);
@@ -12579,6 +12657,11 @@ class ArkTextComponent extends ArkComponent {
   }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
     return this;
   }
   onCopy(callback) {
@@ -13428,6 +13511,19 @@ class TextAreaOnEditChangeModifier extends ModifierWithKey {
   }
 }
 TextAreaOnEditChangeModifier.identity = Symbol('textAreaOnEditChange');
+class TextAreaOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCopyModifier.identity = Symbol('textAreaOnWillCopy');
 class TextAreaOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13441,6 +13537,19 @@ class TextAreaOnCopyModifier extends ModifierWithKey {
   }
 }
 TextAreaOnCopyModifier.identity = Symbol('textAreaOnCopy');
+class TextAreaOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCutModifier.identity = Symbol('textAreaOnWillCut');
 class TextAreaOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14065,6 +14174,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextAreaEnableAutoSpacingModifier.identity = Symbol('textAreaEnableAutoSpacing');
 
+class TextAreaOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textArea.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaOrphanCharOptimizationModifier.identity = Symbol('textAreaOrphanCharOptimization');
+
 class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14153,6 +14279,22 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
+class TextAreaHorizontalScrollingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().textArea.setHorizontalScrolling(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaHorizontalScrollingModifier.identity = Symbol('textAreaHorizontalScrolling');
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14209,6 +14351,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  horizontalScrolling(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHorizontalScrollingModifier.identity, TextAreaHorizontalScrollingModifier, value);
     return this;
   }
   allowChildCount() {
@@ -14287,8 +14433,16 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity, TextAreaOnEditChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCopyModifier.identity, TextAreaOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity, TextAreaOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCutModifier.identity, TextAreaOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {
@@ -14591,6 +14745,11 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
+      TextAreaOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -15604,6 +15763,19 @@ class TextInputOnContentScrollModifier extends ModifierWithKey {
   }
 }
 TextInputOnContentScrollModifier.identity = Symbol('textInputOnContentScroll');
+class TextInputOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextInputOnWillCopyModifier.identity = Symbol('textInputOnWillCopy');
 class TextInputOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15617,6 +15789,19 @@ class TextInputOnCopyModifier extends ModifierWithKey {
   }
 }
 TextInputOnCopyModifier.identity = Symbol('textInputOnCopy');
+class TextInputOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextInputOnWillCutModifier.identity = Symbol('textInputOnWillCut');
 class TextInputOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16213,6 +16398,23 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextInputEnableAutoSpacingModifier.identity = Symbol('textInputEnableAutoSpacing');
 
+class TextInputOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textInput.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputOrphanCharOptimizationModifier.identity = Symbol('textInputOrphanCharOptimization');
+
 class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16487,8 +16689,16 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputFilterModifier.identity, TextInputFilterModifier, arkValue);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCopyModifier.identity, TextInputOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity, TextInputOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCutModifier.identity, TextInputOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {
@@ -16787,6 +16997,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
+      TextInputOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -17638,6 +17853,17 @@ class ArkOnVisibleAreaChange {
   }
   isEqual(another) {
     return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
+  }
+}
+class ArkOnAreaChange {
+  constructor(event, expectedUpdateInterval, hasOptionsArg = false) {
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.hasOptionsArg = hasOptionsArg;
+  }
+  isEqual(another) {
+    return this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval &&
+      this.hasOptionsArg === another.hasOptionsArg;
   }
 }
 
@@ -24694,25 +24920,28 @@ class TextTimerOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c;
+    let _a, _b, _c, _d;
     if (reset) {
-      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().textTimer.setTextTimerOptions(node,
         (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
         (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
-        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.startTime);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
         (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
-        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.startTime,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.startTime);
   }
 }
 TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
@@ -25344,7 +25573,12 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   enableNativeMediaPlayer(config) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+    return this;
   }
   onRenderProcessNotResponding(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessNotRespondingModifier.identity, WebOnRenderProcessNotRespondingModifier, callback);
@@ -25442,6 +25676,19 @@ class ArkWebComponent extends ArkComponent {
   }
   enableDefaultContextMenu(value) {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
+    return this;
+  }
+  enableScrollDirectionalLock(enabled, type) {
+    const config = { enabled: enabled, type: type };
+    modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, config);
+    return this;
+  }
+  enableDrag(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+  scrollbarLayoutPolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
     return this;
   }
 }
@@ -27156,6 +27403,20 @@ class WebEnableAutoFillModifier extends ModifierWithKey {
 }
 WebEnableAutoFillModifier.identity = Symbol('webEnableAutoFillModifier');
 
+class WebEnableDragModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+WebEnableDragModifier.identity = Symbol('webEnableDragModifier');
+
 class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27169,6 +27430,62 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   }
 }
 WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
+
+class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableScrollDirectionalLock(node);
+    } else {
+      getUINativeModule().web.setEnableScrollDirectionalLock(node, this.value.value, this.value.type);
+    }
+  }
+}
+WebEnableScrollDirectionalLockModifier.identity = Symbol('webEnableScrollDirectionalLockModifier');
+
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+WebEnableNativeMediaPlayerModifier.identity = Symbol('webEnableNativeMediaPlayerModifier');
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+  }
+}
+WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+WebScrollbarLayoutPolicyModifier.identity = Symbol('webScrollbarLayoutPolicyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

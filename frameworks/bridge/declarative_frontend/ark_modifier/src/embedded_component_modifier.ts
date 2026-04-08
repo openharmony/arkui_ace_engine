@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class EmbeddedComponentModifier extends ArkEmbeddedComponent implements AttributeModifier<EmbeddedComponentAttribute> {
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);

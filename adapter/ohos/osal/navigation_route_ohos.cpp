@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 NavigationRouteOhos::NavigationRouteOhos(const std::string& bundleName)
 {
+    bundleName_ = bundleName;
     InitRouteMap();
     RegisteHspUpdateCallback();
 }
@@ -166,9 +167,9 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
     if (callback_ == nullptr) {
         return -1;
     }
-    if (IsPluginRouteInfo(item.bundleName, item.moduleName)) {
+    if (IsPluginRouteInfo(item.bundleName, item.moduleName) || bundleName_ != item.bundleName) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "load navdestination from plugin hsp, bundleName: %{public}s, moduleName: %{public}s",
+            "load navdestination from different bundle, bundleName: %{public}s, moduleName: %{public}s",
             item.bundleName.c_str(), item.moduleName.c_str());
         // pass its real bundleName means navigate between two applications.
         int32_t errorCode = callback_(item.bundleName, item.moduleName, item.ohmurl, false);

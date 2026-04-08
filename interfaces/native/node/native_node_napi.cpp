@@ -534,4 +534,18 @@ int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }
+
+ArkUI_ErrorCode OH_ArkUI_EnableEventPassthrough(ArkUI_ContextHandle uiContext, bool enabled,
+    ArkUI_RawInputEventType type)
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto basicAPI = fullImpl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    auto id = context->id;
+    auto ret = basicAPI->enableEventPassthrough(id, enabled, static_cast<int32_t>(type));
+    return static_cast<ArkUI_ErrorCode>(ret);
+}
 }

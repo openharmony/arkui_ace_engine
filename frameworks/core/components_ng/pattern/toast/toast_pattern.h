@@ -60,6 +60,9 @@ public:
 
     void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps);
 
+    void CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+        const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp);
+
     void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override;

@@ -32,6 +32,7 @@
 namespace OHOS::Ace::NG {
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill, Ark_ItemFillPolicy>;
+using CachedCountOptionsType = std::pair<std::optional<bool>, std::optional<bool>>;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
@@ -142,6 +143,12 @@ SwiperAutoPlayOptions Convert(const Ark_AutoPlayOptions& src)
     return {
         .stopWhenTouched = src.stopWhenTouched
     };
+}
+
+template<>
+CachedCountOptionsType Convert(const Ark_CachedCountOptions& src)
+{
+    return { Converter::OptConvert<bool>(src.isShown), Converter::OptConvert<bool>(src.independent) };
 }
 
 void AssignArkValue(Ark_SwiperContentWillScrollResult &dst, const SwiperContentWillScrollResult& src, ConvContext *ctx)
@@ -779,6 +786,30 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     }
     SwiperModelStatic::SetCachedIsShown(frameNode, *convIsShown);
 }
+void SetCachedCount2Impl(Ark_NativePointer node,
+                         const Opt_Int32* count,
+                         const Opt_CachedCountOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convCount = Converter::OptConvertPtr<int32_t>(count);
+    Validator::ValidateNonNegative(convCount);
+    SwiperModelStatic::SetCachedCount(frameNode, convCount.value_or(DEFAULT_CACHED_COUNT));
+
+    auto optionsConv = Converter::OptConvertPtr<CachedCountOptionsType>(options);
+    auto convIsShown = optionsConv->first;
+    if (convIsShown) {
+        SwiperModelStatic::SetCachedIsShown(frameNode, convIsShown.value());
+    } else {
+        SwiperModelStatic::SetCachedIsShown(frameNode, false);
+    }
+    auto convIndependent = optionsConv->second;
+    if (convIndependent) {
+        SwiperModelStatic::SetCachedIndependent(frameNode, convIndependent.value());
+    } else {
+        SwiperModelStatic::SetCachedIndependent(frameNode, false);
+    }
+}
 void SetDisplayCountImpl(Ark_NativePointer node,
                          const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                          const Opt_Boolean* swipeByGroup)
@@ -891,6 +922,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::SetAutoPlay1Impl,
         SwiperAttributeModifier::SetDisplayArrowImpl,
         SwiperAttributeModifier::SetCachedCount1Impl,
+        SwiperAttributeModifier::SetCachedCount2Impl,
         SwiperAttributeModifier::SetDisplayCountImpl,
         SwiperAttributeModifier::SetPrevMarginImpl,
         SwiperAttributeModifier::SetNextMarginImpl,

@@ -22,6 +22,8 @@
 #include "core/gestures/slide_gesture.h"
 #include "core/gestures/tap_gesture.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components/gesture_listener/gesture_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace::Framework {
 void GestureModelImpl::Create(int32_t priorityNum, int32_t gestureMaskNum)

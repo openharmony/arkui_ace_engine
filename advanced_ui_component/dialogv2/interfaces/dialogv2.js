@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -100,6 +100,7 @@ let AdvancedDialogV2Button = class AdvancedDialogV2Button {
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
     this.enabled = options.enabled;
+    this.textAlign = options.textAlign;
   }
   ;
 };
@@ -127,6 +128,9 @@ __decorate([
 __decorate([
   Trace
 ], AdvancedDialogV2Button.prototype, 'enabled', void 0);
+__decorate([
+  Trace
+], AdvancedDialogV2Button.prototype, 'textAlign', void 0);
 AdvancedDialogV2Button = __decorate([
   ObservedV2
 ], AdvancedDialogV2Button);
@@ -2575,7 +2579,8 @@ class CustomDialogContentComponent extends ViewV2 {
               this.buildButtonWithDivider.bind(this)(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
                 HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
             };
-            this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), forEachItemGenFunction, (item) => item.content.toString(), true, false);
+            this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
+              forEachItemGenFunction, (item) => item.content?.toString() ?? JSON.stringify(item), true, false);
           }, ForEach);
           ForEach.pop();
           Column.pop();

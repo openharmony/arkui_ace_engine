@@ -1297,18 +1297,17 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
-    auto params = JsonUtil::Create();
+    auto params = InspectorJsonUtil::CreateObject();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
     params->Put("month", static_cast<int32_t>(pickerDate.GetMonth()));
     params->Put("day", static_cast<int32_t>(pickerDate.GetDay()));
-    auto value = JsonUtil::Create();
+    auto value = InspectorJsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
-    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
-        ComponentEventType::COMPONENT_EVENT_DIALOG);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
 

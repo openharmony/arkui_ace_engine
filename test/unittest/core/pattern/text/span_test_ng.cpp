@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -126,7 +126,7 @@ public:
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level0)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);

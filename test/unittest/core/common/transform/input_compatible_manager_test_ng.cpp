@@ -18,7 +18,7 @@
 #define private public
 #define protected public
 #include "interfaces/inner_api/ace_kit/include/ui/event/input_compatible_policy.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "frameworks/core/common/transform/input_compatible_manager.h"
 using namespace testing;

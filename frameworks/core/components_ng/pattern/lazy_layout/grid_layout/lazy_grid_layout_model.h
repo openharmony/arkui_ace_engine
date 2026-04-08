@@ -28,11 +28,15 @@ namespace OHOS::Ace::NG {
 
 class LazyGridLayoutModel {
 public:
+    using VisibleIndexesChangeEvent = std::function<void(int32_t, int32_t)>;
+
     static void Create();
     static void SetRowGap(const Dimension& space);
     static void SetColumnGap(const Dimension& space);
     static void SetRowGap(FrameNode* frameNode, const Dimension& space);
     static void SetColumnGap(FrameNode* frameNode, const Dimension& space);
+    static void SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&& onVisibleIndexesChange);
+    static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
 };
 
 class ACE_EXPORT LazyVGridLayoutModel : public LazyGridLayoutModel {

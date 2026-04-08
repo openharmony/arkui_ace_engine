@@ -14,6 +14,9 @@
  */
 #include "flex_new_test_common.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 // Constants for flex layout tests

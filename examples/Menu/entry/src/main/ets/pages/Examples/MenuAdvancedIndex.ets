@@ -32,6 +32,8 @@ struct MenuAdvancedIndex {
     { title: '示例5: 菜单与预览图结合示例', url: 'pages/Examples/MenuWithPreview' },
     { title: '示例6: 菜单遮罩效果示例', url: 'pages/Examples/MenuMaskDemo' },
     { title: '示例7: 菜单系统材质示例', url: 'pages/Examples/MenuSystemMaterial' },
+    { title: '示例8: 菜单样式示例', url: 'pages/Examples/MenuAllInOneDemo' },
+    { title: '示例9: 菜单办公页面示例', url: 'pages/Examples/MenuBusinessScenarios' },
   ]
 
   build() {

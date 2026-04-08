@@ -36,8 +36,8 @@
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/capi/utils/async_work_test_helper.h"
 #include "core/common/ace_engine.h"
 

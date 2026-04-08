@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/gestures/gesture_event.h"
 
@@ -757,7 +758,9 @@ int32_t ListItemDragManager::GetIndex() const
 {
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_RETURN(forEach, -1);
-    return forEach->GetFrameNodeIndex(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return forEach->GetFrameNodeIndex(host);
 }
 
 int32_t ListItemDragManager::GetLanes() const

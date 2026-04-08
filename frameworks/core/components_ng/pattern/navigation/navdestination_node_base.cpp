@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/utils/utf_helper.h"
 #include "base/json/json_util.h"
@@ -375,5 +376,13 @@ OffsetF NavDestinationNodeBase::CalcTranslateForSlideTransition(
 
     auto translate = OffsetF{ isRight ? width : 0.0f, isRight ? 0.0f : height };
     return translate;
+}
+
+void NavDestinationNodeBase::SetNodeFreeze(bool isFreeze)
+{
+    if (isUserSetFreeze_) {
+        return;
+    }
+    FrameNode::SetNodeFreeze(isFreeze);
 }
 } // namespace OHOS::Ace::NG

@@ -1428,4 +1428,326 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetEventTargetPositionX002, Tes
     positionX = OH_ArkUI_UIInputEvent_GetEventTargetPositionX(&event);
     EXPECT_EQ(positionX, 800.5f);
 }
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistorySize001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistorySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistorySize001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    uiInputEvent->inputEvent = nullptr;
+    auto result = OH_ArkUI_PointerEvent_GetHistorySize(uiInputEvent.get());
+    EXPECT_EQ(result, 0);
+
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 1;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistorySize(uiInputEvent.get());
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryEventTime001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryEventTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryEventTime001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].timeStamp = 1;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 1);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 10);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryX001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].nodeX = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryY001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryY001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].nodeY = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryWindowX001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryWindowX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryWindowX001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].windowX = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryWindowY001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryWindowY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryWindowY001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].windowY = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryDisplayX001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryDisplayX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryDisplayX001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].screenX = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryDisplayY001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryDisplayY001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].screenY = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].globalDisplayX = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY001
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+    auto mouseEvent = std::make_unique<ArkUIMouseEvent>();
+    ArkUIHistoryMouseEvent events[2];
+    events[1].globalDisplayY = 20;
+    mouseEvent->historyEvents = events;
+    mouseEvent->historySize = 2;
+    uiInputEvent->inputEvent = mouseEvent.get();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 20);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 0, 3);
+    EXPECT_EQ(result, 0);
+    
+    mouseEvent->historyEvents = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 0, 1);
+    EXPECT_EQ(result, 0);
+}
 } // namespace OHOS::Ace

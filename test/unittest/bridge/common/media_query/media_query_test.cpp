@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #define protected public

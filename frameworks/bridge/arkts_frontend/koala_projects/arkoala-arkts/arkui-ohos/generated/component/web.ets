@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, 
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from '#handwritten'
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookconfirm, hookWebAttributeModifier, AttributeUpdater } from '#handwritten'
 import { default as webview } from '@ohos.web.webview'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -67,17 +67,20 @@ export class ClientAuthenticationHandler implements MaterializedBase {
         return ArkUIGeneratedNativeModule._ClientAuthenticationHandler_getFinalizer()
     }
     public confirm(priKeyFile: string, certChainFile: string): void {
+        hookconfirm(this, priKeyFile, certChainFile)
         const priKeyFile_casted = priKeyFile as (string)
         const certChainFile_casted = certChainFile as (string)
         this.confirm0_serialize(priKeyFile_casted, certChainFile_casted)
         return
     }
     public confirm(authUri: string): void {
+        hookconfirm(this, authUri)
         const authUri_casted = authUri as (string)
         this.confirm1_serialize(authUri_casted)
         return
     }
     public confirm(identity: string, credentialTypeOrCertChainFile: CredentialType | string): void {
+        hookconfirm(this, identity, credentialTypeOrCertChainFile)
         const identity_casted = identity as (string)
         const credentialTypeOrCertChainFile_casted = credentialTypeOrCertChainFile as (CredentialType | string)
         this.confirm2_serialize(identity_casted, credentialTypeOrCertChainFile_casted)
@@ -160,12 +163,14 @@ export class ConsoleMessage implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ConsoleMessage_getMessage(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceId_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLineNumber_serialize(): int32 {
@@ -367,6 +372,7 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMode_serialize(): FileSelectorMode {
@@ -381,6 +387,7 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isCapture_serialize(): boolean {
@@ -395,18 +402,21 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSuggestedName_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getSuggestedName(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getDefaultPath_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getDefaultPath(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getDescriptions_serialize(): Array<string> {
@@ -417,6 +427,7 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isAcceptAllOptionExcluded_serialize(): boolean {
@@ -435,6 +446,7 @@ export class FileSelectorParam implements MaterializedBase {
             return bufferTempBuf;
         })
         const returnResult: Array<Array<AcceptableFileType>> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -680,6 +692,7 @@ export class PermissionRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._PermissionRequest_getOrigin(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getAccessibleResource_serialize(): Array<string> {
@@ -690,6 +703,7 @@ export class PermissionRequest implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private grant_serialize(resources: Array<string>): void {
@@ -742,6 +756,7 @@ export class ScreenCaptureHandler implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ScreenCaptureHandler_getOrigin(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private grant_serialize(config: ScreenCaptureConfig): void {
@@ -912,18 +927,21 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getLinkUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getUnfilteredLinkUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getUnfilteredLinkUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private existsImageContents_serialize(): boolean {
@@ -938,6 +956,7 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getSelectionText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceType_serialize(): ContextMenuSourceType {
@@ -1166,6 +1185,7 @@ export class WebResourceError implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getErrorCode_serialize(): int32 {
@@ -1222,12 +1242,14 @@ export class WebResourceRequest implements MaterializedBase {
             return Header_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<Header> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getRequestUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isRequestGesture_serialize(): boolean {
@@ -1246,6 +1268,7 @@ export class WebResourceRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestMethod(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -1335,6 +1358,7 @@ export class WebResourceResponse implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseDataEx_serialize(): string | int32 | ArrayBuffer | global_resource_Resource | undefined {
@@ -1359,24 +1383,28 @@ export class WebResourceResponse implements MaterializedBase {
             buffer = (bufferOpt as string | int32 | ArrayBuffer | global_resource_Resource)
         }
         const returnResult: string | int32 | ArrayBuffer | global_resource_Resource | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseEncoding_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseEncoding(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseMimeType_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseMimeType(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getReasonMessage_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getReasonMessage(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseHeader_serialize(): Array<Header> {
@@ -1387,6 +1415,7 @@ export class WebResourceResponse implements MaterializedBase {
             return Header_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<Header> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseCode_serialize(): int32 {
@@ -3232,6 +3261,46 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableDefaultContextMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableDragAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollbarLayoutPolicyAttribute(value: ScrollbarLayoutPolicy | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as ScrollbarLayoutPolicy)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setScrollbarLayoutPolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAiSessionOptionsAttribute(value: Array<AISessionEvent> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: AISessionEvent = valueTmpValue[valueTmpValueCounterI]
+                AISessionEvent_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setAiSessionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3282,6 +3351,25 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableScrollDirectionalLockAttribute(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue = (type as ScrollDirectionalLockType)
+            thisSerializer.writeInt32(typeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableScrollDirectionalLock(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -3366,6 +3454,10 @@ export enum MixedMode {
     ALL = 0,
     COMPATIBLE = 1,
     NONE = 2
+}
+export enum ScrollDirectionalLockType {
+    ALL = 0,
+    NESTED_SCROLL = 1
 }
 export type OnSafeBrowsingCheckResultCallback = (threatType: ThreatType) => void;
 export enum CacheMode {
@@ -4276,11 +4368,23 @@ export interface WebAttribute extends CommonMethod {
     enableDefaultContextMenu(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDefaultContextMenu')
     }
+    enableDrag(value: boolean | undefined): this {
+        throw new Error('Unimplemented method enableDrag')
+    }
+    scrollbarLayoutPolicy(value: ScrollbarLayoutPolicy | undefined): this {
+        throw new Error('Unimplemented method scrollbarLayoutPolicy')
+    }
+    aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        throw new Error('Unimplemented method aiSessionOptions')
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
     }
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         throw new Error('Unimplemented method bindSelectionMenu')
+    }
+    enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        throw new Error('Unimplemented method enableScrollDirectionalLock')
     }
     attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -4346,6 +4450,34 @@ export enum MicrophoneCaptureState {
     PAUSED = 1,
     ACTIVE = 2
 }
+export enum ScrollbarLayoutPolicy {
+    CONTENT = 0,
+    SYSTEM = 1
+}
+export type OnCreateAISession = (id: string, params: string, result: OnAISessionCallback) => boolean;
+export type OnExecuteAIAction = (id: string, params: string, result: OnAISessionCallback) => void;
+export type OnDestroyAISession = (id: string) => void;
+export interface AISessionEvent {
+    aiSessionType: AISessionType;
+    onCreateAISession: OnCreateAISession;
+    onExecuteAIAction: OnExecuteAIAction;
+    onDestroyAISession: OnDestroyAISession;
+}
+export enum AISessionType {
+    TRANSLATOR = 1,
+    LANGUAGE_DETECTOR = 2,
+    SUMMARIZER = 3,
+    WRITER = 4,
+    REWRITER = 5,
+    PROMPT = 6,
+    PROOFREADER = 7
+}
+export enum AISessionResultType {
+    SUCCESS = 0,
+    FAILURE = 1,
+    RUNNING = 2
+}
+export type OnAISessionCallback = (state: AISessionResultType, content: string) => void;
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
     getPeer(): ArkWebPeer {
         return (this.peer as ArkWebPeer)
@@ -5082,6 +5214,21 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
         return this
     }
+    public enableDrag(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableDragAttribute(value_casted)
+        return this
+    }
+    public scrollbarLayoutPolicy(value: ScrollbarLayoutPolicy | undefined): this {
+        const value_casted = value as (ScrollbarLayoutPolicy | undefined)
+        this.getPeer()?.setScrollbarLayoutPolicyAttribute(value_casted)
+        return this
+    }
+    public aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        const value_casted = value as (Array<AISessionEvent> | undefined)
+        this.getPeer()?.setAiSessionOptionsAttribute(value_casted)
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         const tag_casted = tag as (string | undefined)
         const type_casted = type as (string | undefined)
@@ -5094,6 +5241,12 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         const responseType_casted = responseType as (WebResponseType | undefined)
         const options_casted = options as (SelectionMenuOptionsExt | undefined)
         this.getPeer()?.setBindSelectionMenuAttribute(elementType_casted, content_casted, responseType_casted, options_casted)
+        return this
+    }
+    public enableScrollDirectionalLock(value: boolean | undefined, type: ScrollDirectionalLockType | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        const type_casted = type as (ScrollDirectionalLockType | undefined)
+        this.getPeer()?.setEnableScrollDirectionalLockAttribute(value_casted, type_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -5653,6 +5806,79 @@ export class AdsBlockedDetails_serializer {
         })
         const adsBlockedTmpResult: Array<string> = adsBlockedTmpBuf
         let value: AdsBlockedDetails = ({url: urlTmpResult, adsBlocked: adsBlockedTmpResult} as AdsBlockedDetails)
+        return value
+    }
+}
+export class AISessionEvent_serializer {
+    public static write(buffer: SerializerBase, value: AISessionEvent): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAiSessionType = value.aiSessionType
+        valueSerializer.writeInt32(valueHolderForAiSessionType.valueOf())
+        const valueHolderForOnCreateAISession = value.onCreateAISession
+        valueSerializer.holdAndWriteCallback(valueHolderForOnCreateAISession)
+        const valueHolderForOnExecuteAIAction = value.onExecuteAIAction
+        valueSerializer.holdAndWriteCallback(valueHolderForOnExecuteAIAction)
+        const valueHolderForOnDestroyAISession = value.onDestroyAISession
+        valueSerializer.holdAndWriteCallback(valueHolderForOnDestroyAISession)
+    }
+    public static read(buffer: DeserializerBase): AISessionEvent {
+        let valueDeserializer: DeserializerBase = buffer
+        const aiSessionTypeTmpResult: AISessionType = AISessionType.fromValue(valueDeserializer.readInt32())
+        const onCreateAISessionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onCreateAISessionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onCreateAISessionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onCreateAISessionTmpBufClosure = (id: string, params: string, result: OnAISessionCallback):boolean => {
+            const onCreateAISessionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onCreateAISessionTmpBufBufArgsSerializer.writeInt32(onCreateAISessionTmpBufBufResource.resourceId);
+            onCreateAISessionTmpBufBufArgsSerializer.writePointer(onCreateAISessionTmpBufBufCall);
+            onCreateAISessionTmpBufBufArgsSerializer.writePointer(onCreateAISessionTmpBufBufCallSync);
+            onCreateAISessionTmpBufBufArgsSerializer.writeString(id);
+            onCreateAISessionTmpBufBufArgsSerializer.writeString(params);
+            onCreateAISessionTmpBufBufArgsSerializer.holdAndWriteCallback(result);
+            let onCreateAISessionTmpBufBufContinuationValue: boolean | undefined;
+            const onCreateAISessionTmpBufBufContinuationCallback: ((isSelected: boolean) => void) = (value: boolean):void => {
+            onCreateAISessionTmpBufBufContinuationValue = value;
+        }
+            onCreateAISessionTmpBufBufArgsSerializer.holdAndWriteCallback(onCreateAISessionTmpBufBufContinuationCallback);
+            InteropNativeModule._CallCallbackSync(10, 1327781825, onCreateAISessionTmpBufBufArgsSerializer.asBuffer(), onCreateAISessionTmpBufBufArgsSerializer.length());
+            onCreateAISessionTmpBufBufArgsSerializer.release();
+            return (onCreateAISessionTmpBufBufContinuationValue as boolean);
+        }
+        resourceFinalizerRegister(onCreateAISessionTmpBufClosure, onCreateAISessionTmpBufBufResource)
+        const onCreateAISessionTmpResult: OnCreateAISession = onCreateAISessionTmpBufClosure
+        const onExecuteAIActionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onExecuteAIActionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onExecuteAIActionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onExecuteAIActionTmpBufClosure = (id: string, params: string, result: OnAISessionCallback):void => {
+            const onExecuteAIActionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onExecuteAIActionTmpBufBufArgsSerializer.writeInt32(onExecuteAIActionTmpBufBufResource.resourceId);
+            onExecuteAIActionTmpBufBufArgsSerializer.writePointer(onExecuteAIActionTmpBufBufCall);
+            onExecuteAIActionTmpBufBufArgsSerializer.writePointer(onExecuteAIActionTmpBufBufCallSync);
+            onExecuteAIActionTmpBufBufArgsSerializer.writeString(id);
+            onExecuteAIActionTmpBufBufArgsSerializer.writeString(params);
+            onExecuteAIActionTmpBufBufArgsSerializer.holdAndWriteCallback(result);
+            InteropNativeModule._CallCallbackSync(10, -999036774, onExecuteAIActionTmpBufBufArgsSerializer.asBuffer(), onExecuteAIActionTmpBufBufArgsSerializer.length());
+            onExecuteAIActionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onExecuteAIActionTmpBufClosure, onExecuteAIActionTmpBufBufResource)
+        const onExecuteAIActionTmpResult: OnExecuteAIAction = onExecuteAIActionTmpBufClosure
+        const onDestroyAISessionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onDestroyAISessionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onDestroyAISessionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onDestroyAISessionTmpBufClosure = (id: string):void => {
+            const onDestroyAISessionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onDestroyAISessionTmpBufBufArgsSerializer.writeInt32(onDestroyAISessionTmpBufBufResource.resourceId);
+            onDestroyAISessionTmpBufBufArgsSerializer.writePointer(onDestroyAISessionTmpBufBufCall);
+            onDestroyAISessionTmpBufBufArgsSerializer.writePointer(onDestroyAISessionTmpBufBufCallSync);
+            onDestroyAISessionTmpBufBufArgsSerializer.writeString(id);
+            InteropNativeModule._CallCallbackSync(10, -597243033, onDestroyAISessionTmpBufBufArgsSerializer.asBuffer(), onDestroyAISessionTmpBufBufArgsSerializer.length());
+            onDestroyAISessionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onDestroyAISessionTmpBufClosure, onDestroyAISessionTmpBufBufResource)
+        const onDestroyAISessionTmpResult: OnDestroyAISession = onDestroyAISessionTmpBufClosure
+        let value: AISessionEvent = ({aiSessionType: aiSessionTypeTmpResult, onCreateAISession: onCreateAISessionTmpResult, onExecuteAIAction: onExecuteAIActionTmpResult, onDestroyAISession: onDestroyAISessionTmpResult} as AISessionEvent)
         return value
     }
 }

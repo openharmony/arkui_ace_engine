@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/animation/animation_util.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -53,6 +55,7 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         CHECK_NULL_VOID(toastTheme);
         safeAreaTop += toastTheme->GetTop().ConvertToPx();
+        CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
     }
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
@@ -80,6 +83,44 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
+    }
+}
+
+void ToastPattern::CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(toastProp);
+    float titleBarHeightPx = 0.0f;
+    bool needAvoidTitleBar = false;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::DEFAULT || showMode == ToastShowMode::TOP_MOST) {
+        needAvoidTitleBar = true;
+    } else if (showMode == ToastShowMode::SYSTEM_TOP_MOST) {
+        auto currentId = Container::CurrentId();
+        if (currentId < 0) {
+            auto container = Container::GetActive();
+            if (container) {
+                currentId = container->GetInstanceId();
+            }
+        }
+        auto parentContainerId = currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+        auto toastSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+        if (toastSubwindow) {
+            auto parentRect = toastSubwindow->GetParentWindowRect();
+            auto toastRect = toastSubwindow->GetWindowRect();
+            if (NearEqual(toastRect.Left(), parentRect.Left()) && NearEqual(toastRect.Top(), parentRect.Top())) {
+                needAvoidTitleBar = true;
+            }
+        }
+    }
+    if (needAvoidTitleBar && pipelineContext) {
+        titleBarHeightPx = static_cast<float>(pipelineContext->GetContainerModalTitleHeight());
+        if (LessOrEqual(titleBarHeightPx, 0.0f)) {
+            titleBarHeightPx = pipelineContext->GetCustomTitleHeight().ConvertToPx();
+        }
+        safeAreaTop += titleBarHeightPx;
     }
 }
 

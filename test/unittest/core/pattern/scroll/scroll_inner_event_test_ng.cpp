@@ -15,10 +15,10 @@
 
 #include "mock_task_executor.h"
 #include "scroll_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
 
@@ -230,6 +230,45 @@ HWTEST_F(ScrollInnerEventTestNg, TouchEvent002, TestSize.Level1)
     EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
     mockTaskExecutor->RunDelayTask();
     EXPECT_EQ(scrollBar_->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
+}
+
+/**
+ * @tc.name: ScrollBarAnimationVibrationParam001
+ * @tc.desc: Test ScrollBar grow/shrink animation with vibration switch parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarAnimationVibrationParam001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Trigger grow animation with vibration disabled.
+     * @tc.expected: ScrollBar enters GROW state and width is active width.
+     */
+    scrollBar_->PlayScrollBarGrowAnimation(false);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
+
+    /**
+     * @tc.steps: step2. Trigger shrink animation with vibration disabled.
+     * @tc.expected: ScrollBar enters SHRINK state and width is inactive width.
+     */
+    scrollBar_->PlayScrollBarShrinkAnimation(false);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
+
+    /**
+     * @tc.steps: step3. Trigger grow/shrink animation with vibration enabled and default parameter.
+     * @tc.expected: ScrollBar states and widths are updated correctly.
+     */
+    scrollBar_->PlayScrollBarGrowAnimation(true);
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_ACTIVE_WIDTH);
+    scrollBar_->PlayScrollBarShrinkAnimation();
+    EXPECT_EQ(scrollBar_->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Width(), DEFAULT_INACTIVE_WIDTH);
 }
 
 /**

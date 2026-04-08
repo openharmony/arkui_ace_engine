@@ -21,7 +21,7 @@
 
 #include "interfaces/native/node/styled_string.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +65,7 @@ public:
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);

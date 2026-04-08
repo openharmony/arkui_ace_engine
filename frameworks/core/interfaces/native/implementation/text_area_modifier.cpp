@@ -335,6 +335,24 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
+}
 void SetOnCutImpl(Ark_NativePointer node,
                   const Opt_synthetic_Callback_String_Void* value)
 {
@@ -351,6 +369,24 @@ void SetOnCutImpl(Ark_NativePointer node,
         arkCallback.InvokeSync(textArkString);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
+}
+void SetOnWillCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillCut(frameNode, std::move(onCallback));
 }
 void SetOnPasteImpl(Ark_NativePointer node,
                     const Opt_Callback_String_PasteEvent_Void* value)
@@ -881,6 +917,14 @@ void SetTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
 }
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetOrphanCharOptimization(frameNode, convValue);
+}
 void SetVoiceButtonImpl(Ark_NativePointer node,
                         const Opt_VoiceButtonOptions* value)
 {
@@ -1043,7 +1087,9 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetOnContentScrollImpl,
         TextAreaAttributeModifier::SetOnEditChangeImpl,
         TextAreaAttributeModifier::SetOnCopyImpl,
+        TextAreaAttributeModifier::SetOnWillCopyImpl,
         TextAreaAttributeModifier::SetOnCutImpl,
+        TextAreaAttributeModifier::SetOnWillCutImpl,
         TextAreaAttributeModifier::SetOnPasteImpl,
         TextAreaAttributeModifier::SetCopyOptionImpl,
         TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
@@ -1097,6 +1143,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetMaxLinesImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,
         TextAreaAttributeModifier::SetLineSpacingImpl,
+        TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

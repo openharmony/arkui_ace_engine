@@ -276,6 +276,14 @@ void SwiperModelStatic::SetCachedIsShown(FrameNode* frameNode, bool isShown)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown, frameNode);
 }
 
+void SwiperModelStatic::SetCachedIndependent(FrameNode* frameNode, bool independent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCountIndependent(independent);
+}
+
 void SwiperModelStatic::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, EdgeEffect, edgeEffect, frameNode);

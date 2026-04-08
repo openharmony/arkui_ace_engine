@@ -25,7 +25,7 @@
 #define protected public
 #include "mock_lazy_for_each_actuator.h"
 #include "mock_lazy_for_each_builder.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -1484,6 +1484,35 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder14, TestSize.Level1)
     lazyForEachNode->needPredict_ = true;
     lazyForEachNode->GetFrameChildByIndex(0, false);
     EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false), nullptr);
+}
+
+/**
+ * @tc.name: ProcessOffscreenNodesNotInExpiring001
+ * @tc.desc: Test LazyForEachBuilder.ProcessOffscreenNodesNotInExpiring001
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessOffscreenNodesNotInExpiring001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    auto node0 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    auto node1 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    auto node2 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    lazyForEachBuilder->expiringItem_["0"] = LazyForEachCacheChild(0, node0);
+    lazyForEachBuilder->expiringItem_["1"] = LazyForEachCacheChild(1, node1);
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+    cache["0"] = LazyForEachCacheChild(0, node0);
+    cache["2"] = LazyForEachCacheChild(2, node2);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
+    lazyForEachBuilder->ProcessOffscreenNode(node0, false);
+    lazyForEachBuilder->ProcessOffscreenNode(node1, false);
+    lazyForEachBuilder->ProcessOffscreenNode(node2, false);
+    auto count1 = offscreenNodesMgr->GetOffscreenNodesSize();
+    lazyForEachBuilder->ProcessOffscreenNodesNotInExpiring(cache);
+    auto count2 = offscreenNodesMgr->GetOffscreenNodesSize();
+    EXPECT_EQ(count1 - count2, 1);
 }
 
 /**

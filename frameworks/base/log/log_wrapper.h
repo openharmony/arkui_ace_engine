@@ -24,7 +24,6 @@
 #include <unordered_map>
 
 #include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 
 #ifdef ACE_INSTANCE_LOG
 #define ACE_FMT_PREFIX "[%{public}s(%{public}d)-(%{public}s)] "
@@ -253,53 +252,15 @@ enum class LogLevel : uint32_t {
 
 class ACE_FORCE_EXPORT LogWrapper final {
 public:
-    static bool JudgeLevel(LogLevel level)
-    {
-        if (level == LogLevel::DEBUG) {
-            return SystemProperties::GetDebugEnabled();
-        }
-        return level_ <= level;
-    }
-
-    static void SetLogLevel(LogLevel level)
-    {
-        level_ = level;
-    }
-
-    static LogLevel GetLogLevel()
-    {
-        return level_;
-    }
-
-    static const char* GetBriefFileName(const char* name)
-    {
-        static const char separator = GetSeparatorCharacter();
-        const char* p = strrchr(name, separator);
-        return p != nullptr ? p + 1 : name;
-    }
-
-    static void StripFormatString(const std::string& prefix, std::string& str)
-    {
-        for (auto pos = str.find(prefix, 0); pos != std::string::npos; pos = str.find(prefix, pos)) {
-            str.erase(pos, prefix.size());
-        }
-    }
-
-    static void ReplaceFormatString(const std::string& prefix, const std::string& replace, std::string& str)
-    {
-        for (auto pos = str.find(prefix, 0); pos != std::string::npos; pos = str.find(prefix, pos)) {
-            str.replace(pos, prefix.size(), replace);
-        }
-    }
+    static bool JudgeLevel(LogLevel level);
+    static void SetLogLevel(LogLevel level);
+    static LogLevel GetLogLevel();
+    static const char* GetBriefFileName(const char* name);
+    static void StripFormatString(const std::string& prefix, std::string& str);
+    static void ReplaceFormatString(const std::string& prefix, const std::string& replace, std::string& str);
 
     static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, ...)
-        __attribute__((__format__(os_log, 4, 5)))
-    {
-        va_list args;
-        va_start(args, fmt);
-        PrintLog(domain, level, tag, fmt, args);
-        va_end(args);
-    }
+        __attribute__((__format__(os_log, 4, 5)));
 
     // MUST implement these interface on each platform.
     static char GetSeparatorCharacter();

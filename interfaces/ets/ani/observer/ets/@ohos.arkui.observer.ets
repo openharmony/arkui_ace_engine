@@ -188,10 +188,9 @@ import { Size } from '@ohos.arkui.node'
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
             }
-            let uniqueId =dynamicValue.getProperty('uniqueId');
+            let uniqueId = dynamicValue.getProperty('uniqueId');
             if (uniqueId.typeOf() !== 'undefined' && uniqueId.typeOf() !== 'null' && uniqueId.isNumber()) {
-                let id = uniqueId.toNumber();
-                staticValue.uniqueId = Double.toInt(id);
+                staticValue.uniqueId = uniqueId.toNumber().toInt();
             }
             return staticValue;
         }
@@ -322,7 +321,7 @@ import { Size } from '@ohos.arkui.node'
 
             let index = dynamicValue.getProperty("index");
             if (index.isNumber()) {
-                staticValue.index = index.toNumber() as int;
+                staticValue.index = index.toNumber().toInt();
             }
 
             let param = dynamicValue.getProperty("param");
@@ -337,7 +336,7 @@ import { Size } from '@ohos.arkui.node'
 
             let uniqueId = dynamicValue.getProperty("uniqueId");
             if (uniqueId.isNumber()) {
-                staticValue.uniqueId = uniqueId.toNumber() as int;
+                staticValue.uniqueId = uniqueId.toNumber().toInt();
             }
 
             let mode = dynamicValue.getProperty("mode");
@@ -426,7 +425,7 @@ import { Size } from '@ohos.arkui.node'
 
             let index = dynamicValue.getProperty('index');
             if (index.isNumber()) {
-                staticValue.index = index.toNumber() as int;
+                staticValue.index = index.toNumber().toInt();
             }
 
             let name = dynamicValue.getProperty('name');
@@ -534,7 +533,7 @@ import { Size } from '@ohos.arkui.node'
             if (!uniqueId.isNumber()) {
                 throw Error("uniqueId in ScrollEventInfo type Error");
             }
-            staticValue.uniqueId = Double.toInt(uniqueId.toNumber());
+            staticValue.uniqueId = uniqueId.toNumber().toInt();
 
             let scrollEvent = dynamicValue.getProperty("scrollEvent");
             if (!scrollEvent.isNumber()) {

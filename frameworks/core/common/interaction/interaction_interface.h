@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/common/interaction/interaction_data.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Rosen {
     class RSTransaction;

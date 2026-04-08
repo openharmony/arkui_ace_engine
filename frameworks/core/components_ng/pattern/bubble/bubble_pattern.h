@@ -77,6 +77,7 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
+        bubbleMethod->SetIsUserSetMaterial(isUserSetMaterial_);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, bubbleMethod);
         auto pipeline = host->GetContext();
@@ -415,6 +416,16 @@ public:
         shadow_ = shadow;
     }
 
+    void SetIsUserSetMaterial(bool isUserSetMaterial)
+    {
+        isUserSetMaterial_ = isUserSetMaterial;
+    }
+
+    bool IsUserSetMaterial() const
+    {
+        return isUserSetMaterial_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -498,6 +509,7 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+    bool isUserSetMaterial_ = false;
     std::function<void()> finish_;
 
     std::optional<OffsetF> targetOffset_;

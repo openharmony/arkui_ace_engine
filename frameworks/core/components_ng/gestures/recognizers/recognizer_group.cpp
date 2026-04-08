@@ -70,6 +70,15 @@ void RecognizerGroup::OnFinishGestureReferee(int32_t touchId, bool isBlocked)
     MultiFingersRecognizer::OnFinishGestureReferee(touchId, isBlocked);
 }
 
+void RecognizerGroup::AttachFrameNode(const WeakPtr<NG::FrameNode>& node)
+{
+    TouchEventTarget::AttachFrameNode(node);
+    auto recognizers = GetGroupRecognizer();
+    for (const auto& recognizer : recognizers) {
+        recognizer->AttachFrameNode(node);
+    }
+}
+
 const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognizer()
 {
     return recognizers_;

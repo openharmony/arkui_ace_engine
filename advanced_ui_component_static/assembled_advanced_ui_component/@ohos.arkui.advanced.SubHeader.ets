@@ -79,6 +79,7 @@ export class OperationOption {
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
   public defaultFocus?: boolean;
+  public id?: string;
 }
 
 export class SelectOptions {
@@ -87,6 +88,7 @@ export class SelectOptions {
   public value?: ResourceStr;
   public onSelect?: (index: int, value?: string) => void;
   public defaultFocus?: boolean;
+  public id?: string;
 }
 
 export class SymbolOptions {
@@ -97,12 +99,12 @@ export class SymbolOptions {
   public renderingStrategy?: SymbolRenderingStrategy;
 }
 
-interface IconOptions {
+export interface IconOptions {
   icon?: ResourceStr;
   symbolicIconOption?: SymbolOptions | null;
 }
 
-interface ContentIconOption {
+export interface ContentIconOption {
   content?: ResourceStr;
   subContent?: ResourceStr;
   iconOptions?: IconOptions;
@@ -111,6 +113,7 @@ interface ContentIconOption {
   accessibilityText?: ResourceStr;
   accessibilityDescription?: ResourceStr;
   defaultFocus?: boolean;
+  id?: string;
 }
 
 class FontStyle {
@@ -120,7 +123,7 @@ class FontStyle {
   public alignment?: Alignment;
 }
 
-class SubHeaderTheme {
+export class SubHeaderTheme {
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   public fontSecondaryColor: ResourceColor = $r('sys.color.font_secondary');
   public fontButtonColor: ResourceColor = $r('sys.color.font_emphasize');
@@ -159,7 +162,7 @@ function disabledStyle(instance: CommonMethod) {
   instance.opacity(getResourceValue('sys.float.interactive_disable'))
 }
 
-class SubHeaderModifier implements AttributeModifier<RowAttribute> {
+export class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false;
 
   applyNormalAttribute(instance: RowAttribute): void {
@@ -248,6 +251,7 @@ export struct SubHeader {
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   isFollowingSystemFontScale: boolean = false;
   appMaxFontScale: number = 3.2;
+  @PropRef titleId: string | undefined = undefined;
 
   onWillApplyTheme(theme: Theme) {
     this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
@@ -405,6 +409,7 @@ export struct SubHeader {
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
         .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -427,6 +432,7 @@ export struct SubHeader {
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
         .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -518,6 +524,7 @@ export struct SubHeader {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItem?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -557,6 +564,7 @@ export struct SubHeader {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItem?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -742,7 +750,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
@@ -781,6 +789,7 @@ export struct SubHeader {
   @Builder
   SelectStyle(selectParam: SelectOptions): void {
     Select(selectParam.options)
+      .id(selectParam?.id)
       .selected(this.selectedIndex)
       .value(this.selectValue)
       .defaultFocus(selectParam.defaultFocus)
@@ -803,7 +812,7 @@ export struct SubHeader {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontPrimaryColor,
@@ -825,6 +834,7 @@ export struct SubHeader {
           .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
+      .id(this.operationType === undefined ? button?.id : undefined)
       .focusable(true)
       .focusBox({
         margin: new LengthMetrics(INDEX_ZERO, LengthUnit.VP),
@@ -1022,6 +1032,7 @@ export struct SubHeader {
                   (this.operationSymbolOptions as SymbolOptions[]).length > index ?
                 (this.operationSymbolOptions as SymbolOptions[])[index.toInt()] : null,
               } as IconOptions,
+              id: item.id,
               action: item.action,
               defaultFocus: item.defaultFocus,
               accessibilityLevel: item.accessibilityLevel,
@@ -1104,6 +1115,7 @@ struct SingleIconStyle {
       Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
         this.IconZone();
       }
+      .id(this.item?.id)
       .focusable(true)
       .defaultFocus(this.item?.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)

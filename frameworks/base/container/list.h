@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/system_properties.h"
 
 #define list_entry(ptr, type, member) reinterpret_cast<type*>(reinterpret_cast<char*>(ptr) - offsetof(type, member))
 

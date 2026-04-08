@@ -18,6 +18,7 @@
 #define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #undef private
 #include "core/gestures/drag_event.h"
 

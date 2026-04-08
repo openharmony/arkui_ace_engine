@@ -292,6 +292,14 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto showValue = Converter::OptConvertPtr<bool>(show);
     WaterFlowModelStatic::SetCachedCount(frameNode, countValue, showValue);
 }
+
+void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enabled = Converter::OptConvertPtr<bool>(value).value_or(false);
+    WaterFlowModelStatic::SetSupportEmptyBranchInLazyLoading(frameNode, enabled);
+}
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowStaticModifier()
 {
@@ -306,6 +314,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowStaticModifier()
         WaterFlowAttributeModifier::SetLayoutDirectionImpl,
         WaterFlowAttributeModifier::SetCachedCount0Impl,
         WaterFlowAttributeModifier::SetSyncLoadImpl,
+        WaterFlowAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
         WaterFlowAttributeModifier::SetOnScrollIndexImpl,
         WaterFlowAttributeModifier::SetOnWillScrollImpl,

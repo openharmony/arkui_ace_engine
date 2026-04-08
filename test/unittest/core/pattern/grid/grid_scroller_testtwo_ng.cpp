@@ -15,8 +15,8 @@
 
 #include "grid_test_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollerTestTwoNg : public GridTestNg, public testing::WithParamInterface<bool> {};

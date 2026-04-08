@@ -30,7 +30,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -488,6 +488,24 @@ void SetOnCopyImpl(Ark_NativePointer node,
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
+}
 void SetCaretColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
@@ -835,6 +853,14 @@ void SetTextDirectionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
 }
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetOrphanCharOptimization(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_arkui_component_units_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -977,6 +1003,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,
+        TextAttributeModifier::SetOnWillCopyImpl,
         TextAttributeModifier::SetCaretColorImpl,
         TextAttributeModifier::SetSelectedBackgroundColorImpl,
         TextAttributeModifier::SetEllipsisModeImpl,
@@ -1012,6 +1039,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
+        TextAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextModifierImpl;
 }

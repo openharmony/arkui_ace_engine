@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"

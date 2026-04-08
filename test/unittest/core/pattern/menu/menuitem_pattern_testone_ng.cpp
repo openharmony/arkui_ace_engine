@@ -20,13 +20,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -1486,5 +1486,56 @@ HWTEST_F(MenuItemPatternTestOneNg, CreateCheckMarkNode001, TestSize.Level1)
     ASSERT_NE(checkMarkLayoutProps, nullptr);
     auto type = checkMarkLayoutProps->GetVisibility().value_or(VisibleType::VISIBLE);
     EXPECT_EQ(type, VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: ReportEvent001
+ * @tc.desc: Testing the ReportEvent001 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent001, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->ReportEvent();
+}
+
+/**
+ * @tc.name: ReportEvent002
+ * @tc.desc: Testing the ReportEvent002 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent002, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->ReportEvent();
 }
 } // namespace OHOS::Ace::NG

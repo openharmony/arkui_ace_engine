@@ -121,8 +121,9 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
         } else {
+            Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
             json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-                .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+                .value_or(defaultFontColor)).ColorToString().c_str(), filter);
         }
         json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
         json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
@@ -141,8 +142,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     if (textLineStyle) {
         json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(dim).ToString().c_str(), filter);
         json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(dim).ToString().c_str(), filter);
-        json->PutExtAttr("baselineOffset",
-            textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
+        json->PutExtAttr("baselineOffset", textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
@@ -867,11 +867,18 @@ void SpanItem::UpdateReLayoutTextStyle(
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
 
+    UpdateReLayoutTextLineStyle(spanTextStyle, textStyle);
+    UpdateReLayoutGradient(spanTextStyle, textStyle);
+}
+
+void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextStyle& textStyle)
+{
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
 
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
@@ -885,7 +892,6 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    UpdateReLayoutGradient(spanTextStyle, textStyle);
 }
 
 void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
@@ -1208,37 +1214,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     ACE_UINODE_TRACE(nodeId_);
     auto sameSpan = MakeRefPtr<SpanItem>();
-    GetFontStyleSpanItem(sameSpan);
-    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
-    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
-    COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
-    COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
-    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
-    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
-    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
-    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
-    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
-    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
-    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
-    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
-    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
-    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
-    COPY_TEXT_STYLE(textLineStyle, DrawableLeadingMargin, UpdateDrawableLeadingMargin);
-    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
-    COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
-    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
-    COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
-    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
-    COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
-    if (textStyle_.has_value()) {
-        sameSpan->textStyle_ = textStyle_;
-    }
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
-    }
-    sameSpan->urlAddress = urlAddress;
-    CopySpanItemEvents(sameSpan);
-    sameSpan->resMap_ = resMap_;
+    CopyBaseSpanItem(sameSpan);
     return sameSpan;
 }
 
@@ -1269,12 +1245,52 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, UpdateEnableDeviceFontWeightCategory);
 }
 
+void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
+{
+    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
+    COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
+    COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
+    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
+    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
+    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
+    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
+    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
+    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
+    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
+    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
+    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, DrawableLeadingMargin, UpdateDrawableLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
+    COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
+    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
+    COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
+    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
+    COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
+}
+
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
 {
     spanItem->urlOnRelease = urlOnRelease;
     spanItem->onClick = onClick;
     spanItem->onLongPress = onLongPress;
     spanItem->onTouch = onTouch;
+}
+
+void SpanItem::CopyBaseSpanItem(RefPtr<SpanItem> sameSpan) const
+{
+    GetFontStyleSpanItem(sameSpan);
+    GetTextLineStyleSpanItem(sameSpan);
+    if (textStyle_.has_value()) {
+        sameSpan->textStyle_ = textStyle_;
+    }
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
+    sameSpan->urlAddress = urlAddress;
+    CopySpanItemEvents(sameSpan);
+    sameSpan->resMap_ = resMap_;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1662,6 +1678,19 @@ void ImageSpanItem::ResetImageSpanOptions()
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        CopyBaseSpanItem(sameSpan);
+    } else {
+        sameSpan->urlOnRelease = urlOnRelease;
+        sameSpan->onClick = onClick;
+        sameSpan->onLongPress = onLongPress;
+        if (backgroundStyle.has_value()) {
+            sameSpan->backgroundStyle = backgroundStyle;
+        }
+        if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
+            sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
+        }
+    }
     if (isEncodeTlvS) {
         if (options.HasValue()) {
             sameSpan->SetImageSpanOptions(options);
@@ -1679,15 +1708,6 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         }
     } else {
         sameSpan->SetImageSpanOptions(options);
-    }
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
-    }
-    if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
-        sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
     }
     return sameSpan;
 }
@@ -1924,17 +1944,21 @@ void PlaceholderSpanItem::DumpTextStyleInfo() const
 RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        CopyBaseSpanItem(sameSpan);
+    } else {
+        sameSpan->urlOnRelease = urlOnRelease;
+        sameSpan->onClick = onClick;
+        sameSpan->onLongPress = onLongPress;
+        if (backgroundStyle.has_value()) {
+            sameSpan->backgroundStyle = backgroundStyle;
+        }
+        if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
+            sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
+        }
+    }
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    if (backgroundStyle.has_value()) {
-        sameSpan->backgroundStyle = backgroundStyle;
-    }
-    if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
-        sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
-    }
     return sameSpan;
 }
 

@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_resource_register.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_resource_register.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/common/asset/mock_asset.h"
 
 #include "common/include/window_session_property.h"
@@ -250,8 +250,19 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
         .width_ = 100,
         .height_ = 100,
     };
+    sceneSession_->enablePersistentScaledSnapshot_ = false;
     windowScene_->CreateSnapshotWindow();
     EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->enablePersistentScaledSnapshot_ = true;
+    sceneSession_->SetShowRecent(false);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, false);
+
+    sceneSession_->SetShowRecent(true);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, true);
+    sceneSession_->SetShowRecent(false);
 
     sceneSession_->layoutRect_ = {
         .posX_ = 100,
@@ -363,7 +374,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_RetainAndInvisi
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_StartWindowType_Default_NoPreloadData
  * @tc.desc: Test CreateStartingWindow when startWindowType is DEFAULT and no preload data is set
@@ -386,7 +397,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_Default_NoPrelo
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_WithValidPreloadPixelMap
  * @tc.desc: Test CreateStartingWindow when valid preload PixelMap is set (PixelMap should be cleared after call)
@@ -414,7 +425,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadPixelMap, TestS
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_WithValidPreloadSvgBuffer
  * @tc.desc: Test CreateStartingWindow when valid preload SVG buffer is set (SVG buffer should be cleared after call)
@@ -444,7 +455,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_PreloadingStartingWindow_True
  * @tc.desc: Test CreateStartingWindow when PreloadingStartingWindow is set to true

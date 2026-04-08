@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 struct TextProperty {

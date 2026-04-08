@@ -16,6 +16,9 @@
 #include "core/components_ng/event/click_event.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/gestures/click_info.h"
+#include <algorithm>
 
 namespace OHOS::Ace::NG {
 
@@ -90,6 +93,104 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
         }
     };
     return callback;
+}
+
+void ClickEvent::operator()(GestureEvent& info) const
+{
+    if (callback_) {
+        callback_(info);
+    }
+}
+
+std::optional<GestureJudgeFunc> ClickEvent::GetSysJudge() const
+{
+    if (sysJudge_.has_value()) {
+        return sysJudge_.value();
+    }
+    return nullptr;
+}
+
+void ClickEventActuator::SetUserCallback(GestureEventFunc&& callback)
+{
+    userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
+}
+
+void ClickEventActuator::ClearUserCallback()
+{
+    // When the event param is undefined, it will clear the callback.
+    if (userCallback_) {
+        userCallback_.Reset();
+    }
+}
+
+bool ClickEventActuator::IsComponentClickable() const
+{
+    return !(clickEvents_.empty() && !clickAfterEvents_ && !userCallback_ && !jsFrameNodeCallback_);
+}
+
+void ClickEventActuator::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    if (clickEvents_.empty()) {
+        clickEvents_.emplace_back(clickEvent);
+        return;
+    }
+    if (std::find(clickEvents_.begin(), clickEvents_.end(), clickEvent) == clickEvents_.end()) {
+        clickEvents_.emplace_back(clickEvent);
+    }
+}
+
+void ClickEventActuator::AddDistanceThreshold(double distanceThreshold)
+{
+    distanceThreshold_ = Dimension(
+        Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    if (distanceThreshold_.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+}
+
+void ClickEventActuator::AddDistanceThreshold(Dimension distanceThreshold)
+{
+    distanceThreshold_ = distanceThreshold;
+    if (distanceThreshold_.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+}
+
+void ClickEventActuator::ClearClickAfterEvent()
+{
+    // When the event param is undefined, it will clear the callback.
+    if (clickAfterEvents_) {
+        clickAfterEvents_.Reset();
+    }
+}
+
+void ClickEventActuator::SetJSFrameNodeCallback(GestureEventFunc&& callback)
+{
+    if (jsFrameNodeCallback_) {
+        jsFrameNodeCallback_.Reset();
+    }
+    jsFrameNodeCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
+    if (!clickRecognizer_) {
+        clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+    }
+}
+
+void ClickEventActuator::ClearJSFrameNodeCallback()
+{
+    // When the event param is undefined, it will clear the callback.
+    if (jsFrameNodeCallback_) {
+        jsFrameNodeCallback_.Reset();
+    }
+}
+
+void ClickEventActuator::CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator)
+{
+    clickEvents_ = clickEventActuator->clickEvents_;
+    userCallback_ = clickEventActuator->userCallback_;
+    jsFrameNodeCallback_ = clickEventActuator->jsFrameNodeCallback_;
+    if (clickEventActuator->clickRecognizer_) {
+        clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "interfaces/native/node/resource.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "base/error/error_code.h"
 #include "core/common/resource/resource_object.h"

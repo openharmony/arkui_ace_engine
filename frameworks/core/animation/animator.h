@@ -30,7 +30,6 @@
 #include "core/animation/status_listener.h"
 #include "core/animation/time_event.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/syntax/if_else_model.h"
 
 #ifdef PREVIEW
 #define CREATE_ANIMATOR(...) AceType::MakeRefPtr<Animator>(__VA_ARGS__)

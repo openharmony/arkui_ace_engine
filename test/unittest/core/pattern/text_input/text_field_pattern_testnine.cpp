@@ -18,15 +18,15 @@
 #include "gtest/gtest.h"
 #include "text_input_base.h"
 
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
 #include "core/common/task_executor_impl.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
@@ -343,7 +343,7 @@ HWTEST_F(TextFieldPatternTestNine, CalcAutoScrollStepOffset001, TestSize.Level0)
     Offset localOffset(1, 2);
     pattern_->axis_ = Axis::HORIZONTAL;
     pattern_->contentRect_.width_ = 10;
-    auto ret = pattern_->CalcAutoScrollStepOffset(localOffset);
+    auto ret = pattern_->CalcAutoScrollStepOffset(localOffset, Axis::HORIZONTAL);
     EXPECT_EQ(static_cast<int>(ret.value()), 28);
 }
 
@@ -3852,5 +3852,66 @@ HWTEST_F(TextFieldPatternTestNine, HandleExtendAction001, TestSize.Level0)
 
     pattern_->HandleExtendAction(ACTION_AUTOFILL);
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PasswordResponseAreaRefreshHotZoneSize001
+ * @tc.desc: Test PasswordResponseArea::Refresh() updates hot zone size correctly for password icon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, PasswordResponseAreaRefreshHotZoneSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField with password type
+     * @tc.expected: TextFieldPattern should be created successfully
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    /**
+     * @tc.steps: step2. Get PasswordResponseArea from pattern
+     * @tc.expected: PasswordResponseArea should not be null
+     */
+    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    ASSERT_NE(passwordResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. Get stack node from PasswordResponseArea
+     * @tc.expected: Stack node should not be null
+     */
+    auto stackNode = passwordResponseArea->GetFrameNode();
+    ASSERT_NE(stackNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Call Refresh() to trigger hot zone size calculation
+     * @tc.expected: Method should execute without errors and update user defined ideal size
+     */
+    passwordResponseArea->Refresh();
+
+    /**
+     * @tc.steps: step5. Get stack layout property and verify user defined ideal size was set
+     * @tc.expected: User defined ideal size should be set with width = iconSize + rightOffset
+     */
+    auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(stackLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step6. Verify hot zone size calculation (iconSize + rightOffset)
+     * @tc.expected: The user defined ideal size width should match hot zone size calculation
+     */
+    auto iconSize = passwordResponseArea->GetIconSize();
+    auto rightOffset = passwordResponseArea->GetIconRightOffset();
+    auto expectedHotZoneSize = iconSize + rightOffset;
+
+    // Get the user defined ideal size from calcLayoutConstraint
+    auto&& calcLayoutConstraint = stackLayoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize->Width().has_value());
+
+    // Convert to float for comparison
+    float actualHotZoneSize = calcLayoutConstraint->selfIdealSize->Width()->GetDimension().ConvertToPx();
+    EXPECT_FLOAT_EQ(actualHotZoneSize, expectedHotZoneSize);
 }
 } // namespace OHOS::Ace::NG

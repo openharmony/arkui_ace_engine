@@ -18,7 +18,10 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/list/list_theme.h"
+#include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -601,7 +604,7 @@ std::pair<int32_t, int32_t> ListItemGroupPattern::UpdateCachedIndexOmni(int32_t 
 }
 
 CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
-    bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache)
+    bool outOfView, int32_t forwardCache, int32_t backwardCache)
 {
     CachedIndexInfo res;
     auto host = GetHost();
@@ -620,11 +623,6 @@ CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
     if (outOfView) {
         cachedItemPosition_.merge(itemPosition_);
         ClearItemPosition();
-    }
-    if (reCache || reCache_) {
-        ClearCachedItemPosition();
-        UpdateActiveChildRange(show);
-        reCache_ = false;
     }
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     if (forwardCache > -1 && backwardCache > -1 && !itemPosition_.empty()) {
@@ -654,6 +652,10 @@ CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
         std::swap(res.forwardCachedCount, res.backwardCachedCount);
         std::swap(res.forwardCacheMax, res.backwardCacheMax);
     }
+    if ((GetTotalItemCount() == 0 && outOfView) || !IsVisible()) {
+        res = {1, 1, 1, 1, isCacheDirty_};
+    }
+    res.needPredict = isCacheDirty_;
     return res;
 }
 
@@ -1371,6 +1373,7 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
     adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
     adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
     listContentSize_ = layoutAlgorithm->GetListContentSize();
+    isCacheDirty_ = layoutAlgorithm->IsCacheDirty();
     prevMeasureBreak_ = layoutAlgorithm->GroupMeasureInNextFrame();
     isAxisChanged_ = false;
     layouted_ = true;

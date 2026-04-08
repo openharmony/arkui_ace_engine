@@ -19,13 +19,20 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/animation/spring_motion.h"
+#include "core/components/list/list_item_theme.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -44,9 +51,55 @@ constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
+ListItemPattern::~ListItemPattern() = default;
+
+void ListItemPattern::BeforeCreateLayoutWrapper()
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+}
+
+void ListItemPattern::OnCollectRemoved()
+{
+    shallowBuilder_.Reset();
+}
+
+RefPtr<LayoutProperty> ListItemPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<ListItemLayoutProperty>();
+}
+
+RefPtr<EventHub> ListItemPattern::CreateEventHub()
+{
+    return MakeRefPtr<ListItemEventHub>();
+}
+
+RefPtr<AccessibilityProperty> ListItemPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<ListItemAccessibilityProperty>();
+}
+
 void ListItemPattern::SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder)
 {
     shallowBuilder_ = std::move(shallowBuilder);
+}
+
+void ListItemPattern::InitDragManager(RefPtr<ForEachBaseNode> forEach)
+{
+    if (!dragManager_) {
+        dragManager_ = MakeRefPtr<ListItemDragManager>(GetHost(), forEach);
+        dragManager_->InitDragDropEvent();
+    }
+}
+
+void ListItemPattern::DeInitDragManager()
+{
+    if (dragManager_) {
+        dragManager_->DeInitDragDropEvent();
+        dragManager_ = nullptr;
+    }
 }
 
 void ListItemPattern::OnAttachToFrameNode()
@@ -201,6 +254,9 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             if (endNodeIndex_ >= startNodeIndex_) {
                 endNodeIndex_++;
             }
+            auto prop = host->GetLayoutProperty<ListItemLayoutProperty>();
+            CHECK_NULL_VOID(prop);
+            prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->ReplaceChild(host->GetChildAtIndex(startNodeIndex_), startNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -236,6 +292,9 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             if (startNodeIndex_ >= endNodeIndex_) {
                 startNodeIndex_++;
             }
+            auto prop = host->GetLayoutProperty<ListItemLayoutProperty>();
+            CHECK_NULL_VOID(prop);
+            prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->ReplaceChild(host->GetChildAtIndex(endNodeIndex_), endNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -1244,7 +1303,9 @@ void ListItemPattern::InitHoverEvent()
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleHoverEvent(isHover, pattern->GetHost());
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->HandleHoverEvent(isHover, host);
         }
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -1280,7 +1341,9 @@ void ListItemPattern::InitPressEvent()
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN || touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            pattern->HandlePressEvent(touchType == TouchType::DOWN, host);
         }
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -1289,6 +1352,7 @@ void ListItemPattern::InitPressEvent()
 
 void ListItemPattern::HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode)
 {
+    CHECK_NULL_VOID(itemNode);
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = GetContext();

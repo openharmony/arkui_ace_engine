@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "overlay_manager.h"
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -27,17 +29,15 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/window.h"
-#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
@@ -62,6 +62,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -3869,6 +3871,8 @@ void SheetPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onAppear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
@@ -3920,6 +3924,8 @@ void SheetPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onDisappear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     isDismissProcess_ = false;
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -4826,5 +4832,69 @@ RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
         return MakeRefPtr<SheetPresentationMinimizeLayoutAlgorithm>();
     }
     return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
+}
+
+int32_t SheetPresentationPattern::ParseCommand(const std::string& command, SheetCmdType& cmdType)
+{
+    cmdType = SheetCmdType::CMD_UNKNOWN;
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+    if (!json->Contains("cmd") || !json->GetValue("cmd")->IsString()) {
+        return RET_FAILED;
+    }
+    std::string cmdStr = json->GetString("cmd");
+    if (cmdStr != "CloseSheet") {
+        return RET_FAILED;
+    }
+    cmdType = SheetCmdType::CMD_CLOSE;
+    return RET_SUCCESS;
+}
+
+int32_t SheetPresentationPattern::OnInjectionEvent(const std::string& command)
+{
+    SheetCmdType cmdType = SheetCmdType::CMD_UNKNOWN;
+    if (command.empty()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "SheetPresentationPattern: Injection command is empty");
+        return RET_FAILED;
+    }
+    if (RET_FAILED == ParseCommand(command, cmdType)) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "command json is error!");
+        return RET_FAILED;
+    }
+    // Handle bind sheet event
+    HandleBindSheetEvent(cmdType);
+    return RET_SUCCESS;
+}
+
+void SheetPresentationPattern::ReportCloseSheetResult(std::string result, std::string reason, std::string event)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", id);
+    params->Put("event", event.c_str());
+    params->Put("result", result.c_str());
+    params->Put("reason", reason.c_str());
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    std::string eventResult = event + "Result";
+    json->Put(eventResult.c_str(), params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
+}
+
+void SheetPresentationPattern::HandleBindSheetEvent(SheetCmdType& cmdType)
+{
+    if (cmdType == SheetCmdType::CMD_CLOSE) {
+        DismissTransition(false, 0);
+        ReportCloseSheetResult("success", "", "CloseSheet");
+    } else {
+        std::string reason = "command is error!";
+        ReportCloseSheetResult("failed", reason, "CloseSheet");
+    }
 }
 } // namespace OHOS::Ace::NG

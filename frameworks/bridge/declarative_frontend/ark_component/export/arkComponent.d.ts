@@ -42,6 +42,10 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
     applyPeer(node: KNode, reset: boolean): void;
     checkObjectDiff(): boolean;
 }
+declare type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
+declare interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -131,7 +135,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;
@@ -467,6 +471,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
     singleLine(enable: boolean): RichEditorAttribute;
+    orphanCharOptimization(enable: Optional<boolean>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -599,7 +604,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;
@@ -785,6 +790,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     marqueeOptions(value: MarqueeOptions): TextAttribute;
     onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
+    orphanCharOptimization(enable: boolean): TextAttribute;
     shaderStyle(value: {
         center: Array<any>;
         radius: number | string;
@@ -827,6 +833,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
     strokeColor(value: ResourceColor): TextAreaAttribute;
+    orphanCharOptimization(enable: boolean): TextAreaAttribute;
     compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAreaAttribute;
 }
@@ -881,6 +888,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
     strokeWidth(value: LengthMetrics): TextInputAttribute;
     strokeColor(value: ResourceColor): TextInputAttribute;
+    orphanCharOptimization(enable: boolean): TextInputAttribute;
     compressLeadingPunctuation(enable: boolean): TextInputAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextInputAttribute;
 }
@@ -1322,6 +1330,7 @@ declare class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribu
     onStart(event: () => void): this;
     onBounce(event: () => void): this;
     onFinish(event: () => void): this;
+    onStop(event: () => void): this;
 }
 declare class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1732,7 +1741,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     transform(value: object): this;
     onAppear(event: () => void): this;
     onDisAppear(event: () => void): this;
-    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this;
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this;
     visibility(value: Visibility): this;
     flexGrow(value: number): this;
     flexShrink(value: number): this;
@@ -2183,6 +2192,7 @@ declare class ArkContainerSpanComponent extends ArkComponent implements Containe
 declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     columnsTemplate(value: string): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
     columnsGap(value: LengthMetrics): this;
     rowsGap(value: LengthMetrics): this;
 }

@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -27,12 +28,12 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
 
@@ -706,4 +707,42 @@ HWTEST_F(HyperlinkTestNg, UpdatePropertyImpl001, TestSize.Level1)
     EXPECT_TRUE(MockPipelineContext::GetCurrent()->fontManager_);
 }
 
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    frameNode->SetDraggable(true);
+    frameNode->MarkModifyDone();
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    /**
+     * @tc.steps: step2. Call OnInjectionEvent with different key.
+     */
+    std::string jsonCommand = R"({"cmd":"click"})";
+    int32_t result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    jsonCommand = R"({"cmd":"Hyperlink"})";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    jsonCommand = R"({")";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    jsonCommand = "";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
 } // namespace OHOS::Ace::NG

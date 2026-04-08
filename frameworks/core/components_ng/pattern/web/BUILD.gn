@@ -35,6 +35,7 @@ build_component_ng("web_pattern_ng") {
       "web_accessibility_child_tree_callback.cpp",
       "web_accessibility_event_report.cpp",
       "web_agent_event_reporter.cpp",
+      "web_agent_utils.cpp",
       "web_accessibility_property.cpp",
       "web_accessibility_session_adapter.cpp",
       "web_content_modifier.cpp",

@@ -2091,4 +2091,23 @@ void NavDestinationModelNG::SetBackButtonTextResource(FrameNode* frameNode, cons
     NavigationTitleUtil::SetBackButtonText(titleBarNode, text,
         "navDestination.backButtonIcon.accessibilityText", resObj);
 }
+
+void NavDestinationModelNG::SetFreeze(bool freeze, bool isValid)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFreeze(frameNode, freeze, isValid);
+}
+
+void NavDestinationModelNG::SetFreeze(FrameNode* frameNode, bool freeze, bool isValid)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    if (!isValid) {
+        ViewAbstract::SetFreeze(false);
+        navDestinationNode->SetIsUserSetFreeze(false);
+        return;
+    }
+    ViewAbstract::SetFreeze(freeze);
+    navDestinationNode->SetIsUserSetFreeze(true);
+}
 } // namespace OHOS::Ace::NG

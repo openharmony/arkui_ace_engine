@@ -38,6 +38,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -7501,8 +7502,9 @@ int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
     CHECK_NULL_RETURN(host, RET_FAILED);
     auto pattern = host->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
+    auto nodeId = host->GetId();
     SwiperUISessionAdapter adapter(pattern);
-    return adapter.OnInjectionEvent(command);
+    return adapter.OnInjectionEvent(nodeId, command);
 }
 
 GestureState SwiperPattern::GetGestureState()

@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/singleton.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 

@@ -19,7 +19,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/frame_node.h"
@@ -28,9 +28,9 @@
 #undef protected
 #undef private
 
-#include "test/mock/base/mock_mouse_style.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
 
 #include "core/components_v2/inspector/inspector_constants.h"

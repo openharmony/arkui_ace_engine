@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
-
-#include "ui/base/ace_type.h"
-#include "ui/base/utils/utils.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"

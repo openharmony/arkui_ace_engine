@@ -29,7 +29,7 @@
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/overlay_show_option.h"
 #include "core/pipeline/base/render_node.h"
-#include "frameworks/base/utils/system_properties.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 

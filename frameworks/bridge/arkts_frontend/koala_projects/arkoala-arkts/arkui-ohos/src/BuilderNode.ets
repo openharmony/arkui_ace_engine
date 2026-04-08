@@ -28,7 +28,7 @@ import { ArkBuilderProxyNodePeer } from "./base/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ArkUIAniModule } from 'arkui.ani'
-import { UIContextImpl, ContextRecord } from "./base/UIContextImpl"
+import { ContextRecord } from "./base/UIContextImpl"
 import { RecordData } from "@ohos.base"
 import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
 import { CustomBuilder } from "./component/builder";
@@ -223,6 +223,7 @@ export class BuilderNode<T = undefined> {
     private nodePtr_: KPointer | undefined;
     constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
         this._JSBuilderNode = new JSBuilderNode<T>(uiContext, nodePtr, frameNodePtr);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
         BuilderNodeFinalizationRegisterProxy.register<T>(this);     
     }
     constructor(uiContext: UIContext, options?: RenderOptions) {
@@ -301,7 +302,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __builder0?: WrappedBuilder<voidBuilderFunc>;
     private __reactiveBuilder?: WrappedBuilder<CustomBuilder>;
     private __frameNode: BuilderRootFrameNode<T> | null;
-    private __uiContext?: UIContextImpl;
+    private __uiContext?: UIContext;
     private _instanceId: int32 = -1;
     private __buildOptions: BuildOptions | undefined = undefined
     private __updateUseParallel: boolean = false;
@@ -325,8 +326,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         super();
-        this.__uiContext = uiContext as UIContextImpl;
-        this._instanceId = (uiContext as UIContextImpl).instanceId_;
+        this.__uiContext = uiContext as UIContext;
+        this._instanceId = (uiContext as UIContext).instanceId_;
         if (options !== undefined) {
             let buildOptions: BuilderNodeOptions = {};
             if (options?.selfIdealSize !== undefined) {
@@ -532,8 +533,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__updateUseParallel = !(this.__frameNode?.isAttached() ?? true);
         this.__params!.value = arg!;
         this.__rootStage?.forceCompleteRerender();
-        this.__manager!.syncChanges();
-        this.__manager!.updateSnapshot();
+        this.__manager?.syncChanges();
+        this.__manager?.updateSnapshot();
         this.__rootStage?.value;
         this.__updateUseParallel = false;
         GlobalStateManager.SetLocalManager(old);
@@ -630,7 +631,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builderProxyNode?.dispose();
         this.__builderProxyNode = undefined;
         this.__builderRootNode = undefined;
-        this.__manager!.reset();
+        this.__manager?.reset();
     }
 
     public dispose(): void {

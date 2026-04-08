@@ -97,9 +97,9 @@
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
-#include "dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+#include "core/common/event_manager.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -485,6 +485,10 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
 };
 
 auto g_getPopupDefaultShadow = []() -> ShadowStyle {
@@ -826,6 +830,13 @@ auto g_bindMenuOptionsParam = [](
     menuParam.minKeyboardAvoidDistance = convValue;
     auto material = OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(nullptr);
     menuParam.systemMaterial = material ? material->Copy() : nullptr;
+    auto scrollBarOpt = OptConvert<DisplayMode>(menuOptions.scrollBar);
+    if (scrollBarOpt.has_value()) {
+        menuParam.scrollBar = scrollBarOpt.value();
+    }
+    auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
+    Validator::ValidateNonNegative(maxHeightOpt);
+    menuParam.maxHeight = maxHeightOpt;
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -3392,7 +3403,9 @@ void SetOnDigitalCrownImpl(Ark_NativePointer node,
                 .angularVelocity = ArkValue<Ark_Number>(info.GetAngularVelocity()),
                 .degree = ArkValue<Ark_Number>(info.GetDegree()),
                 .action = ArkValue<Ark_CrownAction>(info.GetAction()),
+#ifndef ARKUI_WEARABLE
                 .stopPropagation = stopPropagation.ArkValue(),
+#endif
             };
             callback.Invoke(crownEvent);
         };
@@ -4028,8 +4041,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
-void SetOnAreaChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Area_Area_Void* value)
+void SetOnAreaChange0Impl(Ark_NativePointer node, const Opt_Callback_Area_Area_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4081,6 +4093,63 @@ void SetOnAreaChangeImpl(Ark_NativePointer node,
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+void SetOnAreaChange1Impl(Ark_NativePointer node,
+                          const AreaChangeCallback* event,
+                          const Opt_AreaChangeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    auto onEvent = [arkCallback = CallbackHelper(*event), weakNode = AceType::WeakClaim(frameNode)](
+                       const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ConvContext ctx;
+        PipelineContext::SetCallBackNode(weakNode);
+
+        auto previousOffset = oldRect.GetOffset();
+        Ark_Area previous;
+        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()), &ctx);
+        previous.height = Converter::ArkValue<Ark_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()), &ctx);
+        previous.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()), &ctx);
+        previous.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()), &ctx);
+        previous.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()), &ctx);
+        previous.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()), &ctx);
+
+        auto currentOffset = rect.GetOffset();
+        Ark_Area current;
+        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()), &ctx);
+        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()), &ctx);
+        current.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()), &ctx);
+        current.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()), &ctx);
+        current.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()), &ctx);
+        current.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()), &ctx);
+
+        arkCallback.InvokeSync(previous, current);
+    };
+
+    auto areaChangeCallback = [areaChangeFunc = std::move(onEvent)](const RectF& oldRect,
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+
+    int32_t expectedUpdateInterval = (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED)
+        ? Converter::GetOpt(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION)
+        : DEFAULT_DURATION;
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    ViewAbstract::SetOnAreaChangedWithInterval(frameNode, std::move(areaChangeCallback), expectedUpdateInterval);
 }
 void SetVisibilityImpl(Ark_NativePointer node,
                        const Opt_Visibility* value)
@@ -4590,6 +4659,27 @@ void SetOnPreDragImpl(Ark_NativePointer node,
         callback.InvokeSync(Converter::ArkValue<Ark_PreDragStatus>(info));
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
+}
+void SetToolbarImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        ViewAbstractModelStatic::SetToolbarBuilder(frameNode, nullptr);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto nativeNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(nativeNode);
+            auto builder = [uiNode]() -> RefPtr<UINode> {
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+                return uiNode;
+            };
+            ViewAbstractModelStatic::SetToolbarBuilder(AceType::RawPtr(nativeNode), std::move(builder));
+        }, node);
 }
 void SetLinearGradientImpl(Ark_NativePointer node,
                            const Opt_LinearGradientOptions* value)
@@ -6305,20 +6395,25 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
         .value_or(ModalTransition::DEFAULT);
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
-        CallbackHelper(*optBuilder).BuildAsync([frameNode, modalStyle](
-            const RefPtr<UINode>& uiNode) mutable {
-            auto weakNode = AceType::WeakClaim(frameNode);
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ContentCoverParam contentCoverParam;
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
-                nullptr, nullptr, nullptr, nullptr, contentCoverParam);
-            }, node);
+        auto buildFunc =
+            [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PipelineContext::SetCallBackNode(weak);
+            auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            auto finalNode = CreateProxyNode(builderNode);
+#else
+            auto finalNode = builderNode;
+#endif
+            ViewStackProcessor::GetInstance()->Push(finalNode);
+        };
+        ContentCoverParam contentCoverParam;
+        ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
+            nullptr, nullptr, nullptr, nullptr, contentCoverParam);
     } else {
         ContentCoverParam contentCoverParam;
-        std::function<RefPtr<UINode>()> buildFunc = nullptr;
+        std::function<void()> buildFunc = nullptr;
         ViewAbstractModelStatic::BindContentCover(frameNode, false, nullptr, std::move(buildFunc), modalStyle, nullptr,
             nullptr, nullptr, nullptr, contentCoverParam);
     }
@@ -6357,21 +6452,22 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
 
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
-        CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
-            changeEvent = std::move(changeEvent),
-            onShowCallback = std::move(onShowCallback),
-            onDismissCallback = std::move(onDismissCallback),
-            onWillShowCallback = std::move(onWillShowCallback),
-            onWillDismissCallback = std::move(onWillDismissCallback)
-        ](const RefPtr<UINode>& uiNode) mutable {
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
-                modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
-                std::move(onWillDismissCallback), contentCoverParam);
-            }, node);
+        auto buildFunc =
+            [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            PipelineContext::SetCallBackNode(weak);
+            auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            auto finalNode = CreateProxyNode(builderNode);
+#else
+            auto finalNode = builderNode;
+#endif
+            ViewStackProcessor::GetInstance()->Push(finalNode);
+        };
+        ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
+            modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+            std::move(onWillDismissCallback), contentCoverParam);
     } else {
         ViewAbstractModelStatic::BindContentCover(frameNode, false, std::move(changeEvent), nullptr,
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback),
@@ -6756,7 +6852,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDisAppearImpl,
         CommonMethodModifier::SetOnAttachImpl,
         CommonMethodModifier::SetOnDetachImpl,
-        CommonMethodModifier::SetOnAreaChangeImpl,
+        CommonMethodModifier::SetOnAreaChange0Impl,
         CommonMethodModifier::SetVisibilityImpl,
         CommonMethodModifier::SetFlexGrowImpl,
         CommonMethodModifier::SetFlexShrinkImpl,
@@ -6783,6 +6879,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDragEndImpl,
         CommonMethodModifier::SetDraggableImpl,
         CommonMethodModifier::SetOnPreDragImpl,
+        CommonMethodModifier::SetToolbarImpl,
         CommonMethodModifier::SetLinearGradientImpl,
         CommonMethodModifier::SetSweepGradientImpl,
         CommonMethodModifier::SetRadialGradientImpl,
@@ -6872,6 +6969,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

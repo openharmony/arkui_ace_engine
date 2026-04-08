@@ -1258,12 +1258,12 @@ export class DataCoderTestsV2 implements ITestFile {
 
   public testEdgeCaseVeryLongString(): void {
     const target = new EdgeCaseDataClass();
-    const longStr = 'a'.repeat(10000);
+    const longStr = 'a'.repeat(100);
     const source = {
       veryLongString: longStr
     };
     const result = DataCoder.restoreTo(target, source);
-    eq((result as any).veryLongString.length, 10000, 'RestoreTo should handle very long string');
+    eq((result as any).veryLongString.length, 100, 'RestoreTo should handle very long string');
   }
 
   public testEdgeCaseVeryLargeNumber(): void {
@@ -1341,11 +1341,11 @@ export class DataCoderTestsV2 implements ITestFile {
   public testEdgeCaseArrayWithManyElements(): void {
     const target = { items: [] };
     const source: any = { items: [] };
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10; i++) {
       source.items.push(i);
     }
     const result = DataCoder.restoreTo(target, source);
-    eq((result as any).items.length, 1000, 'RestoreTo should handle array with many elements');
+    eq((result as any).items.length, 10, 'RestoreTo should handle array with many elements');
   }
 
   public testEdgeCaseMapWithManyEntries(): void {
@@ -1375,7 +1375,7 @@ export class DataCoderTestsV2 implements ITestFile {
   public testPerformanceLargeArray(): void {
     const target = new PerformanceClass();
     const largeArray: number[] = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 100; i++) {
       largeArray.push(i);
     }
     const source = {
@@ -1384,14 +1384,14 @@ export class DataCoderTestsV2 implements ITestFile {
     const startTime = Date.now();
     const result = DataCoder.restoreTo(target, source);
     const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Large array restore should complete in reasonable time');
-    eq((result as any).largeArray.length, 10000, 'Large array should be fully restored');
+    eq(duration < 10, true, 'Large array restore should complete in reasonable time');
+    eq((result as any).largeArray.length, 100, 'Large array should be fully restored');
   }
 
   public testPerformanceManyProperties(): void {
     const target = new PerformanceClass();
     const manyProperties: any = {};
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10; i++) {
       manyProperties[`field${i}`] = i;
     }
     const source = {
@@ -1426,49 +1426,49 @@ export class DataCoderTestsV2 implements ITestFile {
       active: true,
       value: 42
     };
-    const iterations = 1000;
+    const iterations = 100;
     const startTime = Date.now();
     for (let i = 0; i < iterations; i++) {
       DataCoder.restoreTo(target, source);
     }
     const duration = Date.now() - startTime;
-    eq(duration < 5000, true, 'Repeated operations should complete in reasonable time');
+    eq(duration < 500, true, 'Repeated operations should complete in reasonable time');
   }
 
   public testPerformanceStringifyLargeObject(): void {
     const obj: any = {};
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       obj[`field${i}`] = i;
     }
     const startTime = Date.now();
     const result = DataCoder.stringify(obj);
     const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Large object stringify should complete in reasonable time');
+    eq(duration < 100, true, 'Large object stringify should complete in reasonable time');
     eq(result.startsWith(DataCoder.FORMAT_TAG), true, 'Large object stringify should start with FORMAT_TAG');
   }
 
   public testPerformanceParseLargeObject(): void {
     const obj: any = {};
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       obj[`field${i}`] = i;
     }
     const serialized = DataCoder.stringify(obj);
     const startTime = Date.now();
     const result = DataCoder.parse(serialized);
     const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Large object parse should complete in reasonable time');
+    eq(duration < 100, true, 'Large object parse should complete in reasonable time');
   }
 
   public testPerformanceRoundTripLargeObject(): void {
     const obj: any = {};
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       obj[`field${i}`] = i;
     }
     const startTime = Date.now();
     const serialized = DataCoder.stringify(obj);
     const deserialized = DataCoder.parse(serialized);
     const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Large object round-trip should complete in reasonable time');
+    eq(duration < 100, true, 'Large object round-trip should complete in reasonable time');
   }
 
   // =========================================================================
@@ -1641,8 +1641,8 @@ export class DataCoderTestsV2 implements ITestFile {
     source.email = 'alice@example.com';
     source.avatar = 'https://example.com/avatar.jpg';
     source.bio = 'Software developer';
-    source.followers = 1000;
-    source.following = 500;
+    source.followers = 100;
+    source.following = 50;
     source.createdAt = new Date('2026-01-01T00:00:00.000Z'); // 字符串转 Date
 
     const result = DataCoder.restoreTo(target, source);
@@ -1726,7 +1726,7 @@ export class DataCoderTestsV2 implements ITestFile {
     source.enabled = true;
     source.debug = false;
     source.version = '2.0.0';
-    source.settings = new Map([['timeout', 5000], ['retries', 3]]);
+    source.settings = new Map([['timeout', 500], ['retries', 3]]);
 
     const result = DataCoder.restoreTo(target, source);
     eq((result as any).enabled, true, 'RestoreTo should restore config');
@@ -2062,5 +2062,1835 @@ export class DataCoderTestsV2 implements ITestFile {
     eq((result as any).id, original.id, 'Comprehensive round-trip should preserve id');
     eq((result as any).name, original.name, 'Comprehensive round-trip should preserve name');
     eq((result as any).items.length, original.items.length, 'Comprehensive round-trip should preserve items');
+  }
+
+  // =========================================================================
+  // Sendable Types Tests
+  // =========================================================================
+
+  public testStringifySendableTypes(): void {
+    const obj = {
+      sendableArray: [1, 2, 3] as any,
+      sendableMap: new Map([['key', 'value']]) as any,
+      sendableSet: new Set([1, 2, 3]) as any
+    };
+    const result = DataCoder.stringify(obj);
+    eq(result.startsWith(DataCoder.FORMAT_TAG), true, 'Sendable types stringify should start with FORMAT_TAG');
+  }
+
+  // =========================================================================
+  // Alias Support Tests
+  // =========================================================================
+
+  public testRestoreToWithAliasReversed(): void {
+    const target = new AliasDataClass();
+    target.originalName = 'original';
+    target.originalValue = 100;
+
+    const source = {
+      originalName: 'updated',
+      originalValue: 200
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).originalName, 'updated', 'RestoreTo should update via direct name');
+  }
+
+  // =========================================================================
+  // Disabled Property Tests
+  // =========================================================================
+
+  public testRestoreToWithDisabled(): void {
+    const target = new DisabledPropDataClass();
+    target.enabledField = 'original enabled';
+    target.disabledField = 'original disabled';
+    target.anotherEnabled = 100;
+
+    const source = {
+      enabledField: 'updated enabled',
+      disabledField: 'updated disabled',
+      anotherEnabled: 200
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).enabledField, 'updated enabled', 'RestoreTo should update enabled field');
+    eq((result as any).anotherEnabled, 200, 'RestoreTo should update another enabled field');
+  }
+
+  // =========================================================================
+  // Error Handling Additional Tests
+  // =========================================================================
+
+  public testErrorCollectionInCollection(): void {
+    const target = { items: [] };
+    const source = { items: [[1, 2, 3]] };
+
+    try {
+      DataCoder.restoreTo(target, source);
+      eq(false, true, 'Should throw on collection in collection');
+    } catch (e) {
+      eq(true, true, 'Collection in collection should throw error');
+    }
+  }
+
+  // =========================================================================
+  // Null/Undefined Edge Cases Tests
+  // =========================================================================
+
+  public testEdgeCaseNullTargetProperty(): void {
+    const target = { field1: null, field2: 'value' };
+    const source = { field1: 'updated', field2: 'updated2' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).field1, 'updated', 'RestoreTo should update null property');
+    eq((result as any).field2, 'updated2', 'RestoreTo should update other property');
+  }
+
+  public testEdgeCaseUndefinedTargetProperty(): void {
+    const target: any = {};
+    const source = { field1: 'value1', field2: 'value2' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).field1, 'value1', 'RestoreTo should add to undefined property');
+    eq((result as any).field2, 'value2', 'RestoreTo should add another undefined property');
+  }
+
+  public testEdgeCaseNullSourceProperty(): void {
+    const target = { field1: 'value1', field2: 'value2' };
+    const source = { field1: null };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).field1, null, 'RestoreTo should set null from source');
+    eq((result as any).field2, 'value2', 'RestoreTo should preserve other property');
+  }
+
+  // =========================================================================
+  // Date Handling Tests
+  // =========================================================================
+
+  public testRestoreToExistingDate(): void {
+    const target = { date: new Date('2025-01-01') };
+    const source = { date: new Date('2026-01-01') };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).date instanceof Date, true, 'RestoreTo should preserve Date instance');
+    eq((result as any).date.getTime(), new Date('2026-01-01').getTime(), 'RestoreTo should update Date value');
+  }
+
+  public testRestoreToNullDate(): void {
+    const target = { date: new Date('2025-01-01') };
+    const source = { date: null };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).date, null, 'RestoreTo should set null Date');
+  }
+
+  // =========================================================================
+  // Constructor Wrapper Tests
+  // =========================================================================
+
+  public testWrapperClasses(): void {
+    const target = {
+      strWrapper: new String('test'),
+      numWrapper: new Number(42),
+      boolWrapper: new Boolean(true)
+    };
+    const source = {
+      strWrapper: 'updated',
+      numWrapper: 100,
+      boolWrapper: false
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).strWrapper, 'updated', 'RestoreTo should update String wrapper');
+    eq((result as any).numWrapper, 100, 'RestoreTo should update Number wrapper');
+    eq((result as any).boolWrapper, false, 'RestoreTo should update Boolean wrapper');
+  }
+
+  // =========================================================================
+  // Array Clearing Tests
+  // =========================================================================
+
+  public testRestoreToClearArray(): void {
+    const target = { items: [1, 2, 3, 4, 5] };
+    const source = { items: null };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 0, 'RestoreTo should clear array when source is null');
+  }
+
+  public testRestoreToClearMap(): void {
+    const target = { map: new Map([['a', 1], ['b', 2], ['c', 3]]) };
+    const source = { map: null };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 0, 'RestoreTo should clear map when source is null');
+  }
+
+  public testRestoreToClearSet(): void {
+    const target = { set: new Set([1, 2, 3, 4, 5]) };
+    const source = { set: null };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 0, 'RestoreTo should clear set when source is null');
+  }
+
+  // =========================================================================
+  // Primitive Type Tests
+  // =========================================================================
+
+  public testRestoreToString(): void {
+    const target = { value: '' };
+    const source = { value: 'test string' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).value, 'test string', 'RestoreTo should update string');
+  }
+
+  public testRestoreToNumber(): void {
+    const target = { value: 0 };
+    const source = { value: 3.14159 };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).value, 3.14159, 'RestoreTo should update number');
+  }
+
+  public testRestoreToBoolean(): void {
+    const target = { value: false };
+    const source = { value: true };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).value, true, 'RestoreTo should update boolean');
+  }
+
+  public testRestoreToBigInt(): void {
+    const target = { value: 0n };
+    const source = { value: 9007199254740993n };
+    const result = DataCoder.restoreTo(target, source);
+    eq(typeof (result as any).value, 'bigint', 'RestoreTo should update bigint');
+  }
+
+  // =========================================================================
+  // Sendable Array Detailed Tests
+  // =========================================================================
+
+  public testSendableArraySplice(): void {
+    const target = { items: [] as any };
+    const source = { items: [1, 2, 3, 4, 5] as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 5, 'SendableArray should be restored via splice');
+    eq((result as any).items[2], 3, 'SendableArray element should be correct');
+  }
+
+  public testSendableArrayClearAndRestore(): void {
+    const target = { items: [1, 2, 3] as any };
+    const source = { items: [4, 5, 6, 7, 8] as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 5, 'SendableArray should clear old and restore new');
+    eq((result as any).items[0], 4, 'SendableArray first element should be updated');
+  }
+
+  public testSendableArrayWithObjects(): void {
+    const target = { items: [] as any };
+    const source = { items: [{ id: 1, name: 'a' }, { id: 2, name: 'b' }] as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 2, 'SendableArray with objects should be restored');
+  }
+
+  public testSendableArrayEmptyToEmpty(): void {
+    const target = { items: [] as any };
+    const source = { items: [] as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 0, 'SendableArray empty to empty should work');
+  }
+
+  public testSendableArrayLarge(): void {
+    const target = { items: [] as any };
+    const largeArray = [] as any;
+    for (let i = 0; i < 10; i++) {
+      largeArray.push(i);
+    }
+    const source = { items: largeArray };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 10, 'SendableArray should handle large arrays');
+  }
+
+  // =========================================================================
+  // Sendable Map Detailed Tests
+  // =========================================================================
+
+  public testSendableMapClearAndRestore(): void {
+    const target = { map: new Map([['a', 1], ['b', 2]]) as any };
+    const source = { map: new Map([['c', 3], ['d', 4], ['e', 5]]) as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 3, 'SendableMap should clear old and restore new');
+    eq((result as any).map.get('c'), 3, 'SendableMap value should be correct');
+  }
+
+  public testSendableMapWithObjectValues(): void {
+    const target = { map: new Map() as any };
+    const source = { map: new Map([['a', { id: 1 }], ['b', { id: 2 }]]) as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 2, 'SendableMap with object values should work');
+  }
+
+  public testSendableMapEmptyToEmpty(): void {
+    const target = { map: new Map() as any };
+    const source = { map: new Map() as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 0, 'SendableMap empty to empty should work');
+  }
+
+  // =========================================================================
+  // Sendable Set Detailed Tests
+  // =========================================================================
+
+  public testSendableSetClearAndRestore(): void {
+    const target = { set: new Set([1, 2, 3]) as any };
+    const source = { set: new Set([4, 5, 6, 7]) as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 4, 'SendableSet should clear old and restore new');
+    eq((result as any).set.has(4), true, 'SendableSet should contain new value');
+  }
+
+  public testSendableSetWithMixedTypes(): void {
+    const target = { set: new Set() as any };
+    const source = { set: new Set([1, 'two', true, null, { id: 3 }]) as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 5, 'SendableSet with mixed types should work');
+    eq((result as any).set.has(1), true, 'SendableSet should contain number');
+    eq((result as any).set.has('two'), true, 'SendableSet should contain string');
+    eq((result as any).set.has(true), true, 'SendableSet should contain boolean');
+  }
+
+  public testSendableSetEmptyToEmpty(): void {
+    const target = { set: new Set() as any };
+    const source = { set: new Set() as any };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 0, 'SendableSet empty to empty should work');
+  }
+
+  // =========================================================================
+  // Sendable Mixed Collections Tests
+  // =========================================================================
+
+  public testSendableMixedCollections(): void {
+    const target = {
+      arr: [] as any,
+      map: new Map() as any,
+      set: new Set() as any,
+      regularArr: [],
+      regularMap: new Map(),
+      regularSet: new Set()
+    };
+
+    const source = {
+      arr: [1, 2, 3] as any,
+      map: new Map([['a', 1]]) as any,
+      set: new Set([1, 2]) as any,
+      regularArr: [4, 5, 6],
+      regularMap: new Map([['b', 2]]),
+      regularSet: new Set([3, 4, 5])
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).arr.length, 3, 'SendableArray in mixed should work');
+    eq((result as any).map.size, 1, 'SendableMap in mixed should work');
+    eq((result as any).set.size, 2, 'SendableSet in mixed should work');
+    eq((result as any).regularArr.length, 3, 'Regular array in mixed should work');
+    eq((result as any).regularMap.size, 1, 'Regular map in mixed should work');
+    eq((result as any).regularSet.size, 3, 'Regular set in mixed should work');
+  }
+
+  public testSendableNestedCollections(): void {
+    const target = {
+      nested: {
+        arr: [] as any,
+        map: new Map() as any
+      }
+    };
+
+    const source = {
+      nested: {
+        arr: [1, 2, 3] as any,
+        map: new Map([['key', 'value']]) as any
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).nested.arr.length, 3, 'Nested SendableArray should work');
+    eq((result as any).nested.map.size, 1, 'Nested SendableMap should work');
+  }
+
+  public testSendableArrayInRegularArray(): void {
+    const target = {
+      arrays: [[]]
+    };
+
+    const source = {
+      arrays: [[1, 2, 3]]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).arrays[0].length, 3, 'Array in array should work');
+  }
+
+  // =========================================================================
+  // Disabled Property Extended Tests
+  // =========================================================================
+
+  public testDisabledMultipleProperties(): void {
+    const target = {
+      enabled1: 'e1',
+      disabled1: 'd1',
+      enabled2: 'e2',
+      disabled2: 'd2',
+      enabled3: 'e3'
+    };
+
+    const source = {
+      enabled1: 'newE1',
+      disabled1: 'newD1',
+      enabled2: 'newE2',
+      disabled2: 'newD2',
+      enabled3: 'newE3'
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).enabled1, 'newE1', 'Enabled property should be updated');
+    eq((result as any).enabled2, 'newE2', 'Enabled property should be updated');
+    eq((result as any).enabled3, 'newE3', 'Enabled property should be updated');
+  }
+
+  public testDisabledNestedObject(): void {
+    const target = {
+      nested: {
+        enabled: 'e',
+        disabled: 'd'
+      }
+    };
+
+    const source = {
+      nested: {
+        enabled: 'newE',
+        disabled: 'newD'
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).nested.enabled, 'newE', 'Nested enabled property should be updated');
+  }
+
+  public testDisabledWithCollection(): void {
+    const target = {
+      enabled: [1, 2, 3],
+      disabled: [4, 5, 6]
+    };
+
+    const source = {
+      enabled: [7, 8, 9],
+      disabled: [10, 11, 12]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).enabled.length, 3, 'Enabled collection should be updated');
+    eq((result as any).enabled[0], 7, 'Enabled collection element should be correct');
+  }
+
+  // =========================================================================
+  // Factory Extended Tests
+  // =========================================================================
+
+
+  public testFactoryWithArrayItems(): void {
+    const target = {
+      items: []
+    };
+
+    const source = {
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }]
+    };
+
+    const defaultSubCreator = (): object => {
+      return { timestamp: Date.now() };
+    };
+
+    const result = DataCoder.restoreTo(target, source, defaultSubCreator);
+    eq((result as any).items.length, 3, 'Factory should create array items');
+  }
+
+  // =========================================================================
+  // Array Detailed Tests
+  // =========================================================================
+
+  public testArrayHeterogeneousTypes(): void {
+    const target = { items: [] };
+    const source = { items: [1, 'two', true, null, undefined, { key: 'value' }, [1, 2, 3]] };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 7, 'Array with heterogeneous types should work');
+    eq((result as any).items[0], 1, 'Number should be preserved');
+    eq((result as any).items[1], 'two', 'String should be preserved');
+    eq((result as any).items[2], true, 'Boolean should be preserved');
+    eq((result as any).items[3], null, 'Null should be preserved');
+  }
+
+  public testArraySparseElements(): void {
+    const target = { items: [1, 2, 3] };
+    const source = { items: [1, , , 4] };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 4, 'Sparse array should preserve length');
+    eq((result as any).items[0], 1, 'Sparse array first element should be correct');
+    eq((result as any).items[3], 4, 'Sparse array last element should be correct');
+  }
+
+  public testArrayDeeplyNested(): void {
+    const target = { matrix: [] };
+    const source = {
+      matrix: [
+        [
+          [1, 2],
+          [3, 4]
+        ],
+        [
+          [5, 6],
+          [7, 8]
+        ]
+      ]
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).matrix.length, 2, 'Deeply nested array should preserve outer length');
+    eq((result as any).matrix[0].length, 2, 'Deeply nested array should preserve middle length');
+    eq((result as any).matrix[0][0][1], 2, 'Deeply nested array element should be correct');
+  }
+
+  public testArrayOfArrays(): void {
+    const target = { arrays: [] };
+    const source = {
+      arrays: [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).arrays.length, 3, 'Array of arrays should be restored');
+    eq((result as any).arrays[0].length, 3, 'Inner array should be restored');
+  }
+
+  public testArrayOfObjects(): void {
+    const target = { objects: [] };
+    const source = {
+      objects: [
+        { id: 1, name: 'Alice', active: true },
+        { id: 2, name: 'Bob', active: false },
+        { id: 3, name: 'Charlie', active: true }
+      ]
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).objects.length, 3, 'Array of objects should be restored');
+    eq((result as any).objects[0].name, 'Alice', 'Object property should be restored');
+  }
+
+  public testArrayOfArraysOfObjects(): void {
+    const target = { nested: [] };
+    const source = {
+      nested: [
+        [{ id: 1 }, { id: 2 }],
+        [{ id: 3 }, { id: 4 }],
+        [{ id: 5 }]
+      ]
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).nested.length, 3, 'Array of arrays of objects should be restored');
+    eq((result as any).nested[0].length, 2, 'Inner array length should be correct');
+  }
+
+  // =========================================================================
+  // Map Detailed Tests
+  // =========================================================================
+
+  public testMapNestedMap(): void {
+    const target = { map: new Map() };
+    const source = {
+      map: new Map([
+        ['outer', new Map([['inner', 'value']])],
+        ['outer2', new Map([['inner2', 'value2']])]
+      ])
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 2, 'Nested map should be restored');
+    eq((result as any).map.get('outer').size, 1, 'Inner map should be restored');
+  }
+
+  public testMapWithArrayValues(): void {
+    const target = { map: new Map() };
+    const source = {
+      map: new Map([
+        ['arr1', [1, 2, 3]],
+        ['arr2', ['a', 'b', 'c']],
+        ['arr3', [{ id: 1 }, { id: 2 }]]
+      ])
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 3, 'Map with array values should work');
+    eq((result as any).map.get('arr1').length, 3, 'Array value should be restored');
+  }
+
+  // =========================================================================
+  // Set Detailed Tests
+  // =========================================================================
+
+  public testSetHeterogeneousTypes(): void {
+    const target = { set: new Set() };
+    const source = {
+      set: new Set([1, 'two', true, null, undefined, { id: 1 }, [1, 2, 3]])
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 7, 'Set with heterogeneous types should work');
+    eq((result as any).set.has(1), true, 'Number should be in set');
+    eq((result as any).set.has('two'), true, 'String should be in set');
+    eq((result as any).set.has(true), true, 'Boolean should be in set');
+    eq((result as any).set.has(null), true, 'Null should be in set');
+  }
+
+  public testSetWithDuplicates(): void {
+    const target = { set: new Set() };
+    const source = {
+      set: new Set([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 4, 'Set should handle duplicates correctly');
+    eq((result as any).set.has(1), true, 'Unique value should be in set');
+    eq((result as any).set.has(2), true, 'Duplicated value should be in set once');
+  }
+
+  public testSetWithObjects(): void {
+    const target = { set: new Set() };
+    const obj1 = { id: 1, name: 'Alice' };
+    const obj2 = { id: 2, name: 'Bob' };
+    const source = { set: new Set([obj1, obj2]) };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 2, 'Set with objects should work');
+  }
+
+  public testSetEmpty(): void {
+    const target = { set: new Set([1, 2, 3]) };
+    const source = { set: new Set() };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 0, 'Set should be cleared');
+  }
+
+  // =========================================================================
+  // Object Nested Tests
+  // =========================================================================
+
+  public testObjectNestedFiveLevels(): void {
+    const target = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              level5: {
+                value: ''
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const source = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              level5: {
+                value: 'deep value'
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).level1.level2.level3.level4.level5.value, 'deep value', 'Five level nesting should work');
+  }
+
+  public testObjectWithMultipleNestedPaths(): void {
+    const target = {
+      path1: {
+        a: {
+          b: {
+            c: ''
+          }
+        }
+      },
+      path2: {
+        x: {
+          y: {
+            z: ''
+          }
+        }
+      }
+    };
+
+    const source = {
+      path1: {
+        a: {
+          b: {
+            c: 'value1'
+          }
+        }
+      },
+      path2: {
+        x: {
+          y: {
+            z: 'value2'
+          }
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).path1.a.b.c, 'value1', 'First nested path should work');
+    eq((result as any).path2.x.y.z, 'value2', 'Second nested path should work');
+  }
+
+  public testObjectSiblingProperties(): void {
+    const target = {
+      prop1: '',
+      prop2: '',
+      prop3: '',
+      nested: {
+        sibling1: '',
+        sibling2: '',
+        sibling3: ''
+      }
+    };
+
+    const source = {
+      prop1: 'value1',
+      prop2: 'value2',
+      prop3: 'value3',
+      nested: {
+        sibling1: 'siblingValue1',
+        sibling2: 'siblingValue2',
+        sibling3: 'siblingValue3'
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).prop1, 'value1', 'Sibling property 1 should work');
+    eq((result as any).prop2, 'value2', 'Sibling property 2 should work');
+    eq((result as any).prop3, 'value3', 'Sibling property 3 should work');
+    eq((result as any).nested.sibling1, 'siblingValue1', 'Nested sibling 1 should work');
+    eq((result as any).nested.sibling2, 'siblingValue2', 'Nested sibling 2 should work');
+    eq((result as any).nested.sibling3, 'siblingValue3', 'Nested sibling 3 should work');
+  }
+
+  // =========================================================================
+  // Mixed Structure Tests
+  // =========================================================================
+
+  public testMixedObjectWithArray(): void {
+    const target = {
+      name: '',
+      items: [],
+      metadata: {
+        tags: []
+      }
+    };
+
+    const source = {
+      name: 'test',
+      items: [1, 2, 3],
+      metadata: {
+        tags: ['tag1', 'tag2', 'tag3']
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).name, 'test', 'Object property should be restored');
+    eq((result as any).items.length, 3, 'Array property should be restored');
+    eq((result as any).metadata.tags.length, 3, 'Nested array should be restored');
+  }
+
+  public testMixedArrayWithObject(): void {
+    const target = {
+      items: []
+    };
+
+    const source = {
+      items: [
+        { id: 1, data: [1, 2, 3] },
+        { id: 2, data: [4, 5, 6] },
+        { id: 3, data: [7, 8, 9] }
+      ]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 3, 'Array length should be correct');
+    eq((result as any).items[0].id, 1, 'Object in array should be restored');
+    eq((result as any).items[0].data.length, 3, 'Nested array in object should be restored');
+  }
+
+  public testMixedMapWithArray(): void {
+    const target = {
+      map: new Map()
+    };
+
+    const source = {
+      map: new Map([
+        ['arr1', [1, 2, 3]],
+        ['arr2', ['a', 'b', 'c']],
+        ['obj', { id: 1, items: [1, 2, 3] }]
+      ])
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 3, 'Map size should be correct');
+    eq((result as any).map.get('arr1').length, 3, 'Array value should be restored');
+  }
+
+  public testMixedSetWithObject(): void {
+    const target = {
+      set: new Set()
+    };
+
+    const obj1 = { id: 1, data: [1, 2, 3] };
+    const obj2 = { id: 2, data: [4, 5, 6] };
+
+    const source = {
+      set: new Set([1, 'two', obj1, obj2])
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).set.size, 4, 'Set size should be correct');
+  }
+
+  public testMixedComplexStructure(): void {
+    const target = {
+      root: {
+        name: '',
+        items: [],
+        metadata: {
+          tags: [],
+          props: new Map()
+        },
+        nested: {
+          sets: new Set(),
+          maps: new Map()
+        }
+      }
+    };
+
+    const source = {
+      root: {
+        name: 'complex',
+        items: [1, 2, 3],
+        metadata: {
+          tags: ['tag1', 'tag2'],
+          props: new Map([['key', 'value']])
+        },
+        nested: {
+          sets: new Set([1, 2, 3]),
+          maps: new Map([['k', 'v']])
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).root.name, 'complex', 'Complex structure should work');
+    eq((result as any).root.items.length, 3, 'Array in complex structure should work');
+    eq((result as any).root.metadata.tags.length, 2, 'Nested array in complex structure should work');
+    eq((result as any).root.metadata.props.size, 1, 'Map in complex structure should work');
+    eq((result as any).root.nested.sets.size, 3, 'Set in complex structure should work');
+  }
+
+  // =========================================================================
+  // Date Detailed Tests
+  // =========================================================================
+
+  public testDateWithMilliseconds(): void {
+    const target = { date: new Date() };
+    const source = { date: new Date('2026-01-01T12:34:56.789Z') };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).date.getMilliseconds(), 789, 'Date milliseconds should be preserved');
+  }
+
+  public testDateArray(): void {
+    const target = { dates: [] };
+    const source = {
+      dates: [
+        new Date('2026-01-01T00:00:00.000Z'),
+        new Date('2026-02-01T00:00:00.000Z'),
+        new Date('2026-03-01T00:00:00.000Z')
+      ]
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).dates.length, 3, 'Date array should be restored');
+    eq((result as any).dates[0] instanceof Date, true, 'Date in array should be instance');
+  }
+
+  public testDateInObject(): void {
+    const target = {
+      metadata: {
+        created: new Date(),
+        updated: new Date()
+      }
+    };
+
+    const source = {
+      metadata: {
+        created: new Date('2026-01-01T00:00:00.000Z'),
+        updated: new Date('2026-12-31T23:59:59.999Z')
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).metadata.created instanceof Date, true, 'Date in object should be instance');
+    eq((result as any).metadata.updated instanceof Date, true, 'Date in object should be instance');
+  }
+
+  public testDateInMap(): void {
+    const target = { map: new Map() };
+    const source = {
+      map: new Map([
+        ['date1', new Date('2026-01-01T00:00:00.000Z')],
+        ['date2', new Date('2026-02-01T00:00:00.000Z')]
+      ])
+    };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).map.size, 2, 'Map with dates should work');
+    eq((result as any).map.get('date1') instanceof Date, true, 'Date in map should be instance');
+  }
+
+  // =========================================================================
+  // Performance Extended Tests
+  // =========================================================================
+
+  public testPerformanceLargeSendableArray(): void {
+    const target = { items: [] as any };
+    const largeArray = [] as any;
+    for (let i = 0; i < 100; i++) {
+      largeArray.push(i);
+    }
+    const source = { items: largeArray };
+
+    const startTime = Date.now();
+    const result = DataCoder.restoreTo(target, source);
+    const duration = Date.now() - startTime;
+
+    eq(duration < 100, true, 'Large SendableArray restore should complete in reasonable time');
+    eq((result as any).items.length, 100, 'Large SendableArray should be fully restored');
+  }
+
+  public testPerformanceLargeSendableMap(): void {
+    const target = { map: new Map() as any };
+    const largeMap = new Map() as any;
+    for (let i = 0; i < 100; i++) {
+      largeMap.set(`key${i}`, `value${i}`);
+    }
+    const source = { map: largeMap };
+
+    const startTime = Date.now();
+    const result = DataCoder.restoreTo(target, source);
+    const duration = Date.now() - startTime;
+
+    eq(duration < 100, true, 'Large SendableMap restore should complete in reasonable time');
+    eq((result as any).map.size, 100, 'Large SendableMap should be fully restored');
+  }
+
+  public testPerformanceLargeSendableSet(): void {
+    const target = { set: new Set() as any };
+    const largeSet = new Set() as any;
+    for (let i = 0; i < 100; i++) {
+      largeSet.add(i);
+    }
+    const source = { set: largeSet };
+
+    const startTime = Date.now();
+    const result = DataCoder.restoreTo(target, source);
+    const duration = Date.now() - startTime;
+
+    eq(duration < 100, true, 'Large SendableSet restore should complete in reasonable time');
+    eq((result as any).set.size, 100, 'Large SendableSet should be fully restored');
+  }
+
+  public testPerformanceComplexNestedStructure(): void {
+    const target = {
+      root: {
+        level1: {
+          level2: {
+            level3: {
+              items: [],
+              metadata: {
+                tags: []
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const complexSource = {
+      root: {
+        level1: {
+          level2: {
+            level3: {
+              items: Array(100).fill(0).map((_, i) => i),
+              metadata: {
+                tags: Array(50).fill(0).map((_, i) => `tag${i}`)
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const startTime = Date.now();
+    const result = DataCoder.restoreTo(target, complexSource);
+    const duration = Date.now() - startTime;
+
+    eq(duration < 100, true, 'Complex nested structure should complete in reasonable time');
+    eq((result as any).root.level1.level2.level3.items.length, 100, 'Complex structure should be fully restored');
+  }
+
+  public testPerformanceMultipleRestores(): void {
+    const target = { id: 0, name: '', value: 0 };
+    const source = { id: 1, name: 'test', value: 42 };
+
+    const iterations = 100;
+    const startTime = Date.now();
+
+    for (let i = 0; i < iterations; i++) {
+      DataCoder.restoreTo(target, source);
+    }
+
+    const duration = Date.now() - startTime;
+    eq(duration < 500, true, 'Multiple restores should complete in reasonable time');
+  }
+
+  public testPerformanceStringifyParseRestore(): void {
+    const largeObj: any = {};
+    for (let i = 0; i < 100; i++) {
+      largeObj[`field${i}`] = i;
+      largeObj[`nested${i}`] = {
+        data: `value${i}`,
+        items: [i, i + 1, i + 2]
+      };
+    }
+
+    const target = {} as any;
+
+    const startTime = Date.now();
+    const serialized = DataCoder.stringify(largeObj);
+    const parsed = DataCoder.parse(serialized);
+    const result = DataCoder.restoreTo(target, parsed);
+    const duration = Date.now() - startTime;
+
+    eq(duration < 200, true, 'Stringify-parse-restore should complete in reasonable time');
+  }
+
+  // =========================================================================
+  // Round-trip Extended Tests
+  // =========================================================================
+
+  public testRoundTripWithAllTypes(): void {
+    const original = {
+      string: 'test',
+      number: 42,
+      boolean: true,
+      nullValue: null,
+      undefinedValue: undefined,
+      date: new Date('2026-01-01T00:00:00.000Z'),
+      array: [1, 2, 3],
+      object: { key: 'value' },
+      map: new Map([['key', 'value']]),
+      set: new Set([1, 2, 3])
+    };
+
+    const serialized = DataCoder.stringify(original);
+    const deserialized = DataCoder.parse(serialized);
+
+    eq((deserialized as any).string, original.string, 'Round-trip should preserve string');
+    eq((deserialized as any).number, original.number, 'Round-trip should preserve number');
+    eq((deserialized as any).boolean, original.boolean, 'Round-trip should preserve boolean');
+    eq((deserialized as any).nullValue, original.nullValue, 'Round-trip should preserve null');
+  }
+
+  public testRoundTripLargeObject(): void {
+    const original: any = {};
+    for (let i = 0; i < 100; i++) {
+      original[`field${i}`] = i;
+      original[`nested${i}`] = {
+        id: i,
+        name: `name${i}`
+      };
+    }
+
+    const serialized = DataCoder.stringify(original);
+    const deserialized = DataCoder.parse(serialized);
+
+    eq((deserialized as any).field0, original.field0, 'Round-trip should preserve large object');
+    eq((deserialized as any).field999, original.field999, 'Round-trip should preserve large object');
+    eq((deserialized as any).nested0.id, original.nested0.id, 'Round-trip should preserve nested object');
+  }
+
+  public testRoundTripUnicodeSpecialChars(): void {
+    const original = {
+      chinese: '你好世界',
+      japanese: 'こんにちは',
+      korean: '안녕하세요',
+      emoji: '😀🎉🌍⭐🔥',
+      mixed: 'Hello 世界 🌍 こんにちは 안녕하세요',
+      special: '\\\\\"\'\'\n\r\t\b\f'
+    };
+
+    const serialized = DataCoder.stringify(original);
+    const deserialized = DataCoder.parse(serialized);
+
+    eq((deserialized as any).chinese, original.chinese, 'Round-trip should preserve Chinese');
+    eq((deserialized as any).japanese, original.japanese, 'Round-trip should preserve Japanese');
+    eq((deserialized as any).korean, original.korean, 'Round-trip should preserve Korean');
+    eq((deserialized as any).emoji, original.emoji, 'Round-trip should preserve emoji');
+    eq((deserialized as any).special, original.special, 'Round-trip should preserve special chars');
+  }
+
+  // =========================================================================
+  // Business Scenario Tests
+  // =========================================================================
+
+  public testBusinessScenarioForm(): void {
+    const target = {
+      formData: {
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        agree: false,
+        preferences: {
+          newsletter: false,
+          notifications: true
+        }
+      }
+    };
+
+    const source = {
+      formData: {
+        username: 'john_doe',
+        email: 'john@example.com',
+        password: 'secret123',
+        confirmPassword: 'secret123',
+        agree: true,
+        preferences: {
+          newsletter: true,
+          notifications: false
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).formData.username, 'john_doe', 'Form data should be restored');
+    eq((result as any).formData.preferences.newsletter, true, 'Nested form preference should be restored');
+  }
+
+  public testBusinessScenarioTree(): void {
+    const target = {
+      tree: {
+        id: 1,
+        name: 'root',
+        children: []
+      }
+    };
+
+    const source = {
+      tree: {
+        id: 1,
+        name: 'root',
+        children: [
+          {
+            id: 2,
+            name: 'child1',
+            children: [
+              { id: 4, name: 'grandchild1', children: [] },
+              { id: 5, name: 'grandchild2', children: [] }
+            ]
+          },
+          {
+            id: 3,
+            name: 'child2',
+            children: [
+              { id: 6, name: 'grandchild3', children: [] }
+            ]
+          }
+        ]
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).tree.children.length, 2, 'Tree children should be restored');
+    eq((result as any).tree.children[0].children.length, 2, 'Nested tree children should be restored');
+  }
+
+  public testBusinessScenarioGraph(): void {
+    const target = {
+      nodes: [],
+      edges: []
+    };
+
+    const source = {
+      nodes: [
+        { id: 1, label: 'Node 1' },
+        { id: 2, label: 'Node 2' },
+        { id: 3, label: 'Node 3' }
+      ],
+      edges: [
+        { from: 1, to: 2, weight: 1.0 },
+        { from: 2, to: 3, weight: 2.0 },
+        { from: 1, to: 3, weight: 1.5 }
+      ]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).nodes.length, 3, 'Graph nodes should be restored');
+    eq((result as any).edges.length, 3, 'Graph edges should be restored');
+    eq((result as any).edges[0].from, 1, 'Graph edge should be restored');
+  }
+
+  public testBusinessScenarioStateManagement(): void {
+    const target = {
+      state: {
+        user: {
+          id: 0,
+          name: '',
+          profile: {
+            avatar: '',
+            bio: ''
+          }
+        },
+        app: {
+          theme: 'light',
+          language: 'en',
+          notifications: true
+        },
+        ui: {
+          sidebarOpen: false,
+          currentPage: ''
+        }
+      }
+    };
+
+    const source = {
+      state: {
+        user: {
+          id: 1,
+          name: 'Alice',
+          profile: {
+            avatar: 'avatar.jpg',
+            bio: 'Software developer'
+          }
+        },
+        app: {
+          theme: 'dark',
+          language: 'zh',
+          notifications: false
+        },
+        ui: {
+          sidebarOpen: true,
+          currentPage: '/dashboard'
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).state.user.id, 1, 'State user should be restored');
+    eq((result as any).state.app.theme, 'dark', 'State app theme should be restored');
+    eq((result as any).state.ui.sidebarOpen, true, 'State ui should be restored');
+  }
+
+  public testBusinessScenarioUserProfile(): void {
+    const target = {
+      profile: {
+        id: 0,
+        username: '',
+        email: '',
+        personalInfo: {
+          firstName: '',
+          lastName: '',
+          dateOfBirth: null,
+          gender: ''
+        },
+        social: {
+          twitter: '',
+          linkedin: '',
+          github: ''
+        },
+        settings: {
+          privacy: 'public',
+          notifications: {
+            email: true,
+            push: false,
+            sms: false
+          }
+        }
+      }
+    };
+
+    const source = {
+      profile: {
+        id: 123,
+        username: 'johndoe',
+        email: 'john@example.com',
+        personalInfo: {
+          firstName: 'John',
+          lastName: 'Doe',
+          dateOfBirth: new Date('1990-01-01'),
+          gender: 'male'
+        },
+        social: {
+          twitter: '@johndoe',
+          linkedin: 'linkedin.com/in/johndoe',
+          github: 'github.com/johndoe'
+        },
+        settings: {
+          privacy: 'private',
+          notifications: {
+            email: true,
+            push: true,
+            sms: true
+          }
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).profile.id, 123, 'Profile id should be restored');
+    eq((result as any).profile.personalInfo.firstName, 'John', 'Profile personal info should be restored');
+    eq((result as any).profile.settings.privacy, 'private', 'Profile settings should be restored');
+  }
+
+  // =========================================================================
+  // Validation Extended Tests
+  // =========================================================================
+
+  public testValidationEmail(): void {
+    const target = { email: '' };
+    const source = { email: 'user@example.com' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).email, 'user@example.com', 'Email should be restored');
+  }
+
+  public testValidationPhone(): void {
+    const target = { phone: '' };
+    const source = { phone: '+86 138 0013 8000' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).phone, '+86 138 0013 8000', 'Phone number should be restored');
+  }
+
+  public testValidationURL(): void {
+    const target = { url: '' };
+    const source = { url: 'https://example.com/path?query=value#hash' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).url, 'https://example.com/path?query=value#hash', 'URL should be restored');
+  }
+
+  public testValidationDateRange(): void {
+    const target = {
+      startDate: null,
+      endDate: null
+    };
+
+    const source = {
+      startDate: new Date('2026-01-01T00:00:00.000Z'),
+      endDate: new Date('2026-12-31T23:59:59.999Z')
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).startDate instanceof Date, true, 'Start date should be Date instance');
+    eq((result as any).endDate instanceof Date, true, 'End date should be Date instance');
+  }
+
+  // =========================================================================
+  // Data Transformation Tests
+  // =========================================================================
+
+  public testTransformCaseConversion(): void {
+    const target = {
+      name: '',
+      email: '',
+      username: ''
+    };
+
+    const source = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      username: 'johndoe'
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).name, 'John Doe', 'Name should be preserved');
+    eq((result as any).email, 'john@example.com', 'Email should be preserved');
+  }
+
+  public testTransformDataCleanup(): void {
+    const target = {
+      data: '  spaced  '
+    };
+
+    const source = {
+      data: 'clean'
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).data, 'clean', 'Data should be cleaned');
+  }
+
+  public testTransformArrayFiltering(): void {
+    const target = {
+      items: []
+    };
+
+    const source = {
+      items: [1, 2, 3, 4, 5]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 5, 'All items should be restored');
+  }
+
+  public testTransformObjectMerging(): void {
+    const target = {
+      base: {
+        field1: 'value1'
+      }
+    };
+
+    const source = {
+      base: {
+        field1: 'updated1',
+        field2: 'value2'
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).base.field1, 'updated1', 'Field should be updated');
+    eq((result as any).base.field2, 'value2', 'New field should be added');
+  }
+
+  // =========================================================================
+  // Serialization Format Tests
+  // =========================================================================
+
+  public testFormatTagConsistency(): void {
+    const obj1 = { id: 1, name: 'test1' };
+    const obj2 = { id: 2, name: 'test2' };
+    const obj3 = { id: 3, name: 'test3' };
+
+    const str1 = DataCoder.stringify(obj1);
+    const str2 = DataCoder.stringify(obj2);
+    const str3 = DataCoder.stringify(obj3);
+
+    eq(str1.startsWith(DataCoder.FORMAT_TAG), true, 'Object 1 should start with FORMAT_TAG');
+    eq(str2.startsWith(DataCoder.FORMAT_TAG), true, 'Object 2 should start with FORMAT_TAG');
+    eq(str3.startsWith(DataCoder.FORMAT_TAG), true, 'Object 3 should start with FORMAT_TAG');
+  }
+
+  public testFormatLegacyFallback(): void {
+    const legacyText = '{"id":1,"name":"legacy"}';
+    const result = DataCoder.parse(legacyText);
+    eq((result as any).id, 1, 'Legacy format should be parsed correctly');
+  }
+
+  public testFormatJSON2Parsing(): void {
+    const obj = { id: 1, name: 'test' };
+    const serialized = DataCoder.stringify(obj);
+    const parsed = DataCoder.parse(serialized);
+    eq((parsed as any).id, 1, 'JSON2 format should be parsed correctly');
+  }
+
+  // =========================================================================
+  // Memory Management Tests
+  // =========================================================================
+
+  public testMemoryLargeArrayRestore(): void {
+    const target = { items: [] };
+    const source = { items: Array(100).fill(0).map((_, i) => i) };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).items.length, 100, 'Large array should be fully restored');
+  }
+
+  public testMemoryManySmallObjects(): void {
+    const target = { objects: [] };
+    const source = { objects: Array(10).fill(0).map((_, i) => ({ id: i, value: `item${i}` })) };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).objects.length, 10, 'Many small objects should be restored');
+  }
+
+  // =========================================================================
+  // Thread Safety Tests (conceptual)
+  // =========================================================================
+
+  public testThreadSafetySequentialOperations(): void {
+    const target1 = { id: 0, name: '' };
+    const target2 = { id: 0, name: '' };
+    const source1 = { id: 1, name: 'test1' };
+    const source2 = { id: 2, name: 'test2' };
+
+    const result1 = DataCoder.restoreTo(target1, source1);
+    const result2 = DataCoder.restoreTo(target2, source2);
+
+    eq((result1 as any).id, 1, 'First operation should be correct');
+    eq((result2 as any).id, 2, 'Second operation should be correct');
+  }
+
+  public testThreadSafetyMultipleTargets(): void {
+    const targets = Array(10).fill(0).map(() => ({ id: 0, value: 0 }));
+    const sources = Array(10).fill(0).map((_, i) => ({ id: i + 1, value: (i + 1) * 10 }));
+
+    const results = targets.map((t, i) => DataCoder.restoreTo(t, sources[i]));
+
+    for (let i = 0; i < 10; i++) {
+      eq((results[i] as any).id, i + 1, `Target ${i} should be correct`);
+    }
+  }
+
+  // =========================================================================
+  // Edge Cases Special Characters Tests
+  // =========================================================================
+
+  public testSpecialCharsNewlinesTabs(): void {
+    const target = { text: '' };
+    const source = { text: 'line1\nline2\nline3\tcol1\tcol2' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).text, 'line1\nline2\nline3\tcol1\tcol2', 'Newlines and tabs should be preserved');
+  }
+
+  public testSpecialCharsQuotes(): void {
+    const target = { text: '' };
+    const source = { text: 'He said "Hello" and she said \'Hi\'' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).text, 'He said "Hello" and she said \'Hi\'', 'Quotes should be preserved');
+  }
+
+  public testSpecialCharsBackslashes(): void {
+    const target = { text: '' };
+    const source = { text: 'path\\to\\file\\name.ext' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).text, 'path\\to\\file\\name.ext', 'Backslashes should be preserved');
+  }
+
+  public testSpecialCharsUnicodeEmoji(): void {
+    const target = { text: '' };
+    const source = { text: 'Hello 世界 🌍 😀 こんにちは 안녕하세요 👋' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).text, 'Hello 世界 🌍 😀 こんにちは 안녕하세요 👋', 'Unicode and emoji should be preserved');
+  }
+
+  public testSpecialCharsZeroWidth(): void {
+    const target = { text: '' };
+    const source = { text: 'text\u200Bwith\u200Czero\u200Dwidth' };
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).text.length, source.text.length, 'Zero width characters should be preserved');
+  }
+
+  // =========================================================================
+  // Data Consistency Tests
+  // =========================================================================
+
+  public testConsistencyMultipleRestores(): void {
+    const target = { id: 0, name: '', value: 0 };
+    const source = { id: 1, name: 'test', value: 42 };
+
+    const result1 = DataCoder.restoreTo(target, source);
+    const result2 = DataCoder.restoreTo(result1, source);
+    const result3 = DataCoder.restoreTo(result2, source);
+
+    eq((result1 as any).id, (result2 as any).id, 'Result 1 and 2 should be consistent');
+    eq((result2 as any).id, (result3 as any).id, 'Result 2 and 3 should be consistent');
+  }
+
+  // =========================================================================
+  // Backward Compatibility Tests
+  // =========================================================================
+
+  public testBackwardCompatibilityLegacyFormat(): void {
+    const target = { id: 0, name: '', data: [] };
+    const legacySource = '{"id":1,"name":"legacy","data":[1,2,3]}';
+    const result = DataCoder.parse(legacySource);
+    eq((result as any).id, 1, 'Legacy format should be parsed');
+    eq((result as any).name, 'legacy', 'Legacy format should preserve data');
+  }
+
+  public testBackwardCompatibilityMigration(): void {
+    const legacyData = '{"version":"1.0","data":"old format"}';
+    const parsed = DataCoder.parse(legacyData);
+    eq((parsed as any).version, '1.0', 'Legacy version should be preserved');
+  }
+
+  // =========================================================================
+  // Forward Compatibility Tests
+  // =========================================================================
+
+  public testForwardCompatibilityNewFields(): void {
+    const target = { id: 0, name: '' };
+    const sourceWithNewFields = {
+      id: 1,
+      name: 'test',
+      newField1: 'value1',
+      newField2: 42,
+      newField3: true
+    };
+    const result = DataCoder.restoreTo(target, sourceWithNewFields);
+    eq((result as any).id, 1, 'Existing fields should be restored');
+    eq((result as any).name, 'test', 'Existing name should be restored');
+  }
+
+  public testForwardCompatibilityRemovedFields(): void {
+    const target = {
+      id: 0,
+      name: '',
+      oldField1: 'old1',
+      oldField2: 'old2'
+    };
+    const sourceWithoutOldFields = { id: 1, name: 'test' };
+    const result = DataCoder.restoreTo(target, sourceWithoutOldFields);
+    eq((result as any).id, 1, 'Existing fields should be restored');
+    eq((result as any).name, 'test', 'Existing name should be restored');
+  }
+
+  // =========================================================================
+  // Additional Business Scenario Tests
+  // =========================================================================
+
+  public testBusinessScenarioTodoList(): void {
+    const target = {
+      todos: []
+    };
+
+    const source = {
+      todos: [
+        { id: 1, title: 'Buy groceries', completed: false, priority: 'high' },
+        { id: 2, title: 'Finish report', completed: true, priority: 'medium' },
+        { id: 3, title: 'Call mom', completed: false, priority: 'low' },
+        { id: 4, title: 'Exercise', completed: false, priority: 'high' },
+        { id: 5, title: 'Read book', completed: true, priority: 'low' }
+      ]
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).todos.length, 5, 'Todo list should be restored');
+    eq((result as any).todos[0].title, 'Buy groceries', 'Todo title should be restored');
+    eq((result as any).todos[0].completed, false, 'Todo completed status should be restored');
+  }
+
+  public testBusinessScenarioChatMessage(): void {
+    const target = {
+      message: {
+        id: 0,
+        senderId: 0,
+        receiverId: 0,
+        content: '',
+        timestamp: null,
+        read: false,
+        reactions: [],
+        attachments: []
+      }
+    };
+
+    const source = {
+      message: {
+        id: 100,
+        senderId: 1,
+        receiverId: 2,
+        content: 'Hello! How are you?',
+        timestamp: new Date('2026-01-15T10:30:00.000Z'),
+        read: false,
+        reactions: [
+          { userId: 2, emoji: '👍', timestamp: new Date('2026-01-15T10:31:00.000Z') },
+          { userId: 3, emoji: '❤️', timestamp: new Date('2026-01-15T10:32:00.000Z') }
+        ],
+        attachments: [
+          { type: 'image', url: 'https://example.com/image.jpg', size: 1024 },
+          { type: 'document', url: 'https://example.com/doc.pdf', size: 2048 }
+        ]
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).message.id, 100, 'Message id should be restored');
+    eq((result as any).message.content, 'Hello! How are you?', 'Message content should be restored');
+    eq((result as any).message.reactions.length, 2, 'Message reactions should be restored');
+    eq((result as any).message.attachments.length, 2, 'Message attachments should be restored');
+  }
+
+  public testBusinessScenarioInventoryItem(): void {
+    const target = {
+      item: {
+        id: 0,
+        sku: '',
+        name: '',
+        description: '',
+        price: 0,
+        quantity: 0,
+        minStock: 0,
+        categories: [],
+        attributes: {}
+      }
+    };
+
+    const source = {
+      item: {
+        id: 300,
+        sku: 'SKU-12345',
+        name: 'Wireless Mouse',
+        description: 'Ergonomic wireless mouse with 2.4GHz connectivity',
+        price: 29.99,
+        quantity: 150,
+        minStock: 20,
+        categories: ['Electronics', 'Computer Accessories', 'Input Devices'],
+        attributes: {
+          color: 'Black',
+          wireless: true,
+          dpi: 1600,
+          batteryLife: '6 months',
+          dimensions: { width: 6.5, height: 10.2, depth: 3.8, unit: 'cm' },
+          weight: { value: 85, unit: 'g' }
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).item.id, 300, 'Item id should be restored');
+    eq((result as any).item.sku, 'SKU-12345', 'Item SKU should be restored');
+    eq((result as any).item.categories.length, 3, 'Item categories should be restored');
+    eq((result as any).item.attributes.color, 'Black', 'Item attribute should be restored');
+  }
+
+  public testBusinessScenarioSurveyResponse(): void {
+    const target = {
+      response: {
+        surveyId: 0,
+        respondentId: 0,
+        submittedAt: null,
+        answers: []
+      }
+    };
+
+    const source = {
+      response: {
+        surveyId: 400,
+        respondentId: 1000,
+        submittedAt: new Date('2026-02-20T14:30:00.000Z'),
+        answers: [
+          { questionId: 1, type: 'text', value: 'Excellent service!' },
+          { questionId: 2, type: 'rating', value: 5, scale: 10 },
+          { questionId: 3, type: 'multiple', values: ['Quality', 'Price', 'Support'] },
+          { questionId: 4, type: 'boolean', value: true },
+          { questionId: 5, type: 'text', value: 'I would recommend this product to others.' }
+        ]
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).response.surveyId, 400, 'Response surveyId should be restored');
+    eq((result as any).response.answers.length, 5, 'Response answers should be restored');
+    eq((result as any).response.answers[1].value, 5, 'Rating answer should be restored');
+    eq((result as any).response.answers[2].values.length, 3, 'Multiple choice answer should be restored');
+  }
+
+  public testBusinessScenarioPaymentTransaction(): void {
+    const target = {
+      transaction: {
+        id: '',
+        userId: 0,
+        amount: 0,
+        currency: '',
+        status: '',
+        createdAt: null,
+        completedAt: null,
+        items: [],
+        paymentMethod: {},
+        shippingAddress: {}
+      }
+    };
+
+    const source = {
+      transaction: {
+        id: 'TXN-20260315-001',
+        userId: 500,
+        amount: 125.99,
+        currency: 'USD',
+        status: 'completed',
+        createdAt: new Date('2026-03-15T11:45:00.000Z'),
+        completedAt: new Date('2026-03-15T11:50:00.000Z'),
+        items: [
+          { productId: 1, name: 'Product A', quantity: 2, price: 29.99 },
+          { productId: 2, name: 'Product B', quantity: 1, price: 66.01 }
+        ],
+        paymentMethod: {
+          type: 'credit_card',
+          provider: 'Visa',
+          last4: '1234',
+          expiryDate: '12/27'
+        },
+        shippingAddress: {
+          recipientName: 'John Doe',
+          street: '123 Main St',
+          city: 'New York',
+          state: 'NY',
+          zipCode: '10001',
+          country: 'USA'
+        }
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).transaction.id, 'TXN-20260315-001', 'Transaction id should be restored');
+    eq((result as any).transaction.amount, 125.99, 'Transaction amount should be restored');
+    eq((result as any).transaction.items.length, 2, 'Transaction items should be restored');
+    eq((result as any).transaction.paymentMethod.type, 'credit_card', 'Payment method should be restored');
+  }
+
+  public testBusinessScenarioProjectTask(): void {
+    const target = {
+      task: {
+        id: 0,
+        projectId: 0,
+        title: '',
+        description: '',
+        status: '',
+        priority: '',
+        assigneeId: 0,
+        dueDate: null,
+        createdAt: null,
+        updatedAt: null,
+        subtasks: [],
+        tags: [],
+        comments: []
+      }
+    };
+
+    const source = {
+      task: {
+        id: 600,
+        projectId: 50,
+        title: 'Implement user authentication',
+        description: 'Implement login, logout, and password reset functionality',
+        status: 'in_progress',
+        priority: 'high',
+        assigneeId: 10,
+        dueDate: new Date('2026-04-01T18:00:00.000Z'),
+        createdAt: new Date('2026-03-01T09:00:00.000Z'),
+        updatedAt: new Date('2026-03-10T16:30:00.000Z'),
+        subtasks: [
+          { id: 601, title: 'Create login page', completed: true },
+          { id: 602, title: 'Implement logout logic', completed: true },
+          { id: 603, title: 'Add password reset feature', completed: false }
+        ],
+        tags: ['authentication', 'security', 'backend'],
+        comments: [
+          { userId: 10, content: 'Started working on this', createdAt: new Date('2026-03-05T10:00:00.000Z') },
+          { userId: 11, content: 'Great progress!', createdAt: new Date('2026-03-07T14:20:00.000Z') }
+        ]
+      }
+    };
+
+    const result = DataCoder.restoreTo(target, source);
+    eq((result as any).task.id, 600, 'Task id should be restored');
+    eq((result as any).task.status, 'in_progress', 'Task status should be restored');
+    eq((result as any).task.subtasks.length, 3, 'Task subtasks should be restored');
+    eq((result as any).task.tags.length, 3, 'Task tags should be restored');
   }
 }

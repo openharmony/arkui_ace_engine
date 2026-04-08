@@ -20,6 +20,7 @@
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/common/font_manager.h"
 #include "core/common/udmf/udmf_client.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode()
@@ -414,5 +415,20 @@ void HyperlinkPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
     if (frameNode->GetRerenderable()) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+int32_t HyperlinkPattern::OnInjectionEvent(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "click") {
+        TAG_LOGD(AceLogTag::ACE_HYPERLINK, "unknown cmd: %{public}s", cmdType.c_str());
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

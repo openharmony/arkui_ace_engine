@@ -24,6 +24,11 @@
     "pages/components/dialog/page/ActionSheetAdvanced_Groups",
     "pages/components/dialog/page/ActionSheetAdvanced_Icons",
     "pages/components/dialog/page/AlertDialogExtended_Alignment",
-    "pages/components/dialog/page/AlertDialogExtended_AutoCancel"
+    "pages/components/dialog/page/AlertDialogExtended_AutoCancel",
+    "pages/components/dialog/page/AlertDialogExtended_ButtonStyle",
+    "pages/components/dialog/page/AlertDialogExtended_Callbacks",
+    "pages/components/dialog/page/AlertDialogExtended_CornerRadius",
+    "pages/components/dialog/page/AlertDialogExtended_Styles",
+    "pages/components/dialog/page/AlertDialogExtended_TextStyle"
   ]
 }

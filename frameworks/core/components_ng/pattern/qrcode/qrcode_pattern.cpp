@@ -20,6 +20,17 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void UpdateFocusPaintColorByTheme(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto qrCodeTheme = host->GetTheme<QrcodeTheme>(false);
+    CHECK_NULL_VOID(qrCodeTheme);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetPaintColor(qrCodeTheme->GetFocusedColor());
+}
+} // namespace
 
 void QRCodePattern::OnAttachToFrameNode()
 {
@@ -55,6 +66,7 @@ void QRCodePattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+    UpdateFocusPaintColorByTheme(host);
 }
 
 void QRCodePattern::DumpInfo()
@@ -77,7 +89,7 @@ FocusPattern QRCodePattern::GetFocusPattern() const
     CHECK_NULL_RETURN(host, FocusPattern());
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
     CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
     auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(qrCodeTheme->GetFocusStyleType()));
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
@@ -95,9 +107,7 @@ void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
     CHECK_NULL_VOID(qrCodeTheme);
     json->Put("Color", paintProperty->GetColorValue(qrCodeTheme->GetQrcodeColor()).ColorToString().c_str());
     json->Put("ContentOpacity", std::to_string(paintProperty->GetOpacityValue(1.0f)).c_str());
@@ -185,17 +195,41 @@ void QRCodePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_VOID(theme);
+    auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
+    CHECK_NULL_VOID(qrCodeTheme);
     auto pops = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(pops);
     if (!pops->HasQRCodeColorSetByUser() ||
         (pops->HasQRCodeColorSetByUser() && !pops->GetQRCodeColorSetByUserValue())) {
-        UpdateColor(theme->GetQrcodeColor(), false);
+        UpdateColor(qrCodeTheme->GetQrcodeColor(), false);
     }
     if (!pops->HasQRBackgroundColorSetByUser() ||
         (pops->HasQRBackgroundColorSetByUser() && !pops->GetQRBackgroundColorSetByUserValue())) {
-        UpdateBackgroundColor(theme->GetBackgroundColor(), false);
+        UpdateBackgroundColor(qrCodeTheme->GetBackgroundColor(), false);
     }
+    UpdateFocusPaintColorByTheme(host);
+}
+
+bool QRCodePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    bool result = false;
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    result = !paintProperty->HasColor() || !paintProperty->HasBackgroundColor();
+    if (!paintProperty->HasBackgroundColor()) {
+        auto qrcodeTheme = host->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_RETURN(qrcodeTheme, result);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, result);
+        renderContext->UpdateBackgroundColor(qrcodeTheme->GetBackgroundColor());
+    }
+    UpdateFocusPaintColorByTheme(host);
+    return result;
 }
 } // namespace OHOS::Ace::NG

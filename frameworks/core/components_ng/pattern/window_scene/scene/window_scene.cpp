@@ -363,8 +363,10 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent([windowNode = std::move(host)]() { },
-        "ArkUIWindowDestoryWindowNode", TaskExecutor::TaskType::UI);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([windowNode = std::move(host)]() { },
+        TaskExecutor::TaskType::UI, "ArkUIWindowDestoryWindowNode", PriorityType::IMMEDIATE);
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {
@@ -688,6 +690,20 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     DelayAddAppWindowForDmaResume(session_->GetCallingPid());
+    if (isScaledSnapshot_) {
+        auto scenePersistence = session_->GetScenePersistence();
+        CHECK_NULL_VOID(scenePersistence);
+        CHECK_NULL_VOID(snapshotWindow_);
+        auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto key = session_->GetScreenSnapshotStatus();
+        auto freeMultiWindow = session_->freeMultiWindow_.load();
+        std::string path = scenePersistence->GetSnapshotFilePath(key, true, freeMultiWindow);
+        ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + path);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        ClearImageCache(sourceInfo, key, freeMultiWindow, true);
+        snapshotWindow_->MarkModifyDone();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);

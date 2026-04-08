@@ -29,6 +29,10 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 
+namespace OHOS::Ace::V2 {
+class DataChangeListener;
+}
+
 namespace OHOS::Ace::NG {
 class NativeLazyForEachBuilder : public LazyForEachBuilder {
     DECLARE_ACE_TYPE(NativeLazyForEachBuilder, LazyForEachBuilder);
@@ -40,11 +44,13 @@ public:
 
     void UnregisterDataChangeListener(V2::DataChangeListener* listener) override;
 
+    void RegisterDataChangeListenerHandler() override;
+
     void SetNodeTotalCount(ArkUI_Uint32 nodeCount)
     {
         totalCount_ = nodeCount;
     }
-
+   
     ArkUI_Uint32 GetNodeTotalCount() const
     {
         return totalCount_;

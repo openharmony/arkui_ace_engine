@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -371,6 +372,17 @@ void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
     }
 }
 
+uint64_t GetDumpSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, 0);
+    auto inputTime = pointerEvent->GetSensorInputTime();
+    if (inputTime == 0) {
+        // inject event has no sensor time.
+        inputTime = static_cast<uint64_t>(pointerEvent->GetActionTime());
+    }
+    return inputTime;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, TouchEvent());
@@ -389,6 +401,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetTouchEventId(pointerEvent->GetId());
+    event.sensorTime = TimeStamp(std::chrono::microseconds(GetDumpSensorTime(pointerEvent)));
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();

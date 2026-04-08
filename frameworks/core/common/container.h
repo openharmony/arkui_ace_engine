@@ -60,7 +60,7 @@ template<typename T>
 class sptr;
 } // namespace OHOS
 namespace OHOS::Ace {
-
+struct CrownEvent;
 using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
@@ -77,6 +77,7 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
+using AbilityRuntimeContextCallback = std::function<void()>;
 
 class PipelineBase;
 
@@ -834,6 +835,8 @@ public:
 
     virtual void LoadCompleteManagerStartCollect(const std::string& url) {};
     virtual void LoadCompleteManagerStopCollect() {};
+    virtual void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
+    virtual void TerminateUIExtensionInner() {}
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

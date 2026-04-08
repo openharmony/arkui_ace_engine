@@ -127,6 +127,7 @@ export class CheckBoxGroupConfigurationInternal implements MaterializedBase,Comm
         const retval = ArkUIGeneratedNativeModule._CheckBoxGroupConfiguration_getContentModifier(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: ContentModifier<CheckBoxGroupConfiguration> = (retvalDeserializer.readObject() as ContentModifier<CheckBoxGroupConfiguration>)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setContentModifier_serialize(contentModifier: ContentModifier<CheckBoxGroupConfiguration>): void {
@@ -139,6 +140,7 @@ export class CheckBoxGroupConfigurationInternal implements MaterializedBase,Comm
         const retval = ArkUIGeneratedNativeModule._CheckBoxGroupConfiguration_getName(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setName_serialize(name: string): void {

@@ -15,13 +15,25 @@
 
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "core/components_v2/grid/grid_event.h"
 
 namespace OHOS::Ace::NG {
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
+
+void GridEventHub::FireOnScrollToIndex(int32_t param) const
+{
+    if (onScrollToIndex_) {
+        V2::GridEventInfo info(param);
+        onScrollToIndex_(&info);
+    }
+}
 
 void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {

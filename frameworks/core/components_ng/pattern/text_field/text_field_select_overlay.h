@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
+#include "core/components_ng/pattern/text_field/text_select_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -122,6 +123,7 @@ private:
     void UpdateMagnifier(const OffsetF& offset, bool updateOnScroll);
     bool CheckIfInterruptProcessing(const OverlayRequest& request);
     void RefreshPasteButton();
+    void UpdateHandlesPosition(RefPtr<TextSelectController> selectController, bool isFirst);
     bool needRefreshPasteButton_ = false;
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html", "autofill/secure" };

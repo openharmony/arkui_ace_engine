@@ -15,15 +15,15 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
 #include "core/common/task_executor_impl.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
  
 #include "core/text/text_emoji_processor.h"
 #include "base/i18n/localization.h"
@@ -163,6 +163,77 @@ HWTEST_F(TextFieldPatternTestEight, OnInjectionEventTest001, TestSize.Level1)
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_SUCCESS);
     command = R"({"cmd":"deleteText", "params":{"start":2, "end":-1}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test TextFieldPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, OnInjectionEventTest002, TestSize.Level1)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"addText", "params":{"value":"test123465789"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":3})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":2, "selectionEnd":-1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":4, "selectionEnd":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"copy"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"selectText", "selectionStart":1, "selectionEnd":4})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"cut"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"clear"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"requestKeyboard"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    command = R"({"cmd":"setCaretPosition", "position":1})";
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_SUCCESS);
 }
@@ -1851,7 +1922,7 @@ HWTEST_F(TextFieldPatternTestEight, IsReachedBoundary001, TestSize.Level0)
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateMaxLines(3);
     float offset = 0.1f;
-    pattern_->IsReachedBoundary(offset);
+    pattern_->IsReachedBoundary(offset, Axis::HORIZONTAL);
     EXPECT_TRUE(layoutProperty->HasMaxLines());
 }
 

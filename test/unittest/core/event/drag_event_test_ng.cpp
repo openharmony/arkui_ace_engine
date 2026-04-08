@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 using namespace testing;
 using namespace testing::ext;
 

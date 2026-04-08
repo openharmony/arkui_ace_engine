@@ -22,17 +22,19 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/common/ace_engine.h"
 #include "base/geometry/dimension.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -1656,6 +1658,11 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputeMaxHeight001, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
     sheetTheme->sheetHeightPercentMax_ = 0.9f;
@@ -1692,6 +1699,11 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputePopupStyleOffset002, TestSize.Level1
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
     sheetTheme->sheetHeightPercentMax_ = 0.9f;
@@ -1720,6 +1732,11 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputePopupStyleOffset003, TestSize.Level1
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle style;
+    style.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(style);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
     sheetTheme->sheetHeightPercentMax_ = 0.9f;

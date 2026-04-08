@@ -26,31 +26,45 @@
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
-#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
-#include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/event/mouse_event.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/components/scroll/scroll_controller_base.h"
+
+namespace OHOS::Ace {
+class ScrollControllerBase;
+enum class ScrollAlign : int;
+enum class ScrollEdgeType : size_t;
+}
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class GestureEventHub;
+class InputEvent;
+class InputEventHub;
+class NavDestinationPatternBase;
+class RefreshCoordination;
+enum class RefreshCoordinationMode : char;
+class Scrollable;
+class ScrollableController;
+class ScrollablePaintMethod;
+class ScrollBar;
+struct ScrollBarProperty;
+class ScrollBarOverlayModifier;
+class ScrollBarProxy;
+class ScrollEdgeEffect;
+class SheetPresentationPattern;
+class TouchEventImpl;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
@@ -461,6 +475,10 @@ public:
     /* ============================================================================== */
 
     virtual float GetContentStartOffset() const
+    {
+        return 0.0f;
+    }
+    virtual float GetContentEndOffset() const
     {
         return 0.0f;
     }
@@ -911,6 +929,15 @@ public:
 
     void OnStatusBarClick() override;
 
+    void SetIsAllowMouse(bool enableScrollWithMouse)
+    {
+        isAllowMouse_ = enableScrollWithMouse;
+    }
+    virtual bool GetIsAllowMouse() const
+    {
+        return isAllowMouse_;
+    }
+
     void GetRepeatCountInfo(
         RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
 
@@ -1076,6 +1103,7 @@ protected:
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
     bool lastScrollFromInjection_ = false;
+    bool isAllowMouse_ = false;
 
     void CheckScrollBarOff();
 
@@ -1117,6 +1145,12 @@ private:
 
     void RegisterScrollBarEventTask();
     void RegisterScrollBarOverDragEventTask();
+    void RegisterScrollBarMarginCallback();
+    std::pair<double, double> GetAutoAdjustAvoidOffset();
+    void CalcPaddingAvoidDistByMainAxis(
+        const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl);
+    void CalcBorderWidthAvoidDistByMainAxis(
+        const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl);
     bool OnScrollPosition(double& offset, int32_t source);
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
@@ -1227,14 +1261,7 @@ private:
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
-    void CreateRefreshCoordination()
-    {
-        if (!refreshCoordination_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
-        }
-    }
+    void CreateRefreshCoordination();
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);

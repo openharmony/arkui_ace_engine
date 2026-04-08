@@ -20,8 +20,8 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 

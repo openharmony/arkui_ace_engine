@@ -16,16 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_ITEM_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_ITEM_THEME_H
 
+#include "core/components_ng/pattern/grid/grid_item_constants.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
-enum class GridItemStyle {
-    NONE = 0,
-    PLAIN,
-};
-
 /**
  * GridItemTheme defines styles of grid item. GridItemTheme should be built using GridItemTheme::Builder.
  */

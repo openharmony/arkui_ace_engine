@@ -934,6 +934,10 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const
         auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(swiperLayoutProperty);
         swiperLayoutProperty->UpdateIndex(index);
+        auto prevIndex = tabsLayoutProperty->GetIndex().value_or(0);
+        if (prevIndex != index && index >= 0) {
+            swiperPattern->SetCustomAnimationPrevIndex(prevIndex);
+        }
     }
     tabsLayoutProperty->UpdateIndex(index);
 }

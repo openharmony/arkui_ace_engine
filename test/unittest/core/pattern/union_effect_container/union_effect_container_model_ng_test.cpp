@@ -19,9 +19,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context_creator.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/union_effect_container/union_effect_container_model_ng.h"
 #include "core/components_ng/pattern/union_effect_container/union_effect_container_pattern.h"
@@ -52,17 +50,17 @@ void UnionEffectContainerModelNgTest::TearDownTestSuite()
 void UnionEffectContainerModelNgTest::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
-    RenderContextCreateFunction func = []() -> RefPtr<RenderContext> {
-        auto renderContext = AceType::MakeRefPtr<RosenRenderContext>();
-        return renderContext;
-    };
-    MockRenderContextCreator::SetRenderContextCreateFunction(std::move(func));
+    // RenderContextCreateFunction func = []() -> RefPtr<RenderContext> {
+    //     auto renderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    //     return renderContext;
+    // };
+    // MockRenderContextCreator::SetRenderContextCreateFunction(std::move(func));
 }
 
 void UnionEffectContainerModelNgTest::TearDown()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
-    MockRenderContextCreator::ResetRenderContextCreateFunction();
+    // MockRenderContextCreator::ResetRenderContextCreateFunction();
 }
 
 /**

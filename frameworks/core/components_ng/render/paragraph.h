@@ -192,6 +192,7 @@ struct ParagraphStyle {
     bool isFirstParagraphLineSpacing = true;
     bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
+    bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
     bool includeFontPadding = false;
     bool fallbackLineSpacing = false;
@@ -206,6 +207,7 @@ struct ParagraphStyle {
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
                enableAutoSpacing == others.enableAutoSpacing &&
+               orphanCharOptimization == others.orphanCharOptimization &&
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
                includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
     }
@@ -237,6 +239,8 @@ struct ParagraphStyle {
         result += indent.ToString();
         result += ", enableAutoSpacing: ";
         result += enableAutoSpacing;
+        result += ", orphanCharOptimization: ";
+        result += orphanCharOptimization;
         result += ", compressLeadingPunctuation: ";
         result += compressLeadingPunctuation;
         result += ", includeFontPadding: ";

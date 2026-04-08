@@ -1076,6 +1076,13 @@ void JSCanvasRenderer::JsSetGlobalAlpha(const JSCallbackInfo& info)
 {
     double alpha = 0.0;
     if (GetDoubleArg(info, 0, alpha, isJudgeSpecialValue_)) { // Index0: the 1st arg.
+        // Clamp alpha to valid range [0.0, 1.0]
+        if (LessNotEqual(alpha, 0.0)) {
+            alpha = 0.0;
+        }
+        if (GreatNotEqual(alpha, 1.0)) {
+            alpha = 1.0;
+        }
         renderingContext2DModel_->SetGlobalAlpha(alpha);
     }
 }

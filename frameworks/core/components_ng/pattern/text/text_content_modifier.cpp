@@ -696,15 +696,36 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const F
 void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragraph)
 {
     CHECK_NULL_VOID(paragraph);
-    if (onlyTextColorAnimation_ && animatableTextColor_) {
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
-                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
-        }
-        Color c { animatableTextColor_->Get().GetValue() };
-        c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
+    if (onlyTextColorAnimation_) {
         auto length = paragraph->GetParagraphText().length();
-        paragraph->UpdateColor(0, length, c);
+        if (animatableTextColor_) {
+            Color c { animatableTextColor_->Get().GetValue() };
+            if (textColor_.has_value()) {
+                c.SetPlaceholder(textColor_.value().GetPlaceholder());
+            } else {
+                c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
+            }
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s][PH:%u]",
+                    c.ColorToString().c_str(), static_cast<uint8_t>(c.GetPlaceholder()));
+            }
+            paragraph->UpdateColor(0, length, c);
+        } else if (textColor_.has_value()) {
+            auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "onlyTextColorAnimation_ is true, !animatableTextColor_ [%{public}d]",
+                host->GetId());
+            paragraph->UpdateColor(0, length, textColor_.value());
+        } else {
+            auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "onlyTextColorAnimation_ is true, !textColor_.has_value() [%{public}d]",
+                host->GetId());
+        }
     }
 }
 
@@ -987,18 +1008,23 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
     }
     symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
-        (CompareColorsExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
-            CompareColorsExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
+        (ColorsDifferExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
+            ColorsDifferExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         if (SystemProperties::GetTextTraceEnabled()) {
             ACE_TEXT_SCOPED_TRACE(
-                "TextContentModifier::UpdateSymbolColorMeasureFlag");
+                "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
+                "animatableSymbolColor_:%s]",
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(animatableSymbolColor_->Get()))
+                    .c_str());
         }
         lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
 
-bool TextContentModifier::CompareColorsExceptHolder(
+bool TextContentModifier::ColorsDifferExceptHolder(
     const LinearVector<LinearColor>& colors1, const LinearVector<LinearColor>& colors2)
 {
     if (colors1.size() != colors2.size()) {
@@ -1541,10 +1567,20 @@ void TextContentModifier::ContentModifierDump()
 {
     auto& dumpLog = DumpLog::GetInstance();
     if (animatableTextColor_) {
-        dumpLog.AddDesc(
-            std::string("animatableTextColor: ").append(Color(animatableTextColor_->Get().GetValue()).ColorToString()));
+        auto animatableTextColor = animatableTextColor_->Get();
+        dumpLog.AddDesc(std::string("animatableTextColor: ")
+                            .append(Color(animatableTextColor.GetValue()).ColorToString())
+                            .append("|PH:")
+                            .append(std::to_string(static_cast<uint8_t>(animatableTextColor.GetPlaceholder()))));
     }
-    dumpLog.AddDesc(std::string("onlyTextColorAnimation: ").append(std::to_string(onlyTextColorAnimation_)));
+    dumpLog.AddDesc(
+        std::string(" onlyTextColorAnimation: ")
+            .append(std::to_string(onlyTextColorAnimation_))
+            .append(" textColor_:")
+            .append(textColor_.has_value() ? textColor_.value().ToString() : "NA")
+            .append("|PH:")
+            .append(textColor_.has_value() ? std::to_string(static_cast<uint8_t>(textColor_.value().GetPlaceholder()))
+                                           : "NA"));
 }
 
 void TextContentModifier::SetIsFocused(const bool isFocused)

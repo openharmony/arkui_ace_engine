@@ -127,6 +127,7 @@ export class ArkUIAniModule {
     native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _SetCustomCallbackWithCheck(ptr: KPointer, node: FrameNode): void
+    native static _SetCustomCallbackWithCheckForFrameNodes(ptrArray: Array<KPointer>, nodeArray: Array<FrameNode>): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
@@ -402,9 +403,11 @@ export class ArkUIAniModule {
     native static _Common_lpx2px(value:double, instanceId: KInt): double
     native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
-    native static _Common_getWindowId(instanceId: KInt): int32 | undefined
+    native static _Common_getWindowId(instanceId: KInt): int32
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
+
+    native static _Common_IsEasySplit(instanceId: KInt): boolean
 
     // for transfer
     native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer

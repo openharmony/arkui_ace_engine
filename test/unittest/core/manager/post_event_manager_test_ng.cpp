@@ -21,9 +21,10 @@
 #include "core/event/touch_event.h"
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -2978,5 +2979,40 @@ HWTEST_F(PostEventManagerTestNg, CheckAxisEventInstanceIDTest, TestSize.Level1)
 
     auto result2 = postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 200);
     EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: CheckMouseEvent001
+ * @tc.desc: test CheckMouseEvent with duplicate PRESS event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add first PRESS event to action queue.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction action;
+    action.targetNode = uiNode;
+    action.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate PRESS event and verify it succeeds (error is reported but returns true).
+     */
+    MouseEvent duplicatePressEvent;
+    duplicatePressEvent.action = MouseAction::PRESS;
+    duplicatePressEvent.id = 1;
+    auto result = postEventManager_->CheckMouseEvent(uiNode, duplicatePressEvent, 0);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

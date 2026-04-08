@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
 
 #include "core/components_ng/render/debug_boundary_painter.h"

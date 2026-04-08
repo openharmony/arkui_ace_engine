@@ -298,6 +298,21 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest002, TestSize.Level1)
     KeyEvent keyEventSeven(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
     focusHub->ProcessOnKeyEventInternal(keyEventSeven);
+
+    /**
+     * @tc.cases: case8.
+     */
+    KeyEvent keyEventEight(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventEight));
+
+    /**
+     * @tc.cases: case9.
+     */
+    KeyEvent keyEventNine(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventNine));
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 
 /**
@@ -1028,6 +1043,27 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
     searchModelInstance.SetCancelIconColor(Color::RED);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
 }
+
+/**
+ * @tc.name: SetCancelButtonStyle002
+ * @tc.desc: Set cancel button style
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetCancelButtonStyle002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::CONSTANT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
+}
+
 
 /**
  * @tc.name: SetCancelImageIcon001

@@ -95,7 +95,10 @@ public:
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
     static void SetOnContentScroll(const JSCallbackInfo& info);
+    static void SetOnWillCopy(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateSimpleJsOnWillObj(const std::u16string& value);
     static void SetOnCopy(const JSCallbackInfo& info);
+    static void SetOnWillCut(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
@@ -151,6 +154,7 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetOrphanCharOptimization(const JSCallbackInfo& info);
     static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);

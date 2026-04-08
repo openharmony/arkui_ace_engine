@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
 #include <cinttypes>
@@ -55,7 +56,10 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/container_window_manager.h"
@@ -461,6 +465,13 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
 extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instanceId)
 {
     return UIContentImpl::GetUIContentWindowID(instanceId);
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ScopeErrorHivewReport()
+{
+    auto context = OHOS::Ace::PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::NAPI_SCOPE_ERROR);
 }
 
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
@@ -897,7 +908,7 @@ public:
 
     void OnRectChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
     {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "window size is changed. current rect width: %{public}u, "
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "window rect is changed. current rect width: %{public}u, "
             "height: %{public}u, left: %{public}d, top: %{public}d, instance id is %{public}d, reason: %{public}d",
             rect.width_, rect.height_, rect.posX_, rect.posY_, instanceId_, reason);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1845,6 +1856,14 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (context) {
         UpdateFontScale(context->GetConfiguration());
     }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
@@ -2703,6 +2722,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (thpExtraManager->Init()) {
         pipeline->SetTHPExtraManager(thpExtraManager);
     }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
+    }
     return errorCode;
 }
 
@@ -3313,6 +3339,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(config);
 
     RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
+    adapter->SetBundleName(bundleName_);
+    adapter->SetModuleName(moduleName_);
     ResourceManager::GetInstance().UpdateMainResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3955,18 +3983,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas] {
-            if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
-                context->AnimateOnSafeAreaUpdate();
-            }
-            AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
-        taskExecutor->PostSyncTask([reason, instanceId = instanceId_,
+        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
             pipelineContext, info, container] {
-            if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
-            }
-            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAvoid");
+                if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
+                    context->AnimateOnSafeAreaUpdate();
+                }
+                AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+                if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+                }
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 
@@ -4489,7 +4515,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             auto appInfo = context->GetApplicationInfo();
             container->SetApiTargetVersion(appInfo->apiTargetVersion);
         }
-
+        container->SetBundleName(context->GetBundleName());
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
@@ -5676,6 +5702,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+            config.splitDividerColorDark);
         if (!(appConfig->isRouter)) {
             navManager->SetForceSplitNavigationId(config.navigationId);
             navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
@@ -5701,6 +5729,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+        config.splitDividerColorDark);
     if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);

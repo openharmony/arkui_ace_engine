@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
+#include "core/components_ng/property/flex_property.h"
 
 namespace OHOS::Ace::NG {
 

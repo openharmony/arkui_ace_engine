@@ -319,13 +319,21 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
-            for (auto&& observer : iter->second) {
+            auto childrenCallbacks = iter->second;
+            for (auto&& observer : childrenCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)();
             }
         }
         auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
         if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
-            for (auto&& observer : iterWithParameter->second) {
+            auto childrenWithParameterCallbacks = iterWithParameter->second;
+            for (auto&& observer : childrenWithParameterCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)(childIds);
             }
         }
@@ -572,17 +580,18 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
-        if (iter == drawChildrenEvents_.end() && iterWithParameter == drawChildrenWithParameterEvents_.end()) {
-            return false;
-        }
-        for (const auto& f : iter->second) {
-            if (f && f->HasCallback()) {
-                return true;
+        if (iter != drawChildrenEvents_.end()) {
+            for (const auto& f : iter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
             }
         }
-        for (const auto& f : iterWithParameter->second) {
-            if (f && f->HasCallback()) {
-                return true;
+        if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
+            for (const auto& f : iterWithParameter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
             }
         }
         return false;

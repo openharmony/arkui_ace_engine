@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 
+#include "core/animation/curve_animation.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

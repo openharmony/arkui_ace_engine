@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -247,6 +249,13 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     }
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
+    if (col < 0 || itemSize.columns < 0
+        || (static_cast<size_t>(col) + static_cast<size_t>(itemSize.columns)) > params.crossLens.size()) {
+        TAG_LOGW(
+            ACE_GRID, "col:%{public}d, itemSize.columns:%{public}d, params.crossLens.size:%{public}zu",
+            col, itemSize.columns, params.crossLens.size());
+        return { -1.f, {} };
+    }
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
         crossLen += params.crossLens[i + col];

@@ -21,8 +21,8 @@
 #define protected public
 
 #include "base/memory/ace_type.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_rect.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_rect.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_circle.h"
 #include "core/components_ng/svg/parse/svg_node.h"

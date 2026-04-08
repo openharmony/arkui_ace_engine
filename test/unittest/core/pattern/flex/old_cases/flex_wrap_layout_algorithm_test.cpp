@@ -22,7 +22,7 @@
 
 #define private public
 #define protectd public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/property/grid_property.h"
@@ -68,7 +68,7 @@ RefPtr<LayoutWrapperNode> WrapLayoutAlgorithmTest::CreateParam()
 RefPtr<LayoutWrapperNode> WrapLayoutAlgorithmTest::CreateLayoutWrapper()
 {
     FrameNode *node = new (FrameNode)(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
-    RefCounter* ref = ThreadSafeRef::Create();
+    RefCounter* ref = RefCounter::Create();
     ref->IncStrongRef();
     WeakPtr<FrameNode> wrapFrameNode(node, ref);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

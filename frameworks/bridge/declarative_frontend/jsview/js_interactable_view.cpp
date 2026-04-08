@@ -92,15 +92,28 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnKeyFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnKeyFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnKeyFuncLocalHandle = jsOnKeyFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [vm, execCtx = args.GetExecutionContext(),
+                          func = panda::CopyableGlobal(vm, jsOnKeyFuncLocalHandle),
+                          node = frameNode](KeyEventInfo& info) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        auto ret = func->ExecuteWithValue(info);
-        return ret->IsBoolean() ? ret->ToBoolean() : false;
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -114,17 +127,30 @@ void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsKeyFunction> JsOnPreImeEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnKeyPreImeFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnKeyPreImeFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnKeyPreImeFuncLocalHandle = jsOnKeyPreImeFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onPreImeEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnPreImeEvent), node = frameNode](
-                          KeyEventInfo& info) -> bool {
+    auto onKeyPreIme = [vm, execCtx = args.GetExecutionContext(),
+                           func = panda::CopyableGlobal(vm, jsOnKeyPreImeFuncLocalHandle),
+                           node = frameNode](KeyEventInfo& info) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKeyPreIme");
         PipelineContext::SetCallBackNode(node);
-        auto ret = func->ExecuteWithValue(info);
-        return ret->IsBoolean() ? ret->ToBoolean() : false;
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
     };
-    ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
+    ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onKeyPreIme));
 }
 
 void JSInteractableView::JsOnKeyEventDispatch(const JSCallbackInfo& args)
@@ -133,15 +159,28 @@ void JSInteractableView::JsOnKeyEventDispatch(const JSCallbackInfo& args)
         ViewAbstractModel::GetInstance()->DisableOnKeyEventDispatch();
         return;
     }
-    RefPtr<JsKeyFunction> JsOnKeyEventDispatch = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnKeyEventDispatchFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnKeyEventDispatchFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnKeyEventDispatchFuncLocalHandle = jsOnKeyEventDispatchFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onKeyEventDispatch = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEventDispatch),
-                             node = frameNode](KeyEventInfo& keyEvent) -> bool {
+    auto onKeyEventDispatch = [vm, execCtx = args.GetExecutionContext(),
+                                  func = panda::CopyableGlobal(vm, jsOnKeyEventDispatchFuncLocalHandle),
+                                  node = frameNode](KeyEventInfo& keyEvent) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKeyEventDispatch");
         PipelineContext::SetCallBackNode(node);
-        auto ret = func->ExecuteWithValue(keyEvent);
-        return ret->IsBoolean() ? ret->ToBoolean() : false;
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(keyEvent);
+        auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        keyEvent.SetStopPropagation(infoPtr->IsStopPropagation());
+        return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEventDispatch(std::move(onKeyEventDispatch));
 }
@@ -155,14 +194,27 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnHoverFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnHoverFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnHoverFuncLocalHandle = jsOnHoverFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc), node = frameNode](
-                       bool isHover, HoverInfo& hoverInfo) {
+    auto onHover = [vm, execCtx = info.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnHoverFuncLocalHandle),
+                       node = frameNode](bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
         PipelineContext::SetCallBackNode(node);
-        func->HoverExecute(isHover, hoverInfo);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto eventObj = NG::CommonBridge::CreateHoverInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[2] = { panda::BooleanRef::New(vm, isHover), eventObj };
+        func->Call(vm, func.ToLocal(), params, 2);
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
 }
@@ -176,16 +228,29 @@ void JSInteractableView::JsOnHoverMove(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsHoverFunction> jsOnHoverMoveFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnHoverMoveFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnHoverMoveFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnHoverMoveFuncLocalHandle = jsOnHoverMoveFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverMoveFunc), node = frameNode](
-                       HoverInfo& hoverInfo) {
+    auto onHoverMove = [vm, execCtx = info.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnHoverMoveFuncLocalHandle),
+                       node = frameNode](HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHoverMove");
         PipelineContext::SetCallBackNode(node);
-        func->HoverMoveExecute(hoverInfo);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto eventObj = NG::CommonBridge::CreateHoverInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
-    ViewAbstractModel::GetInstance()->SetOnHoverMove(std::move(onHover));
+    ViewAbstractModel::GetInstance()->SetOnHoverMove(std::move(onHoverMove));
 }
 
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
@@ -250,7 +315,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         ReportClickEvent(node);
 #endif

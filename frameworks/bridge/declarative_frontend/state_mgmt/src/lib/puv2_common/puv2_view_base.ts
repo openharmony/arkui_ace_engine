@@ -185,10 +185,15 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __customComponentExecuteInit__Internal(): void {
     let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
     const componentInitFunctions = this[watchProp];
-    if (componentInitFunctions instanceof Array) {
+    try {
+      if (componentInitFunctions instanceof Array) {
         componentInitFunctions.forEach((componentInitFunction) => {
             componentInitFunction.call(this);
-        })
+        });
+      }
+    } catch (e) {
+      stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInit error, ${this.debugInfo__()}, ${e.message} ${e.stack}`);
+      throw e;
     }
   }
 
@@ -297,10 +302,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
-  }
-
-  public __registerUpdateJSInstanceCallback__Internal(callback: () => void): void {
-    return this.nativeViewPartialUpdate.registerUpdateJSInstanceCallback(callback);
   }
 
   // Callback handler when instanceId changes in backend

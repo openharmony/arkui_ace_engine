@@ -905,6 +905,11 @@ public:
         return independent_;
     }
 
+    void SetCustomAnimationPrevIndex(int32_t prevIndex)
+    {
+        customAnimationPrevIndex_ = prevIndex;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

@@ -15,7 +15,10 @@
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 struct _ArkUINodeAdapter {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
@@ -27,6 +30,9 @@ namespace OHOS::Ace::NG {
 void NativeLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener)
 {
     listener_ = RawPtr(listener);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
     if (!receiver_) {
         return;
     }
@@ -42,6 +48,22 @@ void NativeLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataC
     receiver_(&event);
 }
 
+void NativeLazyForEachBuilder::RegisterDataChangeListenerHandler()
+{
+    if (!receiver_ || !listener_) {
+        return;
+    }
+    ArkUINodeAdapterEvent event { .type = ON_ATTACH_TO_NODE };
+    event.extraParam = reinterpret_cast<intptr_t>(userData_);
+    auto lazyForEachNode = DynamicCast<LazyForEachNode>(listener_);
+    if (lazyForEachNode) {
+        auto parent = lazyForEachNode->GetParent();
+        if (parent) {
+            event.handle = reinterpret_cast<ArkUINodeHandle>(RawPtr(parent));
+        }
+    }
+    receiver_(&event);
+}
 void NativeLazyForEachBuilder::UnregisterDataChangeListener(V2::DataChangeListener* listener)
 {
     listener_ = nullptr;
@@ -410,9 +432,15 @@ ArkUI_Bool AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
         if (frameNode->GetPattern()->OnAttachAdapter(Referenced::Claim(frameNode), handle->node)) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                handle->node->RegisterBuilderListenerHandler();
+            }
             return true;
         } else if (frameNode->GetFirstChild() == nullptr) {
             uiNode->AddChild(handle->node);
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                handle->node->RegisterBuilderListenerHandler();
+            }
             return true;
         }
     }

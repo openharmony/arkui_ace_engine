@@ -30,6 +30,7 @@ public:
     static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
     static void SetScrollBarMargin(const JSCallbackInfo& info);
     static void JSBackToTop(const JSCallbackInfo& info);
+    static void JSEnableScrollWithMouse(const JSCallbackInfo& info);
     static void JSOnWillStopDragging(const JSCallbackInfo& args);
     static void JSOnWillStartDragging(const JSCallbackInfo& info);
     static void JSOnDidStopDragging(const JSCallbackInfo& info);
@@ -37,6 +38,7 @@ public:
     static void JSOnDidStopFling(const JSCallbackInfo& info);
     static void JSContentStartOffset(const JSCallbackInfo& info);
     static void JSContentEndOffset(const JSCallbackInfo& info);
+    static void JSAutoAdjustScrollBarMargin(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_BASE_H

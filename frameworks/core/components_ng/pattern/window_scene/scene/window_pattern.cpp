@@ -749,6 +749,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", persistentId, host->GetId());
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
+    isScaledSnapshot_ = false;
 
     if (IsSnapshotSizeChanged() && !session_->IsPersistentImageFit()) {
         isBlankForSnapshot_ = true;
@@ -806,8 +807,13 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
             Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key, matchSnapshot,
-                freeMultiWindow));
+            std::string path = scenePersistence->GetSnapshotFilePath(key, matchSnapshot,
+                freeMultiWindow);
+            if (session_->IsPersistentScaledSnapshotEnabled() && session_->GetShowRecent()) {
+                path = scenePersistence->GetSnapshotScaledFilePath();
+                isScaledSnapshot_ = true;
+            }
+            sourceInfo = ImageSourceInfo("file://" + path);
             auto snapshotRotation =
                 static_cast<uint32_t>(scenePersistence->rotate_[key]);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -820,7 +826,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             }
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        ClearImageCache(sourceInfo, key, freeMultiWindow);
+        ClearImageCache(sourceInfo, key, freeMultiWindow, isScaledSnapshot_);
         auto eventHub = snapshotWindow_->GetEventHub<ImageEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
@@ -934,7 +940,8 @@ void WindowPattern::DelayAddAppWindowForDmaResume(int32_t pid)
         DMA_RECLAIM_TIMEOUT_MS, "ArkUIWindowSceneDelayAddAppWindow");
 }
 
-void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)
+void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow,
+    bool isScaledSnapshot)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -944,7 +951,7 @@ void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::Sn
     CHECK_NULL_VOID(imageCache);
     imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize(key, freeMultiWindow);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize(key, freeMultiWindow, isScaledSnapshot);
         imageCache->ClearCacheImage(
             ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
         imageCache->ClearCacheImage(

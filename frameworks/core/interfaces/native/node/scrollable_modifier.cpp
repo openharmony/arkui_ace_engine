@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/scrollable_modifier.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
@@ -255,6 +256,27 @@ int32_t GetBackToTop(ArkUINodeHandle node)
     return ScrollableModelNG::GetBackToTop(frameNode);
 }
 
+void SetEnableScrollWithMouse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetEnableScrollWithMouse(frameNode, value);
+}
+
+void ResetEnableScrollWithMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetEnableScrollWithMouse(frameNode);
+}
+
+int32_t GetEnableScrollWithMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEnableScrollWithMouse(frameNode);
+}
+
 void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
     ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit)
 {
@@ -281,6 +303,28 @@ void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     ScrollableModelNG::GetScrollBarMargin(frameNode, scrollBarMargin);
     (*values)[0].f32 = scrollBarMargin.start_.ConvertToVp();
     (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
+}
+
+
+void SetAutoAdjustScrollBarMargin(ArkUINodeHandle node, ArkUI_Bool autoAdjust)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetAutoAdjustScrollBarMargin(frameNode, autoAdjust);
+}
+
+void ResetAutoAdjustScrollBarMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetAutoAdjustScrollBarMargin(frameNode);
+}
+
+ArkUI_Bool GetAutoAdjustScrollBarMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ScrollableModelNG::GetAutoAdjustScrollBarMargin(frameNode);
 }
 
 void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
@@ -485,9 +529,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
         .getBackToTop = GetBackToTop,
+        .setEnableScrollWithMouse = SetEnableScrollWithMouse,
+        .resetEnableScrollWithMouse = ResetEnableScrollWithMouse,
+        .getEnableScrollWithMouse = GetEnableScrollWithMouse,
         .setScrollBarMargin = SetScrollBarMargin,
         .resetScrollBarMargin = ResetScrollBarMargin,
         .getScrollBarMargin = GetScrollBarMargin,
+        .setAutoAdjustScrollBarMargin = SetAutoAdjustScrollBarMargin,
+        .resetAutoAdjustScrollBarMargin = ResetAutoAdjustScrollBarMargin,
+        .getAutoAdjustScrollBarMargin = GetAutoAdjustScrollBarMargin,
         .getFlingSpeedLimit = GetFlingSpeedLimit,
         .setFlingSpeedLimit = SetFlingSpeedLimit,
         .resetFlingSpeedLimit = ResetFlingSpeedLimit,

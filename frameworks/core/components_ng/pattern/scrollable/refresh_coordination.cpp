@@ -14,7 +14,9 @@
  */
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const

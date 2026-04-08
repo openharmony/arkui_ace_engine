@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/container.h"
@@ -126,11 +127,22 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         }
         wrapper->LoadImage(textString);
     } else {
+        auto jsValue = JsConverter::ConvertNapiValueToJsVal(argv[0]);
+        std::string src;
+        std::string bundleName;
+        std::string moduleName;
+        int32_t resId = 0;
+        bool srcValid = !jsValue.IsEmpty() &&
+            JSViewAbstract::ParseJsMediaWithBundleName(jsValue, src, bundleName, moduleName, resId);
+        if (srcValid) {
+            wrapper->LoadImage(src, bundleName, moduleName);
+        } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        auto pixelMap = GetPixelMap(env, argv[0]);
-        CHECK_NULL_RETURN(pixelMap, nullptr);
-        wrapper->LoadImage(pixelMap);
+            auto pixelMap = GetPixelMap(env, argv[0]);
+            CHECK_NULL_RETURN(pixelMap, nullptr);
+            wrapper->LoadImage(pixelMap);
 #endif
+        }
     }
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachImageBitmap, AttachImageBitmap, AceType::RawPtr(wrapper), nullptr);
@@ -312,6 +324,14 @@ void JSRenderImage::LoadImage(const std::string& src)
 {
     src_ = src;
     auto sourceInfo = ImageSourceInfo(src);
+    sourceInfo_ = sourceInfo;
+    LoadImage(sourceInfo);
+}
+
+void JSRenderImage::LoadImage(const std::string& src, const std::string& bundleName, const std::string& moduleName)
+{
+    src_ = src;
+    auto sourceInfo = ImageSourceInfo(src, bundleName, moduleName);
     sourceInfo_ = sourceInfo;
     LoadImage(sourceInfo);
 }

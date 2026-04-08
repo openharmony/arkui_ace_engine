@@ -15,7 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"

@@ -111,6 +111,9 @@ public:
 
     bool IsMeasureBoundary() const override;
     void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
+    void ReportInjectionEvent(bool result, std::string reson);
+    bool ParseCommand(const std::string& command, int32_t& selected);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 protected:
     void SetAccessibilityAction();
@@ -223,6 +226,7 @@ private:
     void ReportSelectEvent();
     void ReportPoupSelectEvent();
     void UpdateThemeColor();
+    void ReportSelectChangeData(int32_t nodeId, int32_t currentIndex);
     std::vector<int32_t> collapsedItemNums_;
     int32_t collapsedIndex_ = 0;
     int32_t lastCollapsedIndex_ = 0;

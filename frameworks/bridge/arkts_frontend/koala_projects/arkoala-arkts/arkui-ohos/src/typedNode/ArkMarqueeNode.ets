@@ -17,7 +17,14 @@ import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
-import { MarqueeAttribute, ResourceColor, Length, FontWeight, MarqueeUpdateStrategy } from "../framework";
+import {
+    MarqueeAttribute,
+    ResourceColor,
+    Length,
+    FontWeight,
+    MarqueeUpdateStrategy,
+    VoidCallback
+} from "../framework";
 import { ArkMarqueePeer, MarqueeOptions } from "../framework";
 import { Resource } from "global.resource";
 
@@ -96,6 +103,12 @@ export class ArkMarqueeNode extends ArkBaseNode  implements MarqueeAttribute  {
     onFinish(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)
         this.getPeer()?.setOnFinishAttribute(value_casted)
+        this.markDirty();
+        return this;
+    }
+    onStop(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnStopAttribute(value_casted)
         this.markDirty();
         return this;
     }

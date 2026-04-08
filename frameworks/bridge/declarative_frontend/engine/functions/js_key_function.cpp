@@ -14,45 +14,33 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
 
-JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)
+void JsKeyFunction::Execute(EcmaVM* vm, OHOS::Ace::KeyEventInfo& event)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> keyEventObj = objectTemplate->NewInstance();
-    keyEventObj->SetProperty<int32_t>("type", static_cast<int32_t>(event.GetKeyType()));
-    keyEventObj->SetProperty<int32_t>("keyCode", static_cast<int32_t>(event.GetKeyCode()));
-    keyEventObj->SetProperty<const char*>("keyText", event.GetKeyText().c_str());
-    keyEventObj->SetProperty<int32_t>("keySource", static_cast<int32_t>(event.GetKeySource()));
-    keyEventObj->SetProperty<int64_t>("deviceId", event.GetDeviceId());
-    keyEventObj->SetProperty<int32_t>("metaKey", event.GetMetaKey());
-    keyEventObj->SetProperty<uint32_t>("unicode", event.GetUnicode());
-    keyEventObj->SetProperty<double>("timestamp", static_cast<double>(event.GetTimeStamp().time_since_epoch().count()));
-    keyEventObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
-    keyEventObj->SetPropertyObject("getModifierKeyState",
-        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    keyEventObj->SetProperty<int32_t>("intentionCode", static_cast<int32_t>(event.GetKeyIntention()));
-    keyEventObj->SetProperty<bool>("isNumLockOn", event.GetNumLock());
-    keyEventObj->SetProperty<bool>("isCapsLockOn", event.GetCapsLock());
-    keyEventObj->SetProperty<bool>("isScrollLockOn", event.GetScrollLock());
-    keyEventObj->Wrap<KeyEventInfo>(&event);
-    return keyEventObj;
-}
-
-void JsKeyFunction::Execute(OHOS::Ace::KeyEventInfo& event)
-{
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(createKeyEvent(event));
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new KeyEventInfo(event);
+    auto obj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+    JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
     JsFunction::ExecuteJS(1, &param);
+    event.SetStopPropagation(infoPtr->IsStopPropagation());
 }
 
-JSRef<JSVal> JsKeyFunction::ExecuteWithValue(OHOS::Ace::KeyEventInfo& event)
+JSRef<JSVal> JsKeyFunction::ExecuteWithValue(EcmaVM* vm, OHOS::Ace::KeyEventInfo& event)
 {
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(createKeyEvent(event));
-    ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", event.GetKeyType());
-    return JsFunction::ExecuteJS(1, &param);
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new KeyEventInfo(event);
+    auto obj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
+    JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
+    ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", infoPtr->GetKeyType());
+    JSRef<JSVal> result = JsFunction::ExecuteJS(1, &param);
+    event.SetStopPropagation(infoPtr->IsStopPropagation());
+    return result;
 }
 
 } // namespace OHOS::Ace::Framework

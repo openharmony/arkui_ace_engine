@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 
 namespace OHOS::Ace::NG {
+class ScrollBar;
+class ScrollBarOverlayModifier;
+class ScrollEdgeEffect;
+class WaterFlowContentModifier;
+
 class ACE_EXPORT WaterFlowPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod);
 public:
@@ -33,10 +35,7 @@ public:
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
-    {
-        return contentModifier_;
-    }
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
@@ -62,10 +61,7 @@ public:
         scrollBarOverlayModifier_ = scrollBarOverlayModifier;
     }
 
-    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
-    {
-        return scrollBarOverlayModifier_.Upgrade();
-    }
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 

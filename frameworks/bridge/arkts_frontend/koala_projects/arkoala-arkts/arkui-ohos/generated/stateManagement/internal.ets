@@ -59,12 +59,14 @@ export class EnvironmentBackend {
         const retval = ArkUIGeneratedNativeModule._EnvironmentBackend_getLayoutDirection()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getLanguageCode_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._EnvironmentBackend_getLanguageCode()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -101,6 +103,7 @@ export class PersistentStorageBackend {
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static has_serialize(key: string): boolean {

@@ -39,6 +39,7 @@ build_component("common") {
     "properties/scroll_bar.cpp",
     "properties/shadow.cpp",
     "properties/shadow_config.cpp",
+    "properties/text_enums.cpp",
     "properties/text_style.cpp",
     "properties/text_style_parser.cpp",
     "properties/ui_material.cpp",

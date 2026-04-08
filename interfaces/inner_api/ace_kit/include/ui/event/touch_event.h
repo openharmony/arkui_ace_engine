@@ -75,8 +75,9 @@ struct TouchEvent final : public PointerEvent {
     double size = 0.0;
     int64_t deviceId = 0;
     uint64_t modifierKeyState = 0;
-    TimeStamp pressedTime;
-    TimeStamp processTime;
+    TimeStamp sensorTime = {};
+    TimeStamp pressedTime = {};
+    TimeStamp processTime = {};
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
     std::optional<float> tiltX;
@@ -142,6 +143,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetSourceType(SourceType sourceType);
     TouchEvent& SetSourceTool(SourceTool sourceTool);
     TouchEvent& SetTouchEventId(int32_t touchEventId);
+    TouchEvent& SetEventHandleId(int32_t eventHandleId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
     TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);

@@ -13,7 +13,6 @@ import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
 import { default as uiObserver } from "@ohos.arkui.observer";
 import { UIContext } from "@ohos.arkui.UIContext";
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { AbilityInfo, WindowSize } from "bundleManager.AbilityInfo";
 import { ArkBaseNode } from '../typedNode/ArkBaseNode';
@@ -84,7 +83,7 @@ import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from '#generated';
 import { ListHandWritten } from "./ListHandWritten"
-import { ArkWebComponent, JavaScriptProxy } from '#generated';
+import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
@@ -582,8 +581,8 @@ const DIFF: number = 1e-10
 const int_MAX: number = 2147483647
 const PIXEL_SIZE: int = 4
 export function hookGetCanvas(peerPtr: CanvasRenderingContext2D): FrameNode | null {
-    const context: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl
-    const nodeId: number = ArkUIAniModule._CanvasRenderingContext_GetCanvasId(peerPtr.peer!.ptr) as number
+    const context: UIContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext
+    const nodeId: number = ArkUIAniModule._CanvasRenderingContext_GetCanvasId(peerPtr.peer!.ptr).toDouble()
     return context.getFrameNodeByNodeId(nodeId)
 }
 export function getCanvasDensity(peerPtr: CanvasRenderer): number {
@@ -623,8 +622,8 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
         const resObj = new ImageData(0, 0)
         return resObj
     }
-    const width_cast: int = width_value as int
-    const height_cast: int = height_value as int
+    const width_cast: int = width_value.toInt()
+    const height_cast: int = height_value.toInt()
     const length: int = width_cast * height_cast * PIXEL_SIZE
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
@@ -636,8 +635,8 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     return resObj
 }
 export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageData): ImageData {
-    const width_cast: int = imagedata.width as int
-    const height_cast: int = imagedata.height as int
+    const width_cast: int = imagedata.width.toInt()
+    const height_cast: int = imagedata.height.toInt()
     const length: int = width_cast * height_cast * PIXEL_SIZE
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
@@ -658,8 +657,8 @@ export function hookGetImageData(peerPtr: CanvasRenderer, sx: number, sy: number
         const resObj = new ImageData(0, 0)
         return resObj
     }
-    const width_cast: int = width_value as int
-    const height_cast: int = height_value as int
+    const width_cast: int = width_value.toInt()
+    const height_cast: int = height_value.toInt()
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
     return resObj
 }
@@ -668,7 +667,7 @@ export function parseImageData(value: number | string, density: number): number 
     if (value instanceof string) {
         ret_val = convertDimensionStrToNumber(value as string, density)
     } else {
-        let value_casted = value as number
+        let value_casted = value.toDouble()
         ret_val = value_casted * density
     }
     return ret_val
@@ -678,7 +677,7 @@ export function hookPutImageData(peerPtr: CanvasRenderer,
     const density = getCanvasDensity(peerPtr)
     if (imagedata.data != undefined) {
       ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data as Uint8ClampedArray,
-        parseImageData(dx, density), parseImageData(dy, density), imagedata.width as int, imagedata.height as int)
+        parseImageData(dx, density), parseImageData(dy, density), imagedata.width.toInt(), imagedata.height.toInt())
     }
 }
 export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData,
@@ -688,7 +687,7 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData,
     if (imagedata.data != undefined) {
       ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data as Uint8ClampedArray,
         parseImageData(dx, density), parseImageData(dy, density),
-        imagedata.width as int, imagedata.height as int,
+        imagedata.width.toInt(), imagedata.height.toInt(),
         parseImageData(dirtyX, density), parseImageData(dirtyY, density),
         parseImageData(dirtyWidth, density), parseImageData(dirtyHeight, density))
     }
@@ -702,7 +701,7 @@ export function registerAttach(peerPtr: CanvasRenderingContext2D, callback: Void
   if (attachCallbackMap.has(callback)) {
     let res = attachCallbackMap.get(callback)
     if (res !== undefined) {
-      id = res as int
+      id = res.toInt()
     }
   } else {
     id = attachCallbackId
@@ -719,7 +718,7 @@ export function unregisterAttach(peerPtr: CanvasRenderingContext2D, callback?: V
   if (attachCallbackMap.has(callback)) {
     let res = attachCallbackMap.get(callback)
     if (res !== undefined) {
-      id = res as int
+      id = res.toInt()
     }
     attachCallbackMap.delete(callback)
   }
@@ -730,7 +729,7 @@ export function registerDetach(peerPtr: CanvasRenderingContext2D, callback: Void
   if (detachCallbackMap.has(callback)) {
     let res = detachCallbackMap.get(callback)
     if (res !== undefined) {
-      id = res as int
+      id = res.toInt()
     }
   } else {
     id = detachCallbackId
@@ -747,7 +746,7 @@ export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: V
   if (detachCallbackMap.has(callback)) {
     let res = detachCallbackMap.get(callback)
     if (res !== undefined) {
-      id = res as int
+      id = res.toInt()
     }
     detachCallbackMap.delete(callback)
   }
@@ -901,6 +900,21 @@ export function hookListItemGroupChildrenMainSizeImpl(peer: ArkListItemGroupPeer
 export function hookJavaScriptProxy(
   component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
   WebHandWritten.hookJavaScriptProxyImpl(component, value);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, priKeyFile: string, certChainFile: string): void {
+  WebHandWritten.hookConfirmImpl(handler, priKeyFile, certChainFile);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, authUri: string): void {
+  WebHandWritten.hookConfirmImpl(handler, authUri);
+}
+
+export function hookconfirm(
+  handler: MaterializedBase, identity: string, credentialTypeOrCertChainFile: CredentialType | string): void {
+  WebHandWritten.hookConfirmImpl(handler, identity, credentialTypeOrCertChainFile);
 }
 
 export function hookVideoOnError(

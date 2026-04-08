@@ -1156,6 +1156,7 @@ public:
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
+    void DoFillAutoFillData(uint32_t delayMs = 0);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
@@ -1312,6 +1313,7 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1492,6 +1494,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 
@@ -1548,6 +1551,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1565,6 +1570,7 @@ private:
     void WebComponentClickReport(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
+    void HandleNativeEmbedLifecycle(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1793,6 +1799,11 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+
+    // autofill sync state
+    std::string pendingAutoFillJsonStr_;
+    OHOS::NWeb::NWebAutoFillTriggerType pendingAutoFillType_;
+    bool hasPendingAutoFill_ = false;
 
     // data detector js state
     bool initDataDetectorJS_ = false;

@@ -27,7 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
@@ -228,6 +228,7 @@ public:
         }
         SetState(PromptActionCommonState::APPEARED);
         TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARED.");
+        ReportShow();
     }
 
     void CallDialogDidDisappearCallback()
@@ -237,6 +238,7 @@ public:
         }
         SetState(PromptActionCommonState::DISAPPEARED);
         TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARED.");
+        ReportDestroyAutoCancel();
     }
 
     void CallDialogWillAppearCallback()
@@ -371,6 +373,18 @@ public:
         refreshOnWindowShow_ = refreshOnWindowShow;
     }
 
+    void SetDialogThemeNode(const RefPtr<UINode>& themeNode)
+    {
+        dialogThemeNode_ = themeNode;
+    }
+
+    void UpdateDialogTheme();
+
+    RefPtr<DialogTheme> GetDialogTheme() const
+    {
+        return dialogTheme_;
+    }
+
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
 
@@ -379,6 +393,8 @@ public:
         return extraMaskNode_;
     }
     RefPtr<FrameNode> GetMaskNode();
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     bool AvoidKeyboard() const override
@@ -476,9 +492,27 @@ private:
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
     void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
+    Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode);
     bool InvertShadowColor();
     void OnWindowShow() override;
+    void ReportActionSheetOnInjectionEvent(bool result,
+        std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    std::vector<RefPtr<FrameNode>> GetButtons();
+    bool HandleAlertDialogButtonClickCmd(const std::unique_ptr<JsonValue>& json);
+    void ReportAlertDialogOnInjectionEvent(bool result, std::string reason,
+        int32_t btnIndex, RefPtr<FrameNode> btnNode = nullptr);
+    void ReportShow();
+    void ReportDestroy(int32_t buttonIdx);
+    void ReportDestroyAutoCancel();
+    void ReportDestroyActionMenu(int32_t buttonIdx);
+    int32_t HandleActionSheetClick(int32_t index);
+    int32_t HandleActionButtonClick(int32_t index);
+    int32_t HandleActionSheetClickCmd(const std::unique_ptr<JsonValue>& json);
+    int32_t HandleActionMenuButtonClickCmd(const std::unique_ptr<JsonValue>& json);
+    void ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text);
     RefPtr<DialogTheme> dialogTheme_;
+    RefPtr<UINode> dialogThemeNode_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
 
@@ -492,6 +526,8 @@ private:
     std::string message_;
     std::string title_;
     std::string subtitle_;
+    std::string storedSheetTitle_;
+    bool hasReportDestroy = false;
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
     std::function<void()> onWillDismissRelease_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ImageModifier extends ArkImageComponent implements AttributeModifier<ImageAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

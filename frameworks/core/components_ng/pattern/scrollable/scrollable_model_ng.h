@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -26,7 +27,13 @@
 #include "core/event/crown_event.h"
 #endif
 
+namespace OHOS::Ace {
+class ResourceObject;
+class ShapeRect;
+}
+
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
 class ACE_FORCE_EXPORT ScrollableModelNG {
@@ -109,6 +116,10 @@ public:
     static void ResetBackToTop(FrameNode* frameNode);
     static void ResetBackToTopMultiThread(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
+    static void SetEnableScrollWithMouse(bool enableScrollWithMouse);
+    static void SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse);
+    static void ResetEnableScrollWithMouse(FrameNode* frameNode);
+    static bool GetEnableScrollWithMouse(FrameNode* frameNode);
     static void SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin);
     static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);
     static void ResetScrollBarMargin(FrameNode* frameNode);
@@ -129,6 +140,10 @@ public:
     static void CreateWithResourceObjContentEndOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust);
+    static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
+    static void ResetAutoAdjustScrollBarMargin(FrameNode* frameNode);
+    static bool GetAutoAdjustScrollBarMargin(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

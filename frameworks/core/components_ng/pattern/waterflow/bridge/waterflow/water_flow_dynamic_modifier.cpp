@@ -16,9 +16,15 @@
 #include "interfaces/native/node/waterflow_section_option.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/common/container.h"
+#include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_model_impl.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_api.h"
 
@@ -1178,6 +1184,20 @@ void* GetEventResetHandler(uint32_t kind)
     return reinterpret_cast<void*>(waterFlowNodeResetAsyncEventHandlers[kind]);
 }
 
+void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, support);
+}
+
+ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return WaterFlowModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
 #ifndef CROSS_PLATFORM
 void SetRowsTemplateImpl(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
@@ -1487,7 +1507,6 @@ void SetColumnsTemplateImpl(ArkUINodeHandle node, ArkUI_CharPtr value)
 void ResetWaterFlowLayoutModeImpl(ArkUINodeHandle) {}
 
 void ResetItemFillPolicyImpl(ArkUINodeHandle) {}
-
 #endif
 } // namespace
 namespace NodeModifier {
@@ -1594,6 +1613,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowDynamicModifier()
             .createScrollBarProxy = CreateScrollBarProxyImpl,
             .getEventSetHandler = nullptr,
             .getEventResetHandler = nullptr,
+            .setSupportLazyLoadingEmptyBranch = nullptr,
+            .getSupportLazyLoadingEmptyBranch = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifierImpl, 0, 0, 0); // don't move this line
         return &modifierImpl;
@@ -1697,6 +1718,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowDynamicModifier()
         .createScrollBarProxy = CreateScrollBarProxy,
         .getEventSetHandler = GetEventSetHandler,
         .getEventResetHandler = GetEventResetHandler,
+        .setSupportLazyLoadingEmptyBranch = SetSupportLazyLoadingEmptyBranch,
+        .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

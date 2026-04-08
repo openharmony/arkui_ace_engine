@@ -629,15 +629,15 @@ ArkUINodeHandle GetFirstUINode(ArkUINodeHandle node)
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(child));
 }
 
-void GetLayoutSize(ArkUINodeHandle node, ArkUI_Int32* size)
+void GetLayoutSize(ArkUINodeHandle node, ArkUI_Int32 (*size)[2])
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = currentNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rectSize = renderContext->GetPaintRectWithoutTransform().GetSize();
-    size[0] = rectSize.Width();
-    size[1] = rectSize.Height();
+    (*size)[0] = rectSize.Width();
+    (*size)[1] = rectSize.Height();
 }
 
 ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)

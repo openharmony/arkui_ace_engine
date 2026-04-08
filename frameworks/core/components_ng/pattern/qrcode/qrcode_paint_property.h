@@ -61,7 +61,9 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        RefPtr<QrcodeTheme> qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
         CHECK_NULL_VOID(qrCodeTheme);
         json->PutExtAttr("value", propValue_.value_or("").c_str(), filter);
         json->PutExtAttr("color",

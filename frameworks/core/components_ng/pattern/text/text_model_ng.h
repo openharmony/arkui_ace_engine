@@ -21,7 +21,7 @@
 
 #include "interfaces/native/node/styled_string.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -88,6 +88,7 @@ public:
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
@@ -109,6 +110,7 @@ public:
     void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
+    void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
@@ -233,6 +235,7 @@ public:
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
+    static void SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void ResetOnCopy(FrameNode* frameNode);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
@@ -264,6 +267,8 @@ public:
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
+    static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
@@ -286,6 +291,7 @@ public:
     static void SetExternalDrawCallback(
         FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback);
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
+    static void SetStyledString(FrameNode* frameNode, SpanString* value);
 };
 } // namespace OHOS::Ace::NG
 

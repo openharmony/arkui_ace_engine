@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/path_painter.h"
 #include "core/pipeline/pipeline_base.h"

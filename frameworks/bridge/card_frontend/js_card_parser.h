@@ -32,7 +32,7 @@ class ACE_EXPORT JsCardParser : public Referenced {
 public:
     JsCardParser(const WeakPtr<PipelineBase>& context, const WeakPtr<AssetManager>& assertManager,
         std::unique_ptr<JsonValue>&& rootBody)
-        : Referenced(false), context_(context), assetManager_(assertManager), rootBody_(std::move(rootBody))
+        : Referenced(), context_(context), assetManager_(assertManager), rootBody_(std::move(rootBody))
     {}
     ~JsCardParser() override = default;
 

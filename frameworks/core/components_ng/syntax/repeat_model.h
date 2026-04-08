@@ -20,8 +20,6 @@
 #include <functional>
 #include <list>
 #include <string>
-#include <vector>
-#include <memory>
 
 #include "base/utils/macros.h"
 

@@ -95,6 +95,20 @@ class BackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class EnableScrollWithMouseModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableScrollWithMouse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetEnableScrollWithMouse(node);
+    } else {
+      getUINativeModule().scrollable.setEnableScrollWithMouse(node, this.value);
+    }
+  }
+}
+
 class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
   constructor(value: ScrollBarMargin) {
     super(value);
@@ -105,6 +119,20 @@ class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
       getUINativeModule().scrollable.resetScrollBarMargin(node);
     } else {
       getUINativeModule().scrollable.setScrollBarMargin(node, this.value.start, this.value.end);
+    }
+  }
+}
+
+class AutoAdjustScrollBarMarginModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('autoAdjustScrollBarMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetAutoAdjustScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setAutoAdjustScrollBarMargin(node, this.value);
     }
   }
 }
@@ -259,8 +287,16 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
       return this;
     }
+    enableScrollWithMouse(value: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
+      return this;
+    }
     scrollBarMargin(margin: ScrollBarMargin): T {
       modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
+      return this;
+    }
+    autoAdjustScrollBarMargin(value: boolean): T {
+      modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
       return this;
     }
     onWillStopDragging(callback: (velocity: number) => void) : this {

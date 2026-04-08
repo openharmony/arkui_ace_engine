@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,14 @@
 #include "base/utils/device_config.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "frameworks/core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace::Framework {
 class JSRichEditorBaseController : public Referenced {
 public:
     virtual void SetController(const RefPtr<RichEditorBaseControllerBase>& controller);
+
     void CloseSelectionMenu();
     void StopEditing();
     bool FontSizeRangeIsNegative(const CalcDimension& size);
@@ -43,13 +44,6 @@ public:
     bool IsStyledStringMode()
     {
         return isStyledStringMode_;
-    }
-
-    ColorMode GetColorMode()
-    {
-        auto controller = controllerWeak_.Upgrade();
-        CHECK_NULL_RETURN(controller, ColorMode::COLOR_MODE_UNDEFINED);
-        return controller->GetColorMode();
     }
 
     void SetPlaceholderStyledStringCache(const RefPtr<SpanString>& styledString)

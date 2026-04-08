@@ -806,7 +806,6 @@ void* GetAsyncEventHandlers(uint32_t kind)
         SetIndexerChangeEvent,
         SetIndexerCreatChangeEvent,
     };
-    kind = sizeof(alphabetIndexerNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler);
     if (kind >= sizeof(alphabetIndexerNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         return nullptr;

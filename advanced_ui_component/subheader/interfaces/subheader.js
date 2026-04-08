@@ -312,6 +312,7 @@ export class SubHeader extends ViewPU {
         this.__contentPadding = new SynchedPropertyObjectOneWayPU(e11.contentPadding, this, 'contentPadding');
         this.__titleAccessibilityText =
             new SynchedPropertyObjectOneWayPU(e11.titleAccessibilityText, this, 'titleAccessibilityText');
+        this.__titleId = new SynchedPropertySimpleOneWayPU(e11.titleId, this, 'titleId');
         this.subHeaderMargin = {
             start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
             end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
@@ -401,6 +402,7 @@ export class SubHeader extends ViewPU {
         this.__contentMargin.reset(b11.contentMargin);
         this.__contentPadding.reset(b11.contentPadding);
         this.__titleAccessibilityText.reset(b11.titleAccessibilityText);
+        this.__titleId.reset(b11.titleId);
     }
 
     purgeVariableDependenciesOnElmtId(a11) {
@@ -420,6 +422,7 @@ export class SubHeader extends ViewPU {
         this.__contentMargin.purgeDependencyOnElmtId(a11);
         this.__contentPadding.purgeDependencyOnElmtId(a11);
         this.__titleAccessibilityText.purgeDependencyOnElmtId(a11);
+        this.__titleId.purgeDependencyOnElmtId(a11);
         this.__subHeaderTheme.purgeDependencyOnElmtId(a11);
     }
 
@@ -440,6 +443,7 @@ export class SubHeader extends ViewPU {
         this.__contentMargin.aboutToBeDeleted();
         this.__contentPadding.aboutToBeDeleted();
         this.__titleAccessibilityText.aboutToBeDeleted();
+        this.__titleId.aboutToBeDeleted();
         this.__subHeaderTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -573,6 +577,14 @@ export class SubHeader extends ViewPU {
         this.__titleAccessibilityText.set(k10);
     }
 
+    get titleId() {
+        return this.__titleId.get();
+    }
+
+    set titleId(k10) {
+        this.__titleId.set(k10);
+    }
+
     get subHeaderTheme() {
         return this.__subHeaderTheme.get();
     }
@@ -675,8 +687,8 @@ export class SubHeader extends ViewPU {
                         Row.width('100%');
                         Row.accessibilityGroup(this.isLeftAreaAccessibilityGroup());
                         Row.accessibilityText(this.getTitleAccessibilityText());
-                        Row.accessibilityRole(this.primaryTitle || this.secondaryTitle ?
-                            AccessibilityRoleType.TITLE_BAR : undefined);
+                        Row.accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR);
+                        Row.id(this.select ? undefined : this.titleId);
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();
@@ -712,8 +724,8 @@ export class SubHeader extends ViewPU {
                         Row.flexShrink(1);
                         Row.accessibilityGroup(this.isLeftAreaAccessibilityGroup());
                         Row.accessibilityText(this.getTitleAccessibilityText());
-                        Row.accessibilityRole(this.primaryTitle || this.secondaryTitle ?
-                            AccessibilityRoleType.TITLE_BAR : undefined);
+                        Row.accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR);
+                        Row.id(this.select ? undefined : this.titleId);
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();
@@ -974,102 +986,105 @@ export class SubHeader extends ViewPU {
             If.create();
             if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z8, a9) => {
-                        Button.createWithChild({
-                            type: ButtonType.Normal,
-                            buttonStyle: ButtonStyleMode.TEXTUAL,
-                            stateEffect: false
-                        });
-                        Button.focusable(this.operationItem ? true : false);
-                        Button.margin(INDEX_ZERO);
-                        Button.padding(INDEX_ZERO);
-                        Button.align(Alignment.BottomEnd);
-                        Button.onKeyEvent((c9) => {
-                            if (!c9) {
-                                return;
-                            }
-                            if ((c9.keyCode === KeyCode.KEYCODE_SPACE || c9.keyCode === KeyCode.KEYCODE_ENTER) &&
-                                c9.type === KeyType.Down) {
+                    if (!If.canRetake(this.operationItem?.[0]?.id)) {
+                        this.observeComponentCreation2((z8, a9) => {
+                            Button.createWithChild({
+                                type: ButtonType.Normal,
+                                buttonStyle: ButtonStyleMode.TEXTUAL,
+                                stateEffect: false
+                            });
+                            Button.focusable(this.operationItem ? true : false);
+                            Button.margin(INDEX_ZERO);
+                            Button.padding(INDEX_ZERO);
+                            Button.align(Alignment.BottomEnd);
+                            Button.onKeyEvent((c9) => {
+                                if (!c9) {
+                                    return;
+                                }
+                                if ((c9.keyCode === KeyCode.KEYCODE_SPACE || c9.keyCode === KeyCode.KEYCODE_ENTER) &&
+                                    c9.type === KeyType.Down) {
+                                    if ((this.operationType === OperationType.TEXT_ARROW ||
+                                        this.operationType === OperationType.BUTTON) &&
+                                    this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+                                        this.operationItem[0].action();
+                                    }
+                                    c9.stopPropagation();
+                                }
+                            });
+                            Button.onClick(() => {
                                 if ((this.operationType === OperationType.TEXT_ARROW ||
                                     this.operationType === OperationType.BUTTON) &&
                                 this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
                                     this.operationItem[0].action();
                                 }
-                                c9.stopPropagation();
-                            }
-                        });
-                        Button.onClick(() => {
-                            if ((this.operationType === OperationType.TEXT_ARROW ||
-                                this.operationType === OperationType.BUTTON) &&
-                            this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
-                                this.operationItem[0].action();
-                            }
-                        });
-                        Button.onTouch((b9) => {
-                            if (b9.type === TouchType.Down) {
-                                if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': 125831020,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
+                            });
+                            Button.onTouch((b9) => {
+                                if (b9.type === TouchType.Down) {
+                                    if (this.operationType === OperationType.TEXT_ARROW) {
+                                        this.textArrowBgColor = {
+                                            'id': 125831020,
+                                            'type': 10001,
+                                            params: ['sys.color.interactive_pressed'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
+                                    if (this.operationType === OperationType.BUTTON) {
+                                        this.buttonBgColor = {
+                                            'id': 125831020,
+                                            'type': 10001,
+                                            params: ['sys.color.interactive_pressed'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
                                 }
-                                if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': 125831020,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
+                                if (b9.type === TouchType.Up || b9.type === TouchType.Cancel) {
+                                    if (this.operationType === OperationType.TEXT_ARROW) {
+                                        this.textArrowBgColor = {
+                                            'id': 125829134,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
+                                    if (this.operationType === OperationType.BUTTON) {
+                                        this.buttonBgColor = {
+                                            'id': 125829134,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
                                 }
-                            }
-                            if (b9.type === TouchType.Up || b9.type === TouchType.Cancel) {
-                                if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': 125829134,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
-                                }
-                                if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': 125829134,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
-                                }
-                            }
-                        });
-                        Button.constraintSize({
-                            maxWidth: this.getRightAreaMaxWidth(),
-                            minWidth: this.getRightAreaMinWidth(),
-                            minHeight: MIN_HOT_AREA_LENGTH,
-                        });
-                        Button.flexShrink(0);
-                        Button.accessibilityLevel(this.operationType === OperationType.BUTTON ||
-                            this.operationType === OperationType.TEXT_ARROW ?
-                            this.getRightAreaAccessibilityLevel() : 'no');
-                        Button.hoverEffect(HoverEffect.None);
-                        Button.backgroundColor({
-                            'id': 125829134,
-                            'type': 10001,
-                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__',
-                        });
-                        Button.accessibilityGroup(true);
-                        Button.accessibilityText(this.getRightAreaAccessibilityText());
-                        Button.accessibilityDescription(this.getAccessibilityDescription());
-                    }, Button);
-                    this.rightArea.bind(this)();
-                    Button.pop();
+                            });
+                            Button.constraintSize({
+                                maxWidth: this.getRightAreaMaxWidth(),
+                                minWidth: this.getRightAreaMinWidth(),
+                                minHeight: MIN_HOT_AREA_LENGTH,
+                            });
+                            Button.flexShrink(0);
+                            Button.accessibilityLevel(this.operationType === OperationType.BUTTON ||
+                                this.operationType === OperationType.TEXT_ARROW ?
+                                this.getRightAreaAccessibilityLevel() : 'no');
+                            Button.hoverEffect(HoverEffect.None);
+                            Button.backgroundColor({
+                                'id': 125829134,
+                                'type': 10001,
+                                params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
+                            Button.accessibilityGroup(true);
+                            Button.accessibilityText(this.getRightAreaAccessibilityText());
+                            Button.accessibilityDescription(this.getAccessibilityDescription());
+                            Button.id(this.operationItem?.[0]?.id);
+                        }, Button);
+                        this.rightArea.bind(this)();
+                        Button.pop();
+                    }
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
@@ -1486,6 +1501,7 @@ export class SubHeader extends ViewPU {
     SelectStyle(p6, q6 = null) {
         this.observeComponentCreation2((r6, s6) => {
             Select.create(p6.options);
+            Select.id(p6?.id);
             Select.height('auto');
             Select.width('auto');
             Select.selected(ObservedObject.GetRawObject(this.selectedIndex));
@@ -1534,47 +1550,62 @@ export class SubHeader extends ViewPU {
             If.create();
             if (b6) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h6, i6) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.focusable(true);
-                        Button.focusBox({
-                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
-                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
-                        });
-                        Button.padding({
-                            start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
-                            end: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
-                            top: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
-                            bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
-                        });
-                        Button.margin({
-                            start: this.ageing ?
-                                LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
-                                this.leftIconMargin().value) :
-                                LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start'))
-                                    .value +
-                                this.leftIconMargin().value),
-                            bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                                (this.secondaryTitle && this.primaryTitle ?
-                                    getResourceValue('sys.float.subheader_right_button_margin_bottom') :
-                                    getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
-                        });
-                        Button.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
-                        Button.constraintSize({ minHeight: OPERATE_ITEM_LENGTH() });
-                        Button.align(Alignment.End);
-                        Button.borderRadius(getResourceValue('sys.float.subheader_right_button_radius'));
-                        Button.offset({ x: getResourceValue('sys.float.subheader_right_button_x_offset') });
-                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
-                            new DefaultFocusStyleModifier((k6) => {
-                                if (k6) {
-                                    this.buttonBgColor = {
-                                        'id': 125831015,
-                                        'type': 10001,
-                                        params: ['sys.color.comp_background_focus'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
+                    if (!If.canRetake(this.operationType === undefined ? b6?.id : undefined)) {
+                        this.observeComponentCreation2((h6, i6) => {
+                            Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                            Button.id(this.operationType === undefined ? b6?.id : undefined);
+                            Button.focusable(true);
+                            Button.focusBox({
+                                margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                                strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                                strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
+                            });
+                            Button.padding({
+                                start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+                                end: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_horizontal')),
+                                top: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
+                                bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_padding_vertical')),
+                            });
+                            Button.margin({
+                                start: this.ageing ?
+                                    LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
+                                    this.leftIconMargin().value) :
+                                    LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start'))
+                                        .value +
+                                    this.leftIconMargin().value),
+                                bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                                    (this.secondaryTitle && this.primaryTitle ?
+                                        getResourceValue('sys.float.subheader_right_button_margin_bottom') :
+                                        getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
+                            });
+                            Button.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
+                            Button.constraintSize({ minHeight: OPERATE_ITEM_LENGTH() });
+                            Button.align(Alignment.End);
+                            Button.borderRadius(getResourceValue('sys.float.subheader_right_button_radius'));
+                            Button.offset({ x: getResourceValue('sys.float.subheader_right_button_x_offset') });
+                            Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                                new DefaultFocusStyleModifier((k6) => {
+                                    if (k6) {
+                                        this.buttonBgColor = {
+                                            'id': 125831015,
+                                            'type': 10001,
+                                            params: ['sys.color.comp_background_focus'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    } else {
+                                        this.buttonBgColor = {
+                                            'id': 125829134,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
+                                }));
+                            Button.onHover((j6) => {
+                                if (j6) {
+                                    this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                                 } else {
                                     this.buttonBgColor = {
                                         'id': 125829134,
@@ -1584,44 +1615,32 @@ export class SubHeader extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
-                            }));
-                        Button.onHover((j6) => {
-                            if (j6) {
-                                this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
-                            } else {
-                                this.buttonBgColor = {
-                                    'id': 125829134,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            }
-                        });
-                        ViewStackProcessor.visualState('disabled');
-                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
-                        ViewStackProcessor.visualState('pressed');
-                        Button.backgroundColor({
-                            'id': 125831020,
-                            'type': 10001,
-                            params: ['sys.color.interactive_pressed'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__',
-                        });
-                        ViewStackProcessor.visualState();
-                    }, Button);
-                    this.observeComponentCreation2((f6, g6) => {
-                        Text.create(b6.value);
-                        __Text__secondaryTitleStyles({
-                            fontWeight: FontWeight.Medium,
-                            maxLines: DOUBLE_LINE_NUM,
-                            fontColor: this.subHeaderTheme.fontButtonColor,
-                        });
-                        Text.defaultFocus(b6.defaultFocus);
-                        Text.focusable(true);
-                    }, Text);
-                    Text.pop();
-                    Button.pop();
+                            });
+                            ViewStackProcessor.visualState('disabled');
+                            Button.opacity(getResourceValue('sys.float.interactive_disable'));
+                            ViewStackProcessor.visualState('pressed');
+                            Button.backgroundColor({
+                                'id': 125831020,
+                                'type': 10001,
+                                params: ['sys.color.interactive_pressed'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
+                            ViewStackProcessor.visualState();
+                        }, Button);
+                        this.observeComponentCreation2((f6, g6) => {
+                            Text.create(b6.value);
+                            __Text__secondaryTitleStyles({
+                                fontWeight: FontWeight.Medium,
+                                maxLines: DOUBLE_LINE_NUM,
+                                fontColor: this.subHeaderTheme.fontButtonColor,
+                            });
+                            Text.defaultFocus(b6.defaultFocus);
+                            Text.focusable(true);
+                        }, Text);
+                        Text.pop();
+                        Button.pop();
+                    }
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
@@ -1863,34 +1882,60 @@ export class SubHeader extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((o4, p4) => {
-                        Row.create();
-                        Row.margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom') });
-                        Row.focusable(true);
-                        Row.constraintSize({ minWidth: this.getRightAreaMinWidth() });
-                        Row.justifyContent(FlexAlign.End);
-                    }, Row);
-                    this.observeComponentCreation2((k4, l4) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.width(ARROW_ICON_WIDTH());
-                        Button.height(OPERATE_ITEM_LENGTH());
-                        Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
-                        Button.focusBox({
-                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
-                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
-                        });
-                        Button.borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'));
-                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
-                            new DefaultFocusStyleModifier((n4) => {
-                                if (n4) {
-                                    this.textArrowBgColor = {
-                                        'id': 125831015,
-                                        'type': 10001,
-                                        params: ['sys.color.comp_background_focus'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__',
-                                    };
+                    if (!If.canRetake(e4?.id)) {
+                        this.observeComponentCreation2((o4, p4) => {
+                            Row.create();
+                            Row.id(e4?.id);
+                            Row.margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom') });
+                            Row.focusable(true);
+                            Row.constraintSize({ minWidth: this.getRightAreaMinWidth() });
+                            Row.justifyContent(FlexAlign.End);
+                        }, Row);
+                        this.observeComponentCreation2((k4, l4) => {
+                            Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                            Button.width(ARROW_ICON_WIDTH());
+                            Button.height(OPERATE_ITEM_LENGTH());
+                            Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
+                            Button.focusBox({
+                                margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                                strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                                strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
+                            });
+                            Button.borderRadius(getResourceValue('sys.float.subheader_right_text_arrow_radius'));
+                            Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                                new DefaultFocusStyleModifier((n4) => {
+                                    if (n4) {
+                                        this.textArrowBgColor = {
+                                            'id': 125831015,
+                                            'type': 10001,
+                                            params: ['sys.color.comp_background_focus'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    } else {
+                                        this.textArrowBgColor = {
+                                            'id': 125829134,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
+                                }));
+                            ViewStackProcessor.visualState('disabled');
+                            Button.opacity(getResourceValue('sys.float.interactive_disable'));
+                            ViewStackProcessor.visualState('pressed');
+                            Button.backgroundColor({
+                                'id': 125831020,
+                                'type': 10001,
+                                params: ['sys.color.interactive_pressed'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
+                            ViewStackProcessor.visualState();
+                            Button.onHover((m4) => {
+                                if (m4) {
+                                    this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                                 } else {
                                     this.textArrowBgColor = {
                                         'id': 125829134,
@@ -1900,58 +1945,35 @@ export class SubHeader extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
-                            }));
-                        ViewStackProcessor.visualState('disabled');
-                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
-                        ViewStackProcessor.visualState('pressed');
-                        Button.backgroundColor({
-                            'id': 125831020,
-                            'type': 10001,
-                            params: ['sys.color.interactive_pressed'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__',
-                        });
-                        ViewStackProcessor.visualState();
-                        Button.onHover((m4) => {
-                            if (m4) {
-                                this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
-                            } else {
-                                this.textArrowBgColor = {
-                                    'id': 125829134,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            }
-                        });
-                        Button.focusable(true);
-                        Button.margin({
-                            start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                                getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
-                            bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-                                (this.secondaryTitle && this.primaryTitle ?
-                                    getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
-                                    getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
-                        });
-                    }, Button);
-                    this.observeComponentCreation2((i4, j4) => {
-                        SymbolGlyph.create({
-                            'id': 125832664,
-                            'type': 40000,
-                            params: ['sys.symbol.chevron_right'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__',
-                        });
-                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
-                        SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
-                        SymbolGlyph.draggable(false);
-                        SymbolGlyph.focusable(true);
-                        SymbolGlyph.width(ARROW_ICON_WIDTH());
-                        SymbolGlyph.height(OPERATE_ITEM_LENGTH());
-                    }, SymbolGlyph);
-                    Button.pop();
-                    Row.pop();
+                            });
+                            Button.focusable(true);
+                            Button.margin({
+                                start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                                    getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
+                                bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
+                                    (this.secondaryTitle && this.primaryTitle ?
+                                        getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+                                        getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
+                            });
+                        }, Button);
+                        this.observeComponentCreation2((i4, j4) => {
+                            SymbolGlyph.create({
+                                'id': 125832664,
+                                'type': 40000,
+                                params: ['sys.symbol.chevron_right'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
+                            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
+                            SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
+                            SymbolGlyph.draggable(false);
+                            SymbolGlyph.focusable(true);
+                            SymbolGlyph.width(ARROW_ICON_WIDTH());
+                            SymbolGlyph.height(OPERATE_ITEM_LENGTH());
+                        }, SymbolGlyph);
+                        Button.pop();
+                        Row.pop();
+                    }
                 });
             }
         }, If);
@@ -1995,6 +2017,7 @@ export class SubHeader extends ViewPU {
                                                         this.operationSymbolOptions.length > s3 ?
                                                         this.operationSymbolOptions[s3] : null,
                                                 },
+                                                id: t3.id,
                                                 action: t3.action,
                                                 defaultFocus: t3.defaultFocus,
                                                 accessibilityLevel: t3.accessibilityLevel,
@@ -2018,6 +2041,7 @@ export class SubHeader extends ViewPU {
                                                             this.operationSymbolOptions.length > s3 ?
                                                             this.operationSymbolOptions[s3] : null,
                                                     },
+                                                    id: t3.id,
                                                     action: t3.action,
                                                     defaultFocus: t3.defaultFocus,
                                                     accessibilityLevel: t3.accessibilityLevel,
@@ -2192,41 +2216,82 @@ class SingleIconStyle extends ViewPU {
             If.create();
             if (this.item && this.item.iconOptions) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m2, n2) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
-                        Button.focusable(true);
-                        Button.defaultFocus(this.item.defaultFocus);
-                        Button.width(SINGLE_ICON_ZONE_SIZE());
-                        Button.height(SINGLE_ICON_ZONE_SIZE());
-                        Button.align(Alignment.Center);
-                        Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
-                        Button.borderRadius(getResourceValue('sys.float.subheader_right_icon_radius'));
-                        Button.accessibilityLevel(this.getRightIconAccessibilityLevel());
-                        Button.accessibilityText(this.getRightIconAccessibilityText());
-                        Button.accessibilityDescription(this.getRightIconAccessibilityDescription());
-                        Button.focusBox({
-                            margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
-                            strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
-                            strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
-                        });
-                        ViewStackProcessor.visualState('disabled');
-                        Button.opacity(getResourceValue('sys.float.interactive_disable'));
-                        ViewStackProcessor.visualState('pressed');
-                        Button.backgroundColor({
-                            'id': 125831020,
-                            'type': 10001,
-                            params: ['sys.color.interactive_pressed'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__',
-                        });
-                        ViewStackProcessor.visualState();
-                        Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
-                            new DefaultFocusStyleModifier((r2) => {
-                                if (r2) {
+                    if (!If.canRetake(this.item?.id)) {
+                        this.observeComponentCreation2((m2, n2) => {
+                            Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                            Button.id(this.item?.id);
+                            Button.focusable(true);
+                            Button.defaultFocus(this.item.defaultFocus);
+                            Button.width(SINGLE_ICON_ZONE_SIZE());
+                            Button.height(SINGLE_ICON_ZONE_SIZE());
+                            Button.align(Alignment.Center);
+                            Button.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
+                            Button.borderRadius(getResourceValue('sys.float.subheader_right_icon_radius'));
+                            Button.accessibilityLevel(this.getRightIconAccessibilityLevel());
+                            Button.accessibilityText(this.getRightIconAccessibilityText());
+                            Button.accessibilityDescription(this.getRightIconAccessibilityDescription());
+                            Button.focusBox({
+                                margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
+                                strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
+                                strokeWidth: LengthMetrics.vp(getResourceValue('sys.float.outline_extra_larger')),
+                            });
+                            ViewStackProcessor.visualState('disabled');
+                            Button.opacity(getResourceValue('sys.float.interactive_disable'));
+                            ViewStackProcessor.visualState('pressed');
+                            Button.backgroundColor({
+                                'id': 125831020,
+                                'type': 10001,
+                                params: ['sys.color.interactive_pressed'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
+                            ViewStackProcessor.visualState();
+                            Button.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined :
+                                new DefaultFocusStyleModifier((r2) => {
+                                    if (r2) {
+                                        this.bgColor = {
+                                            'id': 125831015,
+                                            'type': 10001,
+                                            params: ['sys.color.comp_background_focus'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    } else {
+                                        this.bgColor = {
+                                            'id': 125829134,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        };
+                                    }
+                                }));
+                            Button.onTouch((q2) => {
+                                if (q2.type === TouchType.Down || TouchType.Cancel) {
                                     this.bgColor = {
-                                        'id': 125831015,
+                                        'id': 125831020,
                                         'type': 10001,
-                                        params: ['sys.color.comp_background_focus'],
+                                        params: ['sys.color.interactive_pressed'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                                if (q2.type === TouchType.Up) {
+                                    this.bgColor = {
+                                        'id': 125829134,
+                                        'type': 10001,
+                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    };
+                                }
+                            });
+                            Button.onHover((p2) => {
+                                if (p2) {
+                                    this.bgColor = {
+                                        'id': 125831019,
+                                        'type': 10001,
+                                        params: ['sys.color.interactive_hover'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__',
                                     };
@@ -2239,55 +2304,17 @@ class SingleIconStyle extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
-                            }));
-                        Button.onTouch((q2) => {
-                            if (q2.type === TouchType.Down || TouchType.Cancel) {
-                                this.bgColor = {
-                                    'id': 125831020,
-                                    'type': 10001,
-                                    params: ['sys.color.interactive_pressed'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            }
-                            if (q2.type === TouchType.Up) {
-                                this.bgColor = {
-                                    'id': 125829134,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            }
-                        });
-                        Button.onHover((p2) => {
-                            if (p2) {
-                                this.bgColor = {
-                                    'id': 125831019,
-                                    'type': 10001,
-                                    params: ['sys.color.interactive_hover'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            } else {
-                                this.bgColor = {
-                                    'id': 125829134,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__',
-                                };
-                            }
-                        });
-                        Button.responseRegion(this.iconResponseRegion());
-                        Button.onClick((o2) => {
-                            if (this.item?.action) {
-                                this.item?.action();
-                            }
-                        });
-                    }, Button);
-                    this.IconZone.bind(this)();
-                    Button.pop();
+                            });
+                            Button.responseRegion(this.iconResponseRegion());
+                            Button.onClick((o2) => {
+                                if (this.item?.action) {
+                                    this.item?.action();
+                                }
+                            });
+                        }, Button);
+                        this.IconZone.bind(this)();
+                        Button.pop();
+                    }
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {

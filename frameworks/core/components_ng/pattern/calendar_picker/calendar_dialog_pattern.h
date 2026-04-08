@@ -127,6 +127,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 private:
     void OnModifyDone() override;
     void InitClickEvent();
@@ -177,6 +179,14 @@ private:
     void MarkMonthNodeDirty();
 
     bool IsDateInRange(const CalendarDay& day);
+
+    bool IsJsonValid(const std::unique_ptr<JsonValue>& json);
+    bool IsJsonObject(const std::unique_ptr<JsonValue>& json);
+    bool ReportCommandResultEvent(int32_t nodeId, const std::string& event,
+        bool isSuccess, const std::string& reason);
+    bool ReportChangeEvent(const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
+    bool CheckCalendarParamDate(const std::unique_ptr<JsonValue>& paramJson, const std::string& command);
 
     int32_t focusAreaID_ = 0;
     int32_t focusAreaIDWithoutWeek_ = 0;

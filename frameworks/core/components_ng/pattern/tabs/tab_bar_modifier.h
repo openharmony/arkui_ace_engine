@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class TabBarModifier : public ContentModifier {

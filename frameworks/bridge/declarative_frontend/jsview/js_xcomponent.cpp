@@ -516,7 +516,7 @@ void JSXComponent::JsOnClick(const JSCallbackInfo& args)
     if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
-    JSViewAbstract::JsOnClick(args);
+    JSInteractableView::JsOnClick(args);
 }
 
 void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
@@ -549,7 +549,7 @@ void JSXComponent::JsOnHover(const JSCallbackInfo& args)
     if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
-    JSViewAbstract::JsOnHover(args);
+    JSInteractableView::JsOnHover(args);
 }
 
 

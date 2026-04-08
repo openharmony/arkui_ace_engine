@@ -19,18 +19,42 @@
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 
 namespace OHOS::Ace::NG {
+
+WaterFlowPattern::~WaterFlowPattern() = default;
+
+RefPtr<LayoutProperty> WaterFlowPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<WaterFlowLayoutProperty>();
+}
+
+RefPtr<EventHub> WaterFlowPattern::CreateEventHub()
+{
+    return MakeRefPtr<WaterFlowEventHub>();
+}
+
+RefPtr<AccessibilityProperty> WaterFlowPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<WaterFlowAccessibilityProperty>();
+}
 
 SizeF WaterFlowPattern::GetContentSize() const
 {
@@ -160,6 +184,7 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     if (sections_ && layoutInfo_->segmentTails_.empty()) {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
     }
+    layoutInfo_->measureInNextFrame_ = false;
 
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
@@ -223,6 +248,10 @@ void WaterFlowPattern::OnModifyDone()
 #ifdef SUPPORT_DIGITAL_CROWN
         SetDigitalCrownEvent();
 #endif
+    }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
     }
     SetEdgeEffect();
 
@@ -356,7 +385,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     if (layoutInfo_->isDataValid_) {
-        GetHost()->ChildrenUpdatedFrom(-1);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->ChildrenUpdatedFrom(-1);
     }
     layoutInfo_->isDataValid_ = true;
 
@@ -379,16 +410,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     if (layoutInfo_->measureInNextFrame_) {
-        auto context = GetContext();
-        CHECK_NULL_RETURN(context, false);
-        context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
-            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
-            auto waterFlow = weak.Upgrade();
-            if (waterFlow) {
-                waterFlow->MarkDirtyNodeSelf();
-                waterFlow->layoutInfo_->measureInNextFrame_ = false;
-            }
-        });
+        ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+        PostAsyncLoadTask();
     } else {
         isInitialized_ = true;
     }
@@ -1115,5 +1138,20 @@ void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event
 int32_t WaterFlowPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void WaterFlowPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->layoutInfo_->measureInNextFrame_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

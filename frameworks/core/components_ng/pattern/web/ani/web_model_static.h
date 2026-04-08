@@ -167,6 +167,8 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnSslSelectCertRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnVerifyPinRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetWindowNewEvent(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
     static void SetWindowNewExtEvent(
@@ -253,6 +255,12 @@ public:
     static void SetCameraCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
+    static void SetAISessionOptions(FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
+        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
+    static void SetEnableScrollDirectionalLock(FrameNode* frameNode, const std::optional<bool>& isEnable,
+        const std::optional<ScrollDirectionalLockType>& type);
+    static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy policy);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

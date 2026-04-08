@@ -500,7 +500,9 @@ void ContentModifierSliderImpl(
 
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            auto elementRegister = ElementRegister::GetInstance();
+            CHECK_NULL_RETURN(elementRegister, nullptr);
+            boxNode = CommonViewModelNG::CreateFrameNode(elementRegister->MakeUniqueId());
             GeneratedApiImpl::SetContentNode(node, boxNode);
         }
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {

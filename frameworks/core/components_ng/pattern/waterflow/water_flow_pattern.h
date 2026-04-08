@@ -16,20 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace::NG {
+class WaterFlowAccessibilityProperty;
+class WaterFlowEventHub;
+class WaterFlowLayoutProperty;
+class WaterFlowSections;
+
 class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern);
 
 public:
+    ~WaterFlowPattern() override;
+
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
     bool IsAtTop() const override;
@@ -54,20 +58,11 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<WaterFlowLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<WaterFlowEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<WaterFlowAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     RefPtr<ScrollableController> GetPositionController() const
     {
@@ -237,6 +232,10 @@ public:
     {
         return layoutInfo_->contentStartOffset_;
     }
+    float GetContentEndOffset() const override
+    {
+        return layoutInfo_->contentEndOffset_;
+    }
 
     int32_t GetFirstIndex() const override;
 private:
@@ -265,6 +264,7 @@ private:
     void ReportOnItemWaterFlowEvent(const std::string& event);
     void ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void PostAsyncLoadTask();
 
     /**
      * @param step FocusStep

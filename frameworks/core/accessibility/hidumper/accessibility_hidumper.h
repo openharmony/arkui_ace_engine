@@ -43,6 +43,7 @@ enum class DumpMode {
     SPECIFIC_SEARCH_TEST,
     SET_CHECKLIST_TEST,
     GET_CHECKLIST_TEST,
+    WEB_ACC_DUMP,
 };
 
 struct DumpInfoArgument {
@@ -56,6 +57,8 @@ struct DumpInfoArgument {
     int64_t nodeId = -1;
     int32_t action = 0;
     int32_t eventId = -1;
+    int64_t webAccId = -1;
+    std::string webAccFun = "tree";
 };
 
 class AccessibilityHidumper {

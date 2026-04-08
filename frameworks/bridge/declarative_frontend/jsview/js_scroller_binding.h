@@ -39,6 +39,7 @@ public:
     void GetItemRect(const JSCallbackInfo& args);
     void GetItemIndex(const JSCallbackInfo& args);
     void ContentSize(const JSCallbackInfo& args);
+    void GetFrameNode(const JSCallbackInfo& args);
 
 private:
     bool ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);

@@ -296,10 +296,10 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
 
     private translateRectToVp(rect: window.Rect): window.RectInVP {
         return {
-            left: this.context?.px2vp(rect.left) ?? rect.left as double,
-            top: this.context?.px2vp(rect.top) ?? rect.top as double,
-            width: this.context?.px2vp(rect.width) ?? rect.width as double,
-            height: this.context?.px2vp(rect.height) ?? rect.height as double
+            left: this.context?.px2vp(rect.left) ?? rect.left.toDouble(),
+            top: this.context?.px2vp(rect.top) ?? rect.top.toDouble(),
+            width: this.context?.px2vp(rect.width) ?? rect.width.toDouble(),
+            height: this.context?.px2vp(rect.height) ?? rect.height.toDouble()
         } as window.RectInVP;
     }
 
@@ -617,9 +617,9 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
 
     public registerEnv(instanceId?: int32): void {
         const tempInstanceId: int32 = instanceId? instanceId : UIContextUtil.getCurrentInstanceId();
-        const getEnvProperty: Object | undefined = UIContextUtil.getEnvContextById(tempInstanceId, this.envValue);
-        if (getEnvProperty !== undefined) {
-            this.finalResult = getEnvProperty as IEnvironmentValue<T>;
+        const envPropertyFromUIContext: Object | undefined = UIContextUtil.getEnvContextById(tempInstanceId, this.envValue);
+        if (envPropertyFromUIContext !== undefined) {
+            this.finalResult = envPropertyFromUIContext as IEnvironmentValue<T>;
             this.finalResult!.reConstructor(tempInstanceId);
         } else {
             if (this.latestInstanceId === undefined) {
@@ -640,7 +640,6 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
 
     public unRegisterEnv(instanceId?: int32): void {
         this.finalResult!.offWatchFunc(instanceId);
-        this.finalResult = undefined;
     }
 
     public resetOnReuse(newValue: T): void {

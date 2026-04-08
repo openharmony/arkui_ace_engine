@@ -1146,6 +1146,17 @@ void WebModelStatic::SetOnSslSelectCertRequest(
     webEventHub->SetOnSslSelectCertRequestEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnVerifyPinRequest(
+    FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](
+                          const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnVerifyPinRequestEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetWindowNewEvent(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback)
 {
@@ -1378,6 +1389,17 @@ void WebModelStatic::SetRotateRenderEffect(FrameNode* frameNode, const std::opti
     } else {
         webPatternStatic->ResetRotateRenderEffect();
     }
+}
+
+void WebModelStatic::SetEnableScrollDirectionalLock(
+    FrameNode* frameNode, const std::optional<bool>& isEnable, const std::optional<ScrollDirectionalLockType>& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->EnableScrollDirectionalLock(
+        isEnable.value_or(false),
+        static_cast<ScrollDirectionalLockType>(type.value_or(ScrollDirectionalLockType::NESTED_SCROLL)));
 }
 
 void WebModelStatic::SetNativeEmbedGestureEventId(
@@ -1664,5 +1686,33 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
+}
+
+void WebModelStatic::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDrag(isEnabled);
+}
+
+void WebModelStatic::SetAISessionOptions(
+    FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
+    const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+}
+
+void WebModelStatic::SetScrollbarLayoutPolicy(
+    FrameNode* frameNode, ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateScrollbarLayoutPolicy(policy);
 }
 } // namespace OHOS::Ace::NG

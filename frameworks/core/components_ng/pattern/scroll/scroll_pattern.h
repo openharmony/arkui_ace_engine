@@ -138,10 +138,7 @@ public:
         return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
-    RefPtr<ScrollableController> GetScrollPositionController() const
-    {
-        return positionController_;
-    }
+    RefPtr<ScrollableController> GetScrollPositionController() const;
 
     void SetDirection(FlexDirection direction)
     {
@@ -404,6 +401,10 @@ public:
     float GetContentStartOffset() const override
     {
         return contentStartOffset_;
+    }
+    float GetContentEndOffset() const override
+    {
+        return contentEndOffset_;
     }
 
     bool FreeOverScrollWithDelta(Axis axis, double delta) override;

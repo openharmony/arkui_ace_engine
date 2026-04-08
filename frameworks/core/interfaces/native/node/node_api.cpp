@@ -18,6 +18,9 @@
 #include <securec.h>
 #include <vector>
 
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -517,6 +520,9 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnDetectResultUpdate,
     NodeModifier::SetOnTextSpanLongPress,
+    NodeModifier::SetOnTextTextSelectionChange,
+    NodeModifier::SetOnTextCopy,
+    NodeModifier::SetOnTextWillCopy,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -535,6 +541,9 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
     NodeModifier::SetOnTextInputWillChange,
+    NodeModifier::SetOnTextInputCopy,
+    NodeModifier::SetOnTextInputWillCopy,
+    NodeModifier::SetOnTextInputWillCut,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -553,6 +562,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
     NodeModifier::SetOnTextAreaWillChange,
+    NodeModifier::SetOnTextAreaCopy,
+    NodeModifier::SetOnTextAreaWillCopy,
+    NodeModifier::SetOnTextAreaCut,
+    NodeModifier::SetOnTextAreaWillCut,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -759,6 +772,9 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnDetectResultUpdate,
     NodeModifier::ResetOnTextSpanLongPress,
+    NodeModifier::ResetOnTextTextSelectionChange,
+    NodeModifier::ResetOnTextCopy,
+    NodeModifier::ResetOnTextWillCopy,
 };
 
 const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -777,6 +793,9 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
     NodeModifier::ResetOnTextInputWillChange,
+    NodeModifier::ResetOnTextInputCopy,
+    NodeModifier::ResetOnTextInputWillCopy,
+    NodeModifier::ResetOnTextInputWillCut,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -795,6 +814,10 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
     NodeModifier::ResetOnTextAreaWillChange,
+    NodeModifier::ResetOnTextAreaCopy,
+    NodeModifier::ResetOnTextAreaWillCopy,
+    NodeModifier::ResetOnTextAreaCut,
+    NodeModifier::ResetOnTextAreaWillCut,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2061,6 +2084,36 @@ ArkUI_Int32 CheckUIContextInvalid(ArkUI_Int32 instanceId)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 EnableEventPassthrough(ArkUI_Int32 instanceId, ArkUI_Bool enabled, ArkUI_Int32 type)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        TAG_LOGW(
+            AceLogTag::ACE_INPUTKEYFLOW, "Cannot find pipeline context by contextHandle ID %{public}d", instanceId);
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto container = Container::GetContainer(instanceId);
+    std::string bundleName = container ? container->GetBundleName() : "";
+    bool enabledValue = (enabled != 0);
+
+    switch (type) {
+        case 0:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabledValue, bundleName);
+            break;
+        case 1:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabledValue, bundleName);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "EnableEventPassthrough: unknown eventType=%{public}d", type);
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2096,6 +2149,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
         .checkUIContextInvalid = CheckUIContextInvalid,
+        .enableEventPassthrough = EnableEventPassthrough,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2795,6 +2849,15 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
     return result.first;
 }
 
+ArkUI_Int32 GetSnapshotSizeLimitation(ArkUI_Int32* maxWidth, ArkUI_Int32* maxHeight)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    auto limitation = delegate->GetSizeLimitation();
+    *maxWidth = limitation.maxWidth;
+    *maxHeight = limitation.maxHeight;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2804,7 +2867,8 @@ const ArkUISnapshotAPI* GetComponentSnapshotAPI()
         .snapshotOptionsSetScale = SnapshotOptionsSetScale,
         .snapshotOptionsSetColorMode = SnapshotOptionsSetColorMode,
         .snapshotOptionsSetDynamicRangeMode = SnapshotOptionsSetDynamicRangeMode,
-        .getSyncSnapshot = GetNodeSnapshot
+        .getSyncSnapshot = GetNodeSnapshot,
+        .getSizeLimitation = GetSnapshotSizeLimitation
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
@@ -3090,25 +3154,5 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
             return nullptr;
         }
     }
-}
-
-__attribute__((constructor)) static void provideEntryPoint(void)
-{
-#ifdef WINDOWS_PLATFORM
-    // mingw has no setenv :(.
-    static char entryPointString[64];
-    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
-        "__LIBACE_ENTRY_POINT=%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
-        return;
-    }
-    putenv(entryPointString);
-#else
-    char entryPointString[64];
-    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
-        "%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
-        return;
-    }
-    setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
-#endif
 }
 }

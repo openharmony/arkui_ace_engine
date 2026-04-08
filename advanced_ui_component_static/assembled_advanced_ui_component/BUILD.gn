@@ -17,11 +17,11 @@ import("//build/ohos.gni")
 
 generate_static_abc("assembled_advanced_ets_abc") {
   base_url = "./"
-  files = [ 
+  files = [
     "./@ohos.arkui.advanced.Dialog.ets",
     "./@ohos.arkui.advanced.DialogV2.ets",
   ]
-  if (!ace_engine_feature_wearable) { 
+  if (!ace_engine_feature_wearable) {
     files += [
       "./@ohos.arkui.advanced.ComposeListItem.ets",
       "./@ohos.arkui.advanced.ComposeTitleBar.ets",
@@ -40,6 +40,18 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.ToolBar.ets",
       "./@ohos.arkui.advanced.ToolBarV2.ets",
       "./@ohos.arkui.advanced.TreeView.ets",
+
+      "./@ohos.arkui.advanced.ArcButton.ets",
+      "./@ohos.arkui.advanced.ArcSlider.ets",
+      "./@ohos.arkui.advanced.Chip.ets",
+      "./@ohos.arkui.advanced.ChipGroup.ets",
+      "./@ohos.arkui.advanced.Counter.ets",
+      "./@ohos.arkui.advanced.FoldSplitContainer.ets",
+      "./@ohos.arkui.advanced.MultiNavigation.ets",
+      "./@ohos.arkui.advanced.Popup.ets",
+      "./@ohos.arkui.advanced.SegmentButton.ets",
+      "./@ohos.arkui.advanced.SegmentButtonV2.ets",
+      "./@ohos.arkui.advanced.SelectionMenu.ets"
     ]
   }
   ui_enable = "True"

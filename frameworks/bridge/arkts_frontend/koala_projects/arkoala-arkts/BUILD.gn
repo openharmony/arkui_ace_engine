@@ -152,6 +152,8 @@ action("arkoala_annotate") {
     rebase_path("."),
     rebase_path("annotate-config.json"),
   ]
+
+  deps = [ "../../arkoala_generator:idlize_gen" ]
 }
 
 action("arkoala_process") {

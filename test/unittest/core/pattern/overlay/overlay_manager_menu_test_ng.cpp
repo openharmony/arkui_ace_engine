@@ -20,11 +20,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_frontend.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -425,6 +425,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(menuManager->menuMap_.empty());
+    menuManager->HideMenu(menuNode, overlayManager, targetId, true, HideMenuType::WRAPPER_LOSE_FOCUS);
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));

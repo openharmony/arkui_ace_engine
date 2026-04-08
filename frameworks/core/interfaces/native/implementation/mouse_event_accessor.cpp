@@ -15,8 +15,6 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
@@ -74,6 +72,15 @@ void StopPropagationImpl(Ark_MouseEvent peer)
     MouseInfo* info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(true);
+}
+Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    std::list<MouseHistoricalPoint> history;
+    history = info->GetHistory();
+    return Converter::ArkValue<Opt_Array_MouseHistoricalPoint>(history, Converter::FC);
 }
 Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
@@ -366,6 +373,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
         MouseEventAccessor::StopPropagationImpl,
+        MouseEventAccessor::GetHistoricalPointsImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
         MouseEventAccessor::GetActionImpl,

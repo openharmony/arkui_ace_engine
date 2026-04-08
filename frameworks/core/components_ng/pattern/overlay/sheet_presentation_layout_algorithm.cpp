@@ -14,10 +14,13 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "ui/base/referenced.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -191,6 +194,21 @@ void SheetPresentationLayoutAlgorithm::MeasureCloseIcon(LayoutWrapper* layoutWra
     sheetCloseIcon->Measure(constraint);
 }
 
+void SheetPresentationLayoutAlgorithm::CalcMaxHeightMinusDoubleStatusBarHeight(
+    LayoutWrapper* layoutWrapper, double& maxHeight, float sheetMaxHeight) const
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
+        if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
+            maxHeight = std::min(static_cast<float>(maxHeight), sheetMaxHeight - sheetTopSafeArea * DOUBLE_SIZE);
+        }
+    }
+}
+
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -246,6 +264,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(sheetTheme);
             auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * sheetTheme->GetSheetHeightPercentMax();
+            CalcMaxHeightMinusDoubleStatusBarHeight(layoutWrapper, maxHeight, sheetMaxHeight);
             maxHeight = SheetInSplitWindow()
                 ? maxHeight : std::max(maxHeight, bigWindowMinHeight.ConvertToPx());
             bool isExistMinHightRestriction =
@@ -702,6 +721,7 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, 0.0f);
     auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * sheetTheme->GetSheetHeightPercentMax();
+    CalcMaxHeightMinusDoubleStatusBarHeight(layoutWrapper, maxHeight, sheetMaxHeight);
     if (sheetPattern->GetWindowButtonRect(floatButtons)) {
         maxHeight = sheetMaxHeight - DOUBLE_SIZE *
             (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());

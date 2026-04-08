@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/text/text_component_v2.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -81,6 +81,7 @@ public:
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override {};
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};

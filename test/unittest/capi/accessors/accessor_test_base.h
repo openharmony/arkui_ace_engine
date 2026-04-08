@@ -22,11 +22,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using testing::NiceMock;
 
@@ -39,6 +39,33 @@ inline void PrintTo(const CalcDimension& dim, std::ostream* os)
 {
     *os << dim.ToString();
 }
+namespace NG {
+inline void PrintTo(const CalcLength& dim, std::ostream* os)
+{
+    *os << dim.ToString();
+}
+inline void PrintTo(const ImageSpanSize& size, std::ostream* os)
+{
+    *os << "[.width=" << ::testing::PrintToString(size.width);
+    *os << ", .height=" << ::testing::PrintToString(size.height) << "]";
+}
+inline void PrintTo(const BorderRadiusProperty& prop, std::ostream* os)
+{
+    *os << "[.topLeft=" << ::testing::PrintToString(prop.radiusTopLeft);
+    *os << ", .topRight=" << ::testing::PrintToString(prop.radiusTopRight);
+    *os << ", .bottomLeft=" << ::testing::PrintToString(prop.radiusBottomLeft);
+    *os << ", .bottomRight=" << ::testing::PrintToString(prop.radiusBottomRight) << "]";
+}
+inline void PrintTo(const MarginProperty& prop, std::ostream* os)
+{
+    *os << "[.left=" << ::testing::PrintToString(prop.left);
+    *os << ", .right=" << ::testing::PrintToString(prop.right);
+    *os << ", .top=" << ::testing::PrintToString(prop.top);
+    *os << ", .bottom=" << ::testing::PrintToString(prop.bottom);
+    *os << ", .start=" << ::testing::PrintToString(prop.start);
+    *os << ", .end=" << ::testing::PrintToString(prop.end) << "]";
+}
+} // namespace NG
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -87,7 +114,7 @@ public:
         themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
@@ -231,27 +258,5 @@ public:
 template<typename AccessorType, auto GetAccessorFunc>
 class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
 };
-
-MATCHER_P(CompareOptMarginsPaddings, expected, "Compare margins and paddings")
-{
-    auto optArg = Converter::OptConvert<MarginProperty>(arg);
-    auto optExpected = Converter::OptConvert<MarginProperty>(expected);
-    return optArg == optExpected;
-}
-
-MATCHER_P(CompareOptBorderRadius, expected, "Compare border radius")
-{
-    auto optArg = Converter::OptConvert<BorderRadiusProperty>(arg);
-    auto optExpected = Converter::OptConvert<BorderRadiusProperty>(expected);
-    return optArg == optExpected;
-}
-
-MATCHER_P(CompareArkSize, expected, "Compare size values")
-{
-    auto optArg = Converter::OptConvert<ImageSpanSize>(arg);
-    auto optExpected = Converter::OptConvert<ImageSpanSize>(expected);
-    return optArg == optExpected;
-}
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H

@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/device_config.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/base/frame_node.h"

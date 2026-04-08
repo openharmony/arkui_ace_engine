@@ -18,7 +18,7 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "core/components/common/properties/ui_material.h"
 
 using namespace testing;

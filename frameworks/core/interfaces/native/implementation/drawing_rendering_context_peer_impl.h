@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline/pipeline_base.h"
 #include "base/geometry/ng/size_t.h"
 #include "arkoala_api_generated.h"
 

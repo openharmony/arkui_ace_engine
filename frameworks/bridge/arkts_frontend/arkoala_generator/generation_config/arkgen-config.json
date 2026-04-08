@@ -1108,6 +1108,12 @@
                 "hookName": "hookJavaScriptProxy",
                 "replaceImplementation": false
             }
+        },
+        "ClientAuthenticationHandler": {
+            "confirm": {
+                "hookName": "hookconfirm",
+                "replaceImplementation": false
+            }
         }
     },
     "materialized": {
@@ -1181,7 +1187,7 @@
         "arkui.component.idlize.AnimationExtender.KeyframeAnimationImpl",
         "arkui.component.idlize.AnimationExtender.OpenImplicitAnimationForAnimation",
         "arkui.component.idlize.AnimationExtender.CloseImplicitAnimationForAnimation",
-        "idlize.internal.interop.Node.ApplyModifierFinish",
+        "idlize.internal.interop.NativeModuleNode.ApplyModifierFinish",
         "arkui.component.idlize.RouterExtender.back",
         "arkui.component.idlize.RouterExtender.clear",
         "arkui.component.idlize.RouterExtender.push",
@@ -1190,6 +1196,7 @@
         "arkui.component.navigation.NavigationAttribute.title",
         "arkui.component.navigation.NavigationAttribute.menus",
         "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
+        "arkui.component.navigation.NavigationAttribute.setNavigationOptions",
         "arkui.component.navigation.NavPathStack.pushPath",
         "arkui.component.navigation.NavPathStack.pushDestination",
         "arkui.component.navigation.NavPathStack.pushPathByName",

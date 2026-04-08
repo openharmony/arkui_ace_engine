@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,15 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -40,6 +47,15 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
+
+GridPattern::GridPattern() = default;
+
+GridPattern::~GridPattern() = default;
+
+RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<GridLayoutProperty>();
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -113,6 +129,16 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     return property;
 }
 
+RefPtr<AccessibilityProperty> GridPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<GridAccessibilityProperty>();
+}
+
+RefPtr<EventHub> GridPattern::CreateEventHub()
+{
+    return MakeRefPtr<GridEventHub>();
+}
+
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
@@ -157,7 +183,10 @@ void GridPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
-
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
@@ -179,6 +208,15 @@ void GridPattern::OnModifyDone()
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool GridPattern::GetIsAllowMouse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, isAllowMouse_);
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_RETURN(gridEventHub, isAllowMouse_);
+    return gridEventHub->GetOnItemDragStart() ? false : isAllowMouse_;
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -594,9 +632,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ChangeCanStayOverScroll();
     info_.currentDelta_ = 0;
 
-    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+    prevMeasureBreak_ = gridLayoutAlgorithm->MeasureInNextFrame();
+    if (prevMeasureBreak_) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
-        MarkDirtyNodeSelf();
+        PostAsyncLoadTask();
     } else {
         isInitialized_ = true;
     }
@@ -882,7 +921,7 @@ void GridPattern::ScrollTo(float position)
     if (!isConfigScrollable_) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GRID, "ScrollTo:%{public}f", position);
+
     StopAnimate();
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
@@ -1936,5 +1975,20 @@ std::string GridPattern::GetLayoutMode() const
 int32_t GridPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void GridPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->prevMeasureBreak_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

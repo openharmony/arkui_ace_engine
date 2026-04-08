@@ -50,7 +50,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     public _enableTransparentLayer_0_0value?: boolean | undefined
     public _hdrBrightness_0_0value?: double | undefined
     public _hdrBrightness_1_0value?: double | undefined
- 	public _hdrBrightness_1_1value?: HdrType | undefined
+    public _hdrBrightness_1_1value?: HdrType | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -161,6 +161,23 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setHdrBrightness1Attribute((this._hdrBrightness_1_0value as double | undefined), (this._hdrBrightness_1_1value as HdrType | undefined));
+                    flagArray[6] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[6] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[6] = 0;
+                    peer.setHdrBrightness1Attribute((undefined as double | undefined), (undefined as HdrType | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: XComponentModifier): void {
         super.mergeModifier(modifier)
@@ -241,6 +258,18 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
+                    this.hdrBrightness((modifier._hdrBrightness_1_0value as double | undefined), (modifier._hdrBrightness_1_1value as HdrType | undefined));
+                    break;
+                }
+                default: {
+                    this.hdrBrightness((undefined as double | undefined), (undefined as HdrType | undefined));
+                }
+            }
+        }
     }
     onLoad(value: VoidCallback | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -303,14 +332,12 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         return this
     }
     hdrBrightness(brightness: double | undefined, type?: HdrType): this {
-        if (((this._flagArray[6]) == (0)) || ((this._hdrBrightness_1_0value) !== (brightness)) || (true))
-        {
+        if (((this._flagArray[6]) == (0)) || ((this._hdrBrightness_1_0value) !== (brightness)) || (true)) {
             this._flagArray[6] = 1
             this._hdrBrightness_1_0value = brightness
             this._hdrBrightness_1_1value = type
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[6] = 3
         }
         return this

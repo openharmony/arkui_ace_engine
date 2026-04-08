@@ -78,7 +78,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextArea>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
+    JSClass<JSTextArea>::StaticMethod("onWillCopy", &JSTextField::SetOnWillCopy);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
+    JSClass<JSTextArea>::StaticMethod("onWillCut", &JSTextField::SetOnWillCut);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextArea>::StaticMethod("onClick", &JSTextField::SetOnClick);
@@ -108,6 +110,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
     JSClass<JSTextArea>::StaticMethod("halfLeading", &JSTextField::SetHalfLeading);
+    JSClass<JSTextArea>::StaticMethod("horizontalScrolling", &JSTextArea::SetHorizontalScrolling);
     JSClass<JSTextArea>::StaticMethod("lineSpacing", &JSTextField::SetLineSpacing);
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::StaticMethod("contentType", &JSTextField::SetContentType);
@@ -132,6 +135,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextArea>::StaticMethod("scrollBarColor", &JSTextField::SetScrollBarColor);
     JSClass<JSTextArea>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
+    JSClass<JSTextArea>::StaticMethod("orphanCharOptimization", &JSTextField::SetOrphanCharOptimization);
     JSClass<JSTextArea>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
     JSClass<JSTextArea>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
     JSClass<JSTextArea>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
@@ -179,6 +183,16 @@ void JSTextArea::SetMinLines(const JSCallbackInfo& info)
         }
     }
     TextFieldModel::GetInstance()->SetMinLines(minLines);
+}
+
+void JSTextArea::SetHorizontalScrolling(const JSCallbackInfo& info)
+{
+    bool isHorizontalScrolling = false;
+    if (info.Length() >= 1) {
+        auto jsValue = info[0];
+        isHorizontalScrolling = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    }
+    TextFieldModel::GetInstance()->SetHorizontalScrolling(isHorizontalScrolling);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

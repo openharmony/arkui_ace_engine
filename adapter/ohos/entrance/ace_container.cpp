@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
 
@@ -33,6 +34,7 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
+#include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/high_contrast_observer.h"
@@ -71,10 +73,13 @@
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/crown_event.h"
 #include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -318,12 +323,16 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
 
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
         resourceAdapter->Init(resourceInfo);
     }
 
@@ -1306,12 +1315,14 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    auto mousePassMode = AceApplicationInfo::GetInstance().GetMouseEventPassMode();
     int32_t debugMode = SystemProperties::GetTouchAccelarate();
     if (debugMode != static_cast<int32_t>(touchPassMode)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
         touchPassMode = static_cast<TouchPassMode>(debugMode);
         AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
     }
+    pipelineContext_->SetMousePassThrough(mousePassMode == MousePassMode::PASS_THROUGH);
     pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
@@ -3035,9 +3046,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
             jsEngine->JsSetAceDebugMode();
-            if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
-                jsEngine->JsEnableSwitchInstance();
-            }
         }
     }
 
@@ -3071,7 +3079,15 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                                      useStageModel = useStageModel_]() {
         return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
     };
-    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
+    auto dataShareObserverHelperImpl = [runtimeContext = runtimeContext_,
+                                          container = WeakClaim(this),
+                                          useStageModel = useStageModel_]() {
+        return AceType::MakeRefPtr<DataShareObserverHelper>(runtimeContext.lock(),
+            container.Upgrade(), useStageModel);
+    };
+
+    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(
+        dataAbilityHelperImpl, dataShareObserverHelperImpl);
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -5192,6 +5208,29 @@ void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+}
+
+void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "RegisterTerminateUIExtension success");
+    uiExtensionContext->TerminateSelfWithAnimation(std::move(callback));
+}
+
+void AceContainer::TerminateUIExtensionInner()
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->TerminateSelfInner();
 }
 
 void AceContainer::LoadCompleteManagerStopCollect()

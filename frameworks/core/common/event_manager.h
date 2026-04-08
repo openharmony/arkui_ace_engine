@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_EVENT_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_EVENT_MANAGER_H
 
+#include <functional>
+#include <list>
 #include <unordered_map>
+#include <vector>
 
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/event_dump.h"
@@ -53,24 +57,10 @@ class RenderNode;
 class Element;
 class TextOverlayManager;
 class CoastingAxisEventGenerator;
-using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
-using OutOfRectGetRectCallback = std::function<void(std::vector<Rect>&)>;
-using OutOfRectTouchCallback = std::function<void(void)>;
-using OutOfRectMouseCallback = std::function<void(void)>;
 using TouchDelegates = std::vector<RefPtr<NG::TouchDelegate>>;
 using TouchDelegatesIter = TouchDelegates::const_iterator;
 
-struct RectCallback final {
-    RectCallback(OutOfRectGetRectCallback rectGetCallback, OutOfRectTouchCallback touchCallback,
-        OutOfRectMouseCallback mouseCallback)
-        : rectGetCallback(std::move(rectGetCallback)), touchCallback(std::move(touchCallback)),
-          mouseCallback(std::move(mouseCallback))
-    {}
-    ~RectCallback() = default;
-    OutOfRectGetRectCallback rectGetCallback;
-    OutOfRectTouchCallback touchCallback;
-    OutOfRectMouseCallback mouseCallback;
-};
+struct RectCallbackListImpl;
 
 struct TouchDelegateHdl {
     TouchDelegateHdl(int32_t touchId, TouchDelegatesIter iter) : touchId(touchId), iter(iter) {}
@@ -110,7 +100,7 @@ class EventManager : virtual public NG::KeyEventManager {
 
 public:
     EventManager();
-    ~EventManager() override = default;
+    ~EventManager() override;
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -199,7 +189,10 @@ public:
     bool HandleFocusByTabIndex(
         const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
-    void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
+    void HandleOutOfRectCallbacks(const Point& point);
+    void AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
+        std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback);
+    void ClearRectCallbacks();
 
     RefPtr<GestureReferee> GetGestureReferee()
     {
@@ -289,6 +282,8 @@ public:
     void DumpTouchInfo(const std::vector<std::string>& params, bool hasJson = false);
 
     void AddDumpTouchInfo(const TouchEvent& event);
+
+    bool CheckTouchInfoDump();
 
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
@@ -477,6 +472,8 @@ private:
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId, int32_t fingerId);
     void CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needAppend);
+    void CleanRefereeBeforeTouchTestForPost(
+        TouchEvent touchPoint, const RefPtr<NG::GestureReferee>& currentReferee);
     void LogTouchTestResultInfo(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
@@ -539,8 +536,8 @@ private:
      * handling does not belong to any controller in general
      */
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> dragTouchEventListener_;
-    MouseHoverTestList mouseHoverTestResults_;
-    MouseHoverTestList mouseHoverTestResultsPre_;
+    std::list<WeakPtr<RenderNode>> mouseHoverTestResults_;
+    std::list<WeakPtr<RenderNode>> mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
@@ -564,6 +561,7 @@ private:
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
     std::unordered_map<int32_t, int32_t> downFingerIds_;
+    std::unordered_map<int32_t, bool> isNewRefereeMap_;
     std::unordered_map<int32_t, int32_t> downTargetDisplayIds_;
     int32_t downEventErrorCnt_ = 0;
     int32_t upEventErrorCnt_ = 0;
@@ -589,6 +587,7 @@ private:
     // Only used in TouchTest
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
+    std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
 };
 
 } // namespace OHOS::Ace

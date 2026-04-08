@@ -863,6 +863,20 @@ class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorCon
   }
 }
 
+class TextOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class TextOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -985,6 +999,23 @@ class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeSt
     } else {
       getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
     }
+  }
+}
+
+class TextOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1311,6 +1342,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       TextLineBreakStrategyModifier, value);
     return this;
   }
+  onWillCopy(callback: Callback<string, boolean>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback: (value: string) => void): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextOnCopyModifier.identity,
       TextOnCopyModifier, callback);
@@ -1380,6 +1416,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
     modifierWithKey(
       this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
     return this;
   }
   enableAutoSpacing(value: boolean): this {

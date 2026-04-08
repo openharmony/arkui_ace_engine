@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 
+#include <functional>
 #include <list>
 #include <vector>
 #include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
@@ -46,6 +48,7 @@ struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 class CalcDimensionRect;
+class DragEvent;
 }
 
 namespace OHOS::Ace::NG {
@@ -81,10 +84,7 @@ struct BindMenuStatus {
     bool isShow = false;
     MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
-    bool IsNotNeedShowPreview() const
-    {
-        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
-    }
+    bool IsNotNeedShowPreview() const;
 };
 
 struct PreparedInfoForDrag {
@@ -136,6 +136,8 @@ struct PreparedAsyncCtxForAnimate {
 struct DragframeNodeInfo {
     WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
+    std::vector<WeakPtr<FrameNode>> autoHideFrameNodes;
+    bool autoHideExecuted = false;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -245,14 +247,8 @@ public:
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
-    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
-    {
-        longPressEventActuator_ = longPressEventActuator;
-    }
-    RefPtr<LongPressEventActuator> GetLongPressEventActuator()
-    {
-        return longPressEventActuator_;
-    }
+    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator);
+    RefPtr<LongPressEventActuator> GetLongPressEventActuator();
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(
@@ -376,6 +372,11 @@ public:
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    std::vector<RefPtr<FrameNode>> ResolveAutoHideTargetsByUniqueId(
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent) const;
+    void HideAutoHideTargets(const std::vector<RefPtr<FrameNode>>& targets);
+    void ResetAutoHideDragInfo();
+    bool UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode) const;
     int32_t GetSelectItemSize();
     bool IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const;
     RefPtr<PixelMap> GetDragPreviewPixelMap();
@@ -412,10 +413,7 @@ public:
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
     bool IsGestureEmpty() const;
-    bool IsGestureHierarchyEmpty() const
-    {
-        return gestureHierarchy_.empty();
-    }
+    bool IsGestureHierarchyEmpty() const;
 
     bool IsPanEventEmpty() const;
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/dump_log.h"
 
@@ -140,6 +141,8 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
             ? propScrollBarProperty_->propScrollBarMargin.value_or(ScrollBarMargin()).ToString().c_str()
             : ScrollBarMargin().ToString().c_str(),
         filter);
+    json->PutExtAttr("autoAdjustScrollBarMargin",
+        propScrollBarProperty_->GetAutoAdjustScrollBarMargin().value_or(false) ? "true" : "false", filter);
     bool defaultFadingEdge = GetDefaultFadingEdge().value_or(false);
     json->PutExtAttr("fadingEdge", GetFadingEdge().value_or(defaultFadingEdge), filter);
     json->PutExtAttr("defaultFadingEdge", defaultFadingEdge, filter);

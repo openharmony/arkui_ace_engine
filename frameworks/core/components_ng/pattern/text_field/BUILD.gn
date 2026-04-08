@@ -37,10 +37,12 @@ build_component_ng("text_field_pattern_ng") {
     "text_input_ai_checker.cpp",
     "text_input_response_area.cpp",
     "text_select_controller.cpp",
+    "text_field_free_scroller.cpp",
+    "text_field_gesture_event_hub.cpp",
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
-  standard_input_deps = [ "imf:inputmethod_client" ]
+  standard_input_deps = [ "imf:inputmethod_client", "ability_base:want" ]
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     external_deps = [
       "ability_runtime:abilitykit_native",

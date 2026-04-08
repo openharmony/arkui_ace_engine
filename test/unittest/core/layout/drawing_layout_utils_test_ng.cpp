@@ -19,7 +19,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
@@ -57,7 +57,7 @@ public:
  * @tc.desc: Test MeasureLayoutPolicySize
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Level1)
+HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -123,7 +123,7 @@ HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest001, TestSize.Leve
  * @tc.desc: Test MeasureLayoutPolicySize
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest002, TestSize.Level1)
+HWTEST_F(DrawingLayoutUtilsTestNg, MeasureLayoutPolicySizeTest002, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

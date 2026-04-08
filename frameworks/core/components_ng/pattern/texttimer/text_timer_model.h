@@ -21,7 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
@@ -40,6 +40,7 @@ public:
     virtual void SetFormat(const std::string& format) = 0;
     virtual void SetIsCountDown(bool isCountDown) = 0;
     virtual void SetInputCount(double count) = 0;
+    virtual void SetStartTime(int32_t value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
     virtual void SetTextColorByUser(bool isSetByUser) = 0;

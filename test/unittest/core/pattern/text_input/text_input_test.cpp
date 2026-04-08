@@ -15,7 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,7 +30,7 @@ public:
  * @tc.desc: Test UpdateCaretByTouchMove
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize textInput and focusHub.

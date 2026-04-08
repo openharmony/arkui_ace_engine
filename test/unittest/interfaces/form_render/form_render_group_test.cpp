@@ -21,7 +21,7 @@
 #define private public
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #undef private
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "configuration.h"
 
 using namespace testing;

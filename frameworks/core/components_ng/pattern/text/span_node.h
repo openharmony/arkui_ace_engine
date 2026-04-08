@@ -315,6 +315,7 @@ public:
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
         TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
+    void UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextStyle& textStyle);
     void UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
@@ -334,7 +335,9 @@ public:
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     void GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
+    void GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
     void CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const;
+    void CopyBaseSpanItem(RefPtr<SpanItem> spanItem) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<std::u16string> urlAddress;
     std::function<void()> urlOnRelease;
@@ -517,7 +520,9 @@ public:
     // 用于属性字符串
     struct SpanResourceUpdater {
         RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
+        std::function<void(
+            const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&, const RefPtr<FrameNode>& frameNode)>
+            updateFunc;
     };
     void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
     void RemoveResourceObj(const std::string& key);
@@ -822,6 +827,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);

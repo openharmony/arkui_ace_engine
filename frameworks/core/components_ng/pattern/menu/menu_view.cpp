@@ -1123,7 +1123,10 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, true, menuNode);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
+    } else {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, false, menuNode);
     }
 }
 
@@ -1390,25 +1393,12 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     menuWrapperPattern->SetMenuParam(menuParam);
-    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    if (menuProperty) {
-        menuProperty->UpdateTitle(menuParam.title);
-        menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
-            menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
-        }
-        menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        if (menuParam.anchorPosition.has_value()) {
-            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
-            if (menuParam.previewMode != MenuPreviewMode::NONE) {
-                menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
-            }
-        }
-    }
+    UpdateMenuLayoutProperty(menuNode, menuParam);
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     SetMenuSystemMaterial(menuNode, menuParam);
     auto scroll = CreateMenuScroll(column);
@@ -1603,12 +1593,40 @@ void MenuView::UpdateMenuParam(
     UpdateMenuMaskType(wrapperNode);
 }
 
+void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    if (menuParam.scrollBar.has_value()) {
+        menuPattern->SetScrollBar(menuParam.scrollBar);
+    }
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+
+    menuProperty->UpdateTitle(menuParam.title);
+    menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+    if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
+        menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+    }
+    menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+    if (menuParam.maxHeight.has_value()) {
+        menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+    }
+    if (menuParam.anchorPosition.has_value()) {
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+        if (menuParam.previewMode != MenuPreviewMode::NONE) {
+            menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+        }
+    }
+}
+
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
@@ -1616,6 +1634,13 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     SetMenuSystemMaterial(menuNode, menuParam);
     menuNode->MarkModifyDone();
 
+    if (menuParam.scrollBar.has_value()) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->SetScrollBar(menuParam.scrollBar);
+            menuPattern->ApplyScrollBarToScrollNode();
+        }
+    }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1624,6 +1649,9 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        if (menuParam.maxHeight.has_value()) {
+            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+        }
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
             if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {

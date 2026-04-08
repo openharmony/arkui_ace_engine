@@ -153,7 +153,7 @@ bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstAr
 
 void ParseSearchValueObject(EcmaVM* vm, const Local<JSValueRef>& changeEventVal)
 {
-    if (changeEventVal->IsNull() || changeEventVal->IsUndefined()) {
+    if (changeEventVal.IsEmpty() || changeEventVal->IsNull() || changeEventVal->IsUndefined()) {
         return;
     }
     CHECK_NULL_VOID(changeEventVal->IsFunction(vm));
@@ -218,7 +218,8 @@ void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, Ecma
         "setInputFilter", "resetInputFilter", "setSelectedBackgroundColor", "resetSelectedBackgroundColor",
         "setTextIndent", "resetTextIndent", "setSelectDetectorEnable", "resetSelectDetectorEnable", "setMaxLength",
         "resetMaxLength", "setType", "resetType", "setOnEditChange", "resetOnEditChange", "setOnSubmit",
-        "resetOnSubmit", "setOnCopy", "resetOnCopy", "setOnCut", "resetOnCut", "setOnPaste", "resetOnPaste",
+        "resetOnSubmit",  "setOnWillCopy", "resetOnWillCopy", "setOnCopy", "resetOnCopy", "setOnWillCut",
+        "resetOnWillCut", "setOnCut", "resetOnCut", "setOnPaste", "resetOnPaste",
         "setOnChange", "resetOnChange", "setOnTextSelectionChange", "resetOnTextSelectionChange", "setOnContentScroll",
         "resetOnContentScroll", "setShowCounter", "resetShowCounter", "setOnWillChange", "resetOnWillChange",
         "setOnWillInsert", "resetOnWillInsert", "setOnDidInsert", "resetOnDidInsert", "setOnWillDelete",
@@ -304,8 +305,12 @@ void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, Ecma
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnEditChange),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnSubmit),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnSubmit),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnWillCopy),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnWillCopy),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnCopy),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnCopy),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnWillCut),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnWillCut),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnCut),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnCut),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnPaste),
@@ -897,11 +902,13 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Color color;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    bool isThemeColor = false;
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
         ArkTSUtils::ParseJsColorAlphaForMaterial(vm, forthArg, value, colorObject, nodeInfo)) {
         color = value;
     } else {
         color = theme->GetSearchIconColor();
+        isThemeColor = true;
     }
     std::string srcStr;
     RefPtr<ResourceObject> srcObject;
@@ -914,7 +921,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     searchButtonIconObj.colorObj = AceType::RawPtr(colorObject);
     searchButtonIconObj.srcObj = AceType::RawPtr(srcObject);
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(
-        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj);
+        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj, isThemeColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2317,6 +2324,56 @@ ArkUINativeModuleValue SearchBridge::ResetOnSubmit(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SearchBridge::SetOnWillCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    bool isInvalidCallback = callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm);
+    CHECK_EQUAL_RETURN(isJsView && isInvalidCallback, true, panda::JSValueRef::Undefined(vm));
+    auto frameNode =
+        isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (isInvalidCallback) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnWillCopy(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const std::u16string&)> callback = [vm, frameNode, isJsView,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+                panda::StringRef::NewFromUtf16(vm, value.c_str()) };
+        auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+        }
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return true;
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnWillCopy(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnWillCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnWillCopy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SearchBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2360,6 +2417,56 @@ ArkUINativeModuleValue SearchBridge::ResetOnCopy(ArkUIRuntimeCallInfo* runtimeCa
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnCopy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnWillCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    bool isInvalidCallback = callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm);
+    CHECK_EQUAL_RETURN(isJsView && isInvalidCallback, true, panda::JSValueRef::Undefined(vm));
+    auto frameNode =
+        isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (isInvalidCallback) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnWillCut(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const std::u16string&)> callback = [vm, frameNode, isJsView,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+                panda::StringRef::NewFromUtf16(vm, value.c_str()) };
+        auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+        }
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return true;
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnWillCut(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnWillCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnWillCut(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

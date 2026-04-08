@@ -145,6 +145,7 @@ void RenderPickerColumn::OnTouchTestHit(
         });
     }
 
+    CHECK_NULL_VOID(panRecognizer_);
     panRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(panRecognizer_);
 }

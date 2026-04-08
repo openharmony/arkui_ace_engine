@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
+using InteractiveSoundEffectsFunc = int32_t (*)(uint32_t type, uint32_t index, int32_t abscissa, int32_t ordinate);
 
 class ACE_FORCE_EXPORT ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
@@ -128,6 +129,7 @@ private:
     Offset ComputeFocusPoint();
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void PlayClickSoundEffect();
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
@@ -166,6 +168,8 @@ private:
     int32_t currentTouchPointsNum_ = 0;
 
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
+
+    InteractiveSoundEffectsFunc interactiveSoundEffectsFunc_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

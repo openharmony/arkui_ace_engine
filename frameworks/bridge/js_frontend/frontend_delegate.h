@@ -291,6 +291,11 @@ public:
         const NG::SnapshotOptions& options)
     {}
 
+    virtual NG::SnapshotSizeLimitation GetSizeLimitation()
+    {
+        return {};
+    }
+
     virtual void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param)

@@ -23,7 +23,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -638,11 +638,19 @@ HWTEST_F(RepeatVirtualScrollAdvancedTestNg, RepeatVirtualInitAllChildrenDragMana
  */
 HWTEST_F(RepeatVirtualScrollAdvancedTestNg, RepeatVirtualUpdateRenderStateTest029, TestSize.Level1)
 {
+    /**
+     * @tc.desc: Verify that UpdateRenderState correctly updates internal state based on the isActive flag.
+     * This test checks both active and inactive states to ensure proper handling of rendering logic.
+     */
     auto node = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
         NODE_ID_1, COUNT_3, templateCachedCountMap,
         onCreateNode, g_onUpdateNode, g_onGetKeys4Range,
         g_onGetTypes4Range, g_onSetActiveRange);
 
+    /**
+     * @tc.desc: Test UpdateRenderState with isActive = true.
+     * This should trigger any logic related to activating the node's rendering state.
+     */
     ASSERT_NE(node, nullptr);
     node->UpdateRenderState(true);
     node->UpdateRenderState(false);

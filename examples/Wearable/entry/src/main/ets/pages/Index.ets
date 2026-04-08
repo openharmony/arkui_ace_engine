@@ -166,6 +166,30 @@ struct Index {
               console.log('router ArcSliderExample004');
               router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample004' })
             })
+
+          Button('ArcSliderExample005 - 综合测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample005');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample005' })
+            })
+
+          Button('ArcSliderExample006 - 触摸事件')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample006');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample006' })
+            })
+
+          Button('ArcSliderExample007 - onChange事件')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample007');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample007' })
+            })
         }
         .width('100%')
         .padding({ left: 20, right: 20 })

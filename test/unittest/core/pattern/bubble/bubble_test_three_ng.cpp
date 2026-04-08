@@ -22,11 +22,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_path.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -49,8 +49,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -233,7 +233,7 @@ RefPtr<FrameNode> BubbleThreeTestNg::CreateBubbleNode(const TestProperty& testPr
  * @tc.desc: Test BubbleNode layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest001, TestSize.Level0)
 {
     // create targetNode and popupNode
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -292,7 +292,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest001, TestSize.Level1)
  * @tc.desc: Test Bubble Layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest002, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -356,7 +356,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest002, TestSize.Level1)
  * @tc.desc: Test the Bubble created by message Measure and Layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest003, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -465,7 +465,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest003, TestSize.Level1)
  * @tc.desc: Test  Bubble UpdateTouchRegion in different arrowPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest004, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -522,7 +522,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest004, TestSize.Level1)
  * @tc.desc: Test BubbleLayoutAlgorithm::Measure function
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest005, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -606,7 +606,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest005, TestSize.Level1)
  * @tc.desc: Test GetPositionOffset,UpdatePositionOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest006, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. use UpdatePositionOffset() to update position offset.
@@ -628,7 +628,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest006, TestSize.Level1)
  * @tc.desc: Test BubbleLayoutAlgorithm::Measure function
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest007, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -713,7 +713,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest007, TestSize.Level1)
  * @tc.desc: Test GetIfNeedArrow
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest008, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -847,7 +847,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest008, TestSize.Level1)
  * @tc.desc: Test GetIfNeedArrow
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest009, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest009, TestSize.Level0)
 {
     static std::vector<std::string> TEXT_STATES = { V2::TEXTAREA_ETS_TAG, V2::TEXTINPUT_ETS_TAG,
         V2::RICH_EDITOR_ETS_TAG, V2::SEARCH_ETS_TAG };
@@ -884,7 +884,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest009, TestSize.Level1)
     }
 }
 
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest010, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -950,7 +950,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest010, TestSize.Level1)
  * @tc.desc: Test BorderOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleBorderTest010, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleBorderTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -982,7 +982,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleBorderTest010, TestSize.Level1)
   * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth, Shadow and EnableHoverMode.
   * @tc.type: FUNC
   */
-HWTEST_F(BubbleThreeTestNg, BubblePatternTest022, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubblePatternTest022, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1028,7 +1028,7 @@ HWTEST_F(BubbleThreeTestNg, BubblePatternTest022, TestSize.Level1)
  * @tc.desc: Test BorderLinearGradientPoint
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1070,7 +1070,7 @@ HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
  * @tc.desc: Test BorderLinearGradientPoint
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest002, TestSize.Level0)
 {
     BubblePaintMethod bubblePaintMethod;
     bubblePaintMethod.childOffset_ = OffsetF(10.0f, 10.0f);
@@ -1100,7 +1100,7 @@ HWTEST_F(BubbleThreeTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
  * @tc.desc: Test BorderLinearGradientColors
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest001, TestSize.Level0)
 {
     BubblePaintMethod bubblePaintMethod;
     PopupLinearGradientProperties innerBorderLinearGradient;
@@ -1123,7 +1123,7 @@ HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
  * @tc.desc: Test BorderLinearGradientColors
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest002, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest002, TestSize.Level0)
 {
     BubblePaintMethod bubblePaintMethod;
     PopupLinearGradientProperties outlineLinearGradient;
@@ -1146,7 +1146,7 @@ HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest002, TestSize.Level1)
  * @tc.desc: Test the Bubble created by message Measure and Layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest011, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1264,7 +1264,7 @@ HWTEST_F(BubbleThreeTestNg, BubbleLayoutTest011, TestSize.Level1)
  * @tc.desc: Test BorderLinearGradientColors
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest003, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1296,7 +1296,7 @@ HWTEST_F(BubbleThreeTestNg, BorderLinearGradientColorsTest003, TestSize.Level1)
  * @tc.desc: Test GetDoubleBorderWidthOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1338,7 +1338,7 @@ HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest001, TestSize.Level1)
  * @tc.desc: Test GetDoubleBorderWidthOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest002, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1371,7 +1371,7 @@ HWTEST_F(BubbleThreeTestNg, GetDoubleBorderWidthOffsetTest002, TestSize.Level1)
  * @tc.desc: Test OnAttachToMainTreeMultiThread to verify event registration in a simulated multi-thread environment.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble node and OverlayManager.
@@ -1410,7 +1410,7 @@ HWTEST_F(BubbleThreeTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
  * @tc.desc: Test OnDetachFromMainTreeMultiThread to verify cleanup logic in a simulated multi-thread environment.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleThreeTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+HWTEST_F(BubbleThreeTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble node in UI thread environment and set up its state.

@@ -445,6 +445,33 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEvent011
+ * @tc.desc: Test Space triggers cancel button click when focus is on internal button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent011, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    GetFocus();
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_SPACE;
+    event.pressedCodes = { KeyCode::KEY_SPACE };
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(pattern_->GetTextValue().empty());
+}
+
+/**
  * @tc.name: KeyEvent005
  * @tc.desc: Test KeyEvent ctrl + x
  * @tc.type: FUNC

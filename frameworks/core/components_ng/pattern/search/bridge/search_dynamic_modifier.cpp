@@ -82,7 +82,13 @@ SearchModel* GetInstance()
 SearchModel* GetSearchModelImpl()
 {
     static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
-    static SearchModel* instance = loader ? reinterpret_cast<SearchModel*>(loader->CreateModel()) : nullptr;
+    if (loader == nullptr) {
+        LOGF_ABORT("Can't find search loader");
+    }
+    static SearchModel* instance = reinterpret_cast<SearchModel*>(loader->CreateModel());
+    if (instance == nullptr) {
+        LOGF_ABORT("search loader CreateModel fail");
+    }
     return instance;
 }
 #endif
@@ -321,14 +327,17 @@ void SetJsSearchDefaultCancelButton(ArkUI_Int32 style)
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
+    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes, bool isThemeColor)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
     const auto* colorPtr = reinterpret_cast<const Color*>(color);
-    NG::IconOptions cancelIconOptions = NG::IconOptions(
-        *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    NG::IconOptions cancelIconOptions = isThemeColor && SystemProperties::ConfigChangePerform() ?
+        NG::IconOptions(
+            Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+        NG::IconOptions(
+            *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -412,7 +421,7 @@ void RegisterSearchIconResources(const RefPtr<Pattern>& pattern, const struct Ar
     ArkUIImageIconRes* imageIconRes, const Color& iconColor, bool isJsView)
 {
     CHECK_NULL_VOID(pattern);
-    std::string resourceName = isJsView ? "searchButtonIconSrc" : "searchIconSrc";
+    std::string resourceName = "searchIconSrc";
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
         pattern->RegisterResource<CalcDimension>(
@@ -461,7 +470,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     CHECK_NULL_VOID(value);
@@ -491,7 +500,7 @@ void SetSearchDefaultIcon(ArkUINodeHandle node)
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     SearchModelNG::SetSearchDefaultIcon(frameNode);
@@ -1041,6 +1050,25 @@ void ResetSearchOnSubmitWithEvent(ArkUINodeHandle node)
     SearchModelNG::SetOnSubmit(frameNode, nullptr);
 }
 
+void SetSearchOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCopy(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = GetFrameNode(node);
@@ -1058,6 +1086,25 @@ void ResetSearchOnCopy(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetSearchOnWillCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCut(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCut(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCut(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCut(frameNode, nullptr);
 }
 
 void SetSearchOnCut(ArkUINodeHandle node, void* callback)
@@ -2105,8 +2152,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchOnEditChange = nullptr,
             .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEventImpl,
             .resetSearchOnSubmitWithEvent = nullptr,
+            .setSearchOnWillCopy = nullptr,
+            .resetSearchOnWillCopy = nullptr,
             .setSearchOnCopy = SetSearchOnCopyImpl,
             .resetSearchOnCopy = nullptr,
+            .setSearchOnWillCut = nullptr,
+            .resetSearchOnWillCut = nullptr,
             .setSearchOnCut = SetSearchOnCutImpl,
             .resetSearchOnCut = nullptr,
             .setSearchOnPaste = SetSearchOnPasteImpl,
@@ -2268,8 +2319,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchOnEditChange = ResetSearchOnEditChange,
         .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEvent,
         .resetSearchOnSubmitWithEvent = ResetSearchOnSubmitWithEvent,
+        .setSearchOnWillCopy = SetSearchOnWillCopy,
+        .resetSearchOnWillCopy = ResetSearchOnWillCopy,
         .setSearchOnCopy = SetSearchOnCopy,
         .resetSearchOnCopy = ResetSearchOnCopy,
+        .setSearchOnWillCut = SetSearchOnWillCut,
+        .resetSearchOnWillCut = ResetSearchOnWillCut,
         .setSearchOnCut = SetSearchOnCut,
         .resetSearchOnCut = ResetSearchOnCut,
         .setSearchOnPaste = SetSearchOnPaste,

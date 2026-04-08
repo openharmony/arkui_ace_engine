@@ -50,10 +50,6 @@ declare class ConfigureStateMgmt {
 
 declare class ViewBuildNodeBase {
     public static arkThemeScopeManager: any;
-    public static isNeedBuildPrebuildCmd(): boolean;
-    public static prebuildingElmtId_: number;
-    public static prebuildFuncQueues: Map<number, any>;
-    public static propertyChangedFuncQueues: Map<number, any>;
 }
 
 declare interface IView {
@@ -91,6 +87,8 @@ declare class PUV2ViewBase implements IView {
     public static doRecycle: number;
     public static prebuildFuncQueues: Map<number, any>;
     public static propertyChangedFuncQueues: Map<number, any>;
+    public static isNeedBuildPrebuildCmd(): boolean;
+    public static prebuildingElmtId_: number;
     
     constructor(parent: IView, elmtId: number, extraInfo?: any);
     id__(): number;
@@ -383,19 +381,19 @@ export class PuViewTestsV2 implements ITestFile {
     // =========================================================================
 
     /**
-     * Test ViewBuildNodeBase isNeedBuildPrebuildCmd exists
+     * Test PUV2ViewBase isNeedBuildPrebuildCmd exists
      * Expected: Method is defined
      */
     public testIsNeedBuildPrebuildCmd(): void {
-        eq(typeof ViewBuildNodeBase.isNeedBuildPrebuildCmd, 'function', "should be a function");
+        eq(typeof PUV2ViewBase.isNeedBuildPrebuildCmd, 'function', "should be a function");
     }
 
     /**
-     * Test ViewBuildNodeBase prebuildingElmtId_ exists
+     * Test PUV2ViewBase prebuildingElmtId_ exists
      * Expected: Property is defined
      */
     public testPrebuildingElmtId(): void {
-        eq(typeof ViewBuildNodeBase.prebuildingElmtId_, 'number', "should be a number");
+        eq(typeof PUV2ViewBase.prebuildingElmtId_, 'number', "should be a number");
     }
 
     // =========================================================================

@@ -49,6 +49,10 @@ export declare namespace componentSnapshot {
         colorMode?: ColorModeOptions;
         dynamicRangeMode?: DynamicRangeModeOptions;
     }
+    export interface SnapshotSizeLimitation {
+        maxWidth: int
+        maxHeight: int
+    }
     export function get(callbackId: string, callback: AsyncCallback<PixelMap>, options?: SnapshotOptions): void;
     export function get(promiseId: string, options?: SnapshotOptions): Promise<PixelMap> | null;
     export function getSync(value: string, options?: SnapshotOptions): PixelMap | null;
@@ -56,4 +60,5 @@ export declare namespace componentSnapshot {
     export function getSyncWithUniqueId(uniqueIdValue: int, options?: SnapshotOptions): PixelMap;
     export function getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
         options?: SnapshotOptions): Promise<PixelMap> | null;
+    export function getSizeLimitation(): SnapshotSizeLimitation;
 }

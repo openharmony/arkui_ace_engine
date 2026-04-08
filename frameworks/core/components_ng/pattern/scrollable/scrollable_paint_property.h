@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_PAINT_PROPERTY_H
 
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/paint_property.h"
+
+namespace OHOS::Ace {
+class ShapeRect;
+}
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -31,6 +33,7 @@ struct ScrollBarProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMargin, ScrollBarMargin);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoAdjustScrollBarMargin, bool);
 };
 struct FadingEdgeProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdge, bool);
@@ -80,6 +83,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMargin, ScrollBarMargin, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, AutoAdjustScrollBarMargin, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_GROUP(FadingEdgeProperty, FadingEdgeProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, DefaultFadingEdge, bool, PROPERTY_UPDATE_RENDER);

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <securec.h>
 #include <algorithm>
@@ -73,6 +74,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
@@ -84,6 +86,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/web_agent_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_dom_document.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -219,6 +222,8 @@ struct TranslateTextExtraData {
 TranslateTextExtraData g_translateTextData;
 uint32_t g_currentControllerId = 0;
 bool g_currentControllerIdStop = false;
+std::vector<std::string> g_sameLayerSurfaceIds = {};
+std::mutex g_surfaceIdMutex;
 enum PictureInPictureState {
     PIP_STATE_ENTER = 0,
     PIP_STATE_EXIT,
@@ -401,6 +406,30 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
     return true;
 }
 } // namespace
+
+namespace SameLayerSurface {
+void SetSameLayerSurfaceId(const std::string& surfaceId)
+{
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    if (std::find(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId) == g_sameLayerSurfaceIds.end()) {
+        g_sameLayerSurfaceIds.push_back(surfaceId);
+    }
+}
+
+void RemoveSameLayerSurfaceId(const std::string& surfaceId)
+{
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    auto it = std::remove(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId);
+    if (it != g_sameLayerSurfaceIds.end()) {
+        g_sameLayerSurfaceIds.erase(it, g_sameLayerSurfaceIds.end());
+    }
+}
+
+bool HasSurfaceId(const std::string& surfaceId) {
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    return std::find(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId) != g_sameLayerSurfaceIds.end();
+}
+}
 
 void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
 {
@@ -2745,6 +2774,9 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
     InitWebEventHubDragDropStart(eventHub);
     InitWebEventHubDragDropEnd(eventHub);
     InitWebEventHubDragMove(eventHub);
+
+    CHECK_NULL_VOID(delegate_);
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
 }
 
@@ -4251,7 +4283,8 @@ bool WebPattern::IsRootNeedExportTexture()
         }
         isNeedExportTexture = frameNode->IsNeedExportTexture();
         if (isNeedExportTexture) {
-            return isNeedExportTexture;
+            auto textureInfo = frameNode->GetExportTextureInfo();
+            return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
         }
     }
     return isNeedExportTexture;
@@ -4421,6 +4454,25 @@ void WebPattern::OnColorConfigurationUpdate()
     }
 }
 
+void WebPattern::OnLanguageConfigurationUpdate()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+}
+
+void WebPattern::OnDirectionConfigurationUpdate()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+}
+
+void WebPattern::OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy)
+{
+    scrollbarLayoutPolicy_ = layoutPolicy;
+}
+
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -4558,16 +4610,34 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
-        delegate_->UpdateWebCursiveFont(GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY));
-        delegate_->UpdateWebFantasyFont(GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY));
-        delegate_->UpdateWebFixedFont(GetWebFixedFontValue(DEFAULT_FIXED_fONT_FAMILY));
-        delegate_->UpdateWebSansSerifFont(GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY));
-        delegate_->UpdateWebSerifFont(GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY));
-        delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
-        delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
-        delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        if (HasWebCursiveFont()) {
+            delegate_->UpdateWebCursiveFont(GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY));
+        }
+        if (HasWebFantasyFont()) {
+            delegate_->UpdateWebFantasyFont(GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY));
+        }
+        if (HasWebFixedFont()) {
+            delegate_->UpdateWebFixedFont(GetWebFixedFontValue(DEFAULT_FIXED_fONT_FAMILY));
+        }
+        if (HasWebSansSerifFont()) {
+            delegate_->UpdateWebSansSerifFont(GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY));
+        }
+        if (HasWebSerifFont()) {
+            delegate_->UpdateWebSerifFont(GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY));
+        }
+        if (HasWebStandardFont()) {
+            delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
+        }
+        if (HasDefaultFixedFontSize()) {
+            delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
+        }
+        if (HasDefaultFontSize()) {
+            delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        }
         delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT));
-        delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        if (HasMinFontSize()) {
+            delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        }
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
@@ -4616,6 +4686,8 @@ void WebPattern::OnModifyDone()
         UpdateScrollBarWithBorderRadius();
         OnBackToTopUpdate(backToTop_);
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
+        delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+        UpdateScrollbarLayout();
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4667,6 +4739,8 @@ void WebPattern::OnModifyDone()
     }
     CheckAndSetWebNestedScrollExisted();
     UpdateScrollBarWithBorderRadius();
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+    UpdateScrollbarLayout();
 }
 
 void WebPattern::SetSurfaceDensity(double density)
@@ -4737,6 +4811,17 @@ char* HandleWebMessage(const char** params, int32_t size)
 }
 }
 
+std::string WebPattern::GetLayoutModeStr()
+{
+    switch (GetLayoutMode()) {
+        case WebLayoutMode::FIT_CONTENT:
+            return "FIT_CONTENT";
+        case WebLayoutMode::NONE:
+        default:
+            return "NONE";
+    }
+}
+
 void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
@@ -4745,6 +4830,7 @@ void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     if (config.withWeb && webDomDocument_->IsValid()) {
         json->Put(WEB_DOM_JSON_URL, webDomDocument_->GetUrl().c_str());
         json->Put(WEB_DOM_JSON_TITLE, webDomDocument_->GetTitle().c_str());
+        json->Put(WEB_DOM_JSON_LAYOUTMODE, GetLayoutModeStr().c_str());
     }
 }
 
@@ -5555,6 +5641,13 @@ void WebPattern::OnEnableAutoFillUpdate(bool isEnabled)
 void WebPattern::OnEnableDefaultContextMenuUpdate(bool isEnabled)
 {
     isEnableDefaultContextMenu_ = isEnabled;
+}
+
+void WebPattern::OnEnableDragUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->SetEnableDrag(isEnabled);
+    }
 }
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
@@ -6428,12 +6521,27 @@ CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
                 cursorType_ = type;
             }
             nweb_cursorInfo_.reset();
+            custom_cursorImg_.reset();
             if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
-                nweb_cursorInfo_ = info;
+                ProcessCustomCursor(info);
             }
             break;
     }
     return std::make_tuple(type, info);
+}
+
+void WebPattern::ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
+{
+    if (!info) {
+        return;
+    }
+    nweb_cursorInfo_ = info;
+    uint64_t len = nweb_cursorInfo_->GetWidth() * nweb_cursorInfo_->GetHeight() * 4;
+    custom_cursorImg_ = std::make_unique<uint8_t[]>(len);
+    auto res = memcpy_s(custom_cursorImg_.get(), len, nweb_cursorInfo_->GetBuff(), len);
+    if (res != EOK) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnCursorChange memcpy_s failed errorcode is %{public}d", res);
+    }
 }
 
 void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
@@ -6474,7 +6582,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     if (info) {
         x = info->GetX();
         y = info->GetY();
-        buff = info->GetBuff();
+        buff = custom_cursorImg_.get();
         width = info->GetWidth();
         height = info->GetHeight();
     }
@@ -7448,6 +7556,16 @@ void WebPattern::OnActive()
         GetWebId(), isActive_);
     UpdateScrollBarWithBorderRadius();
     SetActiveStatusInner(true);
+    delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
+    UpdateScrollbarLayout();
+}
+
+void WebPattern::UpdateScrollbarLayout()
+{
+    CHECK_NULL_VOID(delegate_);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    delegate_->SetIsSystemRtlEnable(isRtl);
+    delegate_->SetScrollbarLayoutPolicy(scrollbarLayoutPolicy_);
 }
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
@@ -7848,26 +7966,39 @@ void WebPattern::ReleaseResizeHold()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
 
+void WebPattern::EnableScrollDirectionalLock(bool enabled, ScrollDirectionalLockType type)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::EnableScrollDirectionalLock  enabled=%{public}d, type=%{public}d ",
+        enabled, type);
+    isDirectionalLockEnabled_ = enabled;
+    scrollDirectionalLockType_ = type;
+}
+
 bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
 {
     isAvailable = true;
     // not a nested scrolling scene
     bool hasHorizontalParent = parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end();
     bool hasVerticalParent = parentsMap_.find(Axis::VERTICAL) != parentsMap_.end();
-    if (!hasHorizontalParent && !hasVerticalParent) {
-        return false;
-    }
+    bool isNestedScrollScene = hasHorizontalParent || hasVerticalParent;
+
+    // Apply directional lock based on user settingn
+    bool shouldApplyDirectionalLock = isDirectionalLockEnabled_ &&
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::ALL ||
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::NESTED_SCROLL && isNestedScrollScene ));
+
     float offset = y;
     float velocity = yVelocity;
     if (expectedScrollAxis_ == Axis::HORIZONTAL) {
         offset = x;
         velocity = xVelocity;
-        if (isScrollStarted_) {
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
             y = 0.0f;
             yVelocity = 0.0f;
         }
     } else {
-        if (isScrollStarted_) {
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
             x = 0.0f;
             xVelocity = 0.0f;
         }
@@ -7875,8 +8006,41 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandleVelocity(velocity);
     TAG_LOGI(AceLogTag::ACE_WEB,
         "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, xVelocity:%{public}f, yVelocity:%{public}f, "
-        "isConsumed:%{public}d",
-        x, y, xVelocity, yVelocity, isConsumed);
+        "isConsumed:%{public}d, ApplyDirectionalLock:%{public}d",
+        x, y, xVelocity, yVelocity, isConsumed, shouldApplyDirectionalLock);
+    return isConsumed;
+}
+
+bool WebPattern::OnNestedScrollV2(float& x, float& y)
+{
+    bool hasHorizontalParent = parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end();
+    bool hasVerticalParent = parentsMap_.find(Axis::VERTICAL) != parentsMap_.end();
+    bool isNestedScrollScene = hasHorizontalParent || hasVerticalParent;
+
+    // Apply directional lock based on user settingn
+    bool shouldApplyDirectionalLock = isDirectionalLockEnabled_ &&
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::ALL ||
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::NESTED_SCROLL && isNestedScrollScene ));
+
+    float offset = y;
+    if (expectedScrollAxis_ == Axis::HORIZONTAL) {
+        offset = x;
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
+            y = 0.0f;
+        }
+    } else {
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
+            x = 0.0f;
+        }
+    }
+    bool isConsumed = false;
+    if (offset != 0) {
+        isConsumed = FilterScrollEventHandleOffset(offset);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, "
+        "isConsumed:%{public}d, ApplyDirectionalLock:%{public}d",
+        x, y, isConsumed, shouldApplyDirectionalLock);
     return isConsumed;
 }
 
@@ -8360,6 +8524,21 @@ void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
         accessibilityState_ = state;
         delegate_->SetAccessibilityState(state, isDelayed);
     }
+}
+
+bool WebPattern::GetAccessibilityState()
+{
+    return accessibilityState_;
+}
+
+void WebPattern::OnAccessibilityEvent(
+    int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (!accessibilityState_) {
+        return;
+    }
+    delegate_->OnAccessibilityEvent(accessibilityId, eventType, argument);
 }
 
 bool WebPattern::IsAccessibilitySamePage()
@@ -10386,17 +10565,6 @@ void SnapshotTouchReporter::OnPan()
 }
 
 namespace {
-bool IsNumber(const std::string &str)
-{
-    // 检查字符串是否为空
-    if (str.empty()) {
-        return false;
-    }
-
-    // 使用all_of检查所有字符是否为数字
-    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
-}
-
 std::string EncodeURIComponent(const std::string &value)
 {
     std::ostringstream escaped;
@@ -10441,12 +10609,15 @@ void WebPattern::HighlightSpecifiedContent(
     agentManager->SetAgentNeedHighlight(parsedConfigs->GetBool("NeedHighlight", true));
 
     std::unique_ptr<JsonValue> jsonArray = JsonUtil::CreateArray(true);
+    std::vector<std::string> Xpaths = {};
     for (const std::string& nodeId : nodeIds) {
         std::unique_ptr<JsonValue> jsonNode = JsonUtil::Create(true);
-        if (IsNumber(nodeId)) {
+        if (WebAgentUtils::IsNumber(nodeId)) {
             std::string Xpath = webDomDocument_->GetXpathById(std::atoi(nodeId.c_str()));
+            Xpaths.push_back(Xpath);
             jsonNode->Put("value", Xpath.c_str());
         } else {
+            Xpaths.push_back(nodeId);
             jsonNode->Put("value", nodeId.c_str());
         }
         jsonArray->PutRef(std::move(jsonNode));
@@ -10454,8 +10625,9 @@ void WebPattern::HighlightSpecifiedContent(
     std::string jsonString = jsonArray->ToString();
     RunJavascriptAsync("window.AgentHighlightUtils.HighlightTargetContent(\"" + EncodeURIComponent(jsonString) +
                            "\",\"" + EncodeURIComponent(content) + "\")",
-        [](std::string result) {
-            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
+        [XpathList = std::move(Xpaths)](const std::string& result) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s", result.c_str());
+            WebAgentUtils::ParseHighlightResult(result, XpathList);
         });
 }
 

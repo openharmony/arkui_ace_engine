@@ -20,7 +20,6 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +54,8 @@ public:
     void NotifyThemeScopeUpdate();
     void SetOnThemeScopeDestroy(ThemeScopeDestroyCallback&& callback);
     void SetThemeScopeId(int32_t themeScopeId) override;
+    void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override;
+    static std::optional<int32_t> GetCurrentBuildingNodeId();
 
 private:
     ThemeScopeDestroyCallback themeScopeDestroyCallback_;

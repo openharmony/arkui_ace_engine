@@ -19,7 +19,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "frameworks/base/utils/utils.h"
-#include "test/mock/base/mock_jank_frame_report.h"
+#include "test/mock/frameworks/base/log/mock_jank_frame_report.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

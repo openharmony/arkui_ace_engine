@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 
 #include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"

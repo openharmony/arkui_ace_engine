@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text/text_base.h"
 
@@ -1235,6 +1235,24 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg013, TestSize.Level1)
     EXPECT_EQ(textFieldModelNG.GetBarState(frameNode), DisplayMode::AUTO);
     textFieldModelNG.SetBarState(frameNode, DisplayMode::ON);
     EXPECT_EQ(textFieldModelNG.GetBarState(frameNode), DisplayMode::ON);
+}
+
+/**
+ * @tc.name: testFieldModelNg014
+ * @tc.desc: test textInput ModelNg one time code number type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg014, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    TextFieldModelNG::SetType(frameNode, TextInputType::ONE_TIME_CODE_NUMBER);
+
+    auto type = TextFieldModelNG::GetJSInputType(frameNode);
+    EXPECT_EQ(type, static_cast<int32_t>(TextInputType::ONE_TIME_CODE_NUMBER));
 }
 
 /**

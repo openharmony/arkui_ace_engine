@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ export class RenderNodeTransfer {
     private mapNodeDynamic = new Map<int, ESValue>();
 
     private transProperty2Static(inVal: ESValue, rn: RenderNode): void {
-        rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
+        rn.lengthMetricsUnit = LengthMetricsUnit.fromValue((TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue")).toInt());
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
         if (styleVal) {
             rn.borderStyle = styleVal as NodeEdges<BorderStyle>;
@@ -86,7 +86,7 @@ export class RenderNodeTransfer {
         }
         let colorVal = getRenderNodeColorInt(inVal, 'backgroundColorValue');
         if (colorVal !== undefined) {
-            rn.backgroundColor = colorVal as int;
+            rn.backgroundColor = colorVal.toInt();
         }
         rn.clipToFrame = TransferUtil.getPropBool(inVal, "clipToFrameValue");
         rn.frame = TransferUtil.getPropFrame(inVal, "frameValue");
@@ -97,7 +97,7 @@ export class RenderNodeTransfer {
         rn.scale = TransferUtil.getPropVector2(inVal, "scaleValue");
         let clrVal = getRenderNodeColorInt(inVal, 'shadowColorValue');
         if (clrVal !== undefined) {
-            rn.shadowColor = clrVal as int;
+            rn.shadowColor = clrVal.toInt();
         }
         rn.shadowOffset = TransferUtil.getPropVector2(inVal, "shadowOffsetValue");
         rn.label = TransferUtil.getPropString(inVal, "labelValue");

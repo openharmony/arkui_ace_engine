@@ -51,7 +51,7 @@ const ERROR_CODE = 0x3900;
 const LONG_PRESS_TIME: number = 500;
 
 @Observed
-class ButtonGestureModifier implements GestureModifier {
+export class ButtonGestureModifier implements GestureModifier {
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
   public controller: CustomDialogController | null = null;
@@ -63,7 +63,7 @@ class ButtonGestureModifier implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: LONG_PRESS_TIME as int })
+        new LongPressGestureHandler({ repeat: false, duration: LONG_PRESS_TIME.toInt()})
           .onAction(() => {
             if (event) {
               this.controller?.open();

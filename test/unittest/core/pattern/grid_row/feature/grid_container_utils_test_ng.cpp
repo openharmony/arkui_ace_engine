@@ -14,7 +14,7 @@
  */
 #include "test/unittest/core/pattern/grid_row/grid_row_base_test_ng.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class GridContainerUtilsTestNG : public GridRowBaseTestNG {
@@ -151,10 +151,16 @@ HWTEST_F(GridContainerUtilsTestNG, SaveGridRowGutterOptionxResObjXsSmMdTest, Tes
     RefPtr<ResourceObject> gutterSizeArrayResObj[V2::MAX_NUMBER_BREAKPOINT];
     gutterSizeArrayResObj[0] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_.find("gridrow.gutter.xXs") != gutter->resMap_.end().
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.xXs") != gutter->resMap_.end());
 
     gutterSizeArrayResObj[1] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_.find("gridrow.gutter.xSm") != gutter->resMap_.end().
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.xSm") != gutter->resMap_.end());
 
     gutterSizeArrayResObj[2] = AceType::MakeRefPtr<ResourceObject>();

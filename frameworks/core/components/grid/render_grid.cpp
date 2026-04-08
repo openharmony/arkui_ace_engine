@@ -15,6 +15,8 @@
 
 #include "core/components/grid/render_grid.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/animation/curve_animation.h"
 #include "core/components/grid/grid_component.h"
 #include "core/components/grid/render_grid_item.h"
 #include "core/event/ace_event_helper.h"

@@ -722,7 +722,7 @@ HWTEST_F(ListItemGroupPatternTestNg, UpdateCachedIndex001, TestSize.Level1)
      * @tc.steps: step3. Call the UpdateCachedIndex
      * @tc.expected: The listItemGroupPattern's forwardCachedIndex_ and backwardCachedIndex_ is changed
      */
-    listItemGroupPattern->UpdateCachedIndex(true, false, 2, 4);
+    listItemGroupPattern->UpdateCachedIndex(true, 2, 4);
     EXPECT_EQ(listItemGroupPattern->forwardCachedIndex_, -1);
     EXPECT_EQ(listItemGroupPattern->backwardCachedIndex_, INT_MAX);
 }

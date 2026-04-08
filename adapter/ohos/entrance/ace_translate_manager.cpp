@@ -364,7 +364,6 @@ void UiTranslateManagerImpl::GetPixelMapFromImageTypeNode(RefPtr<NG::FrameNode> 
             componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
             return;
         }
-        imagePattern->AddPixelMapToUiManager();
         auto canvasImage = imagePattern->GetCanvasImage();
         if (canvasImage == nullptr) {
             const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);

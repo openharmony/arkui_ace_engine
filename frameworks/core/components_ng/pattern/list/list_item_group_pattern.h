@@ -19,17 +19,19 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_info.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
+
+class ListItemGroupLayoutAlgorithm;
 
 struct ListItemGroupPaintInfo {
     TextDirection layoutDirection = TextDirection::LTR;
@@ -246,7 +248,7 @@ public:
         return false;
     }
 
-    const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
+    const ListItemGroupPositionMap& GetItemPosition()
     {
         return itemPosition_;
     }
@@ -390,7 +392,7 @@ public:
     void ClearCachedItemPosition();
     void CalculateItemStartIndex();
     bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
-    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, int32_t forwardCache, int32_t backwardCache);
     int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
     int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
     std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);
@@ -398,10 +400,6 @@ public:
     void UpdateActiveChildRange(bool show);
     void SyncItemsToCachedItemPosition();
     bool IsVisible() const;
-    void SetRecache(bool value)
-    {
-        reCache_ = value;
-    }
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
 
@@ -523,14 +521,14 @@ private:
     bool layouted_ = false;
     bool isAxisChanged_ = false;
 
-    bool reCache_ = false;
+    bool isCacheDirty_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
-    ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;
+    ListItemGroupPositionMap cachedItemPosition_;
     float adjustRefPos_ = 0.0f;
     float adjustTotalSize_ = 0.0f;
 
-    ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
+    ListItemGroupPositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;

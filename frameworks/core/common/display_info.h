@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include <vector>
 
 namespace OHOS::Ace {
 /**

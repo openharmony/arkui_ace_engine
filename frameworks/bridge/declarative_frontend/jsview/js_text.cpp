@@ -28,11 +28,13 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -46,6 +48,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -79,6 +82,26 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
 const int32_t DEFAULT_LINE_HEIGHT = 28;
+
+void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
+    int32_t& variableFontWeight, FontWeight& fontWeightEnum)
+{
+    if (fontWeight->IsNumber()) {
+        JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
+        weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        fontWeightEnum = ConvertStrToFontWeight(weight);
+    } else {
+        JSContainerBase::ParseJsString(fontWeight, weight);
+        auto parseResult = ParseFontWeight(weight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
+}
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -143,14 +166,10 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-        ParseJsInt32(fontWeight, variableFontWeight);
+        FontWeight fontWeightEnum = FontWeight::NORMAL;
+        ParseFontWeightInfo(fontWeight, weight, variableFontWeight, fontWeightEnum);
         TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSContainerBase::ParseJsString(fontWeight, weight);
-        }
-        font.fontWeight = ConvertStrToFontWeight(weight);
+        font.fontWeight = fontWeightEnum;
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     UnRegisterResource("FontFamily");
@@ -203,15 +222,24 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(args, variableFontWeight);
-    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
-
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
     if (args->IsNumber()) {
+        ParseJsInt32(args, variableFontWeight);
         fontWeight = args->ToString();
+        fontWeightEnum = ConvertStrToFontWeight(fontWeight);
     } else {
         ParseJsString(args, fontWeight);
+        auto parseResult = ParseFontWeight(fontWeight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
     }
-    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+    TextModel::GetInstance()->SetFontWeight(fontWeightEnum);
 
     if (info.Length() < 2) { // 2 : two args
         return;
@@ -861,7 +889,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
             auto frameNode = node.Upgrade();
@@ -1000,6 +1028,33 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     TextModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSText::SetOnWillCopy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCopy");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextModel::GetInstance()->SetOnWillCopy(std::move(callback));
+}
+
+JSRef<JSVal> JSText::CreateSimpleJsOnWillObj(const std::u16string& value)
+{
+    JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+    return stringValue;
 }
 
 void JSText::SetOnCopy(const JSCallbackInfo& info)
@@ -1405,6 +1460,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onWillCopy", &JSText::SetOnWillCopy);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
     JSClass<JSText>::StaticMethod("minLines", &JSText::SetMinLines);
     JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
@@ -1424,6 +1480,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
+    JSClass<JSText>::StaticMethod("orphanCharOptimization", &JSText::SetOrphanCharOptimization);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
@@ -1733,6 +1790,18 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     };
 
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
+void JSText::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
 }
 
 void JSText::EditMenuOptions(const JSCallbackInfo& info)

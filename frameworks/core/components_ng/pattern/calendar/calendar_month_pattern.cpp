@@ -66,7 +66,7 @@ void CalendarMonthPattern::SetCalendarDay(const CalendarDay& calendarDay)
     if (monthState_ == MonthState::CUR_MONTH && !obtainedMonth_.days.empty()) {
         for (auto& day : obtainedMonth_.days) {
             if (day.month.year == calendarDay.month.year && day.month.month == calendarDay.month.month &&
-                day.day == calendarDay.day) {
+                day.day == calendarDay.day && IsDateInRange(day)) {
                 day.focused = true;
             }
         }
@@ -260,7 +260,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
     for (int i = 0; i < static_cast<int32_t>(accessibilityPropertyVec_.size()); i++) {
         if (i == selectedIndex &&
             obtainedMonth_.days[i].month.month == obtainedMonth_.month &&
-            obtainedMonth_.days[i].month.year == obtainedMonth_.year) {
+            obtainedMonth_.days[i].month.year == obtainedMonth_.year && IsDateInRange(obtainedMonth_.days[i])) {
             selectMessage += accessibilityPropertyVec_[index]->GetAccessibilityText();
             continue;
         }
@@ -272,7 +272,8 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         }
         auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
-        if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size())) {
+        if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size()) &&
+            IsDateInRange(obtainedMonth_.days[selectedIndex])) {
             obtainedMonth_.days[selectedIndex].focused = true;
             auto json = JsonUtil::Create(true);
             json->Put("day", obtainedMonth_.days[selectedIndex].day);
@@ -857,7 +858,8 @@ void CalendarMonthPattern::ChangeVirtualNodeState(const CalendarDay& calendarDay
         return;
     }
     if (calendarDay.index != selectedIndex_ &&
-        calendarDay.month.month == obtainedMonth_.month && calendarDay.month.month == obtainedMonth_.month) {
+        calendarDay.month.month == obtainedMonth_.month && calendarDay.month.month == obtainedMonth_.month &&
+        IsDateInRange(calendarDay)) {
         accessibilityPropertyVec_[selectedIndex_]->SetUserSelected(true);
     }
 }
@@ -1107,7 +1109,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     }
     std::string message;
     if (calendarDay.month.year == calendarDay_.month.year && calendarDay.month.month == calendarDay_.month.month &&
-                      calendarDay.day == calendarDay_.day) {
+                      calendarDay.day == calendarDay_.day && IsDateInRange(calendarDay)) {
         message += GetTodayStr();
     }
     message += std::to_string(calendarDay.month.year) + "/";
@@ -1117,7 +1119,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
-    if (calendarDay.month.month != obtainedMonth_.month) {
+    if ((calendarDay.month.month != obtainedMonth_.month) || !IsDateInRange(calendarDay)) {
         buttonAccessibilityProperty->SetAccessibilityDescription(disabledDesc_);
     } else if (index == selectedIndex_) {
         // Delete the description of the selected node
@@ -1126,7 +1128,8 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
         // Set the default description to other nodes
         buttonAccessibilityProperty->SetAccessibilityDescription("");
     }
-    buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
+    buttonAccessibilityProperty->SetUserDisabled(
+        ((calendarDay.month.month != obtainedMonth_.month) || !IsDateInRange(calendarDay)) ? true : false);
     buttonAccessibilityProperty->SetUserSelected(false);
     buttonAccessibilityProperty->SetAccessibilityText(message);
 }

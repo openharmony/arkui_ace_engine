@@ -16,18 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 
-#include "core/components_ng/base/geometry_node.h"
+#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/focus_type.h"
-#include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
+
+#include <optional>
 
 namespace OHOS::Ace::NG {
 
 class FocusView;
 class FocusManager;
+class GeometryNode;
+class TouchEventImpl;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 using OnGetNextFocusNodeFunc = std::function<RefPtr<FocusHub>(FocusReason, FocusIntension)>;
@@ -422,38 +425,10 @@ public:
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetFocusPadding();
     }
-    void SetPaintRect(const RoundRect& rect)
-    {
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
-        }
-        CHECK_NULL_VOID(focusPaintParamsPtr_);
-        focusPaintParamsPtr_->SetPaintRect(rect);
-    }
-    void SetPaintColor(const Color& color)
-    {
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
-        }
-        CHECK_NULL_VOID(focusPaintParamsPtr_);
-        focusPaintParamsPtr_->SetPaintColor(color);
-    }
-    void SetPaintWidth(const Dimension& width)
-    {
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
-        }
-        CHECK_NULL_VOID(focusPaintParamsPtr_);
-        focusPaintParamsPtr_->SetPaintWidth(width);
-    }
-    void SetFocusPadding(const Dimension& padding)
-    {
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
-        }
-        CHECK_NULL_VOID(focusPaintParamsPtr_);
-        focusPaintParamsPtr_->SetFocusPadding(padding);
-    }
+    void SetPaintRect(const RoundRect& rect);
+    void SetPaintColor(const Color& color);
+    void SetPaintWidth(const Dimension& width);
+    void SetFocusPadding(const Dimension& padding);
 
     RefPtr<FocusManager> GetFocusManager() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
@@ -738,16 +713,7 @@ public:
         focusDepend_ = focusDepend;
     }
 
-    size_t GetFocusableCount()
-    {
-        size_t count = 0;
-        AllChildFocusHub([&count](const RefPtr<FocusHub>& child) {
-            if (child->IsFocusable()) {
-                count++;
-            }
-        });
-        return count;
-    }
+    size_t GetFocusableCount();
 
     void SetIsFocusActiveWhenFocused(bool value)
     {

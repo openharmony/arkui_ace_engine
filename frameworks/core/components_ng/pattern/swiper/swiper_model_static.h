@@ -46,6 +46,7 @@ public:
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
+    static void SetCachedIndependent(FrameNode* frameNode, bool independent);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
     static void SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);

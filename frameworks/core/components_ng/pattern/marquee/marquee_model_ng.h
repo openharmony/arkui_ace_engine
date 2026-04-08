@@ -18,6 +18,12 @@
 
 #include "core/components_ng/pattern/marquee/marquee_model.h"
 
+namespace OHOS::Ace {
+class FrameRateRange;
+template<class T>
+class RefPtr;
+}
+
 namespace OHOS::Ace::NG {
 const char MARQUEE_ETS_TAG[] = "Marquee";
 const char TEXT_ETS_TAG[] = "Text";
@@ -38,6 +44,7 @@ public:
     void SetOnStart(std::function<void()>&& onChange) override;
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;
+    void SetOnStop(std::function<void()>&& onChange) override;
     void SetMarqueeSpacing(const std::optional<CalcDimension>& spacing) override;
     void SetMarqueeDelay(const std::optional<int32_t>& delay) override;
 
@@ -56,6 +63,8 @@ public:
     static void ResetOnBounce(FrameNode* frameNode);
     static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange);
     static void ResetOnFinish(FrameNode* frameNode);
+    static void SetOnStop(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void ResetOnStop(FrameNode* frameNode);
     static void SetMarqueeFrameRateRange(
         FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
     static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);

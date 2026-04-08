@@ -46,7 +46,9 @@ public:
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintMask(canvas, paintWrapper);
-                bubble->ClipBubble(paintWrapper);
+                if (!bubble->IsUserSetMaterial()) {
+                    bubble->ClipBubble(paintWrapper);
+                }
                 bubble->PaintBorder(canvas, paintWrapper);
             }
         };
@@ -159,6 +161,16 @@ public:
         innerBorderWidthByUser_ = innerBorderWidthByUser.ConvertToPx();
     }
 
+    void SetIsUserSetMaterial(bool isUserSetMaterial)
+    {
+        isUserSetMaterial_ = isUserSetMaterial;
+    }
+
+    bool IsUserSetMaterial() const
+    {
+        return isUserSetMaterial_;
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -222,6 +234,7 @@ private:
     bool useCustom_ = false;
     Placement arrowPlacement_ = Placement::BOTTOM;
     bool enableArrow_ = false;
+    bool isUserSetMaterial_ = false;
     Dimension arrowOffset_;
     Color maskColor_;
     Color backgroundColor_;

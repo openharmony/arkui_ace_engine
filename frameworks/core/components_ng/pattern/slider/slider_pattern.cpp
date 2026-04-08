@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,15 @@
  */
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/dump_log.h"
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -34,15 +30,10 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
-#include "core/components_ng/pattern/slider/slider_layout_property.h"
-#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
-#include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -70,6 +61,8 @@ constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
 constexpr int64_t CROWN_TIME_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #endif
+const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
+const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -682,6 +675,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     ACE_UINODE_TRACE(pointNode);
     auto gestureHub = pointNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    CHECK_EQUAL_VOID(index >= pointAccessibilityNodeEventVec_.size(), true);
     if (isClickAbled && !pointAccessibilityNodeEventVec_[index]) {
         auto clickHandle = [weak = WeakClaim(this), index, reverse](GestureEvent& info) {
             auto pattern = weak.Upgrade();
@@ -2904,14 +2898,31 @@ int32_t SliderPattern::CheckAccessibilityStepCount()
 
 bool SliderPattern::ParseCommand(const std::string& command, float& value)
 {
-    auto json = JsonUtil::ParseJsonString(command);
-    CHECK_NE_RETURN(json->IsObject(), true, false);
-    auto cmdType = json->GetString("cmd");
-    CHECK_NE_RETURN(cmdType, "SetSliderValue", false);
-    auto paramJson = json->GetValue("params");
-    CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+    auto jsonObj = JsonUtil::ParseJsonString(command);
+    if (!jsonObj->IsValid() || !jsonObj->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto cmdObj = jsonObj->GetValue("cmd");
+    if (!cmdObj->IsValid() || !cmdObj->IsString()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto cmdType = cmdObj->GetString();
+    if (cmdType != "onSliderChange") {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto paramJson = jsonObj->GetValue("params");
+    if (!paramJson->IsValid() || !paramJson->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
     auto valueJson = paramJson->GetValue("value");
-    CHECK_NE_RETURN(valueJson->IsNumber(), true, false);
+    if (!valueJson->IsValid() || !valueJson->IsNumber()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
     value = static_cast<float>(valueJson->GetDouble());
     return true;
 }
@@ -2924,12 +2935,19 @@ int32_t SliderPattern::OnInjectionEvent(const std::string& command)
     int32_t mode = SliderChangeMode::End;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, RET_FAILED);
+    if (!eventHub->IsEnabled()) {
+        ReportInjectionResult(false, COMPONENT_IN_READONLY);
+        return RET_FAILED;
+    }
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, RET_FAILED);
     float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     value = GetValueInValidRange(sliderPaintProperty, value, min, max);
     SetSliderValue(value, mode, false);
+    ReportInjectionResult(true, "");
     return RET_SUCCESS;
 }
 
@@ -2945,9 +2963,26 @@ void SliderPattern::ReportChangeEvent(float value, int32_t mode)
     params->Put("mode", mode);
     auto json = JsonUtil::Create();
     CHECK_NULL_VOID(json);
-    json->Put("event", "Slider.onChange");
+    json->Put("event", "onSliderChange");
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+}
+
+bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    CHECK_NULL_RETURN(nodeId, false);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_RETURN(result, false);
+    result->Put("nodeId", nodeId);
+    result->Put("event", "onSliderChange");
+    result->Put("result", isSuccess ? "success" : "failed");
+    result->Put("reason", reason.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "SliderResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+    return true;
 }
 } // namespace OHOS::Ace::NG

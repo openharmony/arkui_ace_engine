@@ -16,6 +16,7 @@
 
 
 #include "core/common/container.h"
+#include "core/components_ng/syntax/if_else_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

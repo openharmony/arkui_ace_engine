@@ -13,12 +13,101 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class CheckboxModifier extends ArkCheckboxComponent implements AttributeModifier<CheckboxAttribute> {
+class LazyArkCheckboxComponent extends ArkComponent {
+  static module: CheckboxComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkCheckboxComponent.module === undefined) {
+     LazyArkCheckboxComponent.module = globalThis.requireNapi('arkui.components.arkcheckbox');
+   }
+
+   this.lazyComponent = LazyArkCheckboxComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  allowChildCount(): number {
+   return 0;
+  }
+
+  initialize(value: CheckboxOptions): this {
+   this.lazyComponent.initialize(value);
+   return this;
+  }
+
+  shape(value: CheckBoxShape): this {
+   this.lazyComponent.shape(value);
+   return this;
+  }
+
+  width(value: Length): this {
+   this.lazyComponent.width(value);
+   return this;
+  }
+
+  height(value: Length): this {
+  this.lazyComponent.height(value);
+   return this;
+  }
+
+  select(value: boolean): this {
+   this.lazyComponent.select(value);
+   return this;
+  }
+
+  selectedColor(value: ResourceColor): this {
+   this.lazyComponent.selectedColor(value);
+   return this;
+  }
+
+  unselectedColor(value: ResourceColor): this {
+   this.lazyComponent.unselectedColor(value);
+   return this;
+  }
+
+  mark(value: MarkStyle): this {
+   this.lazyComponent.mark(value);
+   return this;
+  }
+
+  padding(value: Padding | Length): this {
+   this.lazyComponent.padding(value);
+   return this;
+  }
+
+  size(value: SizeOptions): this {
+   this.lazyComponent.size(value);
+   return this;
+  }
+
+  responseRegion(value: Array<Rectangle> | Rectangle): this {
+   this.lazyComponent.responseRegion(value);
+   return this;
+  }
+
+  margin(value: Margin | Length): this {
+   this.lazyComponent.margin(value);
+   return this;
+  }
+
+  contentModifier(value: ContentModifier<CheckBoxConfiguration>): this {
+   this.lazyComponent.contentModifier(value);
+   return this;
+  }
+
+  onChange(callback: OnCheckboxChangeCallback): this {
+   this.lazyComponent.onChange(callback);
+   return this;
+  }
+}
+class CheckboxModifier extends LazyArkCheckboxComponent implements AttributeModifier<CheckboxAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: CheckboxAttribute): void {

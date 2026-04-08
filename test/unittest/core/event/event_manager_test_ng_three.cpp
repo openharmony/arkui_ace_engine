@@ -14,9 +14,14 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/event/event_manager_test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/common/mock_frontend.h"
+#include "core/common/event_manager.h"
+
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -235,25 +240,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest067, TestSize.Level2)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList {
-        RectCallback(rectGetCallback, touchCallback, nullptr),
-        RectCallback(rectGetCallback, nullptr, mouseCallback)
-    };
+    eventManager->AddRectCallback(
+        [rectGetCallback](std::vector<Rect>& rectList) -> void { rectGetCallback(rectList); },
+        touchCallback, nullptr);
+    eventManager->AddRectCallback(
+        [rectGetCallback](std::vector<Rect>& rectList) -> void { rectGetCallback(rectList); },
+        nullptr, mouseCallback);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 1
+     * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
+     * @tc.expected: one callback processed for touch
      */
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_EQ(rectCallbackList.size(), 1);
+    eventManager->HandleOutOfRectCallbacks(point);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList is empty
+     * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
+     * @tc.expected: remaining callback processed for mouse
      */
     point.SetSourceType(SourceType::MOUSE);
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_TRUE(rectCallbackList.empty());
+    eventManager->HandleOutOfRectCallbacks(point);
 }
 
 /**
@@ -348,11 +353,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest070, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
-    
+
     event.action = MouseAction::MOVE;
     event.button = MouseButton::RIGHT_BUTTON;
     eventManager->MouseTest(event, pageNode, touchRestrict);
-    
+
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
@@ -683,7 +688,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest082, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     TouchEvent touchPoint;
     touchPoint.id = 1;
-    
+
     touchPoint.type = TouchType::DOWN;
     eventManager->CheckDownEvent(touchPoint);
     eventManager->downFingerIds_[1] = 1;

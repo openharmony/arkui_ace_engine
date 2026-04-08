@@ -164,6 +164,23 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaHorizontalScrollingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaHorizontalScrolling');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().textArea.setHorizontalScrolling(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -851,6 +868,20 @@ class TextAreaOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) 
   }
 }
 
+class TextAreaOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -861,6 +892,20 @@ class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
       getUINativeModule().textArea.resetOnCopy(node);
     } else {
       getUINativeModule().textArea.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnWillCutModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCut(node, this.value);
     }
   }
 }
@@ -1491,6 +1536,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textArea.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1609,6 +1671,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
     return this;
   }
+  horizontalScrolling(value: boolean): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHorizontalScrollingModifier.identity, TextAreaHorizontalScrollingModifier, value);
+    return this;
+  }
   type(value: TextAreaType): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaTypeModifier.identity, TextAreaTypeModifier, value);
     return this;
@@ -1677,9 +1743,19 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
       TextAreaOnEditChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback: Callback<string, boolean>): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCopyModifier.identity,
+      TextAreaOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback: (value: string) => void): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity,
       TextAreaOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback: Callback<string, boolean>): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCutModifier.identity,
+      TextAreaOnWillCutModifier, callback);
     return this;
   }
   onCut(callback: (value: string) => void): TextAreaAttribute {
@@ -1974,6 +2050,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
+      TextAreaOrphanCharOptimizationModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

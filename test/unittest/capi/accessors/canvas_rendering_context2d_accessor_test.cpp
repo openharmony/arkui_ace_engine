@@ -20,7 +20,7 @@
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/rendering_context_settings_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
 
 #include "accessor_test_base.h"
 

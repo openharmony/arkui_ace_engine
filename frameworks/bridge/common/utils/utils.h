@@ -226,6 +226,11 @@ inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight d
     return StringUtils::StringToFontWeight(weight, defaultFontWeight);
 }
 
+inline int32_t GetFontWeightNumericValue(FontWeight fontWeight)
+{
+    return StringUtils::GetFontWeightNumericValue(fontWeight);
+}
+
 ACE_FORCE_EXPORT TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration);
 
 inline TextDecorationStyle ConvertStrToTextDecorationStyle(const std::string& textDecorationStyle)

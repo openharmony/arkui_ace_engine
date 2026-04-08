@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -17,9 +17,9 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
 
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -27,8 +27,10 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 using namespace testing;
@@ -992,5 +994,71 @@ HWTEST_F(GestureEventHubTestFiveNg, SetResponseRegionMap001, TestSize.Level1)
     guestureEventHub->SetResponseRegionMap(regionMap);
     auto touchRegions = guestureEventHub->GetFingerResponseRegionFromMap();
     EXPECT_EQ(touchRegions.size(), 2);
+}
+
+/**
+ * @tc.name: AutoHideComponentUniqueIds001
+ * @tc.desc: Test resolving auto hide targets by unique id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, AutoHideComponentUniqueIds001, TestSize.Level1)
+{
+    auto hostNode = FrameNode::CreateFrameNode(
+        NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    auto gestureHub = hostNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    auto targetNode = FrameNode::CreateFrameNode(
+        "target", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto secondTargetNode = FrameNode::CreateFrameNode(
+        "target2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(secondTargetNode, nullptr);
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    dragEvent->SetAutoHideComponentUniqueIds(
+        { targetNode->GetId(), secondTargetNode->GetId(), targetNode->GetId(), -1 });
+
+    auto targets = gestureHub->ResolveAutoHideTargetsByUniqueId(dragEvent);
+    ASSERT_EQ(targets.size(), 2);
+    EXPECT_EQ(targets.front(), targetNode);
+    EXPECT_EQ(targets.back(), secondTargetNode);
+}
+
+/**
+ * @tc.name: AutoHideComponentUniqueIds002
+ * @tc.desc: Test hiding auto hide targets is idempotent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, AutoHideComponentUniqueIds002, TestSize.Level1)
+{
+    auto hostNode = FrameNode::CreateFrameNode(
+        NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    auto gestureHub = hostNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    auto targetNode = FrameNode::CreateFrameNode(
+        "target", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto secondTargetNode = FrameNode::CreateFrameNode(
+        "target2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(secondTargetNode, nullptr);
+
+    gestureHub->HideAutoHideTargets({ targetNode, secondTargetNode });
+    EXPECT_TRUE(gestureHub->dragframeNodeInfo_.autoHideExecuted);
+    EXPECT_EQ(gestureHub->dragframeNodeInfo_.autoHideFrameNodes.size(), 2);
+    EXPECT_EQ(targetNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(secondTargetNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+
+    targetNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+    gestureHub->HideAutoHideTargets({ targetNode });
+    EXPECT_EQ(targetNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    gestureHub->ResetAutoHideDragInfo();
+    EXPECT_FALSE(gestureHub->dragframeNodeInfo_.autoHideExecuted);
+    EXPECT_TRUE(gestureHub->dragframeNodeInfo_.autoHideFrameNodes.empty());
 }
 } // namespace OHOS::Ace::NG

@@ -225,6 +225,7 @@ void DrawableCreatePixelMapDrawable(
     ani_boolean isUndefined;
     env->Reference_IsUndefined(pixelAni, &isUndefined);
     auto* modifier = GetDrawableDescriptorModifier();
+    CHECK_NULL_VOID(modifier);
     // first create native pixel map drawable descriptor
     auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::PIXELMAP));
     CHECK_NULL_VOID(drawable);
@@ -247,6 +248,7 @@ void DrawableCreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniC
     env->Reference_IsUndefined(backgroundAni, &isBackgroundUndefined);
     env->Reference_IsUndefined(maskAni, &isMaskUndefined);
     auto* modifier = GetDrawableDescriptorModifier();
+    CHECK_NULL_VOID(modifier);
     auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::LAYERED));
     CHECK_NULL_VOID(drawable);
     modifier->increaseRef(drawable);

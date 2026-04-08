@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <algorithm>
 #include <unordered_set>
@@ -29,8 +30,10 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -3308,7 +3311,19 @@ void NavigationPattern::UpdateDividerBackgroundColor()
     CHECK_NULL_VOID(theme);
     Color defaultColor = theme->GetNavigationDividerColor();
     Color dividerColor = defaultColor;
-    if (colorDefined) {
+    auto pipelineContext = navigationGroupNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetForceSplitManager();
+    if (manager != nullptr && manager->IsForceSplitEnable(false)) {
+        std::pair<std::optional<Color>, std::optional<Color>> splitColor =
+            manager->GetSplitDividerColor();
+        if (pipelineContext->GetColorMode() == ColorMode::LIGHT) {
+            dividerColor = splitColor.first.value_or(defaultColor);
+        }
+        if (pipelineContext->GetColorMode() == ColorMode::DARK) {
+            dividerColor = splitColor.second.value_or(defaultColor);
+        }
+    } else if (colorDefined) {
         dividerColor = layoutProperty->GetDividerColor().value_or(defaultColor);
     }
     auto dividerNode = GetDividerNode();
@@ -5644,6 +5659,7 @@ void NavigationPattern::RegisterForceSplitListener(PipelineContext* context, int
         CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
+        pattern->UpdateDividerBackgroundColor();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     mgr->AddForceSplitStateListener(nodeId, std::move(listener));
@@ -5668,6 +5684,7 @@ void NavigationPattern::TryForceSplitIfNeeded()
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
     bool forceSplitSuccess = false;

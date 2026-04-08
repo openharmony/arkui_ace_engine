@@ -15,13 +15,13 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
@@ -334,6 +334,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
  */
 HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Init pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -342,6 +345,10 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
     AddSpan(INIT_VALUE_1);
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+
+    /**
+     * @tc.steps: step2. set style
+     */
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE);
@@ -353,6 +360,9 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
     updateSpanStyle.updateLetterSpacing = LETTER_SPACING;
     updateSpanStyle.updateFontFeature = TEXT_FONTFEATURE;
 
+    /**
+     * @tc.steps: step3. UpdateTextStyle
+     */
     richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetLineHeight(), LINE_HEIGHT_VALUE);

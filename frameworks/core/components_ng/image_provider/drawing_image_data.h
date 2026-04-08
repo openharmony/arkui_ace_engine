@@ -19,7 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {

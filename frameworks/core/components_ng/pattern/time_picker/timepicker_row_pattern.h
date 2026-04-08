@@ -684,6 +684,15 @@ public:
         return isEnableCascade_;
     }
 
+    void SetIsInDatePickerDialog(bool isInDatePickerDialog) {
+        isInDatePickerDialog_ = isInDatePickerDialog;
+    }
+    
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
+
     void ColumnPatternInitHapticController();
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
@@ -695,8 +704,16 @@ public:
     void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
     void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
+    bool ReportTimeChangeEvent(int32_t nodeId, const std::string& timeStr);
+    bool ReportCommandResult(int32_t nodeId, const std::string& event,
+        const std::string& result, const std::string& reason = "");
+    static bool IsJsonValid(const std::unique_ptr<JsonValue>& json);
+    static bool IsJsonObject(const std::unique_ptr<JsonValue>& json);
+    bool ValidateTimeParameters(
+        const std::unique_ptr<JsonValue>& paramJson, int32_t& hour, int32_t& minute, int32_t& second);
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
     void ClearFocus();
@@ -848,6 +865,7 @@ private:
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool showLunarSwitch_ = false;
     bool isUserSetDividerSpacingFont_ = false;
     bool isUserSetGradientFont_ = false;
@@ -873,6 +891,7 @@ private:
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
     bool useButtonFocusArea_ = false;
+    bool isInDatePickerDialog_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG

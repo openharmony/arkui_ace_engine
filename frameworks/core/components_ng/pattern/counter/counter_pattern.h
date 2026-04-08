@@ -171,6 +171,8 @@ public:
         }
     }
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 private:
     void DumpInfo() override
     {
@@ -201,6 +203,9 @@ private:
     {
         ToJsonValueAttribute(json);
     }
+
+    void SetCounterOnInc();
+    void SetCounterOnDec();
 
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;

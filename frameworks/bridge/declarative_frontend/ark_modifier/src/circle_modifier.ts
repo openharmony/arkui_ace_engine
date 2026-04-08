@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class CircleModifier extends ArkCircleComponent implements AttributeModifier<CircleAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
-  
+
   applyNormalAttribute(instance: CircleAttribute): void {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier<CircleAttribute, ArkCircleComponent, ArkComponent>(instance, this);

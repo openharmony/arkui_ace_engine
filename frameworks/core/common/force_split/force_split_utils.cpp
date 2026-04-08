@@ -14,6 +14,7 @@
  */
 
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <string>
 #include <vector>
@@ -53,6 +54,9 @@ constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholde
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
+constexpr char SPLIT_DIVIDER_COLOR[] = "splitDividerColor";
+constexpr char COLOR_LIGHT[] = "light";
+constexpr char COLOR_DARK[] = "dark";
 
 std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
 {
@@ -370,6 +374,32 @@ bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& ful
     return true;
 }
 
+bool ForceSplitUtils::ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor,
+    ForceSplitConfig& config)
+{
+    if (!splitDividerColor || !splitDividerColor->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor is an invalid json object!");
+        return false;
+    }
+    if (splitDividerColor->Contains(COLOR_LIGHT)) {
+        auto lightColorValue = splitDividerColor->GetValue(COLOR_LIGHT);
+        if (!lightColorValue->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.light is not color!");
+            return false;
+        }
+        config.splitDividerColorLight = Color::FromString(lightColorValue->GetString());
+    }
+    if (splitDividerColor->Contains(COLOR_DARK)) {
+        auto darkColorValue = splitDividerColor->GetValue(COLOR_DARK);
+        if (!darkColorValue->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.dark is not color!");
+            return false;
+        }
+        config.splitDividerColorDark = Color::FromString(darkColorValue->GetString());
+    }
+    return true;
+}
+
 bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
@@ -390,6 +420,11 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
     }
     if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
         if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
+        if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
             return false;
         }
     }
@@ -441,6 +476,11 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
             return false;
         }
     }
+    if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
+        if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
+            return false;
+        }
+    }
     if (isRouter) {
         return true;
     }
@@ -483,11 +523,14 @@ void ForceSplitUtils::LogSystemForceSplitConfig(
         AceLogTag::ACE_NAVIGATION,
         "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
         "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
         isRouter, homePage.c_str(), FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
         (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
 }
 
 void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
@@ -495,11 +538,14 @@ void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConf
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
         "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
-        "disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        "disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
         isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
         FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
 }
 } // namespace OHOS::Ace::NG
 

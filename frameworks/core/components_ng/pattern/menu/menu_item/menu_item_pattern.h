@@ -479,6 +479,8 @@ public:
         return detachedProxy_ != nullptr;
     }
 
+    void ReportEvent();
+
 protected:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void RegisterOnKeyEvent();

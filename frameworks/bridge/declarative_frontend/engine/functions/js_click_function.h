@@ -36,8 +36,8 @@ public:
     ~JsClickFunction() override {};
     void Execute();
     void Execute(const ClickInfo& info);
-    void Execute(GestureEvent& info);
-    void Execute(MouseInfo& info);
+    void Execute(EcmaVM* vm, GestureEvent& info);
+    void Execute(EcmaVM* vm, MouseInfo& info);
 };
 
 class JsWeakClickFunction : public JsWeakFunction {

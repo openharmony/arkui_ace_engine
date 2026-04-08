@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
@@ -39,23 +40,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-enum class NestedState {
-    GESTURE = 0,
-    CHILD_SCROLL,
-    CHILD_OVER_SCROLL,
-    CHILD_CHECK_OVER_SCROLL,
-};
-
-struct OverScrollOffset {
-    double start;
-    double end;
-};
-
-struct ScrollResult {
-    double remain;
-    bool reachEdge;
-};
-
 struct SlidInfo {
     double gestureVelocity {0.0};
     double velocityScale {0.0};
@@ -167,6 +151,13 @@ public:
     {
         if (panRecognizerNG_) {
             panRecognizerNG_->SetTouchRestrict(touchRestrict);
+        }
+    }
+
+    void SetIsAllowMouse(const bool isAllowMouse)
+    {
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetIsAllowMouse(isAllowMouse);
         }
     }
 

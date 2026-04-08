@@ -1154,6 +1154,10 @@ class LazyArkMarqueeComponent extends ArkComponent {
     this.lazyComponent.onFinish(event);
     return this;
   }
+  onStop(event) {
+    this.lazyComponent.onStop(event);
+    return this;
+  }
   marqueeUpdateStrategy(value) {
     this.lazyComponent.marqueeUpdateStrategy(value);
     return this;
@@ -1589,6 +1593,10 @@ class LazyArkRatingComponent extends ArkComponent {
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
   }
   stars(value) {
     this.lazyComponent.stars(value);
@@ -2280,11 +2288,7 @@ class LazyArkSliderComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
-      this.lazyComponent.initialize(value[0]);
-    } else {
-      this.lazyComponent.initialize(undefined);
-    }
+    this.lazyComponent.initialize(value);
     return this;
   }
   blockColor(value) {
@@ -2864,6 +2868,14 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
   };
   onDidStopFling(value) {
     this.lazyComponent.onDidStopFling(value);
+    return this;
+  };
+  onWillScroll(value) {
+    this.lazyComponent.onWillScroll(value);
+    return this;
+  };
+  onDidScroll(value) {
+    this.lazyComponent.onDidScroll(value);
     return this;
   };
 }

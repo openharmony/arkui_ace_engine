@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -597,6 +598,9 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
         curr = curr->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_RETURN(curr, false);
+    if (ancestor->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        path.push_back(ancestor);
+    }
     pointNode = pointAncestor;
     for (auto nodePtr = path.rbegin(); nodePtr != path.rend(); ++nodePtr) {
         auto renderContext = (*nodePtr)->GetRenderContext();
@@ -613,6 +617,10 @@ bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(
     AccessibilityHoverEventType prevEventType)
 {
     if ((prevEventType == AccessibilityHoverEventType::MOVE)
+        && (eventType == AccessibilityHoverEventType::EXIT)) {
+        return true;
+    }
+    if ((prevEventType == AccessibilityHoverEventType::ENTER)
         && (eventType == AccessibilityHoverEventType::EXIT)) {
         return true;
     }

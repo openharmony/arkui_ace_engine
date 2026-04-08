@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
@@ -304,6 +305,7 @@ void MenuPattern::OnModifyDone()
     }
 
     SetAccessibilityAction();
+    ApplyScrollBarToScrollNode();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
         auto node = host->GetChildren().front();
@@ -315,6 +317,29 @@ void MenuPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
+    }
+}
+
+void MenuPattern::ApplyScrollBarToScrollNode()
+{
+    CHECK_EQUAL_VOID(scrollBar_.has_value(), false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& child : host->GetChildren()) {
+        auto childFrame = AceType::DynamicCast<FrameNode>(child);
+        if (childFrame && childFrame->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPaintProperty = childFrame->GetPaintProperty<ScrollablePaintProperty>();
+            if (scrollPaintProperty) {
+                scrollPaintProperty->UpdateScrollBarMode(scrollBar_.value());
+            }
+            auto scrollPattern = childFrame->GetPattern<ScrollablePattern>();
+            if (scrollPattern) {
+                scrollPattern->SetScrollBar(scrollBar_.value());
+            }
+            childFrame->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            break;
+        }
     }
 }
 

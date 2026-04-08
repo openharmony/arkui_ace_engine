@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-
 #include "animator_option.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
+
+#include "base/log/log_wrapper.h"
 #include "base/thread/frame_trace_adapter.h"
+#include "core/animation/animation.h"
+#include "core/animation/curve_animation.h"
 
 namespace OHOS::Ace::Napi {
 

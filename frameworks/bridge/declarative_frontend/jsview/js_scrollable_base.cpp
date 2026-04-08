@@ -128,12 +128,15 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
     JSClass<JSScrollableBase>::StaticMethod("scrollBarMargin", &JSScrollableBase::SetScrollBarMargin);
     JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
+    JSClass<JSScrollableBase>::StaticMethod("enableScrollWithMouse", &JSScrollableBase::JSEnableScrollWithMouse);
     JSClass<JSScrollableBase>::StaticMethod("onWillStartDragging", &JSScrollableBase::JSOnWillStartDragging, opt);
     JSClass<JSScrollableBase>::StaticMethod("onDidStopDragging", &JSScrollableBase::JSOnDidStopDragging, opt);
     JSClass<JSScrollableBase>::StaticMethod("onWillStartFling", &JSScrollableBase::JSOnWillStartFling, opt);
     JSClass<JSScrollableBase>::StaticMethod("onDidStopFling", &JSScrollableBase::JSOnDidStopFling, opt);
     JSClass<JSScrollableBase>::StaticMethod("contentStartOffset", &JSScrollableBase::JSContentStartOffset, opt);
     JSClass<JSScrollableBase>::StaticMethod("contentEndOffset", &JSScrollableBase::JSContentEndOffset, opt);
+    JSClass<JSScrollableBase>::StaticMethod(
+        "autoAdjustScrollBarMargin", &JSScrollableBase::JSAutoAdjustScrollBarMargin, opt);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -202,6 +205,16 @@ void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)
         NG::ScrollableModelNG::SetBackToTop(info[0]->ToBoolean());
     } else {
         NG::ScrollableModelNG::ResetBackToTop();
+    }
+}
+
+void JSScrollableBase::JSEnableScrollWithMouse(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NG::ScrollableModelNG::SetEnableScrollWithMouse(info[0]->ToBoolean());
     }
 }
 
@@ -297,5 +310,14 @@ void JSScrollableBase::JSContentEndOffset(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         NG::ScrollableModelNG::CreateWithResourceObjContentEndOffset(resObj);
     }
+}
+
+void JSScrollableBase::JSAutoAdjustScrollBarMargin(const JSCallbackInfo& info)
+{
+    std::optional<bool> autoAdjust = std::nullopt;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        autoAdjust = info[0]->ToBoolean();
+    }
+    NG::ScrollableModelNG::SetAutoAdjustScrollBarMargin(autoAdjust);
 }
 } // namespace OHOS::Ace::Framework

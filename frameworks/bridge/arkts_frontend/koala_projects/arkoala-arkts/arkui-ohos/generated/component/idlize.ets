@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -91,6 +91,7 @@ import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { default as curves } from '@ohos.curves'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from './particle'
 import { default as router } from '@ohos.router'
 import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo_serializer, CustomSpanDrawInfo_serializer } from './styledString'
@@ -102,6 +103,7 @@ import { CustomBuilderRootModifier } from './../CustomBuilderRootModifier'
 import { CustomLayoutRootModifier } from './../CustomLayoutRootModifier'
 import { GlobalScope } from './../framework/GlobalScope'
 import { curves_ICurve_serializer } from './../framework/ohos.curves'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export class ActionSheet {
     public static show(options: ActionSheetOptions): void {
         const options_casted = options as (ActionSheetOptions)
@@ -2079,6 +2081,7 @@ export class CustomDialogControllerExtender implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._CustomDialogControllerExtender_getExternalOptions(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CustomDialogControllerExternalOptionsExtender = CustomDialogControllerExternalOptionsExtender_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getState_serialize(): promptAction.CommonState {
@@ -2628,6 +2631,28 @@ export class FrameNodeExtender {
         FrameNodeExtender.applyAttributesFinish_serialize(peer_casted)
         return
     }
+    public static createFrameNodes(count: int32): Array<KPointer> {
+        const count_casted = count as (int32)
+        return FrameNodeExtender.createFrameNodes_serialize(count_casted)
+    }
+    public static getRenderNodesByFrameNodes(ptrs: Array<KPointer>): Array<KPointer> {
+        const ptrs_casted = ptrs as (Array<KPointer>)
+        return FrameNodeExtender.getRenderNodesByFrameNodes_serialize(ptrs_casted)
+    }
+    public static getIdsByFrameNodes(ptrs: Array<KPointer>): Array<int32> {
+        const ptrs_casted = ptrs as (Array<KPointer>)
+        return FrameNodeExtender.getIdsByFrameNodes_serialize(ptrs_casted)
+    }
+    public static getFrameNodeById(peer: FrameNode, id: string): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const id_casted = id as (string)
+        return FrameNodeExtender.getFrameNodeById1_serialize(peer_casted, id_casted)
+    }
+    public static getFrameNodeByUniqueId(peer: FrameNode, id: int32): KPointer {
+        const peer_casted = peer as (FrameNode)
+        const id_casted = id as (int32)
+        return FrameNodeExtender.getFrameNodeByUniqueId1_serialize(peer_casted, id_casted)
+    }
     private static constructorFrameNode_serialize(supportMultiThread: boolean): KPointer {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode(supportMultiThread ? true : false)
         return retval
@@ -2688,30 +2713,35 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getPositionToParent_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParent(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getMeasuredSize_serialize(peer: FrameNode): Size {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getMeasuredSize(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Size = Size_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getLayoutPosition_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getLayoutPosition(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getId_serialize(peer: FrameNode): string {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUniqueId_serialize(peer: FrameNode): int32 {
@@ -2722,6 +2752,7 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getOpacity_serialize(peer: FrameNode): double {
@@ -2744,6 +2775,7 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getInspectorInfo(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static invalidate_serialize(peer: FrameNode): void {
@@ -2800,54 +2832,63 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreen(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getGlobalPositionOnDisplay_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getGlobalPositionOnDisplay(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getPositionToWindowWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getPositionToParentWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParentWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getPositionToScreenWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreenWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Vector2 = Vector2_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUserConfigBorderWidth_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigBorderWidth(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUserConfigPadding_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigPadding(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUserConfigMargin_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigMargin(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUserConfigSize_serialize(peer: FrameNode): SizeTLengthMetrics {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigSize(extractors.toFrameNodePtr(peer))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeTLengthMetrics = SizeTLengthMetrics_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getFrameNodeByKey_serialize(name: string): KPointer {
@@ -2930,6 +2971,7 @@ export class FrameNodeExtender {
             return retvalDeserializer.readFloat64();
         })
         const returnResult: Array<double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getFrameNodePtr_serialize(node: FrameNode): KPointer {
@@ -2964,6 +3006,7 @@ export class FrameNodeExtender {
             return retvalDeserializer.readFloat64();
         })
         const returnResult: Array<double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getRenderNode_serialize(peer: KPointer): KPointer {
@@ -2982,6 +3025,7 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getInteractionEventBindingInfo(extractors.toFrameNodePtr(peer), eventType.valueOf())
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: InteractionEventBindingInfo = InteractionEventBindingInfo_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static isOnRenderTree_serialize(peer: FrameNode): boolean {
@@ -3003,6 +3047,7 @@ export class FrameNodeExtender {
             return retvalDeserializer.readFloat64();
         })
         const returnResult: Array<double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static convertPositionFromWindow_serialize(peer: FrameNode, positionByWindow: NodePosition): Array<double> {
@@ -3016,10 +3061,69 @@ export class FrameNodeExtender {
             return retvalDeserializer.readFloat64();
         })
         const returnResult: Array<double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static applyAttributesFinish_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_applyAttributesFinish(extractors.toFrameNodePtr(peer))
+    }
+    private static createFrameNodes_serialize(count: int32): Array<KPointer> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createFrameNodes(count)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<KPointer> = new Array<KPointer>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readPointer()
+        }
+        const returnResult : Array<KPointer> = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
+    private static getRenderNodesByFrameNodes_serialize(ptrs: Array<KPointer>): Array<KPointer> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((ptrs.length).toInt())
+        for (let ptrsCounterI = 0; ptrsCounterI < ptrs.length; ptrsCounterI++) {
+            const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
+            thisSerializer.writePointer(ptrsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodesByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<KPointer> = new Array<KPointer>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readPointer()
+        }
+        const returnResult : Array<KPointer> = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
+    private static getIdsByFrameNodes_serialize(ptrs: Array<KPointer>): Array<int32> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((ptrs.length).toInt())
+        for (let ptrsCounterI = 0; ptrsCounterI < ptrs.length; ptrsCounterI++) {
+            const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
+            thisSerializer.writePointer(ptrsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdsByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<int32> = new Array<int32>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readInt32()
+        }
+        const returnResult : Array<int32> = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
+    static getFrameNodeById1_serialize(peer: FrameNode, id: string): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById1(extractors.toFrameNodePtr(peer), id)
+        return retval
+    }
+    private static getFrameNodeByUniqueId1_serialize(peer: FrameNode, id: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId1(extractors.toFrameNodePtr(peer), id)
+        return retval
     }
 }
 export class GaugeExtender {
@@ -3426,18 +3530,21 @@ export class GlobalScope_ohos_font {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getFontByName_serialize(fontName: string): font.FontInfo {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: font.FontInfo = font_FontInfo_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getUIFontConfig_serialize(): font.UIFontConfig {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getUIFontConfig()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: font.UIFontConfig = font_UIFontConfig_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -3469,6 +3576,7 @@ export class GlobalScope_ohos_measure_utils {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeOptions = SizeOptions_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getParagraphs_serialize(styledString: StyledString, options?: TextLayoutOptions): Array<text.Paragraph> {
@@ -3488,6 +3596,7 @@ export class GlobalScope_ohos_measure_utils {
             return (text_Paragraph_serializer.read(retvalDeserializer) as text.Paragraph);
         })
         const returnResult: Array<text.Paragraph> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -3585,6 +3694,12 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
+    public static enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        const enabled_casted = enabled as (boolean | undefined)
+        const eventType_casted = eventType as (RawInputEventType)
+        IUIContext.enableEventPassthrough_serialize(enabled_casted, eventType_casted)
+        return
+    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3663,6 +3778,18 @@ export class IUIContext {
     }
     private static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
         ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
+    }
+    private static enableEventPassthrough_serialize(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (enabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enabledTmpValue = enabled!
+            thisSerializer.writeBoolean(enabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._IUIContext_enableEventPassthrough(thisSerializer.asBuffer(), thisSerializer.length(), eventType.valueOf())
+        thisSerializer.release()
     }
 }
 export class LazyBuild {
@@ -3960,6 +4087,7 @@ export class NavExtender {
         const retval = ArkUIGeneratedNativeModule._NavExtender_pop(toPeerPtr(pathStack), animated ? true : false)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static setOnPopCallback_serialize(pathStack: NavPathStack, popCallback: ((breakpoints: string) => void)): void {
@@ -3972,6 +4100,7 @@ export class NavExtender {
         const retval = ArkUIGeneratedNativeModule._NavExtender_getIdByIndex(toPeerPtr(pathStack), index)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getIdByName_serialize(pathStack: NavPathStack, name: string): Array<string> {
@@ -3982,6 +4111,7 @@ export class NavExtender {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static popToIndex_serialize(pathStack: NavPathStack, index: int32, animated: boolean): void {
@@ -4005,6 +4135,7 @@ export class NavExtender {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static setSplitPlaceholder_serialize(navigation: KPointer, placeholderNode: KPointer): void {
@@ -5152,6 +5283,7 @@ export class RestrictedWorker implements MaterializedBase {
             buffer = bufferOptClosure
         }
         const returnResult: RestrictedWorker_onexit_Callback | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnexit_serialize(onexit: RestrictedWorker_onexit_Callback | undefined): void {
@@ -5189,6 +5321,7 @@ export class RestrictedWorker implements MaterializedBase {
             buffer = bufferOptClosure
         }
         const returnResult: RestrictedWorker_onerror_Callback | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnerror_serialize(onerror: RestrictedWorker_onerror_Callback | undefined): void {
@@ -5226,6 +5359,7 @@ export class RestrictedWorker implements MaterializedBase {
             buffer = bufferOptClosure
         }
         const returnResult: RestrictedWorker_onmessage_Callback | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnmessage_serialize(onmessage: RestrictedWorker_onmessage_Callback | undefined): void {
@@ -5263,6 +5397,7 @@ export class RestrictedWorker implements MaterializedBase {
             buffer = bufferOptClosure
         }
         const returnResult: RestrictedWorker_onmessage_Callback | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnmessageerror_serialize(onmessageerror: RestrictedWorker_onmessage_Callback | undefined): void {
@@ -5535,12 +5670,14 @@ export class RouterExtender {
         const retval = ArkUIGeneratedNativeModule._RouterExtender_getLength()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getState_serialize(): RouterStateInner {
         const retval = ArkUIGeneratedNativeModule._RouterExtender_getState()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RouterStateInner = RouterStateInner_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getStateByIndex_serialize(index: int32): RouterStateInner | undefined {
@@ -5552,6 +5689,7 @@ export class RouterExtender {
             buffer = RouterStateInner_serializer.read(retvalDeserializer)
         }
         const returnResult: RouterStateInner | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getStateByUrl_serialize(url: string): Array<RouterStateInner> {
@@ -5562,12 +5700,14 @@ export class RouterExtender {
             return RouterStateInner_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<RouterStateInner> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static getParams_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._RouterExtender_getParams()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static pushNamedRoute0_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback): Promise<void> {
@@ -5901,6 +6041,7 @@ export class SystemOps {
             return (retvalDeserializer.readNumber() as number);
         })
         const returnResult: Array<number> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static blendColorByColorMetrics_serialize(color: number, overlayColor: number): Array<number> {
@@ -5911,6 +6052,7 @@ export class SystemOps {
             return (retvalDeserializer.readNumber() as number);
         })
         const returnResult: Array<number> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static resourceToLengthMetrics_serialize(res: global_resource_Resource): LengthMetricsCustom {
@@ -5920,6 +6062,7 @@ export class SystemOps {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: LengthMetricsCustom = LengthMetricsCustom_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static createResourceObject_serialize(resource: global_resource_Resource): KPointer {
@@ -6160,6 +6303,7 @@ export class TouchEventExtender {
             buffer = bufferOpt
         }
         const returnResult: Array<HistoricalPoint> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static preventDefault_serialize(ptr: KPointer): void {
@@ -6175,6 +6319,7 @@ export class UIContextAtomicServiceBar {
         const retval = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Frame = Frame_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -6197,6 +6342,7 @@ export class UIContextGetInfo {
             buffer = uiObserver_NavigationInfo_serializer.read(retvalDeserializer)
         }
         const returnResult: uiObserver.NavigationInfo | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static enableSwipeBack_serialize(enabled: boolean | undefined): void {
@@ -6576,6 +6722,7 @@ export interface CustomDialogControllerOptionsExtender {
     immersiveMode?: ImmersiveMode;
     levelOrderExtender?: LevelOrderExtender;
     focusable?: boolean;
+    systemMaterial?: SystemUiMaterial;
 }
 export interface CustomDialogControllerExternalOptionsExtender {
     customStyle?: boolean;
@@ -9726,6 +9873,14 @@ export class CustomDialogControllerOptionsExtender_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): CustomDialogControllerOptionsExtender {
         let valueDeserializer: DeserializerBase = buffer
@@ -10172,7 +10327,13 @@ export class CustomDialogControllerOptionsExtender_serializer {
             focusableTmpBuf = valueDeserializer.readBoolean()
         }
         const focusableTmpResult: boolean | undefined = focusableTmpBuf
-        let value: CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrderExtender: levelOrderExtenderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        let value: CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrderExtender: levelOrderExtenderTmpResult, focusable: focusableTmpResult, systemMaterial: systemMaterialTmpResult} as CustomDialogControllerOptionsExtender)
         return value
     }
 }

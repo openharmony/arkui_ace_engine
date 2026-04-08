@@ -357,8 +357,6 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
-    virtual ColorMode GetColorMode() = 0;
-    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -442,6 +440,7 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetEnableAutoSpacing(bool enabled) {};
+    virtual void SetOrphanCharOptimization(bool enabled) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};

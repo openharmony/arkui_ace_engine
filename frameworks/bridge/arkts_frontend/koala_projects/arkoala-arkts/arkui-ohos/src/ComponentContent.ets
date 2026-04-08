@@ -15,7 +15,6 @@
 import { CustomBuilder } from './component/builder';
 import { ReactiveBuilderNode } from './BuilderNode';
 import { UIContext } from '@ohos/arkui/UIContext'
-import { UIContextImpl } from './base/UIContextImpl'
 import { FrameNode } from './FrameNode'
 import { Content } from './Content'
 import { KPointer, pointer, nullptr } from '@koalaui/interop'
@@ -39,7 +38,7 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
 
     constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
         this.builderNode_ = new BuilderNode<T>(uiContext, nodePtr, frameNodePtr);
-        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
     }
 
     //@ts-ignore
@@ -47,21 +46,21 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params);
-        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
     }
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params, options);
-        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
     }
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<voidBuilderFunc>) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder);
-        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
     }
 
     update(params: T): void {

@@ -21,15 +21,6 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 
 namespace OHOS::Ace::Napi {
-namespace {
-void ThrowDelegateError(napi_env env)
-{
-    auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
-    std::string message =
-        AceEngine::GetEnhancedContextBNotFoundMessage(currentIdAndReason.second, Container::CurrentIdSafely());
-    NapiThrow(env, "UI execution context not found." + message, ERROR_CODE_INTERNAL_ERROR);
-}
-} // namespace
 static NG::FrameNode* ParseFrameNode(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -60,9 +51,13 @@ static napi_value JSAddFrameNode(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, &data));
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     if (argc == 1) {
@@ -126,9 +121,13 @@ static napi_value JSRemoveFrameNode(napi_env env, napi_callback_info info)
 {
     NG::FrameNode* frameNode = ParseFrameNode(env, info);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->RemoveFrameNodeOnOverlay(AceType::Claim(frameNode));
@@ -139,9 +138,13 @@ static napi_value JSShowNode(napi_env env, napi_callback_info info)
 {
     NG::FrameNode* frameNode = ParseFrameNode(env, info);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowNodeOnOverlay(AceType::Claim(frameNode));
@@ -152,9 +155,13 @@ static napi_value JSHideNode(napi_env env, napi_callback_info info)
 {
     NG::FrameNode* frameNode = ParseFrameNode(env, info);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->HideNodeOnOverlay(AceType::Claim(frameNode));
@@ -163,9 +170,13 @@ static napi_value JSHideNode(napi_env env, napi_callback_info info)
 
 static napi_value JSShowAllFrameNodes(napi_env env, napi_callback_info info)
 {
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowAllNodesOnOverlay();
@@ -174,9 +185,13 @@ static napi_value JSShowAllFrameNodes(napi_env env, napi_callback_info info)
 
 static napi_value JSHideAllFrameNodes(napi_env env, napi_callback_info info)
 {
+    auto reason = ContainerScope::CurrentIdWithReason().second;
+    auto instanceId = Container::CurrentIdSafely();
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        ThrowDelegateError(env);
+        std::string errorMessage =
+            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
+        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->HideAllNodesOnOverlay();

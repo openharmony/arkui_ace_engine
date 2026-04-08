@@ -51,9 +51,8 @@ const ARGS_SPEC = [
     },
     {
         flag: '--ark-entry-point',
-        help: 'Entry point function in format like `ETSGLOBAL::main`',
+        help: 'Entry point function in format like `<module name>::main`',
         domain: 'string',
-        default: 'ETSGLOBAL::main'
     },
     ...DEFAULT_DRIVER_FLAGS,
 ]

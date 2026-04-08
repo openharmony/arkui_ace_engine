@@ -32,11 +32,11 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "ui/properties/ui_material.h"
 
 using namespace testing;
@@ -119,7 +119,7 @@ CheckboxBuilderFunc CheckBoxTestNG::CheckboxBuilder()
  * @tc.desc: Set CheckBox value into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init CheckBox node

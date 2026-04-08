@@ -23,29 +23,45 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
-#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
@@ -125,6 +141,15 @@ ScrollablePattern::ScrollablePattern() = default;
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
     : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
 {}
+
+void ScrollablePattern::CreateRefreshCoordination()
+{
+    if (!refreshCoordination_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
+    }
+}
 
 ScrollablePattern::~ScrollablePattern()
 {
@@ -282,6 +307,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    json->PutExtAttr("enableScrollWithMouse", GetIsAllowMouse(), filter);
     if (NearEqual(GetFriction(), -1.0) && scrollableEvent_) {
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
@@ -1369,6 +1395,80 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     RegisterScrollBarOverDragEventTask();
 }
 
+void ScrollablePattern::RegisterScrollBarMarginCallback()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    scrollBar_->SetGetAvoidScrollBarMargin([weak = WeakClaim(this)]() -> std::pair<double, double> {
+        std::pair<double, double> result = { 0.0, 0.0 };
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, result);
+        return pattern->GetAutoAdjustAvoidOffset();
+    });
+}
+
+std::pair<double, double> ScrollablePattern::GetAutoAdjustAvoidOffset()
+{
+    std::pair<double, double> result = { 0.0, 0.0 };
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    auto isRtl = IsRTL();
+    result.first += GetContentStartOffset();
+    result.second += GetContentEndOffset();
+    if (IsReverse()) {
+        std::swap(result.first, result.second);
+    }
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetPaddingProperty(), result, isRtl);
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetSafeAreaPaddingProperty(), result, isRtl);
+    CalcBorderWidthAvoidDistByMainAxis(layoutProperty->GetBorderWidthProperty(), result, isRtl);
+    return result;
+}
+
+void ScrollablePattern::CalcPaddingAvoidDistByMainAxis(
+    const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->start || property->end) {
+            auto startPadding = property->start.value_or(CalcLength()).GetDimension().ConvertToPx();
+            auto endPadding = property->end.value_or(CalcLength()).GetDimension().ConvertToPx();
+            if (isRtl) {
+                std::swap(startPadding, endPadding);
+            }
+            offset.first += startPadding;
+            offset.second += endPadding;
+        } else {
+            offset.first += property->left.value_or(CalcLength()).GetDimension().ConvertToPx();
+            offset.second += property->right.value_or(CalcLength()).GetDimension().ConvertToPx();
+        }
+    } else {
+        offset.first += property->top.value_or(CalcLength()).GetDimension().ConvertToPx();
+        offset.second += property->bottom.value_or(CalcLength()).GetDimension().ConvertToPx();
+    }
+}
+
+void ScrollablePattern::CalcBorderWidthAvoidDistByMainAxis(
+    const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->startDimen || property->endDimen) {
+            auto startBorder = property->startDimen.value_or(Dimension()).ConvertToPx();
+            auto endBorder = property->endDimen.value_or(Dimension()).ConvertToPx();
+            if (isRtl) {
+                std::swap(startBorder, endBorder);
+            }
+            offset.first += startBorder;
+            offset.second += endBorder;
+        } else {
+            offset.first += property->leftDimen.value_or(Dimension()).ConvertToPx();
+            offset.second += property->rightDimen.value_or(Dimension()).ConvertToPx();
+        }
+    } else {
+        offset.first += property->topDimen.value_or(Dimension()).ConvertToPx();
+        offset.second += property->bottomDimen.value_or(Dimension()).ConvertToPx();
+    }
+}
+
 bool ScrollablePattern::CanOverScrollWithDelta(double delta, bool isNestScroller)
 {
     if (isNestScroller && GetNestedScroll().NeedParent()) {
@@ -1491,6 +1591,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         scrollBar_ = CreateScrollBar();
         CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
+        RegisterScrollBarMarginCallback();
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
     }
@@ -1570,6 +1671,12 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
                 scrollBar_->SetScrollBarMargin(scrollableBarMargin.value());
                 scrollBar_->FlushBarWidth();
             }
+        } else if (scrollBar_->GetAutoAdjustScrollBarMargin() != property->GetAutoAdjustScrollBarMargin()) {
+            scrollBar_->SetAutoAdjustScrollBarMargin(property->GetAutoAdjustScrollBarMargin());
+            scrollBar_->FlushBarWidth();
+        }
+        if (scrollBar_->GetAutoAdjustScrollBarMargin().value_or(false)) {
+            scrollBar_->NeedUpdateAutoAdjustScrollBarMargin();
         }
     }
 }

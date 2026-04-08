@@ -1,0 +1,38 @@
+[
+  {"version":"v0.9","createSurface":{"surfaceId":"main","catalogId":"https://a2ui.org/specification/v0_9/standard_catalog.json"}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"main","components":[
+    {"id":"root","component":"Column","children":["checkoutTitle","checkinTitle", "3_Title", "4_Title"]},
+    {"id":"checkoutTitle","component":"Text","text":"Hello World 01!"},
+    {"id":"checkinTitle","component":"Text","text": {"path":"/contact/colleague/email"}},
+    {"id":"3_Title","component":"Text","text": {"path":"/contact/family/phone"}}
+  ]}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"main","components":[
+    {"id":"4_Title","component":"Text","text":"Hello World 04"}
+
+  ]}},
+  {"version":"v0.9", "updateDataModel":{
+    "surfaceId":"main",
+    "value": {
+      "contact": {
+        "family":{
+          "firstName":"John",
+          "secondName":"Doe",
+          "email":"john.doe@example.com",
+          "phone":"1234567890",
+          "preference":["email"],
+          "subscribe": {
+            "myname": "xxxx"
+          }
+        },
+        "colleague":{
+          "firstName":"Andy",
+          "secondName":"Eer",
+          "email":"andy.doe@example.com",
+          "phone":"1234567890",
+          "preference":["email"],
+          "subscribe":true
+        }
+      }
+    }
+  }}
+]

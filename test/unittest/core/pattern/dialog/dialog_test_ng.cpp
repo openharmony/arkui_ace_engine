@@ -17,14 +17,16 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/common/recorder/event_recorder.h"
 
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_container_info.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
@@ -249,7 +251,7 @@ void DialogPatternTestNg::CheckTextMarquee(RefPtr<FrameNode> buttonNode)
  * @tc.type: FUNC
  * @tc.author: zhoutianer
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator004, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator004, TestSize.Level0)
 {
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
     bool isCalled = false;
@@ -264,7 +266,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author: zhoutianer
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator005, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator005, TestSize.Level0)
 {
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
     dialogEventHub->FireCancelEvent();
@@ -277,7 +279,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author: zhoutianer
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator006, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator006, TestSize.Level0)
 {
     bool isCalled = false;
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
@@ -297,7 +299,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author: zhoutianer
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create dialogEventHub object.
@@ -318,7 +320,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level1)
  * @tc.desc: Test AlertDialog with button color and text color
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
@@ -372,7 +374,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
  * @tc.desc: Test Dialog IsAlignmentByWholeScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
@@ -423,7 +425,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level1)
  * @tc.desc: Test Action Sheet Accessibility Property
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level0)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
@@ -455,7 +457,7 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
  * @tc.desc: Test AlertDialog with button color and text color
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create dialogNode and dialogTheme instance.
@@ -488,7 +490,7 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
  * @tc.desc: Dialog already in close
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create dialogNode and dialogTheme instance.
@@ -515,7 +517,7 @@ HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level1)
  * @tc.desc: Test Alert Accessibility Property
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level0)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
@@ -547,7 +549,7 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
  * @tc.desc: Test GetMaxWidthBasedOnGridType function
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -580,7 +582,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
  * @tc.desc: Test CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set properties.
@@ -629,7 +631,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
  * @tc.desc: Verify function CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg001, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogProperties.
@@ -657,7 +659,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg001, TestSize.Level1)
  * @tc.desc: Verify function CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg002, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogProperties.
@@ -686,7 +688,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg002, TestSize.Level1)
  * @tc.desc: Verify function CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg003, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogProperties.
@@ -715,7 +717,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg003, TestSize.Level1)
  * @tc.desc: Verify function GetCloseAnimation and GetOpenAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg004, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogProperties.
@@ -754,7 +756,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg004, TestSize.Level1)
  * @tc.desc: Verify function HandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg005, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create GestureEvent and DialogProperties.
@@ -795,7 +797,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg005, TestSize.Level1)
  * @tc.desc: Verify function HandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create GestureEvent and DialogProperties.
@@ -836,7 +838,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level1)
  * @tc.desc: CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set properties.
@@ -880,7 +882,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
  * @tc.desc: CreateDialogNode
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set properties.
@@ -913,7 +915,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
  * @tc.desc: Test DialogPattern OnColorConfigurationUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set properties.
@@ -962,7 +964,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
  * @tc.desc: Test CreateDialogNode function with maskRect.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set maskRect width and height in positive number.
@@ -1005,7 +1007,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
  * @tc.desc: Test CreateDialogNode function with maskRect.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set maskRect width and height in negative number.
@@ -1048,7 +1050,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
  * @tc.desc: Test dialogLayoutAlgorithm.MultipleDialog function.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest011, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create overlayManager and DialogLayoutAlgorithm instance.
@@ -1104,7 +1106,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest011, TestSize.Level1)
  * @tc.desc: Test dialog UpdateContentRenderContext.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
@@ -1160,7 +1162,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level1)
  * @tc.desc: Dialog already in close
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, PopDialog02, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, PopDialog02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogLayoutAlgorithm and overlayManager instance.
@@ -1224,7 +1226,7 @@ HWTEST_F(DialogPatternTestNg, PopDialog02, TestSize.Level1)
  * @tc.desc: Test dialog UpdateContentRenderContext.
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest013, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create dialogTheme.
@@ -1276,7 +1278,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest013, TestSize.Level1)
  * @tc.desc: Test DialogLayoutAlgorithm::Distribute function
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm003, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create DialogLayoutAlgorithm instance.
@@ -1305,7 +1307,7 @@ HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm003, TestSize.Level1)
  * @tc.desc: fullfill DialogPattern function branch
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest014, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create GestureEvent and DialogProperties.
@@ -1347,7 +1349,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest014, TestSize.Level1)
  * @tc.desc: fullfill DialogPattern function branch
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest015, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create GestureEvent and DialogProperties.
@@ -1392,7 +1394,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest015, TestSize.Level1)
  * @tc.desc: fullfill DialogPattern function branch
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest016, TestSize.Level1)
+HWTEST_F(DialogPatternTestNg, DialogPatternTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create GestureEvent and DialogProperties.

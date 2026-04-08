@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ImageSpanModifier extends ArkImageSpanComponent implements AttributeModifier<ImageSpanAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

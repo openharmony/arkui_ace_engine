@@ -26,10 +26,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_media_player.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
@@ -126,7 +126,7 @@ public:
     void TearDown() {}
 
 protected:
-    static RefPtr<FrameNode> CreateVideoNode(TestProperty& g_testProperty);
+    static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);
 };
 
 void VideoTestAddNg::SetUpTestSuite()
@@ -155,10 +155,10 @@ void VideoTestAddNg::SetUp()
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
+RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& testProperty)
 {
-    if (g_testProperty.videoController.has_value()) {
-        VideoModelNG().Create(g_testProperty.videoController.value());
+    if (testProperty.videoController.has_value()) {
+        VideoModelNG().Create(testProperty.videoController.value());
     } else {
         auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
         VideoModelNG().Create(videoController);
@@ -170,32 +170,32 @@ RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
 
-    if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
+    if (testProperty.src.has_value()) {
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
-    if (g_testProperty.progressRate.has_value()) {
-        VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
+    if (testProperty.progressRate.has_value()) {
+        VideoModelNG().SetProgressRate(testProperty.progressRate.value());
     }
-    if (g_testProperty.posterUrl.has_value()) {
-        VideoModelNG().SetPosterSourceInfo(g_testProperty.posterUrl.value(), "", "");
+    if (testProperty.posterUrl.has_value()) {
+        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value(), "", "");
     }
-    if (g_testProperty.muted.has_value()) {
-        VideoModelNG().SetMuted(g_testProperty.muted.value());
+    if (testProperty.muted.has_value()) {
+        VideoModelNG().SetMuted(testProperty.muted.value());
     }
-    if (g_testProperty.autoPlay.has_value()) {
-        VideoModelNG().SetAutoPlay(g_testProperty.autoPlay.value());
+    if (testProperty.autoPlay.has_value()) {
+        VideoModelNG().SetAutoPlay(testProperty.autoPlay.value());
     }
-    if (g_testProperty.controls.has_value()) {
-        VideoModelNG().SetControls(g_testProperty.controls.value());
+    if (testProperty.controls.has_value()) {
+        VideoModelNG().SetControls(testProperty.controls.value());
     }
-    if (g_testProperty.loop.has_value()) {
-        VideoModelNG().SetLoop(g_testProperty.loop.value());
+    if (testProperty.loop.has_value()) {
+        VideoModelNG().SetLoop(testProperty.loop.value());
     }
-    if (g_testProperty.objectFit.has_value()) {
-        VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    if (testProperty.objectFit.has_value()) {
+        VideoModelNG().SetObjectFit(testProperty.objectFit.value());
     }
-    if (g_testProperty.showFirstFrame.has_value()) {
-        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
+    if (testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1431,5 +1431,342 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest015, TestSize.Level1)
     pattern15->OnPlayerStatus(PlaybackStatus::NONE);
 }
 
+/**
+ * @tc.name: VideoPatternOnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent with valid play command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
 
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send play command
+     */
+    std::string playCommand = R"({"cmd":"setVideoPlayerStatus","value":"play"})";
+    int32_t result = pattern->OnInjectionEvent(playCommand);
+
+    /**
+     * @tc.expected: step2. Return success and verify playback status
+     */
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_EQ(pattern->currentInjectedStatusCmd_, "play");
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent002
+ * @tc.desc: Test OnInjectionEvent with valid speed command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send speed command with valid value
+     */
+    std::string speedCommand = R"({"cmd":"setVideoPlaybackSpeed","value":2.0})";
+    int32_t result = pattern->OnInjectionEvent(speedCommand);
+
+    /**
+     * @tc.expected: step2. Return success and verify speed
+     */
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_DOUBLE_EQ(pattern->GetProgressRate(), 2.0);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent003
+ * @tc.desc: Test OnInjectionEvent with invalid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send invalid JSON
+     */
+    std::string invalidJson = R"({"cmd":"setVideoPlayerStatus","value":)";
+    int32_t result = pattern->OnInjectionEvent(invalidJson);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent004
+ * @tc.desc: Test OnInjectionEvent with unsupported cmd type
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send unsupported cmd
+     */
+    std::string unsupportedCmd = R"({"cmd":"unsupportedCommand","value":"play"})";
+    int32_t result = pattern->OnInjectionEvent(unsupportedCmd);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent005
+ * @tc.desc: Test OnInjectionEvent with missing value field
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send command without value field
+     */
+    std::string missingValue = R"({"cmd":"setVideoPlayerStatus"})";
+    int32_t result = pattern->OnInjectionEvent(missingValue);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent006
+ * @tc.desc: Test OnInjectionEvent with invalid status value
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send invalid status value
+     */
+    std::string invalidStatus = R"({"cmd":"setVideoPlayerStatus","value":"invalid"})";
+    int32_t result = pattern->OnInjectionEvent(invalidStatus);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent007
+ * @tc.desc: Test OnInjectionEvent with numeric value for status command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send status command with numeric value
+     */
+    std::string numericStatus = R"({"cmd":"setVideoPlayerStatus","value":123})";
+    int32_t result = pattern->OnInjectionEvent(numericStatus);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent008
+ * @tc.desc: Test OnInjectionEvent with string value for speed command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send speed command with string value
+     */
+    std::string stringSpeed = R"({"cmd":"setVideoPlaybackSpeed","value":"fast"})";
+    int32_t result = pattern->OnInjectionEvent(stringSpeed);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent009
+ * @tc.desc: Test OnInjectionEvent with invalid speed value
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send speed command with invalid value (negative)
+     */
+    std::string invalidSpeed = R"({"cmd":"setVideoPlaybackSpeed","value":-1.0})";
+    int32_t result = pattern->OnInjectionEvent(invalidSpeed);
+
+    /**
+     * @tc.expected: step2. Return failure
+     */
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent010
+ * @tc.desc: Test OnInjectionEvent multiple commands sequentially
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Send play command
+     */
+    std::string playCommand = R"({"cmd":"setVideoPlayerStatus","value":"play"})";
+    int32_t result = pattern->OnInjectionEvent(playCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step3. Send pause command
+     */
+    std::string pauseCommand = R"({"cmd":"setVideoPlayerStatus","value":"paused"})";
+    result = pattern->OnInjectionEvent(pauseCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step4. Send speed command
+     */
+    std::string speedCommand = R"({"cmd":"setVideoPlaybackSpeed","value":1.5})";
+    result = pattern->OnInjectionEvent(speedCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: VideoPatternOnInjectionEvent011
+ * @tc.desc: Test OnInjectionEvent with valid pause command
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestAddNg, OnInjectionEvent011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video node
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Setup mock media player and expect Pause to be called once
+     */
+    auto mockPlayer = AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_);
+    ASSERT_TRUE(mockPlayer);
+    EXPECT_CALL(*mockPlayer, Pause()).WillOnce(Return(0));
+
+    /**
+     * @tc.steps: step3. Send pause command
+     */
+    std::string pauseCommand = R"({"cmd":"setVideoPlayerStatus","value":"paused"})";
+    int32_t result = pattern->OnInjectionEvent(pauseCommand);
+
+    /**
+     * @tc.steps: step4. Verify result
+     * @tc.expected: Return success and Pause() called exactly once
+     */
+    EXPECT_EQ(result, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

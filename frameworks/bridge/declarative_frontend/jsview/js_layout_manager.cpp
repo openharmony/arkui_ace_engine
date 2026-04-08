@@ -267,8 +267,8 @@ void JSLayoutManager::GetCharacterPositionAtCoordinate(const JSCallbackInfo& arg
     CHECK_NULL_VOID(layoutInfoInterface);
     int32_t coordinateX = 0;
     int32_t coordinateY = 0;
-    JSContainerBase::ParseJsInt32(args[0], coordinateX);
-    JSContainerBase::ParseJsInt32(args[1], coordinateY);
+    CHECK_NULL_VOID(
+        JSContainerBase::ParseJsInt32(args[0], coordinateX) && JSContainerBase::ParseJsInt32(args[1], coordinateY));
     auto value = layoutInfoInterface->GetCharacterPositionAtCoordinate(coordinateX, coordinateY);
 
     auto vm = args.GetVm();

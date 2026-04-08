@@ -331,6 +331,11 @@ void TextFieldModelStatic::SetTextDirection(FrameNode* frameNode, const std::opt
         TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
 }
 
+void TextFieldModelStatic::SetHorizontalScrolling(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextFieldModelNG::SetHorizontalScrolling(frameNode, valueOpt.value_or(false));
+}
+
 void TextFieldModelStatic::SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
     if (colorOpt) {
@@ -811,6 +816,11 @@ void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::op
 void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextFieldModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, valueOpt.value_or(false));
 }
 
 void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)

@@ -143,12 +143,12 @@ export enum GridObjectSortComponentType {
   TEXT = 'text'
 }
 
-interface PositionXY {
+export interface PositionXY {
   x: number;
   y: number;
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   private gridObjectSortComponent: GridObjectSortComponent;
 
   constructor(gridObjectSortComponent: GridObjectSortComponent) {
@@ -379,7 +379,7 @@ export struct GridObjectSortComponent {
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
     if (this.callbackId) {
-      this.applicationContext.offEnvironment(this.callbackId! as int,
+      this.applicationContext.offEnvironment(this.callbackId!.toInt(),
         (err: BusinessError<void> | null): void => {
           hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
         })

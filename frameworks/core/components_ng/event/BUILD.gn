@@ -38,7 +38,7 @@ build_component_ng("event_ng") {
     "touch_event.cpp",
   ]
 
-  standard_input_deps = [ "imf:inputmethod_client" ]
+  standard_input_deps = [ "imf:inputmethod_client", "ability_base:want" ]
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     external_deps = [
       "hilog:libhilog",

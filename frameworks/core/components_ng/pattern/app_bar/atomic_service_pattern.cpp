@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <string>
 
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -493,6 +494,13 @@ bool AtomicServicePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(atom, false);
     auto pipeline = atom->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_RETURN(appbar, false);
+    appbar->UpdateVisibilityOfMenuBarRow(GetMenuBarRow(), container);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -546,5 +554,13 @@ void AtomicServicePattern::CallRectChange()
     }
     NotifyRectChange(rect.value());
     appBarRect_ = rect;
+}
+
+void AtomicServicePattern::FireAbilityCloseEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "Pattern FireAbilityCloseEvent");
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_ABILITY_CLOSE_EVENT, true);
 }
 } // namespace OHOS::Ace::NG

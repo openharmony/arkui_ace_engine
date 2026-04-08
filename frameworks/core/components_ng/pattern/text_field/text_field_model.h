@@ -30,7 +30,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -364,7 +364,9 @@ public:
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
+    virtual void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) = 0;
@@ -432,6 +434,7 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
     virtual void SetHalfLeading(bool value) {};
+    virtual void SetHorizontalScrolling(bool value) {};
     virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
@@ -457,6 +460,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};

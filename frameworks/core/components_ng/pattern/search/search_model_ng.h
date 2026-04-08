@@ -70,7 +70,9 @@ public:
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
@@ -186,7 +188,9 @@ public:
         std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& onChange);
+    static void SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
+    static void SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
                                     std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);

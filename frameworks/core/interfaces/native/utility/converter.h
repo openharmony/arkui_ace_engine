@@ -59,22 +59,34 @@ namespace OHOS::Ace {
 class DrawableDescriptor;
 class SpanBase;
 class ResponseRegion;
+enum class AutoCapitalizationMode;
 enum class CanvasUnit;
+enum class CancelButtonStyle;
 enum class ChainEdgeEffect;
 enum class CheckBoxStyle;
+enum class CleanNodeStyle;
 enum class EffectLayer;
 enum class GestureFocusMode;
 enum class ImageAnalyzerType;
+enum class InputStyle;
 enum class LayoutStyle;
 enum class LineCapStyle;
 enum class LineJoinStyle;
+enum class MenuPolicy;
 enum class NavigationType;
 enum class ParticleDisturbanceShapeType : uint32_t;
 enum class TabsCacheMode;
+enum class TextDeleteDirection;
+enum class TextInputAction;
+enum class TextInputType;
 enum class UndoStyle;
+struct Font;
 struct PickerIndicatorStyle;
+struct PreviewText;
+struct SelectionOptions;
 struct TextDetectConfig;
 struct TextMetrics;
+struct UserUnderlineColor;
 struct RenderingContextOptions;
 struct UpdateParagraphStyle;
 
@@ -89,8 +101,12 @@ enum class LaunchMode;
 enum class NavDestinationMode;
 enum class NavToolbarItemStatus;
 enum class PickerIndicatorType;
+enum class SelectionMenuType;
 enum class SessionType : int32_t;
 enum class SubMenuExpandingMode;
+enum class TextContentType;
+enum class TextResponseType;
+enum class TextSpanType;
 enum class ToggleType;
 struct BarItem;
 struct KeyboardOptions;
@@ -102,6 +118,8 @@ struct NavigationOptions;
 struct NavigationTitlebarOptions;
 struct NavigationTransition;
 struct PreviewBadge;
+struct PreviewMenuOptions;
+struct SelectMenuParam;
 struct KeyboardAppearanceConfig;
 struct UnionEffectContainerOptions;
 
@@ -665,6 +683,7 @@ namespace Converter {
     template<> FontWeightInt Convert(const Ark_Int32& src);
     template<> FontWeightInt Convert(const Ark_String& src);
     template<> FontWeightInt Convert(const Ark_Resource& src);
+    template<> FontWeightInt Convert(const Ark_ResourceStr& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> Gradient Convert(const Ark_RadialGradientOptions& value);
@@ -830,6 +849,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
+    template<> void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src);
     template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);
@@ -1085,6 +1105,8 @@ namespace Converter {
         const Ark_SharedTransitionEffectType& src);
     template<>
     void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
+    template<> void AssignCast(std::optional<ScrollDirectionalLockType>& dst,
+        const Ark_ScrollDirectionalLockType& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>

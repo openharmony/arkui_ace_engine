@@ -130,7 +130,7 @@ export class InteropAppStorageV2 {
         const isDeleted = AppStorageV2Impl.instance().removeByInterop(keyOrType);
         if (!isDeleted) {
             // keyOrType is verified in remove function
-            const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+            const key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
             // delete 1.1
             this.removeDynamicValue_(key);
         }

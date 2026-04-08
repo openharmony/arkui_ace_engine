@@ -19,14 +19,8 @@
 #include <cstdint>
 #include <list>
 
-#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/group_node.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

@@ -64,6 +64,8 @@ std::optional<void*> Text::GetParagraph()
 
 void Text::SetDrawCallback(DrawCallback&& drawCallback)
 {
+    auto isValidCallback = static_cast<bool>(drawCallback);
+    auto needMarkDirty = (hasDrawCallback_ != isValidCallback);
     auto drawCallbackNg = [callback = std::move(drawCallback)](const ExternalDrawCallbackInfo& info) {
         if (callback) {
             DrawCallbackInfo callbackInfo;
@@ -77,7 +79,12 @@ void Text::SetDrawCallback(DrawCallback&& drawCallback)
         }
         return false;
     };
-    NG::TextModelNG::SetExternalDrawCallback(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(drawCallbackNg));
+    auto aceNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    NG::TextModelNG::SetExternalDrawCallback(aceNode, std::move(drawCallbackNg));
+    if (needMarkDirty && aceNode) {
+        aceNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    hasDrawCallback_ = isValidCallback;
 }
 
 std::u16string Text::GetContent()

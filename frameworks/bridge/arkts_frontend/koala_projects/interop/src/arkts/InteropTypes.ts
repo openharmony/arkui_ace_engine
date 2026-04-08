@@ -16,10 +16,10 @@
 export type NodePointer = pointer // Improve: move to NativeModule
 
 export type KStringPtr = string
-export type KStringPtrArray = FixedArray<byte>
-export type KUint8ArrayPtr = FixedArray<byte>
-export type KInt32ArrayPtr = FixedArray<int>
-export type KFloat32ArrayPtr = FixedArray<float>
+export type KStringPtrArray = ValueArray<byte>
+export type KUint8ArrayPtr = ValueArray<byte>
+export type KInt32ArrayPtr = ValueArray<int>
+export type KFloat32ArrayPtr = ValueArray<float>
 export type KInt = int
 export type KLong = long
 export type KUInt = KInt
@@ -29,7 +29,7 @@ export type KDouble = double;
 export type KPointer = long // look once again
 export type pointer = KPointer
 export type KNativePointer = KPointer
-export type KInteropReturnBuffer = FixedArray<byte>
+export type KInteropReturnBuffer = ValueArray<byte>
 export type KSerializerBuffer = pointer
 
 export const nullptr: pointer = 0

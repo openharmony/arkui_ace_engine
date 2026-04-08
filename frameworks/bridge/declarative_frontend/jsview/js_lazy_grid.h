@@ -25,6 +25,7 @@ public:
     static void JsRowsGap(const JSCallbackInfo& info);
     static void JsColumnsGap(const JSCallbackInfo& info);
     static void JsColumnsTemplate(const std::string& value);
+    static void JsOnVisibleIndexesChange(const JSCallbackInfo& info);
     static void Create();
 };
 } // namespace OHOS::Ace::Framework

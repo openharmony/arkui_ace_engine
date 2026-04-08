@@ -43,8 +43,7 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
     const PreviewTextInfo GetPreviewTextInfo() const override;
-    ColorMode GetColorMode() override;
-    RefPtr<NG::RichEditorTheme> GetTheme() override;
+
 protected:
     WeakPtr<RichEditorPattern> pattern_;
 };

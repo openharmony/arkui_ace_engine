@@ -2536,6 +2536,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
         tabBarPattern->currentDelta_ = value - tabBarPattern->currentOffset_;
         tabBarPattern->currentOffset_ = value;
         auto host = tabBarPattern->GetHost();
+        CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     });
     host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, currentOffset_);

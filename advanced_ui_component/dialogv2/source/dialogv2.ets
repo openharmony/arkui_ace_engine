@@ -106,6 +106,8 @@ export class AdvancedDialogV2Button {
   public defaultFocus?: boolean;
   @Trace
   public enabled?: boolean;
+  @Trace
+  public textAlign?: TextAlign;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -115,6 +117,7 @@ export class AdvancedDialogV2Button {
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
     this.enabled = options.enabled;
+    this.textAlign = options.textAlign;
   };
 }
 
@@ -127,6 +130,7 @@ export declare interface AdvancedDialogV2ButtonOptions {
   role?: ButtonRole;
   defaultFocus?: boolean;
   enabled?: boolean;
+  textAlign?: TextAlign;
 }
 
 @ComponentV2
@@ -1472,7 +1476,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: AdvancedDialogV2Button, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: AdvancedDialogV2Button) => item.content.toString());
+        }, (item: AdvancedDialogV2Button) => item.content?.toString() ?? JSON.stringify(item));
       }
     }
   }

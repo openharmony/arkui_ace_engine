@@ -142,8 +142,10 @@ private:
     void FireStartEvent() const;
     void FireBounceEvent() const;
     void FireFinishEvent() const;
+    void FireStopEvent() const;
 
     void StartMarqueeAnimation();
+    void ExecuteStopMarquee();
     void StopMarqueeAnimation(bool stopAndStart);
     void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
@@ -157,6 +159,7 @@ private:
     float CalculateStart();
     float CalculateEnd();
     float GetTextOffset();
+    float GetTextOffsetOnly();
     std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
@@ -208,6 +211,7 @@ private:
     int32_t lastWindowHeight_ = 0.0;
     int32_t lastWindowWidth_ = 0.0;
     float marqueeWidth_ = 0.0f;
+    bool hasStart_ = false;
     std::optional<OffsetF> lastAnimationOffset_;
     std::optional<OffsetF> secondChildLastAnimationOffset_;
     std::unordered_map<MarqueeDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;

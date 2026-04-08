@@ -174,6 +174,12 @@ public:
         }
     }
 
+    void RegisterBuilderListenerHandler()
+    {
+        CHECK_NULL_VOID(builder_);
+        builder_->RegisterDataChangeListenerHandler();
+    }
+
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
         std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);

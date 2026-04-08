@@ -99,9 +99,28 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 }
 } // namespace
 
+int32_t GetMainInstanceId(int32_t instanceId)
+{
+    if (instanceId >= MIN_SUBCONTAINER_ID && instanceId < MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto manager = SubwindowManager::GetInstance();
+        return manager ? manager->GetParentContainerId(instanceId) : instanceId;
+    }
+    return instanceId;
+}
+
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
 static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
+
+ani_boolean IsEasySplit(ArkUI_Int32 instanceId)
+{
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "IsEasySplit-ani can not get current context.");
+        return false;
+    }
+    return context->IsDisplayInForceSplitMode();
+}
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
@@ -645,13 +664,13 @@ std::optional<std::string> GetWindowName(ani_int instanceId)
     return windowName;
 }
 
-std::optional<uint32_t> GetWindowId(ani_int instanceId)
+ani_int GetWindowId(ani_int instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, std::nullopt);
+    CHECK_NULL_RETURN(container, -1);
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN(context, std::nullopt);
+    CHECK_NULL_RETURN(context, -1);
     return context->GetFocusWindowId();
 }
 
@@ -1115,23 +1134,27 @@ ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
 }
 void GetCallingScopeUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::CurrentId();
+    instanceId = GetMainInstanceId(ContainerScope::CurrentId());
 }
 
 void GetLastFocusedUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::RecentActiveId();
+    instanceId = GetMainInstanceId(ContainerScope::RecentActiveId());
 }
 
 void GetLastForegroundUIContext(int32_t& instanceId)
 {
-    instanceId = ContainerScope::RecentForegroundId();
+    instanceId = GetMainInstanceId(ContainerScope::RecentForegroundId());
 }
 
 void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 {
     const auto allIds = ContainerScope::GetAllUIContexts();
+    std::set<int32_t> idSet;
     for (const auto& id : allIds) {
+        idSet.emplace(GetMainInstanceId(id));
+    }
+    for (const auto& id : idSet) {
         instanceIds.push_back(id);
     }
 }
@@ -1139,7 +1162,7 @@ void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
     auto currnetId = ContainerScope::CurrentIdWithReason();
-    instnace.push_back(currnetId.first);
+    instnace.push_back(GetMainInstanceId(currnetId.first));
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
 
@@ -1243,6 +1266,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
+        .isEasySplit = OHOS::Ace::NG::IsEasySplit,
     };
     return &impl;
 }

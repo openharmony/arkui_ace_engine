@@ -139,6 +139,54 @@ void AppBarView::BindJSContainer()
     pattern->AppScreenCallBack();
     pattern->AppBgColorCallBack();
     FireExtensionHostParams();
+    InitAbilityContextCallback();
+}
+
+void AppBarView::OnThirdCloseEvent()
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar OnThirdCloseEvent");
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtensionInner();
+    }
+}
+void AppBarView::FireAbilityCloseEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "FireAbilityCloseEvent");
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [atomicService = atomicService_]() {
+            auto atom = atomicService.Upgrade();
+            CHECK_NULL_VOID(atom);
+            auto pattern = atom->GetPattern<AtomicServicePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireAbilityCloseEvent();
+        },
+        OHOS::Ace::TaskExecutor::TaskType::UI, "ArkUIFireArkuiAbilityCloseEvent");
+}
+
+void AppBarView::InitAbilityContextCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "InitAbilityContextCallback");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto abilityRuntimeContextCallback = [weakSelf = WeakClaim(this), container]() {
+        auto self = weakSelf.Upgrade();
+        CHECK_NULL_VOID(self);
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "abilityRuntimeContextCallback");
+        self->FireAbilityCloseEvent();
+    };
+    container->RegisterTerminateUIExtension(std::move(abilityRuntimeContextCallback));
 }
 
 void AppBarView::FireExtensionHostParams()
@@ -173,9 +221,21 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     CHECK_NULL_VOID(appbar->contentStage_);
     pattern->BeforeCreateLayoutWrapper();
     InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
+    appbar->UpdateVisibilityOfMenuBarRow(pattern->GetMenuBarRow(), container);
+    appbar->AddInnerOnSizeChangeCallback(pattern->GetMenuBar());
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+}
+
+void AppBarView::UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container)
+{
+    CHECK_NULL_VOID(menubarRow);
+    CHECK_NULL_VOID(container);
+    CHECK_EQUAL_VOID(container->IsSubWindow(), false);
+    auto layoutProperty = menubarRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 }
 
 void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
@@ -186,6 +246,13 @@ void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityZIndex(MENU_BAR_AY_Z_INDEX);
+}
+
+void AppBarView::AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto callback = rectChangeCallback_;
+    frameNode->AddInnerOnSizeChangeCallback(frameNode->GetId(), std::move(callback));
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
@@ -650,4 +717,13 @@ void AppBarView::SetMenuBarVisible(bool visible)
     pattern->SetMenuBarVisibleCallBack(visible);
 }
 
+void AppBarView::SetRectChangeCallback(RectChangeFunc&& callback)
+{
+    rectChangeCallback_ = std::move(callback);
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    AddInnerOnSizeChangeCallback(pattern->GetMenuBar());
+}
 } // namespace OHOS::Ace::NG

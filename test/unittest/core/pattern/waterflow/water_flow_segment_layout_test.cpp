@@ -23,7 +23,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
@@ -2359,5 +2359,48 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentNaNTest002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 5), 0.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);  // Even index
     EXPECT_EQ(GetChildHeight(frameNode_, 7), 200.0f);  // Odd index
+}
+
+/**
+ * @tc.name: WaterFlowSegmentCrossCountZeroTest001
+ * @tc.desc: Reproduce crash when a laid-out segmented WaterFlow is updated with crossCount = 0.
+ *           Without a fix, the test should crash before reaching the final assertions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentCrossCountZeroTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(NG::WaterFlowLayoutMode::TOP_DOWN);
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        { .itemsCount = 60, .crossCount = 2, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC }
+    };
+    secObj->ChangeData(0, 0, sections);
+
+    CreateDone();
+    FlushUITasks();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    ASSERT_NE(info, nullptr);
+    ASSERT_FALSE(info->itemInfos_.empty());
+
+    std::vector<WaterFlowSections::Section> badSections = {
+        { .itemsCount = 60, .crossCount = 0, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC }
+    };
+    secObj->ChangeData(0, 1, badSections);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->layoutInfo_->isDataValid_);
+    EXPECT_FALSE(info->itemInfos_.empty());
+    EXPECT_GE(info->endIndex_, info->startIndex_);
+    EXPECT_EQ(info->items_.size(), 1);
+    EXPECT_EQ(info->items_[0].size(), 1);
+    EXPECT_EQ(info->itemInfos_[0].crossIdx, 0);
 }
 } // namespace OHOS::Ace::NG

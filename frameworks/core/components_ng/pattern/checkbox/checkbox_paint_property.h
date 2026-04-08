@@ -16,11 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_PAINT_PROPERTY_H
 
-#include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

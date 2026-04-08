@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -49,11 +50,75 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
+const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+constexpr char JS_LAYOUT_POLICY_CLASS_NAME[] = "LayoutPolicy";
+constexpr char LAYOUT_POLICY_MATCH_PARENT[] = "matchParent";
+constexpr char LAYOUT_POLICY_WRAP_CONTENT[] = "wrapContent";
+constexpr char LAYOUT_POLICY_FIX_AT_IDEAL_SIZE[] = "fixAtIdealSize";
 const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
-const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+
+const char* GetLayoutPolicyId(LayoutCalPolicy layoutPolicy)
+{
+    switch (layoutPolicy) {
+        case LayoutCalPolicy::NO_MATCH:
+            return nullptr;
+        case LayoutCalPolicy::MATCH_PARENT:
+            return LAYOUT_POLICY_MATCH_PARENT;
+        case LayoutCalPolicy::WRAP_CONTENT:
+            return LAYOUT_POLICY_WRAP_CONTENT;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE:
+            return LAYOUT_POLICY_FIX_AT_IDEAL_SIZE;
+    }
+}
+
+JSRef<JSObject> CreateJsLayoutPolicy(const std::string& id)
+{
+    JSRef<JSObject> empty;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, empty);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, empty);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_LAYOUT_POLICY_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    napi_value obj = nullptr;
+    ret = napi_get_named_property(env, constructor, id.c_str(), &obj);
+    if (ret == napi_ok) {
+        JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+        if (value->IsObject()) {
+            return JSRef<JSObject>::Cast(value);
+        }
+    }
+
+    napi_value layoutPolicyId = nullptr;
+    ret = napi_create_string_utf8(env, id.c_str(), id.length(), &layoutPolicyId);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    ret = napi_new_instance(env, constructor, 1, &layoutPolicyId, &obj);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+    if (!value->IsObject()) {
+        return empty;
+    }
+    return JSRef<JSObject>::Cast(value);
+}
 } // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -138,11 +203,14 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         Color color;
         RefPtr<ResourceObject> resObj;
         if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
-            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_VOID(context);
-            auto theme = context->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            color = theme->GetTextStyle().GetTextColor();
+            // From version 26 and above, styledString's withTheme takes effect.
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(context);
+                auto theme = context->GetTheme<TextTheme>();
+                CHECK_NULL_VOID(theme);
+                color = theme->GetTextStyle().GetTextColor();
+            }
         }
         if (resObj) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
@@ -184,26 +252,39 @@ void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
 {
-    if (obj->HasProperty("fontWeight")) {
-        auto fontWeight = obj->GetProperty("fontWeight");
-        std::string weight = "";
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSViewAbstract::ParseJsString(fontWeight, weight);
+    if (!obj->HasProperty("fontWeight")) {
+        return;
+    }
+    auto fontWeight = obj->GetProperty("fontWeight");
+    std::string weight = "";
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
+    if (fontWeight->IsNumber()) {
+        weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        variableFontWeight = fontWeight->ToNumber<int32_t>();
+        fontWeightEnum = ConvertStrToFontWeight(weight);
+    } else {
+        JSViewAbstract::ParseJsString(fontWeight, weight);
+        if (!weight.empty()) {
+            auto parseResult = ParseFontWeight(weight);
+            fontWeightEnum = parseResult.second;
+            if (parseResult.first) {
+                variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+            } else {
+                variableFontWeight = StringUtils::IsNumber(weight) ?
+                    StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+            }
         }
-        if (weight != "") {
-            font.fontWeight = ConvertStrToFontWeight(weight);
-            int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-            JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
-            font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
-        } else {
-            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-            CHECK_NULL_VOID(context);
-            auto theme = context->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            font.fontWeight = theme->GetTextStyle().GetFontWeight();
-        }
+    }
+    font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
+    if (weight != "") {
+        font.fontWeight = fontWeightEnum;
+    } else {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontWeight = theme->GetTextStyle().GetFontWeight();
     }
 }
 
@@ -1498,6 +1579,19 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         objectTemplate->SetInternalFieldCount(1);
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();
         contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
+        if (customSpanMeasureInfo.maxWidth.has_value()) {
+            contextObj->SetProperty<float>("maxWidth", customSpanMeasureInfo.maxWidth.value());
+        }
+        if (customSpanMeasureInfo.layoutPolicy.has_value() &&
+            static_cast<int32_t>(customSpanMeasureInfo.layoutPolicy.value()) > 0) {
+            auto layoutPolicyId = GetLayoutPolicyId(customSpanMeasureInfo.layoutPolicy.value());
+            if (layoutPolicyId != nullptr) {
+                JSRef<JSObject> layoutPolicyObj = CreateJsLayoutPolicy(layoutPolicyId);
+                if (!layoutPolicyObj->IsEmpty()) {
+                    contextObj->SetPropertyObject("layoutPolicy", layoutPolicyObj);
+                }
+            }
+        }
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
         auto obj = func->ExecuteJS(1, &jsVal);
         if (obj->IsObject()) {

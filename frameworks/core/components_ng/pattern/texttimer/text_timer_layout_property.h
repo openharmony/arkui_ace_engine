@@ -41,6 +41,7 @@ public:
         value->propFormat_ = CloneFormat();
         value->propIsCountDown_ = CloneIsCountDown();
         value->propInputCount_ = CloneInputCount();
+        value->propStartTime_ = CloneStartTime();
         value->propFontSize_ = CloneFontSize();
         value->propTextColor_ = CloneTextColor();
         value->propItalicFontStyle_ = CloneItalicFontStyle();
@@ -56,6 +57,7 @@ public:
         ResetFormat();
         ResetIsCountDown();
         ResetInputCount();
+        ResetStartTime();
         ResetFontSize();
         ResetTextColor();
         ResetItalicFontStyle();
@@ -68,6 +70,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(InputCount, double, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(StartTime, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
@@ -92,6 +95,11 @@ private:
     }
 
     void OnInputCountUpdate(double inputCountUpdate)
+    {
+        ResetCount();
+    }
+
+    void OnStartTimeUpdate(int32_t StartTime)
     {
         ResetCount();
     }

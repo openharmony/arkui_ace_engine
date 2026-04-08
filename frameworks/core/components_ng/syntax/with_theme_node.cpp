@@ -19,6 +19,24 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+thread_local std::vector<int32_t> g_withThemeBuildNodeIdStack;
+
+class WithThemeBuildStackGuard final {
+public:
+    explicit WithThemeBuildStackGuard(int32_t nodeId)
+    {
+        g_withThemeBuildNodeIdStack.push_back(nodeId);
+    }
+
+    ~WithThemeBuildStackGuard()
+    {
+        if (!g_withThemeBuildNodeIdStack.empty()) {
+            g_withThemeBuildNodeIdStack.pop_back();
+        }
+    }
+};
+} // namespace
 
 WithThemeNode::~WithThemeNode()
 {
@@ -74,6 +92,20 @@ void WithThemeNode::SetThemeScopeId(int32_t themeScopeId)
     if (themeScopeId_ == 0) {
         UINode::SetThemeScopeId(themeScopeId);
     }
+}
+
+void WithThemeNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
+{
+    WithThemeBuildStackGuard guard(GetId());
+    UINode::Build(extraInfos);
+}
+
+std::optional<int32_t> WithThemeNode::GetCurrentBuildingNodeId()
+{
+    if (g_withThemeBuildNodeIdStack.empty()) {
+        return std::nullopt;
+    }
+    return g_withThemeBuildNodeIdStack.back();
 }
 
 } // namespace OHOS::Ace::NG

@@ -48,7 +48,7 @@ export class ArkUIExtensionComponentPeerBase extends ArkCommonMethodPeer {
                 const onTerminated = this._callbackHelp?.onTerminated;
                 if (onTerminated !== undefined && onTerminated !== null) {
                     const param = {
-                        code: code1 as int,
+                        code: code1.toInt(),
                         want: want1
                     } as TerminationInfo
                     onTerminated(param);
@@ -128,7 +128,7 @@ export class ArkUIExtensionComponentPeerBase extends ArkCommonMethodPeer {
                     const onError = this._callbackHelp?.onError;
                     if (onError !== undefined && onError !== null) {
                         const param = {
-                            code: code1 as int,
+                            code: code1.toInt(),
                             name: name1,
                             message: message1
                         } as BusinessError

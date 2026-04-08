@@ -91,6 +91,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
         const retval = ArkUIGeneratedNativeModule._SubmitEvent_getText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setText_serialize(text: string): void {
@@ -462,6 +463,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWillCopyAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOnWillCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnCutAttribute(value: arkui_component_common_Callback<string, void> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -472,6 +485,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextInputAttribute_setOnCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillCutAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOnWillCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPasteAttribute(value: OnPasteCallback | undefined): void {
@@ -1403,6 +1428,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setShowCounter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum InputType {
     Normal = 0,
@@ -1549,8 +1586,14 @@ export interface TextInputAttribute extends CommonMethod {
     onCopy(value: arkui_component_common_Callback<string, void> | undefined): this {
         throw new Error('Unimplemented method onCopy')
     }
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCopy')
+    }
     onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
         throw new Error('Unimplemented method onCut')
+    }
+    onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCut')
     }
     onPaste(value: OnPasteCallback | undefined): this {
         throw new Error('Unimplemented method onPaste')
@@ -1741,6 +1784,9 @@ export interface TextInputAttribute extends CommonMethod {
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         throw new Error('Unimplemented method showCounter')
     }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error('Unimplemented method orphanCharOptimization')
+    }
     attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -1856,9 +1902,19 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         this.getPeer()?.setOnCopyAttribute(value_casted)
         return this
     }
+    public onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCopyAttribute(value_casted)
+        return this
+    }
     public onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
         const value_casted = value as (arkui_component_common_Callback<string, void> | undefined)
         this.getPeer()?.setOnCutAttribute(value_casted)
+        return this
+    }
+    public onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCutAttribute(value_casted)
         return this
     }
     public onPaste(value: OnPasteCallback | undefined): this {
@@ -2177,6 +2233,11 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         const value_casted = value as (boolean | undefined)
         const options_casted = options as (InputCounterOptions | undefined)
         this.getPeer()?.setShowCounterAttribute(value_casted, options_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/property/accessibility_property_helper.h"

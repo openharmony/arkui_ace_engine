@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 
-#include <chrono>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -26,7 +24,6 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS {
 
@@ -67,108 +64,6 @@ enum class AllocatorType : int32_t {
     SHARE_MEM_ALLOC = 2,
     CUSTOM_ALLOC = 3,  // external
     DMA_ALLOC = 4, // SurfaceBuffer
-};
-
-enum class ResizableOption {
-    LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM,
-};
-
-struct ImageResizableSlice {
-    Dimension left;
-    Dimension right;
-    Dimension top;
-    Dimension bottom;
-    struct ResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)> updateFunc;
-    };
-    std::unordered_map<std::string, ResourceUpdater> resMap_;
-    std::string ToString() const
-    {
-        std::string result;
-        result.append("ImageResizableSlice: {");
-        result.append("left: ");
-        result.append(left.ToString());
-        result.append(", right: ");
-        result.append(right.ToString());
-        result.append(", top: ");
-        result.append(top.ToString());
-        result.append(", bottom: ");
-        result.append(bottom.ToString());
-        result.append("}");
-        return result;
-    }
-    bool operator==(const ImageResizableSlice& slice) const
-    {
-        return left == slice.left && right == slice.right && top == slice.top && bottom == slice.bottom;
-    }
-    bool Valid() const
-    {
-        return left.IsValid() || right.IsValid() || top.IsValid() || bottom.IsValid();
-    }
-    void SetResizableLeft(const Dimension& sliceDimension)
-    {
-        left = sliceDimension;
-    }
-    void SetResizableRight(const Dimension& sliceDimension)
-    {
-        right = sliceDimension;
-    }
-    void SetResizableBottom(const Dimension& sliceDimension)
-    {
-        bottom = sliceDimension;
-    }
-    void SetResizableTop(const Dimension& sliceDimension)
-    {
-        top = sliceDimension;
-    }
-    void SetEdgeSlice(ResizableOption direction, const Dimension& sliceDimension)
-    {
-        switch (direction) {
-            case ResizableOption::TOP:
-                SetResizableTop(sliceDimension);
-                break;
-            case ResizableOption::BOTTOM:
-                SetResizableBottom(sliceDimension);
-                break;
-            case ResizableOption::LEFT:
-                SetResizableLeft(sliceDimension);
-                break;
-            case ResizableOption::RIGHT:
-                SetResizableRight(sliceDimension);
-                break;
-            default:
-                break;
-        }
-    }
-
-    void AddResource(
-        const std::string& key,
-        const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&, ImageResizableSlice&)>&& updateFunc)
-    {
-        if (resObj && updateFunc) {
-            resMap_[key] = { resObj, std::move(updateFunc) };
-        }
-    }
-
-    void RemoveResource(const std::string& key)
-    {
-        auto iter = resMap_.find(key);
-        if (iter != resMap_.end()) {
-            resMap_.erase(iter);
-        }
-    }
-
-    void ReloadResources()
-    {
-        for (const auto& [key, resourceUpdater] : resMap_) {
-            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
-        }
-    }
 };
 
 enum class AceAntiAliasingOption : int32_t {

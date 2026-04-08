@@ -64,6 +64,7 @@ public:
     void UpdateBorderWidth(const CalcDimension& borderWidth, bool isFirstLoad = false);
     void UpdateOuterBorderWidth(const CalcDimension& outerBorderWidth, bool isFirstLoad = false);
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnModifyDone() override;

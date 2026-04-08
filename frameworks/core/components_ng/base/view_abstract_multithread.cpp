@@ -25,6 +25,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+}
+
 void BindPopupMultiThread(
     const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
@@ -98,6 +102,23 @@ void SetOnAreaChangedMultiThread(FrameNode* frameNode, std::function<void(const 
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddOnAreaChangeNode(frameNode->GetId());
+    });
+}
+
+void SetOnAreaChangedWithIntervalMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
+    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged, int32_t minInterval)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (minInterval < 0) {
+        minInterval = DEFAULT_AREA_CHANGE_INTERVAL;
+    }
+    frameNode->SetOnAreaChangeCallbackWithInterval(std::move(onAreaChanged), static_cast<uint32_t>(minInterval));
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        context->AddOnAreaChangeNode(frameNode->GetId());
     });
 }
 

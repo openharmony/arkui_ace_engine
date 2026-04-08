@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/sheet/minimize/sheet_minimize_object.h"
 #include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 
-#include "ui/base/ace_type.h"
-#include "ui/base/utils/utils.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"

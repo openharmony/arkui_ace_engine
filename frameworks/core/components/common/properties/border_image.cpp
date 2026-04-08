@@ -15,6 +15,8 @@
 
 #include "core/components/common/properties/border_image.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 
 void BorderImage::SetEdgeSlice(BorderImageDirection direction, const Dimension& sliceDimension)

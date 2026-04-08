@@ -110,6 +110,10 @@ private:
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
     void CalcContentOffset(LayoutWrapper* layoutWrapper);
+    OffsetF GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
+        TextDirection layoutDirection, const SizeF& size, const SizeF& viewPortExtent);
+    SizeF MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
+        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize);
 
     float crossOffset_;
     double currentOffset_ = 0.0f;
@@ -120,6 +124,7 @@ private:
     SizeF viewPort_;       // content area size (viewSize_ minus padding)
     SizeF viewPortExtent_; // size of child (scrollable area)
     SizeF viewSize_;       // size of the Scroll component
+    bool hasLazyLayoutChild_ = false;
     void UpdateScrollAlignment(Alignment& scrollAlignment);
 };
 

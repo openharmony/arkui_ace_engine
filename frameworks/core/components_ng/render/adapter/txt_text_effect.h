@@ -18,7 +18,7 @@
 
 #include <optional>
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/text_effect.h"
 

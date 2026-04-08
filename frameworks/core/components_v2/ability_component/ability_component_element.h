@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_ABILITY_COMPONENT_ABILITY_COMPONENT_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_ABILITY_COMPONENT_ABILITY_COMPONENT_ELEMENT_H
 
-#include "core/components_v2/ability_component/ability_component.h"
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace::V2 {

@@ -14,10 +14,12 @@
  */
 
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/corner_mark/corner_mark.h"
+
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/event/focus_hub.h"
- 
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
+#include "core/components_ng/property/accessibility_property.h"
+
 namespace OHOS::Ace::NG {
 int32_t Pattern::OnRecvCommand(const std::string& command)
 {
@@ -60,9 +62,7 @@ void Pattern::OnColorModeChange(uint32_t colorMode)
     }
 }
 
-void Pattern::AddResObj(
-    const std::string& key,
-    const RefPtr<ResourceObject>& resObj,
+void Pattern::AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
     std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
 {
     if (resourceMgr_ == nullptr) {
@@ -109,6 +109,82 @@ ScopeFocusAlgorithm Pattern::GetScopeFocusAlgorithm()
 
 FocusPattern Pattern::GetFocusPattern() const
 {
-    return { FocusType::DISABLE, false, FocusStyleType::NONE };
+    return {};
+}
+
+GestureEventFunc Pattern::GetLongPressEventRecorder()
+{
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
+        auto desc = host->GetAutoEventParamValue("");
+
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetEventType(Recorder::LONG_PRESS)
+            .SetText(text)
+            .SetHost(host)
+            .SetDescription(desc);
+        if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT)) {
+            auto rect = host->GetTransformRectRelativeToWindow().ToBounds();
+            builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
+        }
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    };
+    return longPressCallback;
+}
+
+RefPtr<AccessibilityProperty> Pattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<AccessibilityProperty>();
+}
+
+RefPtr<LayoutAlgorithm> Pattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<BoxLayoutAlgorithm>();
+}
+
+RefPtr<EventHub> Pattern::CreateEventHub()
+{
+    return MakeRefPtr<EventHub>();
+}
+
+void Pattern::CheckLocalized()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    if (layoutProperty->IsPositionLocalizedEdges()) {
+        layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
+    }
+    layoutProperty->CheckMarkAnchorPosition(layoutDirection);
+    if (layoutProperty->IsOffsetLocalizedEdges()) {
+        layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
+    }
+    layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
+    layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
+    layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
+    layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
+    layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
+    layoutProperty->CheckLocalizedOuterBorderColor(layoutDirection);
+    layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
+    layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
+    layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+    layoutProperty->CheckLocalizedAlignment(layoutDirection);
+    // Reset for safeAreaExpand's Cache in GeometryNode
+    host->ResetSafeAreaPadding();
+    layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
+    layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
 }
 } // namespace OHOS::Ace::NG

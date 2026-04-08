@@ -1360,6 +1360,7 @@ export class ListScroller extends Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private scrollToItemInGroup_serialize(index: int32, indexInGroup: int32, smooth?: boolean, align?: ScrollAlign): void {
@@ -1397,6 +1398,7 @@ export class ListScroller extends Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: VisibleListContentInfo = VisibleListContentInfo_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }

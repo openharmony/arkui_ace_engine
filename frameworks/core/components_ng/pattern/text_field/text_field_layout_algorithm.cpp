@@ -132,6 +132,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetOrphanCharOptimization(textFieldLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
     textStyle.SetIncludeFontPadding(textFieldLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textFieldLayoutProperty->GetFallbackLineSpacingValue(false));
@@ -620,11 +621,21 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
 {
     ACE_LAYOUT_SCOPED_TRACE("TextAreaMeasureContent");
     ApplyIndent(layoutWrapper, contentConstraint.maxSize.Width());
-    paragraph_->Layout(contentConstraint.maxSize.Width());
+
+    auto isHorizontalScrolling = IsHorizontalScrollEnabled(layoutWrapper);
+    if (isHorizontalScrolling) {
+        paragraph_->Layout(std::numeric_limits<double>::infinity());
+        paragraph_->Layout(paragraph_->GetLongestLineWithIndent());
+    } else {
+        paragraph_->Layout(contentConstraint.maxSize.Width());
+    }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
+    if (isHorizontalScrolling) {
+        contentWidth = std::min(contentConstraint.maxSize.Width(), paragraph_->GetMaxWidth());
+    }
 
-    if (autoWidth_) {
+    if (autoWidth_ && !isHorizontalScrolling) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLineWithIndent());
         auto minWidth = INLINE_MIN_WITH.ConvertToPx();
         contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
@@ -883,6 +894,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(IncludeFontPadding, IncludeFontPadding);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(FallbackLineSpacing, FallbackLineSpacing);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(OrphanCharOptimization, OrphanCharOptimization);
     textLayoutProperty->UpdateLayoutDirection(direction_);
     textLayoutProperty->UpdateTextDirection(textDirection_);
     if (!isInlineFocus_) {
@@ -1084,6 +1096,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .fontSize = fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
@@ -1132,6 +1145,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .fontSize = paragraphData.fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing() };
@@ -1687,5 +1701,14 @@ bool TextFieldLayoutAlgorithm::IsStyledPlaceholder(const RefPtr<TextFieldPattern
     auto placeholderResponseArea = pattern->GetPlaceholderResponseArea();
     CHECK_NULL_RETURN(placeholderResponseArea, false);
     return showPlaceHolder_;
+}
+
+bool TextFieldLayoutAlgorithm::IsHorizontalScrollEnabled(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsHorizontalScrollEnabled();
 }
 } // namespace OHOS::Ace::NG

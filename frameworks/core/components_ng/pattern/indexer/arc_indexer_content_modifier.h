@@ -17,13 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ARC_INDEXER_CONTENT_MODIFIER_H
 
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

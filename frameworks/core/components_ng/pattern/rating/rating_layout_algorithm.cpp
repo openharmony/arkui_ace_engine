@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 
 #include "core/common/container.h"
+#include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 
 namespace OHOS::Ace::NG {

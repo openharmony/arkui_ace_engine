@@ -16,12 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PAINT_PROPERTY_H
 
-#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuWrapperPaintProperty : public PaintProperty {

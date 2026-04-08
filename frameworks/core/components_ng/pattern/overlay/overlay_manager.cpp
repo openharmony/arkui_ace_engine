@@ -14,11 +14,12 @@
  */
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
-#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
+
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "want.h"
 #endif
@@ -31,33 +32,22 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/select/select_theme.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components/theme/ui_material_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components_ng/animation/geometry_transition.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -70,10 +60,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -85,18 +72,16 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
@@ -104,6 +89,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string DETACHED_FREE_ROOT_PROXY = "DetachedFreeRootProxy";
 // should be moved to theme.
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
@@ -213,6 +199,7 @@ OverlayManager::~OverlayManager()
     tipsInfoList_.clear();
     tipsEnterAndLeaveInfoMap_.clear();
     tipsStatusList_.clear();
+    detachedProxyMap_.clear();
 }
 
 bool OverlayManager::CheckMenuManager()
@@ -3459,7 +3446,7 @@ bool OverlayManager::RemoveModalInOverlay()
     if (isProhibitBack_ && pattern->GetTargetId() < 0) {
         return true;
     }
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_RETURN(builder, false);
     if (!ModalExitProcess(topModalNode)) {
         return false;
@@ -3523,7 +3510,7 @@ bool OverlayManager::RemoveAllModalInOverlayByStack()
         }
         auto rootNode = FindWindowScene(topModalNode);
         CHECK_NULL_RETURN(rootNode, true);
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
         CHECK_NULL_RETURN(builder, false);
         ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
@@ -3586,7 +3573,7 @@ bool OverlayManager::OnRemoveAllModalInOverlayByList()
         }
         auto rootNode = FindWindowScene(topModalNode);
         CHECK_NULL_RETURN(rootNode, true);
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
         CHECK_NULL_RETURN(builder, false);
         ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
@@ -3732,7 +3719,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_RETURN(builder, false);
     topModalNode->GetPattern<ModalPresentationPattern>()->OnWillDisappear();
     auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
@@ -4006,6 +3993,7 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             return;
         }
+        ACE_SCOPED_TRACE("Modal lifecycle onWillAppear");
         if (onWillAppear) {
             onWillAppear();
         }
@@ -4022,13 +4010,20 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
     }
 }
 
+RefPtr<FrameNode> OverlayManager::GetFirstFrameNodeOfModalBuilder(const RefPtr<FrameNode>& topModalNode) const
+{
+    auto buildNode = topModalNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(buildNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
+}
+
 void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
     std::function<void()>&& onDisappear, std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode,
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto buildNode = buildNodeFunc();
+    RefPtr<UINode> buildNode = buildNodeFunc();
     CHECK_NULL_VOID(buildNode);
     auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
@@ -4067,7 +4062,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     } else {
         MountToParentWithService(rootNode, modalNode, levelOrder);
     }
-    modalNode->AddChild(builder);
+    modalNode->AddChild(buildNode);
     auto modalNodeParent = modalNode->GetParent();
     if (!modalNodeParent) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "ModalPage MountToParent error");
@@ -4076,6 +4071,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
+    SetDetachedFreeRootProxy(buildNode, targetId);
     if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
@@ -4122,7 +4118,7 @@ void OverlayManager::HandleModalPop(
     if (!CheckTopModalNode(topModalNode, targetId)) {
         return;
     }
-    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    auto builder = GetFirstFrameNodeOfModalBuilder(topModalNode);
     CHECK_NULL_VOID(builder);
     if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
@@ -4138,6 +4134,7 @@ void OverlayManager::HandleModalPop(
     auto modalTransition = modalPresentationPattern->GetType();
     // lost focus
     ModalPageLostFocus(topModalNode);
+    ACE_SCOPED_TRACE("Modal lifecycle onWillDisappear");
     if (onWillDisappear) {
         onWillDisappear();
     }
@@ -4552,7 +4549,7 @@ void OverlayManager::DismissContentCover()
     }
     if (modalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         ModalPageLostFocus(modalNode);
-        auto builder = AceType::DynamicCast<FrameNode>(modalNode->GetFirstChild());
+        auto builder = GetFirstFrameNodeOfModalBuilder(modalNode);
         if (!ModalPageExitProcess(modalNode)) {
             return;
         }
@@ -4627,6 +4624,7 @@ void OverlayManager::RemoveModal(int32_t targetId)
             modalStack_.push(*modal);
         }
     }
+    ResetDetachedFreeRootProxy(targetId);
 }
 
 void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
@@ -7245,8 +7243,14 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
     CHECK_NULL_RETURN(column, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        return frameNode;
+    }
     auto textRowNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_RETURN(textRowNode, nullptr);
+    if (textRowNode->GetTag() == V2::TEXT_ETS_TAG) {
+        return textRowNode;
+    }
     auto textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
     if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
@@ -8013,4 +8017,87 @@ void OverlayManager::UpdateImageGeneratorSheetScale(
             nullptr, nullptr, nullptr, nullptr, std::move(sheetSpringBackInner));
     }, nullptr, nullptr, sheetNode->GetContextRefPtr());
 }
+
+void OverlayManager::SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId)
+{
+    if (node && node->GetTag() == DETACHED_FREE_ROOT_PROXY) {
+        if (detachedProxyMap_.find(targetId) != detachedProxyMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY,
+                "DetachedFreeRootProxy for targetId %{public}d already exists, replacing.", targetId);
+        }
+        detachedProxyMap_[targetId] = node;
+    }
+}
+
+void OverlayManager::ResetDetachedFreeRootProxy(int32_t targetId)
+{
+    if (detachedProxyMap_.empty()) {
+        return;
+    }
+
+    auto iter = detachedProxyMap_.find(targetId);
+    if (iter != detachedProxyMap_.end()) {
+        detachedProxyMap_.erase(iter);
+    }
+}
+
+PopupInfo OverlayManager::GetPopupInfo(int32_t targetId) const
+{
+    auto it = popupMap_.find(targetId);
+    if (it == popupMap_.end()) {
+        return {};
+    }
+    return it->second;
+}
+
+void OverlayManager::ErasePopupInfo(int32_t targetId)
+{
+    if (popupMap_.find(targetId) != popupMap_.end()) {
+        popupMap_.erase(targetId);
+    }
+}
+
+void OverlayManager::CallOnHideDialogCallback()
+{
+    if (onHideDialogCallback_) {
+        onHideDialogCallback_();
+    }
+}
+
+bool OverlayManager::FireBackPressEvent() const
+{
+    if (backPressEvent_) {
+        return backPressEvent_();
+    }
+    return false;
+}
+
+void OverlayManager::ResetContextMenuDragHideFinished()
+{
+    isContextMenuDragHideFinished_ = false;
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::ResetContextMenuRestartDragVector()
+{
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::UpdateDragMoveVector(const NG::OffsetF& offset)
+{
+    lastDragMoveVector_ = dragMoveVector_;
+    dragMoveVector_ = offset;
+}
+
+bool OverlayManager::SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+{
+    if (overlayInfo_.has_value()) {
+        return false;
+    }
+    overlayInfo_ = overlayInfo;
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

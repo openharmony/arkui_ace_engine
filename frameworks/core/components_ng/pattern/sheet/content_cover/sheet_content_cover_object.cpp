@@ -24,9 +24,6 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "ui/base/ace_type.h"
-#include "ui/base/referenced.h"
-#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;

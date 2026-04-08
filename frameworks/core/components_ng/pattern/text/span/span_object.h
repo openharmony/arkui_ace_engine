@@ -125,6 +125,8 @@ public:
     int32_t GetLength() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     virtual void ClearSpecialData() {};
+    static void ParseColorWithVersion(
+        const RefPtr<ResourceObject>& resObj, Color& outColor, const RefPtr<NG::FrameNode>& frameNode);
 
 private:
     int32_t start_ = 0;

@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

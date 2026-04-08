@@ -30,6 +30,7 @@ enum class StatisticEventType {
     FA_AND_DECLARATIVE_APP_START,
     WEB_LIKE_FRONTEND,
     JS_CARD_FRONTEND,
+    NAPI_SCOPE_ERROR,
     // XComponent events (10100-10199)
     XCOMPONENT_TYPE_USE_STRING = 10100,
     XCOMPONENT_SET_SURFACE_SIZE = 10101,
@@ -85,6 +86,8 @@ enum class StatisticEventType {
     // Video events (10900-10999)
     VIDEO_INVALID_PROGRESS_RATE = 10901,
     VIDEO_EXCEED_PROGRESS_RATE = 10902,
+    // Navigation events (11100-11199)
+    NAVIGATION_HOME_DESTINATION = 11100,
 };
 
 struct StatisticAppInfo {

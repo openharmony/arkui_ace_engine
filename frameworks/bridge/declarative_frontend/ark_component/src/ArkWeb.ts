@@ -1667,6 +1667,75 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebEnableScrollDirectionalLockModifier extends ModifierWithKey<ArkEnableScrollDirectionalLock> {
+  constructor(value: ArkEnableScrollDirectionalLock) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableScrollDirectionalLockModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableScrollDirectionalLock(node);
+    } else {
+      getUINativeModule().web.setEnableScrollDirectionalLock(node, this.value.value, this.value.type);
+    }
+  }
+}
+
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey<NativeMediaPlayerConfig> {
+  constructor(value: NativeMediaPlayerConfig) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableNativeMediaPlayerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableWebAVSessionModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+    }
+}
+class WebEnableDragModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDrag');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webScrollbarLayoutPolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2116,6 +2185,21 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     }
     return this;
   }
+  enableScrollDirectionalLock(value: boolean, type: number): this {
+    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
+    if (!isUndefined(value) && !isNull(value)) {
+      arkEnableScrollDirectionalLock.value = value;
+    }
+    if (!isUndefined(type) && !isNull(type)) {
+      arkEnableScrollDirectionalLock.type = type;
+    }
+    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
+        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+    }
+    return this;
+  }
   nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt): this {
     if (!value) return this;
     const options = new ArkNestedScrollOptionsExt();
@@ -2232,8 +2316,31 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
+
+  enableDrag(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+
   enableDefaultContextMenu(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
+    return this;
+  }
+  enableScrollDirectionalLock(enabled: boolean, type: number): this {
+    const config: DirectionalLockConfig = { enabled, type };
+    modifierWithKey(this._modifiersWithKeys, WebEnableDirectionalLockModifier.identity, WebEnableDirectionalLockModifier, config);
+    return this;
+  }
+  enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+      return this;
+  }
+  scrollbarLayoutPolicy(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
     return this;
   }
 }

@@ -787,9 +787,6 @@ public:
         return paintDividerSpacing_;
     }
 
-    static bool ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
-        const std::string& eventName, const std::string& eventData);
-
     void SetUserDefinedOpacity(double opacity)
     {
         curOpacity_ = opacity;
@@ -807,6 +804,11 @@ public:
     {
         return isEnableHaptic_;
     }
+    
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
 
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
@@ -819,8 +821,25 @@ public:
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
     void UpdateDateOrder();
     bool IsNotSetStartEndDate();
+    int32_t OnInjectionEvent(const std::string& command) override;
+    static bool ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
+    static bool ReportDialogDateChangeEvent(int32_t nodeId, const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
 
 private:
+    bool ReportCommandResult(int32_t nodeId, const std::string& event,
+         const std::string& result, const std::string& reason = "");
+    static bool IsJsonValid(const std::unique_ptr<JsonValue>& json);
+    static bool IsJsonObject(const std::unique_ptr<JsonValue>& json);
+    bool ValidateDateParameters(
+        const std::unique_ptr<JsonValue>& paramJson, int32_t& year, int32_t& month, int32_t& day);
+    int32_t OnDateInjection(const std::string& command);
+    int32_t OnDialogDateInjection(const std::string& command);
+    void SetDatePickerDialogTime(int32_t hour, int32_t minute, int32_t second);
+    void SetDatePickerDialogDate(int32_t year, int32_t month, int32_t day);
+    bool CheckDialogParamValue(const std::unique_ptr<JsonValue>& paramJson, const std::string& command);
+    bool CheckDialogParamDataValid(const std::unique_ptr<JsonValue>& paramJson, const std::string& command);
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -863,6 +882,7 @@ private:
     void AdjustFocusBoxOffset(double& centerX);
     bool IsCircle();
     bool CurrentIsLunar();
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
     bool OnCrownEvent(const CrownEvent& event);
@@ -910,6 +930,7 @@ private:
     double resizePickerItemHeight_ = 0.0;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
     bool useButtonFocusArea_ = false;

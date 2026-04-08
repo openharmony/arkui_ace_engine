@@ -32,7 +32,6 @@ RefPtr<FrameNode> CreateSliderFrameNode(int32_t nodeId)
 {
     auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
     return frameNode;
 }
 

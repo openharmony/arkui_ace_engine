@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
 #include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
@@ -24,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
+constexpr Dimension DIVIDER_WIDTH = 1.0_px;
 
 void LogPrimaryChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
 {
@@ -61,7 +62,9 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
     }
     LogPrimaryChange(primaryPageNode_, pageNode);
     primaryPageNode_ = pageNode;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     if (pageNode == nullptr) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set primary page nullptr");
         if (hasDividerNode_) {
@@ -95,7 +98,9 @@ void ParallelStagePattern::FireModeChangeCallback()
 
 void ParallelStagePattern::OnAttachToMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -117,7 +122,9 @@ bool ParallelStagePattern::CalculateMode()
 {
     // calculate mode
     PageMode splitMode = PageMode::STACK;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     auto pipelineContext = hostNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipelineContext->GetForceSplitManager());
@@ -191,7 +198,9 @@ void ParallelStagePattern::OnDirectionConfigurationUpdate()
 
 void ParallelStagePattern::OnDetachFromMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     do {
         CHECK_NULL_BREAK(relatedPage_);
@@ -216,13 +225,47 @@ void ParallelStagePattern::OnDetachFromMainTree()
     mgr->RemoveForceSplitStateListener(id);
 }
 
+Color ParallelStagePattern::GetDividerNodeColor(RefPtr<FrameNode> hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, Color());
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, Color());
+    auto theme = pipeline->GetTheme<NavigationBarTheme>();
+    auto themeColor = theme->GetNavigationDividerColor();
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
+    if (forceSplitMgr->IsForceSplitEnable(true)) {
+        auto splitColor = forceSplitMgr->GetSplitDividerColor();
+        if (pipeline->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
+            return splitColor.first.value();
+        }
+        if (pipeline->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
+            return splitColor.second.value();
+        }
+    }
+    return themeColor;
+}
+
+void ParallelStagePattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    if (dividerNode_) {
+        dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+    }
+}
+
 void ParallelStagePattern::CreateDividerNodeIfNeeded()
 {
     if (dividerNode_) {
         return;
     }
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     dividerNode_ = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     auto dividerLayoutProperty = dividerNode_->GetLayoutProperty<DividerLayoutProperty>();
@@ -230,14 +273,11 @@ void ParallelStagePattern::CreateDividerNodeIfNeeded()
     dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
     dividerLayoutProperty->UpdateVertical(true);
     // set divider color
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
     auto dividerRenderProperty = dividerNode_->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
     // set background color can expand to safe area
-    dividerNode_->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
 }
 
 void ParallelStagePattern::OnWindowShow()

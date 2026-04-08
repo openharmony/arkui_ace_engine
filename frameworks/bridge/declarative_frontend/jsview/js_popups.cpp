@@ -28,7 +28,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -305,6 +305,15 @@ void SetPopupBorderLinearGradientInfo(const JSRef<JSObject>& popupObj, const Ref
         } else {
             popupParam->SetInnerBorderLinearGradient(popupBorderLinearGradient);
         }
+    }
+}
+
+void SetPopupSystemMaterial(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    auto systemMaterialValue = popupObj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        popupParam->SetSystemMaterial(systemUiMaterial->Copy());
     }
 }
 
@@ -679,6 +688,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, INNER_BORDER_LINEAR_GRADIENT);
+    SetPopupSystemMaterial(popupObj, popupParam);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -715,7 +725,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("primaryButton.action");
                     PipelineContext::SetCallBackNode(node);
-                    func->Execute(info);
+                    func->Execute(execCtx.vm_, info);
                 };
                 properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
@@ -746,7 +756,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("secondaryButton.action");
                     PipelineContext::SetCallBackNode(node);
-                    func->Execute(info);
+                    func->Execute(execCtx.vm_, info);
                 };
                 properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
@@ -1581,6 +1591,28 @@ void JSViewPopups::ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG
     }
 }
 
+void JSViewPopups::ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto scrollBarValue = menuOptions->GetProperty("scrollBar");
+    if (scrollBarValue->IsNumber()) {
+        auto barState = scrollBarValue->ToNumber<int32_t>();
+        if (barState >= static_cast<int32_t>(DisplayMode::OFF) && barState <= static_cast<int32_t>(DisplayMode::ON)) {
+            menuParam.scrollBar = static_cast<DisplayMode>(barState);
+        }
+    }
+}
+
+void JSViewPopups::ParseMenuMaxHeight(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto maxHeightProperty = menuOptions->GetProperty("maxHeight");
+    if (maxHeightProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(maxHeightProperty, value) && value.IsNonNegative()) {
+            menuParam.maxHeight = value;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1622,7 +1654,9 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
+    JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(

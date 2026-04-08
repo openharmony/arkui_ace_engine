@@ -39,14 +39,60 @@ export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifi
     applyFocusedAttribute(instance: ToolBarItemAttribute): void { }
     applyDisabledAttribute(instance: ToolBarItemAttribute): void { }
     applySelectedAttribute(instance: ToolBarItemAttribute): void { }
+    public _debugLine_0_0value?: string
+    public _debugLine_0_1value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkToolBarItemPeer;
         const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkToolBarItemPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[0] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[0] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[0] = 0;
+                }
+            }
+        }
     }
     mergeModifier(modifier: ToolBarItemModifier): void {
         this._state = modifier._state;
         const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ToolBarItemModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.debugLine((modifier._debugLine_0_0value as string), (modifier._debugLine_0_1value as string | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[0]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+            this._flagArray[0] = 1
+            this._debugLine_0_0value = sourceLine
+            this._debugLine_0_1value = moduleName
+            this._state.fireChange()
+        } else {
+            this._flagArray[0] = 3
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
         throw new Error('Not implemented')

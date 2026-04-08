@@ -19,8 +19,10 @@
 
 #include "base/error/error_code.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
@@ -31,6 +33,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"

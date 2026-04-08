@@ -123,7 +123,7 @@ private:
     void InitTextTimerController();
 
     void InitTimerDisplay();
-    void UpdateTextTimer(uint32_t elapsedTime);
+    void UpdateTextTimer(double elapsedTime);
     void FireChangeEvent();
 
     void HandleStart();
@@ -137,6 +137,7 @@ private:
     std::string GetFormat() const;
     bool GetIsCountDown() const;
     double GetInputCount() const;
+    int32_t GetStartTime() const;
     RefPtr<FrameNode> GetTextNode();
     void RegisterVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
@@ -153,6 +154,7 @@ private:
     uint64_t lastElapsedTime_ = 0;
     bool isCountDown_ = false;
     double inputCount_ = 0.0;
+    int32_t startTime_ = 0;
     std::optional<int32_t> textId_;
     bool isRegisteredAreaCallback_ = false;
     bool resetCount_ = false;

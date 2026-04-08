@@ -205,7 +205,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
         layoutInfo_->targetIndex_ = layoutInfo_->GetChildrenCount() - 1;
     }
     while (layoutInfo_->targetIndex_.has_value() && (startFrom < layoutInfo_->targetIndex_.value())) {
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(
+        auto itemWrapper = WaterFlowLayoutUtils::GetWaterFlowItem(layoutWrapper,
             GetChildIndexWithFooter(currentIndex), !cacheDeadline, cacheDeadline.has_value());
         if (!itemWrapper) {
             layoutInfo_->targetIndex_.reset();
@@ -392,9 +392,10 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
-    while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
-           layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
+    while ((LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
+           layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) &&
+           (GetChildIndexWithFooter(currentIndex) < layoutInfo_->GetChildrenCount())) {
+        auto itemWrapper = WaterFlowLayoutUtils::GetWaterFlowItem(layoutWrapper, GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;
         }

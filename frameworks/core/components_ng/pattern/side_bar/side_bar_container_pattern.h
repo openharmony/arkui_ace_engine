@@ -23,6 +23,12 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 
+namespace OHOS::Ace {
+class Animator;
+template<typename T>
+class CurveAnimation;
+}
+
 namespace OHOS::Ace::NG {
 
 inline constexpr char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
@@ -44,8 +50,8 @@ class SideBarContainerPattern : public Pattern {
     DECLARE_ACE_TYPE(SideBarContainerPattern, Pattern);
 
 public:
-    SideBarContainerPattern() = default;
-    ~SideBarContainerPattern() override = default;
+    SideBarContainerPattern();
+    ~SideBarContainerPattern() override;
 
     bool IsAtomicNode() const override
     {

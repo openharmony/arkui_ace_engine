@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text/text_base.h"
 
@@ -664,4 +664,32 @@ HWTEST_F(TextFieldTestNgFive, ResetChainWeight001, TestSize.Level1)
     EXPECT_NE(frameNode_, nullptr);
 }
 
+/**
+ * @tc.name: IsHorizontalScrollEnabled
+ * @tc.desc: Test IsHorizontalScrollEnabled with all conditions at boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgFive, IsHorizontalScrollEnabled, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextArea node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetTextInputFlag(false);
+
+    pattern_->SetHorizontalScrolling(false);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    EXPECT_FALSE(pattern_->IsHorizontalScrollEnabled());
+
+    pattern_->SetHorizontalScrolling(true);
+    TextFieldModelNG::SetMaxLines(AceType::RawPtr(frameNode_), 1);
+    EXPECT_FALSE(pattern_->IsHorizontalScrollEnabled());
+
+    pattern_->SetHorizontalScrolling(true);
+    TextFieldModelNG::SetMaxLines(AceType::RawPtr(frameNode_), 10);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    TextFieldModelNG::SetType(AceType::RawPtr(frameNode_), TextInputType::UNSPECIFIED);
+    EXPECT_TRUE(pattern_->IsHorizontalScrollEnabled());
+}
 } // namespace OHOS::Ace::NG

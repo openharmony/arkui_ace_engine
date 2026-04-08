@@ -381,7 +381,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onAreaChange(value: ((oldValue: Area, newValue: Area) => void) | undefined): this {
-        this.getPeer().setOnAreaChangeAttribute(value);
+        this.getPeer().setOnAreaChange0Attribute(value);
         return this
     }
     public visibility(value: Visibility | undefined): this {
@@ -430,6 +430,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public enabled(value: boolean | undefined): this {
         this.getPeer().setEnabledAttribute(value);
+        this.markDirty();
         return this
     }
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {

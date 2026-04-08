@@ -15,7 +15,7 @@
 
 import { FrameNode, LayoutConstraint } from '../FrameNode';
 import { KPointer } from '@koalaui/interop'
-import { UIContextImpl } from '../base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { int32 } from '@koalaui/compat';
 import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer'
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -42,7 +42,7 @@ export class FrameNodeTransfer {
         if (nodeTypeESValue.isString()) {
             nodeType = nodeTypeESValue.toString();
         }
-        let uiContext = new UIContextImpl(instanceId as int32);
+        let uiContext = new UIContext(instanceId.toInt());
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
         let nodePtr = ESValue.wrap(input).getProperty('nodePtr_');
@@ -52,8 +52,8 @@ export class FrameNodeTransfer {
         }
         const pointStr = point.toNumber();
         // todo 
-        let frameNodePeerPont = FrameNodeExtender.createByRawPtr(pointStr as KPointer);
-        let node: FrameNode = new TransFrameNode(uiContext, nodeType, frameNodePeerPont);
+        let frameNodePeerPont = FrameNodeExtender.createByRawPtr(pointStr.toLong());
+        let node: FrameNode = new TransFrameNode(uiContext, nodeType!, frameNodePeerPont);
         return node;
     }
     static transferDynamic(input: Object): Any {

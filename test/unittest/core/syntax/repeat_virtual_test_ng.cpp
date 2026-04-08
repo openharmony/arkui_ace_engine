@@ -23,7 +23,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -180,6 +180,12 @@ const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = 
     {"elmt2", { true, 2 } }
 };
 
+/**
+ * Helper function to create RepeatVirtualScrollNode with or without items in cache depending on the parameter passed
+ * createItems==true will create RepeatVirtualScrollNode with 3 items in cache while createItems==false will create
+ * This function is used in multiple test cases to create RepeatVirtualScrollNode with different cache states
+ * createItems parameter is used to test the behavior of RepeatVirtualScrollNode when there are different number
+ */
 RefPtr<RepeatVirtualScrollNode> RepeatVirtualTestNg::GetOrCreateRepeatNode(bool createItems)
 {
     RefPtr<RepeatVirtualScrollNode> node;

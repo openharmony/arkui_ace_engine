@@ -18,7 +18,6 @@
 
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/pipeline/base/component.h"

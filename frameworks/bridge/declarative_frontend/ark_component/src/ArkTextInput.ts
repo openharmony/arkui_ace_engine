@@ -922,6 +922,20 @@ class TextInputOnContentScrollModifier extends ModifierWithKey<(totalOffsetX: nu
   }
 }
 
+class TextInputOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCopy(node, this.value);
+    }
+  }
+}
+
 class TextInputOnCopyModifier extends ModifierWithKey<(value: string) => void> {
   constructor(value: (value: string) => void) {
     super(value);
@@ -932,6 +946,20 @@ class TextInputOnCopyModifier extends ModifierWithKey<(value: string) => void> {
       getUINativeModule().textInput.resetOnCopy(node);
     } else {
       getUINativeModule().textInput.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextInputOnWillCutModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnWillCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCut(node, this.value);
     }
   }
 }
@@ -1529,6 +1557,23 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOrphanCharOptimizationModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textInput.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1796,9 +1841,19 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputFilterModifier, arkValue);
     return this;
   }
+  onWillCopy(callback: Callback<string, boolean>): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCopyModifier.identity,
+      TextInputOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback: (value: string) => void): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity,
       TextInputOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback: Callback<string, boolean>): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCutModifier.identity,
+      TextInputOnWillCutModifier, callback);
     return this;
   }
   onCut(callback: (value: string) => void): TextInputAttribute {
@@ -2096,6 +2151,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
+      TextInputOrphanCharOptimizationModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

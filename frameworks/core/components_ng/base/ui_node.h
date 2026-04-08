@@ -32,6 +32,7 @@
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/theme/theme.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -312,6 +313,15 @@ public:
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
+
+    int32_t GetThemeScopeIdForTheme(bool useApiVersionIsolation) const;
+    RefPtr<Theme> GetThemeByType(ThemeType type, bool useApiVersionIsolation = false) const;
+
+    template<typename T>
+    RefPtr<T> GetTheme(bool useApiVersionIsolation = false) const
+    {
+        return AceType::DynamicCast<T>(GetThemeByType(T::TypeId(), useApiVersionIsolation));
+    }
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -797,6 +807,10 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static RefPtr<UINode> BfsFindUINode(
+        const RefPtr<UINode>& root, const std::function<bool(const RefPtr<UINode>&)>& matcher);
+    RefPtr<FrameNode> GetFrameNodeByIdInSubTree(const std::string& id);
+    RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     virtual bool HasVirtualNodeAccessibilityProperty()
@@ -1058,10 +1072,6 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
-    {
-        isDestroyingState_ = isDestroying;
-    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
     /**

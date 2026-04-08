@@ -17,7 +17,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
@@ -82,7 +82,7 @@ void GridPropertyTestNg::TearDownTestSuite()
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, UpdateSpan_Test, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, UpdateSpan_Test, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -117,7 +117,7 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -143,7 +143,7 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -169,7 +169,7 @@ HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, SetSpan_Test, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, SetSpan_Test, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -200,7 +200,7 @@ HWTEST_F(GridPropertyTestNg, SetSpan_Test, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, SetOffset_Test, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, SetOffset_Test, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -231,7 +231,7 @@ HWTEST_F(GridPropertyTestNg, SetOffset_Test, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, ToJsonValue_Test01, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, ToJsonValue_Test01, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -267,7 +267,7 @@ HWTEST_F(GridPropertyTestNg, ToJsonValue_Test01, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.
@@ -308,7 +308,7 @@ HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level1)
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
  */
-HWTEST_F(GridPropertyTestNg, GetContainerPositionTest01, TestSize.Level1)
+HWTEST_F(GridPropertyTestNg, GetContainerPositionTest01, TestSize.Level0)
 {
     /**
      * @tc.steps1: create a object gridProperty.

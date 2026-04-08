@@ -253,7 +253,7 @@ std::optional<ViewPosReference> LazyGridLayoutAlgorithm::GetReferencePos(RefPtr<
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     if (frameNode->GetTag() != V2::COMMON_VIEW_ETS_TAG && frameNode->GetTag() != V2::NODE_CONTAINER_ETS_TAG &&
         frameNode->GetTag() != "BuilderProxyNode" && frameNode->GetTag() != V2::FLOW_ITEM_ETS_TAG &&
-        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG) {
+        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG && frameNode->GetTag() != V2::LIST_ETS_TAG) {
         return std::nullopt;
     }
     auto geometry = frameNode->GetGeometryNode();

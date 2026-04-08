@@ -158,7 +158,7 @@ export class ToolBarV2Item {
   @Trace
   public icon?: ToolBarV2ItemIconType = undefined;
   @Trace
-  public state?: ToolBarV2ItemState = 1 as ToolBarV2ItemState;
+  public state?: ToolBarV2ItemState = ToolBarV2ItemState.fromValue(1);
   @Trace
   public accessibilityText?: ResourceStr = '';
   @Trace
@@ -249,7 +249,7 @@ export class ToolBarV2Modifier implements AttributeModifier<ColumnAttribute> {
 }
 
 @ObservedV2
-class ToolBarV2Theme {
+export class ToolBarV2Theme {
   @Trace
   public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
   @Trace
@@ -685,7 +685,7 @@ export struct ToolBarV2 {
         this.gestureItem = item;
         this.gestureIndex = index;
         event.addGesture(
-          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime.toInt()})
             .onAction(() => {
               try {
                 this.getUIContext().getPromptAction().openCustomDialog({

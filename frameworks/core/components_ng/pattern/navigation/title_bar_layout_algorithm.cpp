@@ -263,6 +263,26 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
 }
 
+bool TitleBarLayoutAlgorithm::PrasePaddingEnd(const RefPtr<TitleBarNode>& titleBarNode, float& avoidWidth)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
+    CHECK_NULL_RETURN(navDestination, true);
+    auto isCustomTitle = navDestination->GetPrevTitleIsCustomValue(false);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, true);
+    auto options = titlePattern->GetTitleBarOptions();
+    auto paddingEnd = options.brOptions.paddingEnd;
+    auto isSetPadding = paddingEnd.has_value();
+    if (!isSetPadding || (isCustomTitle && !options.enableCustomTitlePaddingCheck)) {
+        return true;
+    }
+    if (GreatOrEqual(paddingRightForMenu_, avoidWidth)) {
+        return false;
+    }
+    avoidWidth -= paddingRightForMenu_;
+    return true;
+}
+
 float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     const RefPtr<TitleBarNode>& titleBarNode, float width)
 {
@@ -307,6 +327,8 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         avoidWidth = avoidAreaOffset.GetX() + avoidAreaSize.Width() - titleBarOffset.GetX();
     }
+    bool isNeedAvoid = PrasePaddingEnd(titleBarNode, avoidWidth);
+    CHECK_EQUAL_RETURN(isNeedAvoid, false, afterAvoidWidth);
     auto avoidAreaBottom = avoidAreaOffset.GetY() + avoidAreaSize.Height();
     if (LessOrEqual(titleBarOffset.GetY(), avoidAreaBottom) && GreatOrEqual(avoidWidth, 0.0f)) {
         afterAvoidWidth = afterAvoidWidth - avoidWidth;

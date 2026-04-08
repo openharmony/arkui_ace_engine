@@ -14,9 +14,9 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/properties/shadow_config.h"
@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -31,6 +33,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "core/components_ng/syntax/repeat_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -864,7 +867,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
 
     /**
      * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
@@ -877,7 +880,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, 4));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 100);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 /**

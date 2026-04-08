@@ -1372,12 +1372,60 @@ void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
 }
 
+void JSTextField::SetOnWillCopy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCopy");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillCopy(std::move(callback));
+}
+
+JSRef<JSVal> JSTextField::CreateSimpleJsOnWillObj(const std::u16string& value)
+{
+    JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+    return stringValue;
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCopy(std::move(callback));
+}
+
+void JSTextField::SetOnWillCut(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCut");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillCut(std::move(callback));
 }
 
 void JSTextField::SetOnCut(const JSCallbackInfo& info)
@@ -2461,6 +2509,18 @@ void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
+void JSTextField::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
 }
 
 void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)

@@ -25,7 +25,7 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
@@ -41,9 +41,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {

@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -60,6 +63,10 @@ void ScrollPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
     if (axisChanged) {
         // need to init after scrollableEvent
@@ -75,6 +82,9 @@ void ScrollPattern::OnModifyDone()
             freeScroll_.Reset();
             scrollBar2d_.Reset();
         }
+    }
+    if (freeScroll_) {
+        freeScroll_->SetIsAllowMouse(GetIsAllowMouse());
     }
     if (scrollBar2d_) {
         scrollBar2d_->Update(paintProperty->GetScrollBarProperty());
@@ -1967,5 +1977,10 @@ void ScrollPattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& param
 int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+RefPtr<ScrollableController> ScrollPattern::GetScrollPositionController() const
+{
+    return positionController_;
 }
 } // namespace OHOS::Ace::NG

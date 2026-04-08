@@ -68,7 +68,9 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     public _onTextSelectionChange_0_0value?: OnTextSelectionChangeCallback | undefined
     public _onContentScroll_0_0value?: OnContentScrollCallback | undefined
     public _onCopy_0_0value?: arkui_component_common_Callback<string, void> | undefined
+    public _onWillCopy_0_0value?: arkui_component_common_Callback<string, boolean> | undefined
     public _onCut_0_0value?: arkui_component_common_Callback<string, void> | undefined
+    public _onWillCut_0_0value?: arkui_component_common_Callback<string, boolean> | undefined
     public _onPaste_0_0value?: OnPasteCallback | undefined
     public _copyOption_0_0value?: CopyOptions | undefined
     public _maxLength_0_0value?: int32 | undefined
@@ -398,7 +400,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         if (flagArray[16] != 0) {
             switch (flagArray[16]) {
                 case 1: {
-                    peer.setOnCutAttribute((this._onCut_0_0value as arkui_component_common_Callback<string, void> | undefined));
+                    peer.setOnWillCopyAttribute((this._onWillCopy_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
                     flagArray[16] = 2;
                     break;
                 }
@@ -408,14 +410,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[16] = 0;
-                    peer.setOnCutAttribute((undefined as arkui_component_common_Callback<string, void> | undefined));
+                    peer.setOnWillCopyAttribute((undefined as arkui_component_common_Callback<string, boolean> | undefined));
                 }
             }
         }
         if (flagArray[17] != 0) {
             switch (flagArray[17]) {
                 case 1: {
-                    peer.setOnPasteAttribute((this._onPaste_0_0value as OnPasteCallback | undefined));
+                    peer.setOnCutAttribute((this._onCut_0_0value as arkui_component_common_Callback<string, void> | undefined));
                     flagArray[17] = 2;
                     break;
                 }
@@ -425,14 +427,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[17] = 0;
-                    peer.setOnPasteAttribute((undefined as OnPasteCallback | undefined));
+                    peer.setOnCutAttribute((undefined as arkui_component_common_Callback<string, void> | undefined));
                 }
             }
         }
         if (flagArray[18] != 0) {
             switch (flagArray[18]) {
                 case 1: {
-                    peer.setCopyOptionAttribute((this._copyOption_0_0value as CopyOptions | undefined));
+                    peer.setOnWillCutAttribute((this._onWillCut_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
                     flagArray[18] = 2;
                     break;
                 }
@@ -442,14 +444,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[18] = 0;
-                    peer.setCopyOptionAttribute((undefined as CopyOptions | undefined));
+                    peer.setOnWillCutAttribute((undefined as arkui_component_common_Callback<string, boolean> | undefined));
                 }
             }
         }
         if (flagArray[19] != 0) {
             switch (flagArray[19]) {
                 case 1: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
+                    peer.setOnPasteAttribute((this._onPaste_0_0value as OnPasteCallback | undefined));
                     flagArray[19] = 2;
                     break;
                 }
@@ -459,7 +461,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
+                    peer.setOnPasteAttribute((undefined as OnPasteCallback | undefined));
                 }
             }
         }
@@ -468,7 +470,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         if (flagArray[20] != 0) {
             switch (flagArray[20]) {
                 case 1: {
-                    peer.setTextAlignAttribute((this._textAlign_0_0value as TextAlign | undefined));
+                    peer.setCopyOptionAttribute((this._copyOption_0_0value as CopyOptions | undefined));
                     flagArray[20] = 2;
                     break;
                 }
@@ -478,14 +480,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[20] = 0;
-                    peer.setTextAlignAttribute((undefined as TextAlign | undefined));
+                    peer.setCopyOptionAttribute((undefined as CopyOptions | undefined));
                 }
             }
         }
         if (flagArray[21] != 0) {
             switch (flagArray[21]) {
                 case 1: {
-                    peer.setEnableKeyboardOnFocusAttribute((this._enableKeyboardOnFocus_0_0value as boolean | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     flagArray[21] = 2;
                     break;
                 }
@@ -495,14 +497,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[21] = 0;
-                    peer.setEnableKeyboardOnFocusAttribute((undefined as boolean | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
         if (flagArray[22] != 0) {
             switch (flagArray[22]) {
                 case 1: {
-                    peer.setSelectionMenuHiddenAttribute((this._selectionMenuHidden_0_0value as boolean | undefined));
+                    peer.setTextAlignAttribute((this._textAlign_0_0value as TextAlign | undefined));
                     flagArray[22] = 2;
                     break;
                 }
@@ -512,14 +514,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[22] = 0;
-                    peer.setSelectionMenuHiddenAttribute((undefined as boolean | undefined));
+                    peer.setTextAlignAttribute((undefined as TextAlign | undefined));
                 }
             }
         }
         if (flagArray[23] != 0) {
             switch (flagArray[23]) {
                 case 1: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | global_resource_Resource | undefined));
+                    peer.setEnableKeyboardOnFocusAttribute((this._enableKeyboardOnFocus_0_0value as boolean | undefined));
                     flagArray[23] = 2;
                     break;
                 }
@@ -529,14 +531,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[23] = 0;
-                    peer.setMinFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
+                    peer.setEnableKeyboardOnFocusAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[24] != 0) {
             switch (flagArray[24]) {
                 case 1: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | global_resource_Resource | undefined));
+                    peer.setSelectionMenuHiddenAttribute((this._selectionMenuHidden_0_0value as boolean | undefined));
                     flagArray[24] = 2;
                     break;
                 }
@@ -546,14 +548,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[24] = 0;
-                    peer.setMaxFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
+                    peer.setSelectionMenuHiddenAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[25] != 0) {
             switch (flagArray[25]) {
                 case 1: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | global_resource_Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | global_resource_Resource | undefined));
                     flagArray[25] = 2;
                     break;
                 }
@@ -563,14 +565,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setMinFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setMinFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[26] != 0) {
             switch (flagArray[26]) {
                 case 1: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | global_resource_Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | global_resource_Resource | undefined));
                     flagArray[26] = 2;
                     break;
                 }
@@ -580,14 +582,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setMaxFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setMaxFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[27] != 0) {
             switch (flagArray[27]) {
                 case 1: {
-                    peer.setDecorationAttribute((this._decoration_0_0value as TextDecorationOptions | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | global_resource_Resource | undefined));
                     flagArray[27] = 2;
                     break;
                 }
@@ -597,14 +599,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setDecorationAttribute((undefined as TextDecorationOptions | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[28] != 0) {
             switch (flagArray[28]) {
                 case 1: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | global_resource_Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | global_resource_Resource | undefined));
                     flagArray[28] = 2;
                     break;
                 }
@@ -614,14 +616,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setLetterSpacingAttribute((undefined as double | string | global_resource_Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[29] != 0) {
             switch (flagArray[29]) {
                 case 1: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | global_resource_Resource | undefined));
+                    peer.setDecorationAttribute((this._decoration_0_0value as TextDecorationOptions | undefined));
                     flagArray[29] = 2;
                     break;
                 }
@@ -631,14 +633,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setLineHeightAttribute((undefined as double | string | global_resource_Resource | undefined));
+                    peer.setDecorationAttribute((undefined as TextDecorationOptions | undefined));
                 }
             }
         }
         if (flagArray[30] != 0) {
             switch (flagArray[30]) {
                 case 1: {
-                    peer.setTypeAttribute((this._type_0_0value as SearchType | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | global_resource_Resource | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -648,14 +650,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setTypeAttribute((undefined as SearchType | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[31] != 0) {
             switch (flagArray[31]) {
                 case 1: {
-                    peer.setFontFeatureAttribute((this._fontFeature_0_0value as string | undefined));
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | global_resource_Resource | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -665,14 +667,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setFontFeatureAttribute((undefined as string | undefined));
+                    peer.setLineHeightAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[32] != 0) {
             switch (flagArray[32]) {
                 case 1: {
-                    peer.setOnWillInsertAttribute((this._onWillInsert_0_0value as arkui_component_common_Callback<InsertValue, boolean> | undefined));
+                    peer.setTypeAttribute((this._type_0_0value as SearchType | undefined));
                     flagArray[32] = 2;
                     break;
                 }
@@ -682,14 +684,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[32] = 0;
-                    peer.setOnWillInsertAttribute((undefined as arkui_component_common_Callback<InsertValue, boolean> | undefined));
+                    peer.setTypeAttribute((undefined as SearchType | undefined));
                 }
             }
         }
         if (flagArray[33] != 0) {
             switch (flagArray[33]) {
                 case 1: {
-                    peer.setOnDidInsertAttribute((this._onDidInsert_0_0value as arkui_component_common_Callback<InsertValue, void> | undefined));
+                    peer.setFontFeatureAttribute((this._fontFeature_0_0value as string | undefined));
                     flagArray[33] = 2;
                     break;
                 }
@@ -699,14 +701,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setOnDidInsertAttribute((undefined as arkui_component_common_Callback<InsertValue, void> | undefined));
+                    peer.setFontFeatureAttribute((undefined as string | undefined));
                 }
             }
         }
         if (flagArray[34] != 0) {
             switch (flagArray[34]) {
                 case 1: {
-                    peer.setOnWillDeleteAttribute((this._onWillDelete_0_0value as arkui_component_common_Callback<DeleteValue, boolean> | undefined));
+                    peer.setOnWillInsertAttribute((this._onWillInsert_0_0value as arkui_component_common_Callback<InsertValue, boolean> | undefined));
                     flagArray[34] = 2;
                     break;
                 }
@@ -716,14 +718,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setOnWillDeleteAttribute((undefined as arkui_component_common_Callback<DeleteValue, boolean> | undefined));
+                    peer.setOnWillInsertAttribute((undefined as arkui_component_common_Callback<InsertValue, boolean> | undefined));
                 }
             }
         }
         if (flagArray[35] != 0) {
             switch (flagArray[35]) {
                 case 1: {
-                    peer.setOnDidDeleteAttribute((this._onDidDelete_0_0value as arkui_component_common_Callback<DeleteValue, void> | undefined));
+                    peer.setOnDidInsertAttribute((this._onDidInsert_0_0value as arkui_component_common_Callback<InsertValue, void> | undefined));
                     flagArray[35] = 2;
                     break;
                 }
@@ -733,14 +735,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setOnDidDeleteAttribute((undefined as arkui_component_common_Callback<DeleteValue, void> | undefined));
+                    peer.setOnDidInsertAttribute((undefined as arkui_component_common_Callback<InsertValue, void> | undefined));
                 }
             }
         }
         if (flagArray[36] != 0) {
             switch (flagArray[36]) {
                 case 1: {
-                    peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
+                    peer.setOnWillDeleteAttribute((this._onWillDelete_0_0value as arkui_component_common_Callback<DeleteValue, boolean> | undefined));
                     flagArray[36] = 2;
                     break;
                 }
@@ -750,14 +752,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
+                    peer.setOnWillDeleteAttribute((undefined as arkui_component_common_Callback<DeleteValue, boolean> | undefined));
                 }
             }
         }
         if (flagArray[37] != 0) {
             switch (flagArray[37]) {
                 case 1: {
-                    peer.setEnablePreviewTextAttribute((this._enablePreviewText_0_0value as boolean | undefined));
+                    peer.setOnDidDeleteAttribute((this._onDidDelete_0_0value as arkui_component_common_Callback<DeleteValue, void> | undefined));
                     flagArray[37] = 2;
                     break;
                 }
@@ -767,14 +769,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[37] = 0;
-                    peer.setEnablePreviewTextAttribute((undefined as boolean | undefined));
+                    peer.setOnDidDeleteAttribute((undefined as arkui_component_common_Callback<DeleteValue, void> | undefined));
                 }
             }
         }
         if (flagArray[38] != 0) {
             switch (flagArray[38]) {
                 case 1: {
-                    peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
+                    peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
                     flagArray[38] = 2;
                     break;
                 }
@@ -784,14 +786,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[38] = 0;
-                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
+                    peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
                 }
             }
         }
         if (flagArray[39] != 0) {
             switch (flagArray[39]) {
                 case 1: {
-                    peer.setAutoCapitalizationModeAttribute((this._autoCapitalizationMode_0_0value as AutoCapitalizationMode | undefined));
+                    peer.setEnablePreviewTextAttribute((this._enablePreviewText_0_0value as boolean | undefined));
                     flagArray[39] = 2;
                     break;
                 }
@@ -801,7 +803,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[39] = 0;
-                    peer.setAutoCapitalizationModeAttribute((undefined as AutoCapitalizationMode | undefined));
+                    peer.setEnablePreviewTextAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -810,7 +812,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         if (flagArray[40] != 0) {
             switch (flagArray[40]) {
                 case 1: {
-                    peer.setHalfLeadingAttribute((this._halfLeading_0_0value as boolean | undefined));
+                    peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
                     flagArray[40] = 2;
                     break;
                 }
@@ -820,14 +822,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[40] = 0;
-                    peer.setHalfLeadingAttribute((undefined as boolean | undefined));
+                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[41] != 0) {
             switch (flagArray[41]) {
                 case 1: {
-                    peer.setStopBackPressAttribute((this._stopBackPress_0_0value as boolean | undefined));
+                    peer.setAutoCapitalizationModeAttribute((this._autoCapitalizationMode_0_0value as AutoCapitalizationMode | undefined));
                     flagArray[41] = 2;
                     break;
                 }
@@ -837,14 +839,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[41] = 0;
-                    peer.setStopBackPressAttribute((undefined as boolean | undefined));
+                    peer.setAutoCapitalizationModeAttribute((undefined as AutoCapitalizationMode | undefined));
                 }
             }
         }
         if (flagArray[42] != 0) {
             switch (flagArray[42]) {
                 case 1: {
-                    peer.setOnWillChangeAttribute((this._onWillChange_0_0value as arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined));
+                    peer.setHalfLeadingAttribute((this._halfLeading_0_0value as boolean | undefined));
                     flagArray[42] = 2;
                     break;
                 }
@@ -854,14 +856,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[42] = 0;
-                    peer.setOnWillChangeAttribute((undefined as arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined));
+                    peer.setHalfLeadingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[43] != 0) {
             switch (flagArray[43]) {
                 case 1: {
-                    peer.setKeyboardAppearanceAttribute((this._keyboardAppearance_0_0value as KeyboardAppearance | undefined));
+                    peer.setStopBackPressAttribute((this._stopBackPress_0_0value as boolean | undefined));
                     flagArray[43] = 2;
                     break;
                 }
@@ -871,14 +873,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[43] = 0;
-                    peer.setKeyboardAppearanceAttribute((undefined as KeyboardAppearance | undefined));
+                    peer.setStopBackPressAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[44] != 0) {
             switch (flagArray[44]) {
                 case 1: {
-                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as arkui_component_units_LengthMetrics | undefined));
+                    peer.setOnWillChangeAttribute((this._onWillChange_0_0value as arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined));
                     flagArray[44] = 2;
                     break;
                 }
@@ -888,14 +890,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[44] = 0;
-                    peer.setStrokeWidthAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
+                    peer.setOnWillChangeAttribute((undefined as arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined));
                 }
             }
         }
         if (flagArray[45] != 0) {
             switch (flagArray[45]) {
                 case 1: {
-                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as arkui_component_common_Callback<IMEClient, void> | undefined));
+                    peer.setKeyboardAppearanceAttribute((this._keyboardAppearance_0_0value as KeyboardAppearance | undefined));
                     flagArray[45] = 2;
                     break;
                 }
@@ -905,14 +907,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[45] = 0;
-                    peer.setOnWillAttachIMEAttribute((undefined as arkui_component_common_Callback<IMEClient, void> | undefined));
+                    peer.setKeyboardAppearanceAttribute((undefined as KeyboardAppearance | undefined));
                 }
             }
         }
         if (flagArray[46] != 0) {
             switch (flagArray[46]) {
                 case 1: {
-                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as arkui_component_units_LengthMetrics | undefined));
                     flagArray[46] = 2;
                     break;
                 }
@@ -922,14 +924,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[46] = 0;
-                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
+                    peer.setStrokeWidthAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
                 }
             }
         }
         if (flagArray[47] != 0) {
             switch (flagArray[47]) {
                 case 1: {
-                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
+                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as arkui_component_common_Callback<IMEClient, void> | undefined));
                     flagArray[47] = 2;
                     break;
                 }
@@ -939,14 +941,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[47] = 0;
-                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
+                    peer.setOnWillAttachIMEAttribute((undefined as arkui_component_common_Callback<IMEClient, void> | undefined));
                 }
             }
         }
         if (flagArray[48] != 0) {
             switch (flagArray[48]) {
                 case 1: {
-                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
                     flagArray[48] = 2;
                     break;
                 }
@@ -956,14 +958,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[48] = 0;
-                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
+                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
         if (flagArray[49] != 0) {
             switch (flagArray[49]) {
                 case 1: {
-                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
                     flagArray[49] = 2;
                     break;
                 }
@@ -973,14 +975,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[49] = 0;
-                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[50] != 0) {
             switch (flagArray[50]) {
                 case 1: {
-                    peer.setDividerColorAttribute((this._dividerColor_0_0value as arkui_component_units_ColorMetrics | undefined));
+                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
                     flagArray[50] = 2;
                     break;
                 }
@@ -990,14 +992,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[50] = 0;
-                    peer.setDividerColorAttribute((undefined as arkui_component_units_ColorMetrics | undefined));
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[51] != 0) {
             switch (flagArray[51]) {
                 case 1: {
-                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
                     flagArray[51] = 2;
                     break;
                 }
@@ -1007,14 +1009,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[51] = 0;
-                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[52] != 0) {
             switch (flagArray[52]) {
                 case 1: {
-                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    peer.setDividerColorAttribute((this._dividerColor_0_0value as arkui_component_units_ColorMetrics | undefined));
                     flagArray[52] = 2;
                     break;
                 }
@@ -1024,14 +1026,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[52] = 0;
-                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                    peer.setDividerColorAttribute((undefined as arkui_component_units_ColorMetrics | undefined));
                 }
             }
         }
         if (flagArray[53] != 0) {
             switch (flagArray[53]) {
                 case 1: {
-                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
                     flagArray[53] = 2;
                     break;
                 }
@@ -1041,14 +1043,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[53] = 0;
-                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[54] != 0) {
             switch (flagArray[54]) {
                 case 1: {
-                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
                     flagArray[54] = 2;
                     break;
                 }
@@ -1058,14 +1060,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[54] = 0;
-                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[55] != 0) {
             switch (flagArray[55]) {
                 case 1: {
-                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined | undefined));
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
                     flagArray[55] = 2;
                     break;
                 }
@@ -1075,14 +1077,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[55] = 0;
-                    peer.setSearchButtonAttribute((undefined as string | undefined), (undefined as SearchButtonOptions | undefined | undefined));
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
                 }
             }
         }
         if (flagArray[56] != 0) {
             switch (flagArray[56]) {
                 case 1: {
-                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as arkui_component_common_Callback<string, void> | undefined | undefined));
+                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
                     flagArray[56] = 2;
                     break;
                 }
@@ -1092,14 +1094,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[56] = 0;
-                    peer.setInputFilterAttribute((undefined as ResourceStr | undefined), (undefined as arkui_component_common_Callback<string, void> | undefined | undefined));
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
                 }
             }
         }
         if (flagArray[57] != 0) {
             switch (flagArray[57]) {
                 case 1: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined | undefined));
                     flagArray[57] = 2;
                     break;
                 }
@@ -1109,6 +1111,40 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     flagArray[57] = 0;
+                    peer.setSearchButtonAttribute((undefined as string | undefined), (undefined as SearchButtonOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
+                case 1: {
+                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as arkui_component_common_Callback<string, void> | undefined | undefined));
+                    flagArray[58] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[58] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[58] = 0;
+                    peer.setInputFilterAttribute((undefined as ResourceStr | undefined), (undefined as arkui_component_common_Callback<string, void> | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
+                case 1: {
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    flagArray[59] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[59] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[59] = 0;
                     peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined));
                 }
             }
@@ -1319,6 +1355,18 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
             switch (flagArray[16]) {
                 case 1:
                 case 3: {
+                    this.onWillCopy((modifier._onWillCopy_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
+                    break;
+                }
+                default: {
+                    this.onWillCopy((undefined as arkui_component_common_Callback<string, boolean> | undefined));
+                }
+            }
+        }
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
                     this.onCut((modifier._onCut_0_0value as arkui_component_common_Callback<string, void> | undefined));
                     break;
                 }
@@ -1327,8 +1375,20 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[17] != 0) {
-            switch (flagArray[17]) {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.onWillCut((modifier._onWillCut_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
+                    break;
+                }
+                default: {
+                    this.onWillCut((undefined as arkui_component_common_Callback<string, boolean> | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
                 case 1:
                 case 3: {
                     this.onPaste((modifier._onPaste_0_0value as OnPasteCallback | undefined));
@@ -1339,8 +1399,10 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[18] != 0) {
-            switch (flagArray[18]) {
+    }
+    mergeModifier1(modifier: SearchModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
                 case 1:
                 case 3: {
                     this.copyOption((modifier._copyOption_0_0value as CopyOptions | undefined));
@@ -1351,8 +1413,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[19] != 0) {
-            switch (flagArray[19]) {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
                 case 1:
                 case 3: {
                     this.maxLength((modifier._maxLength_0_0value as int32 | undefined));
@@ -1363,10 +1425,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-    }
-    mergeModifier1(modifier: SearchModifier, flagArray: Uint8Array): void {
-        if (flagArray[20] != 0) {
-            switch (flagArray[20]) {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
                 case 1:
                 case 3: {
                     this.textAlign((modifier._textAlign_0_0value as TextAlign | undefined));
@@ -1377,8 +1437,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[21] != 0) {
-            switch (flagArray[21]) {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
                 case 1:
                 case 3: {
                     this.enableKeyboardOnFocus((modifier._enableKeyboardOnFocus_0_0value as boolean | undefined));
@@ -1389,8 +1449,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[22] != 0) {
-            switch (flagArray[22]) {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
                 case 1:
                 case 3: {
                     this.selectionMenuHidden((modifier._selectionMenuHidden_0_0value as boolean | undefined));
@@ -1401,8 +1461,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[23] != 0) {
-            switch (flagArray[23]) {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
                 case 1:
                 case 3: {
                     this.minFontSize((modifier._minFontSize_0_0value as double | string | global_resource_Resource | undefined));
@@ -1413,8 +1473,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[24] != 0) {
-            switch (flagArray[24]) {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
                 case 1:
                 case 3: {
                     this.maxFontSize((modifier._maxFontSize_0_0value as double | string | global_resource_Resource | undefined));
@@ -1425,8 +1485,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[25] != 0) {
-            switch (flagArray[25]) {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
                 case 1:
                 case 3: {
                     this.minFontScale((modifier._minFontScale_0_0value as double | global_resource_Resource | undefined));
@@ -1437,8 +1497,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[26] != 0) {
-            switch (flagArray[26]) {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
                 case 1:
                 case 3: {
                     this.maxFontScale((modifier._maxFontScale_0_0value as double | global_resource_Resource | undefined));
@@ -1449,8 +1509,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[27] != 0) {
-            switch (flagArray[27]) {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
                 case 1:
                 case 3: {
                     this.decoration((modifier._decoration_0_0value as TextDecorationOptions | undefined));
@@ -1461,8 +1521,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[28] != 0) {
-            switch (flagArray[28]) {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
                 case 1:
                 case 3: {
                     this.letterSpacing((modifier._letterSpacing_0_0value as double | string | global_resource_Resource | undefined));
@@ -1473,8 +1533,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[29] != 0) {
-            switch (flagArray[29]) {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
                 case 1:
                 case 3: {
                     this.lineHeight((modifier._lineHeight_0_0value as double | string | global_resource_Resource | undefined));
@@ -1485,8 +1545,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[30] != 0) {
-            switch (flagArray[30]) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1:
                 case 3: {
                     this.type((modifier._type_0_0value as SearchType | undefined));
@@ -1497,8 +1557,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[31] != 0) {
-            switch (flagArray[31]) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1:
                 case 3: {
                     this.fontFeature((modifier._fontFeature_0_0value as string | undefined));
@@ -1509,8 +1569,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[32] != 0) {
-            switch (flagArray[32]) {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
                 case 1:
                 case 3: {
                     this.onWillInsert((modifier._onWillInsert_0_0value as arkui_component_common_Callback<InsertValue, boolean> | undefined));
@@ -1521,8 +1581,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[33] != 0) {
-            switch (flagArray[33]) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1:
                 case 3: {
                     this.onDidInsert((modifier._onDidInsert_0_0value as arkui_component_common_Callback<InsertValue, void> | undefined));
@@ -1533,8 +1593,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[34] != 0) {
-            switch (flagArray[34]) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1:
                 case 3: {
                     this.onWillDelete((modifier._onWillDelete_0_0value as arkui_component_common_Callback<DeleteValue, boolean> | undefined));
@@ -1545,8 +1605,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[35] != 0) {
-            switch (flagArray[35]) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1:
                 case 3: {
                     this.onDidDelete((modifier._onDidDelete_0_0value as arkui_component_common_Callback<DeleteValue, void> | undefined));
@@ -1557,8 +1617,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[36] != 0) {
-            switch (flagArray[36]) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1:
                 case 3: {
                     this.editMenuOptions((modifier._editMenuOptions_0_0value as EditMenuOptions | undefined));
@@ -1569,8 +1629,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[37] != 0) {
-            switch (flagArray[37]) {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
                 case 1:
                 case 3: {
                     this.enablePreviewText((modifier._enablePreviewText_0_0value as boolean | undefined));
@@ -1581,8 +1641,10 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[38] != 0) {
-            switch (flagArray[38]) {
+    }
+    mergeModifier2(modifier: SearchModifier, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
                 case 1:
                 case 3: {
                     this.enableHapticFeedback((modifier._enableHapticFeedback_0_0value as boolean | undefined));
@@ -1593,8 +1655,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[39] != 0) {
-            switch (flagArray[39]) {
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
                 case 1:
                 case 3: {
                     this.autoCapitalizationMode((modifier._autoCapitalizationMode_0_0value as AutoCapitalizationMode | undefined));
@@ -1605,10 +1667,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-    }
-    mergeModifier2(modifier: SearchModifier, flagArray: Uint8Array): void {
-        if (flagArray[40] != 0) {
-            switch (flagArray[40]) {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
                 case 1:
                 case 3: {
                     this.halfLeading((modifier._halfLeading_0_0value as boolean | undefined));
@@ -1619,8 +1679,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[41] != 0) {
-            switch (flagArray[41]) {
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
                 case 1:
                 case 3: {
                     this.stopBackPress((modifier._stopBackPress_0_0value as boolean | undefined));
@@ -1631,8 +1691,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[42] != 0) {
-            switch (flagArray[42]) {
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
                 case 1:
                 case 3: {
                     this.onWillChange((modifier._onWillChange_0_0value as arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined));
@@ -1643,8 +1703,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[43] != 0) {
-            switch (flagArray[43]) {
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
                 case 1:
                 case 3: {
                     this.keyboardAppearance((modifier._keyboardAppearance_0_0value as KeyboardAppearance | undefined));
@@ -1655,8 +1715,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[44] != 0) {
-            switch (flagArray[44]) {
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
                 case 1:
                 case 3: {
                     this.strokeWidth((modifier._strokeWidth_0_0value as arkui_component_units_LengthMetrics | undefined));
@@ -1667,8 +1727,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[45] != 0) {
-            switch (flagArray[45]) {
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
                 case 1:
                 case 3: {
                     this.onWillAttachIME((modifier._onWillAttachIME_0_0value as arkui_component_common_Callback<IMEClient, void> | undefined));
@@ -1679,8 +1739,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[46] != 0) {
-            switch (flagArray[46]) {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
                 case 1:
                 case 3: {
                     this.strokeColor((modifier._strokeColor_0_0value as ResourceColor | undefined));
@@ -1691,8 +1751,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[47] != 0) {
-            switch (flagArray[47]) {
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
                 case 1:
                 case 3: {
                     this.enableAutoSpacing((modifier._enableAutoSpacing_0_0value as boolean | undefined));
@@ -1703,8 +1763,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[48] != 0) {
-            switch (flagArray[48]) {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
                 case 1:
                 case 3: {
                     this.enableSelectedDataDetector((modifier._enableSelectedDataDetector_0_0value as boolean | undefined));
@@ -1715,8 +1775,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[49] != 0) {
-            switch (flagArray[49]) {
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
                 case 1:
                 case 3: {
                     this.compressLeadingPunctuation((modifier._compressLeadingPunctuation_0_0value as boolean | undefined));
@@ -1727,8 +1787,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[50] != 0) {
-            switch (flagArray[50]) {
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
                 case 1:
                 case 3: {
                     this.dividerColor((modifier._dividerColor_0_0value as arkui_component_units_ColorMetrics | undefined));
@@ -1739,8 +1799,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[51] != 0) {
-            switch (flagArray[51]) {
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
                 case 1:
                 case 3: {
                     this.includeFontPadding((modifier._includeFontPadding_0_0value as boolean | undefined));
@@ -1751,8 +1811,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[52] != 0) {
-            switch (flagArray[52]) {
+        if (flagArray[54] != 0) {
+            switch (flagArray[54]) {
                 case 1:
                 case 3: {
                     this.fallbackLineSpacing((modifier._fallbackLineSpacing_0_0value as boolean | undefined));
@@ -1763,8 +1823,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[53] != 0) {
-            switch (flagArray[53]) {
+        if (flagArray[55] != 0) {
+            switch (flagArray[55]) {
                 case 1:
                 case 3: {
                     this.selectedDragPreviewStyle((modifier._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
@@ -1775,8 +1835,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[54] != 0) {
-            switch (flagArray[54]) {
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
                 case 1:
                 case 3: {
                     this.textDirection((modifier._textDirection_0_0value as TextDirection | undefined));
@@ -1787,8 +1847,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[55] != 0) {
-            switch (flagArray[55]) {
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
                 case 1:
                 case 3: {
                     this.searchButton((modifier._searchButton_0_0value as string | undefined), (modifier._searchButton_0_1value as SearchButtonOptions | undefined));
@@ -1799,8 +1859,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[56] != 0) {
-            switch (flagArray[56]) {
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
                 case 1:
                 case 3: {
                     this.inputFilter((modifier._inputFilter_0_0value as ResourceStr | undefined), (modifier._inputFilter_0_1value as arkui_component_common_Callback<string, void> | undefined));
@@ -1811,8 +1871,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (flagArray[57] != 0) {
-            switch (flagArray[57]) {
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
                 case 1:
                 case 3: {
                     this.customKeyboard((modifier._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (modifier._customKeyboard_0_1value as KeyboardOptions | undefined));
@@ -1984,426 +2044,446 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
         if (((this._flagArray[16]) == (0)) || (true)) {
             this._flagArray[16] = 1
-            this._onCut_0_0value = value
+            this._onWillCopy_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[16] = 3
         }
         return this
     }
-    onPaste(value: OnPasteCallback | undefined): this {
+    onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
         if (((this._flagArray[17]) == (0)) || (true)) {
             this._flagArray[17] = 1
-            this._onPaste_0_0value = value
+            this._onCut_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[17] = 3
         }
         return this
     }
-    copyOption(value: CopyOptions | undefined): this {
+    onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
         if (((this._flagArray[18]) == (0)) || (true)) {
             this._flagArray[18] = 1
-            this._copyOption_0_0value = value
+            this._onWillCut_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[18] = 3
         }
         return this
     }
-    maxLength(value: int32 | undefined): this {
-        if (((this._flagArray[19]) == (0)) || ((this._maxLength_0_0value) !== (value))) {
+    onPaste(value: OnPasteCallback | undefined): this {
+        if (((this._flagArray[19]) == (0)) || (true)) {
             this._flagArray[19] = 1
-            this._maxLength_0_0value = value
+            this._onPaste_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[19] = 3
         }
         return this
     }
-    textAlign(value: TextAlign | undefined): this {
+    copyOption(value: CopyOptions | undefined): this {
         if (((this._flagArray[20]) == (0)) || (true)) {
             this._flagArray[20] = 1
-            this._textAlign_0_0value = value
+            this._copyOption_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[20] = 3
         }
         return this
     }
-    enableKeyboardOnFocus(value: boolean | undefined): this {
-        if (((this._flagArray[21]) == (0)) || ((this._enableKeyboardOnFocus_0_0value) !== (value))) {
+    maxLength(value: int32 | undefined): this {
+        if (((this._flagArray[21]) == (0)) || ((this._maxLength_0_0value) !== (value))) {
             this._flagArray[21] = 1
-            this._enableKeyboardOnFocus_0_0value = value
+            this._maxLength_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[21] = 3
         }
         return this
     }
-    selectionMenuHidden(value: boolean | undefined): this {
-        if (((this._flagArray[22]) == (0)) || ((this._selectionMenuHidden_0_0value) !== (value))) {
+    textAlign(value: TextAlign | undefined): this {
+        if (((this._flagArray[22]) == (0)) || (true)) {
             this._flagArray[22] = 1
-            this._selectionMenuHidden_0_0value = value
+            this._textAlign_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[22] = 3
         }
         return this
     }
-    minFontSize(value: double | string | global_resource_Resource | undefined): this {
-        if (((this._flagArray[23]) == (0)) || (true)) {
+    enableKeyboardOnFocus(value: boolean | undefined): this {
+        if (((this._flagArray[23]) == (0)) || ((this._enableKeyboardOnFocus_0_0value) !== (value))) {
             this._flagArray[23] = 1
-            this._minFontSize_0_0value = value
+            this._enableKeyboardOnFocus_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[23] = 3
         }
         return this
     }
-    maxFontSize(value: double | string | global_resource_Resource | undefined): this {
-        if (((this._flagArray[24]) == (0)) || (true)) {
+    selectionMenuHidden(value: boolean | undefined): this {
+        if (((this._flagArray[24]) == (0)) || ((this._selectionMenuHidden_0_0value) !== (value))) {
             this._flagArray[24] = 1
-            this._maxFontSize_0_0value = value
+            this._selectionMenuHidden_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[24] = 3
         }
         return this
     }
-    minFontScale(value: double | global_resource_Resource | undefined): this {
+    minFontSize(value: double | string | global_resource_Resource | undefined): this {
         if (((this._flagArray[25]) == (0)) || (true)) {
             this._flagArray[25] = 1
-            this._minFontScale_0_0value = value
+            this._minFontSize_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[25] = 3
         }
         return this
     }
-    maxFontScale(value: double | global_resource_Resource | undefined): this {
+    maxFontSize(value: double | string | global_resource_Resource | undefined): this {
         if (((this._flagArray[26]) == (0)) || (true)) {
             this._flagArray[26] = 1
-            this._maxFontScale_0_0value = value
+            this._maxFontSize_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[26] = 3
         }
         return this
     }
-    decoration(value: TextDecorationOptions | undefined): this {
+    minFontScale(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[27]) == (0)) || (true)) {
             this._flagArray[27] = 1
-            this._decoration_0_0value = value
+            this._minFontScale_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[27] = 3
         }
         return this
     }
-    letterSpacing(value: double | string | global_resource_Resource | undefined): this {
+    maxFontScale(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[28]) == (0)) || (true)) {
             this._flagArray[28] = 1
-            this._letterSpacing_0_0value = value
+            this._maxFontScale_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[28] = 3
         }
         return this
     }
-    lineHeight(value: double | string | global_resource_Resource | undefined): this {
+    decoration(value: TextDecorationOptions | undefined): this {
         if (((this._flagArray[29]) == (0)) || (true)) {
             this._flagArray[29] = 1
-            this._lineHeight_0_0value = value
+            this._decoration_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[29] = 3
         }
         return this
     }
-    type(value: SearchType | undefined): this {
+    letterSpacing(value: double | string | global_resource_Resource | undefined): this {
         if (((this._flagArray[30]) == (0)) || (true)) {
             this._flagArray[30] = 1
-            this._type_0_0value = value
+            this._letterSpacing_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[30] = 3
         }
         return this
     }
-    fontFeature(value: string | undefined): this {
-        if (((this._flagArray[31]) == (0)) || ((this._fontFeature_0_0value) !== (value))) {
+    lineHeight(value: double | string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[31]) == (0)) || (true)) {
             this._flagArray[31] = 1
-            this._fontFeature_0_0value = value
+            this._lineHeight_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[31] = 3
         }
         return this
     }
-    onWillInsert(value: arkui_component_common_Callback<InsertValue, boolean> | undefined): this {
+    type(value: SearchType | undefined): this {
         if (((this._flagArray[32]) == (0)) || (true)) {
             this._flagArray[32] = 1
-            this._onWillInsert_0_0value = value
+            this._type_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[32] = 3
         }
         return this
     }
-    onDidInsert(value: arkui_component_common_Callback<InsertValue, void> | undefined): this {
-        if (((this._flagArray[33]) == (0)) || (true)) {
+    fontFeature(value: string | undefined): this {
+        if (((this._flagArray[33]) == (0)) || ((this._fontFeature_0_0value) !== (value))) {
             this._flagArray[33] = 1
-            this._onDidInsert_0_0value = value
+            this._fontFeature_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[33] = 3
         }
         return this
     }
-    onWillDelete(value: arkui_component_common_Callback<DeleteValue, boolean> | undefined): this {
+    onWillInsert(value: arkui_component_common_Callback<InsertValue, boolean> | undefined): this {
         if (((this._flagArray[34]) == (0)) || (true)) {
             this._flagArray[34] = 1
-            this._onWillDelete_0_0value = value
+            this._onWillInsert_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[34] = 3
         }
         return this
     }
-    onDidDelete(value: arkui_component_common_Callback<DeleteValue, void> | undefined): this {
+    onDidInsert(value: arkui_component_common_Callback<InsertValue, void> | undefined): this {
         if (((this._flagArray[35]) == (0)) || (true)) {
             this._flagArray[35] = 1
-            this._onDidDelete_0_0value = value
+            this._onDidInsert_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[35] = 3
         }
         return this
     }
-    editMenuOptions(value: EditMenuOptions | undefined): this {
+    onWillDelete(value: arkui_component_common_Callback<DeleteValue, boolean> | undefined): this {
         if (((this._flagArray[36]) == (0)) || (true)) {
             this._flagArray[36] = 1
-            this._editMenuOptions_0_0value = value
+            this._onWillDelete_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[36] = 3
         }
         return this
     }
-    enablePreviewText(value: boolean | undefined): this {
-        if (((this._flagArray[37]) == (0)) || ((this._enablePreviewText_0_0value) !== (value))) {
+    onDidDelete(value: arkui_component_common_Callback<DeleteValue, void> | undefined): this {
+        if (((this._flagArray[37]) == (0)) || (true)) {
             this._flagArray[37] = 1
-            this._enablePreviewText_0_0value = value
+            this._onDidDelete_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[37] = 3
         }
         return this
     }
-    enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._flagArray[38]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        if (((this._flagArray[38]) == (0)) || (true)) {
             this._flagArray[38] = 1
-            this._enableHapticFeedback_0_0value = value
+            this._editMenuOptions_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[38] = 3
         }
         return this
     }
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
-        if (((this._flagArray[39]) == (0)) || (true)) {
+    enablePreviewText(value: boolean | undefined): this {
+        if (((this._flagArray[39]) == (0)) || ((this._enablePreviewText_0_0value) !== (value))) {
             this._flagArray[39] = 1
-            this._autoCapitalizationMode_0_0value = value
+            this._enablePreviewText_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[39] = 3
         }
         return this
     }
-    halfLeading(value: boolean | undefined): this {
-        if (((this._flagArray[40]) == (0)) || ((this._halfLeading_0_0value) !== (value))) {
+    enableHapticFeedback(value: boolean | undefined): this {
+        if (((this._flagArray[40]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
             this._flagArray[40] = 1
-            this._halfLeading_0_0value = value
+            this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[40] = 3
         }
         return this
     }
-    stopBackPress(value: boolean | undefined): this {
-        if (((this._flagArray[41]) == (0)) || ((this._stopBackPress_0_0value) !== (value))) {
+    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
+        if (((this._flagArray[41]) == (0)) || (true)) {
             this._flagArray[41] = 1
-            this._stopBackPress_0_0value = value
+            this._autoCapitalizationMode_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[41] = 3
         }
         return this
     }
-    onWillChange(value: arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined): this {
-        if (((this._flagArray[42]) == (0)) || (true)) {
+    halfLeading(value: boolean | undefined): this {
+        if (((this._flagArray[42]) == (0)) || ((this._halfLeading_0_0value) !== (value))) {
             this._flagArray[42] = 1
-            this._onWillChange_0_0value = value
+            this._halfLeading_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[42] = 3
         }
         return this
     }
-    keyboardAppearance(value: KeyboardAppearance | undefined): this {
-        if (((this._flagArray[43]) == (0)) || (true)) {
+    stopBackPress(value: boolean | undefined): this {
+        if (((this._flagArray[43]) == (0)) || ((this._stopBackPress_0_0value) !== (value))) {
             this._flagArray[43] = 1
-            this._keyboardAppearance_0_0value = value
+            this._stopBackPress_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[43] = 3
         }
         return this
     }
-    strokeWidth(value: arkui_component_units_LengthMetrics | undefined): this {
+    onWillChange(value: arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined): this {
         if (((this._flagArray[44]) == (0)) || (true)) {
             this._flagArray[44] = 1
-            this._strokeWidth_0_0value = value
+            this._onWillChange_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[44] = 3
         }
         return this
     }
-    onWillAttachIME(value: arkui_component_common_Callback<IMEClient, void> | undefined): this {
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (((this._flagArray[45]) == (0)) || (true)) {
             this._flagArray[45] = 1
-            this._onWillAttachIME_0_0value = value
+            this._keyboardAppearance_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[45] = 3
         }
         return this
     }
-    strokeColor(value: ResourceColor | undefined): this {
+    strokeWidth(value: arkui_component_units_LengthMetrics | undefined): this {
         if (((this._flagArray[46]) == (0)) || (true)) {
             this._flagArray[46] = 1
-            this._strokeColor_0_0value = value
+            this._strokeWidth_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[46] = 3
         }
         return this
     }
-    enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._flagArray[47]) == (0)) || ((this._enableAutoSpacing_0_0value) !== (value))) {
+    onWillAttachIME(value: arkui_component_common_Callback<IMEClient, void> | undefined): this {
+        if (((this._flagArray[47]) == (0)) || (true)) {
             this._flagArray[47] = 1
-            this._enableAutoSpacing_0_0value = value
+            this._onWillAttachIME_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[47] = 3
         }
         return this
     }
-    enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._flagArray[48]) == (0)) || ((this._enableSelectedDataDetector_0_0value) !== (value))) {
+    strokeColor(value: ResourceColor | undefined): this {
+        if (((this._flagArray[48]) == (0)) || (true)) {
             this._flagArray[48] = 1
-            this._enableSelectedDataDetector_0_0value = value
+            this._strokeColor_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[48] = 3
         }
         return this
     }
-    compressLeadingPunctuation(value: boolean | undefined): this {
-        if (((this._flagArray[49]) == (0)) || ((this._compressLeadingPunctuation_0_0value) !== (value))) {
+    enableAutoSpacing(value: boolean | undefined): this {
+        if (((this._flagArray[49]) == (0)) || ((this._enableAutoSpacing_0_0value) !== (value))) {
             this._flagArray[49] = 1
-            this._compressLeadingPunctuation_0_0value = value
+            this._enableAutoSpacing_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[49] = 3
         }
         return this
     }
-    dividerColor(value: arkui_component_units_ColorMetrics | undefined): this {
-        if (((this._flagArray[50]) == (0)) || (true)) {
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        if (((this._flagArray[50]) == (0)) || ((this._enableSelectedDataDetector_0_0value) !== (value))) {
             this._flagArray[50] = 1
-            this._dividerColor_0_0value = value
+            this._enableSelectedDataDetector_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[50] = 3
         }
         return this
     }
-    includeFontPadding(value: boolean | undefined): this {
-        if (((this._flagArray[51]) == (0)) || ((this._includeFontPadding_0_0value) !== (value))) {
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._flagArray[51]) == (0)) || ((this._compressLeadingPunctuation_0_0value) !== (value))) {
             this._flagArray[51] = 1
-            this._includeFontPadding_0_0value = value
+            this._compressLeadingPunctuation_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[51] = 3
         }
         return this
     }
-    fallbackLineSpacing(value: boolean | undefined): this {
-        if (((this._flagArray[52]) == (0)) || ((this._fallbackLineSpacing_0_0value) !== (value))) {
+    dividerColor(value: arkui_component_units_ColorMetrics | undefined): this {
+        if (((this._flagArray[52]) == (0)) || (true)) {
             this._flagArray[52] = 1
-            this._fallbackLineSpacing_0_0value = value
+            this._dividerColor_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[52] = 3
         }
         return this
     }
-    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
-        if (((this._flagArray[53]) == (0)) || (true)) {
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._flagArray[53]) == (0)) || ((this._includeFontPadding_0_0value) !== (value))) {
             this._flagArray[53] = 1
-            this._selectedDragPreviewStyle_0_0value = value
+            this._includeFontPadding_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[53] = 3
         }
         return this
     }
-    textDirection(value: TextDirection | undefined): this {
-        if (((this._flagArray[54]) == (0)) || (true)) {
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._flagArray[54]) == (0)) || ((this._fallbackLineSpacing_0_0value) !== (value))) {
             this._flagArray[54] = 1
-            this._textDirection_0_0value = value
+            this._fallbackLineSpacing_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[54] = 3
         }
         return this
     }
-    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
-        if (((this._flagArray[55]) == (0)) || ((this._searchButton_0_0value) !== (value)) || (true)) {
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._flagArray[55]) == (0)) || (true)) {
             this._flagArray[55] = 1
-            this._searchButton_0_0value = value
-            this._searchButton_0_1value = option
+            this._selectedDragPreviewStyle_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[55] = 3
         }
         return this
     }
-    inputFilter(value: ResourceStr | undefined, error?: arkui_component_common_Callback<string, void>): this {
-        if (((this._flagArray[56]) == (0)) || (true) || (true)) {
+    textDirection(value: TextDirection | undefined): this {
+        if (((this._flagArray[56]) == (0)) || (true)) {
             this._flagArray[56] = 1
-            this._inputFilter_0_0value = value
-            this._inputFilter_0_1value = error
+            this._textDirection_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[56] = 3
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
-        if (((this._flagArray[57]) == (0)) || (true) || (true)) {
+    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+        if (((this._flagArray[57]) == (0)) || ((this._searchButton_0_0value) !== (value)) || (true)) {
             this._flagArray[57] = 1
+            this._searchButton_0_0value = value
+            this._searchButton_0_1value = option
+            this._state.fireChange()
+        } else {
+            this._flagArray[57] = 3
+        }
+        return this
+    }
+    inputFilter(value: ResourceStr | undefined, error?: arkui_component_common_Callback<string, void>): this {
+        if (((this._flagArray[58]) == (0)) || (true) || (true)) {
+            this._flagArray[58] = 1
+            this._inputFilter_0_0value = value
+            this._inputFilter_0_1value = error
+            this._state.fireChange()
+        } else {
+            this._flagArray[58] = 3
+        }
+        return this
+    }
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
+        if (((this._flagArray[59]) == (0)) || (true) || (true)) {
+            this._flagArray[59] = 1
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
             this._state.fireChange()
         } else {
-            this._flagArray[57] = 3
+            this._flagArray[59] = 3
         }
         return this
     }

@@ -177,9 +177,9 @@ const FOCUSED_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_
 const NORMAL_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_normal_color');
 const FOCUSED_ITEM_SCALE: number = LengthMetrics.resource($r('sys.float.composeListItem_focus_magnification')).value;
 const FOCUSED_SHADOW: ShadowStyle | number =
-  LengthMetrics.resource($r('sys.float.composeListItem_focus_shadow_attribute'))?.value as ShadowStyle | number;
+  LengthMetrics.resource($r('sys.float.composeListItem_focus_shadow_attribute'))?.value ?? 0;
 const NORMAL_SHADOW: ShadowStyle | number =
-  LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))?.value as ShadowStyle | number;
+  LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))?.value ?? 0;
 const ITEM_PADDING: Resource = $r('sys.float.composeListItem_padding');
 const OPERATEITEM_ARROW_MARGIN_WIDTH: number = LengthMetrics.resource(
   $r('sys.float.composeListItem_arrow_margin')).value;
@@ -206,7 +206,7 @@ class Util {
   }
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   ComposeListItem: ComposeListItem;
 
   constructor(ComposeListItem: ComposeListItem) {
@@ -480,7 +480,7 @@ interface CreateIconParam {
   icon?: OperateIcon;
 }
 
-class OperateItemStructController {
+export class OperateItemStructController {
   public changeRadioState = () => {
   };
   public changeCheckboxState = () => {
@@ -723,7 +723,7 @@ struct OperateItemStruct {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value.toInt())
       .draggable(false)
       .flexShrink(1)
   }
@@ -977,7 +977,7 @@ struct OperateItemStruct {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value.toInt())
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -1176,7 +1176,7 @@ export struct ComposeListItem {
   @State canTouch: boolean = true;
   @State canHover: boolean = true;
   @State isHover: boolean = false;
-  @State itemHeight: number = ItemHeight.FIRST_HEIGHT as number;
+  @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
   @State isActive: boolean = false;
   @State hoveringColor: ResourceColor = '#0d000000';
   @State touchDownColor: ResourceColor = '#1a000000';
@@ -1230,7 +1230,7 @@ export struct ComposeListItem {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
         this.itemHeight =
-          (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT as number :
+          (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT :
             systemIconLineHeight as number;
       }
     } else if (this.contentItem?.description === undefined) {
@@ -1301,7 +1301,7 @@ export struct ComposeListItem {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.offEnvironment(this.callbackId as Int,
+        this.applicationContext.offEnvironment(this.callbackId.toInt(),
           (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })

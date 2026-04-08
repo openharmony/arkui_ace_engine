@@ -33,9 +33,12 @@ public:
     void CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
     void CreateWithResourceObjFlag(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
     void ProcessBadgeValue(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
-    void ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
-    void ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
-    void ProcessBorderColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    void ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<FrameNode>& frameNode);
+    void ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<FrameNode>& frameNode);
+    void ProcessBorderColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<FrameNode>& frameNode);
     void ProcessOuterBorderColor(
         const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessFontWeight(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);

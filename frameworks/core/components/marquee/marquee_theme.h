@@ -18,7 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 

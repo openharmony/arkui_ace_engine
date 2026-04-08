@@ -20,12 +20,11 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_mode.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-
-enum class WaterFlowLayoutMode;
 
 class WaterFlowLayoutInfoBase : public AceType {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoBase, AceType);
@@ -244,7 +243,6 @@ public:
     ScrollAlign align_ = ScrollAlign::START;
     std::optional<int32_t> targetIndex_;
     std::optional<float> extraOffset_;
-    int32_t jumpForRecompose_ = EMPTY_JUMP_INDEX;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;

@@ -15,8 +15,8 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -1984,7 +1984,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
      */
     pattern->isMoveCaretAnywhere_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+    /**
+     * @tc.steps: step5. ProcessOverlay
+     */
     pattern->isMoveCaretAnywhere_ = false;
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = true;
@@ -1994,7 +1996,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
-
+    /**
+     * @tc.step: step6. SetLocalOffset
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
@@ -2030,16 +2034,21 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step3. call GetMagnifierController
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->isShowMagnifier_ = true;
+    /**
+     * @tc.steps: step4. call GetShowMagnifier
+     */
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, true);
 
 
     /**
-     * @tc.steps: step3. GetMagnifierController
+     * @tc.steps: step5. GetMagnifierController
      *
      */
     result = controller->GetShowMagnifier();
@@ -3292,6 +3301,16 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread4, TestSize.Level1
     pattern->ProcessDefaultStyleAndBehaviorsMultiThread();
 }
 
+HWTEST_F(TextFieldPatternTest, TextPatternIsDisabled001, TestSize.Level1)
+{
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(eventHub_, nullptr);
+    EXPECT_FALSE(pattern_->IsDisabled());
+    eventHub_->SetEnabled(false);
+    EXPECT_TRUE(pattern_->IsDisabled());
+}
+
 /**
  * @tc.name: TextInputResponseAreaGetChildOffset
  * @tc.desc: test TextInputResponseArea GetChildOffset method
@@ -3345,5 +3364,25 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
      */
     auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
     ASSERT_NE(windowId, nullptr);
+}
+
+/**
+ * @tc.name: TextPattern109
+ * @tc.desc: Test TextPattern DumpSimplifyInfo placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(DEFAULT_TEXT_U16);
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
+    pattern->DumpSimplifyInfo(json);
+    EXPECT_EQ(json->GetString("placeholder", DEFAULT_TEXT), DEFAULT_TEXT);
 }
 } // namespace OHOS::Ace::NG

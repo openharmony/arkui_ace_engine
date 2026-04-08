@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IF_ELSE_H
 
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/syntax/if_else_model.h"
 

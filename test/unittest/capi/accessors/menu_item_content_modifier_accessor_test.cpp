@@ -49,6 +49,8 @@ static constexpr int TEST_OBJ_ID = 1001;
 static constexpr int TEST_BUILDER_ID = 1002;
 static constexpr bool TEST_DEFAULT_SELECTED = false;
 static constexpr int TEST_DEFAULT_INDEX = 0;
+static constexpr std::string TEST_TEXT = "XXX";
+static constexpr std::string TEST_ICON = "YYY";
 
 static void NoOpResource(InteropInt32) {}
 
@@ -74,7 +76,10 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, Tes
     ASSERT_NE(pattern, nullptr);
     pattern->SetMenuNode(wrapperNode);
 
-    SelectParam param = {.text = "XXX", .icon = "YYY"};
+    SelectParam param = {
+        .text = TEST_TEXT,
+        .icon = TEST_ICON
+    };
     std::vector<SelectParam> params = {param};
     auto mn = pattern->GetMenuNode();
     ASSERT_NE(mn, nullptr);
@@ -82,12 +87,7 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, Tes
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->SetSelectProperties(params);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t objId;
-        bool selected;
-        int index;
-    };
+    struct CheckEvent { int32_t nodeId; int32_t objId; bool selected; int index; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     // In gen140 ArkCreate<Ark_Object> is deleted; create Ark_Object manually for test id.

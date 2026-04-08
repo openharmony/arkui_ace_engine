@@ -14,6 +14,7 @@
  */
 
 #include "inspect_label.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectLabel::InspectLabel(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

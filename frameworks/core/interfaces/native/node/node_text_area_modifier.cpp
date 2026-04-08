@@ -1665,6 +1665,25 @@ void ResetTextAreaOnEditChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
 }
 
+void SetTextAreaOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        TextFieldModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetTextAreaOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1682,6 +1701,25 @@ void ResetTextAreaOnCopy(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextAreaOnWillCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        TextFieldModelNG::SetOnWillCut(frameNode, std::move(*func));
+    } else {
+        TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
 }
 
 void SetTextAreaOnCut(ArkUINodeHandle node, void* callback)
@@ -1877,6 +1915,27 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetSelectDetectEnable(frameNode);
+}
+
+void SetHorizontalScrolling(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHorizontalScrolling(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetHorizontalScrolling(frameNode));
+}
+
+void ResetHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetHorizontalScrolling(frameNode);
 }
 
 void SetAllOptionalBorderStyle(
@@ -2696,6 +2755,27 @@ void TextAreaDeleteBackward(ArkUINodeHandle node)
     TextFieldModelNG::DeleteBackward(frameNode);
 }
 
+void SetTextAreaOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+
+ArkUI_Int32 GetTextAreaOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetOrphanCharOptimization(frameNode));
+}
+
+void ResetTextAreaOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2811,6 +2891,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setHorizontalScrolling = SetHorizontalScrolling,
+        .getHorizontalScrolling = GetHorizontalScrolling,
+        .resetHorizontalScrolling = ResetHorizontalScrolling,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,
@@ -2922,8 +3005,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaOnContentScroll = ResetTextAreaOnContentScroll,
         .setTextAreaOnEditChange = SetTextAreaOnEditChange,
         .resetTextAreaOnEditChange = ResetTextAreaOnEditChange,
+        .setTextAreaOnWillCopy = SetTextAreaOnWillCopy,
+        .resetTextAreaOnWillCopy = ResetTextAreaOnWillCopy,
         .setTextAreaOnCopy = SetTextAreaOnCopy,
         .resetTextAreaOnCopy = ResetTextAreaOnCopy,
+        .setTextAreaOnWillCut = SetTextAreaOnWillCut,
+        .resetTextAreaOnWillCut = ResetTextAreaOnWillCut,
         .setTextAreaOnCut = SetTextAreaOnCut,
         .resetTextAreaOnCut = ResetTextAreaOnCut,
         .setTextAreaOnPaste = SetTextAreaOnPaste,
@@ -3005,6 +3092,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
         .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
         .textAreaDeleteBackward = TextAreaDeleteBackward,
+        .setTextAreaOrphanCharOptimization = SetTextAreaOrphanCharOptimization,
+        .getTextAreaOrphanCharOptimization = GetTextAreaOrphanCharOptimization,
+        .resetTextAreaOrphanCharOptimization = ResetTextAreaOrphanCharOptimization,
         .setTextAreaCompressLeadingPunctuation = SetTextAreaCompressLeadingPunctuation,
         .getTextAreaCompressLeadingPunctuation = GetTextAreaCompressLeadingPunctuation,
         .resetTextAreaCompressLeadingPunctuation = ResetTextAreaCompressLeadingPunctuation,
@@ -3225,7 +3315,9 @@ void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXTAREA_PASTE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        event.textInputEvent.preventDefault = 1;
         SendArkUISyncEvent(&event);
+        commonEvent.SetPreventDefault(!static_cast<bool>(event.textInputEvent.preventDefault));
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
@@ -3332,41 +3424,69 @@ void ResetOnTextAreaChange(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnChange(node);
 }
+
 void ResetOnTextAreaPaste(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnPaste(node);
 }
+
 void ResetOnTextAreaSelectionChange(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnTextSelectionChange(node);
 }
+
 void ResetOnTextAreaEditChange(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnEditChange(node);
 }
+
 void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
 }
+
 void ResetOnTextAreaInputFilterError(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
 }
+
 void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnContentScroll(node);
 }
+
 void ResetTextAreaOnSubmit(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnSubmitWithEvent(node);
 }
+
 void ResetOnTextAreaWillChange(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnWillChange(node);
+}
+
+void ResetOnTextAreaWillCopy(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnWillCopy(node);
+}
+
+void ResetOnTextAreaCopy(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnCopy(node);
+}
+
+void ResetOnTextAreaWillCut(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnWillCut(node);
+}
+
+void ResetOnTextAreaCut(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnCut(node);
 }
 
 void SetOnTextAreaWillChange(ArkUINodeHandle node, void* extraParam)
@@ -3387,6 +3507,74 @@ void SetOnTextAreaWillChange(ArkUINodeHandle node, void* extraParam)
         return true;
     };
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));
+}
+
+void SetOnTextAreaWillCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) -> bool {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_AREA_WILL_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        nodeEvent.textInputEvent.preventDefault = 1;
+        SendArkUISyncEvent(&nodeEvent);
+        return static_cast<bool>(nodeEvent.textInputEvent.preventDefault);
+    };
+    TextFieldModelNG::SetOnWillCopy(frameNode, std::move(func));
+}
+
+void SetOnTextAreaCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_AREA_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        SendArkUISyncEvent(&nodeEvent);
+    };
+    TextFieldModelNG::SetOnCopy(frameNode, std::move(func));
+}
+
+void SetOnTextAreaWillCut(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) -> bool {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_AREA_WILL_CUT;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        nodeEvent.textInputEvent.preventDefault = 1;
+        SendArkUISyncEvent(&nodeEvent);
+        return static_cast<bool>(nodeEvent.textInputEvent.preventDefault);
+    };
+    TextFieldModelNG::SetOnWillCut(frameNode, std::move(func));
+}
+
+void SetOnTextAreaCut(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_AREA_CUT;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        SendArkUISyncEvent(&nodeEvent);
+    };
+    TextFieldModelNG::SetOnCut(frameNode, std::move(func));
 }
 
 void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam)

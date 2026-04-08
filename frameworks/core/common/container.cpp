@@ -42,22 +42,7 @@ NG::SafeAreaInsets Container::GetKeyboardSafeArea()
 
 int32_t Container::SafelyId()
 {
-    uint32_t containerCount = ContainerScope::ContainerCount();
-    if (containerCount == 0) {
-        return INSTANCE_ID_UNDEFINED;
-    }
-    if (containerCount == 1) {
-        return ContainerScope::SingletonId();
-    }
-    int32_t currentId = ContainerScope::RecentActiveId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    currentId = ContainerScope::RecentForegroundId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    return ContainerScope::DefaultId();
+    return ContainerScope::SafelyId();
 }
 
 int32_t Container::CurrentIdSafely()

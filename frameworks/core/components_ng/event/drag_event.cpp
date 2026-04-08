@@ -19,25 +19,31 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "ui/properties/ui_material.h"
 
@@ -1202,7 +1208,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     UpdatePreviewOptionDefaultAttr(frameNode);
     auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
     if (!modifierOnApply) {
-        optionsAfterApplied_ = frameNode->GetDragPreviewOption().options;
+        optionsAfterApplied_ = std::make_unique<OptionsAfterApplied>(frameNode->GetDragPreviewOption().options);
         return;
     }
 
@@ -1252,7 +1258,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     }
     dragPreviewOption.options = options; // replace the options with the new one after applied
     frameNode->SetDragPreviewOptions(dragPreviewOption);
-    optionsAfterApplied_ = options;
+    optionsAfterApplied_ = std::make_unique<OptionsAfterApplied>(options);
 }
 
 void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode)
@@ -1398,7 +1404,7 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
     CHECK_NULL_VOID(frameNode);
     auto context = imageNode->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    frameNode->SetOptionsAfterApplied(optionsAfterApplied_);
+    frameNode->SetOptionsAfterApplied(GetOptionsAfterApplied());
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     // update scale
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
@@ -2155,6 +2161,15 @@ void DragEventActuator::SetGatherNode(const RefPtr<FrameNode>& gatherNode)
 RefPtr<FrameNode> DragEventActuator::GetGatherNode() const
 {
     return gatherNode_;
+}
+
+const OptionsAfterApplied& DragEventActuator::GetOptionsAfterApplied()
+{
+    if (!optionsAfterApplied_) {
+        static OptionsAfterApplied defaultInstance;
+        return defaultInstance;
+    }
+    return *optionsAfterApplied_;
 }
 
 const std::vector<GatherNodeChildInfo>& DragEventActuator::GetGatherNodeChildrenInfo() const

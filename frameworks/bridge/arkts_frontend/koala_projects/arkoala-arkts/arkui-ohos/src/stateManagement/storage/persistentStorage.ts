@@ -94,7 +94,7 @@ class TypedMap {
         const ref = this.key2Value_.get(key);
         if (ref !== undefined) {
             const regId = (ref as AbstractProperty<Any>).getMyTriggerFromSourceWatchId();
-            AppStorage.__getStoragePropUnsafe(key)!.__unregister(regId);
+            AppStorage.__getStoragePropUnsafe<Any>(key)!.__unregister(regId);
         }
         const r2 = this.key2Value_.delete(key);
         return r1 && r2;

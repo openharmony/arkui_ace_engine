@@ -18,6 +18,7 @@
 #include "core/event/touch_event.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;
@@ -2045,5 +2046,58 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetEnableClickSoundEffect001, TestSize.Level1
     frameNode->SetEnableClickSoundEffect(true);
     enable = frameNode->GetEnableClickSoundEffect();
     EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground005
+ * @tc.desc: Test UpdateBackground with various branch conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground005, TestSize.Level1)
+{
+    struct TestCase {
+        bool hasBuilderBackgroundFlag;
+        bool isBuilderBackground;
+        bool hasBuilderFunc;
+        bool isNeedRefresh;
+        bool builderFuncReturnsValid;
+        uint32_t refreshCallbackId;
+        bool expectedIsNeedRefreshAfterCall;
+    };
+
+    std::vector<TestCase> testCases = {
+        { false, false, false, false, false, 0, false },
+        { true, false, false, false, false, 0, false },
+        { true, true, false, true, false, 0, true },
+        { true, true, true, false, false, 0, false },
+        { true, true, true, false, false, 0, false },
+        { true, true, true, true, 0, false },
+        { true, true, true, true, 123, false }
+    };
+
+    for (const auto& testCase : testCases) {
+        auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+        ASSERT_NE(frameNode, nullptr);
+        auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+        ASSERT_NE(mockRenderContext, nullptr);
+
+        if (testCase.hasBuilderBackgroundFlag) {
+            mockRenderContext->UpdateBuilderBackgroundFlag(testCase.isBuilderBackground);
+        }
+
+        frameNode->builderFunc_ = nullptr;
+        if (testCase.hasBuilderFunc && testCase.builderFuncReturnsValid) {
+            frameNode->builderFunc_ = []() -> RefPtr<UINode> {
+                return FrameNode::CreateFrameNode("builderNode", 100, AceType::MakeRefPtr<Pattern>(), true);
+            };
+        }
+        if (testCase.hasBuilderFunc && !testCase.builderFuncReturnsValid) {
+            frameNode->builderFunc_ = []() -> RefPtr<UINode> { return nullptr; };
+        }
+        frameNode->isNeedRefreshBackgroundBuilder_ = testCase.isNeedRefresh;
+        frameNode->refreshBackgroundBuilderId_ = testCase.refreshCallbackId;
+        frameNode->UpdateBackground();
+        EXPECT_EQ(frameNode->isNeedRefreshBackgroundBuilder_, testCase.expectedIsNeedRefreshAfterCall);
+    }
 }
 } // namespace OHOS::Ace::NG

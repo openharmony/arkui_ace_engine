@@ -23,12 +23,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
-#include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/properties/text_style.h"
@@ -2486,10 +2486,9 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
             CHECK_NULL_VOID(node);
             auto symbolNode = Referenced::RawPtr(node);
             auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
-            if (customModifier) {
-                customModifier->initialSymbol(symbolNode, symbolId);
-                customModifier->setFontSize(symbolNode, symbolSize);
-            }
+            CHECK_NULL_VOID(customModifier);
+            customModifier->initialSymbol(symbolNode, symbolId);
+            customModifier->setFontSize(symbolNode, symbolSize);
             if (!symbolColor.empty()) {
                 customModifier->setFontColor(symbolNode, symbolColor);
             }
@@ -2792,10 +2791,9 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
                 auto symbolNode = weak.Upgrade();
                 auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
-                if (customModifier) {
-                    customModifier->initialSymbol(RawPtr(symbolNode), symbolId);
-                    customModifier->setFontSize(RawPtr(symbolNode), symbolSize);
-                }
+                CHECK_NULL_VOID(customModifier);
+                customModifier->initialSymbol(RawPtr(symbolNode), symbolId);
+                customModifier->setFontSize(RawPtr(symbolNode), symbolSize);
                 if (!symbolColor.empty()) {
                     customModifier->setFontColor(RawPtr(symbolNode), symbolColor);
                 }
@@ -3762,7 +3760,9 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     }
 
     if (pattern->IsCustomMenu()) {
-        for (auto& child : pattern->GetHost()->GetChildren()) {
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        for (auto& child : host->GetChildren()) {
             auto childFrameNode = DynamicCast<FrameNode>(child);
             if (!childFrameNode) {
                 continue;

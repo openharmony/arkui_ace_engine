@@ -16,18 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 
+#include <functional>
+#include <memory>
+
 #include "base/utils/macros.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
-#include "core/pipeline/base/render_context.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Rosen {
 class RSUIContext;
-}
+}  // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+
+class Curve;
+enum class CancelAnimationStatus;
+class PipelineContext;
+class AnimationOption;
+class Color;
 
 namespace NG {
 class RenderContext;

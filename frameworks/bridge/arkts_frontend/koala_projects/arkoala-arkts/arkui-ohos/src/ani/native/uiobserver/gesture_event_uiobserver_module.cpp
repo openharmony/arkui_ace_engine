@@ -23,18 +23,24 @@
 
 namespace OHOS::Ace::Ani {
 
-// Constants
-constexpr int32_t INVALID_RESOURCE_ID = 0;  // Invalid resource identifier
+namespace {
+void ReleaseGlobalRef(ani_env* env, ani_ref& ref)
+{
+    if (env != nullptr && ref != nullptr) {
+        env->GlobalReference_Delete(ref);
+        ref = nullptr;
+    }
+}
+}
 
-// Gesture type constants for validation (corresponding to GestureListenerType enum)
-constexpr int32_t GESTURE_TYPE_MIN = 0;  // TAP
-constexpr int32_t GESTURE_TYPE_MAX = 5;  // ROTATION
+constexpr int32_t GESTURE_TYPE_MIN = 0;
+constexpr int32_t GESTURE_TYPE_MAX = 5;
 
 struct CallbackResourceInfo {
     int32_t instanceId;
     int32_t resourceId;
-    std::string tag;    // Used by pan/click/tap listeners
-    int32_t type;       // Used by global gesture listeners
+    std::string tag;
+    int32_t type;
 };
 
 static std::mutex g_panListenerMutex;
@@ -58,14 +64,18 @@ void RegisterBeforePanStartCallback(ani_env* env, CallbackResourceInfo info, ani
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_panListenerMutex);
-    for (auto& item : beforePanStartListenerCallbackMap) {
+    for (auto it = beforePanStartListenerCallbackMap.begin(); it != beforePanStartListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = beforePanStartListenerCallbackMap.erase(it);
+        break;
     }
     beforePanStartListenerCallbackMap[callback] = info;
 }
@@ -76,14 +86,18 @@ void RegisterBeforePanEndCallback(ani_env* env, CallbackResourceInfo info, ani_r
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_panListenerMutex);
-    for (auto& item : beforePanEndListenerCallbackMap) {
+    for (auto it = beforePanEndListenerCallbackMap.begin(); it != beforePanEndListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = beforePanEndListenerCallbackMap.erase(it);
+        break;
     }
     beforePanEndListenerCallbackMap[callback] = info;
 }
@@ -94,14 +108,18 @@ void RegisterAfterPanStartCallback(ani_env* env, CallbackResourceInfo info, ani_
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_panListenerMutex);
-    for (auto& item : afterPanStartListenerCallbackMap) {
+    for (auto it = afterPanStartListenerCallbackMap.begin(); it != afterPanStartListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = afterPanStartListenerCallbackMap.erase(it);
+        break;
     }
     afterPanStartListenerCallbackMap[callback] = info;
 }
@@ -112,14 +130,18 @@ void RegisterAfterPanEndCallback(ani_env* env, CallbackResourceInfo info, ani_re
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_panListenerMutex);
-    for (auto& item : afterPanEndListenerCallbackMap) {
+    for (auto it = afterPanEndListenerCallbackMap.begin(); it != afterPanEndListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = afterPanEndListenerCallbackMap.erase(it);
+        break;
     }
     afterPanEndListenerCallbackMap[callback] = info;
 }
@@ -130,14 +152,18 @@ void RegisterWillClickCallback(ani_env* env, CallbackResourceInfo info, ani_ref&
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_clickListenerMutex);
-    for (auto& item : willClickListenerCallbackMap) {
+    for (auto it = willClickListenerCallbackMap.begin(); it != willClickListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = willClickListenerCallbackMap.erase(it);
+        break;
     }
     willClickListenerCallbackMap[callback] = info;
 }
@@ -148,14 +174,17 @@ void RegisterDidClickCallback(ani_env* env, CallbackResourceInfo info, ani_ref& 
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_clickListenerMutex);
-    for (auto& item : didClickListenerCallbackMap) {
+    for (auto it = didClickListenerCallbackMap.begin(); it != didClickListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = didClickListenerCallbackMap.erase(it);
     }
     didClickListenerCallbackMap[callback] = info;
 }
@@ -166,14 +195,17 @@ void RegisterWillTapCallback(ani_env* env, CallbackResourceInfo info, ani_ref& c
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_clickListenerMutex);
-    for (auto& item : willTapListenerCallbackMap) {
+    for (auto it = willTapListenerCallbackMap.begin(); it != willTapListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = willTapListenerCallbackMap.erase(it);
     }
     willTapListenerCallbackMap[callback] = info;
 }
@@ -184,14 +216,17 @@ void RegisterDidTapCallback(ani_env* env, CallbackResourceInfo info, ani_ref& ca
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     std::lock_guard<std::mutex> lock(g_clickListenerMutex);
-    for (auto& item : didTapListenerCallbackMap) {
+    for (auto it = didTapListenerCallbackMap.begin(); it != didTapListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (!isEquals) {
+            ++it;
             continue;
         }
         modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
-            info.tag, item.second.instanceId, item.second.resourceId, false);
+            info.tag, it->second.instanceId, it->second.resourceId, false);
+        env->GlobalReference_Delete(it->first);
+        it = didTapListenerCallbackMap.erase(it);
     }
     didTapListenerCallbackMap[callback] = info;
 }
@@ -200,8 +235,20 @@ void RegisterGlobalGestureListenerCallback(ani_env* env, CallbackResourceInfo in
 {
     CHECK_NULL_VOID(env);
     std::lock_guard<std::mutex> lock(g_globalGestureListenerMutex);
-    // Store the callback for global gesture listener tracking
-    globalGestureListenerCallbackMap[callback] = info;
+    for (auto it = globalGestureListenerCallbackMap.begin(); it != globalGestureListenerCallbackMap.end();) {
+        ani_boolean isEquals = false;
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
+        if (!isEquals) {
+            ++it;
+            continue;
+        }
+        env->GlobalReference_Delete(it->first);
+        it = globalGestureListenerCallbackMap.erase(it);
+        break;
+    }
+    if (callback != nullptr) {
+        globalGestureListenerCallbackMap[callback] = info;
+    }
 }
 
 void UnregisterGlobalGestureCallback(ani_env* env, ani_int type, ani_ref& callback)
@@ -214,19 +261,26 @@ void UnregisterGlobalGestureCallback(ani_env* env, ani_int type, ani_ref& callba
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        // Remove all callbacks for this gesture type
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removeGlobalGestureListenerCallback(
-            static_cast<int32_t>(type), INVALID_RESOURCE_ID, true);
+        for (auto it = globalGestureListenerCallbackMap.begin(); it != globalGestureListenerCallbackMap.end();) {
+            if (it->second.type == type) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removeGlobalGestureListenerCallback(
+                    static_cast<int32_t>(type), it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = globalGestureListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
 
-    // Remove specific callback with matching type
     for (auto it = globalGestureListenerCallbackMap.begin(); it != globalGestureListenerCallbackMap.end();) {
         ani_boolean isEquals = false;
         env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (isEquals && it->second.type == type) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeGlobalGestureListenerCallback(
                 static_cast<int32_t>(type), it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = globalGestureListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -243,8 +297,16 @@ void UnregisterBeforePanStartCallback(ani_env* env, ani_int instanceId, const st
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = beforePanStartListenerCallbackMap.begin(); it != beforePanStartListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = beforePanStartListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = beforePanStartListenerCallbackMap.begin(); it != beforePanStartListenerCallbackMap.end();) {
@@ -253,6 +315,7 @@ void UnregisterBeforePanStartCallback(ani_env* env, ani_int instanceId, const st
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = beforePanStartListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -269,8 +332,16 @@ void UnregisterBeforePanEndCallback(ani_env* env, ani_int instanceId, const std:
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = beforePanEndListenerCallbackMap.begin(); it != beforePanEndListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = beforePanEndListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = beforePanEndListenerCallbackMap.begin(); it != beforePanEndListenerCallbackMap.end();) {
@@ -279,6 +350,7 @@ void UnregisterBeforePanEndCallback(ani_env* env, ani_int instanceId, const std:
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = beforePanEndListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -295,8 +367,16 @@ void UnregisterAfterPanStartCallback(ani_env* env, ani_int instanceId, const std
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = afterPanStartListenerCallbackMap.begin(); it != afterPanStartListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = afterPanStartListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = afterPanStartListenerCallbackMap.begin(); it != afterPanStartListenerCallbackMap.end();) {
@@ -305,6 +385,7 @@ void UnregisterAfterPanStartCallback(ani_env* env, ani_int instanceId, const std
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = afterPanStartListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -321,8 +402,16 @@ void UnregisterAfterPanEndCallback(ani_env* env, ani_int instanceId, const std::
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = afterPanEndListenerCallbackMap.begin(); it != afterPanEndListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = afterPanEndListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = afterPanEndListenerCallbackMap.begin(); it != afterPanEndListenerCallbackMap.end();) {
@@ -331,6 +420,7 @@ void UnregisterAfterPanEndCallback(ani_env* env, ani_int instanceId, const std::
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removePanListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = afterPanEndListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -347,8 +437,16 @@ void UnregisterWillClickCallback(ani_env* env, ani_int instanceId, const std::st
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = willClickListenerCallbackMap.begin(); it != willClickListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = willClickListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = willClickListenerCallbackMap.begin(); it != willClickListenerCallbackMap.end();) {
@@ -357,6 +455,7 @@ void UnregisterWillClickCallback(ani_env* env, ani_int instanceId, const std::st
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = willClickListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -373,8 +472,16 @@ void UnregisterDidClickCallback(ani_env* env, ani_int instanceId, const std::str
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = didClickListenerCallbackMap.begin(); it != didClickListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = didClickListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = didClickListenerCallbackMap.begin(); it != didClickListenerCallbackMap.end();) {
@@ -383,6 +490,7 @@ void UnregisterDidClickCallback(ani_env* env, ani_int instanceId, const std::str
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeClickListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = didClickListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -399,8 +507,16 @@ void UnregisterWillTapCallback(ani_env* env, ani_int instanceId, const std::stri
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = willTapListenerCallbackMap.begin(); it != willTapListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = willTapListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = willTapListenerCallbackMap.begin(); it != willTapListenerCallbackMap.end();) {
@@ -409,6 +525,7 @@ void UnregisterWillTapCallback(ani_env* env, ani_int instanceId, const std::stri
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = willTapListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -425,8 +542,16 @@ void UnregisterDidTapCallback(ani_env* env, ani_int instanceId, const std::strin
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
-        modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
-            tag, static_cast<int32_t>(instanceId), 0, true);
+        for (auto it = didTapListenerCallbackMap.begin(); it != didTapListenerCallbackMap.end();) {
+            if (it->second.instanceId == instanceId) {
+                modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
+                    tag, it->second.instanceId, it->second.resourceId, false);
+                env->GlobalReference_Delete(it->first);
+                it = didTapListenerCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
         return;
     }
     for (auto it = didTapListenerCallbackMap.begin(); it != didTapListenerCallbackMap.end();) {
@@ -435,6 +560,7 @@ void UnregisterDidTapCallback(ani_env* env, ani_int instanceId, const std::strin
         if (isEquals && it->second.instanceId == instanceId) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeTapListenerCallback(
                 tag, it->second.instanceId, it->second.resourceId, false);
+            env->GlobalReference_Delete(it->first);
             it = didTapListenerCallbackMap.erase(it);
         } else {
             ++it;
@@ -482,6 +608,7 @@ void RemovePanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClas
     } else if (tagStr == "afterPanEnd") {
         UnregisterAfterPanEndCallback(env, instanceId, tagStr, fnObjGlobalRef);
     }
+    ReleaseGlobalRef(env, fnObjGlobalRef);
 }
 
 void SetClickListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
@@ -516,6 +643,7 @@ void RemoveClickListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniCl
     } else if (tagStr == "didClick") {
         UnregisterDidClickCallback(env, instanceId, tagStr, fnObjGlobalRef);
     }
+    ReleaseGlobalRef(env, fnObjGlobalRef);
 }
 
 void SetTapListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
@@ -550,6 +678,7 @@ void RemoveTapListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClas
     } else if (tagStr == "didTap") {
         UnregisterDidTapCallback(env, instanceId, tagStr, fnObjGlobalRef);
     }
+    ReleaseGlobalRef(env, fnObjGlobalRef);
 }
 
 void AddGlobalGestureListener(ani_env* env, [[maybe_unused]] ani_object aniClass,
@@ -557,24 +686,20 @@ void AddGlobalGestureListener(ani_env* env, [[maybe_unused]] ani_object aniClass
 {
     CHECK_NULL_VOID(env);
 
-    // Validate gesture type (corresponding to GestureListenerType enum values)
     int32_t gestureType = static_cast<int32_t>(type);
     if (gestureType < GESTURE_TYPE_MIN || gestureType > GESTURE_TYPE_MAX) {
-        return;  // Invalid gesture type
+        return;
     }
 
-    // Create a global reference for the callback
     ani_ref fnObjGlobalRef = nullptr;
     if (fnObj != nullptr) {
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     }
 
-    // Create callback info structure
     CallbackResourceInfo info;
     info.resourceId = static_cast<int32_t>(resourceId);
-    info.type = gestureType;  // Store the gesture type
+    info.type = gestureType;
 
-    // Register the callback for tracking
     RegisterGlobalGestureListenerCallback(env, info, fnObjGlobalRef);
 }
 
@@ -583,20 +708,18 @@ void RemoveGlobalGestureListener(ani_env* env, [[maybe_unused]] ani_object aniCl
 {
     CHECK_NULL_VOID(env);
 
-    // Validate gesture type (corresponding to GestureListenerType enum values)
     int32_t gestureType = static_cast<int32_t>(type);
     if (gestureType < GESTURE_TYPE_MIN || gestureType > GESTURE_TYPE_MAX) {
-        return;  // Invalid gesture type
+        return;
     }
 
-    // Create a global reference for the callback
     ani_ref fnObjGlobalRef = nullptr;
     if (fnObj != nullptr) {
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     }
 
-    // Unregister the callback through modifier
     UnregisterGlobalGestureCallback(env, gestureType, fnObjGlobalRef);
+    ReleaseGlobalRef(env, fnObjGlobalRef);
 }
 
 } // namespace OHOS::Ace::Ani

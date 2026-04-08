@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
@@ -137,6 +138,7 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
+    RefPtr<WebAgentEventReporter> GetAgentEventReporter();
 
     void SetNewDragStyle(bool isNewDragStyle)
     {
@@ -167,6 +169,10 @@ public:
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
+    void EnableScrollDirectionalLock(bool enabled,
+        ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
+    void UpdateEnableDrag(bool enabled) {}
+    void UpdateScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
 
 private:
     std::string GetMixedModeAsString() const;
@@ -271,6 +277,7 @@ private:
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     RefPtr<WebController> webController_;
+    RefPtr<WebAgentEventReporter> webAgentEventReporter_ = nullptr;
     std::optional<std::string> webData_;
     bool isNewDragStyle_ = false;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
