@@ -779,6 +779,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DepthComponentAttribute_setBackgroundScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _DistortionComponent_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _DistortionComponentInterface_setDistortionComponentOptions(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Divider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _DividerInterface_setDividerOptions(ptr: KPointer): void

@@ -2286,6 +2286,8 @@ typedef struct Ark_DepthVector4 Ark_DepthVector4;
 typedef struct Opt_DepthVector4 Opt_DepthVector4;
 typedef struct Ark_DirectionalEdgesT_F64 Ark_DirectionalEdgesT_F64;
 typedef struct Opt_DirectionalEdgesT_F64 Opt_DirectionalEdgesT_F64;
+typedef struct Ark_DistortionParam Ark_DistortionParam;
+typedef struct Opt_DistortionParam Opt_DistortionParam;
 typedef struct Ark_DisturbanceFieldOptionsInner Ark_DisturbanceFieldOptionsInner;
 typedef struct Opt_DisturbanceFieldOptionsInner Opt_DisturbanceFieldOptionsInner;
 typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
@@ -2986,6 +2988,8 @@ typedef struct Ark_DepthLightParams Ark_DepthLightParams;
 typedef struct Opt_DepthLightParams Opt_DepthLightParams;
 typedef struct Ark_Dimension Ark_Dimension;
 typedef struct Opt_Dimension Opt_Dimension;
+typedef struct Ark_DistortionComponentOptions Ark_DistortionComponentOptions;
+typedef struct Opt_DistortionComponentOptions Opt_DistortionComponentOptions;
 typedef struct Ark_DividerStyleOptions Ark_DividerStyleOptions;
 typedef struct Opt_DividerStyleOptions Opt_DividerStyleOptions;
 typedef struct Ark_DragPreviewOptions Ark_DragPreviewOptions;
@@ -15641,6 +15645,18 @@ typedef struct Opt_DirectionalEdgesT_F64 {
     Ark_Tag tag;
     Ark_DirectionalEdgesT_F64 value;
 } Opt_DirectionalEdgesT_F64;
+typedef struct Ark_DistortionParam {
+    /* kind: Interface */
+    Ark_Vector2 topLeft;
+    Ark_Vector2 topRight;
+    Ark_Vector2 bottomLeft;
+    Ark_Vector2 bottomRight;
+    Ark_CustomObject barrelDistortion;
+} Ark_DistortionParam;
+typedef struct Opt_DistortionParam {
+    Ark_Tag tag;
+    Ark_DistortionParam value;
+} Opt_DistortionParam;
 typedef struct Ark_DisturbanceFieldOptionsInner {
     /* kind: Interface */
     Opt_Float64 strength;
@@ -19482,6 +19498,14 @@ typedef struct Opt_Dimension {
     Ark_Tag tag;
     Ark_Dimension value;
 } Opt_Dimension;
+typedef struct Ark_DistortionComponentOptions {
+    /* kind: Interface */
+    Opt_DistortionParam distortion;
+} Ark_DistortionComponentOptions;
+typedef struct Opt_DistortionComponentOptions {
+    Ark_Tag tag;
+    Ark_DistortionComponentOptions value;
+} Opt_DistortionComponentOptions;
 typedef struct Ark_DividerStyleOptions {
     /* kind: Interface */
     Opt_LengthMetrics strokeWidth;
@@ -24840,6 +24864,14 @@ typedef struct GENERATED_ArkUIDepthComponentModifier {
     void (*setBackgroundScale)(Ark_NativePointer node,
                                const Ark_ScaleOptions* value);
 } GENERATED_ArkUIDepthComponentModifier;
+
+typedef struct GENERATED_ArkUIDistortionComponentModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setDistortionComponentOptions)(Ark_NativePointer node,
+                                          Ark_ComponentContent content,
+                                          const Opt_DistortionComponentOptions* options);
+} GENERATED_ArkUIDistortionComponentModifier;
 
 typedef struct GENERATED_ArkUIDividerModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -31882,6 +31914,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIDataPanelModifier* (*getDataPanelModifier)();
     const GENERATED_ArkUIDatePickerModifier* (*getDatePickerModifier)();
     const GENERATED_ArkUIDepthComponentModifier* (*getDepthComponentModifier)();
+    const GENERATED_ArkUIDistortionComponentModifier* (*getDistortionComponentModifier)();
     const GENERATED_ArkUIDividerModifier* (*getDividerModifier)();
     const GENERATED_ArkUIEffectComponentModifier* (*getEffectComponentModifier)();
     const GENERATED_ArkUIEllipseModifier* (*getEllipseModifier)();
@@ -32231,6 +32264,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_DATA_PANEL,
     GENERATED_ARKUI_DATE_PICKER,
     GENERATED_ARKUI_DEPTH_COMPONENT,
+    GENERATED_ARKUI_DISTORTION_COMPONENT,
     GENERATED_ARKUI_DIVIDER,
     GENERATED_ARKUI_EFFECT_COMPONENT,
     GENERATED_ARKUI_ELLIPSE,
