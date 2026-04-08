@@ -3761,6 +3761,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkoala_generator/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkui_idlize/ @arkui-idlize
 
 [UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
