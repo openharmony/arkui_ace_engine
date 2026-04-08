@@ -137,25 +137,33 @@ action("runner_gen_code") {
   ]
 }
 
-action("idlize_gen") {
-  script = "gn/command/deploy.py"
-  args = [
-    "--source",
-    rebase_path(idlize_gen_output_path),
-    "--destination",
-    rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
-    "--config",
-    rebase_path("./generation_config/instructive-config.json"),
-    "--stamp",
-    rebase_path("$target_out_dir/idlize_gen_stamp"),
-  ]
-  deps = [
-    ":runner_gen_code",
-  ]
-  public_deps = [
-    ":runner_gen_code",
-  ]
-  outputs = [
-    "$target_out_dir/idlize_gen_stamp",
-  ]
+if (!build_ohos_sdk) {
+  action("idlize_gen") {
+    script = "gn/command/deploy.py"
+    args = [
+      "--source",
+      rebase_path(idlize_gen_output_path),
+      "--destination",
+      rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
+      "--config",
+      rebase_path("./generation_config/instructive-config.json"),
+      "--stamp",
+      rebase_path("$target_out_dir/idlize_gen_stamp"),
+    ]
+    deps = [
+      ":runner_gen_code",
+    ]
+    public_deps = [
+      ":runner_gen_code",
+    ]
+    outputs = [
+      "$target_out_dir/idlize_gen_stamp",
+    ]
+  }
+} else {
+  # dummy dep for native build. Bridges must not be built in that until problem
+  # with node 18 is resolved in ohos-sdk and YZ CIs.
+  group("idlize_gen") {
+    deps = []
+  }
 }

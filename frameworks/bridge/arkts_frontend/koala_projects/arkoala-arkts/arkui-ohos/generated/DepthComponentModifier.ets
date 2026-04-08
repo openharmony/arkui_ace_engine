@@ -28,16 +28,11 @@ import { ResourceStr, Resource as arkui_component_units_Resource, Position, Edge
 import { Resource as global_resource_Resource } from 'global.resource'
 import { default as image } from '@ohos.multimedia.image'
 export class DepthComponentModifier extends CommonMethodModifier implements DepthComponentAttribute,AttributeModifier<DepthComponentAttribute> {
-    _instanceId: number = -1;
-    _state: ModifierState = new ModifierState;
-    _addr: ArrayBuffer = new ArrayBuffer(4096);
-    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    private _DepthComponent_addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _DepthComponent_flagArray: Uint8Array = new Uint8Array(this._DepthComponent_addr);
     constructor() {
         super();
-        this._flagArray.fill(0);
-    }
-    setInstanceId(instanceId: number): void {
-        this._instanceId = instanceId
+        this._DepthComponent_flagArray.fill(0);
     }
     isUpdater: () => boolean = () => false
     applyNormalAttribute(instance: DepthComponentAttribute): void { }
@@ -45,23 +40,23 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
     applyFocusedAttribute(instance: DepthComponentAttribute): void { }
     applyDisabledAttribute(instance: DepthComponentAttribute): void { }
     applySelectedAttribute(instance: DepthComponentAttribute): void { }
-    public _depthMap_0_0value?: ResourceStr | PixelMap
-    public _camera_0_0value?: DepthCameraParams
-    public _light_0_0value?: DepthLightParams
-    public _backgroundOffset_0_0value?: Position | Edges | LocalizedEdges
-    public _backgroundScale_0_0value?: ScaleOptions
+    public _DepthComponent_depthMap_0_0value?: ResourceStr | PixelMap
+    public _DepthComponent_camera_0_0value?: DepthCameraParams
+    public _DepthComponent_light_0_0value?: DepthLightParams
+    public _DepthComponent_backgroundOffset_0_0value?: Position | Edges | LocalizedEdges
+    public _DepthComponent_backgroundScale_0_0value?: ScaleOptions
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
         const peer = node as ArkDepthComponentPeer;
-        const flagArray = this._flagArray;
+        const flagArray = this._DepthComponent_flagArray;
         this.applyModifierPatch0(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkDepthComponentPeer, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1: {
-                    peer.setDepthMapAttribute((this._depthMap_0_0value as ResourceStr | PixelMap));
+                    peer.setDepthMapAttribute((this._DepthComponent_depthMap_0_0value as ResourceStr | PixelMap));
                     flagArray[0] = 2;
                     break;
                 }
@@ -77,7 +72,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
         if (flagArray[1] != 0) {
             switch (flagArray[1]) {
                 case 1: {
-                    peer.setCameraAttribute((this._camera_0_0value as DepthCameraParams));
+                    peer.setCameraAttribute((this._DepthComponent_camera_0_0value as DepthCameraParams));
                     flagArray[1] = 2;
                     break;
                 }
@@ -93,7 +88,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
         if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1: {
-                    peer.setLightAttribute((this._light_0_0value as DepthLightParams));
+                    peer.setLightAttribute((this._DepthComponent_light_0_0value as DepthLightParams));
                     flagArray[2] = 2;
                     break;
                 }
@@ -109,7 +104,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
         if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1: {
-                    peer.setBackgroundOffsetAttribute((this._backgroundOffset_0_0value as Position | Edges | LocalizedEdges));
+                    peer.setBackgroundOffsetAttribute((this._DepthComponent_backgroundOffset_0_0value as Position | Edges | LocalizedEdges));
                     flagArray[3] = 2;
                     break;
                 }
@@ -125,7 +120,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
         if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1: {
-                    peer.setBackgroundScaleAttribute((this._backgroundScale_0_0value as ScaleOptions));
+                    peer.setBackgroundScaleAttribute((this._DepthComponent_backgroundScale_0_0value as ScaleOptions));
                     flagArray[4] = 2;
                     break;
                 }
@@ -142,7 +137,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
     mergeModifier(modifier: DepthComponentModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        const flagArray = modifier._flagArray;
+        const flagArray = modifier._DepthComponent_flagArray;
         this.mergeModifier0(modifier, flagArray);
     }
     mergeModifier0(modifier: DepthComponentModifier, flagArray: Uint8Array): void {
@@ -150,7 +145,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
             switch (flagArray[0]) {
                 case 1:
                 case 3: {
-                    this.depthMap((modifier._depthMap_0_0value as ResourceStr | PixelMap));
+                    this.depthMap((modifier._DepthComponent_depthMap_0_0value as ResourceStr | PixelMap));
                     break;
                 }
                 default: {
@@ -161,7 +156,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
             switch (flagArray[1]) {
                 case 1:
                 case 3: {
-                    this.camera((modifier._camera_0_0value as DepthCameraParams));
+                    this.camera((modifier._DepthComponent_camera_0_0value as DepthCameraParams));
                     break;
                 }
                 default: {
@@ -172,7 +167,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
             switch (flagArray[2]) {
                 case 1:
                 case 3: {
-                    this.light((modifier._light_0_0value as DepthLightParams));
+                    this.light((modifier._DepthComponent_light_0_0value as DepthLightParams));
                     break;
                 }
                 default: {
@@ -183,7 +178,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
             switch (flagArray[3]) {
                 case 1:
                 case 3: {
-                    this.backgroundOffset((modifier._backgroundOffset_0_0value as Position | Edges | LocalizedEdges));
+                    this.backgroundOffset((modifier._DepthComponent_backgroundOffset_0_0value as Position | Edges | LocalizedEdges));
                     break;
                 }
                 default: {
@@ -194,7 +189,7 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
             switch (flagArray[4]) {
                 case 1:
                 case 3: {
-                    this.backgroundScale((modifier._backgroundScale_0_0value as ScaleOptions));
+                    this.backgroundScale((modifier._DepthComponent_backgroundScale_0_0value as ScaleOptions));
                     break;
                 }
                 default: {
@@ -203,52 +198,52 @@ export class DepthComponentModifier extends CommonMethodModifier implements Dept
         }
     }
     depthMap(value: ResourceStr | PixelMap): this {
-        if (((this._flagArray[0]) == (0)) || (true)) {
-            this._flagArray[0] = 1
-            this._depthMap_0_0value = value
+        if (((this._DepthComponent_flagArray[0]) == (0)) || (true)) {
+            this._DepthComponent_flagArray[0] = 1
+            this._DepthComponent_depthMap_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[0] = 3
+            this._DepthComponent_flagArray[0] = 3
         }
         return this
     }
     camera(value: DepthCameraParams): this {
-        if (((this._flagArray[1]) == (0)) || (true)) {
-            this._flagArray[1] = 1
-            this._camera_0_0value = value
+        if (((this._DepthComponent_flagArray[1]) == (0)) || (true)) {
+            this._DepthComponent_flagArray[1] = 1
+            this._DepthComponent_camera_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[1] = 3
+            this._DepthComponent_flagArray[1] = 3
         }
         return this
     }
     light(value: DepthLightParams): this {
-        if (((this._flagArray[2]) == (0)) || (true)) {
-            this._flagArray[2] = 1
-            this._light_0_0value = value
+        if (((this._DepthComponent_flagArray[2]) == (0)) || (true)) {
+            this._DepthComponent_flagArray[2] = 1
+            this._DepthComponent_light_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[2] = 3
+            this._DepthComponent_flagArray[2] = 3
         }
         return this
     }
     backgroundOffset(value: Position | Edges | LocalizedEdges): this {
-        if (((this._flagArray[3]) == (0)) || (true)) {
-            this._flagArray[3] = 1
-            this._backgroundOffset_0_0value = value
+        if (((this._DepthComponent_flagArray[3]) == (0)) || (true)) {
+            this._DepthComponent_flagArray[3] = 1
+            this._DepthComponent_backgroundOffset_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[3] = 3
+            this._DepthComponent_flagArray[3] = 3
         }
         return this
     }
     backgroundScale(value: ScaleOptions): this {
-        if (((this._flagArray[4]) == (0)) || (true)) {
-            this._flagArray[4] = 1
-            this._backgroundScale_0_0value = value
+        if (((this._DepthComponent_flagArray[4]) == (0)) || (true)) {
+            this._DepthComponent_flagArray[4] = 1
+            this._DepthComponent_backgroundScale_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[4] = 3
+            this._DepthComponent_flagArray[4] = 3
         }
         return this
     }

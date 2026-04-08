@@ -982,6 +982,8 @@ typedef struct Ark_Tuple_Double_Double Ark_Tuple_Double_Double;
 typedef struct Opt_Tuple_Double_Double Opt_Tuple_Double_Double;
 typedef struct Ark_Tuple_F64_F64 Ark_Tuple_F64_F64;
 typedef struct Opt_Tuple_F64_F64 Opt_Tuple_F64_F64;
+typedef struct Ark_Tuple_F64_F64_F64 Ark_Tuple_F64_F64_F64;
+typedef struct Opt_Tuple_F64_F64_F64 Opt_Tuple_F64_F64_F64;
 typedef struct Ark_Tuple_I32_I32 Ark_Tuple_I32_I32;
 typedef struct Opt_Tuple_I32_I32 Opt_Tuple_I32_I32;
 typedef struct Ark_Tuple_I32_I32_I32_I32 Ark_Tuple_I32_I32_I32_I32;
@@ -2186,8 +2188,6 @@ typedef struct Ark_BlankScreenDetails Ark_BlankScreenDetails;
 typedef struct Opt_BlankScreenDetails Opt_BlankScreenDetails;
 typedef struct Ark_BlankScreenDetectionConfig Ark_BlankScreenDetectionConfig;
 typedef struct Opt_BlankScreenDetectionConfig Opt_BlankScreenDetectionConfig;
-typedef struct Ark_Blender Ark_Blender;
-typedef struct Opt_Blender Opt_Blender;
 typedef struct Ark_BlurOptions Ark_BlurOptions;
 typedef struct Opt_BlurOptions Opt_BlurOptions;
 typedef struct Ark_BorderRadiuses_graphics Ark_BorderRadiuses_graphics;
@@ -2720,6 +2720,8 @@ typedef struct Ark_Tuple_ResourceColor_F64 Ark_Tuple_ResourceColor_F64;
 typedef struct Opt_Tuple_ResourceColor_F64 Opt_Tuple_ResourceColor_F64;
 typedef struct Ark_Tuple_ResourceColor_ResourceColor Ark_Tuple_ResourceColor_ResourceColor;
 typedef struct Opt_Tuple_ResourceColor_ResourceColor Opt_Tuple_ResourceColor_ResourceColor;
+typedef struct Ark_uiEffect_HdrDarkenBlender Ark_uiEffect_HdrDarkenBlender;
+typedef struct Opt_uiEffect_HdrDarkenBlender Opt_uiEffect_HdrDarkenBlender;
 typedef struct Ark_UIExtensionOptions Ark_UIExtensionOptions;
 typedef struct Opt_UIExtensionOptions Opt_UIExtensionOptions;
 typedef struct Ark_uiObserver_NavigationInfo Ark_uiObserver_NavigationInfo;
@@ -2750,8 +2752,6 @@ typedef struct Ark_Union_Array_ToolbarItem_CustomNodeBuilder Ark_Union_Array_Too
 typedef struct Opt_Union_Array_ToolbarItem_CustomNodeBuilder Opt_Union_Array_ToolbarItem_CustomNodeBuilder;
 typedef struct Ark_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String Ark_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String;
 typedef struct Opt_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String Opt_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String;
-typedef struct Ark_Union_BlendMode_Blender Ark_Union_BlendMode_Blender;
-typedef struct Opt_Union_BlendMode_Blender Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_Bindable_Boolean Ark_Union_Boolean_Bindable_Boolean;
 typedef struct Opt_Union_Boolean_Bindable_Boolean Opt_Union_Boolean_Bindable_Boolean;
 typedef struct Ark_Union_Boolean_Callback_DismissPopupAction_Void Ark_Union_Boolean_Callback_DismissPopupAction_Void;
@@ -2952,6 +2952,8 @@ typedef struct Ark_BindableResourceStr Ark_BindableResourceStr;
 typedef struct Opt_BindableResourceStr Opt_BindableResourceStr;
 typedef struct Ark_BlankScreenDetectionEventInfo Ark_BlankScreenDetectionEventInfo;
 typedef struct Opt_BlankScreenDetectionEventInfo Opt_BlankScreenDetectionEventInfo;
+typedef struct Ark_Blender Ark_Blender;
+typedef struct Opt_Blender Opt_Blender;
 typedef struct Ark_ButtonIconOptions Ark_ButtonIconOptions;
 typedef struct Opt_ButtonIconOptions Opt_ButtonIconOptions;
 typedef struct Ark_cacheDownload_DownloadInfo Ark_cacheDownload_DownloadInfo;
@@ -3206,6 +3208,8 @@ typedef struct Ark_Union_ArcDotIndicatorInner_Boolean Ark_Union_ArcDotIndicatorI
 typedef struct Opt_Union_ArcDotIndicatorInner_Boolean Opt_Union_ArcDotIndicatorInner_Boolean;
 typedef struct Ark_Union_BindableResourceStr_BindableResourceStrArray Ark_Union_BindableResourceStr_BindableResourceStrArray;
 typedef struct Opt_Union_BindableResourceStr_BindableResourceStrArray Opt_Union_BindableResourceStr_BindableResourceStrArray;
+typedef struct Ark_Union_BlendMode_Blender Ark_Union_BlendMode_Blender;
+typedef struct Opt_Union_BlendMode_Blender Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_MenuMaskType Ark_Union_Boolean_MenuMaskType;
 typedef struct Opt_Union_Boolean_MenuMaskType Opt_Union_Boolean_MenuMaskType;
 typedef struct Ark_Union_Boolean_PopupMaskType Ark_Union_Boolean_PopupMaskType;
@@ -5734,6 +5738,7 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
+    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
@@ -7503,6 +7508,14 @@ typedef struct Opt_TransitionType {
     Ark_Tag tag;
     Ark_TransitionType value;
 } Opt_TransitionType;
+typedef enum Ark_UIMaterialAnimationMode {
+    ARK_UIMATERIAL_ANIMATION_MODE_IMMERSIVE = 0,
+    ARK_UIMATERIAL_ANIMATION_MODE_NONE = 1,
+} Ark_UIMaterialAnimationMode;
+typedef struct Opt_UIMaterialAnimationMode {
+    Ark_Tag tag;
+    Ark_UIMaterialAnimationMode value;
+} Opt_UIMaterialAnimationMode;
 typedef enum Ark_UndoStyle {
     ARK_UNDO_STYLE_CLEAR_STYLE = 0,
     ARK_UNDO_STYLE_KEEP_STYLE = 1,
@@ -9473,6 +9486,16 @@ typedef struct Opt_Tuple_F64_F64 {
     Ark_Tag tag;
     Ark_Tuple_F64_F64 value;
 } Opt_Tuple_F64_F64;
+typedef struct Ark_Tuple_F64_F64_F64 {
+    /* kind: Interface */
+    Ark_Float64 value0;
+    Ark_Float64 value1;
+    Ark_Float64 value2;
+} Ark_Tuple_F64_F64_F64;
+typedef struct Opt_Tuple_F64_F64_F64 {
+    Ark_Tag tag;
+    Ark_Tuple_F64_F64_F64 value;
+} Opt_Tuple_F64_F64_F64;
 typedef struct Ark_Tuple_I32_I32 {
     /* kind: Interface */
     Ark_Int32 value0;
@@ -15134,18 +15157,6 @@ typedef struct Opt_BlankScreenDetectionConfig {
     Ark_Tag tag;
     Ark_BlankScreenDetectionConfig value;
 } Opt_BlankScreenDetectionConfig;
-typedef struct Ark_Blender {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_uiEffect_BrightnessBlender value0;
-        Ark_uiEffect_HdrBrightnessBlender value1;
-    };
-} Ark_Blender;
-typedef struct Opt_Blender {
-    Ark_Tag tag;
-    Ark_Blender value;
-} Opt_Blender;
 typedef struct Ark_BlurOptions {
     /* kind: Interface */
     Opt_Tuple_F64_F64 grayscale;
@@ -17882,6 +17893,15 @@ typedef struct Opt_Tuple_ResourceColor_ResourceColor {
     Ark_Tag tag;
     Ark_Tuple_ResourceColor_ResourceColor value;
 } Opt_Tuple_ResourceColor_ResourceColor;
+typedef struct Ark_uiEffect_HdrDarkenBlender {
+    /* kind: Interface */
+    Ark_Float64 hdrBrightnessRatio;
+    Opt_Tuple_F64_F64_F64 grayscaleFactor;
+} Ark_uiEffect_HdrDarkenBlender;
+typedef struct Opt_uiEffect_HdrDarkenBlender {
+    Ark_Tag tag;
+    Ark_uiEffect_HdrDarkenBlender value;
+} Opt_uiEffect_HdrDarkenBlender;
 typedef struct Ark_UIExtensionOptions {
     /* kind: Interface */
     Opt_Boolean isTransferringCaller;
@@ -18063,18 +18083,6 @@ typedef struct Opt_Union_Array_uniformTypeDescriptor_UniformDataType_Array_Strin
     Ark_Tag tag;
     Ark_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String value;
 } Opt_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String;
-typedef struct Ark_Union_BlendMode_Blender {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_BlendMode value0;
-        Ark_Blender value1;
-    };
-} Ark_Union_BlendMode_Blender;
-typedef struct Opt_Union_BlendMode_Blender {
-    Ark_Tag tag;
-    Ark_Union_BlendMode_Blender value;
-} Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_Bindable_Boolean {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19281,6 +19289,19 @@ typedef struct Opt_BlankScreenDetectionEventInfo {
     Ark_Tag tag;
     Ark_BlankScreenDetectionEventInfo value;
 } Opt_BlankScreenDetectionEventInfo;
+typedef struct Ark_Blender {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_uiEffect_BrightnessBlender value0;
+        Ark_uiEffect_HdrBrightnessBlender value1;
+        Ark_uiEffect_HdrDarkenBlender value2;
+    };
+} Ark_Blender;
+typedef struct Opt_Blender {
+    Ark_Tag tag;
+    Ark_Blender value;
+} Opt_Blender;
 typedef struct Ark_ButtonIconOptions {
     /* kind: Interface */
     Ark_Union_String_image_PixelMap_Resource shown;
@@ -20634,6 +20655,18 @@ typedef struct Opt_Union_BindableResourceStr_BindableResourceStrArray {
     Ark_Tag tag;
     Ark_Union_BindableResourceStr_BindableResourceStrArray value;
 } Opt_Union_BindableResourceStr_BindableResourceStrArray;
+typedef struct Ark_Union_BlendMode_Blender {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_BlendMode value0;
+        Ark_Blender value1;
+    };
+} Ark_Union_BlendMode_Blender;
+typedef struct Opt_Union_BlendMode_Blender {
+    Ark_Tag tag;
+    Ark_Union_BlendMode_Blender value;
+} Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_MenuMaskType {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22731,6 +22764,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_UIMaterialAnimationMode uiMaterialAnimationMode;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -22776,6 +22810,7 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -22958,6 +22993,7 @@ typedef struct Ark_MenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_UIMaterialAnimationMode uiMaterialAnimationMode;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;
@@ -31811,8 +31847,6 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     void (*cursorControl_setCursor)(Ark_pointer_PointerStyle value);
     Ark_Boolean (*focusControl_requestFocus)(const Ark_String* value);
     Ark_ComponentInfo (*getRectangleById)(const Ark_String* id);
-    void (*postCardAction)(const Ark_Object* component,
-                           const Ark_Object* action);
     void (*Profiler_registerVsyncCallback)(const Callback_String* callback_);
     void (*Profiler_unregisterVsyncCallback)();
     void (*setAppBgColor)(const Ark_String* value);

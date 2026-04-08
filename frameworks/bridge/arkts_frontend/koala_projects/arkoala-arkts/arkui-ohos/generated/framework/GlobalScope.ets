@@ -41,19 +41,6 @@ export class GlobalScope {
         retvalDeserializer.dispose()
         return returnResult
     }
-    public static postCardAction(component: Object, action: Object): void {
-        const component_casted = component as (Object)
-        const action_casted = action as (Object)
-        GlobalScope.postCardAction_serialize(component_casted, action_casted)
-        return
-    }
-    static postCardAction_serialize(component: Object, action: Object): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(component)
-        thisSerializer.holdAndWriteObject(action)
-        ArkUIGeneratedNativeModule._GlobalScope_postCardAction(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     public static $r(value: string, params: Array<RecordData>): global_resource_Resource {
         const value_casted = value as (string)
         const params_casted = params as (Array<RecordData>)

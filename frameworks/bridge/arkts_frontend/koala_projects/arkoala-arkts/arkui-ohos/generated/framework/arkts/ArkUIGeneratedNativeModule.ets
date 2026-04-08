@@ -7041,8 +7041,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _XComponentController_setOnSurfaceDestroyed(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _XComponentControllerExtender_startImageAnalyzer(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _GlobalScope_postCardAction(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _GlobalScope_$r(value: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick

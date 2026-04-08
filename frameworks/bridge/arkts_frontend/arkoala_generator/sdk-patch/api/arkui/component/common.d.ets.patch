@@ -1,8 +1,8 @@
 diff --git a/api/arkui/component/common.d.ets b/api/arkui/component/common.d.ets
-index 0123491..00ccef0 100644
+index b506594..ec45129 100644
 --- a/api/arkui/component/common.d.ets
 +++ b/api/arkui/component/common.d.ets
-@@ -4892,17 +4892,6 @@ export declare interface TouchObject {
+@@ -4882,17 +4882,6 @@ export declare interface TouchObject {
       * @since 24
       */
      globalDisplayY?: double;
@@ -20,7 +20,7 @@ index 0123491..00ccef0 100644
  }
  /**
   * TouchObject getHistoricalPoints Function Parameters
-@@ -12026,7 +12015,8 @@ export declare interface CommonMethod {
+@@ -12023,7 +12012,8 @@ export declare interface CommonMethod {
       * @stagemodelonly
       * @since 26.0.0
       */

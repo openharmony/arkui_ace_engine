@@ -1,8 +1,8 @@
 diff --git a/api/arkui/component/navigation.d.ets b/api/arkui/component/navigation.d.ets
-index 4f49a85..86f9669 100644
+index 5ac2c1e..a6db1e0 100644
 --- a/api/arkui/component/navigation.d.ets
 +++ b/api/arkui/component/navigation.d.ets
-@@ -1380,6 +1380,14 @@ export declare interface MoreButtonOptions {
+@@ -1383,6 +1383,14 @@ export declare interface MoreButtonOptions {
      backgroundEffect?: BackgroundEffectOptions;
  }
  
@@ -17,7 +17,7 @@ index 4f49a85..86f9669 100644
  /**
   * Declare Navigation view properties.
   *
-@@ -1389,6 +1397,10 @@ export declare interface MoreButtonOptions {
+@@ -1392,6 +1400,10 @@ export declare interface MoreButtonOptions {
   * @noninterop
   */
  export declare interface NavigationAttribute extends CommonMethod {

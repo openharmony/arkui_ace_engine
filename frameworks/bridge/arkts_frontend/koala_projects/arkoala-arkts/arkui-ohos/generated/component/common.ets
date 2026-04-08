@@ -12194,9 +12194,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         super.applyOptionsFinish(traceName)
     }
 }
-export function postCardAction(component: Object, action: Object): void {
-    GlobalScope.postCardAction(component, action)
-}
 export function $r(value: string, params: Array<RecordData>): global_resource_Resource {
     return GlobalScope.$r(value, params)
 }

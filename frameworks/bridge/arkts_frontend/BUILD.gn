@@ -55,10 +55,13 @@ template("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
     deps = [
-      ":ArkoalaNative_ark",
       "$ace_root/build:libace_compatible",
       "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common",
     ]
+    
+    if (!build_ohos_sdk) {
+      deps += [ ":ArkoalaNative_ark" ]
+    }
 
     sources = [
       "ani_context_module.cpp",
