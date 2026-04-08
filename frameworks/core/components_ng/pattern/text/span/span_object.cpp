@@ -136,6 +136,10 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.enableDeviceFontWeightCategory.has_value()) {
         spanItem->fontStyle->UpdateEnableDeviceFontWeightCategory(font_.enableDeviceFontWeightCategory.value());
     }
+
+    if (font_.fontSizeScale.has_value()) {
+        spanItem->fontStyle->UpdateFontSizeScale(font_.fontSizeScale.value());
+    }
 }
 
 void FontSpan::AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const
@@ -194,6 +198,7 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetVariableFontWeight();
     spanItem->fontStyle->ResetEnableVariableFontWeight();
     spanItem->fontStyle->ResetEnableDeviceFontWeightCategory();
+    spanItem->fontStyle->ResetFontSizeScale();
 }
 
 Font FontSpan::GetFont() const

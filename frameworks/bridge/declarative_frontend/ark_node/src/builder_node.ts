@@ -168,7 +168,7 @@ class JSBuilderNode extends BaseNode {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new BusinessError(100029, 'aboutToReuseInternal: Reuse not implemented for ViewV2, yet');
+            child.aboutToReuseInternal(param);
           }
         } // if child
       });
@@ -187,7 +187,7 @@ class JSBuilderNode extends BaseNode {
         }
         else {
           // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new BusinessError(100029, 'aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+          child.aboutToRecycleInternal();
         }
       } // if child
     });

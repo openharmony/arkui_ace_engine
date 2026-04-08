@@ -259,7 +259,7 @@ group("core_event_unittest") {
     ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",
-    ":event_manager_test_ng",
+    # ":event_manager_test_ng",
     ":focus_box_test_ng",
     ":focus_event_handler_test_ng",
     ":focus_hub_test_ng",

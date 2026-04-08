@@ -160,6 +160,7 @@ constexpr uint8_t TLV_TEXTDIRECTION_TAG = 0xA5;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT = 0xA6;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT = 0xA7;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY = 0xA8;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_FONTSIZESCALE = 0xA9;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \

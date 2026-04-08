@@ -53,17 +53,23 @@ struct Font {
     std::optional<Dimension> strokeWidth;
     std::optional<Color> strokeColor;
     std::optional<SuperscriptStyle> superscript;
+    std::optional<double> fontSizeScale;
 
     RefPtr<ResourceObject> fontColorResObj;
     RefPtr<ResourceObject> strokeColorResObj;
 
     bool IsEqual(const Font& other) const
     {
+        bool isFontSizeScaleEqual = !fontSizeScale.has_value() && !other.fontSizeScale.has_value();
+        if (fontSizeScale.has_value() && other.fontSizeScale.has_value()) {
+            isFontSizeScaleEqual = NearEqual(fontSizeScale.value(), other.fontSizeScale.value());
+        }
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
                     fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
                     strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
                     superscript == other.superscript && variableFontWeight == other.variableFontWeight &&
-                    enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory;
+                    enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory &&
+                    isFontSizeScaleEqual;
         if (!flag) {
             return false;
         }

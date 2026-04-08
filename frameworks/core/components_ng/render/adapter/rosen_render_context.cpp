@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5586,6 +5586,13 @@ void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShad
     rsNode_->SetBackgroundShader(shader);
 }
 
+void RosenRenderContext::SetHDRColorHeadRoom(float headRoom)
+{
+    FREE_RS_CONTEXT_CHECK(SetHDRColorHeadRoom, headRoom);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetHDRColorHeadroom(headRoom);
+}
+
 void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -7285,7 +7292,7 @@ void RosenRenderContext::AddInitTypeCallBack(const std::function<void(int32_t&)>
 {
     FREE_RS_CONTEXT_CHECK(AddInitTypeCallBack, initTypeCallback);
     CHECK_NULL_VOID(rsNode_);
-#if defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSurfaceTextureInitTypeCallBack(initTypeCallback);

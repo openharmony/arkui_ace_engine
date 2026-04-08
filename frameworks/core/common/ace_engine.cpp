@@ -143,7 +143,7 @@ void AceEngine::RemoveContainer(int32_t instanceId)
         return;
     }
     RefPtr<Container> container = it->second;
-    int32_t windowId = container->GetWindowId();
+    uint32_t windowId = container->GetWindowId();
     int64_t destroyTime = GetCurrentTimestamp();
     UIContextCacheInfo info { instanceId, container->GetCreateTime(), destroyTime,
         windowId, container->GetWindowName() };
