@@ -64,7 +64,8 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
         return;
     }
-    auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
+    auto gradient = GetGradient();
+    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, frameSize);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
     if (!shader) {
@@ -72,6 +73,14 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
         return;
     }
     renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    auto colors = gradient.GetColors();
+    CHECK_NULL_VOID(!colors.empty());
+    for (int32_t index = 0; index < colors.size(); index++) {
+        auto colorWithHeadRoom = colors[index].GetColor().GetHeadRoomColor();
+        if (colorWithHeadRoom.has_value()) {
+            renderContext->SetHDRColorHeadRoom(colorWithHeadRoom.value().headRoom);
+        }
+    }
 }
 #endif
 

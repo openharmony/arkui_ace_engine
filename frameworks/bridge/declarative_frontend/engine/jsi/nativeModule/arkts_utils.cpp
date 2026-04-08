@@ -961,6 +961,38 @@ bool ArkTSUtils::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueR
     return ParseColorMetricsToColor(vm, jsValue, result, resourceObject);
 }
 
+bool ArkTSUtils::ParseHDRColorToColor(const EcmaVM* vm, const Local<panda::ObjectRef>& colorObj, Color& result)
+{
+    auto isHDRProp = colorObj->Get(vm, "isHDR");
+    auto getColorSpace = colorObj->Get(vm, "getColorSpace");
+    if (!isHDRProp->IsFunction(vm) || !getColorSpace->IsFunction(vm)) {
+        return false;
+    }
+    panda::Local<panda::FunctionRef> func = isHDRProp;
+    auto isHDRVal = func->Call(vm, colorObj, nullptr, 0);
+    func = getColorSpace;
+    auto colorSpaceVal = func->Call(vm, colorObj, nullptr, 0);
+    if ((isHDRVal->IsBoolean() && isHDRVal->ToBoolean(vm)->Value()) ||
+        (colorSpaceVal->IsNumber() && colorSpaceVal->Uint32Value(vm) == static_cast<uint32_t>(ColorSpace::BT2020))) {
+        auto redProp = colorObj->Get(vm, "redValue_");
+        auto greenProp = colorObj->Get(vm, "greenValue_");
+        auto blueProp = colorObj->Get(vm, "blueValue_");
+        auto headRoomProp = colorObj->Get(vm, "headRoom_");
+        auto alphaProp = colorObj->Get(vm, "alpha_");
+        if (redProp->IsNumber() && greenProp->IsNumber() && blueProp->IsNumber() &&
+            headRoomProp->IsNumber() && alphaProp->IsNumber()) {
+            auto redValue = redProp->ToNumber(vm)->Value();
+            auto greenValue = greenProp->ToNumber(vm)->Value();
+            auto blueValue = blueProp->ToNumber(vm)->Value();
+            auto headRoomValue = headRoomProp->ToNumber(vm)->Value();
+            auto alphaValue = alphaProp->ToNumber(vm)->Value();
+            result = Color::FromFloat(redValue, greenValue, blueValue, alphaValue, headRoomValue);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ArkTSUtils::ParseColorMetricsToColor(
     const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject)
 {
@@ -978,15 +1010,23 @@ bool ArkTSUtils::ParseColorMetricsToColor(
         resourceObject = GetResourceObject(vm, jsObjRes);
     }
     if (toNumericProp->IsFunction(vm) && colorSpaceProp->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> func = toNumericProp;
-        auto colorVal = func->Call(vm, obj, nullptr, 0);
-        result.SetValue(colorVal->Uint32Value(vm));
+        if (!ParseHDRColorToColor(vm, obj, result)) {
+            panda::Local<panda::FunctionRef> func = toNumericProp;
+            auto colorVal = func->Call(vm, obj, nullptr, 0);
+            result.SetValue(colorVal->Uint32Value(vm));
+        }
 
-        func = colorSpaceProp;
+        panda::Local<panda::FunctionRef> func = colorSpaceProp;
         auto colorSpaceVal = func->Call(vm, obj, nullptr, 0);
-        if (colorSpaceVal->IsNumber() &&
-            colorSpaceVal->Uint32Value(vm) == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
-            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        if (colorSpaceVal->IsNumber()) {
+            uint32_t colorSpaceValue = colorSpaceVal->Uint32Value(vm);
+            if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+                result.SetColorSpace(ColorSpace::DISPLAY_P3);
+            } else if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::BT2020)) {
+                result.SetColorSpace(ColorSpace::BT2020);
+            } else {
+                result.SetColorSpace(ColorSpace::SRGB);
+            }
         } else {
             result.SetColorSpace(ColorSpace::SRGB);
         }
@@ -3610,6 +3650,54 @@ void ArkTSUtils::ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& 
     values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueY)});
     values.push_back({.f32 = static_cast<ArkUI_Float32>(valueY.Value())});
     values.push_back({.i32 = static_cast<ArkUI_Int32>(valueY.Unit())});
+}
+
+void ArkTSUtils::ParseGradientColorStopsWithFloatColor(const EcmaVM *vm, const Local<JSValueRef>& value,
+    std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+    const NodeInfo& nodeInfo)
+{
+    if (!value->IsArray(vm)) {
+        return;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        if (!item->IsArray(vm)) {
+            continue;
+        }
+        auto itemArray = panda::Local<panda::ArrayRef>(item);
+        auto itemLength = itemArray->Length(vm);
+        if (itemLength < NUM_1) {
+            continue;
+        }
+        Color color;
+        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
+            continue;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                vectorResObj.push_back(resObj);
+            } else {
+                vectorResObj.push_back(nullptr);
+            }
+        }
+        bool hasDimension = false;
+        double dimension = 0.0;
+        if (itemLength > NUM_1) {
+            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_1);
+            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
+                hasDimension = true;
+            }
+        }
+        // use srgb color
+        colors.push_back({.i32 = static_cast<ArkUI_Int32>(false)});
+        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
+        colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
+    }
 }
 
 void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,

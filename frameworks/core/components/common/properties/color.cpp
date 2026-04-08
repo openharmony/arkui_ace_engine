@@ -281,6 +281,18 @@ Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
     return FromARGB(0xff, red, green, blue);
 }
 
+Color Color::FromFloat(double red, double green, double blue, double opacity, double headRoom)
+{
+    ColorWithHeadRoom colorWithHeadRoom {
+        .red = static_cast<float>(red),
+        .green = static_cast<float>(green),
+        .blue = static_cast<float>(blue),
+        .alpha = static_cast<float>(opacity),
+        .headRoom = static_cast<float>(headRoom)
+    };
+    return Color(colorWithHeadRoom);
+}
+
 Color Color::BlendColor(const Color& overlayColor) const
 {
     if (GetValue() == Color::TRANSPARENT.GetValue()) {

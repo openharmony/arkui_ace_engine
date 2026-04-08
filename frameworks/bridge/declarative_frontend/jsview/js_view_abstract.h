@@ -430,6 +430,7 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseHDRColorToColor(const JSRef<JSObject>& colorObj, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);

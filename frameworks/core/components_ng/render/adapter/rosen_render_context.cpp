@@ -5586,6 +5586,13 @@ void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShad
     rsNode_->SetBackgroundShader(shader);
 }
 
+void RosenRenderContext::SetHDRColorHeadRoom(float headRoom)
+{
+    FREE_RS_CONTEXT_CHECK(SetHDRColorHeadRoom, headRoom);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetHDRColorHeadroom(headRoom);
+}
+
 void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);

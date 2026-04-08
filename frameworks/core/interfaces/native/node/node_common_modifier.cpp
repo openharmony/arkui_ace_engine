@@ -455,6 +455,69 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
     }
 }
 
+void SetSweepGradientColorsForHDR(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    ColorSpace colorSpace, void* colorRawPtr, FrameNode* frameNode)
+{
+    if (colors == nullptr) {
+        return;
+    }
+    int32_t startPos = NUM_2;
+    std::vector<RefPtr<ResourceObject>> objs;
+    bool isNeedCompleteResObj = SystemProperties::ConfigChangePerform() && !colorRawPtr;
+    if (isNeedCompleteResObj) {
+        objs = {
+            nullptr,  // centerX
+            nullptr,  // centerY
+        };
+    }
+    CovnertResourceObjectVector(objs, colorRawPtr);
+    int32_t round = 0;
+    for (int32_t index = 0; index < colorsLength; round++) {
+        Color color;
+        bool hasDimension = false;
+        float dimension = 0.f;
+        auto useFloat = static_cast<bool>(colors[index].i32);
+        if (useFloat) {
+            auto redVal = colors[index + NUM_1].f32;
+            auto greenVal = colors[index + NUM_2].f32;
+            auto blueVal = colors[index + NUM_3].f32;
+            auto alphaVal = colors[index + NUM_4].f32;
+            auto headRoomVal = colors[index + NUM_5].f32;
+            hasDimension = static_cast<bool>(colors[index + NUM_6].i32);
+            dimension = colors[index + NUM_7].f32;
+            color = Color::FromFloat(redVal, greenVal, blueVal, alphaVal, headRoomVal);
+            index += NUM_8;
+        } else {
+            auto colorVal = static_cast<uint32_t>(colors[index + NUM_1].u32);
+            hasDimension = static_cast<bool>(colors[index + NUM_2].i32);
+            dimension = colors[index + NUM_3].f32;
+            color.SetValue(colorVal);
+            index += NUM_4;
+        }
+        NG::GradientColor gradientColor;
+        color.SetColorSpace(colorSpace);
+
+        if (isNeedCompleteResObj) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+            objs.emplace_back(colorResObj);
+        }
+
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+        auto idx = round + startPos;
+        if (SystemProperties::ConfigChangePerform() &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
+            CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], round);
+        }
+    }
+}
+
 void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
     void* colorRawPtr, FrameNode* frameNode)
 {
@@ -2408,6 +2471,28 @@ void ResetSweepGradient(ArkUINodeHandle node)
     ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+}
+
+void SetSweepGradientForHDR(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_13)) {
+        return;
+    }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    SetSweepGradientValues(gradient, values, valuesLength, resRawPtr);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3, resRawPtr, frameNode);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::BT2020, resRawPtr, frameNode);
+    } else {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::SRGB, resRawPtr, frameNode);
+    }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
 
@@ -11166,6 +11251,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLinearGradient = ResetLinearGradient,
         .setSweepGradient = SetSweepGradient,
         .resetSweepGradient = ResetSweepGradient,
+        .setSweepGradientForHDR = SetSweepGradientForHDR,
         .setRadialGradient = SetRadialGradient,
         .resetRadialGradient = ResetRadialGradient,
         .setOverlay = SetOverlay,
