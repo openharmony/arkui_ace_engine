@@ -13,33 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef ARKUI_ERROR_MESSAGE_MANAGER_H
-#define ARKUI_ERROR_MESSAGE_MANAGER_H
-
-#include <cstdint>
-#include <string>
-
-#include "ui/base/macros.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/error_message_manager.h"
 
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT ErrorMessageManager {
-public:
-    static ErrorMessageManager& GetInstance();
+std::string ErrorInfoToString(ArkUIErrorInfo& errorInfo)
+{
+    return "";
+}
 
-    void SetLastError(ArkUIErrorInfo lastErrorInfo);
+ErrorMessageManager& ErrorMessageManager::GetInstance()
+{
+    static ErrorMessageManager instance;
+    return instance;
+}
 
-    const char* GetLastError() const;
+void ErrorMessageManager::SetLastError(ArkUIErrorInfo lastError)
+{
+    return;
+}
 
-private:
-    ErrorMessageManager() = default;
-    ~ErrorMessageManager() = default;
-    ErrorMessageManager(const ErrorMessageManager&) = delete;
-    ErrorMessageManager& operator=(const ErrorMessageManager&) = delete;
-};
-
-
+const char* ErrorMessageManager::GetLastError() const
+{
+    return "";
+}
 } // namespace OHOS::Ace
-
-#endif // ARKUI_ERROR_MESSAGE_MANAGER_H

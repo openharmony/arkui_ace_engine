@@ -97,20 +97,20 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest001, TestSize.Level1)
     const auto* contentModifier = NodeModifier::GetNodeContentModifier();
     auto childFrameNode1 = FrameNode::CreateFrameNode("frameNode1", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->addChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)), nullptr);
     auto children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_1 && children.front()->GetTag() == "frameNode1");
 
     auto childFrameNode2 = FrameNode::CreateFrameNode("frameNode2", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->insertChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), 0);
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), 0, nullptr);
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_2 && children.front()->GetTag() == "frameNode2");
 
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)), nullptr);
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), nullptr);
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == 0);
 }
@@ -138,7 +138,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest002, TestSize.Level1)
      */
     const auto* contentModifier = NodeModifier::GetNodeContentModifier();
     auto* userData = new int32_t(NODE_CONTENT_INIT_STATUS);
-    contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+    contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
     auto callback = [](ArkUINodeContentEvent* event) {
         auto* nodeContent = event->nodeContent;
         const auto* contentModifier = NodeModifier::GetNodeContentModifier();
@@ -148,17 +148,18 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest002, TestSize.Level1)
             EXPECT_EQ(*userData, NODE_CONTENT_INIT_STATUS);
             delete userData;
             userData = new int32_t(NODE_CONTENT_ATTACH_TO_TREE);
-            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
         } else if (event->type == 1) {
             int32_t* userData = reinterpret_cast<int32_t*>(
                 contentModifier->getUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent)));
             EXPECT_EQ(*userData, NODE_CONTENT_ATTACH_TO_TREE);
             delete userData;
             userData = new int32_t(NODE_CONTENT_DETACH_FROM_TREE);
-            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
         }
     };
-    contentModifier->registerEvent(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback));
+    contentModifier->registerEvent(
+        reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback), nullptr);
     nodeContent->OnAttachToMainTree();
     EXPECT_TRUE(nodeContent->onMainTree_);
     nodeContent->OnDetachFromMainTree();
