@@ -388,6 +388,8 @@ struct ArkUITouchEvent {
     ArkUI_Int32 targetDisplayId;
     void* rawPointerEvent;
     ArkUI_Float64 rollAngle;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
 };
 
 struct ArkUIHistoryMouseEvent {
@@ -432,6 +434,8 @@ struct ArkUIMouseEvent {
     bool stopPropagation;
     ArkUIHistoryMouseEvent* historyEvents;
     ArkUI_Uint32 historySize;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
 };
 
 struct ArkUIAxisEvent {
@@ -457,6 +461,8 @@ struct ArkUIAxisEvent {
     ArkUI_Uint32 axes;
     ArkUI_Int32 eventHandleId;
     ArkUI_Bool isNewReferee;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
 };
 
 struct ArkUICoastingAxisEvent {
