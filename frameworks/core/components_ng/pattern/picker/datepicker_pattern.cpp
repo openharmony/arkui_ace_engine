@@ -740,6 +740,9 @@ bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);

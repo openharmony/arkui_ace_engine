@@ -1751,6 +1751,9 @@ bool TextPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, result);
@@ -1760,7 +1763,8 @@ bool TextPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     // If they are setted by user, then use the value by user set; Otherwise use the value from withTheme
     // When the "result" is true, mean to notify the framework to Re-render
     if ((!pickerProperty->HasColor()) || (!pickerProperty->HasDisappearColor()) ||
-        (!pickerProperty->HasSelectedColor())) {
+        (!pickerProperty->HasSelectedColor()) || GetDivider().isDefaultColor ||
+        (!pickerProperty->HasSelectedBackgroundColor())) {
         result = true;
     }
     FREE_NODE_CHECK(host, OnThemeScopeUpdate);

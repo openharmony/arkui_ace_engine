@@ -2322,7 +2322,7 @@ void TextPickerColumnPattern::UpdateUserSetSelectColor()
     isUserSetSelectColor_ = true;
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     UpdateSelectedTextColor(pickerTheme);
 }

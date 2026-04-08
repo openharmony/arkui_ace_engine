@@ -24,6 +24,7 @@ class ArkThemeWhiteList {
         'Badge',
         'Button',
         'DataPanel',
+        'DatePicker',
         'Menu',
         'MenuItem',
         'PatternLock',
@@ -33,6 +34,8 @@ class ArkThemeWhiteList {
         'Swiper',
         'Text',
         'TextClock',
+        'TextPicker',
+        'TimePicker',
     ];
 
     /**
