@@ -204,8 +204,7 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(selectPaintProperty);
     auto material = renderContext->GetSystemMaterial();
     if (selectPaintProperty->HasBackgroundColor() ||
-        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
+        (material && MaterialUtils::CheckMaterialValid(material->GetType()))) {
         return;
     }
     auto context = host->GetContextRefPtr();

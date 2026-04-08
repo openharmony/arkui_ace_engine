@@ -29,6 +29,7 @@
 
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/ui_material.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -543,6 +544,21 @@ int32_t ReadDragDropFrameworkStatus()
 int32_t ReadTouchAccelarateMode()
 {
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
+UiMaterialLevel ReadUiMaterialLevel()
+{
+    UiMaterialLevel result = UiMaterialLevel::DEFAULT;
+    if (MaterialUtils::GetGlobalMaterialLevel(result)) {
+        return result;
+    }
+    int32_t level =
+        system::GetIntParameter("const.immersive_material_level", static_cast<int32_t>(UiMaterialLevel::DEFAULT));
+    if (level >= static_cast<int32_t>(UiMaterialLevel::EXQUISITE) &&
+        level <= static_cast<int32_t>(UiMaterialLevel::MAX)) {
+        result = static_cast<UiMaterialLevel>(level);
+    }
+    return result;
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -1557,5 +1573,11 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    static auto uiMaterialLevel = ReadUiMaterialLevel();
+    return uiMaterialLevel;
 }
 } // namespace OHOS::Ace

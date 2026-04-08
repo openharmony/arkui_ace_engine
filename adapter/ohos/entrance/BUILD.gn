@@ -55,6 +55,8 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/reporter_impl.cpp",
       "$ace_root/adapter/ohos/entrance/rs_adapter.cpp",
+      "$ace_root/adapter/ohos/entrance/setting_data_manager_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/setting_data_observer.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos_static.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
