@@ -284,6 +284,33 @@ void SetArrowSize(float& width, float& height)
     width = BUBBLE_ARROW_WIDTH.ConvertToPx();
     height = BUBBLE_ARROW_HEIGHT.ConvertToPx();
 }
+
+bool IsPositionInWindowBounds(const OffsetF& position, Placement placement, const Rect& bounds)
+{
+    if (!bounds.IsValid()) {
+        return true;
+    }
+    switch (placement) {
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            return LessNotEqual(position.GetY(), bounds.Bottom());
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            return GreatNotEqual(position.GetY(), bounds.Top());
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            return LessNotEqual(position.GetX(), bounds.Right());
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            return GreatNotEqual(position.GetX(), bounds.Left());
+        default:
+            return true;
+    }
+}
 } // namespace
 
 BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
@@ -438,6 +465,29 @@ void BubbleLayoutAlgorithm::FitMouseOffset(LayoutWrapper* layoutWrapper)
         targetOffset_.SetX(targetOffset_.GetX() / scaleX);
         targetOffset_.SetY(targetOffset_.GetY() / scaleY);
     }
+}
+
+void BubbleLayoutAlgorithm::UpdateWindowBoundsRect(bool showInSubWindow)
+{
+    if (followCursor_ || (!isTips_ && !showInSubWindow)) {
+        windowBoundsRect_ = Rect(0, 0, 0, 0);
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    if (!pipelineContext) {
+        windowBoundsRect_ = Rect(0, 0, wrapperSize_.Width(), wrapperSize_.Height());
+        return;
+    }
+    if (showInSubWindow) {
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineContext->GetInstanceId(), SubwindowType::TYPE_POPUP);
+        if (currentSubwindow) {
+            auto rect = currentSubwindow->GetRect();
+            windowBoundsRect_ = Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+            return;
+        }
+    }
+    windowBoundsRect_ = pipelineContext->GetDisplayWindowRectInfo();
 }
 
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -647,6 +697,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         // because the final node position is set relative to the overlay node.
         auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
         targetOffset_ -= overlayGlobalOffset;
+        UpdateWindowBoundsRect(showInSubWindow);
     }
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
     auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
@@ -2446,6 +2497,9 @@ bool BubbleLayoutAlgorithm::CheckPositionBottom(
     if (GreatNotEqual(childSize.Height(), rect.Height())) {
         i += step;
         return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
+        i += step;
+        return false;
     } else {
         bVertical_ = true;
     }
@@ -2468,6 +2522,9 @@ bool BubbleLayoutAlgorithm::CheckPositionTop(
         RecordMaxSpace(maxAreaSpace, position, maxWidth, maxHeight, arrowPosition);
     }
     if (GreatNotEqual(childSize.Height(), rect.Height())) {
+        i += step;
+        return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
         i += step;
         return false;
     } else {
@@ -2494,6 +2551,9 @@ bool BubbleLayoutAlgorithm::CheckPositionRight(
     if (GreatNotEqual(childSize.Width(), rect.Width())) {
         i += step;
         return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
+        i += step;
+        return false;
     } else {
         bHorizontal_ = true;
     }
@@ -2516,6 +2576,9 @@ bool BubbleLayoutAlgorithm::CheckPositionLeft(
         RecordMaxSpace(maxAreaSpace, position, maxWidth, maxHeight, arrowPosition);
     }
     if (GreatNotEqual(childSize.Width(), rect.Width())) {
+        i += step;
+        return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
         i += step;
         return false;
     } else {
