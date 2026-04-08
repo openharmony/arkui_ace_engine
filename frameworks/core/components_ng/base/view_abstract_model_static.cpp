@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"

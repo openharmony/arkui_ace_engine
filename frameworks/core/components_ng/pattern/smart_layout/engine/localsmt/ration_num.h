@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef RATION_NUM_H
-#define RATION_NUM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_RATION_NUM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_RATION_NUM_H
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
 
-#include "log.h"
-
 // (n / m) m>0
 struct RationNum {
     int64_t n = 0;
     int64_t m = 1;
-    int64_t maxPrecision = 10000000; // 最大精度为小数点后7位
+    const int64_t kMaxPrecision = 10000000; // 最大精度为小数点后7位
     static constexpr int64_t kMaxFractionOverflow = 1000000000000000LL; // 1e15
     static constexpr int kMaxContinuedFractionIterations = 20;
     static constexpr double kDoubleMinThreshold = 1e-15;
     RationNum() {}
-    RationNum(const RationNum& other) : n(other.n), m(other.m), maxPrecision(other.maxPrecision) {}
+    RationNum(const RationNum& other) : n(other.n), m(other.m), kMaxPrecision(other.kMaxPrecision) {}
     explicit RationNum(int64_t num) : n(num) {}
     RationNum(int64_t num1, int64_t num2) : n(num1), m(num2)
     {
@@ -67,12 +66,12 @@ struct RationNum {
         this->n /= gcd;
         this->m /= gcd;
 
-        if (maxPrecision > 0 && m > maxPrecision) {
+        if (kMaxPrecision > 0 && m > kMaxPrecision) {
             double val = static_cast<double>(n) / static_cast<double>(m);
-            int64_t newN = static_cast<int64_t>(std::round(std::abs(val) * static_cast<double>(maxPrecision)));
+            int64_t newN = static_cast<int64_t>(std::round(std::abs(val) * static_cast<double>(kMaxPrecision)));
             newN *= val < 0 ? -1 : 1;
             n = newN;
-            m = maxPrecision;
+            m = kMaxPrecision;
         }
     }
     RationNum& operator=(const int64_t& r1)
@@ -109,8 +108,8 @@ struct RationNum {
     RationNum operator/(const RationNum& r1) const
     {
         RationNum rNew(n, m);
-        if (r1.n == 0) { // 如果r1的分子等于0，说明发生了除零错误，转为除以1/maxPrecision
-            rNew.n *= maxPrecision;
+        if (r1.n == 0) { // 如果r1的分子等于0，说明发生了除零错误，转为除以1/kMaxPrecision
+            rNew.n *= kMaxPrecision;
         } else {
             rNew.n *= r1.m;
             rNew.m *= r1.n;
@@ -295,9 +294,9 @@ struct RationNum {
             if (std::abs(h2) > 1e15 || std::abs(k2) > 1e15) {
                 break;
             }
-            h0 = h1; 
+            h0 = h1;
             h1 = h2;
-            k0 = k1; 
+            k0 = k1;
             k1 = k2;
 
             if (std::abs(v - static_cast<double>(h1) / k1) < epsilon) {
@@ -346,4 +345,4 @@ struct RationNum {
         return RationNum(n1);
     }
 };
-#endif
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_ENGINE_LOCALSMT_RATION_NUM_H

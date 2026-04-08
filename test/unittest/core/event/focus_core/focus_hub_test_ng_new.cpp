@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

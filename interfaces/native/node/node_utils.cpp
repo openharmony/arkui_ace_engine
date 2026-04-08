@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -914,6 +915,10 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+const char* OH_ArkUI_NativeModule_GetErrorMessage()
+{
+    return OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+}
 #ifdef __cplusplus
 };
 #endif

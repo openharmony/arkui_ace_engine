@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -596,6 +597,31 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG020, TestSize.Level1)
     hoverEventTarget->SetPenHoverMoveCallback(onHoverMove);
     eventManager->curPenHoverMoveResultsMap_[eventId].push_back(hoverEventTarget);
     eventManager->DispatchPenHoverMoveEventNG(touchEvent);
+    EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
+}
+
+ * @tc.name: PenHoverTest0021
+ * @tc.desc: Test PenHoverTest function.
+ */
+HWTEST_F(EventManagerTestNg, PenHoverTest0021, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    TouchRestrict touchRestrict;
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+    touchEvent.sourceTool = SourceTool::PEN;
+
+    touchEvent.SetType(TouchType::PROXIMITY_OUT);
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(hoverEventTarget);
+    eventManager->PenHoverTest(touchEvent, frameNode, touchRestrict);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
     EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
 } // namespace OHOS::Ace::NG

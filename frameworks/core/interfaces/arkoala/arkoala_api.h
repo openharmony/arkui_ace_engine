@@ -244,6 +244,12 @@ struct ArkUIAttributeItem {
     void* object;
 };
 
+struct ArkUIErrorInfo {
+    ArkUI_Int32 errorCode = 0;
+    std::string functionName;
+    std::string errorMessage;
+};
+
 struct ArkUICornerRadius {
     ArkUI_Float32 topLeft;
     ArkUI_Float32 topRight;

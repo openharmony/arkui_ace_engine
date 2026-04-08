@@ -805,8 +805,6 @@ private:
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
-    void LoadCompleteManagerStartCollect(int32_t index);
-    void LoadCompleteManagerStopCollect();
     void NotifyTabBarItemsChange();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;

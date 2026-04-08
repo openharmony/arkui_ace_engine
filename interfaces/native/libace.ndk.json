@@ -6602,6 +6602,10 @@
     },
     {
         "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetErrorMessage"
+    },
+    {
+        "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
     },
     {

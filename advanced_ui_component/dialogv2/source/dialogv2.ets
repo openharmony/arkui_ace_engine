@@ -211,7 +211,11 @@ export struct TipsDialogV2 {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              this.checkBoxPart();
+            }
+          }
         }
       });
     }

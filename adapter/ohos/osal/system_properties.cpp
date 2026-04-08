@@ -424,18 +424,6 @@ bool IsUseMemoryMonitor()
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
 }
 
-int32_t ReadComponentLoadNumber()
-{
-    return system::GetIntParameter(
-        "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
-}
-
-int32_t ReadStopCollectTimeWait()
-{
-    return system::GetIntParameter(
-        "persist.ace.stopCollect.timeWait", 800); // 800 : Stop collecting asynchronous task waiting time.
-}
-
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -555,12 +543,6 @@ int32_t ReadDragDropFrameworkStatus()
 int32_t ReadTouchAccelarateMode()
 {
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
-}
-
-int32_t ReadPageLoadTimeThreshold()
-{
-    return system::GetIntParameter(
-        "const.arkui.pageload.timethreshold", 1500); // page load max timethreshold is 1500ms.
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -789,7 +771,6 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
-int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -1121,18 +1102,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
-{
-    static int32_t componentLoadNumber = ReadComponentLoadNumber();
-    return componentLoadNumber;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetStopCollectTimeWait()
-{
-    static int32_t stopCollectTimeWait = ReadStopCollectTimeWait();
-    return stopCollectTimeWait;
 }
 
 bool SystemProperties::IsFormAnimationLimited()
@@ -1470,11 +1439,6 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 int32_t SystemProperties::GetTouchAccelarate()
 {
     return touchAccelarate_;
-}
-
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

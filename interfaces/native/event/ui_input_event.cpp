@@ -29,6 +29,8 @@ extern "C" {
 
 thread_local ArkUI_ErrorCode g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
 thread_local ArkUI_ErrorCode g_scenarioSupportCheckResult = ARKUI_ERROR_CODE_NO_ERROR;
+constexpr int32_t MAX_POINTS = 10;
+
 
 ArkUI_CrownEvent_Action ToCrownEventAction(ArkUI_CrownAction action)
 {
@@ -5057,6 +5059,8 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_CreatePointerEvent(ArkUI_UIInputEvent** ev
         case ARKUI_UIINPUTEVENT_TYPE_TOUCH: {
             ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
             ArkUITouchEvent* touchEvent = new ArkUITouchEvent();
+            touchEvent->touchPointes = new ArkUITouchPoint[MAX_POINTS];
+            touchEvent->touchPointSize = MAX_POINTS;
             currentEvent->inputEvent = touchEvent;
             currentEvent->eventTypeId = C_TOUCH_EVENT_ID;
             currentEvent->isCreatedByUser = true;
@@ -5068,6 +5072,8 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_CreatePointerEvent(ArkUI_UIInputEvent** ev
             ArkUIMouseEvent* mouseEvent = new ArkUIMouseEvent();
             currentEvent->inputEvent = mouseEvent;
             currentEvent->eventTypeId = C_MOUSE_EVENT_ID;
+            mouseEvent->pressedButtons = new ArkUI_Int32[MAX_POINTS];
+            mouseEvent->pressedButtonsLength = MAX_POINTS;
             currentEvent->isCreatedByUser = true;
             *event = currentEvent;
             break;

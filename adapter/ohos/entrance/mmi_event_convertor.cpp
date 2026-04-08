@@ -788,6 +788,7 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetPointerEvent(pointerEvent);
     touchEvt.convertInfo.first = UIInputEventType::AXIS;
     touchEvt.convertInfo.second = UIInputEventType::TOUCH;
+    touchEvt.primitiveSourceTool = GetSourceTool(pointerItem.GetToolType());
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
 }

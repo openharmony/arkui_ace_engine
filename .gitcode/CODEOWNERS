@@ -3118,6 +3118,9 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @ArkUI_Event
 interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
+interfaces/native/error_message_macros.h @arkui_framework_xnode
+interfaces/native/error_message_manager.h @arkui_framework_xnode
+interfaces/native/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/node/rich_editor_native_impl.h @arkui_rich_editor
 interfaces/native/node/rich_editor_native_impl.cpp @arkui_rich_editor
 interfaces/native/node/span_style_native_impl.h @arkui_rich_editor
@@ -3699,6 +3702,7 @@ test/unittest/core/pattern/select_overlay/ @huawei_g_five
 test/unittest/core/pattern/shape/ @arkuilayout1
 test/unittest/core/pattern/side_bar/ @arkui_navigation
 test/unittest/core/pattern/slider/ @arkuipopupwindow_all
+test/unittest/core/pattern/smart_layout/ @arkuilayout1
 test/unittest/core/pattern/stack/ @arkuilayout1
 test/unittest/core/pattern/stage/ @arkui_navigation
 test/unittest/core/pattern/stepper/ @arkui_navigation
@@ -3727,7 +3731,6 @@ test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkui_framework_xnode
 test/unittest/core/property/templates_parser_test_ng.cpp @arkuiscroll
-test/unittest/core/manager/load_complete_manager_test_ng.cpp @arkui_framework_xnode
 test/unittest/core/property/accessibility_property_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_test_three_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_testtwo_ng.cpp @ArkUI_ability_group
@@ -3758,6 +3761,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkoala_generator/ @arkui-idlize
+frameworks/bridge/arkts_frontend/arkui_idlize/ @arkui-idlize
 
 [UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
@@ -4204,8 +4209,6 @@ frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp @Ark
 frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.h @ArkUI_Event
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp @form_framework
 frameworks/core/components_ng/manager/form_visible/form_visible_manager.h @form_framework
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.cpp @arkui_framework_xnode
-frameworks/core/components_ng/manager/load_complete/load_complete_manager.h @arkui_framework_xnode
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp @arkuiscroll
 frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h @arkuiscroll
 frameworks/core/components_ng/pattern/arc_scroll/ @arkuiscroll

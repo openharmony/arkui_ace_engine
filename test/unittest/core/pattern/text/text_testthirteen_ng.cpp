@@ -14,7 +14,7 @@
  */
 
 #include <memory>
-
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "foundation/arkui/ace_engine/test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "gtest/gtest.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"

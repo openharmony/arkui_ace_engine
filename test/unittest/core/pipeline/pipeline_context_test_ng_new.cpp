@@ -14,9 +14,11 @@
  */
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
+#include "core/event/resample_algo.h"
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/unittest/core/pattern/scroll/mock_task_executor.h"
 

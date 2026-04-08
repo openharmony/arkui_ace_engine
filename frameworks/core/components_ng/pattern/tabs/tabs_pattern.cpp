@@ -24,7 +24,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -835,14 +834,6 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
             }
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
-        auto host = GetHost();
-        if (host) {
-            auto pipeline = host->GetContextWithCheck();
-            if (pipeline) {
-                std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(index);
-                pipeline->GetLoadCompleteManager()->StartCollect(url);
-            }
-        }
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }

@@ -17,13 +17,20 @@
 #include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIFlowItemModifier* GetFlowItemStaticModifier();
+#endif
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
 {
     static const GENERATED_ArkUIFlowItemModifier* cachedModifier = nullptr;
     if (!cachedModifier) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetFlowItemStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FlowItem");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIFlowItemModifier*>(module->GetStaticModifier());
+#endif
     }
     return cachedModifier;
 }

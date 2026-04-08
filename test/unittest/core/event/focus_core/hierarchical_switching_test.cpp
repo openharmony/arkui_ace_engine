@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"

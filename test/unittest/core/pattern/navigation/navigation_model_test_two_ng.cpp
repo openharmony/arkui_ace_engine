@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"

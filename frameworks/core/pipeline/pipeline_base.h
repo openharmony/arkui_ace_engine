@@ -40,7 +40,6 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
-#include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
@@ -106,7 +105,9 @@ class FontManager;
 class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
+class EventManager;
 enum class FrontendType;
+enum class PlatformVersion;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
@@ -979,15 +980,9 @@ public:
         return isRightToLeft_;
     }
 
-    void SetEventManager(const RefPtr<EventManager>& eventManager)
-    {
-        eventManager_ = eventManager;
-    }
+    void SetEventManager(const RefPtr<EventManager>& eventManager);
 
-    RefPtr<EventManager> GetEventManager() const
-    {
-        return eventManager_;
-    }
+    RefPtr<EventManager> GetEventManager() const;
 
     const RefPtr<WindowManager>& GetWindowManager() const
     {

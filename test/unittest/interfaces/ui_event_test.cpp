@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/common/event_manager.h"
 #define private public
 #define protected public
 #include "ace_forward_compatibility.h"

@@ -840,8 +840,8 @@ void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoi
     OnMouseTestHit(coordinatePoint, result);
 }
 
-bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& hoverList,
-    WeakPtr<RenderNode>& hoverNode)
+bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalPoint,
+    std::list<WeakPtr<RenderNode>>& hoverList, WeakPtr<RenderNode>& hoverNode)
 {
     if (disableTouchEvent_ || disabled_) {
         return false;
@@ -865,11 +865,9 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     auto beforeSize = hoverList.size();
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
-            if (!hoverNode.Upgrade()) {
-                if (hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
-                    hoverNode = AceType::WeakClaim<RenderNode>(this);
-                    LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
-                }
+            if (!hoverNode.Upgrade() && hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
+                hoverNode = AceType::WeakClaim<RenderNode>(this);
+                LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
             }
             hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
             // Calculates the coordinate offset in this node.
