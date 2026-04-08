@@ -1434,6 +1434,7 @@ ohos_source_set("ace_components_pattern") {
 
     # Smart layout engine
     "$ace_root/frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/smart_layout_engine_loader.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_constraints.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/localsmt.cpp",

@@ -21,6 +21,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -201,24 +202,31 @@ bool LayoutAlgorithm::IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCo
 
 void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 {
-    if (!FeatureParam::IsPageOverflowEnabled()) {
+    if (!FeatureParam::IsPageOverflowEnabled() && !FeatureParam::IsSmartLayoutEnabled()) {
         return;
     }
+
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
-    if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
-        return;
-    }
     auto pattern = hostNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     const auto &vOverflowHandler =
         pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
     CHECK_NULL_VOID(vOverflowHandler);
-    
+
     vOverflowHandler->SetOverflowDisabledFlag(
         vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
-    vOverflowHandler->HandleContentOverflow();
+    if (FeatureParam::IsSmartLayoutEnabled() && !vOverflowHandler->IsOverflowDisabled() &&
+        vOverflowHandler->IsOverflow()) {
+        SmartLayoutAlgorithm smartLayoutAlgorithm;
+        smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+    } else if (FeatureParam::IsPageOverflowEnabled()) {
+        if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
+            return;
+        }
+        vOverflowHandler->HandleContentOverflow();
+    }
 }
 
 void LayoutAlgorithm::HandleStackContentOverflow(LayoutWrapper* layoutWrapper)
