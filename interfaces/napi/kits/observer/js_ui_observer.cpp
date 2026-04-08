@@ -770,7 +770,7 @@ napi_value ObserverProcess::ProcessWinSizeLayoutBreakpointRegister(napi_env env,
     }
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
-        int32_t instanceId = ContainerScope::CurrentId();
+        int32_t instanceId = Container::CurrentIdSafely();
         UIObserver::RegisterWinSizeLayoutBreakpointCallback(instanceId, listener);
     }
 
