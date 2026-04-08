@@ -55,4 +55,9 @@ bool FeatureParam::IsDialogCorrectionEnabled()
 {
     return false;
 }
+
+std::string FeatureParam::GetArkWebAutoLayoutConfig()
+{
+    return "";
+}
 } // OHOS::Ace
