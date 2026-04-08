@@ -63,7 +63,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
      */
     int32_t targetId = menuNode->GetId();
     auto result = ViewAbstract::OpenMenu(menuParam, selectNode, targetId);
-    EXPECT_TRUE(result >= ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(result, ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
 }
 
 /**
