@@ -151,6 +151,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
@@ -162,6 +163,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step3. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     config.frameSizeChange = false;
@@ -175,6 +177,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step4. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     config.frameSizeChange = true;
@@ -188,6 +191,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step5. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -201,6 +205,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step6. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     * @tc.expected: needResetSurface_ is true.
      */
     needReset = true;
     config.frameSizeChange = true;
@@ -214,6 +219,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step7. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     * @tc.expected: needResetSurface_ is true.
      */
     needReset = true;
     config.frameSizeChange = false;
