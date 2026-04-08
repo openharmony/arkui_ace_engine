@@ -29,6 +29,10 @@
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
+#ifdef RELAXED_INTERACTION_SUPPORT
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/relaxed_interaction/relaxed_interaction_manager.h"
+#endif
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
@@ -3286,4 +3290,47 @@ void EventManager::NotifyTouchpadInteraction()
         }
     }
 }
+
+void EventManager::ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    auto relaxedInteractionManager = GetOrCreateRelaxedInteractionManager();
+    if (!relaxedInteractionManager) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "RelaxedInteractionManager is null.");
+        return;
+    }
+    auto result = relaxedInteractionManager->ProcessCommand(command);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "ProcessCommand result: %{public}d.", static_cast<int>(result));
+    if (result == NG::ProcessResult::SUCCESS) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+void EventManager::FlushRelaxedInteraction(std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(relaxedInteractionManager_);
+    auto state = relaxedInteractionManager_->ExecuteNextStep();
+    if (state == NG::ExecutionState::RUNNING) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+#ifdef RELAXED_INTERACTION_SUPPORT
+RefPtr<NG::RelaxedInteractionManager> EventManager::GetOrCreateRelaxedInteractionManager()
+{
+    if (relaxedInteractionManager_) {
+        return relaxedInteractionManager_;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    relaxedInteractionManager_ = AceType::MakeRefPtr<NG::RelaxedInteractionManager>(pipelineContext);
+    return relaxedInteractionManager_;
+}
+#endif
 } // namespace OHOS::Ace
