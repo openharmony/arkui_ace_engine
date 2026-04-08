@@ -1606,4 +1606,324 @@ HWTEST_F(EventManagerTestNg, DumpTouchInfo001, TestSize.Level1)
     eventManager->DumpTouchInfo(params2, hasJson);
     EXPECT_EQ(eventTouchInfoRecord.touchHistory_.size(), 0);
 }
+
+/**
+ * @tc.name: GetCurrentReferee001
+ * @tc.desc: Test GetCurrentReferee function with isNewReferee=false and key=1 (POST_ONCE).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    constexpr bool IS_NEW_REFEREE = false;
+    constexpr int32_t EVENT_HANDLE_ID = 100001;
+ 
+    auto referee = eventManager->GetCurrentReferee(IS_NEW_REFEREE, EVENT_HANDLE_ID);
+    ASSERT_NE(referee, nullptr);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo001
+ * @tc.desc: Test UpdateDragInfo when type is PULL_MOVE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_MOVE;
+    touchEvent.pullType = TouchType::PULL_MOVE;
+ 
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+    EXPECT_EQ(touchEvent.pullType, TouchType::PULL_MOVE);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo002
+ * @tc.desc: Test UpdateDragInfo when type is PULL_IN_WINDOW.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_IN_WINDOW;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo003
+ * @tc.desc: Test UpdateDragInfo when type is PULL_OUT_WINDOW.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_OUT_WINDOW;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo004
+ * @tc.desc: Test UpdateDragInfo when type is PULL_UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_UP;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::UP);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo005
+ * @tc.desc: Test UpdateDragInfo when type is UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::UP);
+}
+ 
+/**
+ * @tc.name: FalsifyCancelEventAndDispatch001
+ * @tc.desc: Test FalsifyCancelEventAndDispatch with non-empty downFingerIds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FalsifyCancelEventAndDispatch001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    eventManager->downFingerIds_[0] = 0;
+    eventManager->downFingerIds_[1] = 1;
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.originalId = 0;
+    eventManager->lastTouchEvent_ = touchEvent;
+    eventManager->FalsifyCancelEventAndDispatch(touchEvent, true);
+}
+ 
+/**
+ * @tc.name: SetResponseLinkRecognizers001
+ * @tc.desc: Test SetResponseLinkRecognizers with non-post event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult result;
+    result.emplace_back(panRecognizer);
+ 
+    ResponseLinkResult responseLinkResult;
+    bool isPostEvent = false;
+    eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
+}
+ 
+/**
+ * @tc.name: SetResponseLinkRecognizers002
+ * @tc.desc: Test SetResponseLinkRecognizers with post event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto sequenceRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(std::vector<RefPtr<NG::NGGestureRecognizer>>());
+    ASSERT_NE(sequenceRecognizer, nullptr);
+ 
+    TouchTestResult result;
+    result.emplace_back(sequenceRecognizer);
+ 
+    ResponseLinkResult responseLinkResult;
+    bool isPostEvent = true;
+    eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
+}
+ 
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.desc: Test CleanRefereeBeforeTouchTest with eventHandleId=0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.eventHandleId = 0;
+    touchEvent.sourceType = SourceType::TOUCH;
+ 
+    constexpr bool NEED_APPEND = false;
+    eventManager->CleanRefereeBeforeTouchTest(touchEvent, NEED_APPEND);
+}
+ 
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest002
+ * @tc.desc: Test CleanRefereeBeforeTouchTest when CheckEventTypeChange returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.eventHandleId = 0;
+    touchEvent.sourceType = SourceType::MOUSE;
+ 
+    auto refereeNG = eventManager->refereeNG_;
+    if (refereeNG) {
+        refereeNG->CheckEventTypeChange(SourceType::TOUCH);
+    }
+ 
+    constexpr bool NEED_APPEND = false;
+    eventManager->CleanRefereeBeforeTouchTest(touchEvent, NEED_APPEND);
+}
+ 
+/**
+ * @tc.name: FlushTouchEventsBegin001
+ * @tc.desc: Test FlushTouchEventsBegin with events in touchTestResults.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FlushTouchEventsBegin001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(panRecognizer);
+    eventManager->touchTestResults_[0] = hitTestResult;
+ 
+    std::list<TouchEvent> touchEvents;
+    TouchEvent event;
+    event.id = 0;
+    touchEvents.push_back(event);
+    eventManager->FlushTouchEventsBegin(touchEvents);
+}
+ 
+/**
+ * @tc.name: FlushTouchEventsEnd001
+ * @tc.desc: Test FlushTouchEventsEnd with resampled events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FlushTouchEventsEnd001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(panRecognizer);
+    eventManager->touchTestResults_[0] = hitTestResult;
+ 
+    std::list<TouchEvent> touchEvents;
+    TouchEvent event;
+    event.id = 0;
+    TouchEvent historyEvent;
+    historyEvent.id = 0;
+    event.history.push_back(historyEvent);
+    touchEvents.push_back(event);
+    eventManager->FlushTouchEventsEnd(touchEvents);
+}
+ 
+/**
+ * @tc.name: DispatchTouchEventToTouchTestResult001
+ * @tc.desc: Test DispatchTouchEventToTouchTestResult with passThrough=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchEventToTouchTestResult001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult touchTestResult;
+    touchTestResult.emplace_back(panRecognizer);
+ 
+    TouchEvent touchEvent;
+    touchEvent.passThrough = true;
+ 
+    constexpr bool SEND_ON_TOUCH = true;
+    eventManager->DispatchTouchEventToTouchTestResult(touchEvent, touchTestResult, SEND_ON_TOUCH);
+}
+ 
+/**
+ * @tc.name: LogTouchTestRecognizerStates001
+ * @tc.desc: Test LogTouchTestRecognizerStates with empty eventTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    eventManager->eventTree_.eventTreeList.clear();
+    eventManager->LogTouchTestRecognizerStates(0);
+}
+ 
+/**
+ * @tc.name: CleanResults001
+ * @tc.desc: Test ClearResults function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanResults001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    eventManager->touchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->postEventTouchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->axisTouchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->ClearResults();
+    EXPECT_TRUE(eventManager->touchTestResults_.empty());
+    EXPECT_TRUE(eventManager->postEventTouchTestResults_.empty());
+    EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
+}
 } // namespace OHOS::Ace::NG
