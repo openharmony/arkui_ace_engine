@@ -22,6 +22,7 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
