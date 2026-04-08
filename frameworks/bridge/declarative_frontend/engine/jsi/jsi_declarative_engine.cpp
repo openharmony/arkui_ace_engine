@@ -228,7 +228,9 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
 #elif defined(PREVIEW)
-    return runtime->ExecuteJsBinForAOT("./module/arkui/jsEnumStyle.abc");
+    std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
 #else
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/jsEnumStyle.abc");
 #endif
@@ -280,7 +282,9 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
 #elif defined(PREVIEW)
-    return runtime->ExecuteJsBinForAOT("./module/arkui/arkComponent.abc");
+    std::string str("arkui_binary_arkComponent_abc_loadFile");
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
 #else
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/arkComponent.abc");
 #endif
