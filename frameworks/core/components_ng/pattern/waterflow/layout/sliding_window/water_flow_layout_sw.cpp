@@ -100,6 +100,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         // no item moves during MeasureToTarget tasks
         return;
     }
+    if (!GetHasMeasured()) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Layout called before Measure, skip layout");
+        return;
+    }
 
     const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     if (!props_->HasCachedCount()) {
