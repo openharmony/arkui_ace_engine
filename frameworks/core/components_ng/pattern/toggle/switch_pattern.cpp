@@ -18,9 +18,18 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components/common/properties/ui_material.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/position_property.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/animation/curve.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -28,6 +37,32 @@ namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
+
+// Drag animation constants
+constexpr float DRAG_FRAME_BASE_SCALE = 2.0f;
+constexpr float DRAG_FRAME_PRESS_START_SCALE = 1.1f;
+constexpr float DRAG_FRAME_PRESS_END_SCALE = 1.0f;
+constexpr float DRAG_FRAME_DRAG_SCALE_X = 1.06f;
+constexpr float DRAG_FRAME_DRAG_SCALE_Y = 0.95f;
+constexpr int32_t DRAG_FRAME_ANIMATION_DURATION = 150;
+// Spring curve: velocity=0, mass=1, stiffness=305, damping=24
+constexpr float SPRING_VELOCITY = 0.0f;
+constexpr float SPRING_MASS = 1.0f;
+constexpr float SPRING_STIFFNESS = 305.0f;
+constexpr float SPRING_DAMPING = 24.0f;
+
+// Low-grade material constants
+constexpr float LOW_GRADE_SHRINK_SCALE = 0.78f;
+constexpr float LOW_GRADE_EXPAND_SCALE = 1.56f;
+constexpr float LOW_GRADE_SPRING_VELOCITY = 0.0f;
+constexpr float LOW_GRADE_SPRING_MASS = 1.0f;
+constexpr float LOW_GRADE_SPRING_STIFFNESS = 224.0f;
+constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
+
+constexpr float BLUR_SCALE_DRAG_FRAME = 0.03f;
+constexpr float BLUR_SCALE_DRAG_POINT = 0.8f;
+constexpr int32_t LONG_PRESS_DELAY_MS = 400;
+
 constexpr int32_t  HOTZONE_SPACE = 2;
 const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
 const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
@@ -95,6 +130,7 @@ void SwitchPattern::OnModifyDone()
     SetAccessibilityAction();
     FireBuilder();
     HandleEnabled();
+    ResetHostMaterialEffects();
 }
 
 void SwitchPattern::InitFocusEvent()
@@ -453,6 +489,8 @@ void SwitchPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    ShowMaterialNode();
+    StartLongPressTimer();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -470,6 +508,10 @@ void SwitchPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    if (longPressTask_) {
+        longPressTask_.Cancel();
+    }
+    HideMaterialNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     FireBuilder();
 }
@@ -540,6 +582,89 @@ void SwitchPattern::InitClickEvent()
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
+}
+
+void SwitchPattern::HandleLongPress()
+{
+    if (!HasSystemMaterial()) { return; }
+    if (IsHighGradeMaterial()) {
+        HandleHighGradeLongPress();
+    } else {
+        HandleLowGradeLongPress();
+    }
+}
+
+void SwitchPattern::StartLongPressTimer()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    longPressTask_.Reset([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress();
+    });
+    taskExecutor->PostDelayedTask(longPressTask_,
+        TaskExecutor::TaskType::UI, LONG_PRESS_DELAY_MS, "ArkUISwitchLongPress");
+}
+
+void SwitchPattern::HandleHighGradeLongPress()
+{
+    CreateDragFrameNode();
+    CHECK_NULL_VOID(dragFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(frameRC);
+    host->AddChild(dragFrameNode_);
+    isFrameNodeVisible_ = true;
+    UpdateMaterialNodePosition();
+    ApplyDragFrameNodeSystemMaterial();
+    AnimationUtils::ExecuteWithoutAnimation(
+        [frameRC]() {
+            frameRC->UpdateOpacity(0.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+        },
+        host->GetContextRefPtr());
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [frameRC]() {
+            frameRC->UpdateOpacity(1.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SwitchPattern::HandleLowGradeLongPress()
+{
+    isDragActive_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
+    CHECK_NULL_VOID(switchModifier);
+    AnimationOption option = CreateLowGradeSpringOption();
+    AnimationUtils::Animate(
+        option,
+        [switchModifier]() {
+            if (switchModifier) {
+                switchModifier->SetPointScale(LOW_GRADE_SHRINK_SCALE);
+            }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+    AnimationUtils::Animate(
+        option,
+        [switchModifier]() {
+            if (switchModifier) {
+                switchModifier->SetPointScale(LOW_GRADE_EXPAND_SCALE);
+            }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SwitchPattern::InitTouchEvent()
@@ -679,12 +804,14 @@ void SwitchPattern::HandleMouseEvent(bool isHover)
 void SwitchPattern::HandleDragStart()
 {
     isDragEvent_ = true;
+    AnimateToDragState();
 }
 
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
 {
     dragOffsetX_ = static_cast<float>(info.GetLocalLocation().GetX());
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch drag update %{public}f", dragOffsetX_);
+    UpdateMaterialNodePosition();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -712,6 +839,581 @@ void SwitchPattern::HandleDragEnd()
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 {
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
+}
+
+float SwitchPattern::GetPointRadius() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto switchTheme = host->GetTheme<SwitchTheme>(true);
+    CHECK_NULL_RETURN(switchTheme, 0.0f);
+
+    auto height = size_.Height();
+    auto radius = height / NUMBER_TWO;
+    auto actualGap = GetActualGap();
+    return radius - actualGap;
+}
+
+float SwitchPattern::GetActualGap() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto switchTheme = host->GetTheme<SwitchTheme>(true);
+    CHECK_NULL_RETURN(switchTheme, 0.0f);
+
+    auto height = size_.Height();
+    constexpr Dimension radiusGap = 2.0_vp;
+    return radiusGap.ConvertToPx() * height /
+        (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUMBER_TWO).ConvertToPx();
+}
+
+bool SwitchPattern::HasSystemMaterial() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto material = renderContext->GetSystemMaterial();
+    return material != nullptr;
+}
+
+bool SwitchPattern::IsHighGradeMaterial() const
+{
+    auto level = SystemProperties::GetUiMaterialLevel();
+    return level == UiMaterialLevel::EXQUISITE || level == UiMaterialLevel::GENTLE;
+}
+
+void SwitchPattern::ResetHostMaterialEffects()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto material = renderContext->GetSystemMaterial();
+    CHECK_NULL_VOID(material);
+
+    // Clear SO-level material effects
+    MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr);
+
+    // Clear RS material filter
+    renderContext->UpdateUiMaterialFilter(nullptr);
+
+    // Reset visual properties (handles SetSystemMaterialImmediate path)
+    auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+    if (preBackgroundColor.has_value()) {
+        renderContext->UpdateBackgroundColor(preBackgroundColor.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+        renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+    }
+
+    auto preBorderWidth = renderContext->GetPreBorderWidth();
+    if (preBorderWidth.has_value()) {
+        auto layoutProperty = host->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateBorderWidth(preBorderWidth.value());
+        }
+        renderContext->UpdateBorderWidth(preBorderWidth.value());
+    } else {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        auto layoutProperty = host->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateBorderWidth(borderWidth);
+        }
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+
+    auto preBorderColor = renderContext->GetPreBorderColor();
+    if (preBorderColor.has_value()) {
+        renderContext->UpdateBorderColor(preBorderColor.value());
+    } else {
+        renderContext->ResetBorderColor();
+    }
+
+    auto preBackShadow = renderContext->GetPreBackShadow();
+    if (preBackShadow.has_value()) {
+        renderContext->UpdateBackShadow(preBackShadow.value());
+    } else {
+        renderContext->ResetBackShadow();
+    }
+
+    // DO NOT clear uiMaterial_ from RenderContext - needed for dragFrameNode
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+AnimationOption SwitchPattern::CreateDragAnimationOption() const
+{
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS, SPRING_DAMPING);
+    option.SetCurve(curve);
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    return option;
+}
+
+BlurStyleOption SwitchPattern::CreateDragBlurStyleOption() const
+{
+    BlurStyleOption option;
+    option.blurStyle = BlurStyle::THIN;
+    option.colorMode = ThemeColorMode::LIGHT;
+    option.adaptiveColor = AdaptiveColor::DEFAULT;
+    option.scale = BLUR_SCALE_DRAG_FRAME;
+    return option;
+}
+
+AnimationOption SwitchPattern::CreateLowGradeSpringOption() const
+{
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+        LOW_GRADE_SPRING_VELOCITY, LOW_GRADE_SPRING_MASS,
+        LOW_GRADE_SPRING_STIFFNESS, LOW_GRADE_SPRING_DAMPING);
+    option.SetCurve(curve);
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    return option;
+}
+
+void SwitchPattern::HideMaterialNodes()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dragFrameNode_ && isFrameNodeVisible_) {
+        host->RemoveChild(dragFrameNode_);
+        isFrameNodeVisible_ = false;
+    }
+    if (dragPointNode_) {
+        host->RemoveChild(dragPointNode_);
+    }
+    if (blurCoverNode_) {
+        host->RemoveChild(blurCoverNode_);
+    }
+}
+
+void SwitchPattern::CreateDragFrameNode()
+{
+    if (dragFrameNode_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    dragFrameNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(dragFrameNode_);
+
+    auto renderContext = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto pointRadius = GetPointRadius();
+    auto pointDiameter = pointRadius * NUMBER_TWO;
+    auto frameSize = pointDiameter * DRAG_FRAME_BASE_SCALE;
+
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateFrontBlurStyle(CreateDragBlurStyleOption());
+
+    dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+
+    ViewAbstract::SetLightPosition(AceType::RawPtr(dragFrameNode_),
+        CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
+        CalcDimension(pointDiameter, DimensionUnit::PX));
+    if (paintProperty->HasSwitchPointColor()) {
+        ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), paintProperty->GetSwitchPointColor().value());
+    } else {
+        ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), Color::WHITE);
+    }
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 0.5f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
+}
+
+void SwitchPattern::CreateDragPointNode()
+{
+    if (dragPointNode_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    dragPointNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(dragPointNode_);
+
+    auto renderContext = dragPointNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto pointRadius = GetPointRadius();
+    auto pointDiameter = pointRadius * NUMBER_TWO;
+    BlurStyleOption option;
+    option.blurStyle = BlurStyle::THIN;
+    option.colorMode = ThemeColorMode::LIGHT;
+    option.adaptiveColor = AdaptiveColor::DEFAULT;
+    option.scale = BLUR_SCALE_DRAG_POINT;
+    renderContext->UpdateFrontBlurStyle(option);
+
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(pointDiameter / NUMBER_TWO, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+
+    dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pointDiameter), CalcLength(pointDiameter)));
+
+    ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
+        CalcDimension(pointRadius, DimensionUnit::PX), CalcDimension(pointRadius, DimensionUnit::PX),
+        CalcDimension(pointRadius, DimensionUnit::PX));
+    if (paintProperty->HasSwitchPointColor()) {
+        ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), paintProperty->GetSwitchPointColor().value());
+    } else {
+        ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), Color::WHITE);
+    }
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
+}
+
+void SwitchPattern::CreateBlurCoverNode()
+{
+    if (blurCoverNode_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    blurCoverNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(blurCoverNode_);
+
+    auto renderContext = blurCoverNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateFrontBlurStyle(CreateDragBlurStyleOption());
+
+    auto pointRadius = GetPointRadius();
+    auto pointDiameter = pointRadius * NUMBER_TWO;
+    auto frameSize = pointDiameter * DRAG_FRAME_BASE_SCALE;
+
+    blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+
+    ViewAbstract::SetLightPosition(AceType::RawPtr(blurCoverNode_),
+        CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
+        CalcDimension(pointDiameter, DimensionUnit::PX));
+    if (paintProperty->HasSwitchPointColor()) {
+        ViewAbstract::SetLightColor(AceType::RawPtr(blurCoverNode_), paintProperty->GetSwitchPointColor().value());
+    } else {
+        ViewAbstract::SetLightColor(AceType::RawPtr(blurCoverNode_), Color::WHITE);
+    }
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(blurCoverNode_), 1.5f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 2u);
+}
+
+float SwitchPattern::CalculatePointCenterX(float pointRadius, float actualGap) const
+{
+    auto width = size_.Width();
+    auto height = size_.Height();
+    auto xOffset = offset_.GetX();
+    if (LessNotEqual(width, height)) {
+        return xOffset + width / NUMBER_TWO;
+    }
+    float pointOffset = 0.0f;
+    if (!isDragEvent_) {
+        bool isRtl = direction_ == TextDirection::RTL;
+        pointOffset = isRtl
+            ? (isOn_.value_or(false) ? 0.0f : (width - height))
+            : (isOn_.value_or(false) ? (width - height) : 0.0f);
+    } else {
+        pointOffset = std::clamp(dragOffsetX_ - xOffset, 0.0f, width - height);
+    }
+    return xOffset + actualGap + pointRadius + pointOffset;
+}
+
+void SwitchPattern::UpdateMaterialNodePosition()
+{
+    CHECK_NULL_VOID(dragFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pointRadius = GetPointRadius();
+    auto actualGap = GetActualGap();
+    float pointCenterX = CalculatePointCenterX(pointRadius, actualGap);
+    float pointCenterY = offset_.GetY() + size_.Height() / NUMBER_TWO;
+    auto pointDiameter = pointRadius * NUMBER_TWO;
+    auto frameSize = pointDiameter * DRAG_FRAME_BASE_SCALE;
+    float frameNodeX = pointCenterX - frameSize / NUMBER_TWO;
+    float frameNodeY = pointCenterY - frameSize / NUMBER_TWO;
+    dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(frameRC);
+    frameRC->UpdatePosition(OffsetT<Dimension>(Dimension(frameNodeX), Dimension(frameNodeY)));
+    if (blurCoverNode_) {
+        blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+        auto blurRC = blurCoverNode_->GetRenderContext();
+        if (blurRC) {
+            blurRC->UpdatePosition(OffsetT<Dimension>(Dimension(frameNodeX), Dimension(frameNodeY)));
+        }
+    }
+    if (dragPointNode_) {
+        float pointNodeX = pointCenterX - pointDiameter / NUMBER_TWO;
+        float pointNodeY = pointCenterY - pointDiameter / NUMBER_TWO;
+        dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pointDiameter), CalcLength(pointDiameter)));
+        auto pointRC = dragPointNode_->GetRenderContext();
+        if (pointRC) {
+            pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointNodeX), Dimension(pointNodeY)));
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SwitchPattern::ShowMaterialNode()
+{
+    if (!HasSystemMaterial()) { return; }
+    if (!IsHighGradeMaterial()) { return; }
+    isDragActive_ = true;
+    CreateDragFrameNode();
+    CreateDragPointNode();
+    CreateBlurCoverNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    if (dragPointNode_) { host->AddChild(dragPointNode_); }
+    if (blurCoverNode_) {
+        host->AddChild(blurCoverNode_);
+        blurCoverNode_->GetRenderContext()->UpdateFrontBlurStyle(CreateDragBlurStyleOption());
+    }
+    UpdateMaterialNodePosition();
+    AnimationUtils::ExecuteWithoutAnimation(
+        [pointRC, blurRC]() {
+            if (pointRC) { pointRC->UpdateOpacity(0.0); }
+            if (blurRC) {
+                blurRC->UpdateOpacity(0.0);
+                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+            }
+        },
+        host->GetContextRefPtr());
+    AnimationOption option = CreateDragAnimationOption();
+    auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
+    AnimationUtils::Animate(option,
+        [pointRC, blurRC, switchModifier]() {
+            if (pointRC) { pointRC->UpdateOpacity(1.0); }
+            if (blurRC) {
+                blurRC->UpdateOpacity(1.0);
+                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+            }
+            if (switchModifier) { switchModifier->SetPointAlpha(0.0f); }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SwitchPattern::AnimateToDragState()
+{
+    if (!IsHighGradeMaterial()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    AnimationOption option = CreateDragAnimationOption();
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        CHECK_NULL_VOID(frameRC);
+        AnimationUtils::Animate(
+            option,
+            [frameRC, blurRC]() {
+                frameRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
+                if (blurRC) {
+                    blurRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
+                }
+            },
+            nullptr, nullptr, host->GetContextRefPtr());
+    } else if (blurRC) {
+        AnimationUtils::Animate(
+            option,
+            [blurRC]() {
+                blurRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
+            },
+            nullptr, nullptr, host->GetContextRefPtr());
+    }
+}
+
+bool SwitchPattern::PredictFinalToggleState() const
+{
+    bool finalIsOn = isOn_.value_or(false);
+    if (!isDragEvent_) { return finalIsOn; }
+    auto mainSize = GetSwitchWidth();
+    auto contentOffset = GetSwitchContentOffsetX();
+    bool willToggle = false;
+    if (direction_ == TextDirection::RTL) {
+        willToggle = (finalIsOn && dragOffsetX_ - contentOffset > mainSize / NUMBER_TWO) ||
+                     (!finalIsOn && dragOffsetX_ - contentOffset <= mainSize / NUMBER_TWO);
+    } else {
+        willToggle = (finalIsOn && dragOffsetX_ - contentOffset < mainSize / NUMBER_TWO) ||
+                     (!finalIsOn && dragOffsetX_ - contentOffset >= mainSize / NUMBER_TWO);
+    }
+    return willToggle ? !finalIsOn : finalIsOn;
+}
+
+void SwitchPattern::CalculateHideTargetPosition(float& targetFrameX, float& targetFrameY,
+    float& targetPointNodeX, float& targetPointNodeY)
+{
+    auto pointRadius = GetPointRadius();
+    auto actualGap = GetActualGap();
+    auto width = size_.Width();
+    auto height = size_.Height();
+    auto xOffset = offset_.GetX();
+    auto yOffset = offset_.GetY();
+    bool finalIsOn = PredictFinalToggleState();
+    float targetPointOffset = 0.0f;
+    if (GreatOrEqual(width, height)) {
+        bool isRtl = direction_ == TextDirection::RTL;
+        targetPointOffset = isRtl
+            ? (finalIsOn ? 0.0f : (width - height))
+            : (finalIsOn ? (width - height) : 0.0f);
+    }
+    float targetCenterX = GreatOrEqual(width, height)
+        ? xOffset + actualGap + pointRadius + targetPointOffset
+        : xOffset + width / NUMBER_TWO;
+    float targetCenterY = yOffset + height / NUMBER_TWO;
+    auto pointDiameter = pointRadius * NUMBER_TWO;
+    auto frameSize = pointDiameter * DRAG_FRAME_BASE_SCALE;
+    targetFrameX = targetCenterX - frameSize / NUMBER_TWO;
+    targetFrameY = targetCenterY - frameSize / NUMBER_TWO;
+    targetPointNodeX = targetCenterX - pointDiameter / NUMBER_TWO;
+    targetPointNodeY = targetCenterY - pointDiameter / NUMBER_TWO;
+}
+
+void SwitchPattern::ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
+    const RefPtr<RenderContext>& blurRC)
+{
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        if (frameRC) {
+            frameRC->UpdateOpacity(1.0);
+            frameRC->UpdateTransformScale({ 1.0f, 1.0f });
+        }
+    }
+    if (pointRC) { pointRC->UpdateOpacity(1.0); }
+    if (blurRC) {
+        blurRC->UpdateOpacity(1.0);
+        blurRC->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+}
+
+void SwitchPattern::AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
+    const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier,
+    float targetFrameX, float targetFrameY, float targetPointNodeX, float targetPointNodeY)
+{
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        if (frameRC) {
+            frameRC->UpdateOpacity(0.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+            frameRC->UpdatePosition(
+                OffsetT<Dimension>(Dimension(targetFrameX), Dimension(targetFrameY)));
+        }
+    }
+    if (pointRC) {
+        pointRC->UpdateOpacity(0.0);
+        pointRC->UpdatePosition(
+            OffsetT<Dimension>(Dimension(targetPointNodeX), Dimension(targetPointNodeY)));
+    }
+    if (blurRC) {
+        blurRC->UpdateOpacity(0.0);
+        blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+        blurRC->UpdatePosition(
+            OffsetT<Dimension>(Dimension(targetFrameX), Dimension(targetFrameY)));
+    }
+    if (switchModifier) { switchModifier->SetPointAlpha(1.0f); }
+}
+
+void SwitchPattern::HideMaterialNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsHighGradeMaterial()) {
+        if (!isDragActive_) { return; }
+        isDragActive_ = false;
+        auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
+        CHECK_NULL_VOID(switchModifier);
+        AnimationUtils::Animate(CreateLowGradeSpringOption(),
+            [switchModifier]() { switchModifier->SetPointScale(1.0f); },
+            nullptr, nullptr, host->GetContextRefPtr());
+        return;
+    }
+    isDragActive_ = false;
+    if (blurCoverNode_) {
+        auto blurRC = blurCoverNode_->GetRenderContext();
+        if (blurRC) { blurRC->UpdateFrontBlurStyle(std::nullopt); }
+    }
+    auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    float targetFrameX = 0.0f;
+    float targetFrameY = 0.0f;
+    float targetPointNodeX = 0.0f;
+    float targetPointNodeY = 0.0f;
+    
+    CalculateHideTargetPosition(targetFrameX, targetFrameY, targetPointNodeX, targetPointNodeY);
+    AnimationUtils::ExecuteWithoutAnimation(
+        [pointRC, blurRC, this]() { ResetMaterialNodeAppearance(pointRC, blurRC); },
+        host->GetContextRefPtr());
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [pointRC, blurRC, switchModifier, this,
+         targetFrameX, targetFrameY, targetPointNodeX, targetPointNodeY]() {
+            AnimateHighGradeHide(pointRC, blurRC, switchModifier,
+                targetFrameX, targetFrameY, targetPointNodeX, targetPointNodeY);
+        },
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (!pattern->isDragActive_) { pattern->HideMaterialNodes(); }
+        },
+        nullptr, host->GetContextRefPtr());
+}
+
+void SwitchPattern::ApplyDragFrameNodeSystemMaterial()
+{
+    CHECK_NULL_VOID(dragFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostRenderContext);
+    auto material = hostRenderContext->GetSystemMaterial();
+    if (material &&
+        material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+        material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        auto renderContext = dragFrameNode_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(dragFrameNode_), AceType::RawPtr(material));
+        ResetHostMaterialEffects();
+    }
 }
 
 // Set the default hot zone for the component.
