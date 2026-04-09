@@ -330,6 +330,16 @@ void SetOnClick1Impl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
     SpanModelNG::SetOnClick(static_cast<UINode *>(node), std::move(onEvent));
 }
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // SpanModelNG::SetSetDebugLine(frameNode, convValue);
+}
 } // SpanAttributeModifier
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
 {
@@ -354,6 +364,7 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
         SpanAttributeModifier::SetFontImpl,
         SpanAttributeModifier::SetFontWeightImpl,
         SpanAttributeModifier::SetOnClick1Impl,
+        SpanAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUISpanModifierImpl;
 }

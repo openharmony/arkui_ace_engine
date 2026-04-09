@@ -100,6 +100,11 @@ void CancelTouchImpl(Ark_TouchRecognizer peer)
     eventManager->DispatchTouchCancelToRecognizer(OHOS::Ace::AceType::RawPtr(target), legacyTarget);
     peer->fingerIds_.clear();
 }
+Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
+                                Ark_Int32 uniqueId)
+{
+    return {};
+}
 } // TouchRecognizerAccessor
 const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
 {
@@ -109,6 +114,7 @@ const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
         TouchRecognizerAccessor::GetFinalizerImpl,
         TouchRecognizerAccessor::GetEventTargetInfoImpl,
         TouchRecognizerAccessor::CancelTouchImpl,
+        TouchRecognizerAccessor::IsHostBelongsToImpl,
     };
     return &TouchRecognizerAccessorImpl;
 }

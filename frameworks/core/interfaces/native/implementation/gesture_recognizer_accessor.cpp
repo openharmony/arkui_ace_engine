@@ -140,6 +140,11 @@ void PreventBeginImpl(Ark_GestureRecognizer peer)
     CHECK_NULL_VOID(recognizer);
     recognizer->SetPreventBegin(true);
 }
+Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                Ark_Int32 uniqueId)
+{
+    return {};
+}
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
@@ -158,6 +163,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerAccessor::GetFingerCountImpl,
         GestureRecognizerAccessor::IsFingerCountLimitImpl,
         GestureRecognizerAccessor::PreventBeginImpl,
+        GestureRecognizerAccessor::IsHostBelongsToImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }

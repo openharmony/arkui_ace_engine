@@ -369,6 +369,14 @@ void SetGlobalDisplayYImpl(Ark_MouseEvent peer,
     globalDisplayLocation.SetY(yConvert, animation);
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
+Opt_Int32 GetEventHandleIdImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetEventHandleIdImpl(Ark_MouseEvent peer,
+                          const Opt_Int32* eventHandleId)
+{
+}
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
 {
@@ -405,6 +413,8 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetGlobalDisplayXImpl,
         MouseEventAccessor::GetGlobalDisplayYImpl,
         MouseEventAccessor::SetGlobalDisplayYImpl,
+        MouseEventAccessor::GetEventHandleIdImpl,
+        MouseEventAccessor::SetEventHandleIdImpl,
     };
     return &MouseEventAccessorImpl;
 }

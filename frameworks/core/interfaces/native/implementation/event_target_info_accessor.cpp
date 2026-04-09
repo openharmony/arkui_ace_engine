@@ -41,6 +41,10 @@ Ark_String GetIdImpl(Ark_EventTargetInfo peer)
     CHECK_NULL_RETURN(peer, {});
     return Converter::ArkValue<Ark_String>(peer->id, Converter::FC);
 }
+Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+{
+    return {};
+}
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {
@@ -49,6 +53,7 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
         EventTargetInfoAccessor::ConstructImpl,
         EventTargetInfoAccessor::GetFinalizerImpl,
         EventTargetInfoAccessor::GetIdImpl,
+        EventTargetInfoAccessor::GetUniqueIdImpl,
     };
     return &EventTargetInfoAccessorImpl;
 }
