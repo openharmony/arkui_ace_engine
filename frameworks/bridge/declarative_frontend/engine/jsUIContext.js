@@ -1743,6 +1743,12 @@ class OverlayManager {
             this.ohos_overlayManager.hideAllFrameNodes();
         });
     }
+
+    openOrderOverlay(content, options) {
+        return withInstanceId(this.instanceId_, () => {
+            return this.ohos_overlayManager.openOrderOverlay(content.getFrameNode(), options);
+        });
+    }
 }
 
 class TextMenuController {

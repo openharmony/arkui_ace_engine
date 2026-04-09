@@ -1189,4 +1189,261 @@ HWTEST_F(OverlayManagerExtendTestNg, UpdatePopupCustomNode001, TestSize.Level1)
     overlayManager->UpdatePopupCustomNode();
     EXPECT_EQ(overlayManager->popupMap_.size(), 1);
 }
+
+/**
+ * @tc.name: OpenOrderOverlay001
+ * @tc.desc: Test OpenOrderOverlay with null node, callback should not be called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager.
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    /**
+     * @tc.steps: step2. call OpenOrderOverlay with null node.
+     * @tc.expected: callback is not called, no crash.
+     */
+    OrderOverlayOptions options;
+    bool callbackCalled = false;
+    int32_t errorCode = -1;
+    overlayManager->OpenOrderOverlay(nullptr, options,
+        [&callbackCalled, &errorCode](int32_t code) {
+            callbackCalled = true;
+            errorCode = code;
+        });
+    EXPECT_FALSE(callbackCalled);
+}
+
+/**
+ * @tc.name: OpenOrderOverlay002
+ * @tc.desc: Test OpenOrderOverlay with null node and null callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager.
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    /**
+     * @tc.steps: step2. call OpenOrderOverlay with null node and null callback.
+     * @tc.expected: no crash.
+     */
+    OrderOverlayOptions options;
+    overlayManager->OpenOrderOverlay(nullptr, options, nullptr);
+}
+
+/**
+ * @tc.name: OpenOrderOverlay003
+ * @tc.desc: Test OpenOrderOverlay normally with levelOrder set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. create a child node and call OpenOrderOverlay with levelOrder.
+     * @tc.expected: callback receives ERROR_CODE_NO_ERROR, node is added to orderOverlayMap_.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    OrderOverlayOptions options;
+    options.levelOrder = 1.0;
+    int32_t errorCode = -1;
+    overlayManager->OpenOrderOverlay(childNode, options,
+        [&errorCode](int32_t code) { errorCode = code; });
+    EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    EXPECT_TRUE(overlayManager->orderOverlayMap_.find(childNode->GetId()) !=
+        overlayManager->orderOverlayMap_.end());
+}
+
+/**
+ * @tc.name: OpenOrderOverlay004
+ * @tc.desc: Test OpenOrderOverlay normally without levelOrder (uses default).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. call OpenOrderOverlay without levelOrder (std::nullopt).
+     * @tc.expected: callback receives ERROR_CODE_NO_ERROR, default order is used.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    OrderOverlayOptions options;
+    // levelOrder is std::nullopt by default
+    int32_t errorCode = -1;
+    overlayManager->OpenOrderOverlay(childNode, options,
+        [&errorCode](int32_t code) { errorCode = code; });
+    EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    EXPECT_TRUE(overlayManager->orderOverlayMap_.find(childNode->GetId()) !=
+        overlayManager->orderOverlayMap_.end());
+}
+
+/**
+ * @tc.name: OpenOrderOverlay005
+ * @tc.desc: Test OpenOrderOverlay with null callback (no crash).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. call OpenOrderOverlay with valid node but null callback.
+     * @tc.expected: no crash, node is still added.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    OrderOverlayOptions options;
+    options.levelOrder = 2.0;
+    overlayManager->OpenOrderOverlay(childNode, options, nullptr);
+    EXPECT_TRUE(overlayManager->orderOverlayMap_.find(childNode->GetId()) !=
+        overlayManager->orderOverlayMap_.end());
+}
+
+/**
+ * @tc.name: OpenOrderOverlay006
+ * @tc.desc: Test OpenOrderOverlay re-add same node (update existing entry).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. add node first time with order 1.0.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    OrderOverlayOptions options1;
+    options1.levelOrder = 1.0;
+    int32_t errorCode1 = -1;
+    overlayManager->OpenOrderOverlay(childNode, options1,
+        [&errorCode1](int32_t code) { errorCode1 = code; });
+    EXPECT_EQ(errorCode1, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step3. re-add same node with different order 2.0.
+     * @tc.expected: node is re-added, overlayNodeId in map may change.
+     */
+    OrderOverlayOptions options2;
+    options2.levelOrder = 2.0;
+    int32_t errorCode2 = -1;
+    overlayManager->OpenOrderOverlay(childNode, options2,
+        [&errorCode2](int32_t code) { errorCode2 = code; });
+    EXPECT_EQ(errorCode2, ERROR_CODE_NO_ERROR);
+    EXPECT_TRUE(overlayManager->orderOverlayMap_.find(childNode->GetId()) !=
+        overlayManager->orderOverlayMap_.end());
+}
+
+/**
+ * @tc.name: OpenOrderOverlay007
+ * @tc.desc: Test OpenOrderOverlay with TopNodeIsModelUEC true (blocked by system window).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. add a modal page node as the last child of rootNode to simulate UEC.
+     * The TopNodeIsModelUEC checks: topNode->GetTag() == V2::MODAL_PAGE_TAG &&
+     * !topNode->IsAllowAddChildBelowModalUec()
+     */
+    auto modalNode = FrameNode::CreateFrameNode(
+        V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    modalNode->MountToParent(rootNode);
+    // Ensure IsAllowAddChildBelowModalUec returns false
+    modalNode->SetIsAllowAddChildBelowModalUec(false);
+    /**
+     * @tc.steps: step3. call OpenOrderOverlay and expect blocked.
+     * @tc.expected: callback receives ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    OrderOverlayOptions options;
+    options.levelOrder = 1.0;
+    int32_t errorCode = -1;
+    overlayManager->OpenOrderOverlay(childNode, options,
+        [&errorCode](int32_t code) { errorCode = code; });
+    EXPECT_EQ(errorCode, ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW);
+    EXPECT_TRUE(overlayManager->orderOverlayMap_.find(childNode->GetId()) ==
+        overlayManager->orderOverlayMap_.end());
+}
+
+/**
+ * @tc.name: OpenOrderOverlay008
+ * @tc.desc: Test OpenOrderOverlay with multiple nodes at different orders.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    /**
+     * @tc.steps: step2. add multiple nodes with different orders.
+     * @tc.expected: all nodes are added to orderOverlayMap_.
+     */
+    auto node1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto node2 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto node3 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+
+    OrderOverlayOptions options1;
+    options1.levelOrder = 0.0;
+    OrderOverlayOptions options2;
+    options2.levelOrder = 1.0;
+    OrderOverlayOptions options3;
+    options3.levelOrder = -1.0;
+
+    int32_t error1 = -1, error2 = -1, error3 = -1;
+    overlayManager->OpenOrderOverlay(node1, options1,
+        [&error1](int32_t code) { error1 = code; });
+    overlayManager->OpenOrderOverlay(node2, options2,
+        [&error2](int32_t code) { error2 = code; });
+    overlayManager->OpenOrderOverlay(node3, options3,
+        [&error3](int32_t code) { error3 = code; });
+
+    EXPECT_EQ(error1, ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(error2, ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(error3, ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(overlayManager->orderOverlayMap_.size(), 3u);
+}
 }
