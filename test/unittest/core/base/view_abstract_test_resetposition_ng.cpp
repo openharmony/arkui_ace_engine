@@ -260,6 +260,27 @@ HWTEST_F(ViewAbstractTestNg, ResetPosition005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetPosition006
+ * @tc.desc: Test SetNeedFocus of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ResetPosition006, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    auto pipe = MockPipelineContext::GetCurrent();
+    auto parent = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
+    parent->tag_ = V2::STACK_ETS_TAG;
+    
+    auto child = FrameNode::CreateFrameNode(TAG_CHILD, 3, AceType::MakeRefPtr<RootPattern>(), true);
+    child->SetParent(parent);
+    parent->context_ = AceType::RawPtr(pipe);
+    child->context_ = AceType::RawPtr(pipe);
+    ViewStackProcessor::GetInstance()->Push(child);
+    ViewAbstract::ResetPosition();
+    EXPECT_FALSE(ViewStackProcessor::GetInstance()->visualState_.has_value());
+}
+
+/**
  * @tc.name: GetCurOverlayManager001
  * @tc.desc: Test SetNeedFocus of View_Abstract
  * @tc.type: FUNC
