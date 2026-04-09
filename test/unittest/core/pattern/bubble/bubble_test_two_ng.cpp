@@ -382,6 +382,7 @@ HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level0)
     ASSERT_NE(themeManagerOne, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     BubbleView::CreateBubbleNode("test1", 1, param);
     EXPECT_TRUE(param->HasEnableHoverMode());
 }

@@ -82,7 +82,7 @@ public:
         CHECK_NULL_RETURN(host, bubbleMethod);
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
-        auto theme = pipeline->GetTheme<PopupTheme>();
+        auto theme = popupTheme_;
         CHECK_NULL_RETURN(theme, bubbleMethod);
         bubbleMethod->SetOuterBorderWidth(theme->GetPopupOuterBorderWidth());
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
@@ -426,6 +426,10 @@ public:
         return isUserSetMaterial_;
     }
 
+    void UpdatePopupTheme(bool colorMode);
+    RefPtr<PopupTheme> GetPopupTheme();
+    ThemeColorMode GetStyleOptionColorMode();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -451,7 +455,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<FrameNode> GetButtonRowNode();
-    RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& clickPosition);
@@ -538,6 +541,8 @@ private:
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
     PopupLinearGradientProperties innerBorderLinearGradient_;
+    RefPtr<PopupTheme> popupTheme_;
+    bool isColorModeFollowTarget_ = true;
 };
 } // namespace OHOS::Ace::NG
 

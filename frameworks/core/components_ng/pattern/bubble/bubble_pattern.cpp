@@ -447,15 +447,54 @@ void BubblePattern::PopBubble(bool tips)
     }
 }
 
+ThemeColorMode BubblePattern::GetStyleOptionColorMode()
+{
+    auto colorMode = ThemeColorMode::SYSTEM;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, colorMode);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (isColorModeFollowTarget_) {
+            auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+            CHECK_NULL_RETURN(targetNode, colorMode);
+            if (targetNode->GetLocalColorMode() == ColorMode::LIGHT) {
+                colorMode = ThemeColorMode::LIGHT;
+            }
+            if (targetNode->GetLocalColorMode() == ColorMode::DARK) {
+                colorMode = ThemeColorMode::DARK;
+            }
+        } else {
+            if (Container::CurrentColorMode() == ColorMode::LIGHT) {
+                colorMode = ThemeColorMode::LIGHT;
+            }
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                colorMode = ThemeColorMode::DARK;
+            }
+        }
+    }
+    return colorMode;
+}
+
+void BubblePattern::UpdatePopupTheme(bool isColorModeFollowTarget)
+{
+    isColorModeFollowTarget_ = isColorModeFollowTarget;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+        if (isColorModeFollowTarget_ && targetNode != nullptr) {
+            host->AllowUseParentTheme(false);
+            host->SetThemeScopeId(targetNode->GetThemeScopeIdForTheme(true));
+        }
+    }
+    popupTheme_ = host->GetTheme<PopupTheme>(true);
+}
+
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, nullptr);
-    return popupTheme;
+    CHECK_NULL_RETURN(popupTheme_, host->GetTheme<PopupTheme>(true));
+    return popupTheme_;
 }
 
 void BubblePattern::Animation(
@@ -894,7 +933,7 @@ void BubblePattern::UpdateBubbleText()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto popupTheme = context->GetTheme<PopupTheme>();
+    auto popupTheme = popupTheme_;
     CHECK_NULL_VOID(popupTheme);
     UpdateText(host, popupTheme);
     host->MarkDirtyNode();
@@ -918,7 +957,7 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     renderContext->UpdateBackgroundColor(backgroundColor);
     BlurStyleOption styleOption;
     styleOption.blurStyle = blurStyle;
-    styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+    styleOption.colorMode = GetStyleOptionColorMode();
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
         auto pipelineContext = host->GetContextRefPtr();
@@ -958,6 +997,9 @@ void BubblePattern::UpdateShadow()
 
 void BubblePattern::OnColorConfigurationUpdate()
 {
+    if (popupParam_) {
+        UpdatePopupTheme(popupParam_->GetColorMode());
+    }
     // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
     if (isTips_) {
         UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
