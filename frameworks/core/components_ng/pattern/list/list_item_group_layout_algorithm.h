@@ -57,6 +57,17 @@ public:
         return cachedItemPosition_;
     }
 
+    void ResetCachedItemPosition()
+    {
+        cachedItemPosition_.clear();
+    }
+
+    void ResetCachedIndex()
+    {
+        forwardCachedIndex_ = -1;
+        backwardCachedIndex_ = INT_MAX;
+    }
+
     void SetItemsPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
@@ -401,11 +412,6 @@ public:
         return isStackFromEnd_;
     }
 
-    bool IsCacheDirty() const
-    {
-        return isCacheDirty_;
-    }
-
     void ReverseItemPosition(ListItemGroupLayoutAlgorithm::PositionMap &itemPosition, int32_t totalItemCount,
         float mainSize);
 
@@ -464,11 +470,11 @@ private:
     void AdjustItemPosition();
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void MeasureCacheItem(LayoutWrapper* layoutWrapper);
-    bool MeasureCacheForward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
-    bool MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
+    void MeasureCacheForward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
+    void MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
     void LayoutCacheItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize, bool show);
     void CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
-    void UpdateCachedItemPosition(LayoutWrapper* layoutWrapper);
+    void UpdateCachedItemPosition(int32_t cacheCount);
     void UpdateLayoutedItemInfo();
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
     bool IsRoundingMode(LayoutWrapper* layoutWrapper);
@@ -527,7 +533,6 @@ private:
     bool measureInNextFrame_ = false;
     bool prevMeasureBreak_ = false;
     bool isAxisChanged_ = false;
-    bool isCacheDirty_ = false;
     int32_t pauseMeasureCacheItem_ = -1;
     int32_t prevItemPosCount_ = 0;
 

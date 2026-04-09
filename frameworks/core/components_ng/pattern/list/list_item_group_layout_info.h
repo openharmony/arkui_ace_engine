@@ -51,7 +51,6 @@ struct CachedIndexInfo {
     int32_t backwardCachedCount = 0;
     int32_t forwardCacheMax = 0;
     int32_t backwardCacheMax = 0;
-    bool needPredict = false;
 };
 
 using ListItemGroupPositionMap = std::map<int32_t, ListItemGroupInfo>;
