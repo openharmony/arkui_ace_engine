@@ -308,7 +308,7 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
         if (isDrawableIndicator) {
             TabContentModel::GetInstance()->SetDrawableIndicatorConfig(drawableIndicatorConfig);
         } else {
-            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
             if (tabTheme) {
                 indicator.color = tabTheme->GetActiveIndicatorColor();
             }
@@ -319,7 +319,7 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
     }
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight, indicatorHightResObj) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
         if (tabTheme) {
             indicator.height = tabTheme->GetActiveIndicatorWidth();
         }
@@ -342,7 +342,7 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
     if (!info->IsObject() ||
         !ParseJsDimensionVp(obj->GetProperty("marginTop"), indicatorMarginTop, indicatorMarginTopResObj) ||
         indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
         if (tabTheme) {
             indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
         }
@@ -373,7 +373,7 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
     RefPtr<ResourceObject> borderRadiusResObj;
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius, borderRadiusResObj) ||
         borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
         if (tabTheme) {
             board.borderRadius = tabTheme->GetFocusIndicatorRadius();
         }
@@ -603,7 +603,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         return;
     }
 
-    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
     if (tabTheme) {
         if (isSubTabStyle) {
             padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
@@ -702,7 +702,7 @@ void JSTabContent::SetId(const JSRef<JSVal>& info)
 
 void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
 {
-    auto tabTheme = GetTheme<TabTheme>();
+    auto tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
     if (!tabTheme) {
         return;
     }
@@ -945,4 +945,12 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+int32_t JSTabContent::GetThemeScopeId()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode || !frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+    }
+    return frameNode->GetThemeScopeId();
+}
 } // namespace OHOS::Ace::Framework

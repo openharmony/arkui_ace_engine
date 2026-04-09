@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_change_event.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -121,7 +122,7 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
     CalcDimension fontSize;
@@ -195,7 +196,7 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
         obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     SwiperParameters swiperParameters;
     swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
@@ -288,7 +289,7 @@ SwiperDigitalParameters JSIndicator::GetDigitIndicatorInfo(const JSRef<JSObject>
     JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFontValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     SwiperDigitalParameters digitalParameters;
     digitalParameters.dimLeft = ParseIndicatorDimension(dotLeftValue);
@@ -379,6 +380,15 @@ void JSIndicator::SetInitialIndex(const JSCallbackInfo& info)
 
     auto index = std::max(0, info[0]->ToNumber<int32_t>());
     IndicatorModel::GetInstance()->SetInitialIndex(index);
+}
+
+int32_t JSIndicator::GetThemeScopeId()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode || !frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+    }
+    return frameNode->GetThemeScopeId();
 }
 
 void JSIndicatorController::JSBind(BindingTarget globalObj)

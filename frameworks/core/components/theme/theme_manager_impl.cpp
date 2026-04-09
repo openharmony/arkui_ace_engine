@@ -106,6 +106,9 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme_wrapper.h"
+#include "core/components_ng/pattern/indexer/indexer_theme_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_theme_wrapper.h"
+#include "core/components_ng/pattern/tabs/tab_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -219,6 +222,9 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
+        { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
+        { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
+        { SwiperIndicatorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwiperThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

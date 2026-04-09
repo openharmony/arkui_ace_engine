@@ -76,9 +76,9 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto indexerTheme = host->GetTheme<IndexerTheme>(true);
         CHECK_NULL_VOID(indexerTheme);
         json->PutExtAttr("selectedBackgroundColor",
             propSelectedBackgroundColor_.value_or(indexerTheme->GetSelectedBackgroundColor()).ColorToString().c_str(),

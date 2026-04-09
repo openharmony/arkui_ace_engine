@@ -100,9 +100,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     if (filter.IsFastFilter()) {
         return;
     }
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto tabBar = JsonUtil::Create(true);
     auto tabContentPattern = GetPattern<TabContentPattern>();

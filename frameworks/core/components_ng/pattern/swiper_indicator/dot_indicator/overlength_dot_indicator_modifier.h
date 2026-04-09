@@ -29,8 +29,8 @@ class OverlengthDotIndicatorModifier : public DotIndicatorModifier {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorModifier, DotIndicatorModifier);
 
 public:
-    OverlengthDotIndicatorModifier()
-        : DotIndicatorModifier(),
+    OverlengthDotIndicatorModifier(int32_t themeScopeId)
+        : DotIndicatorModifier(themeScopeId),
           firstPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
           newPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
           unselectedIndicatorWidth_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),

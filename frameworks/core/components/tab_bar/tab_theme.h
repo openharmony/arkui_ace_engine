@@ -50,77 +50,26 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TAB);
-            if (pattern) {
-                theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
-                theme->activeIndicatorColor_ = pattern->GetAttr<Color>("active_indicator_color", Color::WHITE);
-                theme->focusIndicatorColor_ = pattern->GetAttr<Color>("focus_indicator_color", Color::WHITE);
-                theme->focusIndicatorRadius_ = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
-                theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
-                theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
-                theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
-                theme->subTabBoardTextOnColor_ = pattern->GetAttr<Color>("subtab_board_text_on_color", Color::WHITE);
-                theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
-                theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
-                theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
-                theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
-                theme->subTabItemPadding_ = pattern->GetAttr<Dimension>("subtab_item_padding", 0.0_vp);
-                theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
-                theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
-                theme->subtabTextDefaultFontSize_ =
-                    pattern->GetAttr<Dimension>("subtab_text_default_font_size", 0.0_vp);
-                theme->subtabLandscapeHorizontalPadding_ =
-                    pattern->GetAttr<Dimension>("subtab_landscape_horizontal_padding", 0.0_vp);
-                theme->bottomTabHorizontalPadding_ =
-                    pattern->GetAttr<Dimension>("bottom_tab_horizontal_padding", 0.0_vp);
-                theme->bottomTabTextOn_ = pattern->GetAttr<Color>("bottom_tab_text_on", Color::WHITE);
-                theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
-                theme->bottomTabIconOn_ = pattern->GetAttr<Color>("bottom_tab_icon", Color::WHITE);
-                theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
-                theme->bottomTabSymbolOn_ = pattern->GetAttr<Color>("bottom_tab_symbol", Color(0xFF007DFF));
-                theme->bottomTabSymbolOff_ = pattern->GetAttr<Color>("bottom_tab_symbol_off", Color(0x66182431));
-                theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
-                theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
-                theme->bottomTabHorizontalTextSize_ =
-                    pattern->GetAttr<Dimension>("bottom_tab_horizontal_text_size", BOTTOM_BAR_HORIZONTAL_TEXT_SIZE);
-                theme->bottomTabBackgroundBlurStyle_ = pattern->GetAttr<int>("bottom_tab_bar_bg_blur_style", 0);
-                theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
-                theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
-                theme->horizontalBottomTabBarSpace_ =
-                    pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
-                theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
-                theme->subTabBarBigFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", BIGFONT_DEFAULT_VALUE);
-                theme->subTabBarLargeFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", LARGEFONT_DEFAULT_VALUE);
-                theme->subTabBarMaxFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", MAXFONT_DEFAULT_VALUE);
-                theme->subTabBarOriginFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_origin_font_size_scale", 1.0);
-                theme->subTabBarLeftRightMargin_ =
-                    pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
-                theme->subTabBarIndicatorstyleMarginTop_ =
-                    pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
-                theme->subTabBarThirdLargeFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
 
-                ParseAttribute(theme, pattern);
-            } else {
-                LOGW("find pattern of tab fail");
-            }
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-    private:
-        void ParseAttribute(const RefPtr<TabTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+    protected:
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TabTheme>& theme) const
         {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TAB);
+            if (!pattern) {
+                LOGW("find pattern of tab fail");
+                return;
+            }
+
             theme->subTabBarHoverToPressDuration_ =
                 pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
             theme->tabContentAnimationDuration_ =
                 pattern->GetAttr<double>("tab_content_animation_duration", ANIMATION_DURATION_DEFAULT);
             theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
-            theme->bottomTabBarDefaultHeight_ =
-                pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
+            theme->bottomTabBarDefaultHeight_ = pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
@@ -156,6 +105,60 @@ public:
             theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
             theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
             theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+
+            ParsePattern2(theme, pattern);
+        }
+
+    private:
+        void ParsePattern2(const RefPtr<TabTheme>& theme, const RefPtr<ThemeStyle> pattern) const
+        {
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
+            theme->activeIndicatorColor_ = pattern->GetAttr<Color>("active_indicator_color", Color::WHITE);
+            theme->focusIndicatorColor_ = pattern->GetAttr<Color>("focus_indicator_color", Color::WHITE);
+            theme->focusIndicatorRadius_ = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
+            theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
+            theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
+            theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+            theme->subTabBoardTextOnColor_ = pattern->GetAttr<Color>("subtab_board_text_on_color", Color::WHITE);
+            theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
+            theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
+            theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
+            theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
+            theme->subTabItemPadding_ = pattern->GetAttr<Dimension>("subtab_item_padding", 0.0_vp);
+            theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
+            theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
+            theme->subtabTextDefaultFontSize_ = pattern->GetAttr<Dimension>("subtab_text_default_font_size", 0.0_vp);
+            theme->subtabLandscapeHorizontalPadding_ =
+                pattern->GetAttr<Dimension>("subtab_landscape_horizontal_padding", 0.0_vp);
+            theme->bottomTabHorizontalPadding_ = pattern->GetAttr<Dimension>("bottom_tab_horizontal_padding", 0.0_vp);
+            theme->bottomTabTextOn_ = pattern->GetAttr<Color>("bottom_tab_text_on", Color::WHITE);
+            theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
+            theme->bottomTabIconOn_ = pattern->GetAttr<Color>("bottom_tab_icon", Color::WHITE);
+            theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
+            theme->bottomTabSymbolOn_ = pattern->GetAttr<Color>("bottom_tab_symbol", Color(0xFF007DFF));
+            theme->bottomTabSymbolOff_ = pattern->GetAttr<Color>("bottom_tab_symbol_off", Color(0x66182431));
+            theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
+            theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
+            theme->bottomTabHorizontalTextSize_ =
+                pattern->GetAttr<Dimension>("bottom_tab_horizontal_text_size", BOTTOM_BAR_HORIZONTAL_TEXT_SIZE);
+            theme->bottomTabBackgroundBlurStyle_ = pattern->GetAttr<int>("bottom_tab_bar_bg_blur_style", 0);
+            theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
+            theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
+            theme->horizontalBottomTabBarSpace_ =
+                pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
+            theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+            theme->subTabBarBigFontSizeScale_ =
+                pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", BIGFONT_DEFAULT_VALUE);
+            theme->subTabBarLargeFontSizeScale_ =
+                pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", LARGEFONT_DEFAULT_VALUE);
+            theme->subTabBarMaxFontSizeScale_ =
+                pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", MAXFONT_DEFAULT_VALUE);
+            theme->subTabBarOriginFontSizeScale_ = pattern->GetAttr<double>("sub_tab_bar_origin_font_size_scale", 1.0);
+            theme->subTabBarLeftRightMargin_ = pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
+            theme->subTabBarIndicatorstyleMarginTop_ =
+                pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
+            theme->subTabBarThirdLargeFontSizeScale_ =
+                pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
         }
     };
 
@@ -523,7 +526,6 @@ public:
 protected:
     TabTheme() = default;
 
-private:
     Dimension labelPadding_;
     Dimension padding_;
     Dimension gradientWidth_;

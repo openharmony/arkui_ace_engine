@@ -77,9 +77,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
         });
     stack->Push(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     SetTabBar(tabTheme->GetDefaultTabBarName(), "", std::nullopt, nullptr, true); // Set default tab bar.
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
@@ -103,9 +101,7 @@ void TabContentModelNG::Create()
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     SetTabBar(tabTheme->GetDefaultTabBarName(), "", std::nullopt, nullptr, true); // Set default tab bar.
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
@@ -116,9 +112,7 @@ RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
     CHECK_NULL_RETURN(layout, nullptr);
@@ -179,9 +173,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
         []() { return AceType::MakeRefPtr<TabBarItemPattern>(); });
-    auto pipelineContext = tabsNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(linearLayoutProperty);
@@ -574,9 +566,7 @@ bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T&
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
             CHECK_NULL_RETURN(frameNode, false);
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_RETURN(pipelineContext, false);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_RETURN(tabTheme, false);
             result = tabTheme->GetActiveIndicatorColor();
             return false;
@@ -854,9 +844,7 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
             left.Unit() != DimensionUnit::PERCENT) {
             padding.left = NG::CalcLength(left);
         } else {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             padding.left = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
                 NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
@@ -889,9 +877,7 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
             right.Unit() != DimensionUnit::PERCENT) {
             padding.right = NG::CalcLength(right);
         } else {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             padding.right = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
                 NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
@@ -924,9 +910,7 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
             top.Unit() != DimensionUnit::PERCENT) {
             padding.top = NG::CalcLength(top);
         } else {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             padding.top = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabTopPadding()) : NG::CalcLength(0.0_vp);
         }
@@ -958,9 +942,7 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
             bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
         } else {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             padding.bottom = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabBottomPadding()) :
                 NG::CalcLength(0.0_vp);
@@ -990,9 +972,7 @@ bool TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(FrameNode* f
         auto attrs = pattern->GetBoardStyle();
         if (!ParseType(resObj, "borderRadius", result) || result.Value() < 0.0f ||
             result.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             attrs.borderRadius = tabTheme->GetFocusIndicatorRadius();
         } else {
@@ -1021,9 +1001,7 @@ bool TabContentModelNG::CreateIndicatorColorWithResourceObj(FrameNode* frameNode
         Color result;
         auto attrs = pattern->GetIndicatorStyle();
         if (!ParseType(resObj, "color", result)) {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             attrs.color = tabTheme->GetActiveIndicatorColor();
         } else {
@@ -1053,9 +1031,7 @@ bool TabContentModelNG::CreateIndicatorHeightWithResourceObj(FrameNode* frameNod
         auto attrs = pattern->GetIndicatorStyle();
         if (!ParseType(resObj, "height", result) || result.Value() < 0.0f ||
             result.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             attrs.height = tabTheme->GetActiveIndicatorWidth();
         } else {
@@ -1142,9 +1118,7 @@ bool TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(FrameNode* frame
         auto attrs = pattern->GetIndicatorStyle();
         if (!ParseType(resObj, "marginTop", result) || result.Value() < 0.0f ||
             result.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = frameNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            auto tabTheme = frameNode->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
             attrs.marginTop = tabTheme->GetSubTabIndicatorGap();
         } else {
