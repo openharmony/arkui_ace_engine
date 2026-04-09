@@ -334,6 +334,10 @@ void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bo
     CHECK_NULL_VOID(child);
     auto childProp = child->GetLayoutProperty();
     CHECK_NULL_VOID(childProp);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    if (bubblePattern) {
+        floatButtonsHeight_ = bubblePattern->GetWindowButtonRect(bubbleNode).Height();
+    }
     auto maxSize = GetPopupMaxWidthAndHeight(showInSubWindow, bubbleNode);
     popupMaxWidth_ = maxSize.Width();
     popupMaxHeight_ = maxSize.Height();
@@ -584,7 +588,7 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(frameNode);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar, the bottom is 0
     auto bottom = 0.0;
-    auto top = safeAreaInsets.top_.Length();
+    auto top = std::max(static_cast<float>(safeAreaInsets.top_.Length()), floatButtonsHeight_);
     auto maxHeight = windowGlobalRect.Height();
     if (showInSubWindow) {
         pipelineContext = frameNode->GetContextRefPtr();
@@ -878,7 +882,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
-    top_ = safeAreaInsets.top_.Length();
+    top_ = std::max(static_cast<float>(safeAreaInsets.top_.Length()), floatButtonsHeight_);
     bottom_ = safeAreaInsets.bottom_.Length();
     UpdateDumpInfo();
     marginStart_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();

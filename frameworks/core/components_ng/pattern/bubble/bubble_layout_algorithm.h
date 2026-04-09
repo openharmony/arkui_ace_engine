@@ -453,6 +453,7 @@ private:
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;
     bool isUserSetMaterial_ = false;
+    float floatButtonsHeight_ = 0.0f;
     // param to generate arrow shape.
     double angleSideX_ = 0.0;
     double angleSideY_ = 0.0;
