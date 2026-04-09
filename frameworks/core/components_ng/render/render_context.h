@@ -86,6 +86,8 @@ class InspectorFilter;
 class Modifier;
 class PipelineContext;
 struct DistortionParam;
+struct GestureDebugBoundaryInfo;
+
 struct PaintFocusExtraInfo final {
     PaintFocusExtraInfo() = default;
     PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
@@ -607,6 +609,7 @@ public:
 
     virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
+    virtual void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Transform3DMatrix, Matrix4);

@@ -49,6 +49,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
@@ -59,6 +60,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
+#include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -75,6 +77,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
+#include "core/components_ng/render/gesture_debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
@@ -966,6 +969,60 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
         UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
         debugBoundaryModifier_->SetCustomData(flag);
+    }
+}
+
+void RosenRenderContext::PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info)
+{
+    FREE_RS_CONTEXT_CHECK(PaintGestureDebugBoundary, info);
+    const bool shouldPaint = info.has_value() && info->gestureMask != 0 && !info->colors.empty();
+    if (!shouldPaint && !gestureDebugBoundaryModifier_) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    OffsetF paddingOffset;
+    auto&& padding = geometryNode->GetPadding();
+    if (padding && useContentRectForRSFrame_ && !adjustRSFrameByContentRect_ && host->GetTag() == V2::IMAGE_ETS_TAG) {
+        paddingOffset = OffsetF { padding->left.value_or(0), padding->top.value_or(0) };
+    }
+
+    auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
+                         offset = geometryNode->GetMarginFrameOffset(), frameOffset = geometryNode->GetFrameOffset(),
+                         shouldPaint, paddingOffset, info](RSCanvas& rsCanvas) mutable {
+        if (!shouldPaint || !info.has_value()) {
+            return;
+        }
+        GestureDebugBoundaryPainter painter(
+            contentSize, frameSize, info->gestureMask, info->strokeWidthPx, info->colors);
+        painter.SetFrameOffset(frameOffset);
+        painter.SetPaddingOffset(paddingOffset);
+        painter.DrawGestureDebugBoundaries(rsCanvas, offset);
+    };
+
+    if (!gestureDebugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
+        gestureDebugBoundaryModifier_ = std::make_shared<GestureDebugBoundaryModifier>();
+        gestureDebugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        gestureDebugBoundaryModifier_->SetNoNeedUICaptured(true);
+        auto rect = GetPaintRectWithoutTransform();
+        auto marginOffset = geometryNode->GetMarginFrameOffset();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
+                geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
+        rsNode_->AddModifier(gestureDebugBoundaryModifier_);
+        gestureDebugBoundaryModifier_->SetCustomData(info->gestureMask);
+    } else if (gestureDebugBoundaryModifier_) {
+        gestureDebugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        auto rect = GetPaintRectWithoutTransform();
+        auto marginOffset = geometryNode->GetMarginFrameOffset();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
+                geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
+        UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
+        gestureDebugBoundaryModifier_->SetCustomData(info->gestureMask);
     }
 }
 

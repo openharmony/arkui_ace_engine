@@ -288,6 +288,11 @@ public:
         return debugBoundaryEnabled_.load();
     }
 
+    static bool GetGestureDebugBoundaryEnabled()
+    {
+        return gestureDebugBoundaryEnabled_;
+    }
+
     static bool GetDebugOffsetLogEnabled()
     {
         return debugOffsetLogEnabled_;
@@ -832,6 +837,7 @@ private:
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
+    static bool gestureDebugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;

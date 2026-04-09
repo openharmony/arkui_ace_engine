@@ -49,6 +49,7 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
@@ -109,6 +110,11 @@ bool IsDebugOffsetLogEnabled()
 bool IsDebugBoundaryEnabled()
 {
     return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
+bool IsGestureDebugBoundaryEnabled()
+{
+    return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
 }
 
 bool IsDownloadByNetworkDisabled()
@@ -739,6 +745,7 @@ std::atomic<bool> SystemProperties::unZipHap_(true);
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
@@ -959,6 +966,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         canvasDebugMode_ = ReadCanvasDebugMode();
         safeRefactorMode_ = ReadSafeRefactorMode();
         isHookModeEnabled_ = IsHookModeEnabled();
+        gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
         debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
