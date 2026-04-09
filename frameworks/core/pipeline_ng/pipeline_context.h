@@ -951,6 +951,8 @@ public:
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
+    double CalcPageWidth(double rootWidth) const override;
+
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
 
     const RefPtr<FormEventManager>& GetFormEventManager() const;

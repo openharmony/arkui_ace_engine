@@ -520,7 +520,7 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false) {}
+    virtual void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) {}
 
     virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                                      const std::optional<AppForceSplitConfig>& appConfig) {}

@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FORCE_SPLIT_FORCE_SPLIT_UTILS_H
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
+class PipelineContext;
 class NavDestinationGroupNode;
 class NavBarNode;
 
@@ -34,6 +34,8 @@ struct ForceSplitConfig {
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
     std::set<std::string> fullScreenPages;
+    std::optional<float> wideSplitRatio;
+    std::optional<float> squareSplitRatio;
     std::optional<Color> splitDividerColorLight;
     std::optional<Color> splitDividerColorDark;
 };
@@ -53,6 +55,8 @@ private:
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);
     static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitConfig& config);
+    static bool ParseSplitParam(
+        const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio);
 };
 
 } // namespace OHOS::Ace::NG

@@ -871,6 +871,16 @@ void PipelineContext::StopWindowAnimation() {}
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
+double PipelineContext::CalcPageWidth(double rootWidth) const
+{
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
+        return rootWidth;
+    }
+
+    CHECK_NULL_RETURN(forceSplitMgr_, rootWidth);
+    return rootWidth * forceSplitMgr_->GetSplitRatio();
+}
+
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {

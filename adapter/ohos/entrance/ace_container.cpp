@@ -3337,6 +3337,13 @@ void AceContainer::InitWindowCallback()
             }
     });
 
+    windowManager->SetUpdateForceSplitRatioCallback(
+        [window = uiWindow_](float ratio) {
+            CHECK_NULL_VOID(window);
+            window->NotifySplitRatioChanged(ratio);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will notify window force split ratio to %{public}f", ratio);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);

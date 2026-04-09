@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/utils/string_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +59,11 @@ constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
 constexpr char SPLIT_DIVIDER_COLOR[] = "splitDividerColor";
 constexpr char COLOR_LIGHT[] = "light";
 constexpr char COLOR_DARK[] = "dark";
+constexpr char WIDE_SPLIT_KEY[] = "wideSplit";
+constexpr char SQUARE_SPLIT_KEY[] = "squareSplit";
+constexpr char RATIO_KEY[] = "ratio";
+constexpr float MIN_SPLIT_RATIO = 1.0f / 3;
+constexpr float MAX_SPLIT_RATIO = 2.0f / 3;
 
 std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
 {
@@ -400,6 +407,45 @@ bool ForceSplitUtils::ParseSplitDividerColor(const std::unique_ptr<JsonValue>& s
     return true;
 }
 
+bool ForceSplitUtils::ParseSplitParam(
+    const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio)
+{
+    splitRatio = std::nullopt;
+    if (!split || !split->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json Object!", splitType.c_str());
+        return false;
+    }
+    if (!split->Contains(RATIO_KEY)) {
+        return true;
+    }
+    auto ratioJson = split->GetValue(RATIO_KEY);
+    if (!ratioJson || !ratioJson->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s must be type of string!", RATIO_KEY);
+        return false;
+    }
+    auto ratioStr = ratioJson->GetString();
+    auto pos = ratioStr.find('|');
+    if (pos == std::string::npos) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s format value: %{public}s, expected format "
+            "\"<integer number> | <integer number>\"", RATIO_KEY, ratioStr.c_str());
+        return false;
+    }
+    auto primaryStr = ratioStr.substr(0, pos);
+    auto secondaryStr = ratioStr.substr(pos + 1);
+    auto primaryValue = StringUtils::StringToInt(primaryStr);
+    auto secondaryValue = StringUtils::StringToInt(secondaryStr);
+    if (primaryValue <= 0 || secondaryValue <= 0 || (primaryValue + secondaryValue <= 0)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s value: %{public}s", RATIO_KEY, ratioStr.c_str());
+        return false;
+    }
+    auto ratio = 1.0f * secondaryValue / (primaryValue + secondaryValue);
+    if (ratio < MIN_SPLIT_RATIO || ratio > MAX_SPLIT_RATIO) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "%{public}s: %{public}f must belong to range[1/3, 2/3]", RATIO_KEY, ratio);
+    }
+    splitRatio = std::clamp(ratio, MIN_SPLIT_RATIO, MAX_SPLIT_RATIO);
+    return true;
+}
+
 bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
@@ -425,6 +471,16 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
     }
     if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
         if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(WIDE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(WIDE_SPLIT_KEY), WIDE_SPLIT_KEY, config.wideSplitRatio)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(SQUARE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(SQUARE_SPLIT_KEY), SQUARE_SPLIT_KEY, config.squareSplitRatio)) {
             return false;
         }
     }
@@ -481,6 +537,16 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
             return false;
         }
     }
+    if (configJson->Contains(WIDE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(WIDE_SPLIT_KEY), WIDE_SPLIT_KEY, config.wideSplitRatio)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(SQUARE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(SQUARE_SPLIT_KEY), SQUARE_SPLIT_KEY, config.squareSplitRatio)) {
+            return false;
+        }
+    }
     if (isRouter) {
         return true;
     }
@@ -524,13 +590,16 @@ void ForceSplitUtils::LogSystemForceSplitConfig(
         "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
         "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
         "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
-        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s "
+        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s]",
         isRouter, homePage.c_str(), FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
         (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
         config.navigationDisablePlaceholder, config.navigationDisableDivider,
         (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
-        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
+        (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
+        (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"));
 }
 
 void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
@@ -539,13 +608,16 @@ void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConf
         "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
         "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
         "disablePlaceholder:%{public}d, disableDivider:%{public}d, "
-        "dividerColorLight:%{public}s, dividerColorDark:%{public}s",
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s "
+        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s]",
         isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
         FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
         config.navigationDisablePlaceholder, config.navigationDisableDivider,
         (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
-        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"));
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
+        (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
+        (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"));
 }
 } // namespace OHOS::Ace::NG
 
