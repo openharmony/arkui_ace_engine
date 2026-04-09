@@ -57,6 +57,7 @@ extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
 extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
 extern const char ENABLE_DEBUG_STATEMGR_KEY[];
+enum class UiMaterialLevel;
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -285,6 +286,11 @@ public:
     static bool GetDebugBoundaryEnabled()
     {
         return debugBoundaryEnabled_.load();
+    }
+
+    static bool GetGestureDebugBoundaryEnabled()
+    {
+        return gestureDebugBoundaryEnabled_;
     }
 
     static bool GetDebugOffsetLogEnabled()
@@ -772,6 +778,8 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static UiMaterialLevel GetUiMaterialLevel();
+
     static void ReadSystemParametersCallOnce();
 
 private:
@@ -829,6 +837,7 @@ private:
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
+    static bool gestureDebugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;

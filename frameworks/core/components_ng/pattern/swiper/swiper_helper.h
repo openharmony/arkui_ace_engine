@@ -32,7 +32,8 @@ public:
     static void DumpAdvanceInfo(SwiperPattern& swiper);
 
     static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params);
-    static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params);
+    static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params,
+        int32_t themeScopeId);
 
     static float CalculateFriction(float gamma);
 

@@ -33,7 +33,7 @@ RefPtr<V2::PatternLockTheme> GetPatternLockTheme()
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    return node ? themeManager->GetTheme<V2::PatternLockTheme>(node->GetThemeScopeId())
+    return node ? node->GetTheme<V2::PatternLockTheme>(true)
                 : themeManager->GetTheme<V2::PatternLockTheme>();
 }
 } // namespace

@@ -59,6 +59,7 @@ class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
+class GestureDebugBoundaryModifier;
 class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
@@ -488,6 +489,7 @@ public:
     void SetMarkNodeGroup(bool isNodeGroup) override;
     int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
+    void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
     void SyncPartialRsProperties() override;
@@ -859,6 +861,7 @@ protected:
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
 
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
+    std::shared_ptr<GestureDebugBoundaryModifier> gestureDebugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<TransitionModifier> transitionModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;

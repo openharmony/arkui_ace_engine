@@ -81,7 +81,7 @@ void ResetPatternLockActiveColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = frameNode->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     Color activeColor = patternLockTheme->GetActiveColor();
     PatternLockModelNG::SetActiveColor(frameNode, activeColor);
@@ -148,7 +148,7 @@ void ResetPatternLockSelectedColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = frameNode->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     Color selectedColor = patternLockTheme->GetSelectedColor();
     PatternLockModelNG::SetSelectedColor(frameNode, selectedColor);
@@ -244,7 +244,7 @@ void ResetPatternLockRegularColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = frameNode->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     Color regularColor = patternLockTheme->GetRegularColor();
     PatternLockModelNG::SetRegularColor(frameNode, regularColor);
@@ -277,7 +277,7 @@ void ResetPatternLockPathColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = frameNode->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     Color pathColor = patternLockTheme->GetPathColor();
     PatternLockModelNG::SetPathColor(frameNode, pathColor);

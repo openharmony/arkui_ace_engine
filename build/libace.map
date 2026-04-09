@@ -3657,6 +3657,7 @@
       OHOS::Ace::UIContentImpl::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::UiMaterial::*;
+      OHOS::Ace::UiMaterialMapKeyHasher::*;
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::UtfUtils::*;

@@ -181,12 +181,11 @@ void GetP2(const Dimension& radius)
 
 static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
 {
-    RefPtr<PipelineContext> pipeline;
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(hostNode, nullptr);
-    pipeline = hostNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    auto bubblePattern = hostNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, nullptr);
+    auto popupTheme = bubblePattern->GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     return popupTheme;
 }

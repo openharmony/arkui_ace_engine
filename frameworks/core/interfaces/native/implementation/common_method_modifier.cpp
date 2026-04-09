@@ -489,6 +489,12 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
     }
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
+    }
 };
 
 auto g_getPopupDefaultShadow = []() -> ShadowStyle {

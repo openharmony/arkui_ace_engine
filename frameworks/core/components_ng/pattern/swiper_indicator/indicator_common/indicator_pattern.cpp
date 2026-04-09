@@ -87,9 +87,9 @@ std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
 {
     if (swiperParameters_ == nullptr) {
         swiperParameters_ = std::make_shared<SwiperParameters>();
-        auto pipelineContext = GetContext();
-        CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperParameters_);
+        auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
         swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
@@ -107,9 +107,9 @@ std::shared_ptr<SwiperDigitalParameters> IndicatorPattern::GetSwiperDigitalParam
 {
     if (swiperDigitalParameters_ == nullptr) {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
-        auto pipelineContext = GetContext();
-        CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperDigitalParameters_);
+        auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
@@ -128,9 +128,8 @@ void IndicatorPattern::SaveDigitIndicatorProperty()
     CHECK_NULL_VOID(indicatorNode);
     auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipelineContext = indicatorNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     auto swiperDigitalParameters = GetSwiperDigitalParameters();
     CHECK_NULL_VOID(swiperDigitalParameters);
     layoutProperty->ResetIndicatorLayoutStyle();
@@ -204,9 +203,7 @@ void IndicatorPattern::UpdatePaintProperty()
     CHECK_NULL_VOID(indicatorNode);
     auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = indicatorNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     auto swiperParameters = GetSwiperParameters();
     CHECK_NULL_VOID(swiperParameters);
@@ -643,9 +640,7 @@ void IndicatorPattern::UpdateDefaultColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
         swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
@@ -672,5 +667,29 @@ void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
         SaveDigitIndicatorProperty();
         UpdateDigitalIndicator();
     }
+}
+
+bool IndicatorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    UpdateDefaultColor();
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty();
+    } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        SaveDigitIndicatorProperty();
+        UpdateDigitalIndicator();
+    }
+
+    auto swiperTheme = host->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_RETURN(swiperTheme, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    focusHub->SetPaintColor(swiperTheme->GetFocusedColor());
+    return false;
 }
 } // namespace OHOS::Ace::NG

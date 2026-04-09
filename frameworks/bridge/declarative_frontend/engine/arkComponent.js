@@ -18370,6 +18370,15 @@ class ArkAlignStyle {
     return (this.indexerAlign === another.indexerAlign && this.offset === another.offset);
   }
 }
+class ArkEnableScrollDirectionalLock {
+  constructor() {
+    this.value = undefined;
+    this.type = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value && this.type === another.type);
+  }
+}
 class ArkNestedScrollOptions {
   constructor() {
     this.scrollForward = undefined;
@@ -25679,7 +25688,9 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   enableScrollDirectionalLock(enabled, type) {
-    const config = { enabled: enabled, type: type };
+    let config = new ArkEnableScrollDirectionalLock();
+    config.value = enabled;
+    config.type = type;
     modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, config);
     return this;
   }

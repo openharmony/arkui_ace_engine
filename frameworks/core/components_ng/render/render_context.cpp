@@ -183,9 +183,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    if (uiMaterial_) {
+    if (uiMaterial_ && uiMaterial_->material) {
+        auto& material = uiMaterial_->material;
         auto optJsonValue = JsonUtil::Create(true);
-        optJsonValue->Put("type", MaterialTypeToString(uiMaterial_->GetType()).c_str());
+        optJsonValue->Put("type", MaterialTypeToString(material->GetType()).c_str());
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);
@@ -228,11 +229,43 @@ void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
-    uiMaterial_ = material;
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
+        return;
+    }
+    uiMaterial_->material = material;
 }
 
 RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
 {
-    return uiMaterial_;
+    return uiMaterial_ ? uiMaterial_->material : nullptr;
+}
+
+void RenderContext::SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.immersiveConfig = config});
+        return;
+    }
+    uiMaterial_->immersiveConfig = config;
+}
+
+std::optional<ImmersiveMaterialConfig> RenderContext::GetImmersiveMaterialConfig() const
+{
+    return uiMaterial_ ? uiMaterial_->immersiveConfig : std::nullopt;
+}
+
+std::optional<int32_t> RenderContext::GetTransparencyCallbackId() const
+{
+    return uiMaterial_ ? uiMaterial_->transparencyCallbackId : std::nullopt;
+}
+
+void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.transparencyCallbackId = id});
+        return;
+    }
+    uiMaterial_->transparencyCallbackId = id;
 }
 } // namespace OHOS::Ace::NG

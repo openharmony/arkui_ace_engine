@@ -104,6 +104,7 @@ public:
         PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
         PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     }
     static void TearDownTestSuite()
     {

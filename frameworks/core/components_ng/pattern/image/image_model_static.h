@@ -22,6 +22,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/drawable/drawable_descriptor.h"
 
+namespace OHOS::Ace {
+class DrawingColorFilter;
+}
+
 namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation

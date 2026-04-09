@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "ui/properties/ui_material_enums.h"
+
 #include "base/utils/layout_break_point.h"
 #include "base/utils/system_properties.h"
 
@@ -89,6 +91,7 @@ std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
@@ -506,5 +509,10 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    return UiMaterialLevel::DEFAULT;
 }
 } // namespace OHOS::Ace

@@ -441,6 +441,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         callbackFunction(info);
         HandleReports(info, type);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::PINCH);
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }

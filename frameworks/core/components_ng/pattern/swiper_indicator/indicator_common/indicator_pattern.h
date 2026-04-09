@@ -173,7 +173,12 @@ public:
         ResetOverlongModifier();
 
         if (!GetDotIndicatorModifier()) {
-            SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
+            auto host = GetHost();
+            int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+            if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                id = host->GetThemeScopeId();
+            }
+            SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>(id));
             singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         }
         GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
@@ -251,6 +256,7 @@ public:
     }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;

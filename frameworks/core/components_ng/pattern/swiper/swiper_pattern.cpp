@@ -132,9 +132,7 @@ void SwiperPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto indicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(indicatorTheme);
     renderContext->UpdateClipEdge(indicatorTheme->GetClipEdge());
     InitSurfaceChangedCallback();
@@ -5082,9 +5080,9 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
 {
     if (swiperParameters_ == nullptr) {
         swiperParameters_ = std::make_shared<SwiperParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperParameters_);
+        auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
         swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
@@ -5105,9 +5103,9 @@ std::shared_ptr<SwiperArrowParameters> SwiperPattern::GetSwiperArrowParameters()
 {
     if (swiperArrowParameters_ == nullptr) {
         swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, swiperArrowParameters_);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperArrowParameters_);
+        auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         CHECK_NULL_RETURN(swiperIndicatorTheme, swiperArrowParameters_);
         swiperArrowParameters_->isShowBackground = false;
         swiperArrowParameters_->isSidebarMiddle = false;
@@ -5123,9 +5121,10 @@ std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParamete
 {
     if (swiperDigitalParameters_ == nullptr) {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperDigitalParameters_);
+        auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperDigitalParameters_);
         swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
@@ -5281,9 +5280,7 @@ void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
     CHECK_NULL_VOID(indicatorNode);
     auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     auto swiperParameters = GetSwiperParameters();
     CHECK_NULL_VOID(swiperParameters);
@@ -7461,8 +7458,13 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
             json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
     } else {
+        auto host = GetHost();
+        int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            id = host->GetThemeScopeId();
+        }
         json->PutExtAttr(
-            indicator, SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
+            indicator, SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters(), id).c_str(), filter);
     }
 }
 
@@ -7854,9 +7856,7 @@ void SwiperPattern::UpdateDefaultColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     auto props = host->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -7900,6 +7900,23 @@ void SwiperPattern::OnColorModeChange(uint32_t colorMode)
         MarkDirtyBindIndicatorNode();
     }
     InitArrow();
+}
+
+bool SwiperPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    if (host && !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    UpdateDefaultColor();
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else {
+        MarkDirtyBindIndicatorNode();
+    }
+    InitArrow();
+    return false;
 }
 
 void SwiperPattern::OnFontScaleConfigurationUpdate()

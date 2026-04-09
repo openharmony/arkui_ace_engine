@@ -7243,6 +7243,10 @@ export enum ThemeColorMode {
     LIGHT = 1,
     DARK = 2
 }
+export enum AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1
+}
 export enum AdaptiveColor {
     DEFAULT = 0,
     AVERAGE = 1
@@ -7617,6 +7621,7 @@ export interface PopupCommonOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onDidDisappear?: VoidCallback;
     onWillDisappear?: VoidCallback;
@@ -7670,6 +7675,7 @@ export interface PopupOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onWillDisappear?: VoidCallback;
     onDidAppear?: VoidCallback;
@@ -7706,6 +7712,7 @@ export interface CustomPopupOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onDidAppear?: VoidCallback;
     onWillDisappear?: VoidCallback;
@@ -20505,6 +20512,14 @@ export class CustomPopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSystemMaterial = value.systemMaterial
         if (valueHolderForSystemMaterial !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -20886,6 +20901,12 @@ export class CustomPopupOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -20968,7 +20989,7 @@ export class CustomPopupOptions_serializer {
             onWillAppearTmpBuf = onWillAppearTmpBufOptClosure
         }
         const onWillAppearTmpResult: VoidCallback | undefined = onWillAppearTmpBuf
-        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
+        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
         return value
     }
 }
@@ -22711,6 +22732,14 @@ export class PopupCommonOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSystemMaterial = value.systemMaterial
         if (valueHolderForSystemMaterial !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -23072,6 +23101,12 @@ export class PopupCommonOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -23154,7 +23189,7 @@ export class PopupCommonOptions_serializer {
             onDidAppearTmpBuf = onDidAppearTmpBufOptClosure
         }
         const onDidAppearTmpResult: VoidCallback | undefined = onDidAppearTmpBuf
-        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
+        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
         return value
     }
 }
@@ -25028,6 +25063,14 @@ export class PopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSystemMaterial = value.systemMaterial
         if (valueHolderForSystemMaterial !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -25408,6 +25451,12 @@ export class PopupOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -25490,7 +25539,7 @@ export class PopupOptions_serializer {
             onDidDisappearTmpBuf = onDidDisappearTmpBufOptClosure
         }
         const onDidDisappearTmpResult: VoidCallback | undefined = onDidDisappearTmpBuf
-        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
+        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
         return value
     }
 }

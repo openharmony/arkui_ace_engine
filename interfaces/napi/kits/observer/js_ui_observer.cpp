@@ -783,12 +783,12 @@ napi_value ObserverProcess::ProcessWinSizeLayoutBreakpointUnRegister(napi_env en
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
     if (argc == PARAM_SIZE_ONE) {
-        int32_t instanceId = ContainerScope::CurrentId();
+        int32_t instanceId = Container::CurrentIdSafely();
         UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(instanceId, nullptr);
     }
 
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
-        int32_t instanceId = ContainerScope::CurrentId();
+        int32_t instanceId = Container::CurrentIdSafely();
         UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(instanceId, argv[PARAM_INDEX_ONE]);
     }
 

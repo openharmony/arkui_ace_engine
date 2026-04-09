@@ -121,6 +121,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "filter_accessibility_collapse",
     "filter_accessibility_collapsed",
     "filter_accessibility_expanded",
+    "side_bar_shown",
+    "side_bar_hidden",
     "slider_accessibility_selected",
     "slider_accessibility_unselected",
     "slider_accessibility_unselectedDesc",

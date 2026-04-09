@@ -29,6 +29,7 @@
 
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/ui_material.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -48,6 +49,7 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
@@ -108,6 +110,11 @@ bool IsDebugOffsetLogEnabled()
 bool IsDebugBoundaryEnabled()
 {
     return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
+bool IsGestureDebugBoundaryEnabled()
+{
+    return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
 }
 
 bool IsDownloadByNetworkDisabled()
@@ -545,6 +552,21 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
+UiMaterialLevel ReadUiMaterialLevel()
+{
+    UiMaterialLevel result = UiMaterialLevel::DEFAULT;
+    if (MaterialUtils::GetGlobalMaterialLevel(result)) {
+        return result;
+    }
+    int32_t level =
+        system::GetIntParameter("const.immersive_material_level", static_cast<int32_t>(UiMaterialLevel::DEFAULT));
+    if (level >= static_cast<int32_t>(UiMaterialLevel::EXQUISITE) &&
+        level <= static_cast<int32_t>(UiMaterialLevel::MAX)) {
+        result = static_cast<UiMaterialLevel>(level);
+    }
+    return result;
+}
+
 bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
@@ -723,6 +745,7 @@ std::atomic<bool> SystemProperties::unZipHap_(true);
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
@@ -943,6 +966,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         canvasDebugMode_ = ReadCanvasDebugMode();
         safeRefactorMode_ = ReadSafeRefactorMode();
         isHookModeEnabled_ = IsHookModeEnabled();
+        gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
         debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
@@ -1557,5 +1581,11 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    static auto uiMaterialLevel = ReadUiMaterialLevel();
+    return uiMaterialLevel;
 }
 } // namespace OHOS::Ace

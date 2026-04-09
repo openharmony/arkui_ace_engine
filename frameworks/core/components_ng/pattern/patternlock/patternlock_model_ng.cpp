@@ -319,9 +319,9 @@ void PatternLockModelNG::HandleSelectedColorResource(FrameNode* frameNode, const
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto theme = host->GetTheme<V2::PatternLockTheme>(true);
             CHECK_NULL_VOID(theme);
             result = theme->GetSelectedColor();
         }
@@ -344,9 +344,9 @@ void PatternLockModelNG::HandlePathColorResource(FrameNode* frameNode, const Ref
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto theme = host->GetTheme<V2::PatternLockTheme>(true);
             CHECK_NULL_VOID(theme);
             result = theme->GetPathColor();
         }
@@ -369,9 +369,9 @@ void PatternLockModelNG::HandleActiveColorResource(FrameNode* frameNode, const R
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto theme = host->GetTheme<V2::PatternLockTheme>(true);
             CHECK_NULL_VOID(theme);
             result = theme->GetActiveColor();
         }
@@ -394,9 +394,9 @@ void PatternLockModelNG::HandleRegularColorResource(FrameNode* frameNode, const 
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto theme = host->GetTheme<V2::PatternLockTheme>(true);
             CHECK_NULL_VOID(theme);
             result = theme->GetRegularColor();
         }

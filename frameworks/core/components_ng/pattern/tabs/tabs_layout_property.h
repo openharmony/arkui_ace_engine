@@ -94,7 +94,9 @@ public:
                 divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
                 divider->Put("color", propDivider_.value().color.ColorToString().c_str());
             } else {
-                TabsItemDivider emptyDivider;
+                auto host = GetHost();
+                int32_t id = host ? host->GetThemeScopeId() : TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+                TabsItemDivider emptyDivider(id);
                 emptyDivider.strokeWidth.Reset();
                 emptyDivider.startMargin.Reset();
                 emptyDivider.endMargin.Reset();

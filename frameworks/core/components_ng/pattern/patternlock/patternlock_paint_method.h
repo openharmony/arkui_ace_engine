@@ -52,7 +52,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void GetThemeProp();
+    void GetThemeProp(const RefPtr<FrameNode>& host);
 
     float sideLength_ = 0.0f;
     float scaleActiveCircleRadius_ = 1.0f;

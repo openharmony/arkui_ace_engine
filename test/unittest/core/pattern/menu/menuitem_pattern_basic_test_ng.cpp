@@ -1723,7 +1723,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, NeedPerformHideSubMenuImmediately005, TestS
     PointF mousePoint(90.0f, 40.0f);
     RectF menuZone(0.0f, 0.0f, 100.0f, 100.0f);
     auto result = menuItemPattern->NeedPerformHideSubMenuImmediately(mousePoint, menuZone);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1743,7 +1743,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, NeedPerformHideSubMenuImmediately006, TestS
     PointF mousePoint(90.0f, 40.0f);
     RectF menuZone(0.0f, 0.0f, 100.0f, 100.0f);
     auto result = menuItemPattern->NeedPerformHideSubMenuImmediately(mousePoint, menuZone);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**

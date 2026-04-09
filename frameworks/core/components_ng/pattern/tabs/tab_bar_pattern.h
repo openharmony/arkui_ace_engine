@@ -642,6 +642,7 @@ public:
 
     void ResetOnForceMeasure(int32_t index);
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;

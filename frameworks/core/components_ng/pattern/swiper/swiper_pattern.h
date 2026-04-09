@@ -850,6 +850,7 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void ResetOnForceMeasure();
 
     std::optional<int32_t> GetTargetIndex() const

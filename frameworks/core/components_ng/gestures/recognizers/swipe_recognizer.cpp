@@ -410,43 +410,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
     if (callback && *callback) {
         GestureEvent info;
-        info.SetGestureTypeName(GestureTypeName::SWIPE_GESTURE);
-        info.SetTimeStamp(time_);
-        UpdateFingerListInfo();
-        info.SetFingerList(fingerList_);
-        info.SetGlobalPoint(globalPoint_);
-        info.SetSpeed(resultSpeed_);
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(lastTouchEvent_.force);
-        if (lastTouchEvent_.tiltX.has_value()) {
-            info.SetTiltX(lastTouchEvent_.tiltX.value());
-        }
-        if (lastTouchEvent_.tiltY.has_value()) {
-            info.SetTiltY(lastTouchEvent_.tiltY.value());
-        }
-        if (lastTouchEvent_.rollAngle.has_value()) {
-            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
-        }
-        if (inputEventType_ == InputEventType::AXIS) {
-            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
-            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
-            info.SetSourceTool(lastAxisEvent_.sourceTool);
-            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-            info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
-            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
-        } else {
-            info.SetSourceTool(lastTouchEvent_.sourceTool);
-            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-            info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
-            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
-        }
-        info.SetPointerEvent(lastPointEvent_);
-        if (prevAngle_) {
-            info.SetAngle(prevAngle_.value());
-        }
-        info.SetInputEventType(inputEventType_);
+        GetGestureEventInfo(info);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::SWIPE);
@@ -454,6 +418,48 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         callbackFunction(info);
         HandleReports(info, type);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::SWIPE);
+}
+
+void SwipeRecognizer::GetGestureEventInfo(GestureEvent& info)
+{
+    info.SetGestureTypeName(GestureTypeName::SWIPE_GESTURE);
+    info.SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info.SetFingerList(fingerList_);
+    info.SetGlobalPoint(globalPoint_);
+    info.SetSpeed(resultSpeed_);
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(lastTouchEvent_.force);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info.SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info.SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+    }
+    if (inputEventType_ == InputEventType::AXIS) {
+        info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetSourceTool(lastAxisEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+        info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
+    }
+    info.SetPointerEvent(lastPointEvent_);
+    if (prevAngle_) {
+        info.SetAngle(prevAngle_.value());
+    }
+    info.SetInputEventType(inputEventType_);
 }
 
 void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
