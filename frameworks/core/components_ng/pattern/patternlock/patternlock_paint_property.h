@@ -69,9 +69,9 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
         CHECK_NULL_VOID(patternLockTheme);
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {

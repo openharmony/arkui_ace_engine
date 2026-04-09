@@ -29,7 +29,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         static constexpr Dimension DEFAULT_SIDE_LENGTH = 288.0_vp;
         static constexpr Dimension DEFAULT_CIRCLE_RADIUS = 6.0_vp;
@@ -55,6 +55,12 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            SetTheme(themeConstants, theme);
+            return theme;
+        }
+
+        void SetTheme(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PatternLockTheme> theme) const
+        {
             theme->wrongColor_ = Color::RED;
             theme->correctColor_ = Color::BLUE;
             theme->hoverColor_ = Color::BLACK;
@@ -82,7 +88,6 @@ public:
                 theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS;
                 ParsePattern(themeConstants, theme);
             }
-            return theme;
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PatternLockTheme>& theme) const
@@ -220,7 +225,6 @@ public:
 protected:
     PatternLockTheme() = default;
 
-private:
     Color regularColor_;
     Color selectedColor_;
     Color activeColor_;
@@ -229,6 +233,8 @@ private:
     Color correctColor_;
     Color hoverColor_;
     Color focusColor_;
+    
+private:
     Dimension sideLength_;
     Dimension circleRadius_;
     Dimension pathStrokeWidth_;

@@ -101,7 +101,9 @@ public:
         FocusPaintParam focusPaintParams;
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
         CHECK_NULL_RETURN(patternLockTheme, FocusPattern());
         auto focusColor = patternLockTheme->GetFocusColor();
         auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
@@ -122,6 +124,21 @@ public:
     void UpdateCircleRadius(const CalcDimension& radius, bool isFristLoad = false);
     void UpdateSideLength(const CalcDimension& sideLength, bool isFristLoad = false);
     void UpdateActiveCircleColor(const Color& color, bool isFristLoad = false);
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        UpdateFocusPaintFromTheme();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -158,6 +175,7 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void UpdateFocusPaintFromTheme();
     void OnFocusClick();
     void PaintFocusState();
     void OnKeyDrapUp();

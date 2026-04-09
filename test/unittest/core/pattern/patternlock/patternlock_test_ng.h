@@ -93,4 +93,5 @@ public:
     RefPtr<PatternLockLayoutProperty> layoutProperty_;
     RefPtr<PatternLockPaintProperty> paintProperty_;
 };
+}
 #endif
