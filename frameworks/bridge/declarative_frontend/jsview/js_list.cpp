@@ -1016,6 +1016,19 @@ void JSList::SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSupportEmptyBranchInLazyLoading(supportEmptyBranch);
 }
 
+void JSList::SetBackPressBehavior(const JSCallbackInfo& args)
+{
+    bool closeSwipeAction = true;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        auto behaviorObj = JSRef<JSObject>::Cast(args[0]);
+        auto closeSwipeActionValue = behaviorObj->GetProperty("closeSwipeAction");
+        if (closeSwipeActionValue->IsBoolean()) {
+            closeSwipeAction = closeSwipeActionValue->ToBoolean();
+        }
+    }
+    ListModel::GetInstance()->SetBackPressCloseSwipeAction(closeSwipeAction);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -1046,6 +1059,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("supportEmptyBranchInLazyLoading", &JSList::SetSupportEmptyBranchInLazyLoading);
+    JSClass<JSList>::StaticMethod("backPressBehavior", &JSList::SetBackPressBehavior);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);

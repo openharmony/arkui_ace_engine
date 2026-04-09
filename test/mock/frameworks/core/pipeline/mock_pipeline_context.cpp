@@ -25,6 +25,7 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/back_press_handler_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -760,6 +761,14 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
     return overlayManager_;
+}
+
+const RefPtr<BackPressHandlerManager>& PipelineContext::GetBackPressHandlerManager()
+{
+    if (!backPressHandlerManager_) {
+        backPressHandlerManager_ = MakeRefPtr<BackPressHandlerManager>();
+    }
+    return backPressHandlerManager_;
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)

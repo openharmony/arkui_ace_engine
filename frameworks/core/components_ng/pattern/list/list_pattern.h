@@ -255,7 +255,15 @@ public:
     {
         multiSelectable_ = multiSelectable;
     }
-
+    void UpdateBackPressCloseSwipeActionCallback();
+    void SetBackPressCloseSwipeAction(bool closeSwipeAction)
+    {
+        closeSwipeActionByBackPress_ = closeSwipeAction;
+    }
+    bool GetBackPressCloseSwipeAction() const
+    {
+        return closeSwipeActionByBackPress_;
+    }
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
     WeakPtr<ListItemPattern> GetSwiperItem();
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem);
@@ -475,6 +483,7 @@ public:
 
 protected:
     void OnModifyDone() override;
+    void OnDetachFromMainTree() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     virtual void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex);
@@ -679,6 +688,8 @@ private:
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
     bool canReplaceSwiperItem_ = true;
+    bool closeSwipeActionByBackPress_ = true;
+    bool hasBackPressHandlerRegistered_ = false;
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
