@@ -1520,6 +1520,113 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded001
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with no user-defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize.has_value()) {
+        EXPECT_FALSE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+    }
+
+    EXPECT_FALSE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded002
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with user-defined width only.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BUTTON_WIDTH), std::nullopt));
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    EXPECT_FALSE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+
+    EXPECT_TRUE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded003
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with user-defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGTH)));
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+
+    EXPECT_FALSE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: Test ButtonPattern::ExpandDefaultResponseRegion geometry behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    RectF smallRect(10.0f, 20.0f, BUTTON_WIDTH, 10.0f);
+    auto expandedRect = buttonPattern->ExpandDefaultResponseRegion(smallRect);
+    EXPECT_EQ(expandedRect.Width(), smallRect.Width());
+
+    RectF enoughRect(10.0f, 20.0f, BUTTON_WIDTH, 100.0f);
+    auto unmodifiedRect = buttonPattern->ExpandDefaultResponseRegion(enoughRect);
+    EXPECT_EQ(unmodifiedRect.Height(), enoughRect.Height());
+    EXPECT_EQ(unmodifiedRect.GetY(), enoughRect.GetY());
+}
+
+/**
  * @tc.name: ButtonOnInjectionEventTest001
  * @tc.desc: Test ButtonPattern::OnInjectionEvent success path and ReportButtonClickResult
  * @tc.type: FUNC

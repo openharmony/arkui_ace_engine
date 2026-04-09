@@ -289,6 +289,14 @@ public:
         TouchTestResult& result, int32_t touchId, int32_t originalId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
+    bool HasTouchResponseRegionConfig() const
+    {
+        return hasTouchResponseRegionConfig_;
+    }
+    void MarkTouchResponseRegionConfigured()
+    {
+        hasTouchResponseRegionConfig_ = true;
+    }
     std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
     const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& GetResponseRegionMap();
     void SetResponseRegionMap(
@@ -506,6 +514,7 @@ private:
     bool recreateGesture_ = true;
     bool needRecollect_ = false;
     bool isResponseRegion_ = false;
+    bool hasTouchResponseRegionConfig_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
     std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;

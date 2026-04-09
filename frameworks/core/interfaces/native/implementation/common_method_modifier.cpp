@@ -2408,6 +2408,9 @@ void SetResponseRegionImpl(Ark_NativePointer node,
             pattern->SetIsUserSetResponseRegion(true);
         }
     } else {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->MarkTouchResponseRegionConfigured();
         ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
 }
