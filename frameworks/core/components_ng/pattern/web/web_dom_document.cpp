@@ -314,6 +314,7 @@ void WebDomDocument::UpdateScrollInfoFromJsonString(const std::string& jsonStrin
 std::unique_ptr<JsonValue> WebDomDocument::ExportToJson()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::ExportToJson");
+    std::shared_lock<std::shared_mutex> lock(activeMutex_);
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
     if (IsValid()) {
         auto rootJson = active_->root.ToJson(*this);
