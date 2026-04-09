@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,7 +88,8 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
                 RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
                 CHECK_NULL_VOID(progressTheme);
-                progressColor = progressTheme->GetLoadingColor();
+                progressColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                    ? progressTheme->GetLoadingParseFailedColor() : progressTheme->GetLoadingColor();
             } else {
                 return;
             }
@@ -100,7 +101,8 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
                 RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
                 CHECK_NULL_VOID(progressTheme);
-                progressColor = progressTheme->GetLoadingColor();
+                progressColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                    ? progressTheme->GetLoadingParseFailedColor() : progressTheme->GetLoadingColor();
             } else {
                 return;
             }
@@ -126,13 +128,20 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
         if (state) {
             LoadingProgressModel::GetInstance()->SetColor(progressColor);
         } else {
+            LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(true);
+            LoadingProgressModel::GetInstance()->ResetColor();
             LoadingProgressModel::GetInstance()->SetColorByUser(true);
             return;
         }
     } else {
         if (!ParseJsColor(info[0], progressColor)) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(true);
+                LoadingProgressModel::GetInstance()->ResetColor();
+            }
             return;
         }
+        LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
         LoadingProgressModel::GetInstance()->SetColor(progressColor);
     }
 }

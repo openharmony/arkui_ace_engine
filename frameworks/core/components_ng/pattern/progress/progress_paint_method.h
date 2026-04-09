@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(progressModifier_);
-        GetThemeData(GetThemeScopeId(paintWrapper));
+        GetThemeData(paintWrapper);
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
@@ -111,7 +111,7 @@ public:
         UpdateCapsuleProgress(paintWrapper);
     }
 
-    void GetThemeData(int32_t themeScopeId);
+    void GetThemeData(PaintWrapper* paintWrapper);
     void CalculateStrokeWidth(const SizeF& contentSize);
 
 private:
@@ -148,8 +148,6 @@ private:
     bool isUserInitiatedColor_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
-
-    int32_t GetThemeScopeId(PaintWrapper* paintWrapper) const;
 };
 
 } // namespace OHOS::Ace::NG
