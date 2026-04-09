@@ -22767,6 +22767,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_PreviewScaleMode previewScaleMode;
     Opt_AvailableLayoutArea availableLayoutArea;
     Opt_Position anchorPosition;
+    Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
@@ -22997,6 +22998,7 @@ typedef struct Ark_MenuOptions {
     Opt_PreviewScaleMode previewScaleMode;
     Opt_AvailableLayoutArea availableLayoutArea;
     Opt_Position anchorPosition;
+    Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
