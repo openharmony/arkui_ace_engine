@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/data_panel/data_panel_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -287,11 +288,21 @@ HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest001, TestSize.Level0)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+    auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
+    dataPanelTheme->percentageColors_ = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a FrameNode and obtain its pattern so the modifier has a valid host
+    DataPanelModelNG dataPanel;
+    std::vector<double> initValuesForNode = { 1.0 };
+    dataPanel.Create(initValuesForNode, MAX, TYPE_LINE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+    WeakPtr<Pattern> weakPattern(pattern);
+    DataPanelModifier dataPanelModifier(weakPattern);
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -311,11 +322,23 @@ HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest002, TestSize.Level0)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+    auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
+    dataPanelTheme->percentageColors_ = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a FrameNode and obtain its pattern so the modifier has a valid host
+    {
+        DataPanelModelNG dataPanel;
+        std::vector<double> initValuesForNode = { 1.0 };
+        dataPanel.Create(initValuesForNode, MAX, TYPE_LINE);
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+    WeakPtr<Pattern> weakPattern(pattern);
+    DataPanelModifier dataPanelModifier(weakPattern);
     dataPanelModifier.SetMax(20.0f);
     EXPECT_EQ(dataPanelModifier.GetValuesCount(), 0.0f);
 }
@@ -333,11 +356,21 @@ HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest003, TestSize.Level0)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+    auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
+    dataPanelTheme->percentageColors_ = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a FrameNode and obtain its pattern so the modifier has a valid host
+    DataPanelModelNG dataPanel;
+    std::vector<double> initValuesForNode = { 1.0 };
+    dataPanel.Create(initValuesForNode, MAX, TYPE_LINE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+    WeakPtr<Pattern> weakPattern(pattern);
+    DataPanelModifier dataPanelModifier(weakPattern);
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);

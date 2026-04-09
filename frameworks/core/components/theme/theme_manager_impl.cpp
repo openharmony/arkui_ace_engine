@@ -105,6 +105,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/data_panel/data_panel_theme_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_theme_wrapper.h"
 
 namespace OHOS::Ace {
@@ -218,6 +219,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
+        { DataPanelTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DataPanelThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
     };
 
