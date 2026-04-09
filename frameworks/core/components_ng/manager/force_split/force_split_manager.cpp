@@ -71,7 +71,7 @@ bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
 
 void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}u, needUpdateViewport:%{public}d",
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}d, needUpdateViewport:%{public}d",
         (isForceSplit ? "enable" : "disable"), static_cast<int32_t>(mode), needUpdateViewport);
     /**
      * As long as the application supports force split, regardless of whether it is enabled or not,

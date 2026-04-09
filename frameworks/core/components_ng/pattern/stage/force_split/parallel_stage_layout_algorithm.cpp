@@ -202,6 +202,7 @@ void ParallelStageLayoutAlgorithm::SizeCalculationForForceSplit(const RefPtr<Fra
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
     auto detailPageRatio = forceSplitMgr->GetSplitRatio();
     auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
     auto secondaryWidth = (size.Width() - dividerWidth) * detailPageRatio;
