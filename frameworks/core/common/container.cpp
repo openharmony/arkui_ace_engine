@@ -25,10 +25,25 @@
 #include "core/common/plugin_manager.h"
 #endif
 
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+Container::Container() = default;
+
+Container::~Container() = default;
+
+void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+{
+    appBar_ = appBar;
+}
+
+RefPtr<NG::AppBarView> Container::GetAppBar() const
+{
+    return appBar_;
+}
 
 int32_t Container::CurrentId()
 {

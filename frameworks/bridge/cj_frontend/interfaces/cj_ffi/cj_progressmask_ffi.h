@@ -23,6 +23,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -37,7 +38,7 @@ public:
 
     void EnableBreathingAnimation(bool value);
 
-    const RefPtr<NG::ProgressMaskProperty> GetProgressMask() const
+    RefPtr<NG::ProgressMaskProperty> GetProgressMask() const
     {
         return progress_mask_;
     }
@@ -47,7 +48,7 @@ public:
         progress_mask_ = progressMask;
     }
 
-    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>&& progressMask)
+    void SetProgressMask(RefPtr<NG::ProgressMaskProperty>&& progressMask)
     {
         progress_mask_ = std::move(progressMask);
     }

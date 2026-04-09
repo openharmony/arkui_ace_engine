@@ -18,6 +18,7 @@
 #include "input_manager.h"
 #include "struct_multimodal.h"
 
+#include "base/utils/linear_map.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {

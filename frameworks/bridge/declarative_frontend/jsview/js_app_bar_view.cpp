@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

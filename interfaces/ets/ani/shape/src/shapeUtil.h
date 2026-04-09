@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "base/geometry/shape.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 enum RADIUS { TOP_LEFT_RADIUS = 0, TOP_RIGHT_RADIUS = 1, BOTTOM_RIGHT_RADIUS = 2, BOTTOM_LEFT_RADIUS = 3 };

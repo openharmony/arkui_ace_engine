@@ -17,6 +17,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/bridge/flowitem/water_flow_item_model_impl.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 

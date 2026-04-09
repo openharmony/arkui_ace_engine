@@ -37,7 +37,6 @@ class Component;
 class Gesture;
 
 namespace NG {
-    class ClickEvent;
     class UINode;
     class FrameNode;
     class ChainedTransitionEffect;

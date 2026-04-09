@@ -40,6 +40,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
+#include "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h"
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif

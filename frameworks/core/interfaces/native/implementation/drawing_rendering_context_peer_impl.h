@@ -20,6 +20,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/pipeline/pipeline_base.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
