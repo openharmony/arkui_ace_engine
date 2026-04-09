@@ -86,9 +86,7 @@ void FinishAnimationImpl(Ark_SwiperController peer,
     CHECK_NULL_VOID(peerImpl);
     auto arkCallbackOpt = Converter::GetOptPtr(callback_);
     if (arkCallbackOpt) {
-        auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onFinish = GetAsyncInvoker(*arkCallbackOpt);
         peerImpl->SetFinishCallback(onFinish);
     }
     peerImpl->TriggerFinishAnimation();

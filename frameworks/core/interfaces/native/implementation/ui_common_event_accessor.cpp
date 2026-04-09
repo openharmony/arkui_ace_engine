@@ -97,7 +97,7 @@ void SetOnAppearImpl(Ark_UICommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnAppear = Converter::GetOptPtr(callback_);
     if (arkOnAppear) {
-        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() { arkCallback.InvokeSync(); };
+        auto onAppear = GetSyncInvoker(arkOnAppear.value());
         ViewAbstract::SetFrameNodeCommonOnAppear(rawPtr, std::move(onAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnAppear(rawPtr);
@@ -112,7 +112,7 @@ void SetOnDisappearImpl(Ark_UICommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnDisAppear = Converter::GetOptPtr(callback_);
     if (arkOnDisAppear) {
-        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() { arkCallback.InvokeSync(); };
+        auto onDisAppear = GetSyncInvoker(arkOnDisAppear.value());
         ViewAbstract::SetFrameNodeCommonOnDisappear(rawPtr, std::move(onDisAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnDisappear(rawPtr);
@@ -147,7 +147,7 @@ void SetOnFocusImpl(Ark_UICommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnFocus = Converter::GetOptPtr(callback_);
     if (arkOnFocus) {
-        auto onFocus = [arkCallback = CallbackHelper(arkOnFocus.value())]() { arkCallback.Invoke(); };
+        auto onFocus = GetAsyncInvoker(arkOnFocus.value());
         ViewAbstract::SetJSFrameNodeOnFocusCallback(rawPtr, std::move(onFocus));
     } else {
         ViewAbstract::ClearJSFrameNodeOnFocusCallback(rawPtr);
@@ -162,7 +162,7 @@ void SetOnBlurImpl(Ark_UICommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnBlur = Converter::GetOptPtr(callback_);
     if (arkOnBlur) {
-        auto onBlur = [arkCallback = CallbackHelper(arkOnBlur.value())]() { arkCallback.Invoke(); };
+        auto onBlur = GetAsyncInvoker(arkOnBlur.value());
         ViewAbstract::SetJSFrameNodeOnBlurCallback(rawPtr, std::move(onBlur));
     } else {
         ViewAbstract::ClearJSFrameNodeOnBlurCallback(rawPtr);

@@ -118,9 +118,7 @@ void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->viewNode_);
     CHECK_NULL_VOID(configurationUpdateFunc);
-    auto updateNodeConfig = [updateTsConfig = CallbackHelper(*configurationUpdateFunc)]() mutable {
-        updateTsConfig.InvokeSync();
-    };
+    auto updateNodeConfig = GetSyncInvoker(*configurationUpdateFunc);
     peer->viewNode_->SetUpdateNodeConfig(std::move(updateNodeConfig));
 }
 

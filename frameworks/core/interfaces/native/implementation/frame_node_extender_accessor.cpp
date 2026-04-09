@@ -1198,10 +1198,7 @@ Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
     std::optional<int32_t> finishCount;
     if (onFinish) {
         finishCount = GetAnimationFinishCount();
-        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
-            ContainerScope scope(currentId);
-            arkCallback.InvokeSync();
-        };
+        std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(*onFinish, currentId);
         option.SetOnFinishEvent(onFinishEvent);
     }
     return ViewAbstractModelStatic::CreatePropertyAnimation(

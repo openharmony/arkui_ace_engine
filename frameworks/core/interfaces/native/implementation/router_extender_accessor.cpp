@@ -59,9 +59,7 @@ void Push0Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), jsView]() mutable {
         auto container = Container::Current();
@@ -100,9 +98,7 @@ void Push1Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -141,9 +137,7 @@ void Replace0Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (enterFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(enterFinishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(enterFinishCallback->value, jsView);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), jsView]() mutable {
         auto container = Container::Current();
@@ -182,9 +176,7 @@ void Replace1Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -245,9 +237,7 @@ void RunPageImpl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -333,9 +323,7 @@ void PushNamedRoute0Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), jsView]() mutable {
         auto container = Container::Current();
@@ -374,9 +362,7 @@ void PushNamedRoute1Impl(Ark_NativePointer jsView,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -416,9 +402,7 @@ void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), jsView]() mutable {
         auto container = Container::Current();
@@ -457,9 +441,7 @@ void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
-            finish.InvokeSync(jsNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, jsView);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -521,9 +503,7 @@ void PushDynamic0Impl(
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), pageNode]() {
-            finish.InvokeSync(pageNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, pageNode);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), pageNode]() mutable {
         auto container = Container::Current();
@@ -562,9 +542,7 @@ void PushDynamic1Impl(
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), pageNode]() {
-            finish.InvokeSync(pageNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, pageNode);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -604,9 +582,7 @@ void ReplaceDynamic0Impl(
     }
     std::function<void()> callback;
     if (enterFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(enterFinishCallback->value), pageNode]() {
-            finish.InvokeSync(pageNode);
-        };
+        callback = GetPayloadSyncInvoker(enterFinishCallback->value, pageNode);
     }
     auto execFunc = [routerOptions, callback = std::move(callback), pageNode]() mutable {
         auto container = Container::Current();
@@ -645,9 +621,7 @@ void ReplaceDynamic1Impl(
     }
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), pageNode]() {
-            finish.InvokeSync(pageNode);
-        };
+        callback = GetPayloadSyncInvoker(finishCallback->value, pageNode);
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

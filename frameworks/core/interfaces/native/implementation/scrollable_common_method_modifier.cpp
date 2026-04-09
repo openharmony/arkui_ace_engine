@@ -203,9 +203,7 @@ void SetOnWillStartDraggingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnWillStartDragging(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnWillStartDragging(frameNode, std::move(onEvent));
 }
 void SetOnWillStopDraggingImpl(Ark_NativePointer node,
@@ -250,9 +248,7 @@ void SetOnWillStartFlingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnWillStartFling(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnWillStartFling(frameNode, std::move(onEvent));
 }
 void SetOnDidStopFlingImpl(Ark_NativePointer node,
@@ -265,9 +261,7 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnDidStopFling(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
 void SetEnableScrollWithMouse(Ark_NativePointer node, const Opt_Boolean* value)
@@ -287,9 +281,7 @@ void SetOnReachStartImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnReachStart(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnReachStart(frameNode, std::move(modelCallback));
 }
 void SetOnReachEndImpl(Ark_NativePointer node,
@@ -302,9 +294,7 @@ void SetOnReachEndImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnReachEnd(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStartImpl(Ark_NativePointer node,
@@ -317,9 +307,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnScrollStart(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStopImpl(Ark_NativePointer node,
@@ -332,9 +320,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
 void SetFlingSpeedLimitImpl(Ark_NativePointer node,

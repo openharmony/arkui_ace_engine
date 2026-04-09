@@ -329,11 +329,8 @@ void CustomDialogControllerPeerImpl::SetOpenAnimation(Opt_AnimateParam openAnima
             Converter::OptConvert<int32_t>(openAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
         auto onFinish = Converter::OptConvert<Callback_Void>(openAnimation.value.onFinish);
         if (onFinish.has_value()) {
-            std::function<void()> onFinishEvent = [
-                arkCallback = CallbackHelper(*onFinish), currentId = Container::CurrentIdSafely()]() mutable {
-                ContainerScope scope(currentId);
-                arkCallback.InvokeSync();
-            };
+            std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(
+                *onFinish, Container::CurrentIdSafely());
             option.SetOnFinishEvent(onFinishEvent);
         }
         dialogProperties_.openAnimation = option;
@@ -351,11 +348,8 @@ void CustomDialogControllerPeerImpl::SetCloseAnimation(Opt_AnimateParam closeAni
             Converter::OptConvert<int32_t>(closeAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
         auto onFinish = Converter::OptConvert<Callback_Void>(closeAnimation.value.onFinish);
         if (onFinish.has_value()) {
-            std::function<void()> onFinishEvent = [
-                arkCallback = CallbackHelper(*onFinish), currentId = Container::CurrentIdSafely()]() mutable {
-                ContainerScope scope(currentId);
-                arkCallback.InvokeSync();
-            };
+            std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(
+                *onFinish, Container::CurrentIdSafely());
             option.SetOnFinishEvent(onFinishEvent);
         }
         dialogProperties_.closeAnimation = option;

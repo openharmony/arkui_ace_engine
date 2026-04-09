@@ -80,9 +80,7 @@ void OnAttachImpl(Ark_CanvasRenderingContext2D peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
-    auto func = [arkCallback = CallbackHelper(*callback_)]() {
-        arkCallback.InvokeSync();
-    };
+    auto func = GetSyncInvoker(*callback_);
     peer->On(std::move(func), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
 }
 void OffAttachImpl(Ark_CanvasRenderingContext2D peer,
@@ -91,9 +89,7 @@ void OffAttachImpl(Ark_CanvasRenderingContext2D peer,
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
     if (optCallback) {
-        auto func = [arkCallback = CallbackHelper(*optCallback)]() {
-            arkCallback.InvokeSync();
-        };
+        auto func = GetSyncInvoker(*optCallback);
         peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
     } else {
         peer->Off(nullptr, CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
@@ -104,9 +100,7 @@ void OnDetachImpl(Ark_CanvasRenderingContext2D peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
-    auto func = [arkCallback = CallbackHelper(*callback_)]() {
-        arkCallback.InvokeSync();
-    };
+    auto func = GetSyncInvoker(*callback_);
     peer->On(std::move(func), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
 void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
@@ -115,9 +109,7 @@ void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
     if (optCallback) {
-        auto func = [arkCallback = CallbackHelper(*optCallback)]() {
-            arkCallback.InvokeSync();
-        };
+        auto func = GetSyncInvoker(*optCallback);
         peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
     } else {
         peer->Off(nullptr, CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);

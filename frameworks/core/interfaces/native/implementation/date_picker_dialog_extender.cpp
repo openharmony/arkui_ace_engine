@@ -209,26 +209,22 @@ PickerDialogEvent BuildPickerDialogEvents(const Ark_DatePickerDialogOptions& opt
     PickerDialogEvent dialogEvent;
     auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
     if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onDidAppear = GetAsyncInvoker(*didAppearCallbackOpt);
         dialogEvent.onDidAppear = onDidAppear;
     }
     auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
     if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onDidDisappear = GetAsyncInvoker(*didDisappearCallbackOpt);
         dialogEvent.onDidDisappear = onDidDisappear;
     }
     auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
     if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onWillAppear = GetAsyncInvoker(*willAppearCallbackOpt);
         dialogEvent.onWillAppear = onWillAppear;
     }
     auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
     if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onWillDisappear = GetAsyncInvoker(*willDisappearCallbackOpt);
         dialogEvent.onWillDisappear = onWillDisappear;
     }
     return dialogEvent;
@@ -255,7 +251,7 @@ PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDi
     // onCancel
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(arkOptions.onCancel);
     if (cancelCallbackOpt) {
-        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        events.cancelEvent = GetAsyncInvoker(*cancelCallbackOpt);
     }
     // onDateAccept
     auto dateAcceptCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onDateAccept);

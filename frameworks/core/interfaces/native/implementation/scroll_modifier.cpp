@@ -230,9 +230,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
         ScrollModelStatic::SetOnScrollStart(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollModelStatic::SetOnScrollStart(frameNode, std::move(onEvent));
 }
 void SetOnScrollStopImpl(Ark_NativePointer node,
@@ -245,9 +243,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
         ScrollModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollModelStatic::SetOnScrollStop(frameNode, std::move(onEvent));
 }
 void SetOnDidZoomImpl(Ark_NativePointer node,
@@ -276,9 +272,7 @@ void SetOnZoomStartImpl(Ark_NativePointer node,
         ScrollModelStatic::SetOnZoomStart(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollModelStatic::SetOnZoomStart(frameNode, std::move(onEvent));
 }
 void SetOnZoomStopImpl(Ark_NativePointer node,
@@ -291,9 +285,7 @@ void SetOnZoomStopImpl(Ark_NativePointer node,
         ScrollModelStatic::SetOnZoomStop(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollModelStatic::SetOnZoomStop(frameNode, std::move(onEvent));
 }
 void SetScrollBarImpl(Ark_NativePointer node,

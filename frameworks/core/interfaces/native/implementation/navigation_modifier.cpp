@@ -36,6 +36,40 @@ constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
 constexpr uint32_t INVALID_VALUE = 0;
 constexpr uint32_t DEFAULT_NAV_BAR_WIDTH = 240;
 
+void DispatchNavigationCustomTitle(FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) {
+            CalcDimension titleHeight;
+            NavigationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
+            NavigationModelStatic::SetCustomTitle(frameNode, uiNode);
+        },
+        node);
+}
+
+void DispatchNavigationCustomTitleNode(
+    FrameNode* frameNode, Ark_NativePointer node, const Ark_NavigationCustomTitle& customTitle)
+{
+    CallbackHelper(customTitle.builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomTitle(frameNode, uiNode); },
+        node);
+}
+
+void DispatchNavigationCustomMenu(FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomMenu(frameNode, uiNode); },
+        node);
+}
+
+void DispatchNavigationCustomToolbar(
+    FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
+        node);
+}
+
 std::optional<Dimension> ProcessBindableNavBarWidth(
     FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
 {
@@ -500,14 +534,7 @@ void SetTitleImpl(Ark_VMContext vmContext,
     }
     const int8_t customTitleSelector = 1;
     if (selector == customTitleSelector) {
-        CallbackHelper(value->value.value1)
-            .BuildAsync(
-                [frameNode](const RefPtr<UINode>& uiNode) {
-                    CalcDimension titleHeight;
-                    NavigationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
-                    NavigationModelStatic::SetCustomTitle(frameNode, uiNode);
-                },
-                node);
+        DispatchNavigationCustomTitle(frameNode, node, value->value.value1);
         return;
     }
     const int8_t commonTitleSelector = 2;
@@ -539,10 +566,7 @@ void SetTitleImpl(Ark_VMContext vmContext,
                 NavigationModelStatic::SetTitleHeight(frameNode, length);
             }
         }
-        CallbackHelper(value->value.value3.builder)
-            .BuildAsync(
-                [frameNode](const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomTitle(frameNode, uiNode); },
-                node);
+        DispatchNavigationCustomTitleNode(frameNode, node, value->value.value3);
     }
 }
 void SetHideTitleBar1Impl(Ark_NativePointer node,
@@ -571,9 +595,7 @@ void SetMenusImpl(Ark_VMContext vmContext,
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
             NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
-            CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                NavigationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
-            }, node);
+            DispatchNavigationCustomMenu(frameNode, node, items->value.value1);
         }
     } else {
         std::vector<NG::BarItem> emptyVector;
@@ -617,11 +639,7 @@ void SetToolbarConfigurationImpl(Ark_VMContext vmContext,
             auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
             NavigationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
         } else if (typeValue == 1) {
-            CallbackHelper(value->value.value1)
-                .BuildAsync(
-                    [frameNode](
-                        const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
-                    node);
+            DispatchNavigationCustomToolbar(frameNode, node, value->value.value1);
         }
     } else {
         NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());
