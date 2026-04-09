@@ -37,10 +37,7 @@ void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
     }
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
-    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason type) {
-        if (type != WindowSizeChangeReason::ROTATION && type != WindowSizeChangeReason::UNDEFINED) {
-            return;
-        }
+    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason) {
         auto mgr = weakMgr.Upgrade();
         CHECK_NULL_VOID(mgr);
         mgr->ChangeForceSplitModeIfNeeded();
