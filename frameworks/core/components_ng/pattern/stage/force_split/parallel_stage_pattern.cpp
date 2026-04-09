@@ -27,29 +27,29 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DIVIDER_WIDTH = 1.0_px;
 
-void LogPrimaryChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
+void LogHomePageChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
 {
-    auto prePrimaryPage = prePage.Upgrade();
-    if (prePrimaryPage == newPage) {
+    auto preHomePage = prePage.Upgrade();
+    if (preHomePage == newPage) {
         return;
     }
-    bool hasPrePage = prePrimaryPage != nullptr;
+    bool hasPrePage = preHomePage != nullptr;
     bool hasCurPage = newPage != nullptr;
     if (hasPrePage && hasCurPage) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set PrimaryPage to new one");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set HomePage to new one");
         return;
     }
     if (hasPrePage) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "clear PrimaryPage");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "clear HomePage");
     } else {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set PrimaryPage");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set HomePage");
     }
 }
 }
 
-void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
+void ParallelStagePattern::SetHomePage(const RefPtr<FrameNode>& pageNode)
 {
-    auto originNode = primaryPageNode_.Upgrade();
+    auto originNode = homePageNode_.Upgrade();
     if (originNode) {
         auto originPattern = originNode->GetPattern<ParallelPagePattern>();
         CHECK_NULL_VOID(originPattern);
@@ -60,20 +60,20 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
         CHECK_NULL_VOID(pagePattern);
         pagePattern->InitOnTouchEvent();
     }
-    LogPrimaryChange(primaryPageNode_, pageNode);
-    primaryPageNode_ = pageNode;
+    LogHomePageChange(homePageNode_, pageNode);
+    homePageNode_ = pageNode;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hostNode = AceType::DynamicCast<FrameNode>(host);
     if (pageNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set primary page nullptr");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set home page nullptr");
         if (hasDividerNode_) {
             hostNode->RemoveChild(dividerNode_);
             hasDividerNode_ = false;
         }
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "update primary page: %{public}d", pageNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "update home page: %{public}d", pageNode->GetId());
     if (mode_ != PageMode::SPLIT) {
         if (hasDividerNode_) {
             hostNode->RemoveChild(dividerNode_);
@@ -88,7 +88,7 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
         }
-        TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after setPrimaryPage");
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after setHomePage");
         hostNode->AddChild(dividerNode_, 0);
         hasDividerNode_ = true;
     }
@@ -161,15 +161,15 @@ bool ParallelStagePattern::CalculateMode()
     }
     if (mode_ == PageMode::SPLIT) {
         // show placeholder page
-        auto primaryNode = primaryPageNode_.Upgrade();
-        if (primaryNode) {
-            auto primaryPattern = primaryNode->GetPattern<PagePattern>();
-            if (primaryPattern) {
-                primaryPattern->ResetPageTransitionEffect();
+        auto homeNode = homePageNode_.Upgrade();
+        if (homeNode) {
+            auto homePattern = homeNode->GetPattern<PagePattern>();
+            if (homePattern) {
+                homePattern->ResetPageTransitionEffect();
             }
         }
-        // primary page is set, need to attach divider node
-        if (!hasDividerNode_ && primaryNode) {
+        // home page is set, need to attach divider node
+        if (!hasDividerNode_ && homeNode) {
             CreateDividerNodeIfNeeded();
             if (dividerNode_) {
                 auto renderContext = dividerNode_->GetRenderContext();
@@ -181,7 +181,7 @@ bool ParallelStagePattern::CalculateMode()
             hasDividerNode_ = true;
         }
         // current page is free page, don't need to show divider node
-        if (hasDividerNode_ && !primaryNode) {
+        if (hasDividerNode_ && !homeNode) {
             hostNode->RemoveChild(dividerNode_);
             hasDividerNode_ = false;
         }

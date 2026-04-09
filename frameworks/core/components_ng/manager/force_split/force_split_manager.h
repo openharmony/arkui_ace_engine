@@ -21,6 +21,7 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -85,7 +86,7 @@ public:
         return relatedPageName_;
     }
     
-    void SetFullScreenPages(std::set<std::string>&& pages)
+    void SetFullScreenPages(std::unordered_set<std::string>&& pages)
     {
         fullScreenPages_ = std::move(pages);
     }
@@ -151,6 +152,27 @@ public:
     void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
     void RemoveForceSplitRatioListener(int32_t nodeId);
 
+    void SetBehaviorMode(ForceSplitBehaviorMode mode)
+    {
+        behaviorMode_ = mode;
+    }
+    ForceSplitBehaviorMode GetBehaviorMode() const
+    {
+        return behaviorMode_;
+    }
+    void SetPagePairs(std::unordered_map<std::string, std::unordered_set<std::string>>&& pagePairs)
+    {
+        pagePairs_ = std::move(pagePairs);
+    }
+    bool IsPagePair(const std::string& from, const std::string& to) const;
+    void SetTransPages(std::unordered_set<std::string>&& transPages)
+    {
+        transPages_ = std::move(transPages);
+    }
+    bool IsTransPage(const std::string& name) const;
+    bool CanPushPageToPrimary() const;
+    bool IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const;
+
 private:
     bool IsTopFullScreenPage();
     bool IsWindowConditionMatched();
@@ -167,13 +189,16 @@ private:
     bool isForceSplitEnable_ = false;
     bool isRouter_ = false;
     bool dialogSuppotSplit_ = true;
-    std::set<std::string> fullScreenPages_;
+    std::unordered_set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
     std::optional<float> wideSplitRatio_;
     std::optional<float> squareSplitRatio_;
     float splitRatio_;
     ForceSplitMode mode_;
+    ForceSplitBehaviorMode behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs_;
+    std::unordered_set<std::string> transPages_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     std::unordered_map<int32_t, std::function<void(float)>> forceSplitRatioListeners_;
     int32_t appIconId_ = 0;

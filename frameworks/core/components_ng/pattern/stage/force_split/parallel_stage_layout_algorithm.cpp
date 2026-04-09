@@ -46,9 +46,9 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    auto primaryNode = stagePattern->GetPrimaryPage();
-    if (primaryNode) {
-        primaryIndex_ = hostNode->GetChildIndex(primaryNode);
+    auto homePage = stagePattern->GetHomePage();
+    if (homePage) {
+        primaryIndex_ = hostNode->GetChildIndex(homePage);
     } else {
         primaryIndex_ = -1;
     }

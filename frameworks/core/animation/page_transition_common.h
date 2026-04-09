@@ -29,6 +29,8 @@ enum class PageTransitionType {
     ENTER_PUSH, // current page push into route stack.
     EXIT_POP,   // current page pop from route stack.
     EXIT_PUSH,  // another page push info route stack.
+    MOVE_POP,   // current page moves between split columns during primary-pop-to-secondary.
+    MOVE_PUSH,  // current page moves between split columns during secondary-push-to-primary.
     NONE,
 };
 

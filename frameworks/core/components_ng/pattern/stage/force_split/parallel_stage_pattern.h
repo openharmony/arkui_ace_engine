@@ -38,11 +38,11 @@ public:
         return AceType::MakeRefPtr<ParallelStageLayoutAlgorithm>();
     }
 
-    void SetPrimaryPage(const RefPtr<FrameNode>& pageNode) override;
+    void SetHomePage(const RefPtr<FrameNode>& pageNode) override;
 
-    RefPtr<FrameNode> GetPrimaryPage()
+    RefPtr<FrameNode> GetHomePage()
     {
-        return primaryPageNode_.Upgrade();
+        return homePageNode_.Upgrade();
     }
 
     bool GetIsSplit() override
@@ -111,7 +111,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     Color GetDividerNodeColor(RefPtr<FrameNode> hostNode);
 
-    WeakPtr<FrameNode> primaryPageNode_;
+    WeakPtr<FrameNode> homePageNode_;
     RefPtr<FrameNode> dividerNode_;
     RefPtr<FrameNode> placeHolderPage_;
     RefPtr<FrameNode> relatedPage_;

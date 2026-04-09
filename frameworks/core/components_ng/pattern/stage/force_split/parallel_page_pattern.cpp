@@ -74,11 +74,7 @@ void ParallelPagePattern::InitOnTouchEvent()
         CHECK_NULL_VOID(pipeline);
         auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipeline->GetStageManager());
         CHECK_NULL_VOID(stageManager);
-        if (RouterPageType::PRIMARY_PAGE == pattern->GetPageType()) {
-            stageManager->SetPrimaryPageTouched(true);
-        } else {
-            stageManager->SetPrimaryPageTouched(false);
-        }
+        stageManager->SetHomePageTouched(pattern->GetPageType() == RouterPageType::HOME_PAGE);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
@@ -115,8 +111,8 @@ void ParallelPagePattern::BeforeCreateLayoutWrapper()
     if (!stagePattern->GetIsSplit()) {
         return;
     }
-    auto primaryPage = stagePattern->GetPrimaryPage();
-    if (!primaryPage) {
+    auto homePage = stagePattern->GetHomePage();
+    if (!homePage) {
         return;
     }
 
@@ -126,7 +122,7 @@ void ParallelPagePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(safeArea);
     SafeAreaInsets newSafeArea(*safeArea);
 
-    if (type_ == RouterPageType::PRIMARY_PAGE) {
+    if (type_ == RouterPageType::HOME_PAGE) {
         newSafeArea.right_.end = newSafeArea.right_.start;
     } else {
         newSafeArea.left_.start = newSafeArea.left_.end;

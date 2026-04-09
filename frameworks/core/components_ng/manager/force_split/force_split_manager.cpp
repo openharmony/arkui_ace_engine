@@ -314,4 +314,39 @@ void ForceSplitManager::UpdateForceSplitRatio()
     splitRatio_ = splitRatio;
     OnForceSplitRatioUpdate(splitRatio_);
 }
+
+bool ForceSplitManager::IsPagePair(const std::string& from, const std::string& to) const
+{
+    auto it = pagePairs_.find(from);
+    if (it == pagePairs_.end()) {
+        return false;
+    }
+    return it->second.empty() || it->second.find(to) != it->second.end();
+}
+
+bool ForceSplitManager::IsTransPage(const std::string& name) const
+{
+    return transPages_.find(name) != transPages_.end();
+}
+
+bool ForceSplitManager::CanPushPageToPrimary() const
+{
+    if (behaviorMode_ == ForceSplitBehaviorMode::DISPLACE) {
+        return true;
+    }
+    return !pagePairs_.empty();
+}
+
+bool ForceSplitManager::IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const
+{
+    if (IsFullScreenPage(from) || IsFullScreenPage(to)) {
+        return false;
+    }
+    if (behaviorMode_ == ForceSplitBehaviorMode::DISPLACE) {
+        // In displace mode, except for the fromPage or toPage that belong to transPages,
+        // all transitions will trigger secondary push to primary by default
+        return !IsTransPage(from) && !IsTransPage(to);
+    }
+    return IsPagePair(from, to);
+}
 } // namespace OHOS::Ace::NG

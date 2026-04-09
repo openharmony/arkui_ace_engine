@@ -1385,6 +1385,12 @@ void NavigationPattern::RefreshNavDestination()
     isBackPage_ = newTopNavPath.has_value() ?
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
+    if (IsForceSplitSupported(pipeline)) {
+        BackupPrimaryNodes();
+        RecognizeHomePageIfNeeded();
+        AdjustNodeForStackSync(preTopNavPath, newTopNavPath);
+        SetPrimaryNodesToBeRemoved(hostNode->TakePrimaryNodesToBeRemoved());
+    }
     if (topFromSingletonMoved_) {
         FireOnNewParam(newTopNavPath.has_value() ? newTopNavPath->second : nullptr);
     }
@@ -5691,7 +5697,7 @@ void NavigationPattern::TryForceSplitIfNeeded()
     forceSplitSuccess_ = forceSplitSuccess;
     forceSplitUseNavBar_ = forceSplitUseNavBar;
     context->SetIsCurrentInForceSplitMode(forceSplitSuccess_);
-    SwapNavDestinationAndProxyNode(true);
+    AdjustNodeForLayout();
 }
 
 bool NavigationPattern::IsNavBarValid()
@@ -6579,5 +6585,103 @@ void NavigationPattern::FireRelatedDestinationLifecycleInner(bool isOnShow, bool
         isFromWindow ? NavDestVisibilityChangeReason::APP_STATE : NavDestVisibilityChangeReason::TRANSITION);
     relatedPattern->SetIsOnShow(false);
     NavigationPattern::FireNavigationChange(relatedDest, false, false, isFromWindow);
+}
+
+
+bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
+    const RefPtr<NavDestinationGroupNode>& preTopDest,
+    const RefPtr<NavDestinationGroupNode>& curTopDest)
+{
+    CHECK_NULL_RETURN(preTopDest, false);
+    CHECK_NULL_RETURN(curTopDest, false);
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
+        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
+        // In navigation displace mode, treat dialog destinations as transPages by default even
+        // when developers do not configure them explicitly. This prevents dialog push/pop from
+        // being misidentified as secondary-push-primary transitions.
+        return false;
+    }
+    auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(preTopPattern, false);
+    auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(curTopPattern, false);
+    auto from = preTopPattern->GetName();
+    auto to = curTopPattern->GetName();
+    return forceSplitMgr->IsTransitionShouldMovePageToPrimary(from, to);
+}
+
+void NavigationPattern::ResetSecondaryPushPrimarySceneState()
+{
+    isSecondaryPushToPrimaryScene_ = false;
+    isPrimaryPopToSecondaryScene_ = false;
+    splitPushExitNode_ = nullptr;
+    splitPushMoveNode_ = nullptr;
+    splitPushEnterNode_ = nullptr;
+    splitPopExitNode_ = nullptr;
+    splitPopMoveNode_ = nullptr;
+    splitPopEnterNode_ = nullptr;
+}
+
+void NavigationPattern::AdjustNodeForLayout()
+{
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navNode);
+    auto context = navNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->CanPushPageToPrimary()) {
+        SwapNavDestinationAndProxyNode(true);
+        return;
+    }
+    if (forceSplitSuccess_) {
+        AdjustNodeForSplitDisplayReconfigure();
+    } else {
+        AdjustNodeForStackDisplayReconfigure();
+    }
+}
+
+void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackDisplayReconfigure()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSyncWhenSplitDisplay(
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+    std::optional<std::pair<std::string, RefPtr<UINode>>> curTop)
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSyncWhenStackDisplay()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSync(
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+    std::optional<std::pair<std::string, RefPtr<UINode>>> curTop)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->CanPushPageToPrimary()) {
+        SwapNavDestinationAndProxyNode(false);
+        return;
+    }
+    if (forceSplitSuccess_) {
+        AdjustNodeForStackSyncWhenSplitDisplay(preTop, curTop);
+    } else {
+        AdjustNodeForStackSyncWhenStackDisplay();
+    }
 }
 } // namespace OHOS::Ace::NG

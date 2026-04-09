@@ -20,14 +20,15 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 enum class RouterPageType : int32_t {
-    PRIMARY_PAGE = 0,
-    SECONDARY_PAGE = 1,
+    HOME_PAGE = 0,
+    DETAIL_PAGE = 1,
     PLACEHOLDER_PAGE = 2,
     RELATED_PAGE = 3
 };
@@ -55,6 +56,16 @@ public:
     RouterPageType GetPageType() const
     {
         return type_;
+    }
+
+    void SetColumnType(ForceSplitPageColumnType columnType)
+    {
+        columnType_ = columnType;
+    }
+
+    ForceSplitPageColumnType GetColumnType() const
+    {
+        return columnType_;
     }
 
     bool IsPageBuildCompleted() const
@@ -88,7 +99,8 @@ private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
-    RouterPageType type_ = RouterPageType::SECONDARY_PAGE;
+    RouterPageType type_ = RouterPageType::DETAIL_PAGE;
+    ForceSplitPageColumnType columnType_ = ForceSplitPageColumnType::NONE;
     bool isPageBuildCompleted_ = false;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     bool needNotifyRelatedPageAboutToAppear_ = true;

@@ -34,8 +34,8 @@ public:
     bool CleanPageStack() override;
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true) override;
 
-    bool OnPrimaryPageDetected(const RefPtr<FrameNode>& primaryPage, const std::list<WeakPtr<FrameNode>>& pageStack);
-    void RemoveSecondaryPagesOfPrimaryHomePage();
+    bool OnHomePageDetected(const RefPtr<FrameNode>& homePage, const std::list<WeakPtr<FrameNode>>& pageStack);
+    void RemoveSecondaryPagesOfPrimaryPage();
     int32_t UpdateSecondaryPageNeedRemoved(bool needClearSecondaryPage);
 
     RefPtr<FrameNode> GetLastPage() const override;
@@ -57,14 +57,14 @@ public:
     
     void MarkDirtyPageAndOverlay(const RefPtr<FrameNode>& needMarkDirtyPage, PropertyChangeFlag changeFlag);
 
-    void SetPrimaryPageTouched(bool primaryPageTouched)
+    void SetHomePageTouched(bool homePageTouched)
     {
-        primaryPageTouched_ = primaryPageTouched;
+        homePageTouched_ = homePageTouched;
     }
 
-    bool GetPrimaryPageTouched()
+    bool GetHomePageTouched()
     {
-        return primaryPageTouched_;
+        return homePageTouched_;
     }
 
     void SetNeedClearSecondaryPage(bool needClearSecondaryPage)
@@ -101,6 +101,9 @@ public:
 
     bool IsDisplaySplitMode() const override;
 
+    RefPtr<FrameNode> GetTopPrimaryColumnPage() const;
+    RefPtr<FrameNode> GetTopSecondaryColumnPage() const;
+
 private:
     class StageOptScope {
     public:
@@ -118,10 +121,10 @@ private:
 
     void OnModeChange();
     void OnWindowStateChange(bool show);
-    RefPtr<FrameNode> GetLastPrimaryPage() const;
+    RefPtr<FrameNode> GetHomePage() const;
 
     void FirePageHideOnPushPage(RouterPageType newPageType, const RefPtr<FrameNode>& lastPage,
-        const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& prePrimaryPage,
+        const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& preHomePage,
         PageTransitionType hideTransitionType, bool newPageIsFullScreenPage);
     void FirePageShowOnPushPage(const RefPtr<FrameNode>& newTopPage,
         const RefPtr<ParallelPagePattern>& newTopPattern, PageTransitionType showTransitionType);
@@ -162,12 +165,27 @@ private:
     void FireParallelPageHide(const RefPtr<UINode>& node, PageTransitionType transitionType);
     void ReportPageTransitionEnd(const RefPtr<FrameNode>& page);
 
+    void RebuildRouterColumnNodesIfNeeded();
+    void InvalidateRouterColumnNodes();
+    bool IsVirtualStackBasedSplit() const;
+    void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
+    void OnWindowStateChangeInVirtualStackBasedSplit(bool show);
+    bool PushPageInVirtualStackBasedSplit(
+        const RefPtr<FrameNode>& node, bool isNewLifecycle, bool needHideLast, bool needTransition);
+    bool PopPageInVirtualStackBasedSplit(bool needShowNext, bool needTransition);
+    bool PopPageToIndexInVirtualStackBasedSplit(int32_t index, bool needShowNext, bool needTransition);
+    bool CleanPageStackInVirtualStackBasedSplit(const RefPtr<ParallelStagePattern>& stagePattern);
+    bool MovePageToFrontInVirtualStackBasedSplit(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
+
     std::list<WeakPtr<FrameNode>> secondaryPageStack_;
     bool isInStageOperation_ = false;
-    bool primaryPageTouched_ = false;
+    bool homePageTouched_ = false;
     bool needClearSecondaryPage_ = false;
     bool isTopFullScreenPage_ = false;
     bool isTopFullScreenPageChanged_ = false;
+    mutable std::vector<WeakPtr<FrameNode>> primaryNodes_;
+    mutable std::vector<WeakPtr<FrameNode>> secondaryNodes_;
+    mutable bool routerColumnNodesDirty_ = true;
 };
 } // namespace OHOS::Ace::NG
 
