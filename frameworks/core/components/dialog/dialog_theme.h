@@ -27,6 +27,7 @@
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 

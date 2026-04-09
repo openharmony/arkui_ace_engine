@@ -19,6 +19,7 @@
 #include <regex>
 #include <unordered_map>
 
+#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
