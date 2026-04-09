@@ -556,11 +556,11 @@ void AtomicServicePattern::CallRectChange()
     appBarRect_ = rect;
 }
 
-void AtomicServicePattern::FireAbilityCloseEvent()
+void AtomicServicePattern::FireAbilityCloseEvent(int32_t code)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "Pattern FireAbilityCloseEvent");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "Pattern FireAbilityCloseEvent code = %{public}d", code);
     auto customAppBar = GetJSAppBarContainer();
     CHECK_NULL_VOID(customAppBar);
-    customAppBar->FireCustomCallback(ARKUI_ABILITY_CLOSE_EVENT, true);
+    customAppBar->FireCustomCallback(ARKUI_ABILITY_CLOSE_EVENT, std::to_string(code));
 }
 } // namespace OHOS::Ace::NG
