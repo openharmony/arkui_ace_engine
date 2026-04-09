@@ -142,6 +142,7 @@ private:
         const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateStyleOptionColorMode(const PipelineContext* pipeLineContext, BlurStyleOption& styleOption);
     static void UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static int32_t UpdateNodeThemeScopeId(const RefPtr<FrameNode> &node, int32_t targetId,
