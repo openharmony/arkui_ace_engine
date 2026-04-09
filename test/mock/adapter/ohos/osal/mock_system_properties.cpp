@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "ui/properties/ui_material_enums.h"
+
 #include "base/utils/layout_break_point.h"
 #include "base/utils/system_properties.h"
 
@@ -506,5 +508,10 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    return UiMaterialLevel::DEFAULT;
 }
 } // namespace OHOS::Ace

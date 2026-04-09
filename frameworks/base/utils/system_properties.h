@@ -57,6 +57,7 @@ extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
 extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
 extern const char ENABLE_DEBUG_STATEMGR_KEY[];
+enum class UiMaterialLevel;
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -771,6 +772,8 @@ public:
     {
         return isOpenYuvDecode_;
     }
+
+    static UiMaterialLevel GetUiMaterialLevel();
 
     static void ReadSystemParametersCallOnce();
 

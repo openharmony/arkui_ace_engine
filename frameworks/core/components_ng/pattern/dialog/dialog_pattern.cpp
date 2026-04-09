@@ -379,8 +379,7 @@ void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogPr
 {
     CHECK_NULL_VOID(columnNode);
     if (dialogProperties.systemMaterial &&
-        dialogProperties.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-        dialogProperties.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        MaterialUtils::CheckMaterialValid(dialogProperties.systemMaterial->GetType())) {
         auto renderContext = columnNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);

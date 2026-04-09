@@ -20,9 +20,14 @@
 
 #include "ui/properties/color.h"
 #include "ui/properties/ui_material.h"
+#include "ui/properties/ui_material_structs.h"
 
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/property/border_property.h"
+
+namespace OHOS::Rosen {
+class RSNGFilterBase;
+}
 
 namespace OHOS::Ace {
 extern const char UI_MATERIAL_EXTENSION_SO_PATH[];
@@ -34,17 +39,32 @@ class PipelineContext;
 class FrameNode;
 } // namespace OHOS::Ace::NG
 
-enum class MaterialType: int32_t {
-    NONE = 0,
-    SEMI_TRANSPARENT = 1,
-    MAX = 1,
-};
-
 struct UiMaterialParam {
     Shadow shadow;
     Color backgroundColor;
     NG::BorderWidthProperty borderWidth;
     NG::BorderColorProperty borderColor;
+};
+
+struct ImmersiveMaterialConfig {
+    UiMaterialMapKey key {};
+    Color materialColor;
+    bool colorInvert = false;
+    bool applyShadow = true;
+    float dipScale = 1.0f;
+
+    bool operator==(const ImmersiveMaterialConfig& other) const
+    {
+        return key == other.key && materialColor == other.materialColor && colorInvert == other.colorInvert &&
+               applyShadow == other.applyShadow && NearEqual(dipScale, other.dipScale);
+    }
+};
+
+// store UiMaterial all information
+struct UiMaterialInfo {
+    RefPtr<UiMaterial> material;
+    std::optional<ImmersiveMaterialConfig> immersiveConfig;
+    std::optional<int32_t> transparencyCallbackId;
 };
 
 class ACE_FORCE_EXPORT MaterialUtils {
@@ -55,6 +75,19 @@ public:
     static ColorMode GetResourceColorMode(NG::PipelineContext* pipeline);
     static bool CallSetMaterial(NG::FrameNode* node, const UiMaterial* material);
     static int32_t CallGetMaterialId(const UiMaterial* material);
+    static bool CheckMaterialValid(int32_t type);
+    static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
+        const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node);
+    static bool GetUiMaterialFilter(
+        const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
+    static Shadow GetImmersiveShadow(float dipScale);
+    static Shadow GetImmersiveEmptyShadow();
+    static bool GetGlobalMaterialLevel(UiMaterialLevel& result);
+
+private:
+    static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
+    static bool ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& options, UiMaterialLevel systemLevel,
+        UiMaterialTransparency systemTransparency);
 };
 } // namespace OHOS::Ace
 

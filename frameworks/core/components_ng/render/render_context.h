@@ -52,12 +52,17 @@ class VisualEffect;
 class Filter;
 enum class Gravity;
 class Blender;
+class RSNGFilterBase;
 class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
 class UiMaterial;
+struct UiMaterialInfo;
+struct ImmersiveMaterialConfig;
+enum class MaterialType;
+enum class UiMaterialFilterQuality;
 }
 
 namespace OHOS::Ace::Kit {
@@ -363,6 +368,13 @@ public:
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    virtual void SetMaterialWithQualityLevel(
+        const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
+    {}
+    void SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config);
+    void SetTransparencyCallbackId(const std::optional<int32_t>& id);
+    std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig() const;
+    std::optional<int32_t> GetTransparencyCallbackId() const;
     RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
@@ -890,6 +902,7 @@ public:
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
+    std::shared_ptr<UiMaterialInfo> uiMaterial_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
@@ -1002,7 +1015,6 @@ private:
     std::function<void(bool)> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
-    RefPtr<UiMaterial> uiMaterial_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG
