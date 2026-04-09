@@ -609,7 +609,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     LogDragInfoInner(asyncCtx, dragData.value());
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }
@@ -815,7 +815,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
     LogDragInfoInner(asyncCtx, dragData);
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }
