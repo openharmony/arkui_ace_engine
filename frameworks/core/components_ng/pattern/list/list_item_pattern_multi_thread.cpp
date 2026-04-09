@@ -32,17 +32,12 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemPattern::OnAttachToFrameNodeMultiThread()
-{
-    // do nothing unsafe thread
-}
-
 void ListItemPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
-        SetListItemDefaultAttributes(host);
+        ApplyListItemDefaultAttributes(host);
     }
 }
 void ListItemPattern::CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback)
@@ -68,7 +63,7 @@ void ListItemPattern::SetListItemStyleMultiThread(V2::ListItemStyle style)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->listItemStyle_ = style;
-            pattern->SetListItemDefaultAttributes(node);
+            pattern->ApplyListItemDefaultAttributes(node);
             pattern->InitListItemCardStyleForList();
         });
     }

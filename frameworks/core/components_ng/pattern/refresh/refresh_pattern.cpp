@@ -290,13 +290,10 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    auto context = host->GetContext();
-    if (context) {
-        auto refreshTheme = context->GetTheme<RefreshThemeNG>();
-        if (refreshTheme) {
-            loadingTextLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
-            loadingTextLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
-        }
+    auto refreshTheme = host->GetTheme<RefreshThemeNG>(true);
+    if (refreshTheme) {
+        loadingTextLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
+        loadingTextLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
     }
 
     PaddingProperty textpadding;
@@ -315,9 +312,9 @@ void RefreshPattern::OnColorConfigurationUpdate()
         return;
     }
     CHECK_NULL_VOID(progressChild_);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto refreshTheme = pipelineContext->GetTheme<RefreshThemeNG>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto refreshTheme = host->GetTheme<RefreshThemeNG>(true);
     CHECK_NULL_VOID(refreshTheme);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -331,6 +328,25 @@ void RefreshPattern::OnColorConfigurationUpdate()
         textLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
         textLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
     }
+}
+
+bool RefreshPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!hasLoadingText_ || !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    CHECK_NULL_RETURN(loadingTextNode_, false);
+    auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto refreshTheme = host->GetTheme<RefreshThemeNG>(true);
+    CHECK_NULL_RETURN(refreshTheme, false);
+    textLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
+    loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void RefreshPattern::OnColorModeChange(uint32_t colorMode)

@@ -110,6 +110,7 @@ public:
 
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     bool NestedScrollOutOfBoundary() override
     {

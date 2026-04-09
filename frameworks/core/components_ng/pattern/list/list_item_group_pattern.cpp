@@ -56,9 +56,7 @@ void ListItemGroupPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(itemGroupNode);
     auto renderContext = itemGroupNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = itemGroupNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemGroupTheme = itemGroupNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemGroupTheme);
 
     renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
@@ -71,9 +69,7 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemGroupTheme = itemGroupNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemGroupTheme);
 
     renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
