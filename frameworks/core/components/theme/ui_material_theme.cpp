@@ -16,6 +16,7 @@
 #include "core/components/theme/ui_material_theme.h"
 
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -44,11 +45,18 @@ void UiMaterialTheme::SetInstanceId(int32_t instanceId)
 bool UiMaterialTheme::ParseUiMaterialParam(
     MaterialType type, NG::PipelineContext* pipeline, ColorMode colorMode, UiMaterialParam& result)
 {
+    if (type == MaterialType::NONE) {
+        // MaterialType::NONE
+        result.backgroundColor = Color::TRANSPARENT;
+        result.borderColor.SetColor(Color::TRANSPARENT);
+        result.borderWidth.SetBorderWidth(Dimension(0));
+        return true;
+    }
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
     if (type == MaterialType::SEMI_TRANSPARENT) {
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_RETURN(themeManager, false);
-        auto themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, false);
         auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
         CHECK_NULL_RETURN(shadowTheme, false);
         auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
@@ -61,11 +69,20 @@ bool UiMaterialTheme::ParseUiMaterialParam(
         result.shadow = shadowTheme->GetShadow(MATERIAL_SEMI_TRANSPARENT_SHADOW_STYLE, colorMode);
         return true;
     }
-    // MaterialType::NONE
-    result.backgroundColor = Color::TRANSPARENT;
-    result.borderColor.SetColor(Color::TRANSPARENT);
-    result.borderWidth.SetBorderWidth(Dimension(0));
-    return true;
+    if (type == MaterialType::IMMERSIVE) {
+        // MaterialType::IMMERSIVE
+        auto dipScale = pipeline->GetDipScale();
+        auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
+        auto color = themeConstants->GetColor(resId);
+        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
+        result.borderColor.SetColor(color);
+        result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
+        result.backgroundColor =
+            colorMode == ColorMode::DARK ? MATERIAL_SEMI_TRANSPARENT_COLOR_DARK : MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT;
+        result.shadow = MaterialUtils::GetImmersiveShadow(dipScale);
+        return true;
+    }
+    return false;
 }
 
 uint32_t UiMaterialTheme::GetKeyOfUiMaterial(MaterialType type, ColorMode colorMode)
