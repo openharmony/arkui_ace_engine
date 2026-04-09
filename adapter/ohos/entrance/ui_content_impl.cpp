@@ -5650,7 +5650,7 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
 void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}u needUpdateViewport:%{public}d",
+             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}d needUpdateViewport:%{public}d",
              isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);

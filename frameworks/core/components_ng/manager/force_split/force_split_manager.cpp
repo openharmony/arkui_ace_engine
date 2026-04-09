@@ -278,10 +278,7 @@ void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     FlushArkUIHook();
-    auto winMgr = context->GetWindowManager();
-    if (winMgr) {
-        winMgr->UpdateForceSplitRatio(ratio);
-    }
+
     // Update Dialog ratio
     auto listeners = forceSplitRatioListeners_;
     for (auto pair : listeners) {
