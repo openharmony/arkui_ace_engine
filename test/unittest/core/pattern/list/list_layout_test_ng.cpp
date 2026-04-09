@@ -35,6 +35,19 @@
 #undef protected
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double USER_DEFINED_OPACITY = 0.2;
+constexpr double ENABLED_DYNAMIC_OPACITY = 1.0;
+constexpr double DISABLED_DYNAMIC_OPACITY = 0.2;
+
+struct ListItemDisableEventTestContext {
+    RefPtr<FrameNode> itemNode;
+    RefPtr<ListItemPattern> itemPattern;
+    RefPtr<ListItemEventHub> itemEventHub;
+    RefPtr<RenderContext> itemRenderContext;
+};
+} // namespace
+
 class ListLayoutTestNg : public ListTestNg {
 public:
     void CreateGroupWithSettingWithComponentContent(
@@ -44,6 +57,9 @@ public:
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
+    ListItemDisableEventTestContext CreateCardListItemForDisableEvent();
+    void UpdateDisableEventState(
+        const ListItemDisableEventTestContext& testContext, bool enabled, const std::optional<double>& opacity);
 };
 
 void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
@@ -59,6 +75,26 @@ void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+ListItemDisableEventTestContext ListLayoutTestNg::CreateCardListItemForDisableEvent()
+{
+    CreateList();
+    CreateListItem(V2::ListItemStyle::CARD);
+    CreateDone();
+    auto itemNode = GetChildFrameNode(frameNode_, 0);
+    return { itemNode, GetChildPattern<ListItemPattern>(frameNode_, 0),
+        GetChildEventHub<ListItemEventHub>(frameNode_, 0), itemNode->GetRenderContext() };
+}
+
+void ListLayoutTestNg::UpdateDisableEventState(
+    const ListItemDisableEventTestContext& testContext, bool enabled, const std::optional<double>& opacity)
+{
+    if (opacity.has_value()) {
+        testContext.itemRenderContext->UpdateOpacity(opacity.value());
+    }
+    testContext.itemEventHub->SetEnabled(enabled);
+    testContext.itemPattern->OnModifyDone();
 }
 
 RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
@@ -1686,7 +1722,7 @@ HWTEST_F(ListLayoutTestNg, ListItemDisableEventForCardModeTest001, TestSize.Leve
     auto itemRenderContext = itemNode->GetRenderContext();
     EXPECT_TRUE(itemEventHub->IsEnabled());
     EXPECT_TRUE(itemEventHub->IsDeveloperEnabled());
-    EXPECT_EQ(itemRenderContext->GetOpacity(), 1.0);
+    EXPECT_EQ(itemRenderContext->GetOpacityValue(1.0), 1.0);
 
     itemEventHub->SetEnabled(false);
     itemPattern->OnModifyDone(); // Test InitDisableEvent
@@ -1701,7 +1737,135 @@ HWTEST_F(ListLayoutTestNg, ListItemDisableEventForCardModeTest001, TestSize.Leve
     itemEventHub->SetEnabled(true);
     itemPattern->OnModifyDone();
     EXPECT_FALSE(itemPattern->Selectable());
-    EXPECT_EQ(itemRenderContext->GetOpacity(), 0.4);
+    EXPECT_EQ(itemRenderContext->GetOpacity(), 1.0);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent001
+ * @tc.desc: Verify opacity when user does not set opacity and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent001, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent002
+ * @tc.desc: Verify opacity when user does not set opacity and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent002, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent003
+ * @tc.desc: Verify opacity when user sets fixed opacity and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent003, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+    testContext.itemRenderContext->UpdateOpacity(USER_DEFINED_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent004
+ * @tc.desc: Verify opacity when user sets fixed opacity and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent004, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, USER_DEFINED_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent005
+ * @tc.desc: Verify opacity when user changes opacity dynamically and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent005, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+    testContext.itemRenderContext->UpdateOpacity(ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent006
+ * @tc.desc: Verify opacity when user changes opacity dynamically and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListItemDisableEvent006, TestSize.Level1)
+{
+    auto testContext = CreateCardListItemForDisableEvent();
+    ASSERT_NE(testContext.itemPattern, nullptr);
+    ASSERT_NE(testContext.itemEventHub, nullptr);
+    ASSERT_NE(testContext.itemRenderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.itemRenderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
 }
 
 /**
