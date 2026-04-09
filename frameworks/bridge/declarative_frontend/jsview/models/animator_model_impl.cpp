@@ -29,6 +29,22 @@ RefPtr<JsAcePage> GetCurrentPage()
 #endif
     return nullptr;
 }
+
+class AnimatorEventListener {
+public:
+    AnimatorEventListener(EventMarker eventMarker, WeakPtr<PipelineContext> weakContext)
+        : eventMarker_(std::move(eventMarker)), weakContext_(std::move(weakContext))
+    {}
+
+    void operator()() const
+    {
+        AceAsyncEvent<void()>::Create(eventMarker_, weakContext_)();
+    }
+
+private:
+    EventMarker eventMarker_;
+    WeakPtr<PipelineContext> weakContext_;
+};
 } // namespace
 
 void AnimatorModelImpl::Create(const std::string& animatorId)
@@ -67,36 +83,31 @@ void AnimatorModelImpl::AddEventListener(
         case EventOperation::START:
             animator->ClearStartListeners();
             if (!eventMarker.IsEmpty()) {
-                animator->AddStartListener(
-                    [eventMarker, weakContext] { AceAsyncEvent<void()>::Create(eventMarker, weakContext)(); });
+                animator->AddStartListener(AnimatorEventListener(eventMarker, weakContext));
             }
             break;
         case EventOperation::PAUSE:
             animator->ClearPauseListeners();
             if (!eventMarker.IsEmpty()) {
-                animator->AddPauseListener(
-                    [eventMarker, weakContext] { AceAsyncEvent<void()>::Create(eventMarker, weakContext)(); });
+                animator->AddPauseListener(AnimatorEventListener(eventMarker, weakContext));
             }
             break;
         case EventOperation::REPEAT:
             animator->ClearRepeatListeners();
             if (!eventMarker.IsEmpty()) {
-                animator->AddRepeatListener(
-                    [eventMarker, weakContext] { AceAsyncEvent<void()>::Create(eventMarker, weakContext)(); });
+                animator->AddRepeatListener(AnimatorEventListener(eventMarker, weakContext));
             }
             break;
         case EventOperation::CANCEL:
             animator->ClearIdleListeners();
             if (!eventMarker.IsEmpty()) {
-                animator->AddIdleListener(
-                    [eventMarker, weakContext] { AceAsyncEvent<void()>::Create(eventMarker, weakContext)(); });
+                animator->AddIdleListener(AnimatorEventListener(eventMarker, weakContext));
             }
             break;
         case EventOperation::FINISH:
             animator->ClearStopListeners();
             if (!eventMarker.IsEmpty()) {
-                animator->AddStopListener(
-                    [eventMarker, weakContext] { AceAsyncEvent<void()>::Create(eventMarker, weakContext)(); });
+                animator->AddStopListener(AnimatorEventListener(eventMarker, weakContext));
             }
             break;
         case EventOperation::NONE:

@@ -95,6 +95,194 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
     }
     return true;
 }
+
+void ReportScrollComponentChangeEvent(const char* eventName)
+{
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "event", eventName, ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+struct ScrollBeginJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    ScrollInfo operator()(const Dimension& dx, const Dimension& dy) const
+    {
+        ScrollInfo scrollInfo { .dx = dx, .dy = dy };
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
+        auto params = ConvertToJSValues(dx, dy);
+        auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+        if (result.IsEmpty()) {
+            return scrollInfo;
+        }
+
+        if (!result->IsObject()) {
+            return scrollInfo;
+        }
+
+        auto resObj = JSRef<JSObject>::Cast(result);
+        auto dxRemainValue = resObj->GetProperty("dxRemain");
+        if (dxRemainValue->IsNumber()) {
+            scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+        }
+        auto dyRemainValue = resObj->GetProperty("dyRemain");
+        if (dyRemainValue->IsNumber()) {
+            scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+        }
+        return scrollInfo;
+    }
+};
+
+struct ScrollFrameBeginJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    OHOS::Ace::ScrollFrameResult operator()(const Dimension& offset, ScrollState state) const
+    {
+        OHOS::Ace::ScrollFrameResult scrollRes { .offset = offset };
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+        auto params = ConvertToJSValues(offset, state);
+        auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+        if (result.IsEmpty()) {
+            return scrollRes;
+        }
+
+        if (!result->IsObject()) {
+            return scrollRes;
+        }
+
+        auto resObj = JSRef<JSObject>::Cast(result);
+        auto dxRemainValue = resObj->GetProperty("offsetRemain");
+        if (dxRemainValue->IsNumber()) {
+            scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+        }
+        return scrollRes;
+    }
+};
+
+struct ScrollJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    void operator()(const Dimension& xOffset, const Dimension& yOffset) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(xOffset, yOffset);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    }
+};
+
+struct WillScrollJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    NG::TwoDimensionScrollResult operator()(
+        const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState,
+        ScrollSource scrollSource) const
+    {
+        NG::TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+        auto params = ConvertToJSValues(xOffset, yOffset, scrollState, scrollSource);
+        auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+        if (result.IsEmpty()) {
+            return scrollRes;
+        }
+
+        if (!result->IsObject()) {
+            return scrollRes;
+        }
+
+        auto resObj = JSRef<JSObject>::Cast(result);
+        auto dxRemainValue = resObj->GetProperty("xOffset");
+        if (dxRemainValue->IsNumber()) {
+            scrollRes.xOffset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+        }
+        auto dyRemainValue = resObj->GetProperty("yOffset");
+        if (dyRemainValue->IsNumber()) {
+            scrollRes.yOffset = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+        }
+        return scrollRes;
+    }
+};
+
+struct DidScrollJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    void operator()(const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(xOffset, yOffset, scrollState);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    }
+};
+
+struct ScrollEventJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+    const char* eventName;
+
+    void operator()(const NG::ScrollEdge& side) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(side);
+        func->Call(JSRef<JSObject>(), 1, params.data());
+        ReportScrollComponentChangeEvent(eventName);
+    }
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Call(JSRef<JSObject>(), 0, nullptr);
+        ReportScrollComponentChangeEvent(eventName);
+    }
+};
+
+struct ZeroArgJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Call(JSRef<JSObject>(), 0, nullptr);
+    }
+};
+
+struct ReachJsCallback {
+    JSRef<JSFunc> func;
+
+    void operator()() const
+    {
+        func->Call(JSRef<JSObject>());
+    }
+};
+
+struct ZoomChangeJsCallback {
+    JSExecutionContext execCtx;
+    RefPtr<JsFunction> func;
+    WeakPtr<NG::FrameNode> node;
+
+    void operator()(float param) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    }
+};
+
+struct DidZoomJsCallback {
+    JSExecutionContext execCtx;
+    JSRef<JSFunc> func;
+
+    void operator()(float scale) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto params = ConvertToJSValues(scale);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    }
+};
 } // namespace
 
 void JSScroll::Create(const JSCallbackInfo& info)
@@ -134,32 +322,8 @@ void JSScroll::SetScrollEnabled(const JSCallbackInfo& args)
 void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const Dimension& dx, const Dimension& dy) -> ScrollInfo {
-            ScrollInfo scrollInfo { .dx = dx, .dy = dy };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
-            auto params = ConvertToJSValues(dx, dy);
-            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                return scrollInfo;
-            }
-
-            if (!result->IsObject()) {
-                return scrollInfo;
-            }
-
-            auto resObj = JSRef<JSObject>::Cast(result);
-            auto dxRemainValue = resObj->GetProperty("dxRemain");
-            if (dxRemainValue->IsNumber()) {
-                scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            auto dyRemainValue = resObj->GetProperty("dyRemain");
-            if (dyRemainValue->IsNumber()) {
-                scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            return scrollInfo;
-        };
-        ScrollModel::GetInstance()->SetOnScrollBegin(std::move(onScrollBegin));
+        ScrollModel::GetInstance()->SetOnScrollBegin(
+            ScrollBeginJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     }
     args.SetReturnValue(args.This());
 }
@@ -167,28 +331,8 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScrollFrameBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                      const Dimension& offset, ScrollState state) -> ScrollFrameResult {
-            OHOS::Ace::ScrollFrameResult scrollRes { .offset = offset };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
-            auto params = ConvertToJSValues(offset, state);
-            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                return scrollRes;
-            }
-
-            if (!result->IsObject()) {
-                return scrollRes;
-            }
-
-            auto resObj = JSRef<JSObject>::Cast(result);
-            auto dxRemainValue = resObj->GetProperty("offsetRemain");
-            if (dxRemainValue->IsNumber()) {
-                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            return scrollRes;
-        };
-        ScrollModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+        ScrollModel::GetInstance()->SetOnScrollFrameBegin(
+            ScrollFrameBeginJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     }
     args.SetReturnValue(args.This());
 }
@@ -197,13 +341,8 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     auto callbackInfo = args[0];
     if (callbackInfo->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(callbackInfo)](
-                            const Dimension& xOffset, const Dimension& yOffset) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(xOffset, yOffset);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        ScrollModel::GetInstance()->SetOnScroll(std::move(onScroll));
+        ScrollModel::GetInstance()->SetOnScroll(
+            ScrollJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(callbackInfo) });
     }
 }
 
@@ -214,33 +353,8 @@ void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
     }
 
     if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState,
-                            ScrollSource scrollSource) {
-            NG::TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
-            auto params = ConvertToJSValues(xOffset, yOffset, scrollState, scrollSource);
-            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
-            if (result.IsEmpty()) {
-                return scrollRes;
-            }
-
-            if (!result->IsObject()) {
-                return scrollRes;
-            }
-
-            auto resObj = JSRef<JSObject>::Cast(result);
-            auto dxRemainValue = resObj->GetProperty("xOffset");
-            if (dxRemainValue->IsNumber()) {
-                scrollRes.xOffset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            auto dyRemainValue = resObj->GetProperty("yOffset");
-            if (dyRemainValue->IsNumber()) {
-                scrollRes.yOffset = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
-            }
-            return scrollRes;
-        };
-        ScrollModel::GetInstance()->SetOnWillScroll(std::move(onScroll));
+        ScrollModel::GetInstance()->SetOnWillScroll(
+            WillScrollJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     } else {
         ScrollModel::GetInstance()->SetOnWillScroll(nullptr);
     }
@@ -249,28 +363,16 @@ void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
 void JSScroll::OnDidScrollCallback(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(xOffset, yOffset, scrollState);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        ScrollModel::GetInstance()->SetOnDidScroll(std::move(onScroll));
+        ScrollModel::GetInstance()->SetOnDidScroll(
+            DidScrollJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     }
 }
 
 void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto scrollEdge = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                              const NG::ScrollEdge& side) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(side);
-            func->Call(JSRef<JSObject>(), 1, params.data());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEdge",
-                ComponentEventType::COMPONENT_EVENT_SCROLL);
-        };
-        ScrollModel::GetInstance()->SetOnScrollEdge(std::move(scrollEdge));
+        ScrollModel::GetInstance()->SetOnScrollEdge(
+            ScrollEventJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]), "onScrollEdge" });
     }
     args.SetReturnValue(args.This());
 }
@@ -278,13 +380,8 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Call(JSRef<JSObject>(), 0, nullptr);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEnd",
-                ComponentEventType::COMPONENT_EVENT_SCROLL);
-        };
-        ScrollModel::GetInstance()->SetOnScrollEnd(std::move(scrollEnd));
+        ScrollModel::GetInstance()->SetOnScrollEnd(
+            ScrollEventJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]), "onScrollEnd" });
     }
     args.SetReturnValue(args.This());
 }
@@ -292,11 +389,8 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto scrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Call(JSRef<JSObject>(), 0, nullptr);
-        };
-        ScrollModel::GetInstance()->SetOnScrollStart(std::move(scrollStart));
+        ScrollModel::GetInstance()->SetOnScrollStart(
+            ZeroArgJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     }
     args.SetReturnValue(args.This());
 }
@@ -304,13 +398,8 @@ void JSScroll::OnScrollStartCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Call(JSRef<JSObject>(), 0, nullptr);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop",
-                ComponentEventType::COMPONENT_EVENT_SCROLL);
-        };
-        ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
+        ScrollModel::GetInstance()->SetOnScrollStop(
+            ScrollEventJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]), "onScrollStop" });
     }
     args.SetReturnValue(args.This());
 }
@@ -318,11 +407,7 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
 void JSScroll::ReachStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
-        ScrollModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+        ScrollModel::GetInstance()->SetOnReachStart(ReachJsCallback { JSRef<JSFunc>::Cast(args[0]) });
     }
     args.ReturnSelf();
 }
@@ -330,11 +415,7 @@ void JSScroll::ReachStartCallback(const JSCallbackInfo& args)
 void JSScroll::ReachEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
-        ScrollModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+        ScrollModel::GetInstance()->SetOnReachEnd(ReachJsCallback { JSRef<JSFunc>::Cast(args[0]) });
     }
     args.ReturnSelf();
 }
@@ -607,14 +688,8 @@ void JSScroll::SetZoomScale(const JSCallbackInfo& args)
     if (changeEventVal->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto changeEvent = [execCtx = args.GetExecutionContext(),
-            func = std::move(jsFunc), node = targetNode](float param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
-            PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(1, &newJSVal);
-        };
-        ScrollModel::GetInstance()->SetZoomScaleChangeEvent(std::move(changeEvent));
+        ScrollModel::GetInstance()->SetZoomScaleChangeEvent(
+            ZoomChangeJsCallback { args.GetExecutionContext(), std::move(jsFunc), targetNode });
     }
 }
 
@@ -633,12 +708,8 @@ void JSScroll::SetEnableBouncesZoom(const JSCallbackInfo& args)
 void JSScroll::OnDidZoomCallback(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsFunction()) {
-        auto onZoom = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](float scale) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(scale);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
-        ScrollModel::GetInstance()->SetOnDidZoom(std::move(onZoom));
+        ScrollModel::GetInstance()->SetOnDidZoom(
+            DidZoomJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     } else {
         ScrollModel::GetInstance()->SetOnDidZoom(nullptr);
     }
@@ -648,11 +719,8 @@ void JSScroll::OnDidZoomCallback(const JSCallbackInfo& args)
 void JSScroll::OnZoomStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto zoomStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Call(JSRef<JSObject>(), 0, nullptr);
-        };
-        ScrollModel::GetInstance()->SetOnZoomStart(std::move(zoomStart));
+        ScrollModel::GetInstance()->SetOnZoomStart(
+            ZeroArgJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     } else {
         ScrollModel::GetInstance()->SetOnZoomStart(nullptr);
     }
@@ -662,11 +730,8 @@ void JSScroll::OnZoomStartCallback(const JSCallbackInfo& args)
 void JSScroll::OnZoomStopCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto zoomStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Call(JSRef<JSObject>(), 0, nullptr);
-        };
-        ScrollModel::GetInstance()->SetOnZoomStop(std::move(zoomStop));
+        ScrollModel::GetInstance()->SetOnZoomStop(
+            ZeroArgJsCallback { args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0]) });
     } else {
         ScrollModel::GetInstance()->SetOnZoomStop(nullptr);
     }
