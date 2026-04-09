@@ -154,9 +154,9 @@ ArkUINativeModuleValue SetJSTextStyle(EcmaVM* vm, const panda::Local<panda::JSVa
 {
     ArkUINodeHandle nativeNode =
         reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
 
     NG::PickerTextStyle textStyle;
@@ -176,16 +176,18 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto frameNode = nativeNode
+                        ? nativeNode
+                        : reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNodePtr = reinterpret_cast<NG::FrameNode*>(frameNode);
+    RefPtr<CalendarTheme> calendarTheme = frameNodePtr->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
     if (IsJsView(firstArg, vm)) {
         SetJSTextStyle(vm, runtimeCallInfo->GetCallArgRef(NUM_1));
         return panda::JSValueRef::Undefined(vm);
@@ -195,9 +197,6 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColorSetByUser = false;
     if (!colorArg->IsUndefined()) {
-        auto frameNode = nativeNode
-                             ? nativeNode
-                             : reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
         if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
             textStyleStruct.textColorSetByUser = true;
@@ -728,9 +727,9 @@ bool SetJsHeight(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<pand
 
 void ParseCalendarPickerBorderColor(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<panda::JSValueRef>& args)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<CalendarTheme> theme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     if (!args->IsObject(vm) && !args->IsNumber() && !args->IsString(vm)) {
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderColor(
@@ -778,6 +777,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     if (IsJsView(firstArg, vm)) {
         SetCalendarPickerJSBorder(vm, secondArg);
         return panda::JSValueRef::Undefined(vm);
@@ -796,9 +796,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     }
 
     if (leftArg->IsUndefined() && rightArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+        RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
         CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorder(
             nativeNode, calendarTheme->GetEntryBorderColor().GetValue());

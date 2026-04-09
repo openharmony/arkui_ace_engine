@@ -465,9 +465,11 @@ void CalendarPattern::UpdateTitleNode()
     auto titleDate = Localization::GetInstance()->FormatDateTime(date, "YYYYMM");
     textLayoutProperty->UpdateContent(titleDate);
     selectedMonth_ = titleDate;
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();

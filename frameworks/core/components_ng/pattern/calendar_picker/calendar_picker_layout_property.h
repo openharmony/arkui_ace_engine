@@ -52,7 +52,7 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>(true);
         CHECK_NULL_VOID(calendarTheme);
         auto dialogALignType = GetDialogAlignType().value_or(CalendarEdgeAlign::EDGE_ALIGN_END);
         std::string alignType = "CalendarAlign.END";

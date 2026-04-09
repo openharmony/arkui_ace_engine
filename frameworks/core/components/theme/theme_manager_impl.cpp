@@ -20,6 +20,7 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
+#include "core/components/calendar/calendar_theme_wrapper.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "compatible/components/clock/clock_theme.h"
 #include "core/components/close_icon/close_icon_theme.h"
@@ -224,6 +225,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
             &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
+        { CalendarTheme::TypeId(), &ThemeWrapperBuildFunc<CalendarThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
         { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
