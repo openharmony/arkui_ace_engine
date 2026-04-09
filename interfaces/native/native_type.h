@@ -132,6 +132,35 @@ typedef enum {
 } ArkUI_PickerIndicatorType;
 
 /**
+ * @brief Enumerates the tree operating status for the cross-language option.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * Undefined, the initial value of the node tree operating status. Nodes in this status do not support
+     * cross-language node tree operations.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED = 0,
+    /**
+     * Enable, which means that when the option is applied to the node, the node's tree operating status will be
+     * enabled.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_ENABLE = 1,
+    /**
+     * Disable, which means that when the option is applied to the node, the node's tree operating status will be
+     * disabled.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
+} OH_ArkUI_CrossLanguageOperatingStatus;
+
+/**
  * @brief style parameters of background indicator.
  *
  * @since 23
@@ -5729,6 +5758,27 @@ void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageO
  * @since 15
  */
 bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Sets the tree operating status for the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @param status The tree operating status to be set for the cross-language option.
+ * Default value: OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED.
+ * @since 26.0.0
+ */
+void OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option, OH_ArkUI_CrossLanguageOperatingStatus status);
+
+/**
+ * @brief Gets the tree operating status of the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @return Return the tree operating status of the cross-language option.
+ * @since 26.0.0
+ */
+OH_ArkUI_CrossLanguageOperatingStatus OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option);
 
 /**
  * @brief Defines the parameters for visible area change events.

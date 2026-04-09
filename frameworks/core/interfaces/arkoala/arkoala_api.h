@@ -1174,6 +1174,20 @@ struct ArkUIBackdropBlur {
     ArkUI_Float32 darkeningBlur = 0.0f;
 };
 
+enum ArkUITreeOperatingStatus {
+    // Tree operating status for cross-language attribute setting
+    // Values must match TreeOperatingStatus and OH_ArkUI_CrossLanguageOperatingStatus
+    ARKUI_TREE_OPERATING_STATUS_UNDEFINED = 0,
+    ARKUI_TREE_OPERATING_STATUS_ENABLE = 1,
+    ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
+};
+
+struct ArkUICrossLanguageOption {
+    bool attributeSetting = false;
+    ArkUITreeOperatingStatus treeOperatingStatus = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+};
+
+
 struct ArkUIBadgeParam {
     ArkUI_Bool isPositionXy;
     ArkUI_Bool isDefaultFontSize;
@@ -8658,6 +8672,10 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
     ArkUI_Int32 (*moveNodeTo)(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index);
     ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
+    ArkUI_Int32 (*setCrossLanguageOptionsFull)(
+        ArkUINodeHandle node, const struct ArkUICrossLanguageOption* option);
+    ArkUI_Int32 (*getCrossLanguageOptionsFull)(
+        ArkUINodeHandle node, struct ArkUICrossLanguageOption* option);
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
