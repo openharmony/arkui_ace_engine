@@ -23,6 +23,7 @@ class ArkThemeWhiteList {
         'AlphabetIndexer',
         'Badge',
         'Button',
+        'Counter',
         'DataPanel',
         'DatePicker',
         'Menu',

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -88,6 +89,14 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto counterRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(counterRenderContext);
+        auto theme = host ? host->GetTheme<TextTheme>(host->GetThemeScopeId()) : nullptr;
+        auto defaultForegroundColor = theme ? theme->GetTextStyle().GetTextColor() : Color::BLACK;
+        Color textColor = counterRenderContext->GetForegroundColor().value_or(defaultForegroundColor);
+        json->PutExtAttr("foregroundColor", textColor.ToString().c_str(), filter);
         ToJsonValueAttribute(json);
     }
 
@@ -171,9 +180,60 @@ public:
         }
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        auto counterRenderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(counterRenderContext, false);
+        if (!counterRenderContext->HasForegroundColorFlag() || !counterRenderContext->GetForegroundColorFlagValue()) {
+            auto counterTheme = host->GetTheme<TextTheme>(true);
+            CHECK_NULL_RETURN(counterTheme, false);
+            auto textColor = counterTheme->GetTextStyle().GetTextColor();
+            UpdateButtonTextColor(host, subId_, textColor);
+            UpdateButtonTextColor(host, addId_, textColor);
+            counterRenderContext->UpdateForegroundColor(textColor);
+            return true;
+        }
+        return false;
+    }
+
     int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
+    void UpdateTextColor(const RefPtr<FrameNode>& frameNode, const Color& value)
+    {
+        CHECK_NULL_VOID(frameNode);
+        auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateTextColorByRender(value);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateForegroundColor(value);
+        renderContext->ResetForegroundColorStrategy();
+        renderContext->UpdateForegroundColorFlag(true);
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->UpdateFontColor(value);
+    }
+
+    void UpdateButtonTextColor(
+        const RefPtr<FrameNode>& frameNode, const std::optional<int32_t>& nodeId, const Color& textColor)
+    {
+        CHECK_NULL_VOID(frameNode);
+        if (!nodeId.has_value()) {
+            return;
+        }
+        auto buttonNode =
+            AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(nodeId.value())));
+        CHECK_NULL_VOID(buttonNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        CHECK_NULL_VOID(textNode);
+        UpdateTextColor(textNode, textColor);
+    }
+
     void DumpInfo() override
     {
         auto frameNode = GetHost();
