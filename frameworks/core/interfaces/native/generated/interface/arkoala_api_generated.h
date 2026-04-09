@@ -29318,6 +29318,9 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
     void (*enableEventPassthrough)(const Opt_Boolean* enabled,
                                    Ark_RawInputEventType eventType);
+    void (*setCustomCursor)(Ark_image_PixelMap value,
+                            const Opt_Int32* focusX,
+                            const Opt_Int32* focusY);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

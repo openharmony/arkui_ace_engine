@@ -34375,6 +34375,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetCustomCursorImpl(Ark_image_PixelMap value,
+                             const Opt_Int32* focusX,
+                             const Opt_Int32* focusY)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setCustomCursor(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, focusX);
+        out.append(", ");
+        WriteToString(&out, focusY);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -49660,6 +49676,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
             IUIContextAccessor::EnableEventPassthroughImpl,
+            IUIContextAccessor::SetCustomCursorImpl,
         };
         return &IUIContextAccessorImpl;
     }

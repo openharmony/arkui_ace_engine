@@ -35252,6 +35252,25 @@ void impl_IUIContext_enableEventPassthrough(KSerializerBuffer thisArray, int32_t
         GetAccessors()->getIUIContextAccessor()->enableEventPassthrough(static_cast<Opt_Boolean*>(&enabledValueTemp), static_cast<Ark_RawInputEventType>(eventType));
 }
 KOALA_INTEROP_DIRECT_V3(IUIContext_enableEventPassthrough, KSerializerBuffer, int32_t, Ark_Int32)
+void impl_IUIContext_setCustomCursor(Ark_NativePointer value, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto focusXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Int32 focusXValueTempTmpBuf = {};
+        focusXValueTempTmpBuf.tag = focusXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((focusXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            focusXValueTempTmpBuf.value = thisDeserializer.readInt32();
+        }
+        Opt_Int32 focusXValueTemp = focusXValueTempTmpBuf;;
+        const auto focusYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Int32 focusYValueTempTmpBuf = {};
+        focusYValueTempTmpBuf.tag = focusYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((focusYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            focusYValueTempTmpBuf.value = thisDeserializer.readInt32();
+        }
+        Opt_Int32 focusYValueTemp = focusYValueTempTmpBuf;;
+        GetAccessors()->getIUIContextAccessor()->setCustomCursor(static_cast<Ark_image_PixelMap>(value), static_cast<Opt_Int32*>(&focusXValueTemp), static_cast<Opt_Int32*>(&focusYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(IUIContext_setCustomCursor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }

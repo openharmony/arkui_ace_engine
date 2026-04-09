@@ -3700,6 +3700,13 @@ export class IUIContext {
         IUIContext.enableEventPassthrough_serialize(enabled_casted, eventType_casted)
         return
     }
+    public static setCustomCursor(value: image.PixelMap, focusX?: int32, focusY?: int32): void {
+        const value_casted = value as (image.PixelMap)
+        const focusX_casted = focusX as (int32 | undefined)
+        const focusY_casted = focusY as (int32 | undefined)
+        IUIContext.setCustomCursor_serialize(value_casted, focusX_casted, focusY_casted)
+        return
+    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3789,6 +3796,25 @@ export class IUIContext {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IUIContext_enableEventPassthrough(thisSerializer.asBuffer(), thisSerializer.length(), eventType.valueOf())
+        thisSerializer.release()
+    }
+    private static setCustomCursor_serialize(value: image.PixelMap, focusX?: int32, focusY?: int32): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (focusX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const focusXTmpValue = focusX!
+            thisSerializer.writeInt32(focusXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (focusY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const focusYTmpValue = focusY!
+            thisSerializer.writeInt32(focusYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._IUIContext_setCustomCursor(extractors.toImagePixelMapPtr(value), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
