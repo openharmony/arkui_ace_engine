@@ -142,6 +142,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                     this.clearBindingRefs(listener);
                 }
             });
+            ObserveSingleton.instance.updateDirtySyncMonitorPaths();
         }
         if (!this.hasFired && this.shouldFireChange()) {
             ObserveSingleton.instance.changeMutableState(this);
