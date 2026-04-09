@@ -83,6 +83,11 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
     }
     if (!hasDividerNode_) {
         CreateDividerNodeIfNeeded();
+        if (dividerNode_) {
+            auto renderContext = dividerNode_->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+        }
         TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after setPrimaryPage");
         hostNode->AddChild(dividerNode_, 0);
         hasDividerNode_ = true;
@@ -166,6 +171,11 @@ bool ParallelStagePattern::CalculateMode()
         // primary page is set, need to attach divider node
         if (!hasDividerNode_ && primaryNode) {
             CreateDividerNodeIfNeeded();
+            if (dividerNode_) {
+                auto renderContext = dividerNode_->GetRenderContext();
+                CHECK_NULL_RETURN(renderContext, false);
+                renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+            }
             TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after changeMode");
             hostNode->AddChild(dividerNode_, 0);
             hasDividerNode_ = true;
