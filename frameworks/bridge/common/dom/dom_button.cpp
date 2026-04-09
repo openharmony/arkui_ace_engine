@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/common/dom/dom_button.h"
 
+#include "core/components/progress/loading_progress_component.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
 
