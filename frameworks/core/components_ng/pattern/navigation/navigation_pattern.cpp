@@ -6174,42 +6174,38 @@ bool NavigationPattern::IsHomeDestinationOrNavBarVisible()
 }
 
 bool NavigationPattern::ShouldFireHomeDestiationLifecycle(NavDestinationLifecycle lifecycle,
-    const RefPtr<NavDestinationPattern>& destPattern, int32_t lastStandardIndex,
-    int32_t curStackSize, bool isModeChange)
+    const RefPtr<NavDestinationPattern>& destPattern, int32_t curStackSize, bool notifyByLayout)
 {
-    if (isModeChange || navigationMode_ == NavigationMode::SPLIT) {
-        switch (lifecycle) {
-            case NavDestinationLifecycle::ON_SHOW:
-                return !destPattern->GetIsOnShow();
-            case NavDestinationLifecycle::ON_ACTIVE:
-                return !destPattern->IsActive();
-            case NavDestinationLifecycle::ON_INACTIVE:
-                return destPattern->IsActive();
-            case NavDestinationLifecycle::ON_HIDE:
-                return destPattern->GetIsOnShow();
-            default:
-                return false;
-        }
+    bool isVisible = IsHomeDestinationOrNavBarVisible();
+    bool isStackEmpty = curStackSize == 0;
+    bool isSplitMode = navigationMode_ == NavigationMode::SPLIT;
+    // onHidden and onInActive need to trigger unconditionally, while is not notifyByLayout.
+    switch (lifecycle) {
+        case NavDestinationLifecycle::ON_SHOW:
+            return isVisible;
+
+        case NavDestinationLifecycle::ON_HIDE:
+            if (!notifyByLayout) {
+                return true;
+            }
+            return !isVisible;
+
+        case NavDestinationLifecycle::ON_ACTIVE:
+            return isVisible && (isSplitMode || isStackEmpty);
+
+        case NavDestinationLifecycle::ON_INACTIVE:
+            if (!notifyByLayout) {
+                return true;
+            }
+            return !isVisible || (!isSplitMode && !isStackEmpty);
+
+        default:
+            return false;
     }
-    if (navigationMode_ == NavigationMode::STACK) {
-        switch (lifecycle) {
-            case NavDestinationLifecycle::ON_SHOW:
-                return lastStandardIndex < 0 && !destPattern->GetIsOnShow();
-            case NavDestinationLifecycle::ON_ACTIVE:
-                return curStackSize == 0 && !destPattern->IsActive();
-            case NavDestinationLifecycle::ON_INACTIVE:
-                return curStackSize == 0 && destPattern->IsActive();
-            case NavDestinationLifecycle::ON_HIDE:
-                return lastStandardIndex < 0 && destPattern->GetIsOnShow();
-            default:
-                return false;
-        }
-    }
-    return false;
 }
 
 void NavigationPattern::FireHomeDestinationLifeCycleIfNeeded(
-    NavDestinationLifecycle lifecycle, bool isModeChange, NavDestLifecycleReason reason)
+    NavDestinationLifecycle lifecycle, bool notifyByLayout, NavDestLifecycleReason reason)
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
@@ -6217,9 +6213,8 @@ void NavigationPattern::FireHomeDestinationLifeCycleIfNeeded(
     CHECK_NULL_VOID(destNode);
     auto destPattern = destNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(destPattern);
-    auto lastStandardIndex = host->GetLastStandardIndex();
     int32_t curStackSize = static_cast<int32_t>(GetAllNavDestinationNodes().size());
-    if (!ShouldFireHomeDestiationLifecycle(lifecycle, destPattern, lastStandardIndex, curStackSize, isModeChange)) {
+    if (!ShouldFireHomeDestiationLifecycle(lifecycle, destPattern, curStackSize, notifyByLayout)) {
         return;
     }
     NotifyDestinationLifecycle(destNode, lifecycle, reason);

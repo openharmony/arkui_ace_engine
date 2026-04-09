@@ -639,13 +639,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             SwitchModeWithAnimation(AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost()));
         } else {
             bool isHomeDestinationOrNavBarVisible = navigationPattern->IsHomeDestinationOrNavBarVisible();
-            if (isHomeDestinationOrNavBarVisible) {
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
-            } else {
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_INACTIVE, true);
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
-            }
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_INACTIVE, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
             auto host = navigationPattern->GetHost();
             if (host && IsForceSplitSupported(host->GetContext()) && isSplitDisplayChange) {
                 navigationPattern->FireRelatedDestinationLifecycleForModeChange();

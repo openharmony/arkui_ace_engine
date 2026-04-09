@@ -612,7 +612,7 @@ public:
 
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
     bool IsHomeDestinationOrNavBarVisible();
-    void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
+    void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool notifyByLayout = false,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
 
     bool CheckNeedCreate(int32_t index);
@@ -854,8 +854,7 @@ private:
     bool CheckIfNoNeedAnimationForForceSplit(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination);
     bool ShouldFireHomeDestiationLifecycle(NavDestinationLifecycle lifecycle,
-        const RefPtr<NavDestinationPattern>& destPattern, int32_t lastStandardIndex,
-        int32_t curStackSize, bool isModeChange);
+        const RefPtr<NavDestinationPattern>& destPattern, int32_t curStackSize, bool notifyByLayout);
     void FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
