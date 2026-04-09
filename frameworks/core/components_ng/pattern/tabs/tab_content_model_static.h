@@ -62,6 +62,7 @@ public:
     static void SetDrawableIndicatorConfig(FrameNode* frameNode, const ImageInfoConfig& config);
     static void SetIndicatorColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetDrawableIndicatorFlag(FrameNode* frameNode, bool isDrawableIndicator);
+    static void InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

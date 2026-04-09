@@ -211,6 +211,14 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(
     textLayoutProperty->UpdateFontSize(dialogTheme->GetDialogFontSize());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(dialogTheme->GetMaxLines());
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto fontManager = context->GetFontManager();
+    if (fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+    }
     MarginProperty margin;
     margin.left = CalcLength(dialogTheme->GetTextPropertyLeft());
     margin.right = CalcLength(dialogTheme->GetTextPropertyRight());

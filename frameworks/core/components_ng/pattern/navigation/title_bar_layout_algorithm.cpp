@@ -810,11 +810,14 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             titleWrapper->Layout();
             return;
         }
-        MeasureContext context;
-        context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
-        context.fontSize = titleFontSize_;
-        minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
-        minTitleHeight_ = 0.0;
+        if (NavigationTitleUtil::CheckNeedFontPadding(titleBarNode)) {
+            MeasureContext context;
+            context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
+            context.fontSize = titleFontSize_;
+            minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
+        } else {
+            minTitleHeight_ = 0.0;
+        }
         initialTitleOffsetY_ = menuOccupiedHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);

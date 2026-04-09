@@ -77,6 +77,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
