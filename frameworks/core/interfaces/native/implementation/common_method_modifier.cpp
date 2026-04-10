@@ -99,6 +99,7 @@
 
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+#include "core/common/event_manager.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -487,6 +488,12 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
+    }
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
     }
 };
 

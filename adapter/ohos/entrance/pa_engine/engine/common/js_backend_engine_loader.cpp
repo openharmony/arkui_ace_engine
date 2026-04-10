@@ -17,6 +17,8 @@
 
 #include <dlfcn.h>
 
+#include "base/utils/singleton.h"
+
 namespace OHOS::Ace {
 
 constexpr char BACKEND_ENGINE_ENTRY[] = "OHOS_ACE_GetJsBackendEngineLoader";

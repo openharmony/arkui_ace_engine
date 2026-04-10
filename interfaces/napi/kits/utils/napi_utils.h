@@ -28,6 +28,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::Napi {

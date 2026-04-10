@@ -40,6 +40,9 @@ protected:
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
     static void SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
+
+private:
+    static int32_t GetThemeScopeId();
 };
 
 class JSIndicatorController final : public NG::JSIndicatorControllerBase {

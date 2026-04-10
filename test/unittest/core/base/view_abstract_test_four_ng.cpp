@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
@@ -32,6 +33,7 @@ void ViewAbstractTestFourNg::SetUpTestSuite()
     PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
     PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
 }
 
 void ViewAbstractTestFourNg::TearDownTestSuite()

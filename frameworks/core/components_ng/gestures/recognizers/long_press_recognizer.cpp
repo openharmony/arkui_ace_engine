@@ -409,6 +409,7 @@ void LongPressRecognizer::SendCallbackMsg(
         isOnActionTriggered_ = true;
     }
     TriggerCallbackMsg(callback, isRepeat, type);
+    ReportToGestureDebugManager(type, GestureListenerType::LONG_PRESS);
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }

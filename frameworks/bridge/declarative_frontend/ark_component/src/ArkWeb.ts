@@ -2185,21 +2185,6 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     }
     return this;
   }
-  enableScrollDirectionalLock(value: boolean, type: number): this {
-    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
-    if (!isUndefined(value) && !isNull(value)) {
-      arkEnableScrollDirectionalLock.value = value;
-    }
-    if (!isUndefined(type) && !isNull(type)) {
-      arkEnableScrollDirectionalLock.type = type;
-    }
-    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
-    } else {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
-    }
-    return this;
-  }
   nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt): this {
     if (!value) return this;
     const options = new ArkNestedScrollOptionsExt();
@@ -2326,9 +2311,19 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
-  enableScrollDirectionalLock(enabled: boolean, type: number): this {
-    const config: DirectionalLockConfig = { enabled, type };
-    modifierWithKey(this._modifiersWithKeys, WebEnableDirectionalLockModifier.identity, WebEnableDirectionalLockModifier, config);
+  enableScrollDirectionalLock(value: boolean, type: number): this {
+    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
+    if (!isUndefined(value) && !isNull(value)) {
+      arkEnableScrollDirectionalLock.value = value;
+    }
+    if (!isUndefined(type) && !isNull(type)) {
+      arkEnableScrollDirectionalLock.type = type;
+    }
+    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
+        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+    }
     return this;
   }
   enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {

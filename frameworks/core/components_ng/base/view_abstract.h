@@ -69,6 +69,8 @@ class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
 class UiMaterial;
+struct ImmersiveOptions;
+struct ImmersiveMaterialConfig;
 }
 
 namespace OHOS::Ace::NG {
@@ -1196,6 +1198,15 @@ private:
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static void ResetBorderAndBackgroundEffect(
+        FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void SetImmersiveOptions(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void SetImmersiveConfigs(
+        const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config);
+    static void ResetImmersiveShadowToDefault(
+        const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

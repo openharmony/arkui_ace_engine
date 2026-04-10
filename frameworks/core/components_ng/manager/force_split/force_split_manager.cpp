@@ -19,9 +19,17 @@
 #include "base/utils/system_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/force_split/force_split_utils.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float DEFAULT_SPLIT_RATIO = 0.5f;
+}
+
+ForceSplitManager::ForceSplitManager()
+    : splitRatio_(DEFAULT_SPLIT_RATIO), mode_(ForceSplitMode::NOT_SPLIT)
+{
+}
+
 void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
 {
     if (surfaceChangeCallbackId_.has_value()) {
@@ -29,10 +37,7 @@ void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
     }
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
-    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason type) {
-        if (type != WindowSizeChangeReason::ROTATION && type != WindowSizeChangeReason::UNDEFINED) {
-            return;
-        }
+    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason) {
         auto mgr = weakMgr.Upgrade();
         CHECK_NULL_VOID(mgr);
         mgr->ChangeForceSplitModeIfNeeded();
@@ -46,9 +51,11 @@ void ForceSplitManager::ChangeForceSplitModeIfNeeded()
         return;
     }
     bool isEnable = delayedIsForceSplitEnable_.value();
+    auto mode = delayedMode_.value();
     delayedIsForceSplitEnable_ = std::nullopt;
+    delayedMode_ = std::nullopt;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "delayed %{public}s forceSplit", (isEnable ? "enable" : "disable"));
-    SetForceSplitEnable(isEnable, false);
+    SetForceSplitEnable(isEnable, mode, false);
 }
 
 bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
@@ -59,10 +66,10 @@ bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
     return isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_;
 }
 
-void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, needUpdateViewport:%{public}d",
-        (isForceSplit ? "enable" : "disable"), needUpdateViewport);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}d, needUpdateViewport:%{public}d",
+        (isForceSplit ? "enable" : "disable"), static_cast<int32_t>(mode), needUpdateViewport);
     /**
      * As long as the application supports force split, regardless of whether it is enabled or not,
      * the SetForceSplitEnable interface will be called.
@@ -70,6 +77,7 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
     isForceSplitSupported_ = true;
     if (needUpdateViewport) {
         delayedIsForceSplitEnable_ = isForceSplit;
+        delayedMode_ = mode;
         RegisterSurfaceChangeCallbackIfNeeded();
         return;
     }
@@ -78,6 +86,12 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
             delayedIsForceSplitEnable_.value());
         delayedIsForceSplitEnable_ = std::nullopt;
     }
+    if (delayedMode_.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed mode:%{public}d", delayedMode_.value());
+        delayedMode_ = std::nullopt;
+    }
+    mode_ = mode;
+    UpdateForceSplitRatio();
     if (isForceSplitEnable_ == isForceSplit) {
         return;
     }
@@ -87,9 +101,15 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateVi
 
 void ForceSplitManager::OnForceSplitEnableChange()
 {
+    UpdateIsInForceSplitMode();
+    FlushArkUIHook();
+    NotifyForceSplitStateChange();
+}
+
+void ForceSplitManager::FlushArkUIHook()
+{
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
-    UpdateIsInForceSplitMode();
     auto width = context->GetWindowOriginalWidth();
     if (width > 0) {
         context->ForceUpdateDesignWidthScale(width);
@@ -100,7 +120,6 @@ void ForceSplitManager::OnForceSplitEnableChange()
         geometryNode->ResetParentLayoutConstraint();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    NotifyForceSplitStateChange();
 }
 
 void ForceSplitManager::SetNavigationForceSplitEnableInternal(bool enableSplit)
@@ -142,17 +161,7 @@ bool ForceSplitManager::IsTopFullScreenPage()
     }
     auto navMgr = context->GetNavigationManager();
     CHECK_NULL_RETURN(navMgr, false);
-    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
-    if (!existForceSplitNav.first) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, no force split nav");
-        return false;
-    }
-    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
-    CHECK_NULL_RETURN(navNode, false);
-    auto navPattern = navNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(navPattern, false);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, nav:%{public}d", navPattern->IsTopFullScreenPage());
-    return navPattern->IsTopFullScreenPage();
+    return navMgr->IsTopFullScreenPage();
 }
 
 bool ForceSplitManager::IsWindowConditionMatched()
@@ -235,5 +244,106 @@ void ForceSplitManager::NotifyForceSplitStateChange()
             pair.second();
         }
     }
+}
+
+float ForceSplitManager::CalcCurrentSplitRatio()
+{
+    if (mode_ == ForceSplitMode::NOT_SPLIT) {
+        return DEFAULT_SPLIT_RATIO;
+    }
+    if (mode_ == ForceSplitMode::WIDE_SPLIT) {
+        return wideSplitRatio_.has_value() ? wideSplitRatio_.value() : DEFAULT_SPLIT_RATIO;
+    }
+    return squareSplitRatio_.has_value() ? squareSplitRatio_.value() : DEFAULT_SPLIT_RATIO;
+}
+
+void ForceSplitManager::AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener)
+{
+    forceSplitRatioListeners_[nodeId] = std::move(listener);
+}
+
+void ForceSplitManager::RemoveForceSplitRatioListener(int32_t nodeId)
+{
+    auto it = forceSplitRatioListeners_.find(nodeId);
+    if (it != forceSplitRatioListeners_.end()) {
+        forceSplitRatioListeners_.erase(it);
+    }
+}
+
+void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    FlushArkUIHook();
+
+    // Update Dialog ratio
+    auto listeners = forceSplitRatioListeners_;
+    for (auto pair : listeners) {
+        if (pair.second) {
+            pair.second(ratio);
+        }
+    }
+    if (isRouter_) {
+        auto stageMgr = context->GetStageManager();
+        CHECK_NULL_VOID(stageMgr);
+        auto stageNode = stageMgr->GetStageNode();
+        CHECK_NULL_VOID(stageNode);
+        stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
+    if (!existForceSplitNav.first) {
+        return;
+    }
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
+    CHECK_NULL_VOID(navNode);
+    navNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ForceSplitManager::UpdateForceSplitRatio()
+{
+    auto splitRatio = CalcCurrentSplitRatio();
+    if (NearEqual(splitRatio, splitRatio_)) {
+        return;
+    }
+    splitRatio_ = splitRatio;
+    OnForceSplitRatioUpdate(splitRatio_);
+}
+
+bool ForceSplitManager::IsPagePair(const std::string& from, const std::string& to) const
+{
+    auto it = pagePairs_.find(from);
+    if (it == pagePairs_.end()) {
+        return false;
+    }
+    return it->second.empty() || it->second.find(to) != it->second.end();
+}
+
+bool ForceSplitManager::IsTransPage(const std::string& name) const
+{
+    return transPages_.find(name) != transPages_.end();
+}
+
+bool ForceSplitManager::CanPushPageToPrimary() const
+{
+    if (behaviorMode_ == ForceSplitBehaviorMode::DISPLACE) {
+        return true;
+    }
+    return !pagePairs_.empty();
+}
+
+bool ForceSplitManager::IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const
+{
+    if (IsFullScreenPage(from) || IsFullScreenPage(to)) {
+        return false;
+    }
+    if (behaviorMode_ == ForceSplitBehaviorMode::DISPLACE) {
+        // In displace mode, except for the fromPage or toPage that belong to transPages,
+        // all transitions will trigger secondary push to primary by default
+        return !IsTransPage(from) && !IsTransPage(to);
+    }
+    return IsPagePair(from, to);
 }
 } // namespace OHOS::Ace::NG

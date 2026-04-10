@@ -3878,6 +3878,14 @@ typedef struct Opt_Alignment {
     Ark_Tag tag;
     Ark_Alignment value;
 } Opt_Alignment;
+typedef enum Ark_AnchoredColorMode {
+    ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM = 0,
+    ARK_ANCHORED_COLOR_MODE_FOLLOW_TARGET = 1,
+} Ark_AnchoredColorMode;
+typedef struct Opt_AnchoredColorMode {
+    Ark_Tag tag;
+    Ark_AnchoredColorMode value;
+} Opt_AnchoredColorMode;
 typedef enum Ark_AnimationMode {
     ARK_ANIMATION_MODE_CONTENT_FIRST = 0,
     ARK_ANIMATION_MODE_ACTION_FIRST = 1,
@@ -5649,7 +5657,6 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
-    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
@@ -22656,6 +22663,7 @@ typedef struct Ark_CustomPopupOptions {
     Opt_Dimension borderWidth;
     Opt_PopupBorderLinearGradient outlineLinearGradient;
     Opt_PopupBorderLinearGradient borderLinearGradient;
+    Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
     Opt_VoidCallback onDidAppear;
     Opt_VoidCallback onWillDisappear;
@@ -22926,6 +22934,7 @@ typedef struct Ark_PopupCommonOptions {
     Opt_Dimension borderWidth;
     Opt_PopupBorderLinearGradient outlineLinearGradient;
     Opt_PopupBorderLinearGradient borderLinearGradient;
+    Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
     Opt_VoidCallback onDidDisappear;
     Opt_VoidCallback onWillDisappear;
@@ -23380,6 +23389,7 @@ typedef struct Ark_PopupOptions {
     Opt_Dimension borderWidth;
     Opt_PopupBorderLinearGradient outlineLinearGradient;
     Opt_PopupBorderLinearGradient borderLinearGradient;
+    Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onDidAppear;

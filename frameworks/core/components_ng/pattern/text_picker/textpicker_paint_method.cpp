@@ -28,16 +28,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t DOUBLE = 2;
 
-void UpdateDividerColor(ItemDivider& divider)
+void UpdateDividerColor(ItemDivider& divider, RefPtr<PickerTheme> pickerTheme)
 {
-    if (SystemProperties::ConfigChangePerform() && divider.isDefaultColor) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext && pipelineContext->IsSystemColorChange()) {
-            auto pickerTheme = pipelineContext->GetTheme<PickerTheme>();
-            if (pickerTheme) {
-                divider.color = pickerTheme->GetDividerColor();
-            }
-        }
+    CHECK_NULL_VOID(pickerTheme);
+    if (SystemProperties::ConfigChangePerform() && divider.isDefaultColor && divider.isDefaultColor) {
+        divider.color = pickerTheme->GetDividerColor();
     }
 }
 } // namespace
@@ -46,33 +41,31 @@ CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto pickerNode = renderContext->GetHost();
     CHECK_NULL_RETURN(pickerNode, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>(pickerNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, nullptr);
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto children = pickerNode->GetChildren();
 
-    return [weak = WeakClaim(this), layoutProperty, pattern = pattern_, children](RSCanvas& canvas) {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            if (layoutProperty->HasSelectedBackgroundColor()) {
-                picker->PaintSelectedBackgroundColor(canvas, children,
-                    layoutProperty->GetSelectedBackgroundColorValue(), layoutProperty->GetSelectedBorderRadiusValue());
-            }
-        };
+    return [weak = WeakClaim(this), layoutProperty, pattern = pattern_, children, theme](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        if (layoutProperty->GetSelectedBackgroundColorSetByUserValue(false)) {
+            picker->PaintSelectedBackgroundColor(canvas, children,
+                layoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedBackgroundColor()),
+                layoutProperty->GetSelectedBorderRadiusValue(theme->GetSelectedBorderRadius()));
+        }
+    };
 }
 
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    CHECK_EQUAL_RETURN(theme->IsCircleDial(), true, nullptr);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
@@ -80,6 +73,9 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto pickerNode = renderContext->GetHost();
     CHECK_NULL_RETURN(pickerNode, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>(pickerNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, nullptr);
+    CHECK_EQUAL_RETURN(theme->IsCircleDial(), true, nullptr);
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
 
@@ -89,7 +85,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
 
     return
         [weak = WeakClaim(this), layoutProperty, frameRect,
-            fontScale, pattern = pattern_](RSCanvas& canvas) {
+            fontScale, pattern = pattern_, theme](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
             CHECK_NULL_VOID(picker);
             auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
@@ -107,7 +103,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             if (contentRect.Width() >= 0.0f && (contentRect.Height() >= dividerHeight)) {
                 if (textPickerPattern->GetCustomDividerFlag()) {
                     auto divider = textPickerPattern->GetDivider();
-                    UpdateDividerColor(divider);
+                    UpdateDividerColor(divider, theme);
                     auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
                     divider.isRtl = (textDirection == TextDirection::RTL) ? true : false;
                     picker->PaintCustomDividerLines(canvas, contentRect, frameRect, divider, dividerHeight);

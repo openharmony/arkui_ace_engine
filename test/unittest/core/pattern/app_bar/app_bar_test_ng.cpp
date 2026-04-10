@@ -500,7 +500,16 @@ HWTEST_F(AppBarTestNg, TestOnMenuClick019, TestSize.Level1)
     EXPECT_NE(pipeline, nullptr);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     EXPECT_NE(theme, nullptr);
-    appBar->OnMenuClick();
+    std::map<std::string, std::string> params = {
+        {"bundleName", "com.hmos.asde"},
+        {"abilityName", "MainAbility"},
+        {"module", "entry"},
+        {"pageName", "DETAIL"},
+        {"ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel"},
+        {"TopNavPathInfo", ""},
+        {"ohos.extra.menubar.param.key.showMode", "1"},
+    };
+    appBar->OnMenuClick(params);
     EXPECT_NE(appBar, nullptr);
 }
 

@@ -17,6 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -2415,10 +2416,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg303, TestSize.Level1)
      * @tc.steps2: Call the function CompensateTouchMoveEventBeforeDown.
      * @tc.expected: Test if this function is available and the events is consumed.
      */
-    context_->CompensateTouchMoveEventBeforeDown();
+    context_->CompensateTouchMoveEventBeforeDown(context_->touchEvents_);
     context_->touchEvents_.push_back(touchEventOne);
     context_->touchEvents_.push_back(touchEventTwo);
-    context_->CompensateTouchMoveEventBeforeDown();
+    context_->CompensateTouchMoveEventBeforeDown(context_->touchEvents_);
     EXPECT_TRUE(context_->touchEvents_.empty());
 }
 
@@ -2716,6 +2717,52 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg409, TestSize.Level1)
     context_->OnAxisEvent(lastEvent, context_->rootNode_);
     context_->OnAxisEvent(currentEvent, context_->rootNode_);
     EXPECT_EQ(context_->eventManager_->deviceIdChecker_.empty(), false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg410
+ * @tc.desc: Test OnTouchEvent with SourceTool.MOUSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    const std::chrono::milliseconds timeoutMs{ 300 };
+    const std::chrono::milliseconds durationVsyncTimeMs{ 7 };
+    TimeStamp currentTime = std::chrono::high_resolution_clock::now();
+    context_->compatibleManager_.BreakGenerate();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    touchEvent.primitiveSourceTool = SourceTool::MOUSE;
+    touchEvent.convertInfo.first = UIInputEventType::AXIS;
+    touchEvent.SetTime(currentTime - durationVsyncTimeMs * 2);
+    touchEvent.isGenerate = false;
+    context_->OnTouchEvent(touchEvent, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::READY);
+
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.y = 200.0f;
+    touchEvent.SetTime(currentTime - durationVsyncTimeMs);
+    context_->OnTouchEvent(touchEvent, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::ONGOING);
+
+    touchEvent.type = TouchType::UP;
+    touchEvent.SetTime(currentTime);
+    context_->OnTouchEvent(touchEvent, false);
+
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    int32_t timeSleepUs = durationVsyncTimeMs.count() * 1000;
+    while (context_->compatibleManager_.GetGeneratedMoveEvent()) {
+        usleep(timeSleepUs);
+        context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+        ASSERT_TRUE(std::chrono::high_resolution_clock::now() - currentTime < timeoutMs);
+    }
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
 } // namespace NG
 } // namespace OHOS::Ace

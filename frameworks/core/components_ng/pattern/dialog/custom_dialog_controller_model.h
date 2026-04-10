@@ -23,6 +23,7 @@
 #include "core/components/dialog/dialog_properties.h"
 namespace OHOS::Ace {
 struct DialogProperties;
+enum class PromptActionCommonState;
 enum class DialogOperation {
     DIALOG_OPEN = 0,
     DIALOG_CLOSE,

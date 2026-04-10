@@ -20,6 +20,7 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
+#include "core/components/calendar/calendar_theme_wrapper.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "compatible/components/clock/clock_theme.h"
 #include "core/components/close_icon/close_icon_theme.h"
@@ -93,6 +94,7 @@
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/dialog/dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
+#include "core/components_ng/pattern/patternlock/patternlock_theme_wrapper.h"
 #include "core/components_ng/pattern/qrcode/qrcode_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
@@ -100,12 +102,16 @@
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
+#include "core/components_ng/pattern/bubble/popup_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme_wrapper.h"
+#include "core/components_ng/pattern/indexer/indexer_theme_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_theme_wrapper.h"
+#include "core/components_ng/pattern/tabs/tab_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -205,8 +211,10 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
+        { V2::PatternLockTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PatternLockThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
+        { PopupTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PopupThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
         { NG::ContainerPickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ContainerPickerThemeWrapper::WrapperBuilder> },
         { ProgressTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ProgressThemeWrapper::WrapperBuilder> },
@@ -217,8 +225,12 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
             &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
+        { CalendarTheme::TypeId(), &ThemeWrapperBuildFunc<CalendarThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
+        { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
+        { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
+        { SwiperIndicatorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwiperThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

@@ -16,7 +16,8 @@
 
 #include <sys/time.h>
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "core/common/container.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

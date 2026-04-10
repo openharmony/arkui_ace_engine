@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -480,14 +481,15 @@ int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnR
 
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index)
 {
-    if (node == nullptr || target_parent == nullptr
-        || !OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(target_parent)) {
+    if (node == nullptr || target_parent == nullptr ||
+        !OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(node) ||
+        !OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(target_parent)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(node->uiNodeHandle,
-        target_parent->uiNodeHandle, index);
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(
+        node->uiNodeHandle, target_parent->uiNodeHandle, index);
     return errorCode;
 }
 
@@ -498,8 +500,15 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(
-        node->uiNodeHandle, option->attributeSetting);
+    
+    ArkUICrossLanguageOption arkUIOption;
+    arkUIOption.attributeSetting = option->attributeSetting;
+    
+    arkUIOption.treeOperatingStatus = static_cast<ArkUITreeOperatingStatus>(
+        static_cast<int32_t>(option->treeOperatingStatus));
+    
+    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(
+        node->uiNodeHandle, &arkUIOption);
     return errorCode;
 }
 
@@ -510,15 +519,26 @@ int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    bool isCross = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
-    option->attributeSetting = isCross;
+    
+    ArkUICrossLanguageOption arkUIOption;
+    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptionsFull(
+        node->uiNodeHandle, &arkUIOption);
+    if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        return errorCode;
+    }
+    
+    option->attributeSetting = arkUIOption.attributeSetting;
+    option->treeOperatingStatus = static_cast<OH_ArkUI_CrossLanguageOperatingStatus>(
+        static_cast<int32_t>(arkUIOption.treeOperatingStatus));
+    
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void)
 {
     ArkUI_CrossLanguageOption* option = new ArkUI_CrossLanguageOption {
-        .attributeSetting = false
+        .attributeSetting = false,
+        .treeOperatingStatus = OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED
     };
     return option;
 }
@@ -545,6 +565,24 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
         return false;
     }
     return option->attributeSetting;
+}
+
+void OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option, OH_ArkUI_CrossLanguageOperatingStatus status)
+{
+    if (option == nullptr) {
+        return;
+    }
+    option->treeOperatingStatus = status;
+}
+
+OH_ArkUI_CrossLanguageOperatingStatus OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option)
+{
+    if (option == nullptr) {
+        return OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    }
+    return option->treeOperatingStatus;
 }
 
 int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
@@ -914,6 +952,10 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+const char* OH_ArkUI_NativeModule_GetErrorMessage()
+{
+    return OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+}
 #ifdef __cplusplus
 };
 #endif

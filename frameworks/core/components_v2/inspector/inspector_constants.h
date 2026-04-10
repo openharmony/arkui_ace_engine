@@ -581,6 +581,12 @@ ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
 // effect view
 ACE_EXPORT extern const char EFFECT_COMPONENT_ETS_TAG[];
 
+// distortion component
+ACE_EXPORT extern const char DISTORTION_COMPONENT_ETS_TAG[];
+
+// distortion content node
+ACE_EXPORT extern const char DISTORTION_CONTENT_ETS_TAG[];
+
 // button
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char MODEL_ETS_TAG[];

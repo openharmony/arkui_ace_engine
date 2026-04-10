@@ -142,7 +142,7 @@ void AppBarView::BindJSContainer()
     InitAbilityContextCallback();
 }
 
-void AppBarView::OnThirdCloseEvent()
+void AppBarView::OnThirdCloseEvent(int32_t code)
 {
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
@@ -152,12 +152,12 @@ void AppBarView::OnThirdCloseEvent()
     CHECK_NULL_VOID(container);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "AppBar OnThirdCloseEvent");
     if (container->IsUIExtensionWindow()) {
-        container->TerminateUIExtensionInner();
+        container->TerminateUIExtensionInner(code);
     }
 }
-void AppBarView::FireAbilityCloseEvent()
+void AppBarView::FireAbilityCloseEvent(int32_t code)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "FireAbilityCloseEvent");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "FireAbilityCloseEvent code = %{public}d", code);
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
     auto pipeline = atom->GetContext();
@@ -165,12 +165,12 @@ void AppBarView::FireAbilityCloseEvent()
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [atomicService = atomicService_]() {
+        [atomicService = atomicService_, code]() {
             auto atom = atomicService.Upgrade();
             CHECK_NULL_VOID(atom);
             auto pattern = atom->GetPattern<AtomicServicePattern>();
             CHECK_NULL_VOID(pattern);
-            pattern->FireAbilityCloseEvent();
+            pattern->FireAbilityCloseEvent(code);
         },
         OHOS::Ace::TaskExecutor::TaskType::UI, "ArkUIFireArkuiAbilityCloseEvent");
 }
@@ -180,11 +180,11 @@ void AppBarView::InitAbilityContextCallback()
     TAG_LOGI(AceLogTag::ACE_APPBAR, "InitAbilityContextCallback");
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto abilityRuntimeContextCallback = [weakSelf = WeakClaim(this), container]() {
+    auto abilityRuntimeContextCallback = [weakSelf = WeakClaim(this)](int32_t code) {
         auto self = weakSelf.Upgrade();
         CHECK_NULL_VOID(self);
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "abilityRuntimeContextCallback");
-        self->FireAbilityCloseEvent();
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "abilityRuntimeContextCallback code = %{public}d", code);
+        self->FireAbilityCloseEvent(code);
     };
     container->RegisterTerminateUIExtension(std::move(abilityRuntimeContextCallback));
 }
@@ -520,7 +520,7 @@ void AppBarView::CreateServicePanel(
 #endif
 }
 
-void AppBarView::CreateServicePanel(bool firstTry)
+void AppBarView::CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params)
 {
 #ifndef PREVIEW
     if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
@@ -540,7 +540,6 @@ void AppBarView::CreateServicePanel(bool firstTry)
         abilityName = theme->GetStageAbilityName();
     }
     std::string appGalleryBundleName;
-    std::map<std::string, std::string> params;
     AssembleUiExtensionParams(firstTry, appGalleryBundleName, params);
     auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
     wantWrap->SetWantParam(params);
@@ -626,7 +625,7 @@ void AppBarView::SetStatusBarItemColor(bool isLight)
     pattern->ColorConfigurationCallBack();
 }
 
-void AppBarView::OnMenuClick()
+void AppBarView::OnMenuClick(std::map<std::string, std::string>& params)
 {
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
@@ -639,7 +638,7 @@ void AppBarView::OnMenuClick()
             theme->GetAbilityName().c_str());
         pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
     } else {
-        CreateServicePanel(true);
+        CreateServicePanel(true, std::move(params));
     }
 }
 

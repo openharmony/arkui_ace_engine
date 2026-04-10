@@ -1228,4 +1228,105 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest021, TestSize.Level1)
     columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
     EXPECT_STREQ(columnWidthsStr.c_str(), "");
 }
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest001
+ * @tc.desc: test TextPickerRowPattern OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(TextPickerPatternTestNg, OnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextPicker.
+     */
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+ 
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(Dimension(FONT_SIZE_20, DimensionUnit::PX));
+ 
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+ 
+    auto host = textPickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_FALSE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    PickerTextStyle textStyle;
+    textStyle.fontSize = Dimension(FONT_SIZE_10, DimensionUnit::VP);
+    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+    textStyle.textColor = Color::GREEN;
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest002
+ * @tc.desc: test TextPickerRowPattern OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(TextPickerPatternTestNg, OnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+ 
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(Dimension(FONT_SIZE_20, DimensionUnit::PX));
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+ 
+    auto host = textPickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_TRUE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+ 
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(FONT_SIZE_10 + 1);
+    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    textPickerPattern->UpdateSelectedTextStyle(textStyle);
+    EXPECT_TRUE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    textPickerPattern->UpdateNormalTextStyle(textStyle);
+    EXPECT_TRUE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    textPickerPattern->UpdateDisappearTextStyle(textStyle);
+    EXPECT_TRUE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+ 
+ 
+    NG::PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = Color::RED;
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+    EXPECT_TRUE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+ 
+    NG::ItemDivider newDivider;
+    newDivider.isDefaultColor = false;
+    newDivider.colorResObj = AceType::MakeRefPtr<ResourceObject>();
+    newDivider.strokeWidth = 0.0_vp;
+    textPickerPattern->SetDivider(newDivider);
+    EXPECT_FALSE(textPickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
+}
 } // namespace OHOS::Ace::NG

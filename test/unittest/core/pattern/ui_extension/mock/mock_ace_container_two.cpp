@@ -310,12 +310,8 @@ void AceContainer::TriggerModuleSerializer() {}
 
 void AceContainer::SetIsFormRender(bool isFormRender) {}
 
-void AceContainer::LoadCompleteManagerStartCollect(const std::string& url) {}
-
-void AceContainer::LoadCompleteManagerStopCollect() {}
-
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
 
-void AceContainer::TerminateUIExtensionInner() {}
+void AceContainer::TerminateUIExtensionInner(int32_t code) {}
 
 } // namespace OHOS::Ace::NG

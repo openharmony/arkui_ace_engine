@@ -244,6 +244,12 @@ struct ArkUIAttributeItem {
     void* object;
 };
 
+struct ArkUIErrorInfo {
+    ArkUI_Int32 errorCode = 0;
+    std::string functionName;
+    std::string errorMessage;
+};
+
 struct ArkUICornerRadius {
     ArkUI_Float32 topLeft;
     ArkUI_Float32 topRight;
@@ -1167,6 +1173,20 @@ struct ArkUIBackdropBlur {
     ArkUI_Float32 brighteningBlur = 0.0f;
     ArkUI_Float32 darkeningBlur = 0.0f;
 };
+
+enum ArkUITreeOperatingStatus {
+    // Tree operating status for cross-language attribute setting
+    // Values must match TreeOperatingStatus and OH_ArkUI_CrossLanguageOperatingStatus
+    ARKUI_TREE_OPERATING_STATUS_UNDEFINED = 0,
+    ARKUI_TREE_OPERATING_STATUS_ENABLE = 1,
+    ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
+};
+
+struct ArkUICrossLanguageOption {
+    bool attributeSetting = false;
+    ArkUITreeOperatingStatus treeOperatingStatus = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+};
+
 
 struct ArkUIBadgeParam {
     ArkUI_Bool isPositionXy;
@@ -3055,6 +3075,8 @@ struct ArkUICommonModifier {
     void (*setSweepGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*resetSweepGradient)(ArkUINodeHandle node);
+    void (*setSweepGradientForHDR)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+        const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*setRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* resRawPtr);
     void (*resetRadialGradient)(ArkUINodeHandle node);
@@ -8650,6 +8672,10 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
     ArkUI_Int32 (*moveNodeTo)(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index);
     ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
+    ArkUI_Int32 (*setCrossLanguageOptionsFull)(
+        ArkUINodeHandle node, const struct ArkUICrossLanguageOption* option);
+    ArkUI_Int32 (*getCrossLanguageOptionsFull)(
+        ArkUINodeHandle node, struct ArkUICrossLanguageOption* option);
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);

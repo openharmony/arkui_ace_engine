@@ -13976,4 +13976,851 @@ Color RichEditorPattern::GetScrollBarColor() const
     CHECK_NULL_RETURN(scrollbarTheme, Color());
     return scrollbarTheme->GetForegroundColor();
 }
+
+bool SysScale::operator==(const SysScale& rhs) const
+{
+    return NearEqual(dipScale, rhs.dipScale)
+        && NearEqual(logicScale, rhs.logicScale)
+        && NearEqual(fontScale, rhs.fontScale)
+        && NearEqual(fontWeightScale, rhs.fontWeightScale);
+}
+
+bool SysScale::operator!=(const SysScale& rhs) const
+{
+    return !operator==(rhs);
+}
+
+std::string SysScale::ToString()
+{
+    std::stringstream ss;
+    ss << dipScale << ", " << logicScale << ", " << fontScale << ", " << fontWeightScale;
+    return ss.str();
+}
+
+RichEditorScope::RichEditorScope(bool& scopeFlag) : scopeFlag_(scopeFlag)
+{
+    scopeFlag_ = true;
+}
+
+RichEditorScope::~RichEditorScope()
+{
+    scopeFlag_ = false;
+}
+
+void RichEditorPattern::OperationRecord::Reset()
+{
+    beforeCaretPosition = -1;
+    afterCaretPosition = -1;
+    deleteCaretPosition = -1;
+    addText = std::nullopt;
+    deleteText = std::nullopt;
+}
+
+std::string RichEditorPattern::OperationRecord::ToString() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    JSON_STRING_PUT_INT(jsonValue, beforeCaretPosition);
+    JSON_STRING_PUT_INT(jsonValue, afterCaretPosition);
+    JSON_STRING_PUT_INT(jsonValue, deleteCaretPosition);
+    auto addLength = static_cast<int32_t>(addText.value_or(u"").length());
+    auto deleteLength = static_cast<int32_t>(deleteText.value_or(u"").length());
+    JSON_STRING_PUT_INT(jsonValue, addLength);
+    JSON_STRING_PUT_INT(jsonValue, deleteLength);
+    return jsonValue->ToString();
+}
+
+std::string RichEditorPattern::PreviewTextRecord::ToString() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    JSON_STRING_PUT_STRING(jsonValue, previewContent);
+    JSON_STRING_PUT_BOOL(jsonValue, previewTextHasStarted);
+    JSON_STRING_PUT_INT(jsonValue, startOffset);
+    JSON_STRING_PUT_INT(jsonValue, endOffset);
+    JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
+    JSON_STRING_PUT_BOOL(jsonValue, needUpdateCaret);
+    JSON_STRING_PUT_BOOL(jsonValue, previewTextExiting);
+    return jsonValue->ToString();
+}
+
+void RichEditorPattern::PreviewTextRecord::Reset()
+{
+    startOffset = INVALID_VALUE;
+    endOffset = INVALID_VALUE;
+    previewContent.clear();
+    previewTextHasStarted = false;
+    needReplacePreviewText = false;
+    needReplaceText = false;
+    replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
+    isSpanSplit = false;
+    previewTextExiting = false;
+}
+
+bool RichEditorPattern::PreviewTextRecord::IsValid() const
+{
+    return !previewContent.empty() && previewTextHasStarted && startOffset >= 0 && endOffset >= startOffset;
+}
+
+void RichEditorPattern::TouchAndMoveCaretState::Reset()
+{
+    isTouchCaret = false;
+    isMoveCaret = false;
+    touchDownOffset.Reset();
+    touchFingerId.reset();
+}
+
+void RichEditorPattern::FloatingCaretState::Reset()
+{
+    isFloatingCaretVisible = false;
+    isOriginCaretVisible = false;
+    touchMoveOffset.reset();
+}
+
+void RichEditorPattern::FloatingCaretState::UpdateOriginCaretColor()
+{
+    auto colorMode = Container::CurrentColorMode();
+    originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
+}
+
+void RichEditorPattern::FloatingCaretState::UpdateByTouchMove(const Offset& offset, double distance, const RectF& boundaryRect)
+{
+    isFloatingCaretVisible = true;
+    touchMoveOffset = offset;
+    bool isCaretAtBoundaryLeft = LessOrEqual(touchMoveOffset->GetX(), boundaryRect.Left());
+    bool isCaretAtBoundaryRight = GreatOrEqual(touchMoveOffset->GetX(), boundaryRect.Right());
+    if (!isCaretAtBoundaryLeft && !isCaretAtBoundaryRight) {
+        isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+    } else {
+        touchMoveOffset->SetX(isCaretAtBoundaryLeft ? boundaryRect.Left() : boundaryRect.Right());
+        isOriginCaretVisible = true;
+    }
+}
+
+const RichEditorPattern::FloatingCaretState& RichEditorPattern::GetFloatingCaretState() const
+{
+    return floatingCaretState_;
+}
+
+void RichEditorPattern::ResetFloatingCaretState()
+{
+    floatingCaretState_.Reset();
+}
+
+RichEditorPattern::ContentModifyLock::ContentModifyLock(RichEditorPattern* pattern)
+{
+    pattern->isModifyingContent_ = true;
+    pattern_ = WeakClaim(pattern);
+}
+
+RichEditorPattern::ContentModifyLock::~ContentModifyLock()
+{
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pattern is null, unlock failed");
+        return;
+    }
+    pattern->isModifyingContent_ = false;
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void RichEditorPattern::ReceivePreviewTextStyle(const std::string& style)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewTextStyle: [%{public}s]", style.c_str());
+    auto property = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(property && !style.empty());
+    property->UpdatePreviewTextStyle(style);
+}
+
+bool RichEditorPattern::IsPreviewTextInputting()
+{
+    return previewTextRecord_.IsValid();
+}
+
+void RichEditorPattern::SetSupportPreviewText(bool isTextPreviewSupported)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enablePreviewText=%{public}d", isTextPreviewSupported);
+    isTextPreviewSupported_ = isTextPreviewSupported;
+}
+
+bool RichEditorPattern::IsSupportPreviewText()
+{
+    return isTextPreviewSupported_;
+}
+
+RefPtr<EventHub> RichEditorPattern::CreateEventHub()
+{
+    ACE_UINODE_TRACE(GetHost());
+    return MakeRefPtr<RichEditorEventHub>();
+}
+
+RefPtr<LayoutProperty> RichEditorPattern::CreateLayoutProperty()
+{
+    ACE_UINODE_TRACE(GetHost());
+    return MakeRefPtr<RichEditorLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> RichEditorPattern::CreateLayoutAlgorithm()
+{
+    ACE_UINODE_TRACE(GetHost());
+    HandleSysScaleChanged();
+    return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
+}
+
+void RichEditorPattern::HandleSysScaleChanged()
+{
+    auto ctx = GetContext();
+    if (!ctx) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "context is nullptr, handle scale failed");
+        return;
+    }
+    SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
+    if (sysScale != lastSysScale_) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+            lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
+        lastSysScale_ = sysScale;
+        paragraphCache_.Clear();
+    }
+}
+
+FocusPattern RichEditorPattern::GetFocusPattern() const
+{
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    focusPattern.SetIsFocusActiveWhenFocused(true);
+    return focusPattern;
+}
+
+const RefPtr<RichEditorController>& RichEditorPattern::GetRichEditorController()
+{
+    return richEditorController_;
+}
+
+void RichEditorPattern::SetRichEditorController(const RefPtr<RichEditorController>& controller)
+{
+    richEditorController_ = controller;
+}
+
+const RefPtr<RichEditorStyledStringController>& RichEditorPattern::GetRichEditorStyledStringController()
+{
+    return richEditorStyledStringController_;
+}
+
+void RichEditorPattern::SetRichEditorStyledStringController(const RefPtr<RichEditorStyledStringController>& controller)
+{
+    richEditorStyledStringController_ = controller;
+}
+
+long long RichEditorPattern::GetTimestamp() const
+{
+    return timestamp_;
+}
+
+// RichEditor needs softkeyboard, override function.
+bool RichEditorPattern::NeedSoftKeyboard() const
+{
+    if (onNeedSoftkeyboardCallback_) {
+        return Pattern::NeedSoftKeyboard();
+    }
+    return true;
+}
+
+// Support LayoutPolicy.matchParent
+bool RichEditorPattern::IsEnableMatchParent()
+{
+    return true;
+}
+
+void RichEditorPattern::SetMaxLength(std::optional<int32_t> maxLength)
+{
+    if (maxLength != INT_MAX) {
+        DeleteToMaxLength(maxLength);
+    }
+    maxLength_ = maxLength;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "maxLength: [%{public}d]", maxLength_.value_or(INT_MAX));
+}
+
+int32_t RichEditorPattern::GetMaxLength()
+{
+    return maxLength_.value_or(INT_MAX);
+}
+
+void RichEditorPattern::SetMaxLines(int32_t maxLines)
+{
+    maxLines_ = maxLines;
+}
+
+int32_t RichEditorPattern::GetMaxLines()
+{
+    return maxLines_;
+}
+
+void RichEditorPattern::SetMaxLinesHeight(float maxLinesHeight)
+{
+    maxLinesHeight_ = maxLinesHeight;
+}
+
+float RichEditorPattern::GetMaxLinesHeight()
+{
+    return maxLinesHeight_;
+}
+
+void RichEditorPattern::UpdateSpanPosition()
+{
+    uint32_t spanTextLength = 0;
+    for (auto& span : spans_) {
+        span->rangeStart = static_cast<int32_t>(spanTextLength);
+        spanTextLength += span->content.length();
+        span->position = static_cast<int32_t>(spanTextLength);
+    }
+}
+
+void RichEditorPattern::SetEnableAutoSpacing(bool enabled)
+{
+    CHECK_NULL_VOID(isEnableAutoSpacing_ != enabled);
+    isEnableAutoSpacing_ = enabled;
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
+}
+
+bool RichEditorPattern::IsEnableAutoSpacing()
+{
+    return isEnableAutoSpacing_;
+}
+
+void RichEditorPattern::SetOrphanCharOptimization(bool isOrphanCharOptimization)
+{
+    CHECK_NULL_VOID(isOrphanCharOptimization_ != isOrphanCharOptimization);
+    isOrphanCharOptimization_ = isOrphanCharOptimization;
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetOrphanCharOptimization: [%{public}d]", isOrphanCharOptimization_);
+}
+
+bool RichEditorPattern::IsOrphanCharOptimization()
+{
+    return isOrphanCharOptimization_;
+}
+
+void RichEditorPattern::SetCompressLeadingPunctuation(bool enabled)
+{
+    CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
+    isCompressLeadingPunctuation_ = enabled;
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+}
+
+bool RichEditorPattern::IsCompressLeadingPunctuation()
+{
+    return isCompressLeadingPunctuation_;
+}
+
+void RichEditorPattern::OnAttachToMainTree()
+{
+    TextPattern::OnAttachToMainTree();
+}
+
+void RichEditorPattern::OnDetachFromMainTree()
+{
+    TextPattern::OnDetachFromMainTree();
+}
+
+RefPtr<MutableSpanString> RichEditorPattern::GetStyledString() const
+{
+    return styledString_;
+}
+
+bool RichEditorPattern::IsStyledStringModeEnabled()
+{
+    return isSpanStringMode_ && styledString_;
+}
+
+void RichEditorPattern::NotifyKeyboardClosedByUser()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
+    FocusHub::LostFocusToViewRoot();
+}
+
+void RichEditorPattern::NotifyKeyboardClosed()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
+    lastCaretPos_.reset();
+    CHECK_NULL_VOID(HasFocus());
+    CHECK_NULL_VOID(!((customKeyboardBuilder_ || customKeyboardNode_) && isCustomKeyboardAttached_));
+    // lost focus in floating window mode
+    auto windowMode = GetWindowMode();
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
+    if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        FocusHub::LostFocusToViewRoot();
+    }
+}
+
+void RichEditorPattern::HandleOnExtendUndoAction()
+{
+    HandleOnUndoAction();
+}
+
+void RichEditorPattern::HandleSelectExtend(CaretMoveIntent direction)
+{
+    HandleSelect(direction);
+}
+
+void RichEditorPattern::ResetIsMousePressed()
+{
+    isMousePressed_ = false;
+}
+
+OffsetF RichEditorPattern::GetSelectionMenuOffset() const
+{
+    return selectionMenuOffsetByMouse_;
+}
+
+void RichEditorPattern::SetLastClickOffset(const OffsetF& lastClickOffset)
+{
+    lastClickOffset_ = lastClickOffset;
+}
+
+void RichEditorPattern::ResetLastClickOffset()
+{
+    lastClickOffset_.SetX(-1);
+    lastClickOffset_.SetY(-1);
+}
+
+int32_t RichEditorPattern::GetCaretSpanIndex()
+{
+    return caretSpanIndex_;
+}
+
+std::vector<ParagraphManager::ParagraphInfo> RichEditorPattern::GetParagraphs() const
+{
+    return paragraphs_.GetParagraphs();
+}
+
+RichEditorParagraphManager& RichEditorPattern::GetRichEditorParagraphManager()
+{
+    return paragraphs_;
+}
+
+std::optional<SelectHandleInfo> RichEditorPattern::GetFirstHandleInfo() const
+{
+    return selectOverlay_->GetFirstHandleInfo();
+}
+
+std::optional<SelectHandleInfo> RichEditorPattern::GetSecondHandleInfo() const
+{
+    return selectOverlay_->GetSecondHandleInfo();
+}
+
+RefPtr<UINode> RichEditorPattern::GetCustomKeyboardNode()
+{
+    return customKeyboardNode_;
+}
+
+bool RichEditorPattern::GetCustomKeyboardOption()
+{
+    return keyboardAvoidance_;
+}
+
+const std::u16string& RichEditorPattern::GetPasteStr() const
+{
+    return pasteStr_;
+}
+
+void RichEditorPattern::AddPasteStr(const std::string& addedStr)
+{
+    pasteStr_.append(UtfUtils::Str8ToStr16(addedStr));
+}
+
+void RichEditorPattern::ClearPasteStr()
+{
+    pasteStr_.clear();
+}
+
+void RichEditorPattern::SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+{
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        // close customKeyboard and request system keyboard
+        CloseCustomKeyboard();
+        customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+        RequestKeyboard(false, true, true);
+        return;
+    }
+    if (!customKeyboardBuilder_ && keyboardBuilder) {
+        // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (isEditing_) {
+            CloseKeyboard(true);
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            return;
+        }
+#endif
+    }
+    customKeyboardBuilder_ = keyboardBuilder;
+}
+
+void RichEditorPattern::ClearSelectionMenu()
+{
+    selectionMenuMap_.clear();
+}
+
+bool RichEditorPattern::IsAtBottom(bool considerRepeat) const
+{
+    return true;
+}
+
+bool RichEditorPattern::IsAtTop() const
+{
+    return true;
+}
+
+bool RichEditorPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+const RectF& RichEditorPattern::GetTextRect() const
+{
+    return richTextRect_;
+}
+
+RefPtr<ScrollBar> RichEditorPattern::GetScrollControllerBar()
+{
+    return GetScrollBar();
+}
+
+bool RichEditorPattern::IsScrollable() const
+{
+    return scrollable_;
+}
+
+bool RichEditorPattern::IsAtomicNode() const
+{
+    return true;
+}
+
+RefPtr<FrameNode> RichEditorPattern::GetClientHost() const
+{
+    return GetHost();
+}
+
+TextSpanType RichEditorPattern::GetEditorType() const
+{
+    return selectedType_.value_or(TextSpanType::NONE);
+}
+
+void RichEditorPattern::SetShowSelect(bool isShowSelect)
+{
+    showSelect_ = isShowSelect;
+}
+
+bool RichEditorPattern::IsShowPlaceholder() const
+{
+    return isShowPlaceholder_;
+}
+
+void RichEditorPattern::SetCaretColor(const Color& caretColor)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
+    caretColor_ = caretColor;
+    IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
+}
+
+void RichEditorPattern::ResetCaretColor(const std::optional<Color>& caretColor)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetCaretColor=%{public}s", caretColor->ToString().c_str());
+    caretColor_ = caretColor;
+    IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
+}
+
+void RichEditorPattern::SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
+        selectedBackgroundColor.ToString().c_str());
+    selectedBackgroundColor_ = selectedBackgroundColor;
+}
+
+void RichEditorPattern::HandleOnEnter()
+{
+    PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
+}
+
+int32_t RichEditorPattern::GetCaretIndex() const
+{
+    return caretPosition_;
+}
+
+int32_t RichEditorPattern::GetContentWideTextLength()
+{
+    return GetTextContentLength();
+}
+
+OffsetF RichEditorPattern::GetParentGlobalOffset() const
+{
+    return parentGlobalOffset_;
+}
+
+OffsetF RichEditorPattern::GetFirstHandleOffset() const
+{
+    return textSelector_.firstHandle.GetOffset();
+}
+
+OffsetF RichEditorPattern::GetSecondHandleOffset() const
+{
+    return textSelector_.secondHandle.GetOffset();
+}
+
+RefPtr<AccessibilityProperty> RichEditorPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<RichEditorAccessibilityProperty>();
+}
+
+void RichEditorPattern::SetContentChange(bool onChange)
+{
+    contentChange_ = onChange;
+}
+
+RefPtr<Clipboard> RichEditorPattern::GetClipboard()
+{
+    return clipboard_;
+}
+
+RectF RichEditorPattern::GetTextContentRect(bool isActualText) const
+{
+    return contentRect_;
+}
+
+void RichEditorPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    selectOverlay_->OnAncestorNodeChanged(flag);
+}
+
+bool RichEditorPattern::ConsumeChildrenAdjustment(const OffsetF& /* offset */)
+{
+    return true;
+}
+
+void RichEditorPattern::SetEnableHapticFeedback(bool isEnabled)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setEnableHapticFeedback=%{public}d", isEnabled);
+    isEnableHapticFeedback_ = isEnabled;
+}
+
+bool RichEditorPattern::GetEnableHapticFeedback()
+{
+    return isEnableHapticFeedback_;
+}
+
+void RichEditorPattern::SetRequestKeyboardOnFocus(bool needToRequest)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
+    needToRequestKeyboardOnFocus_ = needToRequest;
+}
+
+bool RichEditorPattern::GetRequestKeyboardOnFocus()
+{
+    return needToRequestKeyboardOnFocus_;
+}
+
+void RichEditorPattern::RequestFocusWhenSelected()
+{
+    CHECK_NULL_VOID(!HasFocus());
+    CHECK_NULL_VOID(IsSelected());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    isOnlyRequestFocus_ = true;
+    IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
+}
+
+DisplayMode RichEditorPattern::GetBarDisplayMode() const
+{
+    return barDisplayMode_.value_or(DisplayMode::AUTO);
+}
+
+void RichEditorPattern::ForceTriggerAvoidOnCaretChange(bool isMoveContent)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+    IF_TRUE(isMoveContent, MoveCaretToContentRect());
+    isTriggerAvoidOnCaretAvoidMode_ = true;
+}
+
+void RichEditorPattern::TriggerAvoidOnCaretChangeNextFrame()
+{
+    ForceTriggerAvoidOnCaretChange(true);
+    isTriggerAvoidOnCaretAvoidMode_ = false;
+    UpdateModifierCaretOffsetAndHeight();
+    TriggerAvoidOnCaretChange();
+}
+
+void RichEditorPattern::ResetTriggerAvoidFlagOnCaretChange()
+{
+    isTriggerAvoidOnCaretAvoidMode_ = false;
+}
+
+bool RichEditorPattern::IsTriggerAvoidOnCaretAvoidMode()
+{
+    return isTriggerAvoidOnCaretAvoidMode_;
+}
+
+void RichEditorPattern::SetAvoidFlagOnCaretAvoidMode(bool isTriggerAvoidOnCaretAvoidMode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+    isTriggerAvoidOnCaretAvoidMode_ = isTriggerAvoidOnCaretAvoidMode;
+}
+
+void RichEditorPattern::ChangeLastRichTextRect()
+{
+    lastRichTextRect_ = richTextRect_;
+}
+
+const RectF& RichEditorPattern::GetLastTextRect()
+{
+    return lastRichTextRect_;
+}
+
+void RichEditorPattern::SetStopBackPress(bool isStopBackPress)
+{
+    isStopBackPress_ = isStopBackPress;
+}
+
+bool RichEditorPattern::IsStopBackPress() const
+{
+    return isStopBackPress_;
+}
+
+void RichEditorPattern::SetIncludeFontPadding(bool isIncludeFontPadding)
+{
+    CHECK_NULL_VOID(isIncludeFontPadding_ != isIncludeFontPadding);
+    isIncludeFontPadding_ = isIncludeFontPadding;
+    auto host = GetContentHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
+}
+
+bool RichEditorPattern::IsIncludeFontPadding()
+{
+    return isIncludeFontPadding_;
+}
+
+void RichEditorPattern::SetFallbackLineSpacing(bool isFallbackLineSpacing)
+{
+    CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
+    isFallbackLineSpacing_ = isFallbackLineSpacing;
+    auto host = GetContentHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+}
+
+bool RichEditorPattern::IsFallbackLineSpacing()
+{
+    return isFallbackLineSpacing_;
+}
+
+void RichEditorPattern::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
+    keyboardAppearance_ = value;
+}
+
+KeyboardAppearance RichEditorPattern::GetKeyboardAppearance() const
+{
+    return keyboardAppearance_;
+}
+
+bool RichEditorPattern::IsSupportStyledUndo() const
+{
+    return isSpanStringMode_ || isStyledUndoSupported_;
+}
+
+bool RichEditorPattern::IsDragging() const
+{
+    return status_ == Status::DRAGGING || status_ == Status::FLOATING;
+}
+
+const RefPtr<SpanItem> RichEditorPattern::GetSpanItemByPosition(int32_t position)
+{
+    CHECK_NULL_RETURN(position >= 0, nullptr);
+    auto it = GetSpanIter(position);
+    CHECK_NULL_RETURN(it != spans_.end(), nullptr);
+    return *it;
+}
+
+const std::map<int32_t, AISpan>& RichEditorPattern::GetAISpanMap()
+{
+    return dataDetectorAdapter_->aiSpanMap_;
+}
+
+void RichEditorPattern::SetTextDetectEnable(bool enable)
+{
+    auto currentEnable = textDetectEnable_;
+    TextPattern::SetTextDetectEnable(enable);
+    CHECK_NULL_VOID(enable && !currentEnable && CanStartAITask());
+    IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
+}
+
+bool RichEditorPattern::GetDefaultClipValue() const
+{
+    return true;
+}
+
+std::optional<float> RichEditorPattern::GetLastCaretPos() const
+{
+    return lastCaretPos_;
+}
+
+void RichEditorPattern::SetLastCaretPos(float lastCaretPos)
+{
+    lastCaretPos_ = lastCaretPos;
+}
+
+bool RichEditorPattern::IsShortCutBlocked()
+{
+    return IsDragging();
+}
+
+RefPtr<TextOverlayModifier> RichEditorPattern::GetOverlayModifier() const
+{
+    return overlayMod_;
+}
+
+RefPtr<TextSelectOverlay> RichEditorPattern::GetSelectOverlay()
+{
+    return selectOverlay_;
+}
+
+bool RichEditorPattern::IsTextArea() const
+{
+    return true;
+}
+
+bool RichEditorPattern::IsReachTop()
+{
+    return NearEqual(richTextRect_.GetY(), contentRect_.GetY());
+}
+
+bool RichEditorPattern::IsReachBottom()
+{
+    return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
+}
+
+void RichEditorPattern::HandleTasksOnLayoutSwap()
+{
+    while (!tasks_.empty()) {
+        const auto& task = tasks_.front();
+        if (task) {
+            task();
+        }
+        tasks_.pop();
+    }
+}
+
+void RichEditorPattern::PostTaskToLayutSwap(std::function<void()>&& task)
+{
+    tasks_.emplace(std::forward<std::function<void()>>(task));
+}
 } // namespace OHOS::Ace::NG

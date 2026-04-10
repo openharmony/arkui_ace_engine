@@ -270,7 +270,23 @@ export class TipsDialogV2 extends ViewV2 {
                     }
                     else {
                       this.ifElseBranchUpdateFunction(2, () => {
-                        this.checkBoxPart.bind(this)();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            Column.create();
+                        }, Column);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (this.checkTips !== null && this.checkTips !== undefined) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.checkBoxPart.bind(this)();
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Column.pop();
                       });
                     }
                   }, If);
@@ -313,7 +329,23 @@ export class TipsDialogV2 extends ViewV2 {
                       }
                       else {
                         this.ifElseBranchUpdateFunction(2, () => {
-                          this.checkBoxPart.bind(this)();
+                          this.observeComponentCreation2((elmtId, isInitialRender) => {
+                              Column.create();
+                          }, Column);
+                          this.observeComponentCreation2((elmtId, isInitialRender) => {
+                              If.create();
+                              if (this.checkTips !== null && this.checkTips !== undefined) {
+                                  this.ifElseBranchUpdateFunction(0, () => {
+                                      this.checkBoxPart.bind(this)();
+                                  });
+                              }
+                              else {
+                                  this.ifElseBranchUpdateFunction(1, () => {
+                                  });
+                              }
+                          }, If);
+                          If.pop();
+                          Column.pop();
                         });
                       }
                     }, If);

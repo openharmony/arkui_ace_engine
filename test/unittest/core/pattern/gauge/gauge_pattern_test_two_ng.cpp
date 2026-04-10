@@ -67,6 +67,10 @@ void GaugePatternTestTwoNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
     auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(progressTheme));
+    auto gaugeTheme = GaugeTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(GaugeTheme::TypeId())).WillRepeatedly(Return(gaugeTheme));
+    EXPECT_CALL(*themeManager, GetTheme(GaugeTheme::TypeId(), _)).WillRepeatedly(Return(gaugeTheme));
 }
 
 void GaugePatternTestTwoNg::TearDownTestSuite()

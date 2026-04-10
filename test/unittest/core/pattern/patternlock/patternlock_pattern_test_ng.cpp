@@ -17,28 +17,6 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-namespace {
-constexpr float SCROLL_WIDTH = 480.f;
-constexpr float SCROLL_HEIGHT = 800.f;
-constexpr float PATTERNLOCK_WIDTH = 400.f;
-constexpr float PATTERNLOCK_HEIGHT = 400.f;
-constexpr Dimension SIDE_LENGTH = 300.0_vp;
-constexpr Dimension CIRCLE_RADIUS = 14.0_vp;
-constexpr Dimension ACTIVE_CIRCLE_RADIUS = 18.0_vp;
-const Color REGULAR_COLOR = Color::BLACK;
-const Color SELECTED_COLOR = Color::BLUE;
-const Color ACTIVE_COLOR = Color::RED;
-const Color PATH_COLOR = Color::GRAY;
-const Color ACTIVE_CIRCLE_COLOR = Color::GREEN;
-constexpr Dimension PATH_STROKE_WIDTH = 34.0_vp;
-constexpr Dimension HOTSPOT_CIRCLE_RADIUS = 48.0_vp;
-constexpr float FIRST_POINT_CHECK_FLOAT = 200.0f;
-constexpr float CONTENT_SIZE_FLOAT = 300.0f;
-constexpr float CONTENT_OFFSET_FLOAT = 150.0f;
-constexpr float CIRCLE_RADIUS_FLOAT = 200.0f;
-constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
-constexpr int32_t RADIUS_TO_DIAMETER = 2;
-} // namespace
 class PatternLockPatternTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
@@ -223,6 +201,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     /**
     * @tc.steps: step3. Set PatternLock pattern variable and Init FocusHub.
     */
@@ -573,6 +552,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest014, TestSize.Level1)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
 
     pattern_->InitMouseEvent();
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
@@ -801,6 +781,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest019, TestSize.Level1)
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
 
     /**
     * @tc.cases: when distance is unvalid, Point(x, y) will not AddChoosePoint.
@@ -849,6 +830,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest019, TestSize.Level1)
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest020, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     /**
     * @tc.case: case1 InitVirtualNode .
     */
@@ -951,6 +937,5 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest022, TestSize.Level1)
     EXPECT_TRUE(layoutProperty->GetActiveColorSetByUser());
     EXPECT_TRUE(layoutProperty->GetRegularColorSetByUser());
     EXPECT_TRUE(layoutProperty->GetActiveCircleColorSetByUser());
-}
 }
 }

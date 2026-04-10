@@ -18,6 +18,11 @@
  
 #include "core/components_ng/common_napi_utils/common_napi_utils.h"
 
+namespace OHOS::Ace {
+struct ImmersiveOptions;
+class UiMaterial;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::Napi {
 
 // Type tag for napi_wrap_s/napi_unwrap_s type safety
@@ -33,13 +38,20 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
 
 private:
-    static napi_value JsEnumIntInit(napi_env env, napi_value exports);
+    static napi_status EnumMaterialTypeInit(napi_env env, napi_value exports);
+    static napi_status EnumImmersiveStyleInit(napi_env env, napi_value exports);
+    static napi_status EnumImmersiveLevelInit(napi_env env, napi_value exports);
+    static napi_status ImmersiveMaterialInit(napi_env env, napi_value exports);
+    static napi_value JSGetImmersiveLevel(napi_env env, napi_callback_info info);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     static int32_t GetCInt32(napi_value value, napi_env env);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
-    static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value MaterialConstructor(napi_env env, napi_callback_info info);
+    static napi_value ImmersiveMaterialConstructor(napi_env env, napi_callback_info info);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
-    static void WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
+    static UiMaterial* WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
+    static UiMaterial* WrapImmersiveMaterialObject(napi_env env, napi_value jsThis, const ImmersiveOptions& options);
+    static ImmersiveOptions ParseImmersiveOptions(napi_env env, napi_value value);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_UI_MATERIAL_NAPI_H

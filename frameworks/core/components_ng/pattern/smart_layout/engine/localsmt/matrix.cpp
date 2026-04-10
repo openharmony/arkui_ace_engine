@@ -39,13 +39,6 @@ int FindPivot(const std::vector<std::vector<RationNum>>& matrix, size_t col, siz
 
 void TransferToInteger(std::vector<RationNum>& row)
 {
-    int64_t mTotal = 1;
-    for (const auto& item : row) {
-        mTotal *= item.m;
-    }
-    for (auto& item : row) {
-        item *= mTotal;
-    }
     int64_t result = row[0].n;
     for (const auto& item : row) {
         result = std::gcd(result, item.n);

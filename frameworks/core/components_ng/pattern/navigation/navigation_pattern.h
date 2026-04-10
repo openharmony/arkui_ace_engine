@@ -612,7 +612,7 @@ public:
 
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
     bool IsHomeDestinationOrNavBarVisible();
-    void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
+    void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool notifyByLayout = false,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
 
     bool CheckNeedCreate(int32_t index);
@@ -674,6 +674,22 @@ public:
         isSplitDisplay_ = isSplit;
     }
     void UpdateForceSplitHomeDestVisibility();
+    bool IsSecondaryPushToPrimaryScene() const
+    {
+        return isSecondaryPushToPrimaryScene_;
+    }
+    void SetIsSecondaryPushToPrimaryScene(bool isPush)
+    {
+        isSecondaryPushToPrimaryScene_ = isPush;
+    }
+    bool IsPrimaryPopToSecondaryScene() const
+    {
+        return isPrimaryPopToSecondaryScene_;
+    }
+    void SetIsPrimaryPopToSecondaryScene(bool isPop)
+    {
+        isPrimaryPopToSecondaryScene_ = isPop;
+    }
     //-------for force split------- end------
 
 private:
@@ -854,15 +870,12 @@ private:
     bool CheckIfNoNeedAnimationForForceSplit(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination);
     bool ShouldFireHomeDestiationLifecycle(NavDestinationLifecycle lifecycle,
-        const RefPtr<NavDestinationPattern>& destPattern, int32_t lastStandardIndex,
-        int32_t curStackSize, bool isModeChange);
+        const RefPtr<NavDestinationPattern>& destPattern, int32_t curStackSize, bool notifyByLayout);
     void FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
     void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
     NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
@@ -888,6 +901,23 @@ private:
     void ProcessHideNavBarChangeInForceSplit();
     void ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop);
     void ReportTopDestinationInForceSplit();
+
+    void ResetSecondaryPushPrimarySceneState();
+    void AdjustNodeForStackSync(
+        std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+        std::optional<std::pair<std::string, RefPtr<UINode>>> curTop);
+    void AdjustNodeForStackSyncWhenSplitDisplay(
+        std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+        std::optional<std::pair<std::string, RefPtr<UINode>>> curTop);
+    void AdjustNodeForStackSyncWhenStackDisplay();
+
+    void AdjustNodeForLayout();
+    void AdjustNodeForSplitDisplayReconfigure();
+    void AdjustNodeForStackDisplayReconfigure();
+
+    bool IsTransitionShouldMovePageToPrimary(
+        const RefPtr<NavDestinationGroupNode>& preTopDest,
+        const RefPtr<NavDestinationGroupNode>& curTopDest);
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -971,7 +1001,16 @@ private:
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    std::vector<WeakPtr<NavDestinationGroupNode>> secondaryNodes_;
     bool isSplitDisplay_ = false;
+    bool isSecondaryPushToPrimaryScene_ = false;
+    WeakPtr<NavDestinationNodeBase> splitPushExitNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPushMoveNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPushEnterNode_ = nullptr;
+    bool isPrimaryPopToSecondaryScene_ = false;
+    WeakPtr<NavDestinationNodeBase> splitPopExitNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPopMoveNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
     //-------for force split------- end  ------
 };
 

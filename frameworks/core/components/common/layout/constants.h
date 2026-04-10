@@ -211,7 +211,6 @@ enum class TextMarqueeState {
     START = 0,
     BOUNCE,
     FINISH,
-    STOP,
 };
 
 enum class MarqueeStartPolicy {

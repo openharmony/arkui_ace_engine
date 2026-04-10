@@ -57,7 +57,7 @@ RefPtr<NodePaintMethod> CalendarMonthPattern::CreateNodePaintMethod()
     params.endDate = endDate_;
     params.markToday = markToday_;
     params.disabledDateRange = disabledDateRange_;
-    return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_);
+    return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_, host);
 }
 
 void CalendarMonthPattern::SetCalendarDay(const CalendarDay& calendarDay)
@@ -180,9 +180,7 @@ void CalendarMonthPattern::SetColRowSpace()
         return;
     }
 
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto selfWidth = constraint.selfIdealSize.Width();
     if (!selfWidth.has_value()) {
@@ -347,9 +345,7 @@ void CalendarMonthPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto swiperNode = host->GetParent();
     CHECK_NULL_VOID(swiperNode);
@@ -380,9 +376,7 @@ void CalendarMonthPattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto swiperNode = host->GetParent();
     CHECK_NULL_VOID(swiperNode);
@@ -417,9 +411,7 @@ void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& c
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto width = GetWidth(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
@@ -450,7 +442,6 @@ void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& c
         textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
         textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(calendarDaySize), std::nullopt));
     }
-
     auto rowFrameNode = AceType::DynamicCast<NG::FrameNode>(rowNode);
     CHECK_NULL_VOID(rowFrameNode);
     auto weekLayoutProperty = rowFrameNode->GetLayoutProperty<LinearLayoutProperty>();
@@ -608,9 +599,7 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, false);
     auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                                 ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
@@ -713,9 +702,9 @@ void CalendarMonthPattern::InitializeCalendarAccessibility()
         CHECK_NULL_VOID(paintProperty);
         dayHeight_ = paintProperty->GetDayHeight().value_or(Dimension(0.0f)).ConvertToPx();
         dayWidth_ = paintProperty->GetDayWidth().value_or(Dimension(0.0f)).ConvertToPx();
-        RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
+        RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
         CHECK_NULL_VOID(theme);
-        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        auto sliderTheme = host->GetTheme<SliderTheme>(true);
         CHECK_NULL_VOID(sliderTheme);
         margin_ = theme->GetDialogMargin().ConvertToPx();
         selectedTxt_ = sliderTheme->GetSelectedTxt();
@@ -1023,9 +1012,7 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto dayHeight = paintProperty->GetDayHeight().value_or(theme->GetCalendarTheme().dayHeight).ConvertToPx();
     auto dayWidth = paintProperty->GetDayWidth().value_or(theme->GetCalendarTheme().dayWidth).ConvertToPx();
@@ -1061,9 +1048,7 @@ std::string CalendarMonthPattern::GetDayStr(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, "");
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, "");
     switch (index) {
         case MONDAY_INDEX:
@@ -1087,9 +1072,7 @@ std::string CalendarMonthPattern::GetTodayStr()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, "");
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, "");
     return theme->GetCalendarTheme().today;
 }

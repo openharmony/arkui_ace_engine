@@ -13,8 +13,6 @@
 
 common_sources = [
   "common/api_impl.cpp",
-  "common/view_model.cpp",
-  "common/view_model2.cpp",
   "implementation/bind_sheet_utils.cpp",
   "implementation/canvas_path_peer_impl.cpp",
   "implementation/canvas_renderer_peer_impl.cpp",
@@ -36,7 +34,6 @@ common_sources = [
   "implementation/text_field_modifier.cpp",
   "implementation/text_picker_dialog_extender.cpp",
   "implementation/video_controller_peer_impl.cpp",
-  "implementation/view_model_bridge.cpp",
   "implementation/ui_extension_proxy_peer.cpp",
   "implementation/web_modifier_callbacks.cpp",
   "implementation/x_component_controller_peer_impl.cpp",

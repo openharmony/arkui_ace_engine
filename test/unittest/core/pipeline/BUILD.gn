@@ -112,6 +112,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/components_ng/manager/form_gesture/mock_form_gesture_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/manager/memory/mock_memory_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/manager/navigation/mock_navigation_manager.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/manager/force_split/mock_force_split_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/manager/post_event/mock_post_event_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/manager/safe_area/mock_safe_area_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/manager/select_overlay/mock_select_overlay_manager.cpp",
@@ -127,6 +128,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/pipeline/base/mock_constants.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline_ng/mock_ui_task_scheduler.cpp",
 
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp",
@@ -164,6 +166,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/common/mock_font_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_reporter.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_setting_data_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_stylus_detector_mgr.cpp",
 
@@ -184,6 +187,7 @@ ace_unittest("pipeline_context_test_ng") {
 
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
   ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
   extra_deps = []

@@ -96,6 +96,8 @@ public:
             theme->controlButtonHeightSmall_ =
                 sideBarPattern->GetAttr<Dimension>("control_button_height_small", 0.0_vp);
             theme->sideBarWidth_ = sideBarPattern->GetAttr<Dimension>("side_bar_width", -1.0_vp);
+            theme->sideBarShown_ = sideBarPattern->GetAttr<std::string>("side_bar_shown", "");
+            theme->sideBarHidden_ = sideBarPattern->GetAttr<std::string>("side_bar_hidden", "");
         }
     };
 
@@ -211,6 +213,16 @@ public:
         return sideBarWidth_;
     }
 
+    const std::string& GetSideBarShown() const
+    {
+        return sideBarShown_;
+    }
+
+    const std::string& GetSideBarHidden() const
+    {
+        return sideBarHidden_;
+    }
+
 protected:
     SideBarTheme() = default;
 
@@ -237,6 +249,8 @@ private:
     Dimension controlButtonWidthSmall_ = 0.0_vp;
     Dimension controlButtonHeightSmall_ = 0.0_vp;
     Dimension sideBarWidth_ = -1.0_vp;
+    std::string sideBarShown_;
+    std::string sideBarHidden_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H

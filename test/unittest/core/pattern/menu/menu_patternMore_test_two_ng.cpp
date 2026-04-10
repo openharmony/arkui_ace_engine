@@ -628,7 +628,7 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuItemChildren002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateMenuItemChildren003
- * @tc.desc: Verify UpdateMenuItemChildren with MENU_ITEM_GROUP_ETS_TAG child.
+ * @tc.desc: Verify UpdateMenuItemChildren with empty MENU_ITEM_GROUP_ETS_TAG child, previousNode remains nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuItemChildren003, TestSize.Level1)
@@ -644,7 +644,8 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuItemChildren003, TestSize.Level1)
     menuItemGroupNode->MountToParent(menuNode);
     RefPtr<UINode> previousNode = nullptr;
     menuPattern->UpdateMenuItemChildren(menuNode, previousNode);
-    EXPECT_NE(previousNode, nullptr);
+    // Empty MENU_ITEM_GROUP_ETS_TAG has no children, previousNode is not updated
+    EXPECT_EQ(previousNode, nullptr);
 }
 
 /**

@@ -980,4 +980,27 @@ void NavigationTitleUtil::SetBackButtonText(const RefPtr<TitleBarNode>& titleBar
         titleBarPattern->RemoveResObj(key);
     }
 }
+
+void NavigationTitleUtil::InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto hostNode = textLayoutProperty->GetHost();
+    if (CheckNeedFontPadding(hostNode)) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
+}
+
+bool NavigationTitleUtil::CheckNeedFontPadding(const RefPtr<FrameNode>& textNode)
+{
+    CHECK_NULL_RETURN(textNode, false);
+    auto context = textNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
 } // namespace OHOS::Ace::NG

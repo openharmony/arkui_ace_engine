@@ -24,6 +24,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
 enum class PointAnimationStage { STATE_SHRINKT_TO_BLACK_POINT, STATE_EXPAND_TO_LONG_POINT };
@@ -215,11 +216,13 @@ protected:
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
     std::pair<float, float> BackwardCalculation(
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
-    static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
+    RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme() const
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        int32_t id = dotIndicatorModifier_ ? dotIndicatorModifier_->GetThemeScopeId()
+                                           : TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(id);
         CHECK_NULL_RETURN(swiperTheme, nullptr);
         return swiperTheme;
     }

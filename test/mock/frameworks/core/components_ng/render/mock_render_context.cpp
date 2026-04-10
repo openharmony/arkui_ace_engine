@@ -18,6 +18,7 @@
 #include "test/mock/frameworks/core/animation/mock_animation_proxy.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -84,12 +85,44 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
 
 void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
-    uiMaterial_ = material;
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
+        return;
+    }
+    uiMaterial_->material = material;
 }
 
 RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
 {
-    return uiMaterial_;
+    return uiMaterial_ ? uiMaterial_->material : nullptr;
+}
+
+void RenderContext::SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.immersiveConfig = config});
+        return;
+    }
+    uiMaterial_->immersiveConfig = config;
+}
+
+std::optional<ImmersiveMaterialConfig> RenderContext::GetImmersiveMaterialConfig() const
+{
+    return uiMaterial_ ? uiMaterial_->immersiveConfig : std::nullopt;
+}
+
+std::optional<int32_t> RenderContext::GetTransparencyCallbackId() const
+{
+    return uiMaterial_ ? uiMaterial_->transparencyCallbackId : std::nullopt;
+}
+
+void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.transparencyCallbackId = id});
+        return;
+    }
+    uiMaterial_->transparencyCallbackId = id;
 }
 
 #ifdef ENHANCED_ANIMATION

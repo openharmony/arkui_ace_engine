@@ -29,6 +29,7 @@
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
 #include "ui/view/components/tabs/tabs_data.h"
@@ -60,18 +61,19 @@ enum class TabJsResType {
 }
 
 struct TabsItemDivider final {
+    int32_t themeScopeId = NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
     Dimension strokeWidth = 0.0_vp;
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::BLACK;
     bool isNull = false;
-    TabsItemDivider()
+    TabsItemDivider(int32_t themeScopeId = NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID)
     {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>(themeScopeId);
         if (!tabTheme) {
             return;
         }

@@ -96,6 +96,8 @@ public:
     static bool SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode);
     static void SetBackButtonText(const RefPtr<TitleBarNode>& titleBarNode, const std::string& text,
                                   const std::string& key, const RefPtr<ResourceObject> ResourceObject);
+    static void InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    static bool CheckNeedFontPadding(const RefPtr<FrameNode>& node);
 };
 
 } // namespace OHOS::Ace::NG

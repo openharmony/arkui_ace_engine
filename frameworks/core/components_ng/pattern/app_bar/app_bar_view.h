@@ -53,7 +53,7 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void OnMenuClick();
+    void OnMenuClick(std::map<std::string, std::string>& params);
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
     void SetOnBackPressedConsumed();
@@ -69,7 +69,7 @@ public:
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
     void SetMenuBarVisible(bool visible);
-    void OnThirdCloseEvent();
+    void OnThirdCloseEvent(int32_t code);
 
     void SetLastRectChangeTime(int64_t time)
     {
@@ -109,11 +109,11 @@ private:
     void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    void CreateServicePanel(bool firstTry);
+    void CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params = {});
     void DestroyServicePanel();
     void FireExtensionHostParams();
     void InitAbilityContextCallback();
-    void FireAbilityCloseEvent();
+    void FireAbilityCloseEvent(int32_t code);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     void AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode);

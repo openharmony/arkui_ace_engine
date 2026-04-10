@@ -636,9 +636,9 @@ class ArkEnableScrollDirectionalLock {
   value: boolean | undefined;
   type: ScrollDirectionalLockType | undefined;
 
-  constructor(value: boolean, type: ScrollDirectionalLockType) {
-    this.value = value;
-    this.type = type;
+  constructor() {
+    this.value = undefined;
+    this.type = undefined;
   }
   isEqual(another: ArkEnableScrollDirectionalLock): boolean {
     return (this.value === another.value && this.type === another.type);

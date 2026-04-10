@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
@@ -259,11 +260,75 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
     }
 }
 
+void ConvertTouchPointsToPointsWithEmptyEvent(GestureEvent& info, std::array<ArkUITouchPoint, MAX_POINTS>& points)
+{
+    size_t i = 0;
+    auto fingerList = info.GetFingerList();
+    for (auto& finger : fingerList) {
+        if (i >= MAX_POINTS) {
+            break;
+        }
+        points[i].id = finger.fingerId_;
+        points[i].windowX = finger.globalLocation_.GetX();
+        points[i].windowY = finger.globalLocation_.GetY();
+        points[i].screenX = finger.screenLocation_.GetX();
+        points[i].screenY = finger.screenLocation_.GetY();
+        points[i].globalDisplayX = finger.globalDisplayLocation_.GetX();
+        points[i].globalDisplayY = finger.globalDisplayLocation_.GetY();
+        points[i].nodeX = finger.localLocation_.GetX();
+        points[i].nodeY = finger.localLocation_.GetY();
+        points[i].toolType = static_cast<int32_t>(finger.sourceTool_);
+        points[i].operatingHand = finger.operatingHand_;
+        i++;
+    }
+}
+
 void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent,
     std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
-    CHECK_NULL_VOID(info.GetPointerEvent());
-    auto tempTouchEvent = NG::ConvertToTouchEvent(info.GetPointerEvent());
+    if (info.GetPointerEvent()) {
+        TouchEvent tempTouchEvent = NG::ConvertToTouchEvent(info.GetPointerEvent());
+        touchEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempTouchEvent.type));
+        touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+        touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
+        touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
+        ConvertTouchPointsToPoints(info, tempTouchEvent.pointers, points);
+        if (tempTouchEvent.pointers.size() > 0) {
+            touchEvent.touchPointes = &(points[0]);
+            touchEvent.actionTouchPoint.nodeX = touchEvent.touchPointes[0].nodeX;
+            touchEvent.actionTouchPoint.nodeY = touchEvent.touchPointes[0].nodeY;
+            touchEvent.actionTouchPoint.windowX = touchEvent.touchPointes[0].windowX;
+            touchEvent.actionTouchPoint.windowY = touchEvent.touchPointes[0].windowY;
+            touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
+            touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
+            touchEvent.actionTouchPoint.globalDisplayX = touchEvent.touchPointes[0].globalDisplayX;
+            touchEvent.actionTouchPoint.globalDisplayY = touchEvent.touchPointes[0].globalDisplayY;
+            touchEvent.actionTouchPoint.toolType = touchEvent.touchPointes[0].toolType;
+            touchEvent.actionTouchPoint.operatingHand = touchEvent.touchPointes[0].operatingHand;
+        }
+        touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
+        tempTouchEvent.pointers.size() : MAX_POINTS;
+    } else {
+        touchEvent.action = info.GetLastAction().value_or(0);
+        touchEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        touchEvent.timeStamp = info.GetTimeStamp().time_since_epoch().count();
+        touchEvent.actionTouchPoint.pressure = info.GetForce();
+        auto fingureBegin = std::begin(info.GetFingerList());
+        auto fingureEnd = std::end(info.GetFingerList());
+        touchEvent.actionTouchPoint.nodeX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetX();
+        touchEvent.actionTouchPoint.nodeY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetY();
+        touchEvent.actionTouchPoint.windowX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetX();
+        touchEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
+        ConvertTouchPointsToPointsWithEmptyEvent(info, points);
+        touchEvent.touchPointes = &(points[0]);
+        touchEvent.touchPointSize = info.GetFingerList().size();
+        touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+        touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        touchEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
+        touchEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+        touchEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+        touchEvent.actionTouchPoint.operatingHand = info.GetOperatingHand();
+    }
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
     const auto& targetOrigin = info.GetTarget().origin;
     // width height x y globalx globaly
@@ -277,26 +342,6 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    touchEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempTouchEvent.type));
-    touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
-    touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
-    touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
-    ConvertTouchPointsToPoints(info, tempTouchEvent.pointers, points);
-    if (tempTouchEvent.pointers.size() > 0) {
-        touchEvent.touchPointes = &(points[0]);
-        touchEvent.actionTouchPoint.nodeX = touchEvent.touchPointes[0].nodeX;
-        touchEvent.actionTouchPoint.nodeY = touchEvent.touchPointes[0].nodeY;
-        touchEvent.actionTouchPoint.windowX = touchEvent.touchPointes[0].windowX;
-        touchEvent.actionTouchPoint.windowY = touchEvent.touchPointes[0].windowY;
-        touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
-        touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
-        touchEvent.actionTouchPoint.globalDisplayX = touchEvent.touchPointes[0].globalDisplayX;
-        touchEvent.actionTouchPoint.globalDisplayY = touchEvent.touchPointes[0].globalDisplayY;
-        touchEvent.actionTouchPoint.toolType = touchEvent.touchPointes[0].toolType;
-        touchEvent.actionTouchPoint.operatingHand = touchEvent.touchPointes[0].operatingHand;
-    }
-    touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
-    tempTouchEvent.pointers.size() : MAX_POINTS;
     touchEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
@@ -459,9 +504,27 @@ void GetUniqueGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, GestureTypeName 
 
 void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent)
 {
-    CHECK_NULL_VOID(info.GetPointerEvent());
-    MouseEvent tempMouseEvent;
-    NG::ConvertToMouseEvent(tempMouseEvent, info.GetPointerEvent());
+    if (info.GetPointerEvent()) {
+        MouseEvent tempMouseEvent;
+        NG::ConvertToMouseEvent(tempMouseEvent, info.GetPointerEvent());
+        mouseEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempMouseEvent.action));
+        mouseEvent.sourceType = static_cast<int32_t>(tempMouseEvent.sourceType);
+        mouseEvent.timeStamp = tempMouseEvent.time.time_since_epoch().count();
+        mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
+        mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
+        mouseEvent.actionTouchPoint.globalDisplayX = tempMouseEvent.globalDisplayX;
+        mouseEvent.actionTouchPoint.globalDisplayY = tempMouseEvent.globalDisplayY;
+        mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
+    } else {
+        mouseEvent.action = info.GetLastAction().value_or(0);
+        mouseEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        mouseEvent.timeStamp = info.GetTimeStamp().time_since_epoch().count();
+        mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+        mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
+        mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+        mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    }
     auto fingureBegin = std::begin(info.GetFingerList());
     auto fingureEnd = std::end(info.GetFingerList());
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
@@ -477,27 +540,43 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    mouseEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempMouseEvent.action));
-    mouseEvent.sourceType = static_cast<int32_t>(tempMouseEvent.sourceType);
-    mouseEvent.timeStamp = tempMouseEvent.time.time_since_epoch().count();
     mouseEvent.actionTouchPoint.pressure = 0.0f;
     mouseEvent.actionTouchPoint.nodeX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetX();
     mouseEvent.actionTouchPoint.nodeY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetY();
     mouseEvent.actionTouchPoint.windowX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetX();
     mouseEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
-    mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
-    mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
-    mouseEvent.actionTouchPoint.globalDisplayX = tempMouseEvent.globalDisplayX;
-    mouseEvent.actionTouchPoint.globalDisplayY = tempMouseEvent.globalDisplayY;
-    mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
     mouseEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
 {
-    CHECK_NULL_VOID(info.GetPointerEvent());
-    AxisEvent tempAxisEvent;
-    NG::ConvertToAxisEvent(tempAxisEvent, info.GetPointerEvent());
+    if (info.GetPointerEvent()) {
+        AxisEvent tempAxisEvent;
+        NG::ConvertToAxisEvent(tempAxisEvent, info.GetPointerEvent());
+        if (info.GetIsFalsifyCancel()) {
+            axisEvent.action = static_cast<int32_t>(AxisAction::CANCEL);
+        } else {
+            axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
+        }
+        axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
+        axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
+        axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;
+        axisEvent.verticalAxis = tempAxisEvent.verticalAxis;
+        axisEvent.pinchAxisScale = tempAxisEvent.pinchAxisScale;
+        axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
+    } else {
+        if (info.GetIsFalsifyCancel()) {
+            axisEvent.action = static_cast<int32_t>(AxisAction::CANCEL);
+        } else {
+            axisEvent.action = info.GetLastAction().value_or(0);
+        }
+        axisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        axisEvent.timeStamp = info.GetTimeStamp().time_since_epoch().count();
+        axisEvent.horizontalAxis = info.GetHorizontalAxis();
+        axisEvent.verticalAxis = info.GetVerticalAxis();
+        axisEvent.pinchAxisScale = info.GetPinchAxisScale();
+        axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    }
     auto fingureBegin = std::begin(info.GetFingerList());
     auto fingureEnd = std::end(info.GetFingerList());
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
@@ -513,16 +592,6 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    if (info.GetIsFalsifyCancel()) {
-        axisEvent.action = static_cast<int32_t>(AxisAction::CANCEL);
-    } else {
-        axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
-    }
-    axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
-    axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
-    axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;
-    axisEvent.verticalAxis = tempAxisEvent.verticalAxis;
-    axisEvent.pinchAxisScale = tempAxisEvent.pinchAxisScale;
     axisEvent.actionTouchPoint.nodeX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetX();
     axisEvent.actionTouchPoint.nodeY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetY();
     axisEvent.actionTouchPoint.windowX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetX();
@@ -533,7 +602,6 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
         fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetX();
     axisEvent.actionTouchPoint.globalDisplayY =
         fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetY();
-    axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
     axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 

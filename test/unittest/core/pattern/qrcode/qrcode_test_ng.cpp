@@ -1330,7 +1330,6 @@ HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest001, TestSize.Level1)
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    EXPECT_FALSE(focusHub->HasPaintColor());
 
     MockContainer::Current()->SetApiTargetVersion(PLATFORM_VERSION_25);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));

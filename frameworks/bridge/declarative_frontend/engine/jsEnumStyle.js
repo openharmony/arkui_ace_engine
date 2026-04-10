@@ -1873,6 +1873,12 @@ let ThemeColorMode;
   ThemeColorMode[ThemeColorMode.DARK = 2] = 'DARK';
 })(ThemeColorMode || (ThemeColorMode = {}));
 
+let AnchoredColorMode;
+(function (AnchoredColorMode) {
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_SYSTEM = 0] = 'FOLLOW_SYSTEM';
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_TARGET = 1] = 'FOLLOW_TARGET';
+})(AnchoredColorMode || (AnchoredColorMode = {}));
+
 let AdaptiveColor;
 (function (AdaptiveColor) {
   AdaptiveColor[AdaptiveColor.Default = 0] = 'Default';
@@ -4578,7 +4584,6 @@ let MarqueeState;
   MarqueeState[MarqueeState.START = 0] = 'START';
   MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
   MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
-  MarqueeState[MarqueeState.STOP = 3] = 'STOP';
 })(MarqueeState || (MarqueeState = {}));
 
 let MarqueeStartPolicy;
@@ -5091,6 +5096,7 @@ let ColorSpace;
 (function (ColorSpace) {
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+  ColorSpace[ColorSpace.BT2020 = 2] = 'BT2020';
 })(ColorSpace || (ColorSpace = {}));
 
 let AudioSessionType;

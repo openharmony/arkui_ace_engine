@@ -1117,9 +1117,7 @@ MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
 void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(menuNode);
-    if (menuParam.systemMaterial &&
-        menuParam.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-        menuParam.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+    if (menuParam.systemMaterial && MaterialUtils::CheckMaterialValid(menuParam.systemMaterial->GetType())) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);

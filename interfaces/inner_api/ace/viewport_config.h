@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace {
 
+enum class ForceSplitMode {
+    NOT_SPLIT,
+    WIDE_SPLIT,
+    SQUARE_SPLIT
+};
+
 struct KeyFrameConfig {
     bool enableKeyFrame_ = false;
     int32_t animationDuration_ = 0;

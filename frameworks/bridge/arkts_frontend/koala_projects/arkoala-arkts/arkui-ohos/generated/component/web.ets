@@ -163,12 +163,14 @@ export class ConsoleMessage implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ConsoleMessage_getMessage(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceId_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLineNumber_serialize(): int32 {
@@ -370,6 +372,7 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMode_serialize(): FileSelectorMode {
@@ -384,6 +387,7 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isCapture_serialize(): boolean {
@@ -398,18 +402,21 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSuggestedName_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getSuggestedName(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getDefaultPath_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getDefaultPath(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getDescriptions_serialize(): Array<string> {
@@ -420,6 +427,7 @@ export class FileSelectorParam implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isAcceptAllOptionExcluded_serialize(): boolean {
@@ -438,6 +446,7 @@ export class FileSelectorParam implements MaterializedBase {
             return bufferTempBuf;
         })
         const returnResult: Array<Array<AcceptableFileType>> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -683,6 +692,7 @@ export class PermissionRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._PermissionRequest_getOrigin(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getAccessibleResource_serialize(): Array<string> {
@@ -693,6 +703,7 @@ export class PermissionRequest implements MaterializedBase {
             return (retvalDeserializer.readString() as string);
         })
         const returnResult: Array<string> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private grant_serialize(resources: Array<string>): void {
@@ -745,6 +756,7 @@ export class ScreenCaptureHandler implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ScreenCaptureHandler_getOrigin(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private grant_serialize(config: ScreenCaptureConfig): void {
@@ -915,18 +927,21 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getLinkUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getUnfilteredLinkUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getUnfilteredLinkUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private existsImageContents_serialize(): boolean {
@@ -941,6 +956,7 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebContextMenuParam_getSelectionText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSourceType_serialize(): ContextMenuSourceType {
@@ -1169,6 +1185,7 @@ export class WebResourceError implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getErrorCode_serialize(): int32 {
@@ -1225,12 +1242,14 @@ export class WebResourceRequest implements MaterializedBase {
             return Header_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<Header> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getRequestUrl_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isRequestGesture_serialize(): boolean {
@@ -1249,6 +1268,7 @@ export class WebResourceRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestMethod(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -1338,6 +1358,7 @@ export class WebResourceResponse implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseDataEx_serialize(): string | int32 | ArrayBuffer | global_resource_Resource | undefined {
@@ -1362,24 +1383,28 @@ export class WebResourceResponse implements MaterializedBase {
             buffer = (bufferOpt as string | int32 | ArrayBuffer | global_resource_Resource)
         }
         const returnResult: string | int32 | ArrayBuffer | global_resource_Resource | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseEncoding_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseEncoding(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseMimeType_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseMimeType(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getReasonMessage_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getReasonMessage(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseHeader_serialize(): Array<Header> {
@@ -1390,6 +1415,7 @@ export class WebResourceResponse implements MaterializedBase {
             return Header_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<Header> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getResponseCode_serialize(): int32 {

@@ -1234,6 +1234,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
     COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
+    COPY_TEXT_STYLE(fontStyle, FontSizeScale, UpdateFontSizeScale);
     COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
     COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
     COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
@@ -1359,6 +1360,7 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
     WRITE_TEXT_STYLE_TLV(
         fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
@@ -1450,6 +1452,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
             case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
                 sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
                 break;

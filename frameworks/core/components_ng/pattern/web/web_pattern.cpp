@@ -8011,6 +8011,39 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
     return isConsumed;
 }
 
+bool WebPattern::OnNestedScrollV2(float& x, float& y)
+{
+    bool hasHorizontalParent = parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end();
+    bool hasVerticalParent = parentsMap_.find(Axis::VERTICAL) != parentsMap_.end();
+    bool isNestedScrollScene = hasHorizontalParent || hasVerticalParent;
+
+    // Apply directional lock based on user settingn
+    bool shouldApplyDirectionalLock = isDirectionalLockEnabled_ &&
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::ALL ||
+        ( scrollDirectionalLockType_ == ScrollDirectionalLockType::NESTED_SCROLL && isNestedScrollScene ));
+
+    float offset = y;
+    if (expectedScrollAxis_ == Axis::HORIZONTAL) {
+        offset = x;
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
+            y = 0.0f;
+        }
+    } else {
+        if (isScrollStarted_ && shouldApplyDirectionalLock) {
+            x = 0.0f;
+        }
+    }
+    bool isConsumed = false;
+    if (offset != 0) {
+        isConsumed = FilterScrollEventHandleOffset(offset);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, "
+        "isConsumed:%{public}d, ApplyDirectionalLock:%{public}d",
+        x, y, isConsumed, shouldApplyDirectionalLock);
+    return isConsumed;
+}
+
 bool WebPattern::IsRtl()
 {
     auto host = GetHost();

@@ -216,7 +216,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
-    EXPECT_FALSE(pickerProperty->HasDisappearColor());
+    EXPECT_TRUE(pickerProperty->HasDisappearColor());
     EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
@@ -311,7 +311,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
-    EXPECT_FALSE(pickerProperty->HasColor());
+    EXPECT_TRUE(pickerProperty->HasColor());
     EXPECT_TRUE(pickerProperty->HasWeight());
 }
 
@@ -392,7 +392,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, Test
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
-    EXPECT_FALSE(pickerProperty->HasSelectedColor());
+    EXPECT_TRUE(pickerProperty->HasSelectedColor());
     EXPECT_TRUE(pickerProperty->HasSelectedWeight());
 }
 

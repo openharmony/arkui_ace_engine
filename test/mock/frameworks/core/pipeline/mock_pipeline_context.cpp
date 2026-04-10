@@ -24,13 +24,17 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -40,7 +44,6 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
-#include "foundation/barrierfree/accessibility/interfaces/innerkits/common/include/accessibility_element_info.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
 namespace OHOS::Ace {
@@ -175,6 +178,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    pipeline_->InitManagers();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -212,11 +216,6 @@ std::string PipelineContext::GetModuleName() const
 std::string PipelineContext::GetWindowName() const
 {
     return "";
-}
-
-const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
-{
-    return loadCompleteMgr_;
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -286,9 +285,6 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
-    }
-    if (!loadCompleteMgr_) {
-        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
     if (!contentChangeMgr_) {
         contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
@@ -875,6 +871,16 @@ void PipelineContext::StopWindowAnimation() {}
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
+double PipelineContext::CalcPageWidth(double rootWidth) const
+{
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
+        return rootWidth;
+    }
+
+    CHECK_NULL_RETURN(forceSplitMgr_, rootWidth);
+    return rootWidth * forceSplitMgr_->GetSplitRatio();
+}
+
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
@@ -1277,6 +1283,75 @@ void PipelineContext::FlushAsyncLoadTask()
     for (auto& task : asyncLoadTasks) {
         task();
     }
+}
+
+bool PipelineContext::IsTabJustTriggerOnKeyEvent() const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->IsTabJustTriggerOnKeyEvent();
+}
+
+bool PipelineContext::SetMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->SetMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode()
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode();
+    }
+    return false;
+}
+
+const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
+{
+    return forceSplitMgr_;
+}
+
+const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
+{
+    return formVisibleMgr_;
+}
+
+const RefPtr<FormEventManager>& PipelineContext::GetFormEventManager() const
+{
+    return formEventMgr_;
+}
+
+const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
+{
+    return formGestureMgr_;
+}
+
+const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
+{
+    return recycleManager_;
+}
+
+void PipelineContext::InitManagers()
+{
+    forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    formEventMgr_ = MakeRefPtr<FormEventManager>();
+    formGestureMgr_ = MakeRefPtr<FormGestureManager>();
 }
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
@@ -1751,6 +1826,16 @@ void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
+
+void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
+{
+    eventManager_ = eventManager;
+}
+
+RefPtr<EventManager> PipelineBase::GetEventManager() const
+{
+    return eventManager_;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

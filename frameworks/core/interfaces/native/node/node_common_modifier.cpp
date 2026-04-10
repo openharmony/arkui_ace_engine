@@ -455,6 +455,69 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
     }
 }
 
+void SetSweepGradientColorsForHDR(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    ColorSpace colorSpace, void* colorRawPtr, FrameNode* frameNode)
+{
+    if (colors == nullptr) {
+        return;
+    }
+    int32_t startPos = NUM_2;
+    std::vector<RefPtr<ResourceObject>> objs;
+    bool isNeedCompleteResObj = SystemProperties::ConfigChangePerform() && !colorRawPtr;
+    if (isNeedCompleteResObj) {
+        objs = {
+            nullptr,  // centerX
+            nullptr,  // centerY
+        };
+    }
+    CovnertResourceObjectVector(objs, colorRawPtr);
+    int32_t round = 0;
+    for (int32_t index = 0; index < colorsLength; round++) {
+        Color color;
+        bool hasDimension = false;
+        float dimension = 0.f;
+        auto useFloat = static_cast<bool>(colors[index].i32);
+        if (useFloat) {
+            auto redVal = colors[index + NUM_1].f32;
+            auto greenVal = colors[index + NUM_2].f32;
+            auto blueVal = colors[index + NUM_3].f32;
+            auto alphaVal = colors[index + NUM_4].f32;
+            auto headRoomVal = colors[index + NUM_5].f32;
+            hasDimension = static_cast<bool>(colors[index + NUM_6].i32);
+            dimension = colors[index + NUM_7].f32;
+            color = Color::FromFloat(redVal, greenVal, blueVal, alphaVal, headRoomVal);
+            index += NUM_8;
+        } else {
+            auto colorVal = static_cast<uint32_t>(colors[index + NUM_1].u32);
+            hasDimension = static_cast<bool>(colors[index + NUM_2].i32);
+            dimension = colors[index + NUM_3].f32;
+            color.SetValue(colorVal);
+            index += NUM_4;
+        }
+        NG::GradientColor gradientColor;
+        color.SetColorSpace(colorSpace);
+
+        if (isNeedCompleteResObj) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+            objs.emplace_back(colorResObj);
+        }
+
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+        auto idx = round + startPos;
+        if (SystemProperties::ConfigChangePerform() &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
+            CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], round);
+        }
+    }
+}
+
 void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
     void* colorRawPtr, FrameNode* frameNode)
 {
@@ -2408,6 +2471,28 @@ void ResetSweepGradient(ArkUINodeHandle node)
     ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+}
+
+void SetSweepGradientForHDR(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_13)) {
+        return;
+    }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    SetSweepGradientValues(gradient, values, valuesLength, resRawPtr);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3, resRawPtr, frameNode);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::BT2020, resRawPtr, frameNode);
+    } else {
+        SetSweepGradientColorsForHDR(gradient, colors, colorsLength, ColorSpace::SRGB, resRawPtr, frameNode);
+    }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
 
@@ -9339,8 +9424,8 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
         TouchPoint point;
         point.id = touchPointes[index].id;
-        point.x = touchPointes[index].nodeX;
-        point.y = touchPointes[index].nodeY;
+        point.x = touchPointes[index].windowX;
+        point.y = touchPointes[index].windowY;
         point.screenX = touchPointes[index].screenX * density;
         point.screenY = touchPointes[index].screenY * density;
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
@@ -9353,8 +9438,8 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         touchEvent.pointers.emplace_back(point);
     }
     touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
-    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
-    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.windowX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.windowY;
     touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
     touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
     touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
@@ -9386,8 +9471,8 @@ ArkUI_Int32 PostMouseEventWithStrategy(
     mouseEvent.time = time;
     mouseEvent.deviceId = arkUIMouseEvent->deviceId;
     mouseEvent.targetDisplayId = arkUIMouseEvent->targetDisplayId;
-    mouseEvent.x = arkUIMouseEvent->actionTouchPoint.nodeX;
-    mouseEvent.y = arkUIMouseEvent->actionTouchPoint.nodeY;
+    mouseEvent.x = arkUIMouseEvent->actionTouchPoint.windowX;
+    mouseEvent.y = arkUIMouseEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();
     mouseEvent.globalDisplayX = arkUIMouseEvent->actionTouchPoint.globalDisplayX * density;
     mouseEvent.globalDisplayY = arkUIMouseEvent->actionTouchPoint.globalDisplayY * density;
@@ -9430,8 +9515,8 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.deviceId = arkUIAxisEvent->deviceId;
     axisEvent.targetDisplayId = arkUIAxisEvent->targetDisplayId;
     axisEvent.action = static_cast<AxisAction>(arkUIAxisEvent->action);
-    axisEvent.x = arkUIAxisEvent->actionTouchPoint.nodeX;
-    axisEvent.y = arkUIAxisEvent->actionTouchPoint.nodeY;
+    axisEvent.x = arkUIAxisEvent->actionTouchPoint.windowX;
+    axisEvent.y = arkUIAxisEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();
     axisEvent.globalDisplayX = arkUIAxisEvent->actionTouchPoint.globalDisplayX * density;
     axisEvent.globalDisplayY = arkUIAxisEvent->actionTouchPoint.globalDisplayY * density;
@@ -9519,6 +9604,10 @@ void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
 {
     CHECK_NULL_VOID(arkUITouchEvent);
     NG::DestroyRawPointerEvent(arkUITouchEvent);
+    if (arkUITouchEvent->touchPointes) {
+        delete[] arkUITouchEvent->touchPointes;
+        arkUITouchEvent->touchPointes = nullptr;
+    }
     delete arkUITouchEvent;
     arkUITouchEvent = nullptr;
 }
@@ -9542,12 +9631,11 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
     arkUITouchEventCloned->deviceId = arkUITouchEvent->deviceId;
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
     NG::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
-    std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
     if (arkUITouchEvent->touchPointSize > 0) {
-        for (size_t i = 0; i < arkUITouchEvent->touchPointSize; i++) {
-            touchPoints[i] = arkUITouchEvent->touchPointes[i];
+        arkUITouchEventCloned->touchPointes = new ArkUITouchPoint[arkUITouchEvent->touchPointSize];
+        for (uint32_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+            arkUITouchEventCloned->touchPointes[index] = arkUITouchEvent->touchPointes[index];
         }
-        arkUITouchEventCloned->touchPointes = &touchPoints[0];
         arkUITouchEventCloned->touchPointSize = arkUITouchEvent->touchPointSize;
     } else {
         arkUITouchEventCloned->touchPointes = nullptr;
@@ -11163,6 +11251,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLinearGradient = ResetLinearGradient,
         .setSweepGradient = SetSweepGradient,
         .resetSweepGradient = ResetSweepGradient,
+        .setSweepGradientForHDR = SetSweepGradientForHDR,
         .setRadialGradient = SetRadialGradient,
         .resetRadialGradient = ResetRadialGradient,
         .setOverlay = SetOverlay,

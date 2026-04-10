@@ -137,6 +137,9 @@ public:
         return false;
     }
 
+    virtual void OnAbortAnimation() {}
+    virtual void OnStageNodeStructureChanged() {}
+
 protected:
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);

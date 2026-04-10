@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace {
@@ -71,9 +72,29 @@ public:
     ~CoastingAxisEventGenerator() override = default;
 };
 
+struct RectCallbackListImpl {};
+
 EventManager::EventManager()
 {
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+}
+
+EventManager::~EventManager() = default;
+
+void EventManager::HandleOutOfRectCallbacks(const Point& point) {}
+
+void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
+    std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)
+{}
+
+void EventManager::ClearRectCallbacks() {}
+
+const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
+{
+    if (!gestureDebugBoundaryManager_) {
+        gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
+    }
+    return gestureDebugBoundaryManager_;
 }
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch)

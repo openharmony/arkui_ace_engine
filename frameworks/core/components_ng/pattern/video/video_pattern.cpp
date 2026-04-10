@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/image/image_perf.h"
 #include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/string_utils.h"
@@ -33,7 +34,6 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
@@ -46,6 +46,9 @@
 
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -664,7 +667,7 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
                 CHECK_NULL_VOID(host);
                 auto pipeline = host->GetContext();
                 CHECK_NULL_VOID(pipeline);
-                pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+                ImagePerf::GetPerfMonitor()->CompleteLoadComponent(hostId_);
             }
             ContainerScope scope(instanceId_);
             if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -712,7 +715,7 @@ void VideoPattern::OnError(const std::string& errorId)
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
     if (!isPrepared_ && (!showImagePreview_ || showFirstFrame_)) {
-        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+        ImagePerf::GetPerfMonitor()->CompleteLoadComponent(hostId_);
     }
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -728,7 +731,7 @@ void VideoPattern::OnError(int32_t code, const std::string& message)
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
     if (!isPrepared_ && (!showImagePreview_ || showFirstFrame_)) {
-        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+        ImagePerf::GetPerfMonitor()->CompleteLoadComponent(hostId_);
     }
 
     auto eventHub = GetEventHub<VideoEventHub>();
@@ -1124,7 +1127,7 @@ void VideoPattern::OnAttachToMainTree()
     auto pipeline = host->GetContext();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     if (pipeline && (!showImagePreview_ || showFirstFrame_)) {
-        pipeline->GetLoadCompleteManager()->AddLoadComponent(hostId_);
+        ImagePerf::GetPerfMonitor()->AddLoadComponent(hostId_);
     }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
     // full screen node is not supposed to register js controller event
@@ -1143,7 +1146,7 @@ void VideoPattern::OnDetachFromMainTree()
     auto id = host->GetId();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     if (pipeline && (!showImagePreview_ || showFirstFrame_)) {
-        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(id);
+        ImagePerf::GetPerfMonitor()->DeleteLoadComponent(id);
     }
     if (host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         Pause();
@@ -1174,6 +1177,18 @@ void VideoPattern::RegisterRenderContextCallBack()
         }
     };
     renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#if defined(ANDROID_PLATFORM) && defined (RS_ENABLE_VK)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        auto OnInitTypeCallBack = [weak = WeakClaim(this)](int32_t& type) {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface != nullptr) {
+                renderSurface->AddInitTypeCallBack(type);
+            }
+        };
+        renderContextForMediaPlayer_->AddInitTypeCallBack(OnInitTypeCallBack);
+    }
+#endif
 #endif
 }
 

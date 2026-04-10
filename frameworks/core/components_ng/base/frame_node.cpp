@@ -23,6 +23,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -57,6 +58,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -1921,6 +1923,14 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         const auto& safeAreaManager = context->GetSafeAreaManager();
         if (safeAreaManager) {
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
+        }
+        if (SystemProperties::GetGestureDebugBoundaryEnabled()) {
+            const auto& eventManager = context->GetEventManager();
+            CHECK_NULL_VOID(eventManager);
+            const auto& gestureDebugMgr = eventManager->GetGestureDebugBoundaryManager();
+            if (gestureDebugMgr) {
+                gestureDebugMgr->ClearNode(GetId());
+            }
         }
 
         if (!lpxAttributes_.empty()) {
@@ -6950,6 +6960,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     event.SetTarget(eventTarget);
     event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
     event.SetTargetDisplayId(touchEvent.targetDisplayId);
+    event.SetEventHandleId(touchEvent.eventHandleId);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
