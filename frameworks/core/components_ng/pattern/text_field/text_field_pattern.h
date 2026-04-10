@@ -1520,17 +1520,7 @@ public:
         return isTransparent_;
     }
 
-    RefPtr<Clipboard> GetClipboard() override
-    {
-        if (!clipboard_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, clipboard_);
-            auto context = host->GetContext();
-            CHECK_NULL_RETURN(context, clipboard_);
-            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-        }
-        return clipboard_;
-    }
+    RefPtr<Clipboard> GetClipboard() override;
 
     const Dimension& GetAvoidSoftKeyboardOffset() const override;
 

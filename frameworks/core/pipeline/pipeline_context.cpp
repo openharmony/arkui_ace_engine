@@ -34,6 +34,7 @@
 #include "base/ressched/ressched_report.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/event_manager.h"
 #include "core/event/crown_event.h"
 #include "core/common/font_manager.h"

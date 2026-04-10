@@ -18,6 +18,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {

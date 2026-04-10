@@ -43,6 +43,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"

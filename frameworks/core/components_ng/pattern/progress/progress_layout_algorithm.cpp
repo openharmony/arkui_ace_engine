@@ -21,7 +21,6 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"

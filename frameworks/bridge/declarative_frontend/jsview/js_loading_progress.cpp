@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_loading_progress_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"

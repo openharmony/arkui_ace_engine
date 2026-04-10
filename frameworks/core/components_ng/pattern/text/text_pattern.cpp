@@ -36,6 +36,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"

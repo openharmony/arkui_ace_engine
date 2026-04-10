@@ -19,8 +19,11 @@
 #include "compatible/components/chart/chart_component.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_component.h"
-#include "core/components/progress/progress_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
+
+namespace OHOS::Ace {
+class ProgressComponent;
+}
 
 namespace OHOS::Ace::Framework {
 extern const char DOM_CHART_TYPE[];

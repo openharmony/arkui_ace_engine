@@ -31,7 +31,6 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 #include "base/memory/ace_type.h"
-#include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
