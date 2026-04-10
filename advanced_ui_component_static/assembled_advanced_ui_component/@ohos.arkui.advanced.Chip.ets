@@ -1,3 +1,5 @@
+'use static'
+
 /*
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,67 +16,56 @@
  */
 
 import {
-  ResourceStr,
-  SizeOptions,
-  ResourceColor,
-  VoidCallback,
-  Dimension,
-  Resource,
-  Length,
-  Margin,
-  LocalizedMargin,
-  LocalizedPadding,
-  Direction,
+  $r,
   Builder,
-  Component,
-  ScaleOptions,
-  SymbolEffect,
-  ShadowStyle,
   Button,
   ButtonOptions,
   ButtonType,
-  Flex,
-  FlexAlign,
-  ItemAlign,
-  SymbolGlyph,
-  SymbolEffectStrategy,
-  Image,
-  ImageFit,
-  Text,
-  TextOverflow,
-  TextAlign,
-  Color,
-  HoverEffect,
-  KeyType,
-  CommonMethod,
   Callback,
   ClickEvent,
+  Color,
+  Component,
   ConstraintSizeOptions,
-  Padding,
-  FontWeight,
   Curve,
-  $r,
+  Dimension,
+  Direction,
+  Flex,
+  FlexAlign,
+  FontWeight,
+  HoverEffect,
+  Image,
+  ImageFit,
+  ItemAlign,
   KeyEvent,
-  Column,
-  Row
+  KeyType,
+  Length,
+  LocalizedMargin,
+  LocalizedPadding,
+  Margin,
+  Padding,
+  Resource,
+  ResourceColor,
+  ResourceStr,
+  Row,
+  ScaleOptions,
+  ShadowStyle,
+  SizeOptions,
+  SymbolEffect,
+  SymbolEffectStrategy,
+  SymbolGlyph,
+  Text,
+  TextAlign,
+  TextOverflow,
+  VoidCallback,
+  Rectangle
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import {
-  Consume,
-  Link,
-  Watch,
-  ObjectLink,
-  Observed,
-  Require,
-  State,
-  Provide,
-  PropRef
-} from '@ohos.arkui.stateManagement';
-import { ColorMetrics, LengthMetrics } from '@ohos.arkui.node';
+import { PropRef, Require, State } from '@ohos.arkui.stateManagement';
+import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import hilog from '@ohos.hilog';
 import resourceManager from '@ohos.resourceManager';
-import common from '@ohos.app.ability.common';
+
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -253,6 +244,7 @@ export interface ChipTheme {
 const RESOURCE_TYPE_STRING: int = 10003;
 const RESOURCE_TYPE_FLOAT: int = 10002;
 const RESOURCE_TYPE_INTEGER: int = 10007;
+const HOT_SPOT_MIN_HEIGHT: double = 32.0f;
 
 function resolveResourceStr(resource: ResourceStr | undefined): string {
   try {
@@ -319,7 +311,7 @@ class LengthMetricsUtils {
 @Builder
 export function Chip(options: ChipOptions) {
   ChipComponent({
-    chipSize: (options.size ??  ChipSize.NORMAL),
+    chipSize: (options.size ?? ChipSize.NORMAL),
     prefixIcon: options.prefixIcon,
     prefixSymbol: options.prefixSymbol,
     label: options.label,
@@ -690,6 +682,7 @@ export struct ChipComponent {
     .borderWidth(this.theme.chipNode.defaultBorderWidth)
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
+    .responseRegion(this.getChipResponseRegion())
     .accessibilityGroup(true)
     .accessibilityDescription(this.getAccessibilityDescription())
     .accessibilityLevel(this.getAccessibilityLevel())
@@ -1337,6 +1330,82 @@ export struct ChipComponent {
         y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
       };
     }
+  }
+
+  private getChipHeight(): double {
+    let height: Length;
+    if (typeof this.chipSize !== 'string') {
+      const chipSize = this.chipSize as SizeOptions;
+      if (typeof chipSize?.height !== 'undefined' && this.isValidLength(chipSize.height)) {
+        height = chipSize.height!;
+      } else {
+        height = this.theme.chipNode.normalHeight;
+      }
+    } else if (this.chipSize === ChipSize.SMALL) {
+      height = this.theme.chipNode.smallHeight;
+    } else {
+      height = this.theme.chipNode.normalHeight;
+    }
+    return this.parseLength(height) ?? HOT_SPOT_MIN_HEIGHT;
+  }
+
+  private getChipResponseRegion(): Rectangle | undefined {
+    const chipHeight = this.getChipHeight();
+    if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
+      return {
+        x: 0,
+        y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
+        width: '100%',
+        height: HOT_SPOT_MIN_HEIGHT
+      };
+    }
+    return undefined;
+  }
+
+  private parseLength(length: Length): double | undefined {
+    if (typeof length === 'number') {
+      return length as double;
+    }
+
+    if (typeof length === 'string') {
+      const regexp = new RegExp('(\\d+)(vp|px|lpx|fp)?');
+      const matches = regexp.match(length as string);
+      if (!matches || matches.length < 2) {
+        return undefined;
+      }
+      const value = parseFloat(matches[1] as string);
+      const unit = matches.length >= 3 ? matches[2] : '';
+      if (unit === 'vp' || unit === '') {
+        return value;
+      } else if (unit === 'px') {
+        return this.getUIContext().px2vp(value);
+      } else if (unit === 'fp') {
+        return this.getUIContext().px2vp(this.getUIContext().fp2px(value));
+      } else if (unit === 'lpx') {
+        return this.getUIContext().px2vp(this.getUIContext().lpx2px(value));
+      } else {
+        return undefined;
+      }
+    }
+
+    if (typeof length === 'object') {
+      try {
+        const metrics = LengthMetrics.resource(length as Resource);
+        if (metrics.unit === LengthUnit.VP) {
+          return metrics.value;
+        } else if (metrics.unit === LengthUnit.PX) {
+          return this.getUIContext().px2vp(metrics.value);
+        } else if (metrics.unit === LengthUnit.FP) {
+          return this.getUIContext().px2vp(this.getUIContext().fp2px(metrics.value));
+        } else {
+          return this.getUIContext().px2vp(this.getUIContext().lpx2px(metrics.value));
+        }
+      } catch (error) {
+        console.error('Failed to parse length because the type of resource is invalid');
+        return undefined;
+      }
+    }
+    return undefined;
   }
 
   build() {
