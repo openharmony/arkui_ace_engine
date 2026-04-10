@@ -1620,6 +1620,19 @@ void JSViewPopups::ParseMenuMaxHeight(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
+void JSViewPopups::ParseMenuAnchoredColorMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto colorModeProperty = menuOptions->GetProperty("colorMode");
+    if (colorModeProperty->IsNumber()) {
+        auto colorMode = colorModeProperty->ToNumber<int32_t>();
+        if (colorMode == static_cast<int32_t>(NG::AnchoredColorMode::FOLLOW_SYSTEM)) {
+            menuParam.isColorModeFollowTarget = false;
+        } else {
+            menuParam.isColorModeFollowTarget = true;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1664,6 +1677,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
     JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
+    JSViewPopups::ParseMenuAnchoredColorMode(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(
