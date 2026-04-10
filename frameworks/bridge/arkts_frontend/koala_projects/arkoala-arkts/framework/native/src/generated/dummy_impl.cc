@@ -40097,8 +40097,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRotationImpl(Ark_RenderNode peer,
-                         const Ark_Vector3* rotation,
-                         Ark_Int32 unitValue)
+                         const Ark_Vector3* rotation)
     {
         if (!needGroupedLog(1)) {
             return;
@@ -40107,8 +40106,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, rotation);
-        out.append(", ");
-        WriteToString(&out, unitValue);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

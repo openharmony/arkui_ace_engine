@@ -30277,8 +30277,7 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     void (*setTranslation)(Ark_RenderNode peer,
                            const Ark_Vector2* translation);
     void (*setRotation)(Ark_RenderNode peer,
-                        const Ark_Vector3* rotation,
-                        Ark_Int32 unitValue);
+                        const Ark_Vector3* rotation);
     void (*setTransform)(Ark_RenderNode peer,
                          const Ark_Matrix4* transform);
     void (*setShadowColor)(Ark_RenderNode peer,
