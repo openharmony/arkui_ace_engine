@@ -21,8 +21,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-}
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,7 +32,7 @@ class SubTabBarStyleAccessorTest : public AccessorTestBase<GENERATED_ArkUISubTab
 using StyledIndUnionTest = Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
 /**
  * @tc.name: indicator1Test
- * @tc.desc:
+ * @tc.desc: Test SubTabBarStyle Indicator1 with DrawableTabBarIndicator style
  * @tc.type: FUNC
  */
 HWTEST_F(SubTabBarStyleAccessorTest, indicator1Test, TestSize.Level1)
