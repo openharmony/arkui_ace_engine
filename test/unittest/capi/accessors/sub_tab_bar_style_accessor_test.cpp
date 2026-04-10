@@ -32,7 +32,6 @@ class SubTabBarStyleAccessorTest : public AccessorTestBase<GENERATED_ArkUISubTab
 
 
 using StyledIndUnionTest = Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
-;
 /**
  * @tc.name: indicator1Test
  * @tc.desc:
