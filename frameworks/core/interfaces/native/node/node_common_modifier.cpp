@@ -9414,12 +9414,14 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
     touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
     touchEvent.targetDisplayId = arkUITouchEvent->targetDisplayId;
     ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    touchEvent.modifierKeyState = arkUITouchEvent->modifierKeyState;
     auto density = PipelineBase::GetCurrentDensity();
     for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
         TouchPoint point;
@@ -9431,6 +9433,7 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
         point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
+        point.operatingHand = touchPointes[index].operatingHand;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
@@ -9515,6 +9518,7 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.deviceId = arkUIAxisEvent->deviceId;
     axisEvent.targetDisplayId = arkUIAxisEvent->targetDisplayId;
     axisEvent.action = static_cast<AxisAction>(arkUIAxisEvent->action);
+    axisEvent.modifierKeyState = arkUIAxisEvent->modifierKeyState;
     axisEvent.x = arkUIAxisEvent->actionTouchPoint.windowX;
     axisEvent.y = arkUIAxisEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();

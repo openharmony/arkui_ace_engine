@@ -98,7 +98,8 @@ bool PostEventManager::PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNo
     if (it != targetNodes_.end()) {
         return false;
     }
-    if (touchEvent.eventHandleId < 0 || touchEvent.eventHandleId > INT_MAX) {
+    if (touchEvent.eventHandleId < 0 || touchEvent.eventHandleId > INT_MAX ||
+        touchEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
         return false;
     }
     if (touchEvent.eventHandleId == 0) {
@@ -188,7 +189,8 @@ bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNo
     if (it != targetNodes_.end()) {
         return false;
     }
-    if (mouseEvent.eventHandleId < 0 || mouseEvent.eventHandleId > INT_MAX) {
+    if (mouseEvent.eventHandleId < 0 || mouseEvent.eventHandleId > INT_MAX ||
+        mouseEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
         return false;
     }
     if (mouseEvent.eventHandleId == 0) {
@@ -236,15 +238,7 @@ bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNo
 bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
-    if (axisEvent.eventHandleId < 0 || axisEvent.eventHandleId > INT_MAX) {
-        return false;
-    }
-    if (axisEvent.eventHandleId == 0) {
-        axisEvent.eventHandleId = axisEvent.id + PASS_THROUGH_EVENT_ID;
-    } else {
-        axisEvent.eventHandleId += PASS_THROUGH_EVENT_ID;
-    }
-    axisEvent.id = axisEvent.eventHandleId;
+    axisEvent.id += PASS_THROUGH_EVENT_ID;
     axisEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
@@ -275,7 +269,16 @@ bool PostEventManager::PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNod
     if (it != targetNodes_.end()) {
         return false;
     }
-    axisEvent.id += PASS_THROUGH_EVENT_ID;
+    if (axisEvent.eventHandleId < 0 || axisEvent.eventHandleId > INT_MAX ||
+        axisEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
+        return false;
+    }
+    if (axisEvent.eventHandleId == 0) {
+        axisEvent.eventHandleId = axisEvent.id + PASS_THROUGH_EVENT_ID;
+    } else {
+        axisEvent.eventHandleId += PASS_THROUGH_EVENT_ID;
+    }
+    axisEvent.id = axisEvent.eventHandleId;
     axisEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
