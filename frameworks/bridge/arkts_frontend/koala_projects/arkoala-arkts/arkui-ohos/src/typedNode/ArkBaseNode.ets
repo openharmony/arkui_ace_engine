@@ -24,7 +24,7 @@ import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBegin
 import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
-import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
+import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, RotateAngleOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
 import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
 import { TouchTestInfo, TouchTestDoneCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
@@ -358,7 +358,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public gridOffset(value: number | undefined): this {
         return this
     }
-    public rotate(value: RotateOptions | undefined): this {
+    public rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
+        this.getPeer()?.setRotateAttribute(value);
         return this
     }
     public transform(value: Object | undefined): this {
