@@ -51,7 +51,7 @@ HWTEST_F(SubTabBarStyleAccessorTest, indicator1Test, TestSize.Level1)
 
     drawInd.drawable = Converter::ArkValue<Opt_DrawableDescriptor>(Ark_Empty());
 
-    StyledIndUnionTest style = = Converter::ArkUnion<StyledIndUnionTest,
+    StyledIndUnionTest style = Converter::ArkUnion<StyledIndUnionTest,
         Ark_DrawableTabBarIndicator>(drawInd);
     auto stylePeer = PeerUtils::CreatePeer<SubTabBarStylePeer>();
     EXPECT_EQ(stylePeer->imageInfoConfig, nullptr);
