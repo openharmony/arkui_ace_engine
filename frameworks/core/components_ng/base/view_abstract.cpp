@@ -38,6 +38,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
@@ -60,6 +61,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -4905,13 +4907,23 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
             CHECK_NULL_VOID(frameNode);
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+                renderContext->UpdateBackShadow(shadow);
+            }
+            renderContext->UpdatePreBackShadow(shadow);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
-    ACE_UPDATE_RENDER_CONTEXT(PreBackShadow, shadow);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        renderContext->UpdateBackShadow(shadow);
+    }
+    renderContext->UpdatePreBackShadow(shadow);
 }
 
 void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
@@ -4926,13 +4938,22 @@ void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
             CHECK_NULL_VOID(frameNode);
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+                renderContext->UpdateBackShadow(shadowValue);
+            }
+            renderContext->UpdatePreBackShadow(shadowValue);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        renderContext->UpdateBackShadow(shadow);
+    }
+    renderContext->UpdatePreBackShadow(shadow);
 }
 
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
@@ -5800,52 +5821,76 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     auto preMaterial = renderContext->GetSystemMaterial();
     if (!preMaterial) {
         return;
+    }
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("viewAbstract.uiMaterial");
+    if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        auto preConfig = renderContext->GetImmersiveMaterialConfig();
+        if (!preConfig.has_value()) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
+                "immersiveConfig is null when remove, node id:%{public}d tag:%{public}s", frameNode->GetId(),
+                frameNode->GetTag().c_str());
+            return;
+        }
+        if (preConfig->key.level == UiMaterialLevel::SMOOTH) {
+            ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        } else {
+            // reset color picker, materialFilter, and transparency callback.
+            if (preConfig->colorInvert) {
+                renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+            }
+            renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+            if (transparencyCallbackId.has_value()) {
+                TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
+                renderContext->SetTransparencyCallbackId(std::nullopt);
+            }
+        }
+        if (preConfig->applyShadow) {
+            ResetImmersiveShadowToDefault(pattern, renderContext);
+        }
+        renderContext->SetImmersiveMaterialConfig(std::nullopt);
     } else {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->RemoveResObj("viewAbstract.uiMaterial");
-        auto preBackgroundColor = renderContext->GetPreBackgroundColor();
-        auto preBorderWidth = renderContext->GetPreBorderWidth();
-        auto preBorderColor = renderContext->GetPreBorderColor();
-        auto preBackShadow = renderContext->GetPreBackShadow();
+        ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        ResetImmersiveShadowToDefault(pattern, renderContext);
+    }
+}
 
-        if (preBackgroundColor.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
-        } else {
-            renderContext->ResetBackgroundColor();
-            renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
-            pattern->OnBackgroundColorReset();
-        }
+void ViewAbstract::ResetBorderAndBackgroundEffect(
+    FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext)
+{
+    auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+    auto preBorderWidth = renderContext->GetPreBorderWidth();
+    auto preBorderColor = renderContext->GetPreBorderColor();
 
-        if (preBorderWidth.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
-        } else {
-            BorderWidthProperty borderWidth;
-            borderWidth.SetBorderWidth(Dimension(0));
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
-            pattern->OnBorderWidthReset();
-        }
+    if (preBackgroundColor.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+    } else {
+        renderContext->ResetBackgroundColor();
+        renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+        pattern->OnBackgroundColorReset();
+    }
 
-        if (preBorderColor.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
-        } else {
-            BorderColorProperty borderColor;
-            borderColor.SetColor(Color::BLACK);
-            renderContext->ResetBorderColor();
-            renderContext->OnBorderColorUpdate(borderColor);
-            pattern->OnBorderColorReset();
-        }
+    if (preBorderWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
+    } else {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+        pattern->OnBorderWidthReset();
+    }
 
-        if (preBackShadow.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, preBackShadow.value(), frameNode);
-        } else {
-            Shadow shadow;
-            renderContext->ResetBackShadow();
-            renderContext->OnBackShadowUpdate(shadow);
-            pattern->OnBackShadowReset();
-        }
+    if (preBorderColor.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
+    } else {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        renderContext->ResetBorderColor();
+        renderContext->OnBorderColorUpdate(borderColor);
+        pattern->OnBorderColorReset();
     }
 }
 
@@ -5853,13 +5898,18 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
 {
     auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
     auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
-    auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+    auto immersiveOptionsPtr = material ? material->CopyImmersiveOptions() : nullptr;
+    auto updateFunc = [materialType, immersiveOptionsPtr = std::move(immersiveOptionsPtr), weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
+        if (materialType == MaterialType::IMMERSIVE) {
+            SetImmersiveOptions(frameNode, immersiveOptionsPtr);
+            return;
+        }
         auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
         if (!materialTheme) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
@@ -5892,6 +5942,126 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         ResetSystemMaterialEffect(frameNode);
     }
     // This function cannot save uiMaterial to renderContext.
+}
+
+void ViewAbstract::SetImmersiveOptions(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!optionsPtr) {
+        return;
+    }
+    auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
+    if (!materialConfig) {
+        return;
+    }
+    if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {
+        RegisterTransparencyListener(frameNode);
+        SetImmersiveConfigs(frameNode, materialConfig);
+        return;
+    }
+    // SMOOTH
+    auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+    if (transparencyCallbackId.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "unExpect: materialLevel change");
+        TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
+        renderContext->SetTransparencyCallbackId(std::nullopt);
+    }
+    SetImmersiveConfigs(frameNode, materialConfig);
+}
+
+void ViewAbstract::RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+    if (!transparencyCallbackId) {
+        auto weakNode = WeakPtr<FrameNode>(frameNode);
+        auto callbackId = TransparencyUtils::RegisterTransparencyListener(weakNode, [weak = weakNode](int32_t _) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto material = renderContext->GetSystemMaterial();
+            if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
+                return;
+            }
+            ViewAbstract::SetImmersiveOptions(frameNode, material->GetImmersiveOptions());
+        });
+        renderContext->SetTransparencyCallbackId(callbackId);
+    }
+}
+
+void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config)
+{
+    if (!config) {
+        return;
+    }
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto preConfig = renderContext->GetImmersiveMaterialConfig();
+    if (config->key.level == UiMaterialLevel::SMOOTH) {
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        if (!materialTheme) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
+            return;
+        }
+        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, pipeline);
+        if (!params) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
+            return;
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+        if (config->applyShadow) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        } else if (preConfig && preConfig->applyShadow) {
+            ResetImmersiveShadowToDefault(pattern, renderContext);
+        }
+        pattern->OnUiMaterialParamUpdate(params.value());
+        renderContext->SetImmersiveMaterialConfig(config);
+        return;
+    }
+    if (preConfig == config) {
+        return;
+    }
+    // gentle or exquisite
+    auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
+    if (preConfig && preConfig->colorInvert && !config->colorInvert) {
+        // reset color picker
+        renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+    }
+    renderContext->SetMaterialWithQualityLevel(
+        materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
+    if (config->applyShadow) {
+        Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
+        renderContext->UpdateBackShadow(shadow);
+    } else if (preConfig && preConfig->applyShadow) {
+        ResetImmersiveShadowToDefault(pattern, renderContext);
+    }
+    renderContext->SetImmersiveMaterialConfig(config);
+}
+
+void ViewAbstract::ResetImmersiveShadowToDefault(
+    const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext)
+{
+    auto shadowProperty = renderContext->GetPreBackShadow();
+    if (shadowProperty.has_value()) {
+        renderContext->UpdateBackShadow(shadowProperty.value());
+    } else {
+        auto shadow = MaterialUtils::GetImmersiveEmptyShadow();
+        renderContext->ResetBackShadow();
+        renderContext->OnBackShadowUpdate(shadow);
+        pattern->OnBackShadowReset();
+    }
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)

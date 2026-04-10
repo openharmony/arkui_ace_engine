@@ -128,6 +128,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/pipeline/base/mock_constants.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline_ng/mock_ui_task_scheduler.cpp",
 
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp",
@@ -165,6 +166,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/common/mock_font_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_reporter.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_setting_data_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_stylus_detector_mgr.cpp",
 

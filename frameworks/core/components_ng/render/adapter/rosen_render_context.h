@@ -581,6 +581,9 @@ public:
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
 
+    void SetMaterialWithQualityLevel(
+        const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -819,6 +822,7 @@ protected:
 #endif
     void DetachModifiers();
     void MarkNeedDrawNode(bool condition);
+    void RemoveTransparencyCallback();
 
     void OnEmitterPropertyUpdate();
 
