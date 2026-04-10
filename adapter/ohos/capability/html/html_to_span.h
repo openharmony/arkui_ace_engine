@@ -160,6 +160,8 @@ private:
     std::map<std::string, HtmlToSpan::StyleValue> ToTextSpanStyle(xmlAttrPtr curNode);
     void AddHeadingStyleSpan(const std::string& element, SpanInfo& info);
     void AddStyleSpan(const std::string& element, SpanInfo& info);
+    void ToHeadingSpan(const std::string& element, xmlNodePtr node, size_t len,
+        size_t& pos, std::vector<SpanInfo>& spanInfos);
     void ToTextSpan(const std::string& element, xmlNodePtr node, size_t len,
         size_t& pos, std::vector<SpanInfo>& spanInfos);
 

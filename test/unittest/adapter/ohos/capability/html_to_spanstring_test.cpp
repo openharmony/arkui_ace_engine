@@ -2411,6 +2411,21 @@ HWTEST_F(HtmlConvertTestNg, HtmlHeadingFontWeightOverrideTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HtmlHeadingAddsBlockLineBreaksTest
+ * @tc.desc: Verify h1 behaves like a block element and keeps line breaks before and after adjacent text.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlHeadingAddsBlockLineBreaksTest, TestSize.Level1)
+{
+    const std::string html = "<html><body>prefix<h1>Heading</h1>suffix</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+
+    EXPECT_EQ(dstSpan->GetString(), "prefix\nHeading\nsuffix");
+}
+
+/**
  * @tc.name: HtmlConvertSmallTagSingle
  * @tc.desc: Verify single <small> tag sets fontSizeScale = 0.8
  * @tc.level: 1
