@@ -1365,6 +1365,20 @@ void EventManager::CleanHoverStatusForDragBegin()
     TouchTestResult testResult;
     falsifyEvent.action = MouseAction::CANCEL;
     falsifyEvent.isFalsifyCancel = true;
+    int32_t falsifyEventId = falsifyEvent.id;
+    int32_t falsifyEventHanleId = falsifyEvent.eventHandleId;
+    for (const auto& iter : mouseTestResults_) {
+        if (iter.first >= EVENT_HANDLE) {
+            falsifyEvent.id = iter.first - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+            falsifyEvent.eventHandleId = falsifyEvent.id;
+            UpdateHoverNode(falsifyEvent, testResult);
+            DispatchMouseEventNG(falsifyEvent);
+            DispatchMouseHoverEventNG(falsifyEvent);
+            DispatchMouseHoverAnimationNG(falsifyEvent);
+        }
+    }
+    falsifyEvent.id = falsifyEventId;
+    falsifyEvent.eventHandleId = falsifyEventHanleId;
     UpdateHoverNode(falsifyEvent, testResult);
     DispatchMouseEventNG(falsifyEvent);
     DispatchMouseHoverEventNG(falsifyEvent);
