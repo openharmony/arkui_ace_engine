@@ -167,6 +167,21 @@ void BuildConfigParams(const RefPtr<NavDestinationNodeBase>& node, PageViewportC
     params.statusBarAnimation = statusBarAnimated;
     params.enableNavIndicator = enableNavIndicator;
 }
+
+void CollectJsViewName(const RefPtr<UINode>& uiNode, std::string& jsViewNames)
+{
+    auto customNode = AceType::DynamicCast<CustomNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    std::string jsViewName = customNode->GetJSViewName();
+    if (jsViewName.empty()) {
+        return;
+    }
+    if (!jsViewNames.empty()) {
+        jsViewNames += "/";
+    }
+    jsViewNames += jsViewName;
+}
 } // namespace
 
 void NavigationPattern::ReplaceNodeWithProxyNodeIfNeeded(
@@ -3862,6 +3877,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
 
     std::string fromNavDestinationName = "";
     std::string toNavDestinationName = "";
+    std::string fromComponentName = "";
+    std::string toComponentName = "";
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
         auto preDestinationPattern = preDestination->GetPattern<NavDestinationPattern>();
@@ -3875,10 +3892,12 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
              */
             preDestination->SetIsAnimated(false);
         }
+        fromComponentName = GetNavDestinationJsViewName(preDestinationPattern->GetCustomNode());
     } else if (GetHomeDestinationName(hostNode, fromNavDestinationName)) {
         fromPathInfo += ", navDesitinationName: " + fromNavDestinationName;
     } else {
         fromPathInfo = hostNode->GetNavigationPathInfo();
+        fromNavDestinationName = "navBar";
     }
     if (topDestination) {
         toPathInfo = topDestination->GetNavDestinationPathInfo();
@@ -3886,16 +3905,19 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(topDestinationPattern);
         toNavDestinationName = topDestinationPattern->GetName();
         toPathInfo += ", navDesitinationName: " + toNavDestinationName;
+        toComponentName = GetNavDestinationJsViewName(topDestinationPattern->GetCustomNode());
     } else if (GetHomeDestinationName(hostNode, toNavDestinationName)) {
         toPathInfo += ", navDesitinationName: " + toNavDestinationName;
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
+        toNavDestinationName = "navBar";
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
-    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
+    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation",
+        fromComponentName, toComponentName);
     UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
@@ -6582,7 +6604,6 @@ void NavigationPattern::FireRelatedDestinationLifecycleInner(bool isOnShow, bool
     NavigationPattern::FireNavigationChange(relatedDest, false, false, isFromWindow);
 }
 
-
 bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
     const RefPtr<NavDestinationGroupNode>& preTopDest,
     const RefPtr<NavDestinationGroupNode>& curTopDest)
@@ -6678,5 +6699,28 @@ void NavigationPattern::AdjustNodeForStackSync(
     } else {
         AdjustNodeForStackSyncWhenStackDisplay();
     }
+}
+
+std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode)
+{
+    std::string jsViewName{};
+    while (uiNode) {
+        if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            // this is a navDestination node
+            return jsViewName;
+        }
+        if (uiNode->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            // this is a jsView node
+            CollectJsViewName(uiNode, jsViewName);
+        }
+        // this is an UINode, go deep further for navDestination node
+        auto children = uiNode->GetChildren();
+        if (children.empty()) {
+            return "";
+        }
+        uiNode = children.front();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
+    return "";
 }
 } // namespace OHOS::Ace::NG
