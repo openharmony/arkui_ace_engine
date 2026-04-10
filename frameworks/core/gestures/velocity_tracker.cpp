@@ -296,7 +296,7 @@ void VelocityTracker::DumpVelocityPoints() const
                     " y " << std::to_string(yVal[i] - baseVal);
             }
         }
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "%{public}s", oss.str().c_str());
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "%{public}s", oss.str().c_str());
     };
     func(xAxis_, "xAxis");
     func(yAxis_, "yAxis");

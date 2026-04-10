@@ -9361,6 +9361,18 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
+    touchEvent.rollAngle= arkUITouchEvent->rollAngle;
+    touchEvent.tiltX = arkUITouchEvent->actionTouchPoint.tiltX;
+    touchEvent.tiltY = arkUITouchEvent->actionTouchPoint.tiltY;
+    touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
+    touchEvent.width = arkUITouchEvent->actionTouchPoint.contactAreaWidth;
+    touchEvent.height = arkUITouchEvent->actionTouchPoint.contactAreaHeight;
+    if (arkUITouchEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUITouchEvent->keyCodesLength; ++i) {
+            touchEvent.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(arkUITouchEvent->pressedKeyCodes[i]));
+        }
+    }
+
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
@@ -9377,6 +9389,7 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
         point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
+        point.operatingHand = touchPointes[index].operatingHand;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
@@ -9488,6 +9501,11 @@ ArkUI_Int32 PostMouseEventWithStrategy(
 
     mouseEvent.rawDeltaX = arkUIMouseEvent->rawDeltaX;
     mouseEvent.rawDeltaY = arkUIMouseEvent->rawDeltaY;
+    if (arkUIMouseEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUIMouseEvent->keyCodesLength; ++i) {
+            mouseEvent.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(arkUIMouseEvent->pressedKeyCodes[i]));
+        }
+    }
 
     int32_t* pressedButtons = arkUIMouseEvent->pressedButtons;
     for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
@@ -9509,6 +9527,11 @@ ArkUI_Int32 PostAxisEventWithStrategy(
         axisEvent.isNewReferee = true;
     } else {
         axisEvent.isNewReferee = false;
+    }
+    if (arkUIAxisEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUIAxisEvent->keyCodesLength; ++i) {
+            axisEvent.pressedCodes.emplace_back(static_cast<KeyCode>(arkUIAxisEvent->pressedKeyCodes[i]));
+        }
     }
     axisEvent.sourceType = static_cast<SourceType>(arkUIAxisEvent->sourceType);
     axisEvent.sourceTool = static_cast<SourceTool>(arkUIAxisEvent->actionTouchPoint.toolType);
@@ -9611,6 +9634,10 @@ void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
     if (arkUITouchEvent->touchPointes) {
         delete[] arkUITouchEvent->touchPointes;
         arkUITouchEvent->touchPointes = nullptr;
+    }
+    if (arkUITouchEvent->pressedKeyCodes) {
+        delete[] arkUITouchEvent->pressedKeyCodes;
+        arkUITouchEvent->pressedKeyCodes = nullptr;
     }
     delete arkUITouchEvent;
     arkUITouchEvent = nullptr;
@@ -11051,8 +11078,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.globalDisplayX = globalDisplayLocation.GetX() / density;
     touchPoint.globalDisplayY = globalDisplayLocation.GetY() / density;
     touchPoint.pressure = locationInfo.GetForce();
-    touchPoint.contactAreaWidth = locationInfo.GetSize();
-    touchPoint.contactAreaHeight = locationInfo.GetSize();
+    touchPoint.contactAreaWidth = locationInfo.GetWidth();
+    touchPoint.contactAreaHeight = locationInfo.GetHeight();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
