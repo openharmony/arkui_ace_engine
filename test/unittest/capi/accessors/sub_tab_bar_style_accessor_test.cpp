@@ -37,14 +37,14 @@ using StyledIndUnionTest = Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndic
  */
 HWTEST_F(SubTabBarStyleAccessorTest, indicator1Test, TestSize.Level1)
 {
-    constexpr double height = 100;
+    constexpr double indicatorSize = 100;
     ASSERT_NE(accessor_->Indicator1, nullptr);
 
     Ark_DrawableTabBarIndicator drawInd;
-    drawInd.width = Converter::ArkValue<Opt_Length>(height);
-    drawInd.height = Converter::ArkValue<Opt_Length>(height);
-    drawInd.borderRadius = Converter::ArkValue<Opt_Length>(height);
-    drawInd.marginTop = Converter::ArkValue<Opt_Length>(height);
+    drawInd.width = Converter::ArkValue<Opt_Length>(indicatorSize);
+    drawInd.height = Converter::ArkValue<Opt_Length>(indicatorSize);
+    drawInd.borderRadius = Converter::ArkValue<Opt_Length>(indicatorSize);
+    drawInd.marginTop = Converter::ArkValue<Opt_Length>(indicatorSize);
 
     drawInd.drawable = Converter::ArkValue<Opt_DrawableDescriptor>(Ark_Empty());
 
