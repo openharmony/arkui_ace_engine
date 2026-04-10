@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/render/adapter/rosen_particle_context.h"
 
+#include "animation/rs_particle_field_collection.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +28,7 @@ void RosenRenderParticle::UpdateDisturbance(
     CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-    std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
+    auto collection = std::make_shared<Rosen::ParticleFieldCollection>();
     for (auto field : disturbanceArray) {
         double sizeWidthPx = Dimension(field.size[0], DimensionUnit::VP).ConvertToPx();
         double sizeHeightPx = Dimension(field.size[1], DimensionUnit::VP).ConvertToPx();
@@ -38,9 +39,9 @@ void RosenRenderParticle::UpdateDisturbance(
         auto rsField = std::make_shared<Rosen::ParticleNoiseField>(static_cast<int>(field.strength),
             static_cast<Rosen::ShapeType>(field.shape), size, position, field.feather, field.noiseScale,
             field.noiseFrequency, field.noiseAmplitude);
-        fields->AddField(rsField);
+        collection->Add(rsField);
     }
-    rsNode->SetParticleNoiseFields(fields);
+    rsNode->SetParticleFields(collection);
 }
 
 void RosenRenderParticle::UpdateRippleFields(
@@ -51,7 +52,7 @@ void RosenRenderParticle::UpdateRippleFields(
     CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-    std::shared_ptr<Rosen::ParticleRippleFields> rippleFields = std::make_shared<Rosen::ParticleRippleFields>();
+    auto collection = std::make_shared<Rosen::ParticleFieldCollection>();
     for (const auto& ripple : rippleArray) {
         Rosen::Vector2f center = {ripple.center.first.ConvertToPx(), ripple.center.second.ConvertToPx()};
         auto rsRipple = std::make_shared<Rosen::ParticleRippleField>(center, ripple.amplitude, ripple.wavelength,
@@ -65,9 +66,9 @@ void RosenRenderParticle::UpdateRippleFields(
             ripple.region.position.first.ConvertToPx(), ripple.region.position.second.ConvertToPx()
         };
         rsRipple->regionPosition_ = position;
-        rippleFields->AddRippleField(rsRipple);
+        collection->Add(rsRipple);
     }
-    rsNode->SetParticleRippleFields(rippleFields);
+    rsNode->SetParticleFields(collection);
 }
 
 void RosenRenderParticle::UpdateVelocityFields(
@@ -78,7 +79,7 @@ void RosenRenderParticle::UpdateVelocityFields(
     CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-    std::shared_ptr<Rosen::ParticleVelocityFields> velocityFields = std::make_shared<Rosen::ParticleVelocityFields>();
+    auto collection = std::make_shared<Rosen::ParticleFieldCollection>();
     for (const auto& velocityField : velocityArray) {
         Rosen::Vector2f velocity = {velocityField.velocity.first, velocityField.velocity.second};
         auto rsVelocity = std::make_shared<Rosen::ParticleVelocityField>(velocity);
@@ -91,9 +92,9 @@ void RosenRenderParticle::UpdateVelocityFields(
             velocityField.region.position.first.ConvertToPx(), velocityField.region.position.second.ConvertToPx()
         };
         rsVelocity->regionPosition_ = position;
-        velocityFields->AddVelocityField(rsVelocity);
+        collection->Add(rsVelocity);
     }
-    rsNode->SetParticleVelocityFields(velocityFields);
+    rsNode->SetParticleFields(collection);
 }
 
 void RosenRenderParticle::updateEmitterPosition(
