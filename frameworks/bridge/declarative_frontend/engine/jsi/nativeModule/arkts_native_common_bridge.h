@@ -366,7 +366,7 @@ public:
     static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent* info);
     static Local<panda::ArrayRef> CreateFingerInfosArray(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);
-    static Local<panda::ObjectRef> CreateTapGestureInfo(EcmaVM* vm, GestureEvent& info);
+    static Local<panda::ObjectRef> CreateTapGestureInfo(EcmaVM* vm, GestureEvent* infoPtr);
     static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo);

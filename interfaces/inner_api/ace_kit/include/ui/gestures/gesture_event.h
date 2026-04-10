@@ -29,6 +29,8 @@ namespace OHOS::Ace {
 class GestureEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(GestureEvent, BaseEventInfo);
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     GestureEvent() : BaseEventInfo("gesture") {}
     ~GestureEvent() override = default;
 
@@ -122,6 +124,18 @@ public:
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
+    }
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+    GestureEvent& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
+        return *this;
     }
     const Offset& GetGlobalLocation() const
     {
@@ -413,6 +427,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
     // Will be used in drag.
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.

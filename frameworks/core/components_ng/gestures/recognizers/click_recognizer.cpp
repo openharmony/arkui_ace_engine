@@ -532,8 +532,18 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
     bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
     TransformForRecognizer(
         localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+    auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));

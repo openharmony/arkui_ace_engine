@@ -46,6 +46,13 @@ struct ArkUI_UIInputEvent {
     void* inputEvent;
     bool isCreatedByUser = false;
     int32_t apiVersion = 0;
+    int32_t nodeId = -1;
+    bool usePXUnit = false;
+};
+
+struct PointerEventResult {
+    float value;
+    ArkUI_ErrorCode  errorCode;
 };
 
 typedef enum {

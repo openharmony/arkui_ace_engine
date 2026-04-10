@@ -23,11 +23,16 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/event/ace_events.h"
+#include "core/event/touch_event.h"
 #include "ui/event/axis_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
 } // namespace OHOS::MMI
+
+namespace OHOS::Ace::NG {
+class FrameNode;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 
@@ -110,6 +115,8 @@ class AxisInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(AxisInfo, BaseEventInfo);
 
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     AxisInfo() : BaseEventInfo("onAxis") {}
     AxisInfo(const AxisEvent& event, const Offset& localLocation, const EventTarget& target);
     ~AxisInfo() override = default;
@@ -130,6 +137,18 @@ public:
     const Offset& GetGlobalDisplayLocation() const;
     const Offset& GetScreenLocation() const;
     const Offset& GetLocalLocation() const;
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+    AxisInfo& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
+        return *this;
+    }
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
     const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
@@ -148,6 +167,7 @@ private:
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
     std::shared_ptr<const MMI::PointerEvent> pointerEvent_;
 };
 
@@ -207,10 +227,9 @@ private:
 
 using OnAxisEventFunc = std::function<void(AxisInfo&)>;
 using OnCoastingAxisEventFunc = std::function<void(CoastingAxisInfo&)>;
-using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
-class AxisEventTarget : public virtual AceType {
-    DECLARE_ACE_TYPE(AxisEventTarget, AceType);
+class AxisEventTarget : public virtual TouchEventTarget {
+    DECLARE_ACE_TYPE(AxisEventTarget, TouchEventTarget);
 
 public:
     AxisEventTarget() = default;
@@ -224,19 +243,29 @@ public:
     void SetFrameName(const std::string& frameName);
     std::string GetFrameName() const;
     bool HandleAxisEvent(const AxisEvent& event);
-    virtual void HandleEvent(const AxisEvent& event) {}
     int32_t GetFrameId() const
     {
         return frameId_;
     }
     void SetOnCoastingAxisCallback(OnCoastingAxisEventFunc&& onCoastingAxisCallback);
     bool HandleCoastingAxisEvent(CoastingAxisInfo& info);
+    bool HandleEvent(const AxisEvent& event) override
+    {
+        return true;
+    }
+    bool HandleEvent(const TouchEvent& event) override
+    {
+        return false;
+    }
+    bool DispatchEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
 
 private:
     OnAxisEventFunc onAxisCallback_;
     OnCoastingAxisEventFunc onCoastingAxisCallback_;
     NG::OffsetF coordinateOffset_;
-    GetEventTargetImpl getEventTargetImpl_;
     std::string frameName_ = "Unknown";
     int32_t frameId_ = 0;
 };

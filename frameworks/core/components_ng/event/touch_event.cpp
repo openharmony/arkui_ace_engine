@@ -153,11 +153,23 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
 TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& lastPoint, const TouchEvent& event)
 {
     TouchLocationInfo changedInfo("onTouch", lastPoint.GetOriginalReCovertId());
+    auto frameNodeWeak = GetAttachedNode();
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    auto postEventNodeId = event.postEventNodeId;
+    auto globalOffset = lastPoint.GetOffset();
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
     NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
+    auto localOffset = Offset(localX, localY);
+    changedInfo.SetCurrentLocalLocationGetter(
+        [frameNodeWeak, needPostEvent, postEventNodeId, globalOffset, localOffset]() {
+            CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+            PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+            NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+            return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+        });
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
@@ -196,6 +208,18 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     TouchLocationInfo info("onTouch", pointItem.GetOriginalReCovertId());
+    auto frameNodeWeak = GetAttachedNode();
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    auto postEventNodeId = event.postEventNodeId;
+    auto currentGlobalOffset = Offset(globalX, globalY);
+    auto localOffset = Offset(localX, localY);
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId, currentGlobalOffset,
+                                           localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetGlobalLocation(Offset(globalX, globalY));
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
@@ -233,6 +257,18 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     TouchLocationInfo historyInfo("onTouch", eventItem.GetOriginalReCovertId());
+    auto frameNodeWeak = GetAttachedNode();
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    auto postEventNodeId = event.postEventNodeId;
+    auto currentGlobalOffset = Offset(globalX, globalY);
+    auto localOffset = Offset(localX, localY);
+    historyInfo.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId, currentGlobalOffset,
+                                                  localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     historyInfo.SetTimeStamp(eventItem.time);
     historyInfo.SetGlobalLocation(Offset(globalX, globalY));
     historyInfo.SetLocalLocation(Offset(localX, localY));

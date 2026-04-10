@@ -655,6 +655,8 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         if (it != eventHandlers.end()) {
             it->second(uiEvent, innerEvent);
             uiEvent.apiVersion = innerEvent->apiVersion;
+            uiEvent.nodeId = innerEvent->nodeId;
+            uiEvent.usePXUnit = UsePXUnit(nodePtr);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
@@ -834,6 +836,8 @@ void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent)
         if (it != eventHandlers.end()) {
             it->second(uiEvent, innerEvent);
             uiEvent.apiVersion = innerEvent->apiVersion;
+            uiEvent.nodeId = innerEvent->nodeId;
+            uiEvent.usePXUnit = UsePXUnit(nodePtr);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
