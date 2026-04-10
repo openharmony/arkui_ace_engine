@@ -2740,40 +2740,6 @@ HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTouchTest002, TestSize.Lev
 }
 
 /**
- * @tc.name: ClearPostInputActionsDefaultTypeTest
- * @tc.desc: test ClearPostInputActions with default/invalid type.
- * @tc.type: FUNC
- */
-HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsDefaultTypeTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct FrameNode and UINode.
-     */
-    Init();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
-
-    /**
-     * @tc.steps: step2. add touch event.
-     */
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::DOWN;
-    touchEvent.id = 1;
-    PostEventAction action;
-    action.targetNode = uiNode;
-    action.touchEvent = touchEvent;
-    postEventManager_->postInputEventAction_.push_back(action);
-
-    auto sizeBefore = postEventManager_->postInputEventAction_.size();
-
-    /**
-     * @tc.steps: step3. try to clear with invalid type and verify size unchanged.
-     */
-    postEventManager_->ClearPostInputActions(uiNode, 1, static_cast<PostInputEventType>(99));
-    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), sizeBefore);
-}
-
-/**
  * @tc.name: PostMouseEventFullSequenceTest
  * @tc.desc: test PostMouseEvent with full event sequence.
  * @tc.type: FUNC
@@ -2824,6 +2790,40 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventFullSequenceTest, TestSize.Level1
     releaseEvent.id = 1;
     postEventManager_->PostMouseEvent(uiNode, std::move(releaseEvent));
     EXPECT_TRUE(postEventManager_->postMouseEventAction_.empty());
+}
+
+/**
+ * @tc.name: ClearPostInputActionsDefaultTypeTest
+ * @tc.desc: test ClearPostInputActions with default/invalid type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsDefaultTypeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add touch event.
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    PostEventAction action;
+    action.targetNode = uiNode;
+    action.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(action);
+
+    auto sizeBefore = postEventManager_->postInputEventAction_.size();
+
+    /**
+     * @tc.steps: step3. try to clear with invalid type and verify size unchanged.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, static_cast<PostInputEventType>(99));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), sizeBefore);
 }
 
 /**
