@@ -942,6 +942,7 @@ private:
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    bool IsCloseKeyboard();
     void HandleBlurEvent();
     void HandleFocusEvent(FocusReason focusReason = FocusReason::DEFAULT);
     void OnFocusNodeChange(FocusReason focusReason) override;

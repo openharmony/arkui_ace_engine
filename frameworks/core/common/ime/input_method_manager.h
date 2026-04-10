@@ -72,6 +72,7 @@ private:
     bool isLastFocusUIExtension_ = false;
     int32_t lastFocusNodeId_ = -1;
     bool lastKeep_ = false;
+    std::string preTag = "";
 };
 } // namespace OHOS::Ace
 

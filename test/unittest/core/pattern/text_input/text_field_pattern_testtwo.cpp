@@ -1603,4 +1603,22 @@ HWTEST_F(TextFieldPatternTestTwo, onWillCut, TestSize.Level0)
     result = true;
     EXPECT_TRUE(eventHub->FireOnWillCut(expected));
 }
+
+/**
+ * @tc.name: IsCloseKeyboard
+ * @tc.desc: test IsCloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, IsCloseKeyboard001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    EXPECT_FALSE(pattern->IsCloseKeyboard(textFieldManager));
+}
 } // namespace OHOS::Ace::NG

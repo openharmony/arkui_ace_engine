@@ -4070,6 +4070,19 @@ void RichEditorPattern::HandleBlurEventReset()
     StopTwinkling();
 }
 
+bool RichEditorPattern::IsCloseKeyboard()
+{
+    auto reason = GetBlurReason();
+    auto textFieldManager = GetTextFieldManager();
+    bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
+    if (!continueFeature) {
+        return ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) ||
+               reason == BlurReason::FRAME_DESTROY;
+    }
+    return (reason == BlurReason::WINDOW_BLUR || reason == BlurReason::VIEW_SWITCH) &&
+           ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+}
+
 void RichEditorPattern::HandleBlurEvent()
 {
     auto reason = GetBlurReason();
@@ -4081,16 +4094,16 @@ void RichEditorPattern::HandleBlurEvent()
     IF_PRESENT(multipleClickRecognizer_, Stop());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     HandleBlurEventReset();
-    bool isCloseCustomKeyboard = (reason == BlurReason::WINDOW_BLUR || reason == BlurReason::VIEW_SWITCH) &&
-                                 ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-    if (isCloseCustomKeyboard) {
-        CloseKeyboard(true);
-    }
+
     // The pattern handles blurevent, Need to close the softkeyboard first.
-    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
+    if (((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) ||
+        reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseSelectOverlay();
         ResetSelection();
+    }
+    if (IsCloseKeyboard()) {
+        CloseKeyboard(true);
     }
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();

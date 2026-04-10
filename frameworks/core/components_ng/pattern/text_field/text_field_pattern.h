@@ -1061,7 +1061,7 @@ public:
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
-    bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
+    bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
     void SetFocusStyle();
