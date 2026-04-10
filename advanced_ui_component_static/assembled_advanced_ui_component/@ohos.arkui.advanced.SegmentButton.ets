@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -792,7 +792,7 @@ struct MultiSelectItemArray {
 
   onOptionsChange(a: string) {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -802,10 +802,10 @@ struct MultiSelectItemArray {
 
   onSelectedChange(a: string) {
     for (let i: number = 0.0; i < MAX_ITEM_COUNT; i++) {
-      this.multiColor[i as int] = Color.Transparent;
+      this.multiColor[i.toInt()] = Color.Transparent;
     }
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -815,7 +815,7 @@ struct MultiSelectItemArray {
 
   aboutToAppear() {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -1770,7 +1770,7 @@ export struct SegmentButton {
           })
         } else {
           Stack() {
-            if (this.options.buttons !== undefined && this!.options!.buttons!.length as number > 1.0) {
+            if (this.options.buttons !== undefined && this!.options!.buttons!.length.toDouble() > 1.0) {
               PressAndHoverEffectArray({
                 options: this.options,
                 buttons: this.options.buttons!,
@@ -1868,7 +1868,7 @@ export struct SegmentButton {
             let selectedInfo: number = fingerInfo!.localX ?? 0;
 
             let buttonLength: number =
-              Math.min(this!.options!.buttons!.length as number, this!.buttonItemsSize!.length as number);
+              Math.min(this!.options!.buttons!.length.toDouble(), this!.buttonItemsSize!.length.toDouble());
 
             // 安全检查
             if (!this.buttonItemsSize || buttonLength <= 0) {
@@ -1881,7 +1881,7 @@ export struct SegmentButton {
                 break;
               }
 
-              let buttonSize = this.buttonItemsSize[i as int];
+              let buttonSize = this.buttonItemsSize[i.toInt()];
               if (!buttonSize) {
                 break;
               }
@@ -1896,8 +1896,8 @@ export struct SegmentButton {
               // 安全检查：确保 selectedIndexes 不为空
               this.doSelectedChangeAnimate =
                 (this.selectedIndexes.length > 0 &&
-                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length as number,
-                    this!.buttonItemsSize!.length as number)) ? false : true;
+                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length.toDouble(),
+                    this!.buttonItemsSize!.length.toDouble())) ? false : true;
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i;
               if (this.onItemClicked) {
@@ -1905,7 +1905,7 @@ export struct SegmentButton {
               }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
 
-                let selectedIndex: int = this.selectedIndexes.indexOf(realClickIndex as int, 0)
+                let selectedIndex: int = this.selectedIndexes.indexOf(realClickIndex.toInt(), 0)
                 if (selectedIndex === -1.0) {
                   this.selectedIndexes.push(realClickIndex.toInt());
                 } else {
@@ -2085,7 +2085,7 @@ export struct SegmentButton {
               let nowX = fingerInfo.globalX - this.panGestureStartPoint.x +
                 (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
               nowX = Math.max(this.buttonItemsPosition[0].start?.value as number, nowX);
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
               nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value as number, nowX);
 
               this.selectedItemPosition = {
@@ -2095,7 +2095,7 @@ export struct SegmentButton {
                 bottom: this.selectedItemPosition.bottom
               }
             } else {
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
               for (let i = 0; i < buttonLength; i++) {
                 selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number)
                 if (selectedInfo < 0.0) {
@@ -2145,7 +2145,7 @@ export struct SegmentButton {
 
             if (this.isBackgroundSystemMaterialEnabled()) {
               let selectedInfo = fingerInfo.localX
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
               let realIndex: int = -1;
               for (let i = 0; i < buttonLength; i++) {
                 selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
