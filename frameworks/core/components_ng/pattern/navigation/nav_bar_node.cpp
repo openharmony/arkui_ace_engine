@@ -184,6 +184,30 @@ void NavBarNode::SystemTransitionPopEnd(bool transitionIn)
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
 
+void NavBarNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPushFinish(int32_t animationId)
+{
+}
+
+void NavBarNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPopFinish(int32_t animationId)
+{
+}
+
 bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
 {
     auto navigation = DynamicCast<NavigationGroupNode>(node);

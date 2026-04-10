@@ -1235,6 +1235,30 @@ std::function<void()> NavDestinationGroupNode::BuildEmptyFinishCallback()
     return finish;
 }
 
+void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPushFinish(int32_t animationId)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopFinish(int32_t animationId)
+{
+}
+
 bool NavDestinationGroupNode::HasStandardBefore() const
 {
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
