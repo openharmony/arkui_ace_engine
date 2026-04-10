@@ -53,6 +53,7 @@ constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int32_t INDEX_OF_FRAME_NODE_POINT = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 constexpr int32_t SIZE_OF_ARRAY = 2;
+constexpr int32_t NUM_2 = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
@@ -2649,7 +2650,18 @@ ArkUINativeModuleValue FrameNodeBridge::SetCrossLanguageOptions(ArkUIRuntimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     bool attributeSetting = secondArg->ToBoolean(vm)->Value();
-    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(nativeNode, attributeSetting);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    ArkUITreeOperatingStatus treeOperating = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    if (thirdArg->IsBoolean()) {
+        treeOperating = (thirdArg->ToBoolean(vm)->Value())
+                        ? ARKUI_TREE_OPERATING_STATUS_ENABLE
+                        : ARKUI_TREE_OPERATING_STATUS_DISABLE;
+    }
+    ArkUICrossLanguageOption option = {
+        .attributeSetting = attributeSetting,
+        .treeOperatingStatus = treeOperating
+    };
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(nativeNode, &option);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -2670,6 +2682,31 @@ ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->checkIfCanCrossLanguageAttributeSetting(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* currentNode = reinterpret_cast<UINode*>(nativeNode);
+    CHECK_NULL_RETURN(currentNode, panda::BooleanRef::New(vm, false));
+    bool result = static_cast<int32_t>(currentNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE;
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* currentNode = reinterpret_cast<UINode*>(nativeNode);
+    CHECK_NULL_RETURN(currentNode, panda::BooleanRef::New(vm, false));
+    bool result = currentNode -> IsCNode() ?
+        (static_cast<int32_t>(currentNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE) : false;
     return panda::BooleanRef::New(vm, result);
 }
 
