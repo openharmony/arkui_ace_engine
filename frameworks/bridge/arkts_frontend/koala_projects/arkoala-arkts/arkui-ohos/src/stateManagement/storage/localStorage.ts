@@ -110,7 +110,7 @@ export class LocalStorage {
      * @since 20
      */
     public size(): int {
-        return this.store_.size() as int;
+        return this.store_.size().toInt();
     }
 
     /**

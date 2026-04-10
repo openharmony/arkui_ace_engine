@@ -15,11 +15,16 @@
 
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 
+#include "core/animation/animator.h"
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+
+AxisAnimator::AxisAnimator() = default;
+
+AxisAnimator::~AxisAnimator() = default;
 
 void AxisAnimator::Initialize(const WeakPtr<PipelineBase>& context)
 {

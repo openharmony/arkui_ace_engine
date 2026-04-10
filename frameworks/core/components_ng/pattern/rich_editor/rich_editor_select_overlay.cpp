@@ -268,6 +268,10 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     recreateAfterMoveDone_ = false;
     pattern->SelectAIDetect();
     contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    std::string selectData = GetSelectedText();
+    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
 }
 
 std::string RichEditorSelectOverlay::GetSelectedText()
@@ -869,4 +873,28 @@ void RichEditorSelectOverlay::UpdateHandleColor()
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
+bool RichEditorSelectOverlay::IsRegisterTouchCallback()
+{
+    return true;
+}
+
+bool RichEditorSelectOverlay::GetIsHandleMoving()
+{
+    return isHandleMoving_;
+}
+
+bool RichEditorSelectOverlay::GetIsHandleHidden()
+{
+    return handleIsHidden_;
+}
+
+bool RichEditorSelectOverlay::IsSingleHandleMoving()
+{
+    return isHandleMoving_ && IsSingleHandle();
+}
+
+bool RichEditorSelectOverlay::NeedRefreshMenu()
+{
+    return needRefreshMenu_;
+}
 } // namespace OHOS::Ace::NG

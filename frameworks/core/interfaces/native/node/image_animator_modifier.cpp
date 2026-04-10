@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/image_animator_modifier.h"
 
+#include "core/animation/animator.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
 namespace OHOS::Ace::NG {

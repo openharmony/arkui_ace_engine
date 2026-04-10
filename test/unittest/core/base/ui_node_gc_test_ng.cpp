@@ -25,7 +25,7 @@ using namespace testing;
 using namespace testing::ext;
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class UINodeGCTestNg : public testing::Test {

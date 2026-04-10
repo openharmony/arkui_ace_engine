@@ -143,14 +143,20 @@ public:
         RefPtr<CalendarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<CalendarTheme> theme = AceType::MakeRefPtr<CalendarTheme>();
-            if (!themeConstants) {
-                return theme;
-            }
-            theme = AceType::MakeRefPtr<CalendarTheme>();
-            ParseNewPattern(themeConstants, theme);
-            ParsePattern(themeConstants, theme);
+            InitTheme(theme, themeConstants);
             return theme;
         }
+    
+    protected:
+        void InitTheme(const RefPtr<CalendarTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            if (!themeConstants) {
+                return;
+            }
+            ParseNewPattern(themeConstants, theme);
+            ParsePattern(themeConstants, theme);
+        }
+
     private:
         void ParseCardTheme(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
         {
@@ -826,6 +832,7 @@ public:
     
 protected:
     CalendarTheme() = default;
+    Color entryFontColor_;
 
 private:
     CalendarThemeStructure calendarTheme_;
@@ -846,7 +853,6 @@ private:
     Color backgroundSelectedNotTodayColor_;
     Color backgroundHoverColor_;
     Color backgroundPressColor_;
-    Color entryFontColor_;
     Color dialogDividerColor_;
     Color dialogButtonBackgroundColor_;
     Dimension entryHeight_;

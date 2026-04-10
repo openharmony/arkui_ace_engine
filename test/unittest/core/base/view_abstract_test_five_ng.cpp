@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +33,7 @@ void ViewAbstractTestFiveNg::SetUpTestSuite()
     PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
     PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
 }
 
 void ViewAbstractTestFiveNg::TearDownTestSuite()
@@ -367,5 +369,720 @@ HWTEST_F(ViewAbstractTestFiveNg, ViewAbstractNGSetClipShape001, TestSize.Level1)
     g_isConfigChangePerform = false;
     std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
     EXPECT_EQ(shapeStr, "");
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest001
+ * @tc.desc: Test SetSweepGradient with basic HDR color configuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Enable config change perform mode
+     * @tc.expected: Config change perform mode should be enabled
+     */
+    g_isConfigChangePerform = true;
+    
+    /**
+     * @tc.steps: step3. Create sweep gradient with HDR colors
+     * @tc.expected: Gradient should be created successfully with HDR colors
+     */
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    // Add first HDR color stop with headRoom=2.0
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    // Add second HDR color stop with headRoom=2.0
+    NG::GradientColor gradientColor2(Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    // Set sweep gradient center position
+    gradient.GetSweepGradient()->centerX = CalcDimension(0.5, DimensionUnit::PERCENT);
+    gradient.GetSweepGradient()->centerY = CalcDimension(0.5, DimensionUnit::PERCENT);
+    
+    /**
+     * @tc.steps: step4. Apply sweep gradient to frame node
+     * @tc.expected: Sweep gradient should be applied successfully
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    /**
+     * @tc.steps: step5. Verify sweep gradient is applied correctly
+     * @tc.expected: Render context should have sweep gradient with HDR colors
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify HDR color headroom values
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[0].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    
+    /**
+     * @tc.steps: step6. Test color mode change callback
+     * @tc.expected: OnColorModeChange should be called without error
+     */
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest002
+ * @tc.desc: Test SetSweepGradient with multiple HDR colors and full parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Enable config change perform mode and create gradient
+     * @tc.expected: Gradient should be created with 3 HDR color stops
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor2.SetDimension(50.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    NG::GradientColor gradientColor3(Color::FromFloat(0.0f, 0.0f, 1.0f, 1.0f, 2.0f));
+    gradientColor3.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor3);
+    
+    /**
+     * @tc.steps: step3. Set all sweep gradient parameters
+     * @tc.expected: All parameters should be set correctly
+     */
+    gradient.GetSweepGradient()->centerX = CalcDimension(0.5, DimensionUnit::PERCENT);
+    gradient.GetSweepGradient()->centerY = CalcDimension(0.5, DimensionUnit::PERCENT);
+    gradient.GetSweepGradient()->startAngle = CalcDimension(0.0, DimensionUnit::PX);
+    gradient.GetSweepGradient()->endAngle = CalcDimension(360.0, DimensionUnit::PX);
+    gradient.GetSweepGradient()->rotation = CalcDimension(0.0, DimensionUnit::PX);
+    
+    /**
+     * @tc.steps: step4. Apply sweep gradient and verify
+     * @tc.expected: All HDR colors and parameters should be correct
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify all HDR colors
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[0].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[2].GetColor().GetHeadRoomColor().has_value());
+    
+    // Verify all sweep gradient parameters
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->centerX,
+        CalcDimension(0.5, DimensionUnit::PERCENT));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->centerY,
+        CalcDimension(0.5, DimensionUnit::PERCENT));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->startAngle,
+        CalcDimension(0.0, DimensionUnit::PX));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+        CalcDimension(360.0, DimensionUnit::PX));
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest003
+ * @tc.desc: Test SetSweepGradient without FrameNode parameter with HDR colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Enable config change perform mode and create gradient
+     * @tc.expected: Gradient should be created with HDR colors
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(0.8f, 0.2f, 0.3f, 1.0f, 1.5f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.3f, 0.7f, 0.9f, 1.0f, 1.8f));
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    gradient.GetSweepGradient()->endAngle = CalcDimension(270.0, DimensionUnit::PX);
+    
+    /**
+     * @tc.steps: step3. Test SetSweepGradient without FrameNode parameter
+     * @tc.expected: Sweep gradient should be applied successfully
+     */
+    ViewAbstract::SetSweepGradient(gradient);
+    
+    /**
+     * @tc.steps: step4. Verify sweep gradient is applied correctly
+     * @tc.expected: Render context should have sweep gradient with HDR colors
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+        CalcDimension(270.0, DimensionUnit::PX));
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest004
+ * @tc.desc: Test SetSweepGradient with HDR color and repeat flag enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create sweep gradient with repeat flag enabled
+     * @tc.expected: Repeat flag should be set to true
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    gradient.SetRepeat(true);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.5f, 0.0f, 1.0f, 2.2f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.5f, 0.0f, 1.0f, 0.8f, 2.5f));
+    gradientColor2.SetDimension(50.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    gradient.GetSweepGradient()->centerX = CalcDimension(0.3, DimensionUnit::PERCENT);
+    gradient.GetSweepGradient()->centerY = CalcDimension(0.7, DimensionUnit::PERCENT);
+    
+    /**
+     * @tc.steps: step3. Apply sweep gradient and verify repeat flag
+     * @tc.expected: Repeat flag should be true and HDR colors should be applied
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetRepeat(), true);
+    
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->centerX,
+        CalcDimension(0.3, DimensionUnit::PERCENT));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->centerY,
+        CalcDimension(0.7, DimensionUnit::PERCENT));
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest005
+ * @tc.desc: Test SetSweepGradient with mixed HDR and normal colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create gradient with mixed HDR and normal colors
+     * @tc.expected: Gradient should contain both HDR and non-HDR colors
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    // First color: HDR color with headRoom
+    NG::GradientColor gradientColor1(Color::FromFloat(1.2f, 0.6f, 0.4f, 1.0f, 1.8f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    // Second color: Normal color without headRoom
+    NG::GradientColor gradientColor2(Color::FromARGB(255, 0, 255, 0));
+    gradientColor2.SetDimension(50.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    // Third color: HDR color with different headRoom
+    NG::GradientColor gradientColor3(Color::FromFloat(0.4f, 0.8f, 1.0f, 1.0f, 2.0f));
+    gradientColor3.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor3);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify mixed color types
+     * @tc.expected: Should have both HDR and non-HDR colors
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify HDR and non-HDR color mix
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[0].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_FALSE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[2].GetColor().GetHeadRoomColor().has_value());
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest006
+ * @tc.desc: Test SetSweepGradient with HDR color in BT2020 color space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create HDR colors with BT2020 color space
+     * @tc.expected: Colors should have BT2020 color space set
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    Color hdrColor1 = Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f);
+    hdrColor1.SetColorSpace(ColorSpace::BT2020);
+    NG::GradientColor gradientColor1(hdrColor1);
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    Color hdrColor2 = Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f);
+    hdrColor2.SetColorSpace(ColorSpace::BT2020);
+    NG::GradientColor gradientColor2(hdrColor2);
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    gradient.GetSweepGradient()->centerX = CalcDimension(0.5, DimensionUnit::PERCENT);
+    gradient.GetSweepGradient()->centerY = CalcDimension(0.5, DimensionUnit::PERCENT);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify color space
+     * @tc.expected: Both colors should have BT2020 color space
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify color space
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_EQ(colors[0].GetColor().GetColorSpace(), ColorSpace::BT2020);
+    EXPECT_EQ(colors[1].GetColor().GetColorSpace(), ColorSpace::BT2020);
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest007
+ * @tc.desc: Test SetSweepGradient with config change perform disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Disable config change perform mode
+     * @tc.expected: Config change perform mode should be disabled
+     */
+    g_isConfigChangePerform = false;
+    
+    /**
+     * @tc.steps: step3. Create sweep gradient with HDR colors
+     * @tc.expected: Gradient should be created successfully
+     */
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    /**
+     * @tc.steps: step4. Apply sweep gradient with config change disabled
+     * @tc.expected: Sweep gradient should still be applied successfully
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest008
+ * @tc.desc: Test SetSweepGradient with different angle configurations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create sweep gradient with custom angles
+     * @tc.expected: Custom angles should be set correctly
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.5f, 0.0f, 1.0f, 1.5f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.0f, 0.5f, 1.0f, 1.0f, 1.5f));
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    // Test different angle configurations
+    gradient.GetSweepGradient()->startAngle = CalcDimension(45.0, DimensionUnit::PX);
+    gradient.GetSweepGradient()->endAngle = CalcDimension(315.0, DimensionUnit::PX);
+    gradient.GetSweepGradient()->rotation = CalcDimension(90.0, DimensionUnit::PX);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify angles
+     * @tc.expected: All angles should be applied correctly
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->startAngle,
+        CalcDimension(45.0, DimensionUnit::PX));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+        CalcDimension(315.0, DimensionUnit::PX));
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->rotation,
+        CalcDimension(90.0, DimensionUnit::PX));
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest009
+ * @tc.desc: Test SetSweepGradient with different opacity values in HDR colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create sweep gradient with different opacity values
+     * @tc.expected: Different opacity values should be set correctly
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    // Test with different opacity values
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.0f, 0.0f, 0.5f, 2.0f)); // opacity=0.5
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.0f, 1.0f, 0.0f, 0.8f, 2.0f)); // opacity=0.8
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify opacity
+     * @tc.expected: Different opacity values should be preserved
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest010
+ * @tc.desc: Test SetSweepGradient with DISPLAY_P3 color space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create HDR color with DISPLAY_P3 color space
+     * @tc.expected: Colors should have DISPLAY_P3 color space set
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    Color hdrColor1 = Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f);
+    hdrColor1.SetColorSpace(ColorSpace::DISPLAY_P3);
+    NG::GradientColor gradientColor1(hdrColor1);
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    Color hdrColor2 = Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f);
+    hdrColor2.SetColorSpace(ColorSpace::DISPLAY_P3);
+    NG::GradientColor gradientColor2(hdrColor2);
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify color space
+     * @tc.expected: Both colors should have DISPLAY_P3 color space
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify DISPLAY_P3 color space
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_EQ(colors[0].GetColor().GetColorSpace(), ColorSpace::DISPLAY_P3);
+    EXPECT_EQ(colors[1].GetColor().GetColorSpace(), ColorSpace::DISPLAY_P3);
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest011
+ * @tc.desc: Test SetSweepGradient with maximum HDR headRoom value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create gradient with maximum headRoom value
+     * @tc.expected: Maximum headRoom value should be set
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    // Test with maximum headRoom value
+    NG::GradientColor gradientColor1(Color::FromFloat(1.5f, 0.8f, 0.6f, 1.0f, 10.0f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(0.6f, 1.2f, 1.0f, 1.0f, 10.0f));
+    gradientColor2.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify headRoom
+     * @tc.expected: Maximum headRoom value should be preserved
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SweepGradientHDRColorTest012
+ * @tc.desc: Test SetSweepGradient with 4 or more color stops
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frame node and pattern for testing
+     * @tc.expected: Frame node and pattern should be available
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create gradient with 4 color stops
+     * @tc.expected: 4 color stops should be added successfully
+     */
+    g_isConfigChangePerform = true;
+    
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    
+    NG::GradientColor gradientColor1(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor1.SetDimension(0.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor1);
+    
+    NG::GradientColor gradientColor2(Color::FromFloat(1.0f, 1.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor2.SetDimension(33.3, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor2);
+    
+    NG::GradientColor gradientColor3(Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 2.0f));
+    gradientColor3.SetDimension(66.6, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor3);
+    
+    NG::GradientColor gradientColor4(Color::FromFloat(0.0f, 0.0f, 1.0f, 1.0f, 2.0f));
+    gradientColor4.SetDimension(100.0, DimensionUnit::PERCENT);
+    gradient.AddColor(gradientColor4);
+    
+    /**
+     * @tc.steps: step3. Apply gradient and verify all colors
+     * @tc.expected: All 4 HDR colors should be present
+     */
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    
+    // Verify all HDR colors
+    auto colors = renderContext->GetSweepGradient()->GetColors();
+    EXPECT_TRUE(colors[0].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[1].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[2].GetColor().GetHeadRoomColor().has_value());
+    EXPECT_TRUE(colors[3].GetColor().GetHeadRoomColor().has_value());
+    
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

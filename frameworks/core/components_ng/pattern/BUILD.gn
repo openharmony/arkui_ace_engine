@@ -119,6 +119,8 @@ build_component_ng("pattern_ng") {
     "dialog/dialog_pattern.cpp",
     "dialog/dialog_pattern_multi_thread.cpp",
     "dialog/dialog_view.cpp",
+    "distortion_component/distortion_component_model_ng.cpp",
+    "distortion_component/distortion_component_pattern.cpp",
     "divider/divider_layout_algorithm.cpp",
     "divider/divider_model_ng.cpp",
     "divider/divider_model_ng_static.cpp",
@@ -602,6 +604,7 @@ build_component_ng("pattern_ng") {
     "toggle/toggle_model_static.cpp",
     "toolbaritem/toolbar_row_pattern.cpp",
     "toolbaritem/toolbaritem_model_ng.cpp",
+    "toolbaritem/toolbaritem_model_static.cpp",
     "union_effect_container/union_effect_container_model_ng.cpp",
     "union_effect_container/union_effect_container_model_static.cpp",
     "union_effect_container/union_effect_container_pattern.cpp",
@@ -634,6 +637,13 @@ build_component_ng("pattern_ng") {
   deps = [
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
+    "smart_layout/engine:smartlayout",
+  ]
+
+  # SmartLayout algorithm
+  sources += [
+    "smart_layout/smart_layout_algorithm.cpp",
+    "smart_layout/smart_layout_engine_loader.cpp",
   ]
 
  if (enable_player_framework) {

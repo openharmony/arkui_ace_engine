@@ -143,6 +143,26 @@ const auto callSyncMethod =
     Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, event);
 }
+void deserializeAndCallAreaChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_AREACHANGECALLBACK))));
+    thisDeserializer.readPointer();
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    call(resourceId, oldValue, newValue);
+}
+void deserializeAndCallSyncAreaChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Area oldValue, const Ark_Area newValue)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_AREACHANGECALLBACK))));
+    Ark_Area oldValue = Area_serializer::read(thisDeserializer);
+    Ark_Area newValue = Area_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, oldValue, newValue);
+}
 void deserializeAndCallAnimationEndHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -5526,6 +5546,45 @@ void deserializeAndCallSyncCallback_String(Ark_VMContext vmContext, KSerializerB
     Ark_String data = static_cast<Ark_String>(thisDeserializer.readString());
     callSyncMethod(vmContext, resourceId, data);
 }
+void deserializeAndCallCallback_String_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String data,
+        const synthetic_Callback_Boolean_Void continuation)>(thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_STRING_BOOLEAN))));
+    thisDeserializer.readPointer();
+    Ark_String data = static_cast<Ark_String>(thisDeserializer.readString());
+    synthetic_Callback_Boolean_Void continuationResult = {thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean isSelected)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCaller(KIND_SYNTHETIC_CALLBACK_BOOLEAN_VOID)))),
+                reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+                const Ark_Boolean isSelected)>(thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(
+                        getManagedCallbackCallerSync(KIND_SYNTHETIC_CALLBACK_BOOLEAN_VOID))))};
+    call(resourceId, data, continuationResult);
+}
+void deserializeAndCallSyncCallback_String_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray,
+    Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+        const Ark_String data, const synthetic_Callback_Boolean_Void continuation)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCallerSync(KIND_CALLBACK_STRING_BOOLEAN))));
+    Ark_String data = static_cast<Ark_String>(thisDeserializer.readString());
+    synthetic_Callback_Boolean_Void continuationResult = {thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean isSelected)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCaller(KIND_SYNTHETIC_CALLBACK_BOOLEAN_VOID)))),
+                reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+                const Ark_Boolean isSelected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                    getManagedCallbackCallerSync(KIND_SYNTHETIC_CALLBACK_BOOLEAN_VOID))))};
+    callSyncMethod(vmContext, resourceId, data, continuationResult);
+}
 void deserializeAndCallCallback_String_PasteEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -9845,6 +9904,26 @@ void deserializeAndCallSyncOnViewportFitChangedCallback(Ark_VMContext vmContext,
     Ark_ViewportFit viewportFit = static_cast<Ark_ViewportFit>(thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, viewportFit);
 }
+void deserializeAndCallOnVisibleIndexesChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ONVISIBLEINDEXESCHANGECALLBACK))));
+    thisDeserializer.readPointer();
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    call(resourceId, start, end);
+}
+void deserializeAndCallSyncOnVisibleIndexesChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONVISIBLEINDEXESCHANGECALLBACK))));
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    callSyncMethod(vmContext, resourceId, start, end);
+}
 void deserializeAndCallOnWaterFlowScrollIndexCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -12343,6 +12422,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallAnimationStartHandler(thisArray, thisLength);
     case KIND_ARCSCROLLINDEXHANDLER:
         return deserializeAndCallArcScrollIndexHandler(thisArray, thisLength);
+    case KIND_AREACHANGECALLBACK:
+        return deserializeAndCallAreaChangeCallback(thisArray, thisLength);
     case KIND_BUTTONMODIFIERBUILDER:
         return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
     case KIND_BUTTONTRIGGERCLICKCALLBACK:
@@ -12678,6 +12759,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallCallback_StateStylesChange(thisArray, thisLength);
     case KIND_CALLBACK_STRING:
         return deserializeAndCallCallback_String(thisArray, thisLength);
+    case KIND_CALLBACK_STRING_BOOLEAN:
+        return deserializeAndCallCallback_String_Boolean(thisArray, thisLength);
     case KIND_CALLBACK_STRING_PASTEEVENT_VOID:
         return deserializeAndCallCallback_String_PasteEvent_Void(thisArray, thisLength);
     case KIND_CALLBACK_STRING_SURFACERECT_VOID:
@@ -12922,6 +13005,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallOnVerifyPinCallback(thisArray, thisLength);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return deserializeAndCallOnViewportFitChangedCallback(thisArray, thisLength);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return deserializeAndCallOnVisibleIndexesChangeCallback(thisArray, thisLength);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return deserializeAndCallOnWaterFlowScrollIndexCallback(thisArray, thisLength);
     case KIND_ONWILLSCROLLCALLBACK:
@@ -13414,6 +13499,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncCallback_StateStylesChange(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_STRING:
         return deserializeAndCallSyncCallback_String(vmContext, thisArray, thisLength);
+    case KIND_CALLBACK_STRING_BOOLEAN:
+        return deserializeAndCallSyncCallback_String_Boolean(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_STRING_PASTEEVENT_VOID:
         return deserializeAndCallSyncCallback_String_PasteEvent_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_STRING_SURFACERECT_VOID:
@@ -13659,6 +13746,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncOnVerifyPinCallback(vmContext, thisArray, thisLength);
     case KIND_ONVIEWPORTFITCHANGEDCALLBACK:
         return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
+    case KIND_ONVISIBLEINDEXESCHANGECALLBACK:
+        return deserializeAndCallSyncOnVisibleIndexesChangeCallback(vmContext, thisArray, thisLength);
     case KIND_ONWATERFLOWSCROLLINDEXCALLBACK:
         return deserializeAndCallSyncOnWaterFlowScrollIndexCallback(vmContext, thisArray, thisLength);
     case KIND_ONWILLSCROLLCALLBACK:

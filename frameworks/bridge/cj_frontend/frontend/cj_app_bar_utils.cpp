@@ -24,6 +24,7 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/app_bar_helper.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/inspector.h"

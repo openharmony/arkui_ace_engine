@@ -946,6 +946,15 @@ void SetPlaceholderImpl(Ark_NativePointer node,
     options.value = Converter::OptConvertPtr<std::u16string>(value);
     RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
+
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetOrphanCharOptimization(frameNode, convValue.value_or(false));
+}
+
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
 {
@@ -995,6 +1004,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
+        RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUIRichEditorModifierImpl;
 }

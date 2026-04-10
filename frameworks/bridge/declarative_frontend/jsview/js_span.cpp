@@ -42,6 +42,7 @@
 #endif
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -183,8 +184,8 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
             FontWeight fontWeightEnum = parseResult.second;
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(weight,
-                DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
@@ -301,8 +302,8 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
             FontWeight fontWeightEnum = parseResult.second;
             variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
         } else {
-            variableFontWeight = StringUtils::StringToInt(fontWeight,
-                DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);

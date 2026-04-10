@@ -55,6 +55,8 @@ public:
             TextStyle normalOptionStyle = GetOptionStyle(false, false);
             normalOptionStyle.SetTextColor(colors->FontPrimary());
             SetOptionStyle(false, false, normalOptionStyle);
+            SetDividerColor(colors->CompDivider());
+            SetSelectedBackgroundColor(colors->CompBackgroundTertiary());
         }
     }
 protected:

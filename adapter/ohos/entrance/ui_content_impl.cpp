@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
 #include <cinttypes>
@@ -55,7 +56,10 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/container_window_manager.h"
@@ -127,6 +131,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
@@ -461,6 +466,13 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
 extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instanceId)
 {
     return UIContentImpl::GetUIContentWindowID(instanceId);
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ScopeErrorHivewReport()
+{
+    auto context = OHOS::Ace::PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::NAPI_SCOPE_ERROR);
 }
 
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
@@ -897,7 +909,7 @@ public:
 
     void OnRectChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
     {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "window size is changed. current rect width: %{public}u, "
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "window rect is changed. current rect width: %{public}u, "
             "height: %{public}u, left: %{public}d, top: %{public}d, instance id is %{public}d, reason: %{public}d",
             rect.width_, rect.height_, rect.posX_, rect.posY_, instanceId_, reason);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1845,6 +1857,14 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (context) {
         UpdateFontScale(context->GetConfiguration());
     }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
@@ -2703,6 +2723,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (thpExtraManager->Init()) {
         pipeline->SetTHPExtraManager(thpExtraManager);
     }
+    // initialize language style optimize flag after fontManager and resourcManager is initialized.
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+        }
+    }
     return errorCode;
 }
 
@@ -3313,6 +3340,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(config);
 
     RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
+    adapter->SetBundleName(bundleName_);
+    adapter->SetModuleName(moduleName_);
     ResourceManager::GetInstance().UpdateMainResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -5619,10 +5648,11 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit:%{public}d "
-        "needUpdateViewport:%{public}d", isForceSplit, needUpdateViewport);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}d needUpdateViewport:%{public}d",
+             isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5630,12 +5660,12 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewpo
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, needUpdateViewport]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, mode, needUpdateViewport]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, needUpdateViewport);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, mode, needUpdateViewport);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
@@ -5674,6 +5704,13 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+        forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
+        forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+            config.splitDividerColorDark);
+        forceSplitMgr->SetBehaviorMode(config.behaviorMode);
+        forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
+        forceSplitMgr->SetTransPages(std::move(config.transPages));
         if (!(appConfig->isRouter)) {
             navManager->SetForceSplitNavigationId(config.navigationId);
             navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
@@ -5699,6 +5736,13 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+    forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
+    forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
+        config.splitDividerColorDark);
+    forceSplitMgr->SetBehaviorMode(config.behaviorMode);
+    forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
+    forceSplitMgr->SetTransPages(std::move(config.transPages));
     if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);

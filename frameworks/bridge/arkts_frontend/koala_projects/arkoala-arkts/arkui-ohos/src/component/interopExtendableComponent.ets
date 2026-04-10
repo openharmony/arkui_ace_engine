@@ -65,7 +65,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     }
 
     override __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
-        const result = this.__findProvidedVarV2__Internal(providedPropName);
+        const result = this.__findProvidedVarV2__Internal<T>(providedPropName);
         if (result == undefined) {
             return undefined;
         }

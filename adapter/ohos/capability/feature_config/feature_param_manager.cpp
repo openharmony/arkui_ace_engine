@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "interfaces/inner_api/ace/ui_content.h"
+#include "base/json/json_util.h"
+
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
 #include "adapter/ohos/capability/feature_config/config_parser_base.h"
@@ -25,6 +28,21 @@
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 
 namespace OHOS::Ace {
+namespace {
+bool ParseConfigBool(const std::unique_ptr<JsonValue>& jsonObject, const std::string& key)
+{
+    if (!jsonObject || !jsonObject->Contains(key)) {
+        return false;
+    }
+    auto value = jsonObject->GetValue(key);
+    if (value && value->IsString()) {
+        auto strValue = value->GetString();
+        return strValue == "true";
+    }
+    return false;
+}
+} // namesapce
+
 #define ADD_PARSER_MODEL(cls)         \
     {                                 \
         #cls, std::make_shared<cls>() \
@@ -41,6 +59,9 @@ const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> Feature
 const std::unordered_map<std::string, std::string> FeatureParamManager::metaDataMappingMap_ = {
     { "idle_delete", "UINodeGcParamParser" },
 };
+
+std::mutex FeatureParamManager::arkui_cloud_config_mutex_;
+std::mutex FeatureParamManager::arkweb_cloud_config_mutex_;
 
 FeatureParamManager::FeatureParamManager() = default;
 FeatureParamManager::~FeatureParamManager() = default;
@@ -118,19 +139,25 @@ bool FeatureParamManager::IsSyncLoadEnabled() const
     return syncLoadEnabled_ || SystemProperties::IsSyncLoadEnabled();
 }
 
-bool FeatureParamManager::IsPageOverflowEnabled() const
+bool FeatureParamManager::IsPageOverflowEnabled()
 {
-    return pageOverflowEnabled_;
+    ParseArkUICorrectionConfigFromUIContent();
+    std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
+    return pageOverflowEnabledFromCloud_.value_or(pageOverflowEnabled_);
 }
 
-bool FeatureParamManager::IsDialogCorrectionEnabled() const
+bool FeatureParamManager::IsDialogCorrectionEnabled()
 {
-    return dialogCorrectionEnabled_;
+    ParseArkUICorrectionConfigFromUIContent();
+    std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
+    return dialogCorrectionEnabledFromCloud_.value_or(dialogCorrectionEnabled_);
 }
 
-bool FeatureParamManager::IsRnOverflowEnable() const
+bool FeatureParamManager::IsRnOverflowEnable()
 {
-    return rnOverflowEnabled_;
+    ParseArkUICorrectionConfigFromUIContent();
+    std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
+    return rnOverflowEnabledFromCloud_.value_or(rnOverflowEnabled_);
 }
 
 void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled)
@@ -162,5 +189,76 @@ void FeatureParamManager::SetUINodeGcEnabled(bool enabled)
 bool FeatureParamManager::IsUINodeGcEnabled() const
 {
     return uiNodeGcEnabled_;
+}
+
+void FeatureParamManager::ParseArkUICorrectionConfigFromUIContent()
+{
+    std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
+    if (hasParseArkUICorrectionConfig_) {
+        return;
+    }
+    hasParseArkUICorrectionConfig_ = true;
+    auto &configJsonStr = UIContent::GetUICorrectionConfig();
+    if (configJsonStr.empty()) {
+        return;
+    }
+    auto jsonValue = JsonUtil::ParseJsonString(configJsonStr);
+    if (!jsonValue || !jsonValue->IsValid() || !jsonValue->IsObject()) {
+        LOGE("FeatureParamManager failed to parse ui correction json string");
+        return;
+    }
+    if (jsonValue->Contains("arkui")) {
+        pageOverflowEnabledFromCloud_ = false;
+        dialogCorrectionEnabledFromCloud_ = false;
+        rnOverflowEnabledFromCloud_ = false;
+    }
+    auto arkUiConfig = jsonValue->GetObject("arkui");
+    if (!arkUiConfig || !arkUiConfig->IsObject()) {
+        LOGW("FeatureParamManager key of ui correction config is missing or invalid");
+        return;
+    }
+    auto featureConfig = arkUiConfig->GetObject("feature");
+    if (!featureConfig || !featureConfig->IsObject()) {
+        LOGW("FeatureParamManager feature is missing or invalid");
+        return;
+    }
+    pageOverflowEnabledFromCloud_ = ParseConfigBool(featureConfig, "pageOverflowEnabled");
+    dialogCorrectionEnabledFromCloud_ = ParseConfigBool(featureConfig, "dialogOverflowEnabled");
+    rnOverflowEnabledFromCloud_ = ParseConfigBool(featureConfig, "RNPageOverflowEnabled");
+}
+
+void FeatureParamManager::ParseArkWebAutoLayoutConfigFromUIContent()
+{
+    std::lock_guard<std::mutex> lock(arkweb_cloud_config_mutex_);
+    if (hasParseArkWebAutoLayoutConfig_) {
+        return;
+    }
+    hasParseArkWebAutoLayoutConfig_ = true;
+    auto &configJsonStr = UIContent::GetUICorrectionConfig();
+    if (configJsonStr.empty()) {
+        arkWebJsonConfigStr_ = "";
+        return;
+    }
+    auto jsonValue = JsonUtil::ParseJsonString(configJsonStr);
+    if (!jsonValue || !jsonValue->IsValid() || !jsonValue->IsObject()) {
+        LOGE("FeatureParamManager failed to parse auto layout config json string");
+        return;
+    }
+    if (jsonValue->Contains("arkweb")) {
+        arkWebJsonConfigStr_ = "{}";
+    }
+    auto arkWebConfig = jsonValue->GetObject("arkweb");
+    if (!arkWebConfig || !arkWebConfig->IsObject()) {
+        LOGW("FeatureParamManager: key of auto layout config is missing or invalid");
+        return;
+    }
+    arkWebJsonConfigStr_ = arkWebConfig->ToString();
+}
+
+std::string FeatureParamManager::GetArkWebAutoLayoutConfig()
+{
+    ParseArkWebAutoLayoutConfigFromUIContent();
+    std::lock_guard<std::mutex> lock(arkweb_cloud_config_mutex_);
+    return arkWebJsonConfigStr_;
 }
 } // namespace OHOS::Ace

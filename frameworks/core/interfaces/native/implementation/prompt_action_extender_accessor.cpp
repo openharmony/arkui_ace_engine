@@ -88,7 +88,7 @@ int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
                     targetId = targetComponentIdNode->GetId();
                     return;
                 }
-                auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+                auto targetNode = NG::FrameNode::FindChildByNameUINode(targetComponentIdNode, targetIdString);
                 if (!targetNode) {
                     result = ERROR_CODE_TARGET_INFO_NOT_EXIST;
                     return;
@@ -477,6 +477,10 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     if (borderLinearGradientOpt.has_value()) {
         popupParam->SetInnerBorderLinearGradient(borderLinearGradientOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
 }
 
 void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
@@ -542,6 +546,12 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         .value_or(popupParam->EnableHoverMode()));
     popupParam->SetFollowTransformOfTarget(Converter::OptConvert<bool>(src.followTransformOfTarget)
         .value_or(popupParam->IsFollowTransformOfTarget()));
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
+    }
 }
 
 void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

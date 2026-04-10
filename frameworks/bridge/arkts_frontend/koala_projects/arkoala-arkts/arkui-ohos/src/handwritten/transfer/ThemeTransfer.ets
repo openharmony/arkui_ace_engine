@@ -27,7 +27,7 @@ export class ResourceColorTransfer {
             return inputVal.toString();
         }
         if (inputVal.isNumber()) {
-            return inputVal.toNumber() as int32;
+            return inputVal.toNumber().toInt();
         }
         if (inputVal.isObject()) {
             return ResourceTransfer.transferStatic(input) as ResourceColor;

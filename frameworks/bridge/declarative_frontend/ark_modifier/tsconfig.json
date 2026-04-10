@@ -1,10 +1,9 @@
 {
     "include": [
-        "../ark_component/export/arkComponent.d.ts"
+        "types/*.d.ts"
     ],
     "files": [
         "src/modifier_utilities.ts",
-        "src/common_modifier.ts",
         "src/alphabet_indexer_modifier.ts",
         "src/blank_modifier.ts",
         "src/button_modifier.ts",
@@ -12,9 +11,12 @@
         "src/checkbox_modifier.ts",
         "src/checkboxgroup_modifier.ts",
         "src/circle_modifier.ts",
+        "src/common_modifier.ts",
         "src/column_modifier.ts",
         "src/column_split_modifier.ts",
         "src/component3d_modifier.ts",
+        "src/container_picker_modifier.ts",
+        "src/container_span_modifier.ts",
         "src/counter_modifier.ts",
         "src/data_panel_modifier.ts",
         "src/date_picker_modifier.ts",
@@ -28,15 +30,18 @@
         "src/griditem_modifier.ts",
         "src/grid_row_modifier.ts",
         "src/hyperlink_modifier.ts",
-        "src/image_animator_modifier.ts",
         "src/image_modifier.ts",
+        "src/image_animator_modifier.ts",
         "src/image_span_modifier.ts",
+        "src/indicator_component_modifier.ts",
         "src/line_modifier.ts",
         "src/list_modifier.ts",
         "src/list_item_modifier.ts",
         "src/list_item_group_modifier.ts",
+        "src/lazy_grid_layout_modifier.ts",
         "src/loading_progress_modifier.ts",
         "src/marquee_modifier.ts",
+        "src/media_cached_image_modifier.ts",
         "src/menu_modifier.ts",
         "src/menu_item_modifier.ts",
         "src/nav_destination_modifier.ts",
@@ -47,6 +52,7 @@
         "src/path_modifier.ts",
         "src/pattern_lock_modifier.ts",
         "src/plugin_component_modifier.ts",
+        "src/particle_modifier.ts",
         "src/polygon_modifier.ts",
         "src/polyline_modifier.ts",
         "src/progress_modifier.ts",
@@ -70,6 +76,8 @@
         "src/stepper_item_modifier.ts",
         "src/stepper_modifier.ts",
         "src/swiper_modifier.ts",
+        "src/symbol_glyph_modifier.ts",
+        "src/symbol_span_modifier.ts",
         "src/tabs_modifier.ts",
         "src/tab_content_modifier.ts",
         "src/text_area_modifier.ts",
@@ -80,28 +88,23 @@
         "src/text_timer_modifier.ts",
         "src/time_picker_modifier.ts",
         "src/toggle_modifier.ts",
+        "src/union_effect_container_modifier.ts",
         "src/video_modifier.ts",
-        "src/water_flow_modifier.ts",
-        "src/symbol_glyph_modifier.ts",
-        "src/symbol_span_modifier.ts",
-        "src/container_span_modifier.ts",
-        "src/linear_indicator_modifitr.ts",
-        "src/indicator_component_modifier.ts",
-        "src/lazy_grid_layout_modifier.ts",
-        "src/container_picker_modifier.ts"
+        "src/water_flow_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",
-        "target": "ES2016",
-        "outDir": "../engine/",
-        "outFile": "../engine/arkModifier.js",
+        "target": "ES2022",
+        "outDir": "dist",
+        "outFile": "dist/arkModifier.js",
         "rootDir": "./src/",
-        "declaration": false,
+        "declaration": true,
         "noEmitOnError": true,
         "removeComments": true,
         "experimentalDecorators": true,
+        "skipLibCheck": true,
         "lib": [
-            "ES2016"
-        ],
+            "ES2022"
+        ]
     }
 }

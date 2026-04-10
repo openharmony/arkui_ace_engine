@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cstdint>
-#include <future>
 #include <iterator>
 #include <stack>
 #include <string>
@@ -33,9 +33,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "base/window/drag_window.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
@@ -45,6 +43,8 @@
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -977,6 +977,18 @@ void TextPattern::HandleOnCopy()
     ACE_UINODE_TRACE(host);
     auto [start, end] = GetSelectedStartAndEnd();
     auto value = GetSelectedText(start, end, false, false, true);
+    if (!value.empty()) {
+        auto eventHub = host->GetEventHub<TextEventHub>();
+        bool isAllowCopy = true;
+        if (eventHub) {
+            isAllowCopy = eventHub->FireOnWillCopy(value);
+        }
+        TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy, isAllowCopy=%{public}d", isAllowCopy);
+        if (!isAllowCopy) {
+            HiddenMenu();
+            return;
+        }
+    }
     if (IsSelectableAndCopy() || dataDetectorAdapter_->hasClickedMenuOption_) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
@@ -1416,6 +1428,77 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
         });
     }
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool TextPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    return true;
+}
+
+bool TextPattern::ParseCommand(const std::string& command)
+{
+    std::string cmd;
+    std::unique_ptr<JsonValue> json = nullptr;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), false);
+    cmd = json->GetString("cmd");
+    if (cmd == "selectText") {
+        if (!json->Contains("selectionStart") || !json->Contains("selectionEnd")) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "ParseCommand failed: missing selectionStart/selectionEnd");
+            return false;
+        }
+        int32_t start = json->GetInt("selectionStart");
+        int32_t end = json->GetInt("selectionEnd");
+        auto length = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+        start = std::max(start, 0);
+        end = (end < 0) ? length : end;
+        start = std::min(start, length);
+        end = std::min(end, length);
+        if (start > end) {
+            std::swap(start, end);
+        }
+        SetTextSelection(start, end);
+    } else if (cmd == "copy") {
+        HandleOnCopy();
+        ReportCommandResult(host->GetId(), "Text.onCopyComplete");
+    } else {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
+            cmd.c_str(), host->GetId());
+        return false;
+    }
+    return true;
+}
+
+int32_t TextPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        host->GetId());
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void TextPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+    const std::string& value, int32_t start, int32_t end)
+{
+    auto json = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", dataStr.c_str());
+    json->Put("value", value.c_str());
+    json->Put("start", start);
+    json->Put("end", end);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 RefPtr<RenderContext> TextPattern::GetRenderContext()
@@ -2788,6 +2871,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         start = -1;
         end = -1;
     }
+
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
         HandleSelectionChange(start, end);
         ReportSelectedText();
@@ -5694,6 +5778,10 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         CHECK_NULL_RETURN(textTheme, false);
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
+    
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        UpdateStyledStringByColorMode();
+    }
     return false;
 }
 
@@ -6208,19 +6296,14 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (TextMarqueeState::STOP != state || hasStart_) {
-        eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
-    }
+    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
 
     if (TextMarqueeState::START == state) {
         CloseSelectOverlay();
         ResetSelection();
         isMarqueeRunning_ = true;
-        hasStart_ = true;
     } else if (TextMarqueeState::FINISH == state) {
         isMarqueeRunning_ = false;
-    } else if (TextMarqueeState::STOP == state) {
-        hasStart_ = false;
     }
 
     RecoverCopyOption();
@@ -6461,7 +6544,7 @@ bool TextPattern::IsShowMenu(MenuPolicy options, bool defaultValue)
     return defaultValue;
 }
 
-void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay, bool isReplace)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6473,9 +6556,14 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     if (closeSelectOverlay) {
         CloseSelectOverlay();
     }
-    auto length = styledString_->GetLength();
-    styledString_->RemoveCustomSpan();
-    styledString_->ReplaceSpanString(0, length, value);
+    auto origin = DynamicCast<MutableSpanString>(value);
+    if (isReplace && origin) {
+        styledString_ = origin;
+    } else {
+        auto length = styledString_->GetLength();
+        styledString_->RemoveCustomSpan();
+        styledString_->ReplaceSpanString(0, length, value);
+    }
     spans_ = styledString_->GetSpanItems();
     StyledStringRegisterResource();
     if (SystemProperties::GetTextTraceEnabled()) {
@@ -6491,18 +6579,23 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
 
 void TextPattern::StyledStringRegisterResource()
 {
+    auto weak = AceType::WeakClaim(this);
     for (const auto& item : spans_) {
         if (!item) {
             continue;
         }
         for (const auto& [key, resourceUpdater] : item->GetResMap()) {
-            auto&& spanUpdateFunc = [func = resourceUpdater.updateFunc, weakSpan = WeakClaim(Referenced::RawPtr(item))](
-                                        const RefPtr<ResourceObject>& resObj) {
+            auto&& spanUpdateFunc = [func = resourceUpdater.updateFunc, weakSpan = WeakClaim(Referenced::RawPtr(item)),
+                                        weakThis = weak](const RefPtr<ResourceObject>& resObj) {
                 auto spanItem = weakSpan.Upgrade();
                 CHECK_NULL_VOID(spanItem);
                 auto updateValue = func;
                 CHECK_NULL_VOID(updateValue);
-                updateValue(spanItem, resObj);
+                auto textPattern = weakThis.Upgrade();
+                CHECK_NULL_VOID(textPattern);
+                auto host = textPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                updateValue(spanItem, resObj, host);
             };
             item->AddResObj(key, resourceUpdater.obj, std::move(spanUpdateFunc));
         }
@@ -7028,16 +7121,25 @@ void TextPattern::HighlightDisappearAnimation()
 
 void TextPattern::ReportSelectedText(bool isRegister)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto res = UtfUtils::Str16DebugToStr8(
+        TextHighlightSelectedContent(textSelector_.GetStart(), textSelector_.GetEnd()));
+    if (textSelector_.GetStart() != -1 && textSelector_.GetEnd() != -1) {
+        if (textSelector_.lastReportSelectionText_ != res) {
+            textSelector_.lastReportSelectionText_ = res;
+            ReportSelectionChangeEvent(host->GetId(),
+                "selectionChange", res, textSelector_.GetStart(), textSelector_.GetEnd());
+        }
+    } else {
+        textSelector_.lastReportSelectionText_ = "";
+    }
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto selectOverlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(selectOverlayManager);
         auto id = selectOverlayManager->GetTextSelectionHolderId();
-        auto res = UtfUtils::Str16DebugToStr8(
-            TextHighlightSelectedContent(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
         if (id != host->GetId() && id != -1) {
             textSelector_.lastReportContent_ = "";
             return;
@@ -7730,4 +7832,24 @@ std::optional<void*> TextPattern::GetDrawParagraph()
     }
     return std::nullopt;
 }
+
+bool TextPattern::GetFallbackLineSpacingStyleOptimizeFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
+
+void TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateIncludeFontPadding(flag);
+    textLayoutProperty->UpdateFallbackLineSpacing(flag);
+}
+
 } // namespace OHOS::Ace::NG

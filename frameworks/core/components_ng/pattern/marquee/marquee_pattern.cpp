@@ -381,7 +381,8 @@ void MarqueePattern::StopAndResetAnimation()
 
 void MarqueePattern::ExecuteStopMarquee()
 {
-    if (!hasStart_) {
+    float offsetX = 0.0f;
+    if (!hasStart_ || GetTextOffsetOnly() != offsetX) {
         return;
     }
     hasStart_ = false;
@@ -469,6 +470,27 @@ float MarqueePattern::GetTextOffset()
         lastAnimationOffset_.has_value()) {
         offsetX = lastAnimationOffset_.value().GetX();
         lastAnimationOffset_ = std::nullopt;
+    }
+    return offsetX;
+}
+
+float MarqueePattern::GetTextOffsetOnly()
+{
+    float offsetX = 0.0f;
+    if (!IsRunMarquee()) {
+        return offsetX;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offsetX);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offsetX);
+    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, offsetX);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
+        lastAnimationOffset_.has_value()) {
+        offsetX = lastAnimationOffset_.value().GetX();
     }
     return offsetX;
 }
@@ -824,7 +846,6 @@ void MarqueePattern::ProcessVisibleAreaCallback()
 
 void MarqueePattern::PauseAnimation()
 {
-    ExecuteStopMarquee();
     CHECK_NULL_VOID(animation_);
     playStatus_ = false;
     AnimationUtils::PauseAnimation(animation_);
@@ -1119,10 +1140,10 @@ void MarqueePattern::HandleAnimationFinish(int32_t animationId, bool isFirst, in
     }
     auto newPlayCount = playCount > 0 ? playCount - 1 : playCount;
     if (newPlayCount == 0 || !needSecondPlay) {
-        OnDoubleAnimationFinish(isFirst);
         if (!isFirst) {
             ExecuteStopMarquee();
         }
+        OnDoubleAnimationFinish(isFirst);
         return;
     }
     PlayMarqueeDoubleAnimation(0.0f, 0.0f, newPlayCount, false,

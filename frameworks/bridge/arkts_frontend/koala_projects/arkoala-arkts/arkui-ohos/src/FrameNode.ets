@@ -258,6 +258,15 @@ export class FrameNode implements MaterializedBase {
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
             this._supportMultiThread = options?.supportMultiThread ?? false;
+            if (type === 'InternalBatchFrameNode') {
+                this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this))
+                if (ptr) {
+                    this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
+                    this.nodePtr_ = this.peer?.ptr
+                }
+                return;
+            }
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
@@ -649,6 +658,56 @@ export class FrameNode implements MaterializedBase {
         this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
     };
+    public static createFrameNodes(uiContext: UIContext, count: int32): Array<FrameNode> {
+        const frameNodes: FrameNode[] = [];
+        if (count <= 0) {
+            return frameNodes;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
+        const ptrs = FrameNodeExtender.createFrameNodes(count);
+        ptrs.forEach((ptr: KPointer) => {
+            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', ptr);
+            frameNodes.push(frameNode);
+        })
+        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(ptrs, frameNodes);
+        const renderNodePtrs = FrameNodeExtender.getRenderNodesByFrameNodes(ptrs);
+        const ids = FrameNodeExtender.getIdsByFrameNodes(ptrs);
+        for (let i = 0; i < frameNodes.length; i++) {
+            frameNodes[i].renderNode_!.peer = new Finalizable(renderNodePtrs[i], RenderNode.getFinalizer());
+            frameNodes[i]._nodeId = ids[i];
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNodes[i]._nodeId, frameNodes[i]);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return frameNodes;
+    }
+    public getFrameNodeById(id: string): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_!.toInt());
+        const retval = FrameNodeExtender.getFrameNodeById(this, id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this.uiContext!, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+    public getFrameNodeByUniqueId(id: int32): FrameNode | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_!.toInt());
+        const retval = FrameNodeExtender.getFrameNodeByUniqueId(this, id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this.uiContext!, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
     public addSupportedUIStates(uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean | undefined): void {
         let exclude_casted: boolean = false;
         if (excludeInner !== undefined && excludeInner !== null) {
@@ -814,6 +873,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getFrameNodePtr(node_casted)
     }
     get commonAttribute(): CommonMethod {
+        ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr);
         if (this._commonAttribute === undefined) {
             let baseNode = new ArkBaseNode();
             const retval = FrameNodeExtender.getFrameNodePtr(this)
@@ -839,7 +899,7 @@ export class FrameNode implements MaterializedBase {
                 return customProperties.get(name_casted);
             }
         }
-        return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
+        return ArkUIAniModule._Common_getCustomProperty<Any>(this!.peer!.ptr, name_casted);
     }
     public convertPosition(position: NodePosition, targetNode: FrameNode): NodePosition {
         if (targetNode === null) {
@@ -1092,6 +1152,10 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         this.type_ = type;
     }
     getType(): string {
+        return this.type_;
+    }
+    public getNodeType(): string {
+        ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
         return this.type_;
     }
     checkValid(node?: FrameNode): boolean {
@@ -2055,7 +2119,7 @@ export namespace typeNode {
         return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
             let arknode = new ArkSearchNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkSearchPeer(retval, node._nodeId as int32, "Search", 0);
+            const peer = new ArkSearchPeer(retval, node._nodeId.toInt(), "Search", 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2104,7 +2168,7 @@ export namespace typeNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
+            const peer = new ArkTextAreaPeer(retval, node._nodeId.toInt(), "TextArea", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2142,7 +2206,7 @@ export namespace typeNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
+            const peer = new ArkTextInputPeer(retval, node._nodeId.toInt(), "TextInput", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2180,7 +2244,7 @@ export namespace typeNode {
         return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
             let arknode = new ArkTextNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+            const peer = new ArkTextPeer(retval, node._nodeId.toInt(), "Text", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2224,7 +2288,7 @@ export namespace typeNode {
         return new MarqueeFrameNode(context, 'Marquee', (node: FrameNode, type: ModifierType): ArkMarqueeNode => {
             let arknode = new ArkMarqueeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkMarqueePeerCustom(retval, node._nodeId as int32, "Marquee", 0);
+            const peer = new ArkMarqueePeerCustom(retval, node._nodeId.toInt(), "Marquee", 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2240,7 +2304,7 @@ export namespace typeNode {
         return new SymbolGlyphFrameNode(context, 'SymbolGlyph', (node: FrameNode, type: ModifierType): ArkSymbolGlyphNode => {
             let arknode = new ArkSymbolGlyphNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkSymbolGlyphPeerCustom(retval, node._nodeId as int32, "SymbolGlyph", 0);
+            const peer = new ArkSymbolGlyphPeerCustom(retval, node._nodeId.toInt(), "SymbolGlyph", 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2263,7 +2327,7 @@ export namespace typeNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId.toInt(), "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2276,7 +2340,7 @@ export namespace typeNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId.toInt(), "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2289,7 +2353,7 @@ export namespace typeNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId.toInt(), "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2302,7 +2366,7 @@ export namespace typeNode {
         return new ImageFrameNode(context, 'Image', (node: FrameNode, type: ModifierType): ArkImageNode => {
             let arknode = new ArkImageNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkImagePeer(retval, node._nodeId as int32, 'Image', 0);
+            const peer = new ArkImagePeer(retval, node._nodeId.toInt(), 'Image', 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2385,7 +2449,7 @@ export namespace typeNode {
         return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
             let arknode = new ArkBadgeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkBadgePeer(retval, node._nodeId as int32, 'Badge', 0);
+            const peer = new ArkBadgePeer(retval, node._nodeId.toInt(), 'Badge', 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2396,7 +2460,7 @@ export namespace typeNode {
         return new QRCodeFrameNode(context, 'QRCode', (node: FrameNode, type: ModifierType): ArkQRCodeNode => {
             let arknode = new ArkQRCodeNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkQRCodePeer(retval, node._nodeId as int32, 'QRCode', 0);
+            const peer = new ArkQRCodePeer(retval, node._nodeId.toInt(), 'QRCode', 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2407,7 +2471,7 @@ export namespace typeNode {
         return new ProgressFrameNode(context, 'Progress', (node: FrameNode, type: ModifierType): ArkProgressNode => {
             let arknode = new ArkProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkProgressPeer(retval, node._nodeId as int32, 'Progress', 0);
+            const peer = new ArkProgressPeer(retval, node._nodeId.toInt(), 'Progress', 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2430,7 +2494,7 @@ export namespace typeNode {
         return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
             let arknode = new ArkLoadingProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkLoadingProgressPeer(retval, node._nodeId as int32, 'LoadingProgress', 0);
+            const peer = new ArkLoadingProgressPeer(retval, node._nodeId.toInt(), 'LoadingProgress', 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2453,7 +2517,7 @@ export namespace typeNode {
         return new TextClockFrameNode(context, 'TextClock', (node: FrameNode, type: ModifierType): ArkTextClockNode => {
             let arknode = new ArkTextClockNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTextClockPeer(retval, node._nodeId as int32, 'TextClock', 0);
+            const peer = new ArkTextClockPeer(retval, node._nodeId.toInt(), 'TextClock', 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2464,7 +2528,7 @@ export namespace typeNode {
         return new TextTimerFrameNode(context, 'TextTimer', (node: FrameNode, type: ModifierType): ArkTextTimerNode => {
             let arknode = new ArkTextTimerNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTextTimerPeer(retval, node._nodeId as int32, 'TextTimer', 0);
+            const peer = new ArkTextTimerPeer(retval, node._nodeId.toInt(), 'TextTimer', 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2475,7 +2539,7 @@ export namespace typeNode {
         return new ButtonFrameNode(context, 'Button', (node: FrameNode, type: ModifierType): ArkButtonNode => {
             let arknode = new ArkButtonNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkButtonPeer(retval, node._nodeId as int32, "Button", 0);
+            const peer = new ArkButtonPeer(retval, node._nodeId.toInt(), "Button", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2486,7 +2550,7 @@ export namespace typeNode {
         return new CheckboxFrameNode(context, 'Checkbox', (node: FrameNode, type: ModifierType): ArkCheckboxNode => {
             let arknode = new ArkCheckboxNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkCheckboxPeer(retval, node._nodeId as int32, "Checkbox", 0);
+            const peer = new ArkCheckboxPeer(retval, node._nodeId.toInt(), "Checkbox", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2497,7 +2561,7 @@ export namespace typeNode {
         return new CheckboxGroupFrameNode(context, 'CheckboxGroup', (node: FrameNode, type: ModifierType): ArkCheckboxGroupNode => {
             let arknode = new ArkCheckboxGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkCheckboxGroupPeer(retval, node._nodeId as int32, "CheckboxGroup", 0);
+            const peer = new ArkCheckboxGroupPeer(retval, node._nodeId.toInt(), "CheckboxGroup", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2508,7 +2572,7 @@ export namespace typeNode {
         return new RadioFrameNode(context, 'Radio', (node: FrameNode, type: ModifierType): ArkRadioNode => {
             let arknode = new ArkRadioNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkRadioPeer(retval, node._nodeId as int32, "Radio", 0);
+            const peer = new ArkRadioPeer(retval, node._nodeId.toInt(), "Radio", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2519,7 +2583,7 @@ export namespace typeNode {
         return new RatingFrameNode(context, 'Rating', (node: FrameNode, type: ModifierType): ArkRatingNode => {
             let arknode = new ArkRatingNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkRatingPeer(retval, node._nodeId as int32, "Rating", 0);
+            const peer = new ArkRatingPeer(retval, node._nodeId.toInt(), "Rating", 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2530,7 +2594,7 @@ export namespace typeNode {
         return new SelectFrameNode(context, 'Select', (node: FrameNode, type: ModifierType): ArkSelectNode => {
             let arknode = new ArkSelectNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkSelectPeer(retval, node._nodeId as int32, "Select", 0);
+            const peer = new ArkSelectPeer(retval, node._nodeId.toInt(), "Select", 0);
             arknode.setPeer(peer);
             return arknode;
         });
@@ -2541,7 +2605,7 @@ export namespace typeNode {
         return new SliderFrameNode(context, 'Slider', (node: FrameNode, type: ModifierType): ArkSliderNode => {
             let arknode = new ArkSliderNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkSliderPeer(retval, node._nodeId as int32, "Slider", 0);
+            const peer = new ArkSliderPeer(retval, node._nodeId.toInt(), "Slider", 0);
             arknode.setPeer(peer);
             return arknode;
         }, options);
@@ -2552,7 +2616,7 @@ export namespace typeNode {
         let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
             let arknode = new ArkToggleNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
-            const peer = new ArkTogglePeer(retval, node._nodeId as int32, "Toggle", 0);
+            const peer = new ArkTogglePeer(retval, node._nodeId.toInt(), "Toggle", 0);
             arknode.setPeer(peer);
             return arknode;
         }, frameNodeOptions);
@@ -2718,7 +2782,7 @@ export class NodeAdapter implements MaterializedBase {
     }
     onCreateNewNodePtr(index: double): pointer {
         if (this.onCreateChild !== undefined) {
-            let frameNode = this.onCreateChild(index as int32);
+            let frameNode = this.onCreateChild(index.toInt());
             if (!this.nodeRefs_.find((node) => {
                 return node === frameNode;
             })) {
@@ -2735,7 +2799,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
-                this.onDisposeChild((index as int32), frameNode);
+                this.onDisposeChild((index.toInt()), frameNode);
                 let index2 = this.nodeRefs_.indexOf(frameNode);
                 if (index2 > -1) {
                     this.nodeRefs_.splice(index2, 1);
@@ -2748,7 +2812,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
-                this.onUpdateChild((index as int32), frameNode!);
+                this.onUpdateChild((index.toInt()), frameNode!);
             }
         }
     }

@@ -15,9 +15,9 @@
 
 #include "text_base.h"
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"

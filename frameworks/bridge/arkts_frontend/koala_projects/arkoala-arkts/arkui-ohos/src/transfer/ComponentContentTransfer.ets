@@ -24,10 +24,14 @@ import { RecordData } from '@ohos.base';
 export class ComponentContentTransfer {
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
+        }
+        let isDisposed = ESValue.wrap(input).invokeMethod('isDisposed').toBoolean();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
         }
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
 
@@ -37,7 +41,7 @@ export class ComponentContentTransfer {
         }
         let getFrameNodeRawPtr = arkUINode.getProperty('getFrameNodeRawPtr');
         let frameNodeRawPtr = getFrameNodeRawPtr.invoke(frameNodeDyn! as Object).toNumber();
-        let frameNodePeer = FrameNodeExtender.createByRawPtr(frameNodeRawPtr as KPointer);
+        let frameNodePeer = FrameNodeExtender.createByRawPtr(Double.toLong(frameNodeRawPtr));
 
         let nodePtrDyn = ESValue.wrap(input).invokeMethod('getNodePtr');
         if (typeof(nodePtrDyn) !== 'object') {
@@ -47,17 +51,21 @@ export class ComponentContentTransfer {
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
         let uiContextSta = new UIContext(instanceId as int32);
-        return new TransComponentContent(uiContextSta as UIContext, nodeRawPtr as KPointer, frameNodePeer);
+        return new TransComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
     }
 
     static transferDynamic(input: Object): Any {
         if (typeof (input) !== 'object') {
-            throw Error('The ComponentContent is not object convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is not object convert fail.');
         }
         if (input === null) {
-            throw Error('The ComponentContent is null convert fail.');
+            throw new BusinessError(401, 'The ComponentContent is null convert fail.');
         }
         let componentContentSta = input as ComponentContent;
+        let isDisposed = componentContentSta.isDisposed();
+        if (isDisposed) {
+            throw new BusinessError(100026, 'The ComponentContent has been disposed convert fail');
+        }
         const instanceId = componentContentSta.getInstanceId();
         let uiContext = UIContextTransfer.createDynamic(instanceId);
 

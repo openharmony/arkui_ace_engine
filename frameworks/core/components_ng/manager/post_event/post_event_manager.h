@@ -19,6 +19,7 @@
 #include <map>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
@@ -105,6 +106,7 @@ private:
     std::list<PostAxisEventAction> postAxisEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
     WeakPtr<FrameNode> targetNode_;
+    std::set<int32_t> targetNodes_;
     bool passThroughResult_ = false;
 };
 } // namespace OHOS::Ace::NG

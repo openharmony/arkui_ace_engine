@@ -14,15 +14,16 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/common/event_manager.h"
 #define private public
 #define protected public
 #include "ace_forward_compatibility.h"
 #include "interfaces/inner_api/ace/ui_event.h"
 #include "interfaces/inner_api/ace/ui_event_func.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/popup/popup_theme.h"
 
@@ -103,6 +104,7 @@ public:
         PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
         PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     }
     static void TearDownTestSuite()
     {

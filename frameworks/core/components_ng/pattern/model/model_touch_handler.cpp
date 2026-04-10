@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/model/model_touch_handler.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace::NG {
 
 bool ModelTouchHandler::HandleTouchEvent(const TouchEventInfo& info, uint32_t viewWidth, uint32_t viewHeight)

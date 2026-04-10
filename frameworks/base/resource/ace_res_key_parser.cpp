@@ -21,6 +21,8 @@
 #include "securec.h"
 #endif
 #include <regex>
+
+#include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {

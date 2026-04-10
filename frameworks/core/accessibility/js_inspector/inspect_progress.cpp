@@ -14,6 +14,7 @@
  */
 
 #include "inspect_progress.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectProgress::InspectProgress(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

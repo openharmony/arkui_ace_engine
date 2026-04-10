@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURES_EXTRA_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_GESTURES_EXTRA_HANDLER_H
 
+#include "base/log/log.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/touch_event.h"
 

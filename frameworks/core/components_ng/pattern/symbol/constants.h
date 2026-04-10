@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <unordered_map>
 #include "ui/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 

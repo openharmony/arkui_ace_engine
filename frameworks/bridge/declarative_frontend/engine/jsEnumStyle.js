@@ -728,22 +728,52 @@ let FlipDirection;
 class LayoutPolicy {
   id_ = '';
 
-  constructor(id) {
+  constructor(id, internal = false) {
+    if (!internal) {
+      const layoutPolicy = LayoutPolicy.fromId(id);
+      if (layoutPolicy !== undefined) {
+        return layoutPolicy;
+      }
+    }
     this.id_ = id;
   }
 
   static get matchParent() {
-    return new LayoutPolicy('matchParent');
+    if (this.matchParent_ === undefined) {
+      this.matchParent_ = new LayoutPolicy('matchParent', true);
+    }
+    return this.matchParent_;
   }
 
   static get wrapContent() {
-    return new LayoutPolicy('wrapContent');
+    if (this.wrapContent_ === undefined) {
+      this.wrapContent_ = new LayoutPolicy('wrapContent', true);
+    }
+    return this.wrapContent_;
   }
 
   static get fixAtIdealSize() {
-    return new LayoutPolicy('fixAtIdealSize');
+    if (this.fixAtIdealSize_ === undefined) {
+      this.fixAtIdealSize_ = new LayoutPolicy('fixAtIdealSize', true);
+    }
+    return this.fixAtIdealSize_;
+  }
+
+  static fromId(id) {
+    switch (id) {
+      case 'matchParent':
+        return LayoutPolicy.matchParent;
+      case 'wrapContent':
+        return LayoutPolicy.wrapContent;
+      case 'fixAtIdealSize':
+        return LayoutPolicy.fixAtIdealSize;
+      default:
+        return undefined;
+    }
   }
 }
+
+globalThis.LayoutPolicy = LayoutPolicy;
 
 var BlurStyle;
 (function (BlurStyle) {
@@ -1604,6 +1634,12 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RETURN_TO_UICONTEXT = 3] = 'RETURN_TO_UICONTEXT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
+let ScrollDirectionalLockType;
+(function (ScrollDirectionalLockType) {
+  ScrollDirectionalLockType[ScrollDirectionalLockType.ALL = 0] = 'ALL';
+  ScrollDirectionalLockType[ScrollDirectionalLockType.NESTED_SCROLL = 1] = 'NESTED_SCROLL';
+})(ScrollDirectionalLockType || (ScrollDirectionalLockType = {}));
+
 let KeyboardAppearance;
 (function (KeyboardAppearance) {
   KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
@@ -1836,6 +1872,12 @@ let ThemeColorMode;
   ThemeColorMode[ThemeColorMode.LIGHT = 1] = 'LIGHT';
   ThemeColorMode[ThemeColorMode.DARK = 2] = 'DARK';
 })(ThemeColorMode || (ThemeColorMode = {}));
+
+let AnchoredColorMode;
+(function (AnchoredColorMode) {
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_SYSTEM = 0] = 'FOLLOW_SYSTEM';
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_TARGET = 1] = 'FOLLOW_TARGET';
+})(AnchoredColorMode || (AnchoredColorMode = {}));
 
 let AdaptiveColor;
 (function (AdaptiveColor) {
@@ -2129,6 +2171,12 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.DEFAULT = 0] = 'DEFAULT';
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
+
+let ScrollbarLayoutPolicy;
+(function (ScrollbarLayoutPolicy) {
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.CONTENT = 0] = 'CONTENT';
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.SYSTEM = 1] = 'SYSTEM';
+})(ScrollbarLayoutPolicy || (ScrollbarLayoutPolicy = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -4536,7 +4584,6 @@ let MarqueeState;
   MarqueeState[MarqueeState.START = 0] = 'START';
   MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
   MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
-  MarqueeState[MarqueeState.STOP = 3] = 'STOP';
 })(MarqueeState || (MarqueeState = {}));
 
 let MarqueeStartPolicy;
@@ -5049,6 +5096,7 @@ let ColorSpace;
 (function (ColorSpace) {
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+  ColorSpace[ColorSpace.BT2020 = 2] = 'BT2020';
 })(ColorSpace || (ColorSpace = {}));
 
 let AudioSessionType;
@@ -5148,6 +5196,12 @@ let PresetFillType;
   PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
 })(PresetFillType || (PresetFillType = {}));
 
+let RawInputEventType;
+(function (RawInputEventType) {
+  RawInputEventType[RawInputEventType.TOUCH = 0] = 'TOUCH';
+  RawInputEventType[RawInputEventType.MOUSE = 1] = 'MOUSE';
+})(RawInputEventType || (RawInputEventType = {}));
+
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
@@ -5224,6 +5278,7 @@ let HdrType;
 (function (HdrType) {
   HdrType[HdrType.DEFAULT = 0] = 'DEFAULT';
   HdrType[HdrType.AIHDR = 1] = 'AIHDR';
+  HdrType[HdrType.EDR = 2] = 'EDR';
 })(HdrType || (HdrType = {}));
 
 let MicrophoneCaptureState;

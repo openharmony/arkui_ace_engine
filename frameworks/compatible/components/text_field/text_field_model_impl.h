@@ -71,7 +71,9 @@ public:
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override {};
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) override {};
     void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override {};

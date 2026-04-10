@@ -40,7 +40,6 @@ export class ArkUINativeModule {
     native static _InsertChildBefore(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): KInt
     @ani.unsafe.Direct
     native static _InsertChildAt(ptr0: KPointer, ptr1: KPointer, arg: KInt): KInt
-    @ani.unsafe.Direct
     native static _ApplyModifierFinish(ptr0: KPointer): void
     @ani.unsafe.Direct
     native static _MarkDirty(ptr0: KPointer, arg: KInt): void

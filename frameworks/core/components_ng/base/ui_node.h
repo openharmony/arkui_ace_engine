@@ -81,6 +81,15 @@ enum class RootNodeType : int32_t {
     WINDOW_SCENE_ETS_TAG = 2
 };
 
+enum class TreeOperatingStatus : int32_t {
+    // Tree operating status for cross-language attribute setting
+    // Values must match ArkUITreeOperatingStatus and OH_ArkUI_CrossLanguageOperatingStatus
+    // UNDEFINED=0, ENABLE=1, DISABLE=2
+    UNDEFINED = 0,
+    ENABLE = 1,
+    DISABLE = 2
+};
+
 struct InteractionEventBindingInfo  {
     bool baseEventRegistered = false;
     bool nodeEventRegistered = false;
@@ -807,6 +816,10 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static RefPtr<UINode> BfsFindUINode(
+        const RefPtr<UINode>& root, const std::function<bool(const RefPtr<UINode>&)>& matcher);
+    RefPtr<FrameNode> GetFrameNodeByIdInSubTree(const std::string& id);
+    RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     virtual bool HasVirtualNodeAccessibilityProperty()
@@ -1058,6 +1071,16 @@ public:
         isCrossLanguageAttributeSetting_ = isCrossLanguageAttributeSetting;
     }
 
+    TreeOperatingStatus GetTreeOperatingStatus() const
+    {
+        return treeOperatingStatus_;
+    }
+
+    void SetTreeOperatingStatus(TreeOperatingStatus treeOperatingStatus)
+    {
+        treeOperatingStatus_ = treeOperatingStatus;
+    }
+
     /**
      * flag used by Repeat virtual scroll
      * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
@@ -1068,10 +1091,6 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
-    {
-        isDestroyingState_ = isDestroying;
-    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
     /**
@@ -1451,6 +1470,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    TreeOperatingStatus treeOperatingStatus_ = TreeOperatingStatus::UNDEFINED;
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;

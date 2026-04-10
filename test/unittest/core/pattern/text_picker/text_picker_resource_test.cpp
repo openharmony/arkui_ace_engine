@@ -16,11 +16,11 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
@@ -1008,6 +1008,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle001, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;
@@ -1077,6 +1078,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle002, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;
@@ -1145,6 +1147,7 @@ HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle003, TestSize.Level1)
     NG::PickerBackgroundStyle pickerBgStyle;
     pickerBgStyle.color = Color::RED;
     pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    pickerBgStyle.textColorSetByUser = true;
     TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
 
     NG::PickerBackgroundStyle result1;

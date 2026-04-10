@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
+
 #include <optional>
 #include "base/log/ace_trace.h"
 #include "base/utils/multi_thread.h"
@@ -51,6 +54,10 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 namespace OHOS::Ace::NG {
+
+SideBarContainerPattern::SideBarContainerPattern() = default;
+
+SideBarContainerPattern::~SideBarContainerPattern() = default;
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
@@ -1433,6 +1440,20 @@ void SideBarContainerPattern::ShowDialogWithNode()
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto text = accessibilityProperty->GetAccessibilityText();
+    do {
+        if (!text.empty()) {
+            break;
+        }
+        auto context = host->GetContext();
+        CHECK_NULL_BREAK(context);
+        auto sideBarTheme = context->GetTheme<SideBarTheme>();
+        CHECK_NULL_BREAK(sideBarTheme);
+        if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+            text = sideBarTheme->GetSideBarHidden();
+        } else {
+            text = sideBarTheme->GetSideBarShown();
+        }
+    } while (0);
 
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_, host->GetThemeScopeId());
 

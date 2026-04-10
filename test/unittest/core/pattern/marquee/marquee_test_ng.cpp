@@ -22,10 +22,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/json/json_util.h"
 #include "core/animation/animator.h"
@@ -2255,5 +2255,57 @@ HWTEST_F(MarqueeTestNg, MarqueeTest027, TestSize.Level1)
     pattern->hasStart_ = true;
     pattern->ExecuteStopMarquee();
     EXPECT_TRUE(isStop);
+}
+
+/**
+ * @tc.name: MarqueeTest028
+ * @tc.desc: Test Stop event function of marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create marquee and set event.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    bool isStop = false;
+    auto onChangeStop = [&isStop]() { isStop = true; };
+    marqueeModel.SetOnStop(onChangeStop);
+
+    /**
+     * @tc.steps: step2. get marquee frameNode and event.
+     * @tc.expected: step2. function is called.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    marqueePaintProperty->UpdatePlayerStatus(true);
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    marqueeLayoutProperty->UpdateSrc("Test MarqueePattern.GetTextOffset");
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    pattern->StopMarqueeAnimation(false);
+    marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    pattern->StartMarqueeAnimation();
+    float offset = 0.0f;
+    offset = pattern->GetTextOffsetOnly();
+    EXPECT_EQ(offset, 0.0f);
+    offset = pattern->GetTextOffset();
+    EXPECT_EQ(offset, 0.0f);
 }
 } // namespace OHOS::Ace::NG

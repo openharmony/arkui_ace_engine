@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/osal/js_accessibility_manager.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;

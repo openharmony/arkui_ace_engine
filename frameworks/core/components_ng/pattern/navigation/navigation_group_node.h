@@ -388,6 +388,11 @@ public:
         return isStaticPlaceholder_;
     }
 
+    std::vector<RefPtr<NavDestinationGroupNode>> TakePrimaryNodesToBeRemoved()
+    {
+        return std::move(primaryNodesToBeRemoved_);
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -424,8 +429,6 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
     bool HandleBackForHomeOrRelatedDestination();
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
     void ContentChangeReport(RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
 

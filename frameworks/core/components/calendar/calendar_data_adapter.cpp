@@ -15,7 +15,10 @@
 
 #include "core/components/calendar/calendar_data_adapter.h"
 
+#include <fstream>
+
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {

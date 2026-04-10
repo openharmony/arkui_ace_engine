@@ -131,6 +131,7 @@ private:
     napi_value OnSetHeight();
 
     void LoadImage(const std::string& src);
+    void LoadImage(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     void LoadImage(const RefPtr<PixelMap>& pixmap);
     void LoadImage(const ImageSourceInfo& src);
     void OnImageDataReady();

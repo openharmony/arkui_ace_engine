@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_PAINT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"

@@ -71,7 +71,7 @@ import {
     applyGesture(event: UIGestureEvent): void {
       if (this.fontSize >= ButtonGestureModifier.minFontSize) {
         event.addGesture(
-          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime.toInt() })
             .onAction(() => {
               if (event) {
                 this.controller?.open();
@@ -159,7 +159,7 @@ import {
     }
   }
   
-  class ToolBarTheme {
+  export class ToolBarTheme {
     public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
     public iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
     public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
@@ -717,7 +717,7 @@ import {
           let properties: window.WindowProperties =
             this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
           let rect = properties.windowRect;
-          if (this.getUIContext().px2vp(rect.height as Int) > this.screenWidth) {
+          if (this.getUIContext().px2vp(rect.height.toInt()) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
           } else {
             this.maxLines = this.horizontalsScreenLines;

@@ -32,11 +32,11 @@
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/state_attributes.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
-#include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_raw_recognizer.h"
 #include "core/event/touch_event.h"
@@ -45,6 +45,12 @@
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Ace::V2 {
+
+class InspectorNode;
+
+}
 
 namespace OHOS::Ace {
 
@@ -559,8 +565,8 @@ public:
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
-    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
-        WeakPtr<RenderNode>& hoverNode);
+    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint,
+        std::list<WeakPtr<RenderNode>>& result, WeakPtr<RenderNode>& hoverNode);
 
     virtual bool AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
         const AxisDirection direction);
@@ -1098,15 +1104,9 @@ public:
         return responseRegionList_;
     }
 
-    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const
-    {
-        return inspector_;
-    }
+    const WeakPtr<V2::InspectorNode>& GetInspectorNode() const;
 
-    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
-    {
-        inspector_ = inspectorNode;
-    }
+    void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode);
 
     virtual void SetNeedClip(bool needClip)
     {

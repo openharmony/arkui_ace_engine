@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -181,6 +182,30 @@ void NavBarNode::SystemTransitionPopEnd(bool transitionIn)
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPushFinish(int32_t animationId)
+{
+}
+
+void NavBarNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavBarNode::SplitTransitionPopFinish(int32_t animationId)
+{
 }
 
 bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)

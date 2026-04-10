@@ -25,10 +25,25 @@
 #include "core/common/plugin_manager.h"
 #endif
 
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+Container::Container() = default;
+
+Container::~Container() = default;
+
+void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+{
+    appBar_ = appBar;
+}
+
+RefPtr<NG::AppBarView> Container::GetAppBar() const
+{
+    return appBar_;
+}
 
 int32_t Container::CurrentId()
 {
@@ -42,22 +57,7 @@ NG::SafeAreaInsets Container::GetKeyboardSafeArea()
 
 int32_t Container::SafelyId()
 {
-    uint32_t containerCount = ContainerScope::ContainerCount();
-    if (containerCount == 0) {
-        return INSTANCE_ID_UNDEFINED;
-    }
-    if (containerCount == 1) {
-        return ContainerScope::SingletonId();
-    }
-    int32_t currentId = ContainerScope::RecentActiveId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    currentId = ContainerScope::RecentForegroundId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    return ContainerScope::DefaultId();
+    return ContainerScope::SafelyId();
 }
 
 int32_t Container::CurrentIdSafely()

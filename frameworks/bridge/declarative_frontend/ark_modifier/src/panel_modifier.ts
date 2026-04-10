@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class PanelModifier extends ArkPanelComponent implements AttributeModifier<PanelAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 

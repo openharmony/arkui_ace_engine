@@ -16,9 +16,12 @@
 #include <memory>
 
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+
+DragDropRelatedConfigurations::~DragDropRelatedConfigurations() = default;
 
 RefPtr<DragSpringLoadingConfiguration> DragDropRelatedConfigurations::GetOrCreateDragSpringLoadingConfiguration()
 {
@@ -36,13 +39,15 @@ void DragDropRelatedConfigurations::SetDragSpringLoadingConfiguration(
     dragSpringLoadingConfiguration_ = std::move(dragSpringLoadingConfiguration);
 }
 
-DragPreviewOption DragDropRelatedConfigurations::GetOrCreateDragPreviewOption()
+const DragPreviewOption& DragDropRelatedConfigurations::GetOrCreateDragPreviewOption()
 {
-    if (previewOption_) {
-        return *previewOption_;
+    if (!previewOption_) {
+        previewOption_ = std::make_unique<DragPreviewOption>();
     }
-    previewOption_ = std::make_unique<DragPreviewOption>();
-    CHECK_NULL_RETURN(previewOption_, DragPreviewOption());
+    if (!previewOption_) {
+        static DragPreviewOption defaultInstance;
+        return defaultInstance;
+    }
     return *previewOption_;
 }
 

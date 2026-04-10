@@ -22,12 +22,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_render_surface.h"
-#include "test/mock/core/rosen/testing_canvas_utils.h"
-#include "test/mock/core/manager/mock_display_manager.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas_utils.h"
+#include "test/mock/frameworks/base/display_manager/mock_display_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"

@@ -560,7 +560,7 @@ template("ace_compatible_source") {
     }
     if (defined(global_parts_info.inputmethod_imf) && !use_mingw_win && !use_mac && !use_linux) {
       sources += [ "components/text_field/on_text_changed_listener_impl.cpp" ]
-      external_deps += [ "imf:inputmethod_client" ]
+      external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
     }
     deps = [
       "$ace_root/frameworks/core:ace_container_scope",

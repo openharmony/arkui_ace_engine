@@ -107,3 +107,14 @@ ace_unittest("water_flow_test_generated") {
     sources += [ "water_flow_static_test_core.cpp" ]
   }
 }
+
+# Aggregate all WaterFlow unit tests
+group("water_flow_test_all") {
+  testonly = true
+  deps = [
+    ":water_flow_test_original",
+    ":water_flow_test_segmented",
+    ":water_flow_test_sw",
+    ":water_flow_test_generated",
+  ]
+}

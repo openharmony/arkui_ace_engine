@@ -42,4 +42,19 @@ void ImagePerfOhos::EndRecordImageLoadStat(
          ", imageType: %{public}s, width: %{public}d, height: %{public}d, state: %{public}d",
         id, imageType.c_str(), size.first, size.second, state);
 }
+
+void ImagePerfOhos::AddLoadComponent(int32_t nodeId)
+{
+    HiviewDFX::PerfMonitorAdapter::GetInstance().AddLoadComponent(nodeId);
+}
+
+void ImagePerfOhos::DeleteLoadComponent(int32_t nodeId)
+{
+    HiviewDFX::PerfMonitorAdapter::GetInstance().DeleteLoadComponent(nodeId);
+}
+
+void ImagePerfOhos::CompleteLoadComponent(int32_t nodeId)
+{
+    HiviewDFX::PerfMonitorAdapter::GetInstance().CompleteLoadComponent(nodeId);
+}
 } // namespace OHOS::Ace

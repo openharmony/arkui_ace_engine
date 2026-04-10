@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -388,13 +389,16 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
         CHECK_NULL_VOID(hostNode);
         hostNode->ReduceModeSwitchAnimationCnt();
         if (hostNode->GetModeSwitchAnimationCnt() == 0) {
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_VOID(dividerNode);
-            auto layoutProperty = dividerNode->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             auto pattern = hostNode->GetPattern<NavigationPattern>();
             CHECK_NULL_VOID(pattern);
+            auto userSetDividerInvisible = pattern->GetUserSetDividerInvisibleFlag();
+            if (!userSetDividerInvisible) {
+                auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+                CHECK_NULL_VOID(dividerNode);
+                auto layoutProperty = dividerNode->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            }
             auto lastStandardIndex = hostNode->GetLastStandardIndex();
             auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
             CHECK_NULL_VOID(navigationLayoutProperty);
@@ -410,11 +414,16 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
         auto hostNode = weakHost.Upgrade();
         CHECK_NULL_VOID(hostNode);
-        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-        CHECK_NULL_VOID(dividerNode);
-        auto layoutProperty = dividerNode->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        auto pattern = hostNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto userSetDividerInvisible = pattern->GetUserSetDividerInvisibleFlag();
+        if (!userSetDividerInvisible) {
+            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+            CHECK_NULL_VOID(dividerNode);
+            auto layoutProperty = dividerNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
         hostNode->IncreaseModeSwitchAnimationCnt();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();
@@ -630,13 +639,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             SwitchModeWithAnimation(AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost()));
         } else {
             bool isHomeDestinationOrNavBarVisible = navigationPattern->IsHomeDestinationOrNavBarVisible();
-            if (isHomeDestinationOrNavBarVisible) {
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
-            } else {
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_INACTIVE, true);
-                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
-            }
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_INACTIVE, true);
+            navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
             auto host = navigationPattern->GetHost();
             if (host && IsForceSplitSupported(host->GetContext()) && isSplitDisplayChange) {
                 navigationPattern->FireRelatedDestinationLifecycleForModeChange();
@@ -656,15 +662,21 @@ void NavigationLayoutAlgorithm::SizeCalculationForForceSplit(
     LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
 {
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto detailPageRatio = forceSplitMgr->GetSplitRatio();
     auto dividerWidth = IsDividerDisabled(hostNode) ? 0.0f : static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    auto secondaryWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
+    auto primaryWidth = frameSize.Width() - secondaryWidth - dividerWidth;
     dividerSize_ = SizeF(dividerWidth, frameSize.Height());
-    auto halfWidth = (frameSize.Width() - dividerWidth) / 2.0f;
-    navBarSize_ = SizeF(halfWidth, frameSize.Height());
-    primaryNodeSize_ = SizeF(halfWidth, frameSize.Height());
-    contentSize_ = SizeF(halfWidth, frameSize.Height());
-    realNavBarWidth_ = halfWidth;
-    realContentWidth_ = halfWidth;
-    realDividerWidth_ = halfWidth;
+    navBarSize_ = SizeF(primaryWidth, frameSize.Height());
+    primaryNodeSize_ = SizeF(primaryWidth, frameSize.Height());
+    contentSize_ = SizeF(secondaryWidth, frameSize.Height());
+    realNavBarWidth_ = primaryWidth;
+    realContentWidth_ = secondaryWidth;
+    realDividerWidth_ = dividerWidth;
 }
 
 void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
@@ -716,10 +728,17 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGrou
     bool isHideNavbar = navigationLayoutProperty->GetHideNavBar().value_or(false);
     if (pattern->IsForceSplitSuccess() && pattern->IsForceSplitUseNavBar()) {
         dividerSize_.SetWidth(dividerWidth);
-        auto halfWidth = (frameSize.Width() - dividerWidth) / 2.0f;
-        navBarSize_.SetWidth(halfWidth);
-        realNavBarWidth_ = halfWidth;
-        realContentWidth_ = halfWidth;
+        auto pipeline = hostNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto forceSplitMgr = pipeline->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        auto detailPageRatio = forceSplitMgr->GetSplitRatio();
+        auto secondaryWidth = (frameSize.Width() - dividerWidth) * detailPageRatio;
+        auto primaryWidth = frameSize.Width() - secondaryWidth - dividerWidth;
+        navBarSize_.SetWidth(primaryWidth);
+        primaryNodeSize_ = navBarSize_;
+        realNavBarWidth_ = primaryWidth;
+        realContentWidth_ = secondaryWidth;
     } else if (isHideNavbar) {
         CHECK_NULL_VOID(hostNode);
         auto targetNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());

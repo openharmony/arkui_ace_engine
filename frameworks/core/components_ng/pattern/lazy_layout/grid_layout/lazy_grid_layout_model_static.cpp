@@ -48,6 +48,15 @@ void LazyGridLayoutModelStatic::SetColumnGap(FrameNode* frameNode, const std::op
     }
 }
 
+void LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(
+    FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+}
+
 void LazyVGridLayoutModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
 {
     if (value.empty()) {

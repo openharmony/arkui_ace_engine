@@ -24,6 +24,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/mouse_event.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/event/touch_event.h"
 #include "core/image/image_cache.h"
 

@@ -15,6 +15,8 @@
 
 #include "pixel_map_ohos.h"
 
+#include <fstream>
+
 #include "drawable_descriptor.h"
 #include "media_errors.h"
 #include "pixel_map_manager.h"

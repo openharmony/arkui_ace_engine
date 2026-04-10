@@ -66,6 +66,7 @@ class RichEditorAbstractSpanResult;
 class SelectionInfo;
 class SpanBase;
 class TouchLocationInfo;
+struct MouseHistoricalPoint;
 class BaseEventInfo;
 enum class AccessibilityActionInterceptResult : uint32_t;
 enum class AccessibilityHoverAction;
@@ -358,6 +359,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src);
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_MouseHistoricalPoint& dst, const OHOS::Ace::MouseHistoricalPoint& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);

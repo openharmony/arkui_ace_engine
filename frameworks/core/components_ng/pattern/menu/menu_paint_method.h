@@ -16,13 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_PAINT_METHOD_H
 
-#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "compatible/components/list_v2/list_component.h"
 
 // @deprecated
 namespace OHOS::Ace::NG {

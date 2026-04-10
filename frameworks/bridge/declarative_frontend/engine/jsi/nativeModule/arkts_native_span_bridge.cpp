@@ -66,7 +66,8 @@ void SetSpanFontWeightValue(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHand
         if (parseResult.first) {
             variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
         } else {
-            variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,

@@ -202,6 +202,9 @@
       "OHOS::Ace::CheckboxComponent::checkboxGroups_";
       "OHOS::Ace::CheckboxComponent::ungroupedCheckboxs_";
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      "OHOS::Ace::TaskExecutor::GetPriorityTypeWithCheck(OHOS::Ace::PriorityType, OHOS::Ace::PriorityType)";
+      OHOS::Ace::TaskExecutor::PostDelayedTask*;
+      OHOS::Ace::TaskExecutor::PostSyncTask*;
       "OHOS::Ace::ClipboardProxy::GetInstance()";
       "OHOS::Ace::Color OHOS::Ace::NG::Converter::Convert<OHOS::Ace::Color, int>(int const&)";
       "OHOS::Ace::Color::BLACK";
@@ -251,6 +254,7 @@
       "OHOS::Ace::ComposedElement::UnregisterForPartialUpdates()";
       "OHOS::Ace::ComposedElement::Update()";
       "OHOS::Ace::ComposedElement::UpdateChild(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&, OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::ConvertFontWeight(OHOS::Ace::FontWeight)";
       "OHOS::Ace::Constants::ConvertSkColor(OHOS::Ace::Color)";
       "OHOS::Ace::Constants::ConvertSkRect(OHOS::Rosen::Drawing::RectF const&)";
       "OHOS::Ace::Constants::ConvertTxtFontStyle(OHOS::Ace::FontStyle)";
@@ -1003,7 +1007,8 @@
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::NG::DatePickerPattern::GetFormatString(OHOS::Ace::PickerDateF)";
       "OHOS::Ace::NG::DialogManager::GetMainPipelineContext(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
-      "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::NG::DialogView::IsSupportBlurStyle(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::DividerPainter::DrawLine(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&) const";
       "OHOS::Ace::NG::DragAnimationHelper::ShowGatherAnimationWithMenu(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::DragAnimationHelper::UpdateGatherNodeToTop()";
@@ -1441,7 +1446,7 @@
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(OHOS::Ace::NG::LayoutConstraintT<float> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::Layout(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::Measure(OHOS::Ace::NG::LayoutWrapper*)";
-      "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::MeasureChildren(OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::TextStyle const&)";
+      "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::MeasureChildren(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::ParagraphReLayout(OHOS::Ace::NG::LayoutConstraintT<float> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(OHOS::Ace::TextStyle&, std::__h::optional<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetContentOffset(OHOS::Ace::NG::LayoutWrapper*)";
@@ -1527,6 +1532,7 @@
       "OHOS::Ace::NG::Pattern::OnColorModeChange(unsigned int)";
       "OHOS::Ace::NG::Pattern::RemoveResObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Pattern::UnRegisterResource(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::Pattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::PickerAudioHapticFactory::GetInstance(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::PickerColumnPattern::AddAnimationTextProperties(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::NG::TextLayoutProperty> const&)";
       "OHOS::Ace::NG::PickerColumnPattern::AddHotZoneRectToText()";
@@ -1869,6 +1875,7 @@
       "OHOS::Ace::NG::TextFieldManagerNG::SetOnFocusTextField(OHOS::Ace::WeakPtr<OHOS::Ace::NG::Pattern> const&)";
       "OHOS::Ace::NG::TextFieldManagerNG::TriggerAvoidOnCaretChange()";
       "OHOS::Ace::NG::TextFieldPattern::AddInputCommand(OHOS::Ace::NG::InputCommandInfo const&)";
+      "OHOS::Ace::NG::TextFieldPattern::ParseCommand(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextFieldPattern::AutoCapTypeToString() const";
       "OHOS::Ace::NG::TextFieldPattern::ClearTextContent()";
       "OHOS::Ace::NG::TextFieldPattern::FilterInitializeText()";
@@ -1908,6 +1915,7 @@
       "OHOS::Ace::NG::TextFieldPattern::StopEditing()";
       "OHOS::Ace::NG::TextFieldPattern::StopTwinkling()";
       "OHOS::Ace::NG::TextFieldPattern::TextFieldPattern()";
+      "OHOS::Ace::NG::TextFieldPattern::TextInputActionToString() const";
       "OHOS::Ace::NG::TextFieldPattern::ToJsonValueForStroke(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextFieldPattern::ToJsonValueSelectOverlay(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextInputBridge::ParseAndCreateIMEAttachCallback(panda::ecmascript::EcmaVM*, panda::Local<panda::JSValueRef>, OHOS::Ace::NG::FrameNode*, bool)";
@@ -2072,6 +2080,7 @@
       "OHOS::Ace::NG::TextPattern::UpdateSelectorOnHandleMove(OHOS::Ace::NG::OffsetT<float> const&, float, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSelectOverlayOrCreate(OHOS::Ace::NG::SelectOverlayInfo&, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSpanItemDragStatus(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&, bool)";
+      "OHOS::Ace::NG::TextPattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextSelectOverlay::AllowSearch()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowShare()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowTranslate()";
@@ -2594,6 +2603,10 @@
       "OHOS::Ace::RosenUniversalPainter::DrawRRectBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::RRect const&, unsigned int, double)";
       "OHOS::Ace::RoundToMaxPrecision(double)";
       "OHOS::Ace::RsNodeAdapter::CreateSurfaceNode(OHOS::Rosen::RSSurfaceNodeConfig const&)";
+      "OHOS::Ace::SelectionInfo::GetSelection() const";
+      "OHOS::Ace::SelectionInfo::SetSelectionStart(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetSelectionEnd(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetResultObjectList(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&)";
       "OHOS::Ace::Scheduler::AddKeyFrame(float, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::Animate(OHOS::Ace::AnimationOption const&, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()>, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::CloseImplicitAnimation()";
@@ -3491,6 +3504,7 @@
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
@@ -3552,6 +3566,7 @@
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetAccessibilityManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
+      OHOS::Ace::PipelineBase::GetEventManager*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
       OHOS::Ace::PipelineBase::GetCurrentDensity*;
       OHOS::Ace::PipelineBase::GetImageCache*;
@@ -3640,11 +3655,13 @@
       OHOS::Ace::TokenColors::*;
       OHOS::Ace::TouchEventInfo::*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      virtual?thunk?to?OHOS::Ace::TouchEventTarget::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::UIContentImpl::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::UiMaterial::*;
+      OHOS::Ace::UiMaterialMapKeyHasher::*;
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::UtfUtils::*;
@@ -3736,6 +3753,7 @@
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::ToJsonValue*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::ToTreeJson*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::UnRegisterResource*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnInjectionEvent*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::UpdatePropertyImpl*;
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::UINode::~UINode*;
@@ -3911,6 +3929,7 @@
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
       vtable?for?OHOS::Ace::PanRecognizer;
+      OHOS::Ace::VelocityTracker::VelocityTracker*;
       vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
       vtable?for?OHOS::Ace::Platform::AceApplicationInfoImpl;

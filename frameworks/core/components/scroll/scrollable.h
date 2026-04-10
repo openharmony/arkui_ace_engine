@@ -34,21 +34,6 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-enum class NestedState {
-    GESTURE = 0,
-    CHILD_SCROLL,
-    CHILD_OVER_SCROLL,
-};
-
-struct OverScrollOffset {
-    double start;
-    double end;
-};
-
-struct ScrollResult {
-    double remain;
-    bool reachEdge;
-};
 
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;

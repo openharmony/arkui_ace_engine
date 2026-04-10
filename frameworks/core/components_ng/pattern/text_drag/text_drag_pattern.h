@@ -21,8 +21,19 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
+
+namespace OHOS::Rosen {
+namespace Drawing {
+class Path;
+}
+}
+
+#ifndef ACE_UNITTEST
+namespace OHOS::Ace {
+using RSPath = Rosen::Drawing::Path;
+}
+#endif
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DRAG_RADIUS_2IN1 = 8.0_vp;
@@ -88,6 +99,11 @@ public:
     ~TextDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+
+    static const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+        const float textStartY);
+    static const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+        const float textStartY);
 
     void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {

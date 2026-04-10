@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
+#include "core/components_ng/render/drawing.h"
+
 #include <functional>
 #include <stdint.h>
 #include <string>
@@ -35,6 +37,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
@@ -740,7 +743,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !titleLayoutRenderContext->IsUniRenderEnabled()) {
+        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
@@ -753,6 +756,9 @@ bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);

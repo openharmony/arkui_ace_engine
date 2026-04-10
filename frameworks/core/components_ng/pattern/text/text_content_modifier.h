@@ -150,7 +150,6 @@ private:
     void PauseTextRace();
     bool AllowTextRace();
     void DetermineTextRace();
-    void FireStopEvent();
     std::optional<double> CalcResetPercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);

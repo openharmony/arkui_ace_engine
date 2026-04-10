@@ -31,7 +31,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -204,8 +204,7 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(selectPaintProperty);
     auto material = renderContext->GetSystemMaterial();
     if (selectPaintProperty->HasBackgroundColor() ||
-        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
+        (material && MaterialUtils::CheckMaterialValid(material->GetType()))) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -769,6 +768,7 @@ void SelectPattern::ClearFocusStyle()
 
 void SelectPattern::ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag)
 {
+    CHECK_NULL_VOID(spinner_);
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     focusedFlag ? spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()}) :
@@ -2783,6 +2783,7 @@ void SelectPattern::SetArrowModifierApply(const std::function<void(WeakPtr<NG::F
 {
     arrowApply_ = arrowApply;
     if (arrowApply) {
+        CHECK_NULL_VOID(spinner_);
         arrowApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(spinner_)));
         spinner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         spinner_->MarkModifyDone();

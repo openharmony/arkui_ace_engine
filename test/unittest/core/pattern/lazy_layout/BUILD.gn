@@ -18,6 +18,7 @@ ace_unittest("lazy_grid_layout_test") {
   type = "new"
   sources = [
     "grid_layout/lazy_grid_layout_test.cpp",
+    "grid_layout/lazy_grid_layout_syntax_test.cpp",
     "grid_layout/lazy_grid_generated_layout_test.cpp",
   ]
 

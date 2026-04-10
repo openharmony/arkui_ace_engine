@@ -23,17 +23,16 @@
 namespace OHOS::Ace::NG {
 class TextTimerConfiguration : public CommonConfiguration {
     public:
-        TextTimerConfiguration(double count, bool isCountDown, bool started, int64_t elapsedTime, bool enabled)
-            : CommonConfiguration(enabled),
-            count_(count),
-            isCountDown_(isCountDown),
-            started_(started),
-            elapsedTime_(elapsedTime)
+        TextTimerConfiguration(
+            double count, bool isCountDown, bool started, int64_t elapsedTime, bool enabled, int32_t startTime)
+            : CommonConfiguration(enabled), count_(count), isCountDown_(isCountDown), started_(started),
+              elapsedTime_(elapsedTime), startTime_(startTime)
         {}
         double count_ = 60000.0;
         bool isCountDown_ = false;
         bool started_ = false;
         uint64_t elapsedTime_ = 0;
+        int32_t startTime_ = 0;
 };
 using TextTimerMakeCallback =
     std::function<RefPtr<FrameNode>(const TextTimerConfiguration& textTimerConfiguration)>;
@@ -43,6 +42,7 @@ public:
     void SetFormat(const std::string& format) override;
     void SetIsCountDown(bool isCountDown) override;
     void SetInputCount(double count) override;
+    void SetStartTime(int32_t value) override;
     void SetOnTimer(std::function<void(int64_t, int64_t)> && onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
@@ -59,6 +59,7 @@ public:
     static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
     static void SetIsCountDown(FrameNode* frameNode, bool isCountDown);
     static void SetInputCount(FrameNode* frameNode, double count);
+    static void SetStartTime(FrameNode* frameNode, int32_t value);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);

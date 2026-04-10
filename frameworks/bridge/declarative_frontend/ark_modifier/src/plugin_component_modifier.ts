@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class PluginComponentModifier extends ArkPluginComponent implements AttributeModifier<PluginComponentAttribute> {
 
     constructor(nativePtr: KNode, classType: ModifierType) {

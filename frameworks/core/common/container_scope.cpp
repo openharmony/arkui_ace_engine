@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+#include <dlfcn.h>
+#endif
+
 #include "core/common/container_scope.h"
+
 #include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
@@ -32,6 +37,32 @@ thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
 }
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+void* ContainerScope::registerHandler_ = nullptr;
+ContainerScope::ReportScopeErrorFun ContainerScope::reportScopeError_ = nullptr;
+
+void ContainerScope::ReportScopeError()
+{
+    if (reportScopeError_ != nullptr) {
+        reportScopeError_();
+        return;
+    }
+    registerHandler_ = dlopen("libace_compatible.z.so", RTLD_LAZY);
+    reportScopeError_ = (ReportScopeErrorFun)dlsym(registerHandler_, "OHOS_ACE_ScopeErrorHivewReport");
+    reportScopeError_();
+}
+
+void ContainerScope::CheckIdChange(int32_t id)
+{
+    if (id < 0) {
+        return;
+    }
+    auto safeId = SafelyId();
+    if (id != safeId) {
+        ReportScopeError();
+    }
+}
+#endif
 
 int32_t ContainerScope::CurrentId()
 {
@@ -74,6 +105,26 @@ int32_t ContainerScope::RecentActiveId()
 int32_t ContainerScope::RecentForegroundId()
 {
     return recentForegroundId_.load(std::memory_order_relaxed);
+}
+
+int32_t ContainerScope::SafelyId()
+{
+    uint32_t containerCount = ContainerCount();
+    if (containerCount == 0) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    if (containerCount == 1) {
+        return SingletonId();
+    }
+    int32_t currentId = RecentActiveId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    currentId = RecentForegroundId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    return DefaultId();
 }
 
 std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
@@ -168,5 +219,4 @@ void ContainerScope::RemoveAndCheck(int32_t id)
         UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
     }
 }
-
 } // namespace OHOS::Ace

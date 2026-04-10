@@ -572,6 +572,12 @@ const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 // effect view
 const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
+// distortion component
+const char DISTORTION_COMPONENT_ETS_TAG[] = "DistortionComponent";
+
+// distortion content node
+const char DISTORTION_CONTENT_ETS_TAG[] = "DistortionContent";
+
 // Model
 const char MODEL_COMPONENT_TAG[] = "Component3DComponent";
 const char MODEL_ETS_TAG[] = "Component3D";

@@ -55,8 +55,8 @@ export class ImageData {
             ((width_value > 0) && (height_value > (int_MAX / width_value / PIXEL_SIZE)))) {
             return
         }
-        this.finalWidth = width_value as int
-        this.finalHeight = height_value as int
+        this.finalWidth = width_value.toInt()
+        this.finalHeight = height_value.toInt()
         const length: int = this.finalWidth * this.finalHeight * PIXEL_SIZE
         if (data == undefined) {
             this.data_val = new Uint8ClampedArray(length)

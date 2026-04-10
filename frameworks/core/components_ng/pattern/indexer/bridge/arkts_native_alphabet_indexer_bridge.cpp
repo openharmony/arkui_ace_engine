@@ -509,8 +509,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemBackgroundColor(ArkUIR
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupItemBackgroundColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupItemBackgroundColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -571,8 +571,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetColor(ArkUIRuntimeCallInfo* run
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -628,8 +628,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupColor(ArkUIRuntimeCallInfo
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -689,8 +689,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedColor(ArkUIRuntimeCallI
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::SELECTED_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -751,8 +751,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupBackground(ArkUIRuntimeCal
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_BACKGROUND),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupBackgroundByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupBackgroundByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -812,8 +812,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedBackgroundColor(ArkUIRu
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedBackgroundColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedBackgroundColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -874,8 +874,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupUnselectedColor(ArkUIRunti
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_UNSELECTED_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupUnselectedColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupUnselectedColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -1012,8 +1012,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupSelectedColor(ArkUIRuntime
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_SELECTED_COLOR),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupSelectedColorByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupSelectedColorByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {
@@ -1419,8 +1419,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupTitleBackground(ArkUIRunti
             GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
                 static_cast<int32_t>(IndexerJsResourceType::POPUP_TITLE_BACKGROUND),
                 reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-            GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupTitleBackgroundByUser(setByUser);
         }
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupTitleBackgroundByUser(setByUser);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!isColorValid) {

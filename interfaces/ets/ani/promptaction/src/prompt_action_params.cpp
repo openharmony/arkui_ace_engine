@@ -15,6 +15,7 @@
 
 #include "prompt_action_params.h"
 
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/pipeline/pipeline_base.h"
 
 std::unordered_map<int, OHOS::Ace::BlurStyle> blurStyleMap = {

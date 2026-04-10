@@ -73,7 +73,7 @@ const tabSimpleTheme = {
   buttonPadding: {
     id: -1,
     type: 10002,
-    params: ['sys.float.padding_level1'],
+    params: ['sys.float.padding_level2'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -189,7 +189,6 @@ const tabSimpleTheme = {
       moduleName: '__harDefaultModuleName__',
     }),
   },
-  itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleSmallest: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleLargest: LARGEST_MAX_FONT_SCALE,
@@ -229,7 +228,7 @@ const capsuleSimpleTheme = {
   buttonPadding: {
     id: -1,
     type: 10002,
-    params: ['sys.float.padding_level1'],
+    params: ['sys.float.padding_level2'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -345,7 +344,6 @@ const capsuleSimpleTheme = {
       moduleName: '__harDefaultModuleName__',
     }),
   },
-  itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleSmallest: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleLargest: LARGEST_MAX_FONT_SCALE,
@@ -1606,7 +1604,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     return this.items ?? EMPTY_ITEMS;
   }
   getItemBackplateShadow() {
-    return this.itemShadow ?? this.theme.itemShadow;
+    return this.itemShadow;
   }
   getButtonBackgroundBlurStyle() {
     if (this.buttonBackgroundEffect) {

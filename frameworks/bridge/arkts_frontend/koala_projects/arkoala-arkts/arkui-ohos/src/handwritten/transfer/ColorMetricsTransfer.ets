@@ -32,7 +32,7 @@ export class ColorMetricsTransfer {
             resourceId = ESValue.wrap(input).getProperty('resourceId_').toNumber();
         }
         let colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
-        colorMetrics.setResourceId(resourceId as int32);
+        colorMetrics.setResourceId(resourceId.toInt());
         return colorMetrics;
     }
     static transferDynamic(input: Object): Any {

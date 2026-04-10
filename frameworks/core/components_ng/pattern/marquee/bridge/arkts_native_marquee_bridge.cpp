@@ -16,7 +16,6 @@
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 static const std::string DEFAULT_FONT_WEIGHT = "400";

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/text_model.h"
 
 #ifdef WEB_SUPPORTED
 #include "arkweb_utils.h"
@@ -2427,6 +2428,33 @@ void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                  const Opt_ScrollbarLayoutPolicy* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<ScrollbarLayoutPolicy>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetScrollbarLayoutPolicy(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+void SetEnableDragImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDrag(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEvent* value)
 {
 #ifdef WEB_SUPPORTED
@@ -2653,6 +2681,19 @@ void SetRotateRenderEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebRotateEffect>(*value);
     WebModelStatic::SetRotateRenderEffect(frameNode, convValue);
+#endif // WEB_SUPPORTED
+}
+
+void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value,
+                                        const Opt_ScrollDirectionalLockType* type)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    auto typeValue = Converter::OptConvert<ScrollDirectionalLockType>(*type); // for enums
+    WebModelStatic::SetEnableScrollDirectionalLock(frameNode, convValue, typeValue);
 #endif // WEB_SUPPORTED
 }
 
@@ -3233,9 +3274,12 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetEnableDragImpl,
+        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
+        WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
     };
     return &ArkUIWebModifierImpl;
 }

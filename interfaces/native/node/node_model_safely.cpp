@@ -15,10 +15,12 @@
 
 #include "node_model_safely.h"
 
-#include "base/error/error_code.h"
-#include "base/utils/utils.h"
 #include "node_extened.h"
 #include "node_model.h"
+
+#include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {

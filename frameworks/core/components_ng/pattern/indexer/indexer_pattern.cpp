@@ -42,7 +42,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -806,9 +805,7 @@ void IndexerPattern::UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutP
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(layoutProperty);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle unselectedFontStyle;
     TextStyle selectedFontStyle;
@@ -1087,9 +1084,8 @@ void IndexerPattern::UpdateBubbleBackgroundView()
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
-        auto pipelineContext = host->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+        auto indexerTheme = host->GetTheme<IndexerTheme>(true);
+        CHECK_NULL_VOID(indexerTheme);
         BlurStyleOption styleOption;
         if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
             styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
@@ -1146,9 +1142,7 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1200,7 +1194,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto fontManager = pipelineContext->GetFontManager();
     CHECK_NULL_VOID(fontManager);
@@ -1267,9 +1261,9 @@ void IndexerPattern::UpdateBubbleListView()
     }
     auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto listPattern = DynamicCast<ListPattern>(listNode->GetPattern());
     listPattern->SetNeedLinked(false);
@@ -1591,11 +1585,10 @@ void IndexerPattern::UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode,
 void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
 {
     popupClickedIndex_ = clickIndex;
-    auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1778,7 +1771,7 @@ void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1822,7 +1815,7 @@ void IndexerPattern::IndexerHoverInAnimation()
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color slipHoverBackgroundColor = indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
@@ -1864,7 +1857,7 @@ void IndexerPattern::IndexerPressInAnimation()
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                 ? indexerTheme->GetSlipPressedBackgroundColor()
@@ -1889,7 +1882,7 @@ void IndexerPattern::IndexerPressOutAnimation()
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                 ? indexerTheme->GetSlipPressedBackgroundColor()
@@ -2059,6 +2052,17 @@ void IndexerPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        auto indexerPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indexerPattern);
+        indexerPattern->MoveIndexByStep(1);
+    });
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        auto indexerPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indexerPattern);
+        indexerPattern->MoveIndexByStep(-1);
+    });
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto textNode = DynamicCast<NG::FrameNode>(iter);
@@ -2172,14 +2176,9 @@ void IndexerPattern::OnColorConfigurationUpdate()
 
 void IndexerPattern::UpdateThemeColor()
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2217,12 +2216,30 @@ void IndexerPattern::UpdateThemeColor()
 void IndexerPattern::OnColorModeChange(uint32_t colorMode)
 {
     Pattern::OnColorModeChange(colorMode);
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateThemeColor();
+    }
+    ApplyIndexChanged(true, false);
+    UpdateBubbleView();
+    if (popupNode_) {
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+bool IndexerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    if (host && !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
     UpdateThemeColor();
     ApplyIndexChanged(true, false);
     UpdateBubbleView();
     if (popupNode_) {
         popupNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    return false;
 }
 
 void IndexerPattern::DumpInfo()

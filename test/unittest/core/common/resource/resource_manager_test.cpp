@@ -18,7 +18,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "base/utils/resource_configuration.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 #define protected public
 #define private public

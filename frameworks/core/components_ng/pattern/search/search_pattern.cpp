@@ -1463,27 +1463,31 @@ int32_t SearchPattern::OnInjectionEvent(const std::string& command)
     std::string cmd;
     std::unique_ptr<JsonValue> json = nullptr;
     std::unique_ptr<JsonValue> params = nullptr;
-    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
-        return RET_FAILED;
-    }
-    if (cmd != "setSearchText") {
-        TAG_LOGE(AceLogTag::ACE_SEARCH, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
-        return RET_FAILED;
-    }
-    // Get TextField child
     auto textFieldChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_RETURN(textFieldChild, RET_FAILED);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, RET_FAILED);
-    std::string text = params->GetString("value");
-    InputCommandInfo inputCommandInfo;
-    inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
-    inputCommandInfo.insertOffset = 0;
-    inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
-    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
-    textFieldPattern->AddInputCommand(inputCommandInfo);
-    if (isSearchButtonEnabled_) {
-        OnClickButtonAndImage();
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), RET_FAILED);
+    cmd = json->GetString("cmd");
+    CHECK_NULL_RETURN(!cmd.empty(), RET_FAILED);
+    if (cmd == "setSearchText") {
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), RET_FAILED);
+        std::string text = params->GetString("value");
+        InputCommandInfo inputCommandInfo;
+        inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
+        inputCommandInfo.insertOffset = 0;
+        inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
+        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+        textFieldPattern->AddInputCommand(inputCommandInfo);
+        if (isSearchButtonEnabled_) {
+            OnClickButtonAndImage();
+        }
+        return RET_SUCCESS;
+    }
+    if (!textFieldPattern->ParseCommand(command)) {
+        return RET_FAILED;
     }
     return RET_SUCCESS;
 }
@@ -1892,6 +1896,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         textFieldLayoutProperty->GetIncludeFontPadding().value_or(false)).c_str(), filter);
     json->PutExtAttr("fallbackLineSpacing", std::to_string(
         textFieldLayoutProperty->GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
+    json->PutExtAttr("selectionMenuHidden",
+        textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2081,7 +2088,8 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
     json->PutExtAttr("caretStyle", cursorJson, filter);
-    auto selectedBackgroundColor = textFieldPaintProperty->GetSelectedBackgroundColor().value_or(Color());
+    auto selectedBackgroundColor =
+        textFieldPaintProperty->GetSelectedBackgroundColor().value_or(textFieldTheme->GetSelectedColor());
     json->PutExtAttr("selectedBackgroundColor", selectedBackgroundColor.ColorToString().c_str(), filter);
 }
 
@@ -2673,6 +2681,8 @@ void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -2797,6 +2807,8 @@ void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
     auto& imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
     if (iconOptions.GetColor().has_value()) {
         imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    } else {
+        imageIconOptions.ResetColor();
     }
     if (iconOptions.GetSize().has_value()) {
         imageIconOptions.UpdateSize(ConvertImageIconSizeValue(iconOptions.GetSize().value()));
@@ -3162,7 +3174,7 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
-        {"scancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+        {"cancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     pattern->SetRightIconSrcPath(*realValue);

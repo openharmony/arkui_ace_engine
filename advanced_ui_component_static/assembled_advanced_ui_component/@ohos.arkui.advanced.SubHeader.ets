@@ -99,12 +99,12 @@ export class SymbolOptions {
   public renderingStrategy?: SymbolRenderingStrategy;
 }
 
-interface IconOptions {
+export interface IconOptions {
   icon?: ResourceStr;
   symbolicIconOption?: SymbolOptions | null;
 }
 
-interface ContentIconOption {
+export interface ContentIconOption {
   content?: ResourceStr;
   subContent?: ResourceStr;
   iconOptions?: IconOptions;
@@ -123,7 +123,7 @@ class FontStyle {
   public alignment?: Alignment;
 }
 
-class SubHeaderTheme {
+export class SubHeaderTheme {
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   public fontSecondaryColor: ResourceColor = $r('sys.color.font_secondary');
   public fontButtonColor: ResourceColor = $r('sys.color.font_emphasize');
@@ -162,7 +162,7 @@ function disabledStyle(instance: CommonMethod) {
   instance.opacity(getResourceValue('sys.float.interactive_disable'))
 }
 
-class SubHeaderModifier implements AttributeModifier<RowAttribute> {
+export class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false;
 
   applyNormalAttribute(instance: RowAttribute): void {
@@ -750,7 +750,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
@@ -812,7 +812,7 @@ export struct SubHeader {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontPrimaryColor,

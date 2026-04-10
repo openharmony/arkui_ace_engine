@@ -645,8 +645,8 @@ bool MultipleParagraphLayoutAlgorithm::ImageSpanMeasure(const RefPtr<ImageSpanIt
     return imageSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(
-    const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper)
+bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -667,7 +667,13 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
-        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+        std::optional<float> maxWidth = GetMaxMeasureSize(contentConstraint).Width();
+        std::optional<LayoutCalPolicy> layoutPolicy;
+        auto layoutPolicyValue = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (layoutPolicyValue != LayoutCalPolicy::NO_MATCH) {
+            layoutPolicy = layoutPolicyValue;
+        }
+        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
             customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
@@ -698,7 +704,8 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
     return placeholderSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::MeasureChildren(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
     CHECK_NULL_VOID(!spans_.empty());
     CHECK_NULL_VOID(layoutWrapper);
@@ -740,7 +747,7 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
                     if (!customSpanItem) {
                         continue;
                     }
-                    needReCreateParagraph |= CustomSpanMeasure(customSpanItem, layoutWrapper);
+                    needReCreateParagraph |= CustomSpanMeasure(customSpanItem, contentConstraint, layoutWrapper);
                     if (customSpanItem->isFrameNode) {
                         ++iterItems; // CAPI custom span is frameNode，need to move the iterator backwards
                     }

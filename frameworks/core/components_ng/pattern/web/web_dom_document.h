@@ -16,14 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 
-#include <string>
-#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
+#include <string>
+#include <unordered_map>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
 class JsonValue;
@@ -37,6 +38,7 @@ constexpr char WEB_DOM_JSON_CHILDREN[] = "$children-web";
 constexpr char WEB_DOM_JSON_TITLE[] = "title";
 constexpr char WEB_DOM_JSON_URL[] = "url";
 constexpr char WEB_DOM_JSON_TYPE_OUTER[] = "web";
+constexpr char WEB_DOM_JSON_LAYOUTMODE[] = "layoutMode";
 
 constexpr char WEB_NATIVE_OBJ_DOM[] = "_arkWebDomTree";
 constexpr char WEB_NATIVE_FUNC_INIT[] = "init";

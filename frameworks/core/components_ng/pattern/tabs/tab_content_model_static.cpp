@@ -51,9 +51,7 @@ void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::option
         frameNodePattern->SetIndicatorStyle(indicatorOpt.value());
     } else {
         IndicatorStyle indicator;
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        RefPtr<TabTheme> tabTheme = pipeline->GetTheme<TabTheme>();
+        RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
             indicator.height = tabTheme->GetActiveIndicatorWidth();
@@ -91,14 +89,13 @@ void TabContentModelStatic::SetLabelStyle(FrameNode* frameNode,
     auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     LabelStyle labelStyle = labelStyleOpt.value_or(LabelStyle());
-    frameNodePattern->SetLabelStyle(CompleteParameters(labelStyle, isSubTabStyle));
+    frameNodePattern->SetLabelStyle(CompleteParameters(frameNode, labelStyle, isSubTabStyle));
 }
 
-LabelStyle TabContentModelStatic::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
+LabelStyle TabContentModelStatic::CompleteParameters(FrameNode* frameNode, LabelStyle& labelStyle, bool isSubTabStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, labelStyle);
-    RefPtr<TabTheme> tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(frameNode, labelStyle);
+    RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, labelStyle);
     if (!labelStyle.maxLines.has_value()) {
         labelStyle.maxLines = 1;
@@ -154,14 +151,14 @@ void TabContentModelStatic::SetPadding(FrameNode* node,
     auto pattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(pattern);
     PaddingProperty paddingProperty = padding.value_or(PaddingProperty());
-    pattern->SetPadding(CompletePaddingProperty(paddingProperty, isSubTabStyle));
+    pattern->SetPadding(CompletePaddingProperty(node, paddingProperty, isSubTabStyle));
 }
 
-PaddingProperty TabContentModelStatic::CompletePaddingProperty(PaddingProperty& padding, bool isSubTabStyle)
+PaddingProperty TabContentModelStatic::CompletePaddingProperty(FrameNode* frameNode,
+    PaddingProperty& padding, bool isSubTabStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, padding);
-    RefPtr<TabTheme> tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(frameNode, padding);
+    RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, padding);
     if (!padding.top.has_value()) {
         padding.top = isSubTabStyle ? NG::CalcLength(tabTheme->GetSubTabTopPadding()) : NG::CalcLength(0.0_vp);
@@ -301,9 +298,7 @@ RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
     CHECK_NULL_RETURN(layout, nullptr);
@@ -409,9 +404,7 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
         []() { return AceType::MakeRefPtr<TabBarItemPattern>(); });
-    auto pipelineContext = tabsNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(linearLayoutProperty);
@@ -660,6 +653,7 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    InitTabText(textLayoutProperty);
     auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {
@@ -773,5 +767,23 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TabContentModelStatic::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto hostNode = textLayoutProperty->GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 } // namespace OHOS::Ace::NG

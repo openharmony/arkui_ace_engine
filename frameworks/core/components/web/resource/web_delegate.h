@@ -1313,6 +1313,7 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1493,6 +1494,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 
@@ -1549,6 +1551,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

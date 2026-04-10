@@ -392,10 +392,10 @@ class IndexRange {
   subtract(other: IndexRange): IndexRangeArray {
     const result = new IndexRangeArray();
     if (other.start > this.start) {
-      result.push(new IndexRange(this.start, Math.min(this.end, other.start) as int32));
+      result.push(new IndexRange(this.start, Double.toInt(Math.min(this.end, other.start))));
     }
     if (other.end < this.end) {
-      result.push(new IndexRange(Math.max(other.end, this.start) as int32, this.end));
+      result.push(new IndexRange(Double.toInt(Math.max(other.end, this.start)), this.end));
     }
     return result;
   }
@@ -403,7 +403,7 @@ class IndexRange {
   // Expand the range to contain another.
   // When `this` and `other` intersect, this is a union.
   expandedWith(other: IndexRange): IndexRange {
-    return new IndexRange(Math.min(this.start, other.start) as int32, Math.max(this.end, other.end) as int32);
+    return new IndexRange(Double.toInt(Math.min(this.start, other.start)), Double.toInt(Math.max(this.end, other.end)));
   }
 
   forEachIndex(callback: (index: int32) => void): void {
@@ -652,7 +652,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
       const distance =
         minVisible + (maxVisible - minVisible) / 2.0 - (this.minVisible + (this.maxVisible - this.minVisible) / 2.0);
       const rawSpeed = Math.abs(distance / timeDifference) * 1000.0;
-      this.speedInternal = (speedWeight * rawSpeed + (1 - speedWeight) * this.speedInternal) as float32;
+      this.speedInternal = (speedWeight * rawSpeed + (1 - speedWeight) * this.speedInternal).toFloat();
     }
   }
 
@@ -679,8 +679,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
       this.lastUpdateTimestamp = Date.now() as int64;
     } else {
       const imagesWeight = 0.95;
-      this.meanImagesOnScreen = (this.meanImagesOnScreen * imagesWeight + (1 - imagesWeight) * imagesOnScreen)
-        as float32;
+      this.meanImagesOnScreen = (this.meanImagesOnScreen * imagesWeight + (1 - imagesWeight) * imagesOnScreen).toFloat()
       this.updateSpeed(minVisible, maxVisible);
     }
 
@@ -773,11 +772,11 @@ class PrefetchRangeRatio {
       prefetchCountMaxRatioRight: 0.25,
     },
   ];
-  private readonly ACTIVE_DEGREE: float32 = 0;
-  private readonly VISIBLE_DEGREE: float32 = 2.5;
-  private meanPrefetchTime: float32 = 0;
-  private leftToleranceEdge: float32 = Number.MIN_VALUE as float32;
-  private rightToleranceEdge: float32 = 250;
+  private readonly ACTIVE_DEGREE: float32 = 0.0f;
+  private readonly VISIBLE_DEGREE: float32 = 2.5f;
+  private meanPrefetchTime: float32 = 0.0f;
+  private leftToleranceEdge: float32 = Double.toFloat(Number.MIN_VALUE);
+  private rightToleranceEdge: float32 = 250.0f;
 
   private readonly itemsOnScreen: ItemsOnScreenProvider;
   private readonly fetchedRegistry: FetchedRegistry;
@@ -809,8 +808,8 @@ class PrefetchRangeRatio {
     this.rangeInternal = RatioRange.newEmpty();
   }
 
-  private minRatioInternal: float32 = (0.25 * 0.6) as float32;
-  private maxRatioInternal: float32 = 0.5 as float32;
+  private minRatioInternal: float32 = (0.25 * 0.6).toFloat();
+  private maxRatioInternal: float32 = 0.5f;
 
   get maxRatio(): float32 {
     return this.maxRatioInternal;
@@ -848,7 +847,7 @@ class PrefetchRangeRatio {
     let isFetchLatecomer: boolean = this.fetchingRegistry.isFetchLatecomer(index, this.itemsOnScreen.meanValue);
 
     if (!isFetchLocal && !isFetchLatecomer) {
-      this.meanPrefetchTime = (this.meanPrefetchTime * weight + (1 - weight) * prefetchDuration) as float32;
+      this.meanPrefetchTime = (this.meanPrefetchTime * weight + (1 - weight) * prefetchDuration).toFloat();
     }
   }
 
@@ -886,7 +885,7 @@ class PrefetchRangeRatio {
         if (i !== 0) {
           this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
         } else {
-          this.leftToleranceEdge = Number.MIN_VALUE as float32;
+          this.leftToleranceEdge = Double.toFloat(Number.MIN_VALUE);
         }
       }
     }
@@ -905,7 +904,7 @@ class PrefetchRangeRatio {
         if (i + 1 !== this.TOLERANCE_RANGES.length) {
           this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
         } else {
-          this.rightToleranceEdge = Number.MAX_VALUE as float32;
+          this.rightToleranceEdge = Double.toFloat(Number.MAX_VALUE);
         }
       }
     }
@@ -920,16 +919,16 @@ class PrefetchRangeRatio {
 
     switch (this.itemsOnScreen.direction) {
       case 'UNKNOWN':
-        start = Math.max(0, visibleRange.start - prefetchCount) as int32;
-        end = Math.min(totalCount, visibleRange.end + prefetchCount) as int32;
+        start = Math.max(0, visibleRange.start - prefetchCount).toInt();
+        end = Math.min(totalCount, visibleRange.end + prefetchCount).toInt();
         break;
       case 'UP':
-        start = Math.max(0, visibleRange.start - prefetchCount) as int32;
-        end = Math.min(totalCount, visibleRange.end + Math.round(0.5 * prefetchCount)) as int32;
+        start = Math.max(0, visibleRange.start - prefetchCount).toInt();
+        end = Math.min(totalCount, visibleRange.end + Math.round(0.5 * prefetchCount)).toInt();
         break;
       case 'DOWN':
-        start = Math.max(0, visibleRange.start - Math.round(0.5 * prefetchCount)) as int32;
-        end = Math.min(totalCount, visibleRange.end + prefetchCount) as int32;
+        start = Math.max(0, visibleRange.start - Math.round(0.5 * prefetchCount)).toInt();
+        end = Math.min(totalCount, visibleRange.end + prefetchCount).toInt();
         break;
     }
 
@@ -945,7 +944,7 @@ class PrefetchRangeRatio {
       Math.pow(1.0 * completedActive / evaluatedPrefetchRange.length, this.ACTIVE_DEGREE) *
       Math.pow(1.0 * completedVisible / visibleRange.length, this.VISIBLE_DEGREE);
 
-    return Math.min(1, ratio) as float32;
+    return Double.toFloat(Math.min(1, ratio));
   }
 
   updateRatioRange(ratio: float32): void {
@@ -1007,8 +1006,8 @@ class PrefetchCount {
     const minItems = Math.min(
       this.currentMaxItems,
       Math.ceil(this.speedCoef * this.itemsOnScreen.speed * this.currentMaxItems),
-    ) as int32;
-    const prefetchCount: int32 = minItems + Math.ceil(ratio * (this.currentMaxItems - minItems)) as int32;
+    ).toInt();
+    const prefetchCount: int32 = minItems + Math.ceil(ratio * (this.currentMaxItems - minItems)).toInt();
     return prefetchCount;
   }
 
@@ -1018,16 +1017,16 @@ class PrefetchCount {
     let end: int32 = 0;
     switch (this.itemsOnScreen.direction) {
       case 'UNKNOWN':
-        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue)) as int32;
-        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue)) as int32;
+        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue)).toInt();
+        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue)).toInt();
         break;
       case 'UP':
-        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue)) as int32;
-        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue * 0.5)) as int32;
+        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue)).toInt();
+        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue * 0.5)).toInt();
         break;
       case 'DOWN':
-        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue * 0.5)) as int32;
-        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue)) as int32;
+        start = Math.max(0, visibleRange.start - Math.round(this.prefetchCountValue * 0.5)).toInt();
+        end = Math.min(totalCount, visibleRange.end + Math.round(this.prefetchCountValue)).toInt();
         break;
     }
     if (start > end) {
@@ -1037,7 +1036,7 @@ class PrefetchCount {
   }
 
   private updateLimits(): void {
-    this.maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue)) as int32;
+    this.maxItems = Math.max(this.currentMinItems, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue)).toInt();
     this.updateCurrentLimit();
   }
 
@@ -1045,8 +1044,8 @@ class PrefetchCount {
     this.currentMaxItemsInternal = Math.max(
       this.currentMinItems,
       Math.ceil(this.maxItems * this.prefetchRangeRatio.maxRatio),
-    ) as int32;
-    this.currentMinItemsInternal = Math.ceil(this.maxItems * this.prefetchRangeRatio.minRatio) as int32;
+    ).toInt();
+    this.currentMinItemsInternal = Math.ceil(this.maxItems * this.prefetchRangeRatio.minRatio).toInt();
   }
 }
 
@@ -1179,7 +1178,7 @@ class FetchingRangeEvaluator implements IFetchingRangeEvaluator {
   }
 
   protected onCollectionChanged(totalCount: int32): void {
-    this.totalItems = Math.max(0, totalCount) as int32;
+    this.totalItems = Math.max(0, totalCount).toInt();
     let newRangeToFetch = this.itemsOnScreen.visibleRange;
     if (newRangeToFetch.end > this.totalItems) {
       const end = this.totalItems;

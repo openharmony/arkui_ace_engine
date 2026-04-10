@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 
@@ -60,6 +64,78 @@ void SheetWrapperPattern::RegisterSheetMaskColorRes(const RefPtr<FrameNode>& mas
     } else {
         pattern->RemoveResObj("sheetWrapper.maskColor");
     }
+}
+
+void SheetWrapperPattern::InitSubWindowId()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsSubContainer()) {
+        return;
+    }
+    subWindowId_ = Container::CurrentId();
+    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet wrapper open in subwindow id is %u", subWindowId_);
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(subWindowId_);
+    container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "sheet host window is UEC");
+        isShowInUEC_ = true;
+    }
+}
+
+void SheetWrapperPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rootNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(rootNode);
+    if (rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        return;
+    }
+    auto wrapperRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(wrapperRenderContext);
+    auto navDestinationPattern = rootNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto zIndex = navDestinationPattern->GetTitlebarZIndex();
+
+    // set the sheet to float on the NavDestination's titlebar when the sheet shows in NavDestination
+    wrapperRenderContext->UpdateZIndex(zIndex + 1);
+}
+
+void SheetWrapperPattern::InitMainWindowRect(int32_t subwindowId)
+{
+    if (subWindowId_ == INVALID_SUBWINDOW_ID) {
+        return;
+    }
+    auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(subwindowId);
+    auto mainWindowContext = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(mainWindowContext);
+    auto windowGlobalRect = mainWindowContext->GetDisplayWindowRectInfo();
+    mainWindowRect_ = RectF(windowGlobalRect.Left(), windowGlobalRect.Top(),
+        windowGlobalRect.Width(), windowGlobalRect.Height());
+    if (isShowInUEC_) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(subWindowId_,
+            SubwindowType::TYPE_SHEET);
+        CHECK_NULL_VOID(subwindow);
+        auto rect = subwindow->GetUIExtensionHostWindowRect();
+        mainWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    }
+}
+
+void SheetWrapperPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto maskLayoutProps = host->GetLayoutProperty();
+    CHECK_NULL_VOID(maskLayoutProps);
+    maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    maskLayoutProps->UpdateAlignment(Alignment::TOP_LEFT);
+    auto maskRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    maskRenderContext->UpdateClipEdge(true);
+    InitSubWindowId();
+    InitMainWindowRect(subWindowId_);
 }
 
 void SheetWrapperPattern::UpdateSheetMaskResource(const RefPtr<FrameNode>& maskNode,

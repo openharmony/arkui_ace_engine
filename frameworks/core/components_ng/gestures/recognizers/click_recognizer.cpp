@@ -17,8 +17,10 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
@@ -592,6 +594,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::TAP);
 }
 
 void ClickRecognizer::PlayClickSoundEffect()

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -50,13 +51,13 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
 #include "../mock/mock_accessibility_child_tree_callback.h"
@@ -69,6 +70,13 @@ namespace {
     const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
     const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class UIExtensionComponentTestTwoNg : public testing::Test {
 public:
@@ -482,7 +490,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
     AAFwk::Want reply;
     auto ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
@@ -519,7 +527,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
     BusinessDataSendType type = BusinessDataSendType::ASYNC;
     auto ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
@@ -907,7 +915,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest002, TestSize
     pattern->instanceId_ = context->GetInstanceId();
     pattern->OnDetachContext(rawContext);
     EXPECT_EQ(pattern->hasDetachContext_, true);
-    
+
     pattern->OnDetachContext(rawContext);
     pattern->hasDetachContext_ = false;
     auto host = pattern->GetHost();
@@ -1385,20 +1393,20 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleMouseEvent, TestSize.Le
     mouseInfo.SetPointerEvent(pointerEvent);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetSourceDevice(SourceType::MOUSE);
     mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PULL_UP);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PRESS);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::RELEASE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);

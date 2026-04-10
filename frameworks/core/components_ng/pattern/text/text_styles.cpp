@@ -151,6 +151,10 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
 
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+        if (fontStyle->propFontSizeScale.has_value()) {
+            auto currentSize = textStyle.GetFontSize();
+            textStyle.SetFontSize(currentSize * fontStyle->propFontSizeScale.value());
+        }
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
         UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);

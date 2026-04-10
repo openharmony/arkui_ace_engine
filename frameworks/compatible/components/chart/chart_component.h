@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
 #include "core/pipeline/base/component.h"
+#include "core/pipeline/base/render_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {

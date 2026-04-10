@@ -283,11 +283,13 @@ export interface TextTimerConfiguration extends CommonConfiguration<TextTimerCon
     isCountDown: boolean;
     started: boolean;
     elapsedTime: int64;
+    startTime?: int32;
 }
 export interface TextTimerOptions {
     isCountDown?: boolean;
     count?: int64;
     controller?: TextTimerController;
+    startTime?: int32;
 }
 export type TimerCallback = (utc: int64, elapsedTime: int64) => void;
 export interface TextTimerAttribute extends CommonMethod {
@@ -423,6 +425,14 @@ export class TextTimerConfiguration_serializer {
         valueSerializer.writeBoolean(valueHolderForStarted)
         const valueHolderForElapsedTime = value.elapsedTime
         valueSerializer.writeInt64(valueHolderForElapsedTime)
+        const valueHolderForStartTime = value.startTime
+        if (valueHolderForStartTime !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTimeTmpValue = valueHolderForStartTime!
+            valueSerializer.writeInt32(valueHolderForStartTimeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextTimerConfiguration {
         let valueDeserializer: DeserializerBase = buffer
@@ -432,7 +442,13 @@ export class TextTimerConfiguration_serializer {
         const isCountDownTmpResult: boolean = valueDeserializer.readBoolean()
         const startedTmpResult: boolean = valueDeserializer.readBoolean()
         const elapsedTimeTmpResult: int64 = valueDeserializer.readInt64()
-        let value: TextTimerConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, count: countTmpResult, isCountDown: isCountDownTmpResult, started: startedTmpResult, elapsedTime: elapsedTimeTmpResult} as TextTimerConfiguration)
+        const startTimeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let startTimeTmpBuf: int32 | undefined = undefined
+        if ((startTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTimeTmpBuf = valueDeserializer.readInt32()
+        }
+        const startTimeTmpResult: int32 | undefined = startTimeTmpBuf
+        let value: TextTimerConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, count: countTmpResult, isCountDown: isCountDownTmpResult, started: startedTmpResult, elapsedTime: elapsedTimeTmpResult, startTime: startTimeTmpResult} as TextTimerConfiguration)
         return value
     }
 }
@@ -474,6 +490,14 @@ export class TextTimerOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStartTime = value.startTime
+        if (valueHolderForStartTime !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTimeTmpValue = valueHolderForStartTime!
+            valueSerializer.writeInt32(valueHolderForStartTimeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextTimerOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -495,7 +519,13 @@ export class TextTimerOptions_serializer {
             controllerTmpBuf = (TextTimerController_serializer.read(valueDeserializer) as TextTimerController)
         }
         const controllerTmpResult: TextTimerController | undefined = controllerTmpBuf
-        let value: TextTimerOptions = ({isCountDown: isCountDownTmpResult, count: countTmpResult, controller: controllerTmpResult} as TextTimerOptions)
+        const startTimeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let startTimeTmpBuf: int32 | undefined = undefined
+        if ((startTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTimeTmpBuf = valueDeserializer.readInt32()
+        }
+        const startTimeTmpResult: int32 | undefined = startTimeTmpBuf
+        let value: TextTimerOptions = ({isCountDown: isCountDownTmpResult, count: countTmpResult, controller: controllerTmpResult, startTime: startTimeTmpResult} as TextTimerOptions)
         return value
     }
 }

@@ -23,7 +23,7 @@ import { PeerNode } from './PeerNode'
 import { ArkLazyGridLayoutAttributePeer, LazyGridLayoutAttribute } from './component/lazyGridLayout'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { CommonMethod } from './component/common'
+import { CommonMethod, OnVisibleIndexesChangeCallback } from './component/common'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 export class LazyGridLayoutModifier extends CommonMethodModifier implements LazyGridLayoutAttribute {
     _instanceId: number = -1;
@@ -40,6 +40,7 @@ export class LazyGridLayoutModifier extends CommonMethodModifier implements Lazy
     isUpdater: () => boolean = () => false
     public _rowsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
     public _columnsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    public _onVisibleIndexesChange_0_0value?: OnVisibleIndexesChangeCallback | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -82,6 +83,23 @@ export class LazyGridLayoutModifier extends CommonMethodModifier implements Lazy
                 }
             }
         }
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setOnVisibleIndexesChangeAttribute((this._onVisibleIndexesChange_0_0value as OnVisibleIndexesChangeCallback | undefined));
+                    flagArray[2] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[2] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[2] = 0;
+                    peer.setOnVisibleIndexesChangeAttribute((undefined as OnVisibleIndexesChangeCallback | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: LazyGridLayoutModifier): void {
         super.mergeModifier(modifier)
@@ -114,6 +132,18 @@ export class LazyGridLayoutModifier extends CommonMethodModifier implements Lazy
                 }
             }
         }
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
+                    this.onVisibleIndexesChange((modifier._onVisibleIndexesChange_0_0value as OnVisibleIndexesChangeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleIndexesChange((undefined as OnVisibleIndexesChangeCallback | undefined));
+                }
+            }
+        }
     }
     rowsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -132,6 +162,16 @@ export class LazyGridLayoutModifier extends CommonMethodModifier implements Lazy
             this._state.fireChange()
         } else {
             this._flagArray[1] = 3
+        }
+        return this
+    }
+    onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
+            this._onVisibleIndexesChange_0_0value = callback_
+            this._state.fireChange()
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }

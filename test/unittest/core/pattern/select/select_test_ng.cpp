@@ -22,10 +22,10 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/resource/resource_info.h"
 
 #include "core/common/ace_application_info.h"
@@ -1455,7 +1455,7 @@ HWTEST_F(SelectTestNg, SelectMaterial001, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Set Material.
      * @tc.expected: Material will set success.

@@ -33,7 +33,7 @@ public:
     }
     explicit LinearColor(const Color& color)
         : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue()),
-            placeholder_(color.GetPlaceholder())
+            placeholder_(color.GetPlaceholder()), colorWithHeadRoom_(color.GetHeadRoomColor())
     {}
     LinearColor(int16_t alpha, int16_t red, int16_t green, int16_t blue)
         : alpha_(alpha), red_(red), green_(green), blue_(blue)
@@ -147,6 +147,9 @@ public:
 
     Color ToColor() const
     {
+        if (colorWithHeadRoom_.has_value()) {
+            return Color(colorWithHeadRoom_.value());
+        }
         return Color::FromARGB(static_cast<uint8_t>(std::clamp<int16_t>(alpha_, 0, UINT8_MAX)),
             static_cast<uint8_t>(std::clamp<int16_t>(red_, 0, UINT8_MAX)),
             static_cast<uint8_t>(std::clamp<int16_t>(green_, 0, UINT8_MAX)),
@@ -164,6 +167,7 @@ private:
     int16_t green_;
     int16_t blue_;
     ColorPlaceholder placeholder_ = ColorPlaceholder::NONE;
+    std::optional<ColorWithHeadRoom> colorWithHeadRoom_;
 };
 
 } // namespace OHOS::Ace

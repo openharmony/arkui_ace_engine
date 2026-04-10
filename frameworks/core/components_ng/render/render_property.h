@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/blend_mode.h"

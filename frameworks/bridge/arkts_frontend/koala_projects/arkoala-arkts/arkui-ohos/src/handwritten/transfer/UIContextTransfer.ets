@@ -20,7 +20,7 @@ export class UIContextTransfer {
 
     static transferStatic(input: Any): Object {
         const instanceId = ESValue.wrap(input).getProperty('instanceId_').toNumber();
-        let uiContext = new UIContext(instanceId as int32);
+        let uiContext = new UIContext(instanceId.toInt());
         return uiContext;
     }
     static transferDynamic(input: Object): Any {

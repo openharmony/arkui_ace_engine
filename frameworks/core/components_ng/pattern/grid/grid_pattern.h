@@ -279,6 +279,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    bool GetIsAllowMouse() const override;
+
     void HandleOnItemFocus(int32_t index);
 
     void OnColorModeChange(uint32_t colorMode) override;

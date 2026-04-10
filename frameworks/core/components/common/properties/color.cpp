@@ -19,6 +19,7 @@
 #include <regex>
 #include <unordered_map>
 
+#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -279,6 +280,18 @@ Color Color::FromRGBO(uint8_t red, uint8_t green, uint8_t blue, double opacity)
 Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
     return FromARGB(0xff, red, green, blue);
+}
+
+Color Color::FromFloat(double red, double green, double blue, double opacity, double headRoom)
+{
+    ColorWithHeadRoom colorWithHeadRoom {
+        .red = static_cast<float>(red),
+        .green = static_cast<float>(green),
+        .blue = static_cast<float>(blue),
+        .alpha = static_cast<float>(opacity),
+        .headRoom = static_cast<float>(headRoom)
+    };
+    return Color(colorWithHeadRoom);
 }
 
 Color Color::BlendColor(const Color& overlayColor) const

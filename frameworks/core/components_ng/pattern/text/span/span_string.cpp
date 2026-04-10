@@ -220,7 +220,11 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
         auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
         if (customSpanItem->onMeasure.has_value()) {
             auto onMeasure = customSpanItem->onMeasure.value();
-            CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+            auto customSpanMeasureInfo = CustomSpanMeasureInfo { .fontSize = fontSize };
+            if (maxWidth.has_value()) {
+                customSpanMeasureInfo.maxWidth = static_cast<float>(maxWidth.value());
+            }
+            CustomSpanMetrics customSpanMetrics = onMeasure(customSpanMeasureInfo);
             run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
             run.height = static_cast<float>(
                 customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
@@ -1379,6 +1383,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.variableFontWeight = spanItem->fontStyle->GetVariableFontWeight();
     font.enableVariableFontWeight = spanItem->fontStyle->GetEnableVariableFontWeight();
     font.enableDeviceFontWeightCategory = spanItem->fontStyle->GetEnableDeviceFontWeightCategory();
+    font.fontSizeScale = spanItem->fontStyle->GetFontSizeScale();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 

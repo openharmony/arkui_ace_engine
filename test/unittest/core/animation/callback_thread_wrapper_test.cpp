@@ -22,7 +22,7 @@
 #define private public
 #define protected public
 #include "core/components_ng/animation/callback_thread_wrapper.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;

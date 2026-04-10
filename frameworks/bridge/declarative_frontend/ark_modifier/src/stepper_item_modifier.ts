@@ -13,12 +13,43 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class StepperItemModifier extends ArkStepperItemComponent implements AttributeModifier<StepperItemAttribute> {
+class LazyArkStepperItemComponent extends ArkComponent {
+  static module: StepperItemComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkStepperItemComponent.module === undefined) {
+     LazyArkStepperItemComponent.module = globalThis.requireNapi('arkui.components.arkstepperitem');
+   }
+
+   this.lazyComponent = LazyArkStepperItemComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  prevLabel(value: string): this {
+   this.lazyComponent.prevLabel(value);
+   return this;
+  }
+
+  nextLabel(value: string): this {
+   this.lazyComponent.nextLabel(value);
+   return this;
+  }
+
+  status(value?: ItemState): this {
+   this.lazyComponent.status(value);
+   return this;
+  }
+}
+
+class StepperItemModifier extends LazyArkStepperItemComponent implements AttributeModifier<StepperItemAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: StepperItemAttribute): void {

@@ -353,7 +353,7 @@ void ResetTextShadow(ArkUINodeHandle node)
     TextTimerModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
 
-void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count)
+void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count, ArkUI_Int32 startTime)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -361,6 +361,7 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
     if (isCountDown) {
         TextTimerModelNG::SetInputCount(frameNode, count);
     }
+    TextTimerModelNG::SetStartTime(frameNode, startTime);
 }
 
 void SetTextTimerOnTimer(ArkUINodeHandle node, void* callback)

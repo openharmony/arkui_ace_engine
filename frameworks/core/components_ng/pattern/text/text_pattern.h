@@ -176,7 +176,6 @@ public:
     {
         return { FocusType::NODE, false };
     }
-
     void DumpAdvanceInfo() override;
 
     void DumpInfo() override;
@@ -509,6 +508,7 @@ public:
     ACE_FORCE_EXPORT OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
+    bool ParseCommand(const std::string& command);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -539,11 +539,6 @@ public:
     bool GetContChange() const
     {
         return contChange_;
-    }
-
-    bool GetHasStart() const
-    {
-        return hasStart_;
     }
 
     bool GetShowSelect() const
@@ -640,8 +635,9 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     bool IsShowMenu(MenuPolicy options, bool defaultValue);
-    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
-    void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true, bool isReplace = false);
+    void SetStyledStringMultiThread(const RefPtr<SpanString>& value,
+        bool closeSelectOverlay = true, bool isReplace = false);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
@@ -1023,6 +1019,10 @@ public:
     {
         return isMeasured_;
     }
+    ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
+
+    bool GetFallbackLineSpacingStyleOptimizeFlag();
+    void SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1222,6 +1222,9 @@ protected:
     bool IsSupportAskCelia();
 
 private:
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+        const std::string& value, int32_t start, int32_t end);
+    bool ReportCommandResult(int32_t nodeId, const std::string& event);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
@@ -1347,7 +1350,6 @@ private:
     bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
-    bool hasStart_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;

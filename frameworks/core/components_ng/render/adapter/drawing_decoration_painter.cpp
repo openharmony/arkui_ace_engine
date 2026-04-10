@@ -46,9 +46,11 @@ class GradientShader {
 public:
     struct ColorStop {
         RSColorQuad color { RSColor::COLOR_TRANSPARENT };
+        RSUIColor colorFloat;
         float offset { 0.0f };
         bool hasValue { false };
         bool isLength { false };
+        bool useFloat { false };
         ColorSpace colorSpace { ColorSpace::SRGB };
     };
 
@@ -56,8 +58,16 @@ public:
     {
         for (auto& stop : gradient.GetColors()) {
             ColorStop colorStop;
-            colorStop.color = stop.GetColor().GetValue();
-            colorStop.colorSpace = stop.GetColor().GetColorSpace();
+            auto curColor = stop.GetColor();
+            if (curColor.GetHeadRoomColor().has_value()) {
+                auto colorFloat = curColor.GetHeadRoomColor().value();
+                colorStop.colorFloat = RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue,
+                    colorFloat.alpha, colorFloat.headRoom);
+                colorStop.useFloat = true;
+            } else {
+                colorStop.color = curColor.GetValue();
+            }
+            colorStop.colorSpace = curColor.GetColorSpace();
             colorStop.hasValue = stop.GetHasValue();
             if (colorStop.hasValue) {
                 colorStop.isLength = stop.GetDimension().Unit() != DimensionUnit::PERCENT;
@@ -219,6 +229,27 @@ protected:
         if (pos.back() < 1.0f) {
             pos.push_back(1.0f);
             color4fs.push_back(color4fs.back());
+        }
+    }
+
+    void ToRsUIColorVector(std::vector<RSScalar>& pos, std::vector<RSUIColor>& uiColors)
+    {
+        if (colorStops_.empty()) {
+            pos.push_back(0.0f);
+            uiColors.push_back(RSUIColor(0.f, 0.f, 0.f, 1.f));
+        } else if (colorStops_.front().offset > 0.0f) {
+            pos.push_back(0.0f);
+            uiColors.push_back(colorStops_.front().colorFloat);
+        }
+
+        for (const auto& stop : colorStops_) {
+            pos.push_back(stop.offset);
+            uiColors.push_back(stop.colorFloat);
+        }
+
+        if (pos.back() < 1.0f) {
+            pos.push_back(1.0f);
+            uiColors.push_back(uiColors.back());
         }
     }
 
@@ -628,22 +659,32 @@ public:
             matrix.Rotate(rotation_, center_.GetX(), center_.GetY());
         }
 
-        std::vector<RSScalar> pos;
-        std::vector<RSColor4f> color4fs;
         std::shared_ptr<RSColorSpace> colorSpace = RSColorSpace::CreateSRGB();
         if (!colorStops_.empty()) {
             if (ColorSpace::DISPLAY_P3 == colorStops_.back().colorSpace) {
                 colorSpace = RSColorSpace::CreateRGB(
                     Rosen::Drawing::CMSTransferFuncType::SRGB, Rosen::Drawing::CMSMatrixType::DCIP3);
+            } else if (ColorSpace::BT2020 == colorStops_.back().colorSpace) {
+                colorSpace = RSColorSpace::CreateRGB(
+                    Rosen::Drawing::CMSTransferFuncType::SRGB, Rosen::Drawing::CMSMatrixType::REC2020);
             }
         }
-        ToRSColor4fVector(pos, color4fs);
         RSTileMode tileMode = RSTileMode::CLAMP;
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(
-            center_, color4fs, colorSpace, pos, tileMode, startAngle_, endAngle_, &matrix);
+        std::vector<RSScalar> pos;
+        if (!colorStops_.empty() && colorStops_.front().useFloat) {
+            std::vector<RSUIColor> uiColors;
+            ToRsUIColorVector(pos, uiColors);
+            return RSRecordingShaderEffect::CreateSweepGradient(
+                center_, uiColors, colorSpace, pos, tileMode, startAngle_, endAngle_, &matrix);
+        } else {
+            std::vector<RSColor4f> color4fs;
+            ToRSColor4fVector(pos, color4fs);
+            return RSRecordingShaderEffect::CreateSweepGradient(
+                center_, color4fs, colorSpace, pos, tileMode, startAngle_, endAngle_, &matrix);
+        }
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)

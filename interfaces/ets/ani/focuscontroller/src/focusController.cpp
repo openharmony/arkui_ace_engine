@@ -22,7 +22,6 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/common/container.h"
 #include "frameworks/base/error/error_code.h"
 
 namespace {
@@ -49,11 +48,11 @@ ani_object WrapStsError(ani_env* env, const std::string& msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass failed %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &method)) !=
         ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Class_FindMethod failed %{public}d", status);
         return nullptr;
@@ -74,7 +73,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{std.core.Error}:", &ctor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }

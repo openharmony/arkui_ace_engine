@@ -25,6 +25,7 @@
 #include "base/utils/layout_break_point.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/common/event_manager.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -37,6 +38,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/event/focus_axis_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -119,6 +121,26 @@ enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
+int32_t NormalizeExpectedUpdateInterval(double expectedUpdateInterval)
+{
+    constexpr int32_t EXPECTED_UPDATE_INTERVAL_MAX = std::numeric_limits<int32_t>::max();
+    if (std::isnan(expectedUpdateInterval)) {
+        return DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    if (std::isinf(expectedUpdateInterval)) {
+        return expectedUpdateInterval > 0 ? EXPECTED_UPDATE_INTERVAL_MAX : DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    if (expectedUpdateInterval > static_cast<double>(EXPECTED_UPDATE_INTERVAL_MAX)) {
+        return EXPECTED_UPDATE_INTERVAL_MAX;
+    }
+
+    auto normalizedInterval = static_cast<int32_t>(expectedUpdateInterval);
+    if (normalizedInterval < 0) {
+        return DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
+    return normalizedInterval;
+}
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -182,7 +204,20 @@ void ParseGradientColorStopsWithColorSpace(const EcmaVM *vm, const Local<JSValue
                 hasDimension = true;
             }
         }
-        colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        if (color.GetHeadRoomColor().has_value()) {
+            // use float color
+            colors.push_back({.i32 = static_cast<ArkUI_Int32>(true)});
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.red)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.green)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha)});
+            colors.push_back({.f32 = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)});
+        } else {
+            // use rgb color
+            colors.push_back({.i32 = static_cast<ArkUI_Int32>(false)});
+            colors.push_back({.u32 = static_cast<ArkUI_Uint32>(color.GetValue())});
+        }
         colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
         colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
     }
@@ -3100,7 +3135,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
         ParseGradientColorStopsWithColorSpace(vm, metricsColorsArg, colors, colorSpace);
     } else {
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+        ArkTSUtils::ParseGradientColorStopsWithFloatColor(vm, colorsArg, colors, vectorResObj, nodeInfo);
     }
     if (!colorSpace.has_value()) {
         colorSpace = ColorSpace::SRGB;
@@ -3108,7 +3143,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     auto resRawPtr = static_cast<void*>(&vectorResObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
+    GetArkUINodeModifiers()->getCommonModifier()->setSweepGradientForHDR(nativeNode, values.data(), values.size(),
         colors.data(), colors.size(), colorSpace.value(), resRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -9686,6 +9721,42 @@ ArkUINativeModuleValue CommonBridge::SetOnAreaChange(ArkUIRuntimeCallInfo* runti
         function->Call(vm, function.ToLocal(), params, 2);
     };
     NG::ViewAbstract::SetOnAreaChanged(frameNode, std::move(onAreaChange));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnAreaChangeWithInterval(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    int32_t minInterval = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (thirdArg->IsNumber()) {
+        minInterval = NormalizeExpectedUpdateInterval(thirdArg->ToNumber(vm)->Value());
+    }
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onAreaChange = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                            node = AceType::WeakClaim(frameNode), containerId](
+                            const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
+        auto area = CreateAreaObject(vm, rect, origin);
+        panda::Local<panda::JSValueRef> params[2] = { oldArea, area };
+        function->Call(vm, function.ToLocal(), params, 2);
+    };
+    NG::ViewAbstract::SetOnAreaChangedWithInterval(frameNode, std::move(onAreaChange), minInterval);
     return panda::JSValueRef::Undefined(vm);
 }
 

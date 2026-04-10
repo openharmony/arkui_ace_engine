@@ -311,6 +311,9 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
 public:
     TextFieldPattern();
     ~TextFieldPattern() override;
+    bool ParseCommand(const std::string& command);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+        int32_t end);
 
     int32_t GetInstanceId() const override
     {
@@ -1060,6 +1063,7 @@ public:
     void HandleBlurEvent();
     bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
     void HandleFocusEvent();
+    void CheckAndUpdateInputTypeForOTP();
     void SetFocusStyle();
     void ClearFocusStyle();
     void ProcessFocusStyle();
@@ -1073,6 +1077,13 @@ public:
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
+    void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
+    void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
+    std::pair<std::unique_ptr<JsonValue>, std::string> ParseBaseJson(const std::string& command);
+    bool HandleTextModifyCommand(int32_t nodeId, const std::unique_ptr<JsonValue>& params, const std::string& cmd);
+    bool CheckAndGetSelectParams(const std::unique_ptr<JsonValue>& json, int32_t* start, int32_t* end);
+    void HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode);
+    bool ReportCommandResult(int32_t nodeId, const std::string& event);
 
     bool CheckAttachInput();
     void HandleSelectionUp();
@@ -1397,6 +1408,7 @@ public:
     bool IsShowPasswordIcon() const;
     std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
+    bool IsOneTimeCodeType() const;
     bool IsShowCancelButtonMode() const;
     bool IsShowVoiceButtonMode() const;
     void CheckPasswordAreaState();
@@ -2010,8 +2022,12 @@ protected:
     bool selectDetectEnabled_ = true;
 
 private:
-    bool ParseCommand(const std::string& command);
+    void ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position);
+    void ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frameNode);
+    bool HandleSelectTextCommand(int32_t start, int32_t end);
     void HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params);
+    void HandleLongPressSelectionAndReport(GestureEvent& info, const Offset& localOffset, int32_t start, int32_t end);
+    bool HandleSetCaretPositionCommand(int32_t position, int32_t hostId);
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
@@ -2258,6 +2274,9 @@ private:
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
+    void ProcessMagnifierInBlurEvent();
+    void ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection);
+    void ProcessCaretIndexInBlurEvent(bool shouldKeepSelection);
 
     void TwinklingByFocus();
 
@@ -2269,7 +2288,7 @@ private:
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
-    void ReportEvent();
+    void ReportEvents();
     void ReportTextChangeEvent(const std::string& eventType);
     void ResetPreviewTextState();
     void CalculateBoundsRect();
@@ -2334,6 +2353,8 @@ private:
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
     void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
+    bool QuerySmartEdgeState();
+    bool ShouldKeepSelectionOnWindowBlur();
 
     RectF frameRect_;
     RectF textRect_;

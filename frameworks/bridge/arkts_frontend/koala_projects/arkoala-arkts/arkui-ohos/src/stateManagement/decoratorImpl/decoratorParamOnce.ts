@@ -19,11 +19,17 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
 export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IParamOnceDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param @Once', owningView, varName);
-        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        if (isDynamicObject(initValue)) {
+            initValue = getV2ObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropV2DecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
 
         // Register the relationship between this ParamOnce variable and the observed object it uses
         this.registerToObservedObject(initValue);
@@ -46,7 +52,9 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase<T> im
         if (value === newValue) {
             return;
         }
-        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+        const processedNewValue = isDynamicObject(newValue)
+            ? getV2ObservedObject(newValue)
+            : (uiUtils.autoProxyObject(newValue) as T);
 
         // Update ObservedObjectRegistry registration before setting the new value
         this.updateObservedObjectRegistration(value, processedNewValue);

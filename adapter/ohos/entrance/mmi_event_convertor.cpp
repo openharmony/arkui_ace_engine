@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -787,6 +788,7 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetPointerEvent(pointerEvent);
     touchEvt.convertInfo.first = UIInputEventType::AXIS;
     touchEvt.convertInfo.second = UIInputEventType::TOUCH;
+    touchEvt.primitiveSourceTool = GetSourceTool(pointerItem.GetToolType());
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
 }

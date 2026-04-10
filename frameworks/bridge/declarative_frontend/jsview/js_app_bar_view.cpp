@@ -20,10 +20,12 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -36,9 +38,11 @@ const std::string EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_di
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL = "arkui_custom_app_bar_create_service_panel";
 const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED = "arkui_app_bar_on_back_pressed";
 const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED = "arkui_app_bar_on_back_pressed_consumed";
+const std::string EVENT_NAME_CUSTOM_APP_BAR_THIRD_CLOSE = "arkui_custom_app_bar_third_close";
 
 constexpr int32_t SERVICE_PANEL_PARAM_COUNT = 2;
 constexpr int32_t PARAM_FIRST = 1;
+constexpr int32_t PARAM_ERROR = -1;
 
 static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> nativeFucMap_;
 } // namespace
@@ -46,11 +50,32 @@ static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> na
 void JSAppBar::OnMenuClick(const JSCallbackInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar OnMenuClick");
+    if (info.Length() < SERVICE_PANEL_PARAM_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnMenuClick param erro");
+        return;
+    }
+    if (!info[PARAM_FIRST]->IsObject()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnMenuClick last param erro");
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(info[PARAM_FIRST]);
+    auto jsParams = jsObject->GetProperty("params");
+    if (!jsParams->IsArray()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar GetStringValueFromJSObject jsParams is error");
+        return;
+    }
+    JSRef<JSArray> jsParamsArray = JSRef<JSArray>::Cast(jsParams);
+    std::map<std::string, std::string> params;
+    GetParamsFromJSArray(jsParamsArray, params);
+    if (params.empty()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar GetStringValueFromJSObject paramsMap param is error");
+        return;
+    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
-    appBar->OnMenuClick();
+    appBar->OnMenuClick(params);
 }
 
 void JSAppBar::OnCloseClick(const JSCallbackInfo& info)
@@ -167,6 +192,30 @@ void JSAppBar::GetParamsFromJSArray(const JSRef<JSArray>& jsArray, std::map<std:
     }
 }
 
+void JSAppBar::OnThirdClickCloseEvent(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar OnThirdClickCloseEvent");
+    if (info.Length() < SERVICE_PANEL_PARAM_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent param erro");
+        return;
+    }
+    std::string codeStr;
+    if (!ParseJsString(info[PARAM_FIRST], codeStr)) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent code param erro");
+        return;
+    }
+    int32_t code = StringUtils::StringToInt(codeStr, PARAM_ERROR);
+    if (code == PARAM_ERROR) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar OnThirdClickCloseEvent code param is not a valid integer");
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->OnThirdCloseEvent(code);
+}
+
 void JSAppBar::CallNative(const JSCallbackInfo& info)
 {
     nativeFucMap_ = {
@@ -177,6 +226,7 @@ void JSAppBar::CallNative(const JSCallbackInfo& info)
         { EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL, JSAppBar::OnCreateServicePanel },
         { EVENT_NAME_APP_BAR_ON_BACK_PRESSED, JSAppBar::RequestAtomicServiceTerminate },
         { EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED, JSAppBar::SetOnBackPressedConsumed },
+         { EVENT_NAME_CUSTOM_APP_BAR_THIRD_CLOSE, JSAppBar::OnThirdClickCloseEvent },
     };
 
     if (info.Length() < 1) {

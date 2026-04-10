@@ -86,6 +86,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
     if (textPickerNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -256,6 +257,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     textPickerPattern->SetPickerTag(false);
     textPickerPattern->SetTextProperties(settingData.properties);
     auto context = textPickerNode->GetContext();
@@ -983,6 +985,7 @@ void TextPickerDialogView::SetSelectedBackgroundStyle(const RefPtr<PickerTheme>&
         pickerBgStyle.color.value_or(pickerTheme->GetSelectedBackgroundColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
         pickerBgStyle.borderRadius.value_or(pickerTheme->GetSelectedBorderRadius()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColorSetByUser, true);
 }
 
 void TextPickerDialogView::SetTextProperties(

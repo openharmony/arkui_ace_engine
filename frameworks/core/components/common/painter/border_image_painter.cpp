@@ -15,6 +15,8 @@
 
 #include "core/components/common/painter/border_image_painter.h"
 
+#include "base/log/log_wrapper.h"
+
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
 #endif

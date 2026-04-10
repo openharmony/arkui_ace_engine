@@ -25,8 +25,7 @@ void RenderContext::RequestNextFrameMultiThread(bool isOffScreenNode) const
     }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
-    auto requestFrame = requestFrame_;
-    node->PostAfterAttachMainTreeTask([requestFrame, isOffScreenNode]() {
+    node->PostAfterAttachMainTreeTask([requestFrame = requestFrame_, isOffScreenNode]() {
         if (requestFrame) {
             requestFrame(isOffScreenNode);
         }

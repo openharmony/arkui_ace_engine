@@ -25,6 +25,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/arc_list/arc_list_item_layout_property.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -126,16 +127,18 @@ void ArcListItemPattern::InitDisableEvent()
     auto theme = pipeline->GetTheme<ArcListItemTheme>();
     CHECK_NULL_VOID(theme);
     auto userDefineOpacity = renderContext->GetOpacityValue(1.0);
+    auto disabledOpacity = theme->GetItemDisabledAlpha();
 
     if (!eventHub->IsDeveloperEnabled()) {
-        enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
-    } else {
-        if (enableOpacity_.has_value()) {
-            renderContext->UpdateOpacity(enableOpacity_.value());
-        } else {
-            renderContext->UpdateOpacity(userDefineOpacity);
+        if (!NearEqual(userDefineOpacity, disabledOpacity)) {
+            enableOpacity_ = userDefineOpacity;
+            renderContext->UpdateOpacity(disabledOpacity);
         }
+    } else {
+        if (enableOpacity_.has_value() && NearEqual(userDefineOpacity, disabledOpacity)) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        }
+        enableOpacity_.reset();
     }
 }
 

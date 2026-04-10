@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"

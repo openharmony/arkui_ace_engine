@@ -33,5 +33,9 @@ add_library(
     image/image_matrix.h
     image/image_matrix.cpp
     ui_node/image_node.cpp
+    image/image_transform.h
+    image/image_transform.cpp
+    image/image_effect.h
+    image/image_effect.cpp
 )
 target_link_libraries(entry PUBLIC libace_napi.z.so libhilog_ndk.z.so libnative_drawing.so)

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/node_render_status_monitor.h"
 
+#include "base/log/ace_trace.h"
 #include "ui/base/utils/utils.h"
 
 #include "core/components_ng/base/frame_node.h"

@@ -19,13 +19,10 @@
 #include <optional>
 
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_accessibility_property.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonPattern : public ButtonPattern {

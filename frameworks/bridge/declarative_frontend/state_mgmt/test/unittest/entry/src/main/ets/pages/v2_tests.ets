@@ -63,7 +63,7 @@ struct Parent {
       TestRunner.bind(this)(new SyncMonitorTestsV2('V2_syncmonitor'));
       TestRunner.bind(this)(new ObserveTestsV2('V2_observe'));
       TestRunner.bind(this)(new RecycleTestsV2('V2_recycle'));
-      TestRunner.bind(this)(new PersistenceV2TestsV2('V2_PersistenceV2TestsV2'));
+      TestRunner.bind(this)(new PersistenceV2TestsV2('V2_persistenceV2'));
       TestRunner.bind(this)(new PuLifecycleTestsV2('V2_puLifecycle'));
       TestRunner.bind(this)(new Puv2ViewBaseTestsV2('V2_puv2ViewBase'));
       TestRunner.bind(this)(new Puv2ViewBuildNodeBaseTestsV2('V2_puv2ViewBuildNodeBase'));

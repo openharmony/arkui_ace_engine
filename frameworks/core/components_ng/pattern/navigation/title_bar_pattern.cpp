@@ -22,6 +22,8 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -570,6 +572,7 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     auto maxLines = hasSubTitle ? 1 : TITLEBAR_MAX_LINES;
     titleLayoutProperty->UpdateMaxLines(maxLines);
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
+    NavigationTitleUtil::InitTextProperty(titleLayoutProperty);
 
     if (!parentIsNavDest) {
         titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
@@ -641,6 +644,7 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     titleLayoutProperty->UpdateFontSize(subTitleSize);
     titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    NavigationTitleUtil::InitTextProperty(titleLayoutProperty);
     SetTextColor(textNode, color);
 }
 

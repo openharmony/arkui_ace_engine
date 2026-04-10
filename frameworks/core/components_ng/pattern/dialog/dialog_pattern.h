@@ -27,7 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
@@ -373,6 +373,18 @@ public:
         refreshOnWindowShow_ = refreshOnWindowShow;
     }
 
+    void SetDialogThemeNode(const RefPtr<UINode>& themeNode)
+    {
+        dialogThemeNode_ = themeNode;
+    }
+
+    void UpdateDialogTheme();
+
+    RefPtr<DialogTheme> GetDialogTheme() const
+    {
+        return dialogTheme_;
+    }
+
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
 
@@ -381,6 +393,8 @@ public:
         return extraMaskNode_;
     }
     RefPtr<FrameNode> GetMaskNode();
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     bool AvoidKeyboard() const override
@@ -478,6 +492,7 @@ private:
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
     void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
+    Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode);
     bool InvertShadowColor();
     void OnWindowShow() override;
     void ReportActionSheetOnInjectionEvent(bool result,
@@ -497,6 +512,7 @@ private:
     int32_t HandleActionMenuButtonClickCmd(const std::unique_ptr<JsonValue>& json);
     void ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text);
     RefPtr<DialogTheme> dialogTheme_;
+    RefPtr<UINode> dialogThemeNode_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
 

@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/property/property.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
 

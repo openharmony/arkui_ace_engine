@@ -289,6 +289,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const retval = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: EventTarget = EventTarget_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTarget_serialize(target: EventTarget): void {
@@ -320,6 +321,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisHorizontal_serialize(axisHorizontal: double | undefined): void {
@@ -343,6 +345,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisVertical_serialize(axisVertical: double | undefined): void {
@@ -387,6 +390,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRollAngle_serialize(rollAngle: double | undefined): void {
@@ -429,6 +433,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDeviceId_serialize(deviceId: int32 | undefined): void {
@@ -452,6 +457,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTargetDisplayId_serialize(targetDisplayId: int32 | undefined): void {
@@ -475,6 +481,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisPinch_serialize(axisPinch: double | undefined): void {
@@ -692,6 +699,7 @@ export class DismissSheetActionInternal implements MaterializedBase,DismissSheet
 export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
+    autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     getDisplayX(): double
     getDisplayY(): double
@@ -723,11 +731,13 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     public dragBehavior: DragBehavior
     public useCustomDropAnimation: boolean
+    public autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
     public getModifierKeyState?: ModifierKeyStateGetter | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DragEventInternal.getFinalizer())
         this.dragBehavior = this.getDragBehavior()
         this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
         this.getModifierKeyState = this.getGetModifierKeyState()
     }
     constructor() {
@@ -834,6 +844,14 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setUseCustomDropAnimation_serialize(useCustomDropAnimation_casted)
         return
     }
+    private getAutoHideComponentUniqueIds(): int32 | Array<int32> | undefined {
+        return this.getAutoHideComponentUniqueIds_serialize()
+    }
+    private setAutoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
+        const autoHideComponentUniqueIds_casted = autoHideComponentUniqueIds as (int32 | Array<int32> | undefined)
+        this.setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds_casted)
+        return
+    }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
         return hookDragEventGetModifierKeyState(this)
     }
@@ -870,6 +888,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             buffer = (unifiedDataChannel_UnifiedData_serializer.read(retvalDeserializer) as unifiedDataChannel.UnifiedData)
         }
         const returnResult: UnifiedData | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
@@ -883,6 +902,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Rectangle = Rectangle_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getVelocityX_serialize(): double {
@@ -911,6 +931,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getDragSource(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private isRemote_serialize(): boolean {
@@ -938,6 +959,63 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private setUseCustomDropAnimation_serialize(useCustomDropAnimation: boolean): void {
         ArkUIGeneratedNativeModule._DragEvent_setUseCustomDropAnimation(this.peer!.ptr, useCustomDropAnimation ? true : false)
+    }
+    private getAutoHideComponentUniqueIds_serialize(): int32 | Array<int32> | undefined {
+        const retval = ArkUIGeneratedNativeModule._DragEvent_getAutoHideComponentUniqueIds(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: int32 | Array<int32> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptUnionSelector: int32 = retvalDeserializer.readInt8()
+            let bufferOpt: int32 | Array<int32> | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = retvalDeserializer.readInt32()
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                const bufferOptBufULength: int32 = retvalDeserializer.readInt32()
+                const bufferOptBufU: Array<int32> = new Array<int32>(bufferOptBufULength, (arg0: int32):int32 => {
+            return retvalDeserializer.readInt32();
+        })
+                bufferOpt = bufferOptBufU
+            } else {
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
+            }
+            buffer = (bufferOpt as int32 | Array<int32>)
+        }
+        const returnResult: int32 | Array<int32> | undefined = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
+    private setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (autoHideComponentUniqueIds !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const autoHideComponentUniqueIdsTmpValue = autoHideComponentUniqueIds!
+            if (autoHideComponentUniqueIdsTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const autoHideComponentUniqueIdsTmpValueForIdx0 = autoHideComponentUniqueIdsTmpValue as int32
+                thisSerializer.writeInt32(autoHideComponentUniqueIdsTmpValueForIdx0)
+            } else if (autoHideComponentUniqueIdsTmpValue instanceof Array) {
+                if (autoHideComponentUniqueIdsTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const autoHideComponentUniqueIdsTmpValueElem = autoHideComponentUniqueIdsTmpValue[0]
+                    if (autoHideComponentUniqueIdsTmpValueElem instanceof int32) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const autoHideComponentUniqueIdsTmpValueForIdx1 = autoHideComponentUniqueIdsTmpValue as Array<int32>
+                        thisSerializer.writeInt32((autoHideComponentUniqueIdsTmpValueForIdx1.length).toInt())
+                        for (let autoHideComponentUniqueIdsTmpValueForIdx1CounterI = 0; autoHideComponentUniqueIdsTmpValueForIdx1CounterI < autoHideComponentUniqueIdsTmpValueForIdx1.length; autoHideComponentUniqueIdsTmpValueForIdx1CounterI++) {
+                            const autoHideComponentUniqueIdsTmpValueForIdx1TmpElement: int32 = autoHideComponentUniqueIdsTmpValueForIdx1[autoHideComponentUniqueIdsTmpValueForIdx1CounterI]
+                            thisSerializer.writeInt32(autoHideComponentUniqueIdsTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DragEvent_setAutoHideComponentUniqueIds(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private setGetModifierKeyState_serialize(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1157,6 +1235,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const retval = ArkUIGeneratedNativeModule._KeyEvent_getKeyText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setKeyText_serialize(keyText: string): void {
@@ -1218,6 +1297,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readInt64()
         }
         const returnResult: int64 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUnicode_serialize(unicode: int64 | undefined): void {
@@ -1241,6 +1321,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsNumLockOn_serialize(isNumLockOn: boolean | undefined): void {
@@ -1264,6 +1345,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsCapsLockOn_serialize(isCapsLockOn: boolean | undefined): void {
@@ -1287,6 +1369,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIsScrollLockOn_serialize(isScrollLockOn: boolean | undefined): void {
@@ -1388,6 +1471,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1399,6 +1483,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1410,12 +1495,14 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMeasureResult_serialize(): MeasureResult {
         const retval = ArkUIGeneratedNativeModule._Layoutable_getMeasureResult(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: MeasureResult = MeasureResult_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setMeasureResult_serialize(measureResult: MeasureResult): void {
@@ -1433,6 +1520,7 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUniqueId_serialize(uniqueId: int32 | undefined): void {
@@ -1569,6 +1657,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = MeasureResult_serializer.read(retvalDeserializer)
         }
         const returnResult: MeasureResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMargin_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1580,6 +1669,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1591,6 +1681,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT<double> | undefined {
@@ -1602,6 +1693,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = DirectionalEdgesT_F64_serializer.read(retvalDeserializer)
         }
         const returnResult: DirectionalEdgesT<double> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getUniqueId_serialize(): int32 | undefined {
@@ -1613,6 +1705,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setUniqueId_serialize(uniqueId: int32 | undefined): void {
@@ -1931,6 +2024,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = CaretOffset_serializer.read(retvalDeserializer)
         }
         const returnResult: CaretOffset | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextContentRect_serialize(): RectResult | undefined {
@@ -1942,6 +2036,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = RectResult_serializer.read(retvalDeserializer)
         }
         const returnResult: RectResult | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextContentLineCount_serialize(): int32 | undefined {
@@ -1953,6 +2048,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
@@ -1973,6 +2069,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setStyledPlaceholder_serialize(styledString: StyledString): void {
@@ -1999,6 +2096,7 @@ export class TextContentControllerBase implements MaterializedBase {
             buffer = TextRange_serializer.read(retvalDeserializer)
         }
         const returnResult: TextRange | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private clearPreviewText_serialize(): void {
@@ -2019,9 +2117,10 @@ export class TextContentControllerBase implements MaterializedBase {
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
         let buffer: string | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readString() as string)
+            buffer = retvalDeserializer.readString()
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private deleteBackward_serialize(): void {
@@ -3954,7 +4053,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAreaChangeAttribute(value: ((oldValue: Area,newValue: Area) => void) | undefined): void {
+    setOnAreaChange0Attribute(value: ((oldValue: Area,newValue: Area) => void) | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3963,7 +4062,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVisibilityAttribute(value: Visibility | undefined): void {
@@ -4332,6 +4431,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setOnPreDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setToolbarAttribute(value: CustomBuilder | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setToolbar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLinearGradientAttribute(value: LinearGradientOptions | undefined): void {
@@ -6062,12 +6173,25 @@ export class ArkCommonMethodPeer extends PeerNode {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (moduleName !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const moduleNameTmpValue  = moduleName!
+            const moduleNameTmpValue = moduleName!
             thisSerializer.writeString(moduleNameTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(event)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -6557,6 +6681,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableScrollWithMouseAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setEnableScrollWithMouse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnReachStartAttribute(value: (() => void) | undefined): void {
@@ -7107,6 +7243,10 @@ export enum ThemeColorMode {
     LIGHT = 1,
     DARK = 2
 }
+export enum AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1
+}
 export enum AdaptiveColor {
     DEFAULT = 0,
     AVERAGE = 1
@@ -7225,6 +7365,17 @@ export interface BorderImageOption {
     width?: Length | EdgeWidths | LocalizedEdgeWidths;
     outset?: Length | EdgeWidths | LocalizedEdgeWidths;
     fill?: boolean;
+}
+export interface MouseHistoricalPoint {
+    x: double;
+    y: double;
+    displayX: double;
+    displayY: double;
+    windowX: double;
+    windowY: double;
+    globalDisplayX: double;
+    globalDisplayY: double;
+    timestamp: int64;
 }
 export interface TouchObject {
     type: TouchType;
@@ -7470,6 +7621,7 @@ export interface PopupCommonOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onDidDisappear?: VoidCallback;
     onWillDisappear?: VoidCallback;
@@ -7523,6 +7675,7 @@ export interface PopupOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onWillDisappear?: VoidCallback;
     onDidAppear?: VoidCallback;
@@ -7559,6 +7712,7 @@ export interface CustomPopupOptions {
     borderWidth?: Dimension;
     outlineLinearGradient?: PopupBorderLinearGradient;
     borderLinearGradient?: PopupBorderLinearGradient;
+    colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
     onDidAppear?: VoidCallback;
     onWillDisappear?: VoidCallback;
@@ -9174,6 +9328,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onPreDrag')
     }
+    toolbar(value: CustomBuilder | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.toolbar(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'toolbar' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method toolbar')
+    }
     linearGradient(value: LinearGradientOptions | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10326,6 +10492,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
     }
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method onAreaChange')
+    }
     applyAttributesFinish(): void {
     }
 }
@@ -10487,6 +10665,9 @@ export interface ScrollableCommonMethod extends CommonMethod {
     onDidStopFling(value: VoidCallback | undefined): this {
         throw new Error('Unimplemented method onDidStopFling')
     }
+    enableScrollWithMouse(value: boolean | undefined): this {
+        throw new Error('Unimplemented method enableScrollWithMouse')
+    }
     onReachStart(value: (() => void) | undefined): this {
         throw new Error('Unimplemented method onReachStart')
     }
@@ -10527,6 +10708,7 @@ export type OnWillStopDraggingCallback = (velocity: double) => void;
 export type OnDidStopDraggingCallback = (willFling: boolean) => void;
 export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
 export type OnGetPreviewBadgeCallback = () => boolean | int32;
+export type OnVisibleIndexesChangeCallback = (start: int32, end: int32) => void;
 export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
     onLongPress?: Callback<int32, void>;
@@ -10616,6 +10798,10 @@ export interface Bindable<T> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
+export interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
+export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -11095,7 +11281,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
         const value_casted = value as (((oldValue: Area,newValue: Area) => void) | undefined)
-        this.getPeer()?.setOnAreaChangeAttribute(value_casted)
+        this.getPeer()?.setOnAreaChange0Attribute(value_casted)
         return this
     }
     public visibility(value: Visibility | undefined): this {
@@ -11230,6 +11416,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onPreDrag(value: Callback<PreDragStatus, void> | undefined): this {
         const value_casted = value as (Callback<PreDragStatus, void> | undefined)
         this.getPeer()?.setOnPreDragAttribute(value_casted)
+        return this
+    }
+    public toolbar(value: CustomBuilder | undefined): this {
+        const value_casted = value as (CustomBuilder | undefined)
+        this.getPeer()?.setToolbarAttribute(value_casted)
         return this
     }
     public linearGradient(value: LinearGradientOptions | undefined): this {
@@ -11762,6 +11953,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const event_casted = event as (AreaChangeCallback)
+        const options_casted = options as (AreaChangeOptions | undefined)
+        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookCommonMethodAttributeModifier(this, value);
@@ -11931,6 +12128,11 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onDidStopFling(value: VoidCallback | undefined): this {
         const value_casted = value as (VoidCallback | undefined)
         this.getPeer()?.setOnDidStopFlingAttribute(value_casted)
+        return this
+    }
+    public enableScrollWithMouse(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableScrollWithMouseAttribute(value_casted)
         return this
     }
     public onReachStart(value: (() => void) | undefined): this {
@@ -12243,6 +12445,43 @@ export class MouseEvent_serializer {
         return MouseEventInternal.fromPtr(ptr)
     }
 }
+export class MouseHistoricalPoint_serializer {
+    public static write(buffer: SerializerBase, value: MouseHistoricalPoint): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForX = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+        const valueHolderForDisplayX = value.displayX
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
+        const valueHolderForDisplayY = value.displayY
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
+        const valueHolderForWindowX = value.windowX
+        valueSerializer.writeFloat64(valueHolderForWindowX)
+        const valueHolderForWindowY = value.windowY
+        valueSerializer.writeFloat64(valueHolderForWindowY)
+        const valueHolderForGlobalDisplayX = value.globalDisplayX
+        valueSerializer.writeFloat64(valueHolderForGlobalDisplayX)
+        const valueHolderForGlobalDisplayY = value.globalDisplayY
+        valueSerializer.writeFloat64(valueHolderForGlobalDisplayY)
+        const valueHolderForTimestamp = value.timestamp
+        valueSerializer.writeInt64(valueHolderForTimestamp)
+    }
+    public static read(buffer: DeserializerBase): MouseHistoricalPoint {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        const displayXTmpResult: double = valueDeserializer.readFloat64()
+        const displayYTmpResult: double = valueDeserializer.readFloat64()
+        const windowXTmpResult: double = valueDeserializer.readFloat64()
+        const windowYTmpResult: double = valueDeserializer.readFloat64()
+        const globalDisplayXTmpResult: double = valueDeserializer.readFloat64()
+        const globalDisplayYTmpResult: double = valueDeserializer.readFloat64()
+        const timestampTmpResult: int64 = valueDeserializer.readInt64()
+        let value: MouseHistoricalPoint = ({x: xTmpResult, y: yTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult, timestamp: timestampTmpResult} as MouseHistoricalPoint)
+        return value
+    }
+}
 export class NestedScrollOptions_serializer {
     public static write(buffer: SerializerBase, value: NestedScrollOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -12456,6 +12695,30 @@ export class VerticalAlignParam_serializer {
         const anchorTmpResult: string = (valueDeserializer.readString() as string)
         const alignTmpResult: VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
         let value: VerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as VerticalAlignParam)
+        return value
+    }
+}
+export class AreaChangeOptions_serializer {
+    public static write(buffer: SerializerBase, value: AreaChangeOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForExpectedUpdateInterval = value.expectedUpdateInterval
+        if (valueHolderForExpectedUpdateInterval !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForExpectedUpdateIntervalTmpValue = valueHolderForExpectedUpdateInterval!
+            valueSerializer.writeInt32(valueHolderForExpectedUpdateIntervalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AreaChangeOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const expectedUpdateIntervalTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let expectedUpdateIntervalTmpBuf: int32 | undefined = undefined
+        if ((expectedUpdateIntervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
+        }
+        const expectedUpdateIntervalTmpResult: int32 | undefined = expectedUpdateIntervalTmpBuf
+        let value: AreaChangeOptions = ({expectedUpdateInterval: expectedUpdateIntervalTmpResult} as AreaChangeOptions)
         return value
     }
 }
@@ -20252,6 +20515,14 @@ export class CustomPopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSystemMaterial = value.systemMaterial
         if (valueHolderForSystemMaterial !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -20633,6 +20904,12 @@ export class CustomPopupOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -20715,7 +20992,7 @@ export class CustomPopupOptions_serializer {
             onWillAppearTmpBuf = onWillAppearTmpBufOptClosure
         }
         const onWillAppearTmpResult: VoidCallback | undefined = onWillAppearTmpBuf
-        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
+        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
         return value
     }
 }
@@ -22458,6 +22735,14 @@ export class PopupCommonOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSystemMaterial = value.systemMaterial
         if (valueHolderForSystemMaterial !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -22819,6 +23104,12 @@ export class PopupCommonOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -22901,7 +23192,7 @@ export class PopupCommonOptions_serializer {
             onDidAppearTmpBuf = onDidAppearTmpBufOptClosure
         }
         const onDidAppearTmpResult: VoidCallback | undefined = onDidAppearTmpBuf
-        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
+        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
         return value
     }
 }
@@ -24537,7 +24828,7 @@ export class PopupOptions_serializer {
                 global_resource_Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
             } else if (valueHolderForPopupColorTmpValue instanceof int64) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForPopupColorTmpValueForIdx3 = valueHolderForPopupColorTmpValue as int64
+                const valueHolderForPopupColorTmpValueForIdx3 = valueHolderForPopupColorTmpValue
                 valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {
@@ -24772,6 +25063,14 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderLinearGradientTmpValue = valueHolderForBorderLinearGradient!
             PopupBorderLinearGradient_serializer.write(valueSerializer, valueHolderForBorderLinearGradientTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColorMode = value.colorMode
+        if (valueHolderForColorMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorModeTmpValue = (valueHolderForColorMode as AnchoredColorMode)
+            valueSerializer.writeInt32(valueHolderForColorModeTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -25155,6 +25454,12 @@ export class PopupOptions_serializer {
             borderLinearGradientTmpBuf = PopupBorderLinearGradient_serializer.read(valueDeserializer)
         }
         const borderLinearGradientTmpResult: PopupBorderLinearGradient | undefined = borderLinearGradientTmpBuf
+        const colorModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorModeTmpBuf: AnchoredColorMode | undefined = undefined
+        if ((colorModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorModeTmpBuf = AnchoredColorMode.fromValue(valueDeserializer.readInt32())
+        }
+        const colorModeTmpResult: AnchoredColorMode | undefined = colorModeTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
         if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -25237,7 +25542,7 @@ export class PopupOptions_serializer {
             onDidDisappearTmpBuf = onDidDisappearTmpBufOptClosure
         }
         const onDidDisappearTmpResult: VoidCallback | undefined = onDidDisappearTmpBuf
-        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, systemMaterial: systemMaterialTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
+        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
         return value
     }
 }
@@ -25426,6 +25731,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -25449,6 +25755,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -25702,6 +26009,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setScrollStep_serialize(scrollStep: int32 | undefined): void {
@@ -25725,6 +26033,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -25748,6 +26057,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -25951,6 +26261,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = InteractionHand.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: InteractionHand | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setHand_serialize(hand: InteractionHand | undefined): void {
@@ -25974,6 +26285,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -25997,6 +26309,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26063,6 +26376,7 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
             buffer.set(bufferKeyVar, bufferValueVar)
         }
         const returnResult: Map<AxisModel, double> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setAxisMap_serialize(axisMap: Map<AxisModel, double>): void {
@@ -26210,6 +26524,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setX_serialize(x: double | undefined): void {
@@ -26233,6 +26548,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setY_serialize(y: double | undefined): void {
@@ -26256,6 +26572,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setWindowX_serialize(windowX: double | undefined): void {
@@ -26279,6 +26596,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setWindowY_serialize(windowY: double | undefined): void {
@@ -26302,6 +26620,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDisplayX_serialize(displayX: double | undefined): void {
@@ -26325,6 +26644,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setDisplayY_serialize(displayY: double | undefined): void {
@@ -26348,6 +26668,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -26371,6 +26692,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26401,6 +26723,7 @@ export interface MouseEvent extends BaseEvent {
     globalDisplayX?: double | undefined
     globalDisplayY?: double | undefined
     stopPropagation(): void
+    getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     public button: MouseButton
@@ -26461,6 +26784,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     public stopPropagation(): void {
         this.stopPropagation_serialize()
         return
+    }
+    public getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined {
+        return this.getHistoricalPoints_serialize()
     }
     private getButton(): MouseButton {
         return this.getButton_serialize()
@@ -26569,6 +26895,22 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     private stopPropagation_serialize(): void {
         ArkUIGeneratedNativeModule._MouseEvent_stopPropagation(this.peer!.ptr)
     }
+    private getHistoricalPoints_serialize(): Array<MouseHistoricalPoint> | undefined {
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getHistoricalPoints(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<MouseHistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<MouseHistoricalPoint> = new Array<MouseHistoricalPoint>(bufferOptLength, (arg0: int32):MouseHistoricalPoint => {
+            return MouseHistoricalPoint_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<MouseHistoricalPoint> | undefined = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
     private getButton_serialize(): MouseButton {
         const retval = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)
         return MouseButton.fromValue(retval)
@@ -26634,6 +26976,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRawDeltaX_serialize(rawDeltaX: double | undefined): void {
@@ -26657,6 +27000,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setRawDeltaY_serialize(rawDeltaY: double | undefined): void {
@@ -26684,6 +27028,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = bufferOpt
         }
         const returnResult: Array<MouseButton> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setPressedButtons_serialize(pressedButtons: Array<MouseButton> | undefined): void {
@@ -26711,6 +27056,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
@@ -26734,6 +27080,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
@@ -26836,6 +27183,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             buffer = bufferOpt
         }
         const returnResult: Array<HistoricalPoint> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private preventDefault_serialize(): void {
@@ -26856,6 +27204,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             return TouchObject_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<TouchObject> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setTouches_serialize(touches: Array<TouchObject>): void {
@@ -26876,6 +27225,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             return TouchObject_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<TouchObject> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setChangedTouches_serialize(changedTouches: Array<TouchObject>): void {

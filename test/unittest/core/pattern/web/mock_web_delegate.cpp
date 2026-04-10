@@ -1199,6 +1199,10 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
 {
     return false;
 }
+bool WebDelegate::OnNestedScrollV2(float& x, float& y)
+{
+    return false;
+}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -1482,8 +1486,11 @@ bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
+void WebDelegate::SetIsSystemRtlEnable(bool enable) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
+void WebDelegate::SetEnableDrag(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}

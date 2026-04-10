@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STAGE_PAGE_TRANSITION_MODEL_H
 
 #include <functional>
+#include <memory>
 #include <mutex>
 
 #include "frameworks/core/animation/page_transition_common.h"

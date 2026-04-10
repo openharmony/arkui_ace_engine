@@ -23,11 +23,11 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -98,7 +98,7 @@ void CalendarPickerTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -108,7 +108,13 @@ void CalendarPickerTestNg::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1324,6 +1330,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerUpdateButtonStyles001, TestSize.Lev
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([buttonTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return buttonTheme;
+        });
     CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     auto testval = buttonLayoutProperty->GetFontWeightValue();

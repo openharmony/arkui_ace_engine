@@ -16,11 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FORCE_SPLIT_FORCE_SPLIT_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FORCE_SPLIT_FORCE_SPLIT_UTILS_H
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include "core/components_ng/base/frame_node.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/force_split/force_split_constants.h"
 
 namespace OHOS::Ace::NG {
 
+class PipelineContext;
 class NavDestinationGroupNode;
 class NavBarNode;
 
@@ -33,7 +37,16 @@ struct ForceSplitConfig {
     bool dialogSupportSplit = true;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
-    std::set<std::string> fullScreenPages;
+    std::unordered_set<std::string> fullScreenPages;
+    std::optional<float> wideSplitRatio;
+    std::optional<float> squareSplitRatio;
+    std::optional<Color> splitDividerColorLight;
+    std::optional<Color> splitDividerColorDark;
+    ForceSplitBehaviorMode behaviorMode = ForceSplitBehaviorMode::NAVIGATION;
+    // For ForceSplitBehaviorMode::NAVIGAITON, from -> to
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs;
+    // For ForceSplitBehaviorMode::DISPLACE
+    std::unordered_set<std::string> transPages;
 };
 
 class ForceSplitUtils {
@@ -48,8 +61,14 @@ public:
     static void LogSystemForceSplitConfig(bool isRouter, const std::string& homePage, const ForceSplitConfig& config);
     static void LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
 private:
+    static bool ParseCommonConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config);
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);
+    static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitConfig& config);
+    static bool ParseSplitParam(
+        const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio);
+    static bool ParsePagePairs(const std::unique_ptr<JsonValue>& pagePairs, ForceSplitConfig& config);
+    static bool ParseTransPages(const std::unique_ptr<JsonValue>& transPages, ForceSplitConfig& config);
 };
 
 } // namespace OHOS::Ace::NG

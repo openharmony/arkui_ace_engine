@@ -731,6 +731,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
     /**
      * @tc.steps: step1. set a flag and init a callback(onAreaChanged)
      */
+    auto frameNode = FrameNode::CreateFrameNode(
+        "two", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
@@ -739,33 +741,35 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_1);
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_1);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
-    FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    frameNode->lastParentOffsetToWindow_ = nullptr;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step4. release lastFrameRect_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->lastFrameRect_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_3);
+    frameNode->lastFrameRect_ = nullptr;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_3);
     EXPECT_FALSE(flag);
 
     /**
      * @tc.steps: step5.set lastParentOffsetToWindow_ and lastFrameRect_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
-    FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
-    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_4);
+    frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    frameNode->lastFrameRect_ = std::make_unique<RectF>();
+    frameNode->TriggerOnAreaChangeCallback(TIMESTAMP_4);
     EXPECT_FALSE(flag);
 }
 
@@ -3757,5 +3761,119 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg333, TestSize.Level1)
     auto partSection = frameProxyInfo.substr(partStart, partEnd - partStart);
     EXPECT_EQ(partSection.find(std::to_string(CHILD_A_ID)), std::string::npos);
     EXPECT_NE(partSection.find(std::to_string(CHILD_B_ID)), std::string::npos);
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute001
+ * @tc.desc: Test registering LPX attributes before attach does not register pipeline dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute002
+ * @tc.desc: Test register and unregister LPX attributes on main tree updates pipeline dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    ASSERT_TRUE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::ALWAYS);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::ALWAYS);
+    EXPECT_TRUE(frameNode->lpxAttributes_.empty());
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute003
+ * @tc.desc: Test attach and detach automatically register and unregister LPX dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute003, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+
+    frameNode->AttachToMainTree(true, AceType::RawPtr(context));
+    EXPECT_TRUE(frameNode->IsOnMainTree());
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->DetachFromMainTree(true);
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute004
+ * @tc.desc: Test SetRootRect marks LPX dirty nodes with PROPERTY_UPDATE_MEASURE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute004, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    ASSERT_TRUE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    ASSERT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->layoutProperty_->CleanDirty();
+    frameNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+
+    context->SetRootRect(context->rootWidth_, context->rootHeight_, 0.0);
+
+    EXPECT_EQ(frameNode->layoutProperty_->propertyChangeFlag_ & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

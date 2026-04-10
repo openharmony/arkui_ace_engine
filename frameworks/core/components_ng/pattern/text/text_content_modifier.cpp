@@ -1367,7 +1367,6 @@ void TextContentModifier::PauseAnimation()
     if (!CheckMarqueeState(MarqueeState::RUNNING)) {
         return;
     }
-    FireStopEvent();
     AnimationUtils::PauseAnimation(raceAnimation_);
     SetMarqueeState(MarqueeState::PAUSED);
 }
@@ -1715,7 +1714,6 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option, fl
                     modifier->marqueeCount_++;
                 }
                 if (!modifier->AllowTextRace()) {
-                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::STOP);
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
                 } else {
                     auto frameNode = textPattern->GetHost();
@@ -1749,7 +1747,6 @@ void TextContentModifier::PauseTextRace()
     if (marqueeOption_.updatePolicy != MarqueeUpdatePolicy::PRESERVE_POSITION) {
         ResetTextRacePercent();
     }
-    FireStopEvent();
 }
 
 bool TextContentModifier::AllowTextRace()
@@ -1893,12 +1890,5 @@ bool TextContentModifier::IsMarqueeVisible() const
     RectF frameRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
     return Positive(visibleInnerRect.Width()) && Positive(visibleInnerRect.Height());
-}
-
-void TextContentModifier::FireStopEvent()
-{
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPattern);
-    textPattern->FireOnMarqueeStateChange(TextMarqueeState::STOP);
 }
 } // namespace OHOS::Ace::NG

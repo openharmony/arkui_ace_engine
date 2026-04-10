@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SPAN_SPAN_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SPAN_SPAN_DECLARATION_H
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 

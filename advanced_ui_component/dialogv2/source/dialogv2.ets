@@ -211,7 +211,11 @@ export struct TipsDialogV2 {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              this.checkBoxPart();
+            }
+          }
         }
       });
     }
@@ -1476,7 +1480,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: AdvancedDialogV2Button, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: AdvancedDialogV2Button) => item.content.toString());
+        }, (item: AdvancedDialogV2Button) => item.content?.toString() ?? JSON.stringify(item));
       }
     }
   }

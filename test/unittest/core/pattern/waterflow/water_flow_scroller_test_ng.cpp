@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"

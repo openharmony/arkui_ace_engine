@@ -15,6 +15,7 @@
 
 #define NAPI_VERSION 8
 
+#include "base/log/log_wrapper.h"
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/common/ai/image_analyzer_default.h"
 #include "key_event.h"

@@ -19,7 +19,7 @@
 #include "gtest/internal/gtest-internal.h"
 #define private public
 #define protected public
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #undef private

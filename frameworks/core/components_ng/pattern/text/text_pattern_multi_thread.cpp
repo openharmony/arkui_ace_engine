@@ -185,7 +185,7 @@ void TextPattern::SetTextDetectConfigMultiThread(const TextDetectConfig& textDet
     });
 }
 
-void TextPattern::SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay)
+void TextPattern::SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay, bool isReplace)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -53,10 +55,54 @@ bool LazyGridLayoutPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     auto layoutAlgorithm = DynamicCast<LazyGridLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
+    FireOnVisibleIndexesChange();
     if (layoutInfo_->NeedPredict()) {
         PostIdleTask();
     }
     return false;
+}
+
+std::pair<int32_t, int32_t> LazyGridLayoutPattern::GetVisibleIndexesRangeForCallback() const
+{
+    if (!layoutInfo_) {
+        return { -1, -1 };
+    }
+    auto totalItemCount = layoutInfo_->totalItemCount_;
+    if (totalItemCount <= 0) {
+        return { -1, -1 };
+    }
+    if (layoutInfo_->startIndex_ < 0 || layoutInfo_->endIndex_ < 0) {
+        return { -1, -1 };
+    }
+    if (layoutInfo_->startIndex_ >= totalItemCount || layoutInfo_->endIndex_ >= totalItemCount) {
+        return { -1, -1 };
+    }
+    return { layoutInfo_->startIndex_, layoutInfo_->endIndex_ };
+}
+
+void LazyGridLayoutPattern::FireOnVisibleIndexesChange()
+{
+    CHECK_NULL_VOID(onVisibleIndexesChange_);
+    auto currentRange = GetVisibleIndexesRangeForCallback();
+    FireOnVisibleIndexesChange(currentRange);
+}
+
+void LazyGridLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range)
+{
+    CHECK_NULL_VOID(onVisibleIndexesChange_);
+    auto currentRange = range;
+    if (hasVisibleIndexesChangeFired_ && currentRange == lastVisibleIndexesRange_) {
+        return;
+    }
+    onVisibleIndexesChange_(currentRange.first, currentRange.second);
+    lastVisibleIndexesRange_ = currentRange;
+    hasVisibleIndexesChangeFired_ = true;
+}
+
+void LazyGridLayoutPattern::OnInActive()
+{
+    CHECK_NULL_VOID(onVisibleIndexesChange_);
+    FireOnVisibleIndexesChange({ -1, -1 });
 }
 
 void LazyGridLayoutPattern::PostIdleTask()
@@ -116,11 +162,25 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && parent->GetTag() != V2::SCROLL_ETS_TAG) {
+        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && !IsVerticalContainer(parent)) {
             LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
         }
         return;
     }
+}
+
+bool LazyGridLayoutPattern::IsVerticalContainer(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    const std::string& nodeTag = node->GetTag();
+    if (nodeTag != V2::LIST_ETS_TAG && nodeTag != V2::SCROLL_ETS_TAG) {
+        return false;
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetAxis() == Axis::VERTICAL;
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo()

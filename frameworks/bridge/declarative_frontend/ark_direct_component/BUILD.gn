@@ -22,3 +22,48 @@ ohos_abc("arkgauge") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+ohos_abc("arkdatapanel") {
+  sources = [ "./src/arkdatapanel.ts" ]
+  output_name = "arkdatapanel"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arktextclock") {
+  sources = [ "./src/arktextclock.ts" ]
+  output_name = "arktextclock"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkpatternlock") {
+  sources = [ "./src/arkpatternlock.ts" ]
+  output_name = "arkpatternlock"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkcounter") {
+  sources = [ "./src/arkcounter.ts" ]
+  output_name = "arkcounter"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkqrcode") {
+  sources = [ "./src/arkqrcode.ts" ]
+  output_name = "arkqrcode"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

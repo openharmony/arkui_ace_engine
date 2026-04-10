@@ -20,7 +20,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/common/statistic_event_reporter.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -209,6 +209,7 @@ private:
     std::optional<int32_t> surfaceChangedCallbackId_;
     PickerDate reportedPickerDate_;
     WeakPtr<FrameNode> titleNode_;
+    bool hasInitTitleArrowsColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

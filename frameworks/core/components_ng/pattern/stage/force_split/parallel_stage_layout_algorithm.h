@@ -17,9 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PARALLEL_STAGE_LAYOUT_ALGORITHM_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
+class ParallelStagePattern;
+
 class ParallelStageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ParallelStageLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -31,11 +34,29 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void MeasureDetailPage(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void MeasureSplitPage(const RefPtr<LayoutWrapper>& layoutWrapper, const SizeF& size);
-    void LayoutInSplitMode(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    float GetDividerOffsetX() const;
+    OffsetF GetPrimarySlotOffset(float pageWidth) const;
+    OffsetF GetSecondarySlotOffset() const;
+    ForceSplitPageColumnType GetPageLayoutColumnType(const RefPtr<FrameNode>& pageNode, int32_t pageIndex) const;
+    void LayoutInNewRouterSplitFlow(const RefPtr<FrameNode>& hostNode,
+        LayoutWrapper* layoutWrapper, const RefPtr<ParallelStagePattern>& stagePattern);
+    void MeasureInNewRouterSplitFlow(const RefPtr<FrameNode>& hostNode,
+        LayoutWrapper* layoutWrapper, const RefPtr<ParallelStagePattern>& stagePattern);
 
+    void MeasureDetailPage(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void MeasurePage(const RefPtr<LayoutWrapper>& layoutWrapper, const SizeF& size);
+    void MeasurePageInColumn(const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType);
+    void MeasureRouterSplitPages(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void LayoutInSplitMode(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void LayoutPageInColumn(const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType);
+    void LayoutRouterSplitPages(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void SizeCalculationForForceSplit(const RefPtr<FrameNode>& hostNode, const SizeF& size);
+
+    SizeF dividerSize_ = SizeF(0.0f, 0.0f);
+    SizeF primarySize_ = SizeF(0.0f, 0.0f);
+    SizeF secondarySize_ = SizeF(0.0f, 0.0f);
     int32_t primaryIndex_ = -1;
+    int32_t secondaryIndex_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelStageLayoutAlgorithm);
 };

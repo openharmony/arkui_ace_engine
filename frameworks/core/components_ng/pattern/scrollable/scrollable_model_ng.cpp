@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -508,6 +509,39 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetBackToTop();
+}
+
+void ScrollableModelNG::SetEnableScrollWithMouse(bool enableScrollWithMouse)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::ResetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(false);
+}
+
+bool ScrollableModelNG::GetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsAllowMouse();
 }
 
 void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)

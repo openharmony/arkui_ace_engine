@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
-#include <climits>
-#include "core/components_ng/base/frame_node.h"
 #include "base/utils/utils.h"
+
+#include <climits>
+
+#include "base/log/log.h"
+#include "core/components_ng/base/frame_node.h"
+
 #ifdef WINDOWS_PLATFORM
 #include <shlwapi.h>
 #endif
 namespace OHOS::Ace {
 constexpr int64_t MAX_FILE_SIZE = 20 * 1024 * 1024;
-    bool RealPath(const std::string& fileName, char* realPath)
+bool RealPath(const std::string& fileName, char* realPath)
 {
 #if defined(WINDOWS_PLATFORM)
-        return PathCanonicalize(realPath, fileName.c_str()) != 0;
+    return PathCanonicalize(realPath, fileName.c_str()) != 0;
 #else
-        return realpath(fileName.c_str(), realPath) != nullptr;
+    return realpath(fileName.c_str(), realPath) != nullptr;
 #endif
 }
 
@@ -111,4 +115,4 @@ RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const 
     return nullptr;
 }
 } // namespace NG
-}
+} // namespace OHOS::Ace

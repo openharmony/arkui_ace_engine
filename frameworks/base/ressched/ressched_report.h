@@ -80,7 +80,8 @@ public:
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
-    void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
+    void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode,
+        const std::string& fromComponentName = {}, const std::string& toComponentName = {});
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
     int64_t GetTid();

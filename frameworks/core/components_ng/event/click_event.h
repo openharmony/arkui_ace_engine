@@ -19,14 +19,22 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "ui/gestures/gesture_event.h"
+#include "core/components_ng/event/target_component.h"
+
+namespace OHOS::Ace {
+
+class ClickInfo;
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 
 class GestureEventHub;
+class ClickRecognizer;
 
 class ClickEvent : public AceType {
     DECLARE_ACE_TYPE(ClickEvent, AceType);
@@ -39,12 +47,7 @@ public:
         return callback_;
     }
 
-    void operator()(GestureEvent& info) const
-    {
-        if (callback_) {
-            callback_(info);
-        }
-    }
+    void operator()(GestureEvent& info) const;
 
     void SetSysJudge(const GestureJudgeFunc& sysJudge)
     {
@@ -56,13 +59,7 @@ public:
         return sysJudge_.has_value();
     }
 
-    std::optional<GestureJudgeFunc> GetSysJudge() const
-    {
-        if (sysJudge_.has_value()) {
-            return sysJudge_.value();
-        }
-        return nullptr;
-    }
+    std::optional<GestureJudgeFunc> GetSysJudge() const;
 
 private:
     GestureEventFunc callback_;
@@ -78,56 +75,21 @@ public:
     explicit ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ClickEventActuator() override = default;
 
-    void SetUserCallback(GestureEventFunc&& callback)
-    {
-        userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
-    }
+    void SetUserCallback(GestureEventFunc&& callback);
 
-    void ClearUserCallback()
-    {
-        // When the event param is undefined, it will clear the callback.
-        if (userCallback_) {
-            userCallback_.Reset();
-        }
-    }
+    void ClearUserCallback();
 
     bool IsUserClickable() const
     {
         return userCallback_ != nullptr;
     }
 
-    bool IsComponentClickable() const
-    {
-        return !(clickEvents_.empty() && !clickAfterEvents_ && !userCallback_ && !jsFrameNodeCallback_);
-    }
+    bool IsComponentClickable() const;
 
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
-    {
-        if (clickEvents_.empty()) {
-            clickEvents_.emplace_back(clickEvent);
-            return;
-        }
-        if (std::find(clickEvents_.begin(), clickEvents_.end(), clickEvent) == clickEvents_.end()) {
-            clickEvents_.emplace_back(clickEvent);
-        }
-    }
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
-    void AddDistanceThreshold(double distanceThreshold)
-    {
-        distanceThreshold_ = Dimension(
-            Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-        if (distanceThreshold_.ConvertToPx() <= 0) {
-            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-        }
-    }
-
-    void AddDistanceThreshold(Dimension distanceThreshold)
-    {
-        distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_.ConvertToPx() <= 0) {
-            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
-        }
-    }
+    void AddDistanceThreshold(double distanceThreshold);
+    void AddDistanceThreshold(Dimension distanceThreshold);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -144,13 +106,7 @@ public:
         clickAfterEvents_ = std::move(clickEvent);
     }
 
-    void ClearClickAfterEvent()
-    {
-        // When the event param is undefined, it will clear the callback.
-        if (clickAfterEvents_) {
-            clickAfterEvents_.Reset();
-        }
-    }
+    void ClearClickAfterEvent();
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
@@ -167,34 +123,11 @@ public:
         return clickRecognizer_;
     }
 
-    void SetJSFrameNodeCallback(GestureEventFunc&& callback)
-    {
-        if (jsFrameNodeCallback_) {
-            jsFrameNodeCallback_.Reset();
-        }
-        jsFrameNodeCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
-        if (!clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
-    }
+    void SetJSFrameNodeCallback(GestureEventFunc&& callback);
 
-    void ClearJSFrameNodeCallback()
-    {
-        // When the event param is undefined, it will clear the callback.
-        if (jsFrameNodeCallback_) {
-            jsFrameNodeCallback_.Reset();
-        }
-    }
+    void ClearJSFrameNodeCallback();
 
-    void CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator)
-    {
-        clickEvents_ = clickEventActuator->clickEvents_;
-        userCallback_ = clickEventActuator->userCallback_;
-        jsFrameNodeCallback_ = clickEventActuator->jsFrameNodeCallback_;
-        if (clickEventActuator->clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
-    }
+    void CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator);
     
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

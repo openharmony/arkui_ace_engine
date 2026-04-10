@@ -16,6 +16,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
@@ -210,6 +211,14 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(
     textLayoutProperty->UpdateFontSize(dialogTheme->GetDialogFontSize());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(dialogTheme->GetMaxLines());
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto fontManager = context->GetFontManager();
+    if (fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+    }
     MarginProperty margin;
     margin.left = CalcLength(dialogTheme->GetTextPropertyLeft());
     margin.right = CalcLength(dialogTheme->GetTextPropertyRight());

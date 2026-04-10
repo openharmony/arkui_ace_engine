@@ -52,6 +52,7 @@ export class ObserveSingleton implements IObserve {
     private computedPropRefsDelayed_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private queuedMutableStateChanges_ = new Set<WeakRef<IBindingSource>>();
     private persistencePropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
         this.finalizeComputedAndMonitorPath
     );
@@ -123,13 +124,32 @@ export class ObserveSingleton implements IObserve {
         if (trackedRef.id >= PersistenceV2Impl.MIN_PERSISTENCE_ID) {
             this.persistencePropRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID) {
-            const currentMonitor = (trackedRef as MonitorValueInternal).monitor;
-            currentMonitor.notifyChangesForPath(trackedRef);
-            currentMonitor.runMonitorFunction();
+            this.syncMonitorPathRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
             this.monitorPathRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
             this.computedPropRefsChanged_.add(trackedRef.weakThis);
+        }
+    }
+
+    /**
+     * Process synchronous monitor paths that have been marked as dirty.
+     *
+     * Synchronous monitors (those with id >= MIN_SYNC_MONITOR_ID) need to be
+     * processed immediately when their dependencies change, unlike regular monitors
+     * which are processed during the next updateDirty() cycle.
+     *
+     * Called from MutableStateMeta.fireChange() to ensure real-time tracking
+     * for synchronous monitors.
+     */
+    public updateDirtySyncMonitorPaths(): void {
+        const monitors = this.syncMonitorPathRefsChanged_;
+        this.syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+        const monitorsToRun = this.notifyDirtyMonitorPaths(monitors);
+        if (monitorsToRun && monitorsToRun.size > 0) {
+            monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
+                monitor.runMonitorFunction();
+            });
         }
     }
 

@@ -296,10 +296,10 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
 
     private translateRectToVp(rect: window.Rect): window.RectInVP {
         return {
-            left: this.context?.px2vp(rect.left) ?? rect.left as double,
-            top: this.context?.px2vp(rect.top) ?? rect.top as double,
-            width: this.context?.px2vp(rect.width) ?? rect.width as double,
-            height: this.context?.px2vp(rect.height) ?? rect.height as double
+            left: this.context?.px2vp(rect.left) ?? rect.left.toDouble(),
+            top: this.context?.px2vp(rect.top) ?? rect.top.toDouble(),
+            width: this.context?.px2vp(rect.width) ?? rect.width.toDouble(),
+            height: this.context?.px2vp(rect.height) ?? rect.height.toDouble()
         } as window.RectInVP;
     }
 

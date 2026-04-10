@@ -19,7 +19,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1284,5 +1284,19 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverEventInner002, Te
     ret = manager.HandleAccessibilityHoverEventInner(frameNode, param4, touchEvent);
     EXPECT_EQ(ret, HandleHoverRet::IN_TIME_LIMIT);
     MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: IsEventTypeChangeDirectHandleHoverTest001
+ * @tc.desc: test IsEventTypeChangeDirectHandleHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, IsEventTypeChangeDirectHandleHoverTest001, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::EXIT;
+    AccessibilityHoverEventType prevEventType = AccessibilityHoverEventType::ENTER;
+    bool ret = accessibilityManagerNg.IsEventTypeChangeDirectHandleHover(eventType, prevEventType);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

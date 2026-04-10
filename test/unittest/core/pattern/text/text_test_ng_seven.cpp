@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
@@ -1264,5 +1264,42 @@ HWTEST_F(TextTestNgSeven, CreateTextDragInfo005, TestSize.Level1)
     textModelNG.ResetSelectedDragPreviewStyle(frameNode);
     color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
     EXPECT_NE(color.GetValue(), Color::BLUE.GetValue());
+}
+
+/**
+ * @tc.name: SetFallbackLineSpacingAndIncludeFontPadding001
+ * @tc.desc: Test the IncludeFontPadding attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, SetFallbackLineSpacingAndIncludeFontPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize text and copyOption.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567891");
+
+    /**
+     * @tc.steps: step3. test the param keyEventInitialized_ is or not true.
+     * @tc.expect: expect keyEventInitialized_ is true.
+     */
+    textPattern->SetFallbackLineSpacingAndIncludeFontPadding(true);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.expected: Get IncludeFontPadding Value true.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), true);
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), true);
 }
 } // namespace OHOS::Ace::NG

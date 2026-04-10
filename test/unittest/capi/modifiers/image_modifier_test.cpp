@@ -736,6 +736,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Le
         "Default value for attribute 'pointLight.bloom'";
     auto resultPointLightPosition =
         GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+    ASSERT_NE(resultPointLightPosition, nullptr);
     EXPECT_EQ(resultPointLightPosition->ToString(), ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_DEFAULT_VALUE) <<
         "Default value for attribute 'pointLight.lightSource.position'";
     EXPECT_TRUE(resultPointLightPosition->IsObject()) <<

@@ -57,7 +57,7 @@ import {
     isShown?: boolean
   }
   
-  class EnvironmentCallbackEntry implements EnvironmentCallback {
+  export class EnvironmentCallbackEntry implements EnvironmentCallback {
     private index: ExceptionPrompt;
   
     constructor(index: ExceptionPrompt) {
@@ -244,7 +244,7 @@ import {
       if (this.callbackId) {
         let context: UIContext = this.getUIContext();
         if (context.getHostContext() !== undefined) {
-          this.applicationContext.offEnvironment(this.callbackId as Int, (err: BusinessError<void> | null): void => {
+          this.applicationContext.offEnvironment(this.callbackId.toInt(), (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })
         }

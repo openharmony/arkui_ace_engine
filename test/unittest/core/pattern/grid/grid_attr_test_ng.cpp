@@ -14,10 +14,10 @@
  */
 
 #include "grid_test_ng.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
@@ -778,6 +778,23 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction002, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     EXPECT_FALSE(layoutProperty_->GetScrollEnabledValue());
+}
+
+/**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    pattern_->SetIsAllowMouse(true);
+    CreateDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
 }
 
 /**

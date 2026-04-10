@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -763,7 +764,7 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             " subRSTransaction[%{public}d]", subRSUIContext != nullptr, subRSTransaction != nullptr);
         }
     }
- 
+
     bool optionIsValid = option && option->IsValid();
     TAG_LOGI(aceLogTag_, "Update DC[%{public}d] Size: %{public}s -> [%{public}d x %{public}d], "
         "reason:[%{public}d], hasSyncTransaction:[%{public}d], orientation:[%{public}d], "
@@ -794,7 +795,7 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
                 reason != Rosen::SizeChangeReason::SCENE_WITH_ANIMATION) {
                 return;
             }
-            
+
             CHECK_NULL_VOID(uiContent);
             uiContent->NotifyRotationAnimationEnd();
 
@@ -919,7 +920,7 @@ int32_t DynamicComponentRendererImpl::GetSCBOrientation(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(screenSession, 0);
     return static_cast<int32_t>(screenSession->GetScreenProperty().GetDisplayOrientation());
 }
- 
+
 std::shared_ptr<Rosen::RSUIContext> DynamicComponentRendererImpl::GetRSUIContextByInstanceId(
     int32_t instanceId)
 {
@@ -931,7 +932,7 @@ std::shared_ptr<Rosen::RSUIContext> DynamicComponentRendererImpl::GetRSUIContext
     CHECK_NULL_RETURN(rsUIDirector, nullptr);
     return rsUIDirector->GetRSUIContext();
 }
- 
+
 std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetCommonRSTransactionByRSUIcontext(
     const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
 {
@@ -940,7 +941,7 @@ std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetCommonRST
     CHECK_NULL_RETURN(transactionController, nullptr);
     return transactionController->GetCommonRSTransaction();
 }
- 
+
 std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetSyncRSTransactionByInstanceId(int32_t instanceId)
 {
     auto rsUIContext = DynamicComponentRendererImpl::GetRSUIContextByInstanceId(instanceId);

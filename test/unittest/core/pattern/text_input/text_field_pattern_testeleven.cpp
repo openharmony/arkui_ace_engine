@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
@@ -835,7 +835,7 @@ HWTEST_F(TextFieldPatternTesteleven, IsReachedBoundary001, TestSize.Level1)
 
     textFieldPattern->textRect_ = RectF(0, 0, 100, 100);
     textFieldPattern->contentRect_ = RectF(0, 0, 50, 100);
-    auto result = textFieldPattern->IsReachedBoundary(-10.0f);
+    auto result = textFieldPattern->IsReachedBoundary(-10.0f, Axis::VERTICAL);
     EXPECT_TRUE(result);
 }
 

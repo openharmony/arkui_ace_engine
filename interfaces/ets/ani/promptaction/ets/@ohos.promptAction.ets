@@ -127,6 +127,7 @@ export default namespace promptAction {
 
     export interface ShowDialogOptionsInternal {
         levelOrder?: number;
+        systemMaterial?: long;
     }
 
     export interface ShowDialogSuccessResponse {
@@ -159,6 +160,10 @@ export default namespace promptAction {
         onDidDisappear?: (() => void);
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
+    }
+
+    export interface ActionMenuOptionsInternal {
+        systemMaterial?: long;
     }
 
     export interface ActionMenuSuccessResponse {
@@ -203,6 +208,7 @@ export default namespace promptAction {
         dialogTransition?: long;
         maskTransition?: long;
         levelOrder?: number;
+        systemMaterial?: long;
     }
 
     export interface CustomDialogOptions extends BaseDialogOptions {
@@ -297,9 +303,10 @@ export default namespace promptAction {
         optionsInternal?: ShowDialogOptionsInternal): Promise<ShowDialogSuccessResponse>;
 
     export native function showActionMenu1(options: ActionMenuOptions,
-        callback: AsyncCallback<ActionMenuSuccessResponse>): void;
+        callback: AsyncCallback<ActionMenuSuccessResponse>, optionsInternal?: ActionMenuOptionsInternal): void;
 
-    export native function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
+    export native function showActionMenu(options: ActionMenuOptions,
+        optionsInternal?: ActionMenuOptionsInternal): Promise<ActionMenuSuccessResponse>;
 
     export native function openCustomDialog1(content: long, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;

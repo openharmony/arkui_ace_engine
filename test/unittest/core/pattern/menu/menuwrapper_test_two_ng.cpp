@@ -19,12 +19,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
@@ -399,111 +399,6 @@ HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg034, TestSize.Level1)
     wrapperPattern->isShowInSubWindow_ = false;
     wrapperPattern->SetHotAreas(layoutWrapper);
     EXPECT_FALSE(wrapperPattern->isShowInSubWindow_);
-}
-
-/**
- * @tc.name: MenuWrapperPatternTestNg037
- * @tc.desc: test IsMenuPreviewNode with previewMode.Custom
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg037, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menuWrapper with customPreview
-     * @tc.expected: menuWrapperNode is not null
-     */
-    auto menuWrapperNode = GetPreviewMenuWrapper();
-    ASSERT_NE(menuWrapperNode, nullptr);
-    auto menuWrapPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(menuWrapPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call IsMenuPreviewNode
-     * @tc.expected: menu node is false, preview node is true
-     */
-    auto menu = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menu, nullptr);
-    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(menu));
-
-    auto preview = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(1));
-    ASSERT_NE(preview, nullptr);
-    EXPECT_TRUE(menuWrapPattern->IsMenuPreviewNode(preview));
-}
-
-/**
- * @tc.name: MenuWrapperPatternTestNg038
- * @tc.desc: test IsMenuPreviewNode with previewMode.Image
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg038, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menuWrapper、menu、image
-     * @tc.expected: node is not null
-     */
-    auto wrapperNode =
-        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(wrapperNode, nullptr);
-    auto menuWrapPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(menuWrapPattern, nullptr);
-
-    auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(menuNode, nullptr);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
-    menuNode->MountToParent(wrapperNode);
-
-    auto imageNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imageNode, nullptr);
-    imageNode->MountToParent(wrapperNode);
-
-    /**
-     * @tc.steps: step2. call IsMenuPreviewNode
-     * @tc.expected: menu node is false, preview node is true
-     */
-    auto menu = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menu, nullptr);
-    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(menu));
-
-    auto preview = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
-    ASSERT_NE(preview, nullptr);
-    EXPECT_TRUE(menuWrapPattern->IsMenuPreviewNode(preview));
-}
-
-/**
- * @tc.name: MenuWrapperPatternTestNg039
- * @tc.desc: test IsMenuPreviewNode without preview
- * @tc.type: FUNC
- */
-HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg039, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menuWrapper、menu
-     * @tc.expected: node is not null
-     */
-    auto wrapperNode =
-        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(mainMenu, nullptr);
-    mainMenu->MountToParent(wrapperNode);
-
-    auto imageNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imageNode, nullptr);
-    imageNode->MountToParent(wrapperNode);
-
-    /**
-     * @tc.steps: step2. call IsMenuPreviewNode
-     * @tc.expected: menu node is false, imageNode node is false
-     */
-    auto menuWrapPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(menuWrapPattern, nullptr);
-    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(mainMenu));
-    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(imageNode));
 }
 
 /**

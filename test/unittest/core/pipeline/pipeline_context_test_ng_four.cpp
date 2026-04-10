@@ -17,12 +17,14 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-#include "test/mock/base/mock_mouse_style.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/pattern/mock_pattern.h"
+#include "core/common/event_manager.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
@@ -38,6 +40,53 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace NG {
+namespace {
+class ReloadResourceTestPattern : public Pattern {
+    DECLARE_ACE_TYPE(ReloadResourceTestPattern, Pattern);
+
+public:
+    void OnColorModeChange(uint32_t colorMode) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        observedColorMode_ = colorMode;
+        observedSystemColorChange_ = context->IsSystemColorChange();
+        callCount_++;
+    }
+
+    bool observedSystemColorChange_ = false;
+    uint32_t observedColorMode_ = 0;
+    int32_t callCount_ = 0;
+};
+
+class ReloadResourceTestNode : public UINode {
+    DECLARE_ACE_TYPE(ReloadResourceTestNode, UINode);
+
+public:
+    explicit ReloadResourceTestNode(int32_t nodeId) : UINode("ReloadResourceTestNode", nodeId, false) {}
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    void OnAllowForceDarkUpdate(uint32_t colorMode) override
+    {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        observedColorMode_ = colorMode;
+        observedSystemColorChange_ = context->IsSystemColorChange();
+        callCount_++;
+    }
+
+    bool observedSystemColorChange_ = false;
+    uint32_t observedColorMode_ = 0;
+    int32_t callCount_ = 0;
+};
+} // namespace
+
 ElementIdType PipelineContextFourTestNg::frameNodeId_ = 0;
 ElementIdType PipelineContextFourTestNg::customNodeId_ = 0;
 RefPtr<FrameNode> PipelineContextFourTestNg::frameNode_ = nullptr;
@@ -88,8 +137,13 @@ void PipelineContextFourTestNg::SetUpTestSuite()
 
 void PipelineContextFourTestNg::TearDownTestSuite()
 {
-    context_->Destroy();
-    context_->window_.reset();
+    if (context_) {
+        context_->Destroy();
+        context_->window_.reset();
+    }
+    frameNode_ = nullptr;
+    customNode_ = nullptr;
+    context_ = nullptr;
     MockContainer::TearDown();
 }
 
@@ -951,6 +1005,108 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028, TestSize.Level
 }
 
 /**
+ * @tc.name: PipelineContextFourTestNg028A
+ * @tc.desc: Test ReloadNodesResource sets isSystemColorChange_ for FrameNode callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028A, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto pattern = AceType::MakeRefPtr<ReloadResourceTestPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("ReloadComponent", 2001, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    frameNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(false);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(pattern->callCount_, 1);
+    EXPECT_TRUE(pattern->observedSystemColorChange_);
+    EXPECT_EQ(pattern->observedColorMode_, static_cast<uint32_t>(context_->GetColorMode()));
+    EXPECT_FALSE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg028B
+ * @tc.desc: Test ReloadNodesResource sets isSystemColorChange_ for non-FrameNode callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028B, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto testNode = AceType::MakeRefPtr<ReloadResourceTestNode>(2002);
+    ASSERT_NE(testNode, nullptr);
+    testNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(false);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(testNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(testNode->callCount_, 1);
+    EXPECT_TRUE(testNode->observedSystemColorChange_);
+    EXPECT_EQ(testNode->observedColorMode_, static_cast<uint32_t>(context_->GetColorMode()));
+    EXPECT_FALSE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg028C
+ * @tc.desc: Test ReloadNodesResource restores original isSystemColorChange_ value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028C, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto pattern = AceType::MakeRefPtr<ReloadResourceTestPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("ReloadRestoreComponent", 2003, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    frameNode->AttachContext(AceType::RawPtr(context_));
+
+    context_->SetIsSystemColorChange(true);
+    context_->needReloadResource_ = true;
+    context_->needReloadNodes_.clear();
+    context_->needReloadNodes_.emplace_back(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    context_->ReloadNodesResource();
+
+    EXPECT_EQ(pattern->callCount_, 1);
+    EXPECT_TRUE(pattern->observedSystemColorChange_);
+    EXPECT_TRUE(context_->IsSystemColorChange());
+    EXPECT_FALSE(context_->needReloadResource_);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
  * @tc.name: PipelineContextFourTestNg029
  * @tc.desc: Test SetOnWindowFocused with valid task executor.
  * @tc.type: FUNC
@@ -977,10 +1133,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg029, TestSize.Level
      * @tc.expected: Callback is stored in focusOnNodeCallback_.
      */
     context_->SetOnWindowFocused(mockCallback);
-    
+
     // Allow time for the posted task to execute
     context_->taskExecutor_->PostTask([]() {}, TaskExecutor::TaskType::UI, "DummyTask");
-    
+
     // Check that the callback was set (indirectly, since it's private)
     EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
 }
@@ -1050,7 +1206,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg032, TestSize.Level
     std::vector<int> testData = {1, 2, 3, 4, 5};
     int sum = 0;
     bool modifiedData = false;
-    
+
     auto complexCallback = [&testData, &sum, &modifiedData]() {
         for (int val : testData) {
             sum += val;
@@ -1085,7 +1241,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg033, TestSize.Level
      * @tc.expected: Each callback is properly defined.
      */
     int callCount = 0;
-    
+
     // First callback
     auto firstCallback = [&callCount]() {
         callCount = 1;
@@ -1160,7 +1316,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg035, TestSize.Level
      */
     int recursionLevel = 0;
     const int maxRecursionLevel = 3;
-    
+
     std::function<void()> recursiveCallback;
     recursiveCallback = [&recursionLevel, maxRecursionLevel, &recursiveCallback]() {
         if (recursionLevel < maxRecursionLevel) {
@@ -1190,7 +1346,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg036, TestSize.Level
      * @tc.expected: Context is not null.
      */
     ASSERT_NE(context_, nullptr);
-    
+
     /**
      * @tc.steps: 2. Ensure no callback is set initially.
      * @tc.expected: Callback pointer is null.
@@ -1217,7 +1373,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg037, TestSize.Level
      * @tc.expected: Context is not null.
      */
     ASSERT_NE(context_, nullptr);
-    
+
     /**
      * @tc.steps: 2. Define and set a callback function.
      * @tc.expected: Callback is properly defined.
@@ -1233,7 +1389,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg037, TestSize.Level
      */
     context_->FlushDragWindowVisibleCallback();
     EXPECT_TRUE(callbackExecuted);
-    
+
     /**
      * @tc.steps: 4. Call FlushDragWindowVisibleCallback again.
      * @tc.expected: Callback is not executed since it was reset.
@@ -1255,7 +1411,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg038, TestSize.Level
      * @tc.expected: Context is not null.
      */
     ASSERT_NE(context_, nullptr);
-    
+
     /**
      * @tc.steps: 2. Define callback to track execution count.
      * @tc.expected: Callback is properly defined.
@@ -1264,7 +1420,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg038, TestSize.Level
     context_->AddDragWindowVisibleTask([&callbackExecutionCount]() {
         callbackExecutionCount++;
     });
-    
+
     /**
      * @tc.steps: 3. Call FlushDragWindowVisibleCallback multiple times.
      * @tc.expected: Callback is executed only on first call, subsequent calls do nothing.
@@ -1288,20 +1444,20 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg039, TestSize.Level
      * @tc.expected: Context is not null.
      */
     ASSERT_NE(context_, nullptr);
-    
+
     /**
      * @tc.steps: 2. Define complex callback with multiple operations.
      * @tc.expected: Callback variables are initialized correctly.
      */
     std::vector<int> executionLog;
     int testValue = 42;
-    
+
     context_->AddDragWindowVisibleTask([&executionLog, &testValue, this]() {
         executionLog.push_back(1);
         testValue *= 2;
         executionLog.push_back(2);
     });
-    
+
     EXPECT_EQ(executionLog.size(), 0u);
     EXPECT_EQ(testValue, 42);
 
@@ -1314,7 +1470,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg039, TestSize.Level
     EXPECT_EQ(executionLog[0], 1);
     EXPECT_EQ(executionLog[1], 2);
     EXPECT_EQ(testValue, 84);
-    
+
     /**
      * @tc.steps: 4. Call FlushDragWindowVisibleCallback again.
      * @tc.expected: Callback does not execute and value remains unchanged.
@@ -1348,7 +1504,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg040, TestSize.Level
     context_->AddDragWindowVisibleTask([this, &callbackCalled, &testString]() {
         callbackCalled = true;
         testString = "modified";
-        
+
         if (this->context_ && this->context_->GetRootElement()) {
             testString += "_with_root";
         }
@@ -1588,11 +1744,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg047, TestSize.Level
      */
     auto originalAccessibilityManager = context_->accessibilityManagerNG_;
     context_->accessibilityManagerNG_ = nullptr;
-    
+
     AccessibilityEvent event;
     auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(testNode, nullptr);
-    
+
     /**
      * @tc.steps: 3. Call SendEventToAccessibilityWithNode with null manager.
      * @tc.expected: Function returns early without crash.
@@ -1626,7 +1782,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg048, TestSize.Level
     AccessibilityEvent event;
     auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(testNode, nullptr);
-    
+
     /**
      * @tc.steps: 3. Call SendEventToAccessibilityWithNode with disabled accessibility.
      * @tc.expected: Function exits early when accessibility is disabled.
@@ -1657,7 +1813,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg049, TestSize.Level
      */
     bool originalAccessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
     AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
-    
+
     AccessibilityEvent event;
     auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(testNode, nullptr);
@@ -1692,7 +1848,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg050, TestSize.Level
      */
     bool originalAccessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
     AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
-    
+
     AccessibilityEvent event;
 
     /**
@@ -1717,7 +1873,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg051, TestSize.Level
     ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
     PipelineContextFourTestNg::context_->SetupRootElement();
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
-    
+
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
 
@@ -1751,17 +1907,17 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg052, TestSize.Level
 
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
     auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
-    
+
     /**
      * @tc.steps: 2. Create mock safe area manager and set unsupported platform version.
      * @tc.expected: Platform version can be modified.
      */
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
-    
+
     PipelineContextFourTestNg::context_->minPlatformVersion_ = 9;
     SafeAreaInsets systemSafeArea;
-    
+
     /**
      * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with old platform version.
      * @tc.expected: Should return early due to platform version check.
@@ -1788,14 +1944,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg053, TestSize.Level
     // Save original values
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
     auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
-    
+
     /**
      * @tc.steps: 2. Create mock safe area manager and set minimum supported platform version.
      * @tc.expected: Platform version can be modified to boundary value.
      */
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
-    
+
     PipelineContextFourTestNg::context_->minPlatformVersion_ = 10;
     SafeAreaInsets systemSafeArea;
 
@@ -1804,7 +1960,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg053, TestSize.Level
      * @tc.expected: Boundary condition with platform version equal to 10.
      */
     PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(systemSafeArea, false);
-    
+
     PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
     PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
@@ -1825,14 +1981,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg054, TestSize.Level
 
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
     auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
-    
+
     /**
      * @tc.steps: 2. Create mock safe area manager and set supported platform version.
      * @tc.expected: Environment is properly configured for test.
      */
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
-    
+
     SafeAreaInsets zeroSafeArea;
     PipelineContextFourTestNg::context_->minPlatformVersion_ = 11;
 
@@ -1841,7 +1997,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg054, TestSize.Level
      * @tc.expected: Boundary condition with zero values.
      */
     PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(zeroSafeArea, false);
-    
+
     PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
     PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
@@ -1862,14 +2018,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg055, TestSize.Level
 
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
     auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
-    
+
     /**
      * @tc.steps: 2. Create mock safe area manager.
      * @tc.expected: Mock manager is properly created.
      */
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
-    
+
     SafeAreaInsets negativeSafeArea;
 
     /**
@@ -1877,7 +2033,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg055, TestSize.Level
      * @tc.expected: Boundary condition with negative values.
      */
     PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(negativeSafeArea, true);
-    
+
     PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
     PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
@@ -1897,7 +2053,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level
     PipelineContextFourTestNg::context_->SetupRootElement();
     auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
     auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
-    
+
     /**
      * @tc.steps: 2. Create mock safe area manager and set platform version.
      * @tc.expected: Test environment is properly configured.
@@ -1905,7 +2061,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level
     auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
     SafeAreaInsets largeSafeArea;
-    
+
     PipelineContextFourTestNg::context_->minPlatformVersion_ = 12;
 
     /**
@@ -1913,7 +2069,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level
      * @tc.expected: Boundary condition with very large values.
      */
     PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(largeSafeArea, false);
-    
+
     PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
     PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
@@ -1926,6 +2082,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, OnHideTest001, TestSize.Level1)
 {
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    testing::Mock::AllowLeak(AceType::RawPtr(frontend));
     ASSERT_NE(frontend, nullptr);
     auto rootBackup = context_->GetRootElement();
     ASSERT_NE(rootBackup, nullptr);

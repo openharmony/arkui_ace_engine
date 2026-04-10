@@ -206,16 +206,16 @@ export class SHA1Hash {
         offset = ((offset ??  0) | 0) as int32
 
         while (i < inputWords) {
-            W[i++] = swap32(data[offset!++] as int32)
+            W[i++] = swap32(data[offset!++].toInt())
         }
 
         for (i = inputWords; i < workWords; i++) {
-            W[i] = rotate1((W[i - 3] as int32) ^ (W[i - 8] as int32) ^ (W[i - 14] as int32) ^ (W[i - 16] as int32))
+            W[i] = rotate1((W[i - 3].toInt()) ^ (W[i - 8].toInt()) ^ (W[i - 14].toInt()) ^ (W[i - 16].toInt()))
         }
 
         for (i = 0; i < workWords; i++) {
             const S = (i / 20) | 0
-            const T = ((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]) as int32) | 0
+            const T = ((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]).toInt()) | 0
             E = D
             D = C
             C = rotate30(B)
@@ -259,8 +259,8 @@ export class SHA1Hash {
 
         // input size
         const bits64: int32 = this._size * 8
-        const low32: int32 = ((bits64 & 0xffffffff) as int32 >>> 0) as int32
-        const high32: int32 = ((bits64 - low32) as int32 / 0x100000000) as int32
+        const low32: int32 = ((bits64 & 0xffffffff) >>> 0).toInt()
+        const high32: int32 = ((bits64 - low32) / 0x100000000).toInt()
         if (high32) _word[highIndex] = swap32(high32) as int32
         if (low32) _word[lowIndex] = swap32(low32) as int32
 

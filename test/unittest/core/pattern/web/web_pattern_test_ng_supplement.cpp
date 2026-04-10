@@ -18,14 +18,14 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 #undef private
 #undef protected
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #define private public
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 #include "nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"
@@ -2476,6 +2476,8 @@ HWTEST_F(WebPatternTestNgSupplement, OnNestedScroll_001, TestSize.Level1)
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
     webPattern->expectedScrollAxis_ = Axis::VERTICAL;
     webPattern->isScrollStarted_ = true;
+    webPattern->isDirectionalLockEnabled_ = true;
+    webPattern->scrollDirectionalLockType_ = ScrollDirectionalLockType::ALL;
     float x = 1.0f, y = 0.5f, xVelocity = 0.0f, yVelocity = 0.0f;
     bool isAvailable = false;
     EXPECT_FALSE(webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable));
@@ -2520,6 +2522,74 @@ HWTEST_F(WebPatternTestNgSupplement, OnNestedScroll_002, TestSize.Level1)
     webPattern->isScrollStarted_ = false;
     x = 1.0f, y = 0.5f, xVelocity = 0.0f, yVelocity = 0.0f;
     EXPECT_FALSE(webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable));
+    EXPECT_TRUE(y == 0.5f);
+#endif
+}
+
+/**
+ * @tc.name: OnNestedScrollV2_001
+ * @tc.desc: OnNestedScrollV2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedScrollV2_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    webPattern->isScrollStarted_ = true;
+    float x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(x == 0.0f);
+    webPattern->isScrollStarted_ = false;
+    x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(x == 1.0f);
+#endif
+}
+
+/**
+ * @tc.name: OnNestedScrollV2_002
+ * @tc.desc: OnNestedScrollV2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedScrollV2_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::VERTICAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    webPattern->isScrollStarted_ = true;
+    float x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
+    EXPECT_TRUE(y == 0.0f);
+    webPattern->isScrollStarted_ = false;
+    x = 1.0f, y = 0.5f;
+    EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
     EXPECT_TRUE(y == 0.5f);
 #endif
 }

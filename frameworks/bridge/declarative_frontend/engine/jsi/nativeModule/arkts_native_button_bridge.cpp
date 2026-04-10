@@ -18,7 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/common_text_constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/components_ng/base/frame_node.h"

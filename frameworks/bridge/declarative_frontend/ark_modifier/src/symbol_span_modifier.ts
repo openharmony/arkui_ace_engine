@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SymbolSpanModifier extends ArkSymbolSpanComponent implements AttributeModifier<SymbolSpanAttribute> {
     constructor(src: Resource, nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);
@@ -22,7 +21,7 @@ class SymbolSpanModifier extends ArkSymbolSpanComponent implements AttributeModi
         this.initialize([src]);
       }
     }
-      
+
     applyNormalAttribute(instance: SymbolSpanAttribute): void {
       ModifierUtils.applySetOnChange(this);
       ModifierUtils.applyAndMergeModifier<SymbolSpanAttribute, ArkSymbolSpanComponent, ArkComponent>(instance, this);

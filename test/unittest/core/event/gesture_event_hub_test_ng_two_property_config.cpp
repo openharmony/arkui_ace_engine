@@ -15,14 +15,15 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
 
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;

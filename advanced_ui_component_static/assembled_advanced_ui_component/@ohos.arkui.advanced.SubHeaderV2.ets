@@ -186,7 +186,7 @@ export class SubHeaderV2OperationItem {
   }
 }
 
-interface ContentIconOption {
+export interface ContentIconOption {
   content?: ResourceStr;
   subContent?: ResourceStr;
   iconOptions?: SubHeaderV2IconType;
@@ -211,7 +211,7 @@ class FontStyle {
 }
 
 @ObservedV2
-class SubHeaderTheme {
+export class SubHeaderTheme {
   @Trace
   public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   @Trace
@@ -258,7 +258,7 @@ function disabledStyle(instance: CommonMethod) {
   instance.opacity(getResourceValue('sys.float.interactive_disable'))
 }
 
-class SubHeaderModifier implements AttributeModifier<RowAttribute> {
+export class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
 
   applyNormalAttribute(instance: RowAttribute): void {
@@ -430,8 +430,8 @@ export struct SubHeaderV2 {
   infoChange(monitor: IMonitor) {
     monitor.dirty.forEach((path: string) => {
       if ('select' === path) {
-        this.selectedIndex = (monitor.value(path) as IMonitorValue<SubHeaderV2Select>).now?.selectedIndex;
-        this.selectedContent = (monitor.value(path) as IMonitorValue<SubHeaderV2Select>).now ?.selectedContent;
+        this.selectedIndex = (monitor.value<Any>(path) as IMonitorValue<SubHeaderV2Select>).now?.selectedIndex;
+        this.selectedContent = (monitor.value<Any>(path) as IMonitorValue<SubHeaderV2Select>).now ?.selectedContent;
       }
     })
   }
@@ -463,7 +463,7 @@ export struct SubHeaderV2 {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderV2Theme.fontPrimaryColor,
@@ -503,7 +503,7 @@ export struct SubHeaderV2 {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderV2Theme.fontPrimaryColor,

@@ -1391,6 +1391,17 @@ void WebModelStatic::SetRotateRenderEffect(FrameNode* frameNode, const std::opti
     }
 }
 
+void WebModelStatic::SetEnableScrollDirectionalLock(
+    FrameNode* frameNode, const std::optional<bool>& isEnable, const std::optional<ScrollDirectionalLockType>& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->EnableScrollDirectionalLock(
+        isEnable.value_or(false),
+        static_cast<ScrollDirectionalLockType>(type.value_or(ScrollDirectionalLockType::NESTED_SCROLL)));
+}
+
 void WebModelStatic::SetNativeEmbedGestureEventId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -1677,6 +1688,14 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelStatic::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDrag(isEnabled);
+}
+
 void WebModelStatic::SetAISessionOptions(
     FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
     const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
@@ -1686,5 +1705,14 @@ void WebModelStatic::SetAISessionOptions(
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));
+}
+
+void WebModelStatic::SetScrollbarLayoutPolicy(
+    FrameNode* frameNode, ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateScrollbarLayoutPolicy(policy);
 }
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,8 @@ function createComponentContentByTrans(uiContext: UIContext, nodePtr: number, fr
 
 class TransComponentContent extends ComponentContent {
     constructor(uiContext: UIContext, nodePtr: number, frameNodePtr: number) {
-        super(uiContext, undefined, undefined, undefined, nodePtr, frameNodePtr);
+        super(uiContext, undefined, undefined, undefined);
+        this.createBuilderNode(uiContext, nodePtr, frameNodePtr);
     }
 
     public isTransferred(): boolean {

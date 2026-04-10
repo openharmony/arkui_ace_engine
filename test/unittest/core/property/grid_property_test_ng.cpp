@@ -17,7 +17,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"

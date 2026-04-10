@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/adapter/focus_modifier.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {

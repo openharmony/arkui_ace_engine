@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class StackModifier extends ArkStackComponent implements AttributeModifier<StackAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

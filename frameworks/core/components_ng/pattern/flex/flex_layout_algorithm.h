@@ -69,6 +69,7 @@ public:
     }
 
 private:
+    bool IsMatchParentAlongAxis(bool isMainAxis, const RefPtr<LayoutWrapper>& child);
     float UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<FrameNode>& host,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset, const OffsetF& paddingOffset,
         bool needExpandMainAxis);
@@ -88,6 +89,8 @@ private:
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize);
+    void MeasureMatchParentChildren(
+        LayoutWrapper* layoutWrapper, SizeF realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
     bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
     bool CheckBlankIllegality(const RefPtr<LayoutProperty>& blankLayoutProperty);
@@ -110,6 +113,12 @@ private:
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
     void SetFinalRealSize(
         LayoutWrapper* layoutWrapper, SizeF& realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy);
+    void HandleExpandAndNonCrossMatchChildren(const LayoutConstraintF& layoutConstraint,
+        IgnoreLayoutSafeAreaBundle& bundle,
+        std::list<RefPtr<LayoutWrapper>>& childrenMatchParentAlongCrossAxis, bool& shouldCorrectMainAixsSize);
+    float MeasureCrossAxisMatchChildrenAndCorrect(const LayoutConstraintF& layoutConstraint,
+        const std::list<RefPtr<LayoutWrapper>>& childrenMatchParentAlongCrossAxis,
+        bool& shouldCorrectMainAixsSize);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize);
     void AddElementIntoMagicNodes(int32_t childDisplayPriority, MagicLayoutNode node, float childLayoutWeight);
     bool AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);

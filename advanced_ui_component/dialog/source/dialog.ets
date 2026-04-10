@@ -211,8 +211,12 @@ export struct TipsDialog {
           }
           .padding({ top: TIP_TEXT_TOP_PADDING() })
         } else {
-          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-            this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                this.checkBoxPart();
+              }
+            }
           }
         }
       });
@@ -222,7 +226,7 @@ export struct TipsDialog {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;
@@ -1580,7 +1584,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: ButtonOptions) => item.value.toString());
+        }, (item: ButtonOptions) => item.value?.toString() ?? JSON.stringify(item));
       }
     }
   }

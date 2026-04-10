@@ -19,7 +19,7 @@
 #define protected public
 #include "core/components_ng/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_param.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,6 +31,13 @@ namespace {
     const std::string ENTRY_POINT = "test_entry_point";
     const int32_t VALID_WORKER_ID = 100;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class ArktsDynamicPatternTestNg : public testing::Test {
 public:

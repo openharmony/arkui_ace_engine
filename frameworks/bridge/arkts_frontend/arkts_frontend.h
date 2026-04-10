@@ -293,14 +293,18 @@ public:
         if (taskExecutor_ == nullptr) {
             return;
         }
-        for (auto&& observer : iter->second) {
-            taskExecutor_->PostTask(
-                [observer, childIds] {
+        auto observers = iter->second;
+        taskExecutor_->PostTask(
+            [observers = std::move(observers), childIds] {
+                for (auto&& observer : observers) {
+                    if (!observer) {
+                        continue;
+                    }
                     (*observer)(childIds);
                     (*observer)();
-                    }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
-            );
-        }
+                }
+            }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
+        );
     }
 
     void DumpFrontend() const override {}

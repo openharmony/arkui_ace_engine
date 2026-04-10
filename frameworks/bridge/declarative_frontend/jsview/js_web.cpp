@@ -51,6 +51,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -2498,6 +2499,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
+    JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
+    JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
+    JSClass<JSWeb>::StaticMethod("scrollbarLayoutPolicy", &JSWeb::ScrollbarLayoutPolicy);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -7789,6 +7793,42 @@ void JSWeb::EnableDefaultContextMenu(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableDefaultContextMenu(isEnabled);
+}
+
+void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
+{
+    if (args.Length() < PARAM_TWO) {
+        return;
+    }
+
+    JSRef<JSVal> objFirst = args[0];
+    JSRef<JSVal> objSecond = args[1];
+    if (!objFirst->IsBoolean() || !objSecond->IsNumber()) {
+        return;
+    }
+
+    bool isEnabled = objFirst->ToBoolean();
+    int32_t type = objSecond->ToNumber<int32_t>();
+    WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
+}
+
+void JSWeb::EnableDrag(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableDrag(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDrag(isEnabled);
+}
+
+void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
+    WebModel::GetInstance()->SetScrollbarLayoutPolicy(layoutPolicy);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

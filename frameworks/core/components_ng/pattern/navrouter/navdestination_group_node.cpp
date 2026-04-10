@@ -17,6 +17,7 @@
 
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
@@ -1232,6 +1233,30 @@ std::function<void()> NavDestinationGroupNode::BuildEmptyFinishCallback()
         node->OnFinishOneTransitionAnimation();
     };
     return finish;
+}
+
+void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPushFinish(int32_t animationId)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+}
+
+void NavDestinationGroupNode::SplitTransitionPopFinish(int32_t animationId)
+{
 }
 
 bool NavDestinationGroupNode::HasStandardBefore() const

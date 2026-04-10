@@ -1,0 +1,16 @@
+{
+  "name": "ark_modifier",
+  "version": "0.0.1",
+  "description": "ArkUI Modifier System",
+  "main": "./dist/arkModifier.js",
+  "devDependencies": {
+    "@types/node": "^15.0.1",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc --build tsconfig.json && node export.js ./dist/arkModifier.js",
+    "genabc": "es2abc --output ./dist/modifier.abc --module ./dist/arkModifier.js"
+  },
+  "author": "ArkUI",
+  "license": "Apache-2.0"
+}

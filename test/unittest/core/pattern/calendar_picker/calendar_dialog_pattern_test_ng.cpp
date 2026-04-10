@@ -23,11 +23,11 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -96,7 +96,7 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -106,7 +106,13 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1794,6 +1800,79 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest037, TestSize.Lev
 }
 
 /**
+ * @tc.name: CalendarDialogPatternTest038
+ * @tc.desc: Test CheckCalendarParamDate Function with invalid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest038, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string invalidJsonCommand = "invalid json";
+    auto json = JsonUtil::ParseJsonString(invalidJsonCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    bool checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidJsonCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string missingParamsCommand = "{\"cmd\":\"setCalendarPickerDialogTime\"}";
+    json = JsonUtil::ParseJsonString(missingParamsCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingParamsCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string notNumberCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":\"2026\",\"month\":\"3\",\"day\":\"19\"}}";
+    json = JsonUtil::ParseJsonString(notNumberCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, notNumberCommand);
+    EXPECT_FALSE(checkResult);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest039
+ * @tc.desc: OnInjectionEvent injection month error Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest039, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string errorParamCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":13,\"day\":19}}";
+    int32_t result = dialogPattern->OnInjectionEvent(errorParamCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest0050
  * @tc.desc: Show Function Test
  * @tc.type: FUNC
@@ -1806,6 +1885,12 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogViewTest0050, TestSize.Level
     auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
     ASSERT_NE(calendarTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([calendarTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return calendarTheme;
+        });
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;

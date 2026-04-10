@@ -45,7 +45,7 @@ public:
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
         CHECK_NULL_RETURN(focusTheme, FocusPattern());
-        auto tabTheme = pipeline->GetTheme<TabTheme>();
+        auto tabTheme = host->GetTheme<TabTheme>(true);
         CHECK_NULL_RETURN(tabTheme, FocusPattern());
         FocusPaintParam focusPaintParam;
         focusPaintParam.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
@@ -89,9 +89,7 @@ public:
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto columnPaintRect = renderContext->GetPaintRectWithTransform();
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto tabTheme = pipeline->GetTheme<TabTheme>();
+        auto tabTheme = host->GetTheme<TabTheme>(true);
         CHECK_NULL_VOID(tabTheme);
         auto padding = tabTheme->GetFocusPadding();
         BorderRadiusProperty borderRadius;

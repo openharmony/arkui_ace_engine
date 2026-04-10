@@ -363,8 +363,10 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent([windowNode = std::move(host)]() { },
-        "ArkUIWindowDestoryWindowNode", TaskExecutor::TaskType::UI);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([windowNode = std::move(host)]() { },
+        TaskExecutor::TaskType::UI, "ArkUIWindowDestoryWindowNode", PriorityType::IMMEDIATE);
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {

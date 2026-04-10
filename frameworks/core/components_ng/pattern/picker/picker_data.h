@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PICKER_PICKER_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PICKER_PICKER_DATA_H
 
+#include <optional>
+#include <string>
+#include <vector>
+
 #include "base/utils/utils.h"
 
 

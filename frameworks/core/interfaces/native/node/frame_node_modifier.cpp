@@ -44,6 +44,17 @@ enum EventQueryType {
     ON_CLICK = 0,
 };
 
+static const std::vector<const char*> CROSS_LANGUAGE_NODE_TYPE_ARRAY = { OHOS::Ace::V2::SCROLL_ETS_TAG,
+    OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
+    OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
+    OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
+    OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
+    OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
+    OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG, OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG,
+    OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG, OHOS::Ace::V2::CHECKBOX_ETS_TAG,
+    OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG, OHOS::Ace::V2::TOGGLE_ETS_TAG,
+    OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
+
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -723,21 +734,34 @@ ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
-    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
-        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
-        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
-        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
-        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
-        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
-        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
-        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
-        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
-        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
-    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
-    if (pos == nodeTypeArray.end()) {
+    
+    auto pos = std::find(CROSS_LANGUAGE_NODE_TYPE_ARRAY.begin(),
+        CROSS_LANGUAGE_NODE_TYPE_ARRAY.end(), currentNode->GetTag());
+    if (pos == CROSS_LANGUAGE_NODE_TYPE_ARRAY.end()) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    
     currentNode->SetIsCrossLanguageAttributeSetting(attributeSetting);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetCrossLanguageOptionsFull(ArkUINodeHandle node, const struct ArkUICrossLanguageOption* option)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(option, ERROR_CODE_PARAM_INVALID);
+    bool needValidation =
+        (option->attributeSetting == true) || (option->treeOperatingStatus == ARKUI_TREE_OPERATING_STATUS_UNDEFINED);
+    if (needValidation) {
+        auto pos = std::find(
+            CROSS_LANGUAGE_NODE_TYPE_ARRAY.begin(), CROSS_LANGUAGE_NODE_TYPE_ARRAY.end(), currentNode->GetTag());
+        if (pos == CROSS_LANGUAGE_NODE_TYPE_ARRAY.end()) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    currentNode->SetIsCrossLanguageAttributeSetting(option->attributeSetting);
+    currentNode->SetTreeOperatingStatus(
+        static_cast<TreeOperatingStatus>(static_cast<int32_t>(option->treeOperatingStatus)));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -746,6 +770,20 @@ ArkUI_Bool GetCrossLanguageOptions(ArkUINodeHandle node)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, false);
     return currentNode->isCrossLanguageAttributeSetting();
+}
+
+ArkUI_Int32 GetCrossLanguageOptionsFull(ArkUINodeHandle node, struct ArkUICrossLanguageOption* option)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(option, ERROR_CODE_PARAM_INVALID);
+
+    option->attributeSetting = currentNode->isCrossLanguageAttributeSetting();
+
+    option->treeOperatingStatus =
+        static_cast<ArkUITreeOperatingStatus>(static_cast<int32_t>(currentNode->GetTreeOperatingStatus()));
+
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
@@ -1256,6 +1294,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setAutoFocusTransfer = SetAutoFocusTransfer,
         .moveNodeTo = MoveNodeTo,
         .setCrossLanguageOptions = SetCrossLanguageOptions,
+        .setCrossLanguageOptionsFull = SetCrossLanguageOptionsFull,
+        .getCrossLanguageOptionsFull = GetCrossLanguageOptionsFull,
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,

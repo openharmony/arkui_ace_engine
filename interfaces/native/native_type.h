@@ -132,6 +132,35 @@ typedef enum {
 } ArkUI_PickerIndicatorType;
 
 /**
+ * @brief Enumerates the tree operating status for the cross-language option.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * Undefined, the initial value of the node tree operating status. Nodes in this status do not support
+     * cross-language node tree operations.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED = 0,
+    /**
+     * Enable, which means that when the option is applied to the node, the node's tree operating status will be
+     * enabled.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_ENABLE = 1,
+    /**
+     * Disable, which means that when the option is applied to the node, the node's tree operating status will be
+     * disabled.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
+} OH_ArkUI_CrossLanguageOperatingStatus;
+
+/**
  * @brief style parameters of background indicator.
  *
  * @since 23
@@ -5731,6 +5760,27 @@ void OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(ArkUI_CrossLanguageO
 bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageOption* option);
 
 /**
+ * @brief Sets the tree operating status for the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @param status The tree operating status to be set for the cross-language option.
+ * Default value: OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED.
+ * @since 26.0.0
+ */
+void OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option, OH_ArkUI_CrossLanguageOperatingStatus status);
+
+/**
+ * @brief Gets the tree operating status of the cross-language option.
+ *
+ * @param option The cross-language option.
+ * @return Return the tree operating status of the cross-language option.
+ * @since 26.0.0
+ */
+OH_ArkUI_CrossLanguageOperatingStatus OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option);
+
+/**
  * @brief Defines the parameters for visible area change events.
  *
  * @since 17
@@ -6832,6 +6882,26 @@ typedef enum {
     /** The text menu type of preview menu. */
     OH_ARKUI_TEXT_EDITOR_PREVIEW_MENU = 1,
 } OH_ArkUI_TextMenuType;
+
+/**
+* @brief Enumerates raw input event types.
+*
+* @since 26.0.0
+*/
+typedef enum {
+    /**
+     * Touch event.
+     *
+     * @since 26.0.0
+     */
+    ARKUI_RAW_INPUT_EVENT_TYPE_TOUCH = 0,
+    /**
+     * Mouse event.
+     *
+     * @since 26.0.0
+     */
+    ARKUI_RAW_INPUT_EVENT_TYPE_MOUSE = 1,
+} ArkUI_RawInputEventType;
 
 /**
  * @brief Create an object of the text selection menu options.
@@ -9804,6 +9874,40 @@ void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
  * @since 24
  */
 OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontConfigs_GetFontWeightConfigs(OH_ArkUI_FontConfigs* option);
+
+/**
+ * @brief Defines controller for text.
+ * @since 26.0.0
+ */
+typedef struct OH_ArkUI_TextController OH_ArkUI_TextController;
+
+/**
+ * @brief Create a controller object for text.
+ * @return A pointer to the text controller object.
+ * @since 26.0.0
+ */
+OH_ArkUI_TextController* OH_ArkUI_TextController_Create();
+
+/**
+ * @brief Destroys the text controller.
+ *
+ * @param controller <b>Text</b> controller.
+ * @since 26.0.0
+ */
+void OH_ArkUI_TextController_Destroy(OH_ArkUI_TextController* controller);
+
+/**
+ * @brief Set the StyledString of the text.
+ *
+ * @param controller <b>Text</b> controller.
+ * @param descriptor Pointer to an <b>ArkUI_StyledString_Descriptor</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
+    OH_ArkUI_TextController* controller, ArkUI_StyledString_Descriptor* descriptor);
 
 #ifdef __cplusplus
 };

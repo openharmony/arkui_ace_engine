@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_ng/syntax/with_theme_node.h"
 

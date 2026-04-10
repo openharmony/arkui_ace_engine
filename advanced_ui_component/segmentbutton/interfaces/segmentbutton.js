@@ -168,13 +168,6 @@ const segmentButtonTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  SEGMENT_BUTTON_SHADOW: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_shadow'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
   SEGMENT_TEXT_HORIZONTAL_PADDING: {
     id: -1,
     type: 10002,
@@ -396,8 +389,8 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     this.buttonPadding = options.buttonPadding;
     this.textPadding = options.textPadding;
     this.type = options.type;
-    this.backgroundBlurStyle =
-      options.backgroundBlurStyle ?? LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value;
+    this.backgroundBlurStyle =	 
+       options.backgroundBlurStyle ?? LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value;
     this.localizedTextPadding = options.localizedTextPadding;
     this.localizedButtonPadding = options.localizedButtonPadding;
     this.direction = options.direction ?? Direction.Auto;
@@ -426,7 +419,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     let themePadding = LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.segment_button_baseplate_padding'],
+      params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }).value;
@@ -707,11 +700,6 @@ class SelectItem extends ViewPU {
               x: this.zoomScaleArray[this.selectedIndexes[0]],
               y: this.zoomScaleArray[this.selectedIndexes[0]],
             });
-            Stack.shadow(
-              this.isSegmentFocusStyleCustomized
-                ? undefined
-                : resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
-            );
           }, Stack);
           Stack.pop();
         });
@@ -2967,13 +2955,17 @@ export class SegmentButton extends ViewPU {
                   Stack.direction(this.options.direction);
                   Stack.size(ObservedObject.GetRawObject(this.componentSize));
                   Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
-                  Stack.systemMaterial(this.options.backgroundSystemMaterial);
                   Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
                   });
-                  Stack.borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH);
-                  Stack.borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR);
+                  Stack.borderWidth(
+                    this.options.backgroundSystemMaterial ? undefined : segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH
+                  );
+                  Stack.borderColor(
+                    this.options.backgroundSystemMaterial ? undefined : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR
+                  );
+                  Stack.systemMaterial(this.options.backgroundSystemMaterial);
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   If.create();
@@ -3302,13 +3294,16 @@ function getBackgroundBorderRadius(options, defaultRadius) {
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
+
 class FocusStyleButtonModifier {
   constructor(stateStyleAction) {
     this.stateStyleAction = stateStyleAction;
   }
+
   applyNormalAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(false);
   }
+
   applyFocusedAttribute(instance) {
     this.stateStyleAction && this.stateStyleAction(true);
   }

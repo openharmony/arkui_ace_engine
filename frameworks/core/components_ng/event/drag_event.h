@@ -17,28 +17,36 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_EVENT_H
 
 #include <functional>
-#include <list>
+#include <memory>
+
+#include "ui/gestures/gesture_event.h"
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
-#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
-#include "core/gestures/drag_event.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/gestures/drag_constants.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+class PixelMap;
 }
 
 namespace OHOS::Ace::NG {
 
+struct OptionsAfterApplied;
+
 class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
+class SequencedRecognizer;
+class TouchEventImpl;
 class FrameNode;
 class OverlayManager;
 class ScrollablePattern;
 struct GatherNodeChildInfo;
+class UINode;
 
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType);
@@ -228,10 +236,7 @@ public:
         return defaultOnDragStartExecuted_;
     }
 
-    const OptionsAfterApplied& GetOptionsAfterApplied()
-    {
-        return optionsAfterApplied_;
-    }
+    const OptionsAfterApplied& GetOptionsAfterApplied();
 
     void SetIsForDragDrop(bool isForDragDrop)
     {
@@ -388,7 +393,7 @@ private:
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
     bool isResponseRegionFull_ = false;
-    OptionsAfterApplied optionsAfterApplied_;
+    std::unique_ptr<OptionsAfterApplied> optionsAfterApplied_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

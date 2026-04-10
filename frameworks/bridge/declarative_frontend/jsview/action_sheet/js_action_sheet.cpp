@@ -24,9 +24,11 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<ActionSheetModel> ActionSheetModel::instance_ = nullptr;
@@ -362,6 +364,15 @@ void ParseLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
     properties.levelOrder = std::make_optional(order);
 }
 
+void ParseSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto systemMaterialValue = obj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+}
+
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -398,6 +409,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                                 parseRadius = ParseRadius, parseAlignment = ParseDialogAlignment,
                                 parseOffset = ParseOffset,  parseMaskRect = ParseMaskRect,
                                 parseDialogLevelMode = ParseDialogLevelMode,
+                                parseSystemMaterial = ParseSystemMaterial,
                                 node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
@@ -413,6 +425,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         parseOffset(dialogProps, obj);
         parseMaskRect(dialogProps, obj);
         parseDialogLevelMode(dialogProps, obj);
+        parseSystemMaterial(dialogProps, obj);
         // Parse sheets
         auto sheetsVal = obj->GetProperty("sheets");
         if (sheetsVal->IsArray()) {
@@ -509,6 +522,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     // Parse transition.
     properties.transitionEffect = ParseJsTransitionEffect(args);
     ParseLevelOrder(properties, obj);
+    ParseSystemMaterial(properties, obj);
     JSViewAbstract::SetDialogProperties(obj, properties);
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(obj, properties);

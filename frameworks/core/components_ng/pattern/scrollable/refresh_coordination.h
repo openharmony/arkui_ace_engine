@@ -19,10 +19,12 @@
 #include <utility>
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/base/frame_node.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+
 class RefreshCoordination : public AceType {
 public:
     RefreshCoordination(RefPtr<FrameNode> scrollableNode)

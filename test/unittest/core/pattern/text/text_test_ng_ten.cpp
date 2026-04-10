@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_base.h"

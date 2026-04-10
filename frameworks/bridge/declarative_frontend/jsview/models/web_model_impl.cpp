@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/models/web_model_impl.h"
 
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/focusable/focusable_component.h"
+
 namespace OHOS::Ace::Framework {
 void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
     RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken,

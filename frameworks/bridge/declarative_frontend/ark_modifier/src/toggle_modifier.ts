@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ToggleModifier extends ArkToggleComponent implements AttributeModifier<ToggleAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

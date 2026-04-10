@@ -1584,6 +1584,14 @@
         "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand"
     },
@@ -2794,6 +2802,10 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_GetNodeSnapshot"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GetNodeSnapshotSizeLimitation"
     },
     {
         "first_introduced": "23",
@@ -5000,6 +5012,10 @@
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_EnableEventPassthrough"
+    },
+    {
         "first_introduced": "24",
  	    "name": "OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext"
     },
@@ -6576,11 +6592,36 @@
  	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
     },
     {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_Create"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_Destroy"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_TextController_SetStyledString"
+    },
+    {
+
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue"
     },
     {
         "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetErrorMessage"
+    },
+    {
+        "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
+    },
+    {
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent"
+    },
+ 	{
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent"
     }
 ]

@@ -19,13 +19,14 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
-#include "core/animation/animator.h"
-#include "core/animation/spring_motion.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/base/render_node.h"
-#include "core/pipeline/pipeline_context.h"
+#include "ui/event/event_constants.h"
 
 namespace OHOS::Ace {
+
+// Forward declarations
+class Animator;
+class RenderNode;
+class PipelineContext;
 
 enum class ClickSpringEffectType {
     NONE,
@@ -45,32 +46,17 @@ public:
 
     void MarkRender();
 
-    void SetRenderNode(const WeakPtr<RenderNode>& renderNode)
-    {
-        renderNode_ = renderNode;
-    }
-
-    double GetScale() const
-    {
-        return scale_;
-    }
-
-    void SetScale(double scale)
-    {
-        scale_ = scale;
-    }
-
-    void SetController(const RefPtr<Animator>& controller)
-    {
-        controller_ = controller;
-    }
+    void SetRenderNode(const WeakPtr<RenderNode>& renderNode);
+    double GetScale() const;
+    void SetScale(double scale);
+    void SetController(const RefPtr<Animator>& controller);
 
 private:
     void FinishPreviousAnimation();
 
     double scale_ { 1.0 };
-    RefPtr<Animator> controller_ = nullptr;
-    WeakPtr<RenderNode> renderNode_ = nullptr;
+    RefPtr<Animator> controller_;
+    WeakPtr<RenderNode> renderNode_;
 };
 
 } // namespace OHOS::Ace

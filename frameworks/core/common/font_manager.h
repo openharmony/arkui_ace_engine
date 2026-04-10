@@ -160,6 +160,8 @@ public:
 
     void OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content);
 
+    void UpdateStyleOptimizeFlagInCurrentLanguage();
+    bool GetFallbackLineSpacingStyleOptimizeFlag();
 protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
@@ -195,6 +197,8 @@ private:
     std::once_flag load_font_flag_;
     std::shared_mutex mutable formCallbackLock_;
     std::shared_mutex mutable externalCallbackLock_;
+
+    bool fallbackLineSpacingStyleOptimizeFlag_ = false;
 };
 
 } // namespace OHOS::Ace

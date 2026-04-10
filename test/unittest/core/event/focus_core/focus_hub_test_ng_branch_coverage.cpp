@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/common/event_manager.h"
+#include "core/common/key_event_manager.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

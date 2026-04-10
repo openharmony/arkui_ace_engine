@@ -22,11 +22,11 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/resource/resource_info.h"
 
 #include "core/common/ace_application_info.h"
@@ -202,13 +202,13 @@ HWTEST_F(SelectTwoTestNg, CreateWithStringResourceObj, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Test with null ResourceObject (no assertion, just function call).
      * @tc.expected: step2. No exception thrown when null resource is passed.
      */
     selectModelNG.CreateWithStringResourceObj(nullptr);
-    
+
     /**
      * @tc.steps: step3. Create valid string ResourceObject and test resource assignment.
      * @tc.expected: step3. Resource is accepted without error.
@@ -222,7 +222,7 @@ HWTEST_F(SelectTwoTestNg, CreateWithStringResourceObj, TestSize.Level1)
         1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
 
     selectModelNG.CreateWithStringResourceObj(resObj);
-    
+
     /**
      * @tc.steps: step4. Add resource to cache and reload, verifying resource manager interaction.
      * @tc.expected: step4. Resource is added to cache and resource manager is accessed.
@@ -253,7 +253,7 @@ HWTEST_F(SelectTwoTestNg, ModifierColorTypeToString, TestSize.Level1)
         { SelectColorType::OPTION_FONT_COLOR, "OptionFontColor" },
         { SelectColorType::MENU_BACKGROUND_COLOR, "MenuBackgroundColor" },
         { static_cast<SelectColorType>(999), "Unknown" } };
-    
+
     /**
      * @tc.steps: step2. Loop through test cases and verify string conversion.
      * @tc.expected: step2. Each color type converts to the expected string, including unknown type.

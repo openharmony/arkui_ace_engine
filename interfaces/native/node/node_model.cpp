@@ -23,6 +23,7 @@
 #include "frameworks/core/interfaces/drawable/drawable_api.h"
 
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NodeModel {
@@ -262,11 +263,12 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+    if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
+        !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
-    if (parentNode->type == -1) {
+    if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -280,11 +282,12 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+    if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
+        !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
-    if (parentNode->type == -1) {
+    if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -297,11 +300,12 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+    if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
+        !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
-    if (parentNode->type == -1) {
+    if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -315,11 +319,12 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+    if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
+        !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
-    if (parentNode->type == -1) {
+    if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -333,11 +338,12 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+    if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
+        !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
-    if (parentNode->type == -1) {
+    if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -1462,6 +1468,32 @@ bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node)
     const auto* impl = GetFullImpl();
     CHECK_NULL_RETURN(impl, false);
     return impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
+}
+
+bool CheckIsAllowCrossLanguageTreeOperating(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return false;
+    }
+    const auto* impl = GetFullImpl();
+    CHECK_NULL_RETURN(impl, false);
+    ArkUICrossLanguageOption option = { false };
+    if (impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptionsFull(node->uiNodeHandle, &option) !=
+        ERROR_CODE_NO_ERROR) {
+        return false;
+    }
+    return option.treeOperatingStatus == ARKUI_TREE_OPERATING_STATUS_ENABLE;
+}
+
+bool CheckIsCNodeOrAllowCrossLanguageTreeOperating(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return false;
+    }
+    if (node->cNode || node->buildNode) {
+        return true;
+    }
+    return CheckIsAllowCrossLanguageTreeOperating(node);
 }
 
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)

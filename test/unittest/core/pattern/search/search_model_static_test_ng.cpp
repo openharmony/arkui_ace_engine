@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "search_base.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/color.h"
 

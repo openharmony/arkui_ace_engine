@@ -304,10 +304,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
 
-  public __registerUpdateJSInstanceCallback__Internal(callback: () => void): void {
-    return this.nativeViewPartialUpdate.registerUpdateJSInstanceCallback(callback);
-  }
-
   // Callback handler when instanceId changes in backend
   protected __onJSInstanceIdUpdate__Internal(): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);

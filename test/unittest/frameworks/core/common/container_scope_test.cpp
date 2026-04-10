@@ -468,4 +468,193 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
     EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "Unknown reason");
 }
 
+/**
+ * @tc.name: ContainerScopeTest012
+ * @tc.desc: SafelyId - when container count is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Clear container set
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Get SafelyId when containerCount equals 0
+     * @tc.expected: SafelyId equals INSTANCE_ID_UNDEFINED
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest013
+ * @tc.desc: SafelyId - when container count is 1 (singleton)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add one container to containerSet
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step2. Get SafelyId when containerCount equals 1
+     * @tc.expected: SafelyId equals the singleton container id
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step3. Clear container set
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+}
+
+/**
+ * @tc.name: ContainerScopeTest014
+ * @tc.desc: SafelyId - when container count > 1 (multiple containers)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add multiple containers to containerSet
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Get SafelyId when no recent active/foreground
+     * @tc.expected: SafelyId equals DefaultId (last container in set)
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step3. Update recent active id and get SafelyId
+     * @tc.expected: SafelyId equals recent active id
+     */
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Clear recent active, update foreground and get SafelyId
+     * @tc.expected: SafelyId equals recent foreground id
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step5. Clear container set
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest015
+ * @tc.desc: ContainerScope constructor with enable parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get currentId
+     */
+    int32_t scopeId = ContainerScope::CurrentId();
+    EXPECT_EQ(scopeId, INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Call constructor with enable = true
+     */
+    ContainerScope scope(TEST_INSTANCE_ID_CONTAINER, true);
+
+    /**
+     * @tc.steps: step3. Get currentId
+     * @tc.expected: CurrentId equals value in constructor
+     */
+    scopeId = ContainerScope::CurrentId();
+    EXPECT_EQ(scopeId, TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Destructor is called automatically
+     * @tc.expected: CurrentId equals default value
+     */
+}
+
+/**
+ * @tc.name: ContainerScopeTest016
+ * @tc.desc: ContainerScope constructor with enable = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get currentId
+     */
+    int32_t scopeId = ContainerScope::CurrentId();
+    EXPECT_EQ(scopeId, INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Call constructor with enable = false
+     */
+    ContainerScope scope(TEST_INSTANCE_ID_CONTAINER, false);
+
+    /**
+     * @tc.steps: step3. Get currentId
+     * @tc.expected: CurrentId still equals INSTANCE_ID_UNDEFINED (unchanged)
+     */
+    scopeId = ContainerScope::CurrentId();
+    EXPECT_EQ(scopeId, INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest017
+ * @tc.desc: SafelyId matches Container::SafelyId logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up: 2 containers, recent active set
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Compare SafelyId with CurrentId when recent active is set
+     * @tc.expected: SafelyId should prioritize recent active
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), ContainerScope::RecentActiveId());
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step3. Clear recent active, set recent foreground
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Compare SafelyId with CurrentId when recent foreground is set
+     * @tc.expected: SafelyId should prioritize recent foreground
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), ContainerScope::RecentForegroundId());
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step5. Clear all
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
 } // namespace OHOS::Ace

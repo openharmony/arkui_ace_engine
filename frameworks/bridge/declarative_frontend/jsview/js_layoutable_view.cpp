@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.h"
 
+#include "core/components_ng/base/view_abstract_model.h"
+
 namespace OHOS::Ace::Framework {
 
 constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;

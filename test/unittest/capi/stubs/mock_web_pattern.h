@@ -169,6 +169,10 @@ public:
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
+    void EnableScrollDirectionalLock(bool enabled,
+        ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
+    void UpdateEnableDrag(bool enabled) {}
+    void UpdateScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
 
 private:
     std::string GetMixedModeAsString() const;

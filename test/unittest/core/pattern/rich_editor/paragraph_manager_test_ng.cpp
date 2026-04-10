@@ -14,10 +14,10 @@
  */
  
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing::ext;
 
@@ -98,6 +98,9 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects002, TestSize.Level
     info.paragraph = mockParagraph;
     info.end = 10;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step1. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2);
     EXPECT_EQ(result.size(), 1);
@@ -118,6 +121,9 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects003, TestSize.Level
     info.paragraph = mockParagraph;
     info.end = 10;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step1. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2, RectHeightPolicy::COVER_TEXT);
     EXPECT_EQ(result.size(), 1);

@@ -127,6 +127,7 @@ export class ArkUIAniModule {
     native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _SetCustomCallbackWithCheck(ptr: KPointer, node: FrameNode): void
+    native static _SetCustomCallbackWithCheckForFrameNodes(ptrArray: Array<KPointer>, nodeArray: Array<FrameNode>): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void

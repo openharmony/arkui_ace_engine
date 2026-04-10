@@ -23,9 +23,9 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
@@ -1560,5 +1560,582 @@ HWTEST_F(SelectPatternTheTestNg, FullInjectFlowWithValueAndIndexTest, TestSize.L
     std::string cmdInvalidIndex = "{\"cmd\":\"onSelect\",\"params\":{\"index\":10}}";
     EXPECT_EQ(selectPattern->OnInjectionEvent(cmdInvalidIndex), RET_FAILED);
     EXPECT_EQ(selectPattern->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: BindMenuTouch001
+ * @tc.desc: Test SelectPattern BindMenuTouch with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, BindMenuTouch001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    RefPtr<GestureEventHub> gestureHub = nullptr;
+    selectPattern->BindMenuTouch(nullptr, gestureHub);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetFocusStyle001
+ * @tc.desc: Test SelectPattern SetFocusStyle with host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetFocusStyle001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    selectPattern->SetFocusStyle();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: BuildChild001
+ * @tc.desc: Test SelectPattern BuildChild with host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, BuildChild001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->BuildChild();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ResetOptionToInitProps001
+ * @tc.desc: Test SelectPattern ResetOptionToInitProps with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ResetOptionToInitProps001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    auto selectingOption = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    selectPattern->ResetOptionToInitProps(option, selectingOption);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ResetOptionToInitProps002
+ * @tc.desc: Test SelectPattern ResetOptionToInitProps with textOptionApply_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ResetOptionToInitProps002, TestSize.Level1)
+{
+    std::cout<<"ResetOptionToInitProps002 00"<<std::endl;
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->textOptionApply_ = [](WeakPtr<NG::FrameNode> node) {};
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto selectingOption = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    std::cout<<"ResetOptionToInitProps002 11"<<std::endl;
+    selectPattern->ResetOptionToInitProps(option, selectingOption);
+    std::cout<<"ResetOptionToInitProps002 22"<<std::endl;
+    EXPECT_TRUE(selectPattern->textOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: ResetOptionToInitProps003
+ * @tc.desc: Test SelectPattern ResetOptionToInitProps with textSelectOptionApply_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ResetOptionToInitProps003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->textOptionApply_ = nullptr;
+    selectPattern->textSelectOptionApply_ = [](WeakPtr<NG::FrameNode> node) {};
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto selectingOption = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    selectPattern->ResetOptionToInitProps(option, selectingOption);
+    EXPECT_TRUE(selectPattern->textSelectOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: UpdateOptionCustomProperties001
+ * @tc.desc: Test SelectPattern UpdateOptionCustomProperties with option font properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, UpdateOptionCustomProperties001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->optionFont_.FontColor = Color::RED;
+    selectPattern->optionFont_.FontSize = Dimension(16.0_vp);
+    selectPattern->optionFont_.FontStyle = Ace::FontStyle::ITALIC;
+    selectPattern->optionFont_.FontWeight = FontWeight::BOLD;
+    selectPattern->optionBgColor_ = Color::BLUE;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->UpdateOptionCustomProperties(option);
+    EXPECT_TRUE(selectPattern->optionFont_.FontColor.has_value());
+}
+
+/**
+ * @tc.name: ResetSelectedOptionToInitProps001
+ * @tc.desc: Test SelectPattern ResetSelectedOptionToInitProps with textSelectOptionApply_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ResetSelectedOptionToInitProps001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->textSelectOptionApply_ = [](WeakPtr<NG::FrameNode> node) {};
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    selectPattern->ResetSelectedOptionToInitProps(option);
+    EXPECT_TRUE(selectPattern->textSelectOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: ResetSelectedOptionToInitProps002
+ * @tc.desc: Test SelectPattern ResetSelectedOptionToInitProps with textOptionApply_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ResetSelectedOptionToInitProps002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->textSelectOptionApply_ = nullptr;
+    selectPattern->textOptionApply_ = [](WeakPtr<NG::FrameNode> node) {};
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    selectPattern->ResetSelectedOptionToInitProps(option);
+    EXPECT_TRUE(selectPattern->textOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectedOptionCustomProperties001
+ * @tc.desc: Test SelectPattern UpdateSelectedOptionCustomProperties with selected font properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, UpdateSelectedOptionCustomProperties001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->selectedFont_.FontColor = Color::GREEN;
+    selectPattern->selectedFont_.FontSize = Dimension(18.0_vp);
+    selectPattern->selectedFont_.FontStyle = Ace::FontStyle::ITALIC;
+    selectPattern->selectedFont_.FontWeight = FontWeight::W900;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->UpdateSelectedOptionCustomProperties(option);
+    EXPECT_TRUE(selectPattern->selectedFont_.FontColor.has_value());
+}
+
+/**
+ * @tc.name: UpdateSelectedOptionCustomProperties002
+ * @tc.desc: Test SelectPattern UpdateSelectedOptionCustomProperties with option font fallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, UpdateSelectedOptionCustomProperties002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->selectedFont_.FontColor = std::nullopt;
+    selectPattern->selectedFont_.FontSize = std::nullopt;
+    selectPattern->optionFont_.FontSize = Dimension(14.0_vp);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->UpdateSelectedOptionCustomProperties(option);
+    EXPECT_TRUE(selectPattern->optionFont_.FontSize.has_value());
+}
+
+/**
+ * @tc.name: ToJsonArrowAndText001
+ * @tc.desc: Test SelectPattern ToJsonArrowAndText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonArrowAndText001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    selectPattern->ToJsonArrowAndText(json, filter);
+    EXPECT_TRUE(json != nullptr);
+}
+
+/**
+ * @tc.name: ToJsonOptionMaxlines001
+ * @tc.desc: Test SelectPattern ToJsonOptionMaxlines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonOptionMaxlines001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    selectPattern->ToJsonOptionMaxlines(json, filter);
+    EXPECT_TRUE(json != nullptr);
+}
+
+/**
+ * @tc.name: ToJsonOptionAlign001
+ * @tc.desc: Test SelectPattern ToJsonOptionAlign with START align.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonOptionAlign001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->menuAlign_.alignType = MenuAlignType::START;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    selectPattern->ToJsonOptionAlign(json, filter);
+    EXPECT_TRUE(json != nullptr);
+}
+
+/**
+ * @tc.name: ToJsonOptionAlign002
+ * @tc.desc: Test SelectPattern ToJsonOptionAlign with CENTER align.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonOptionAlign002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->menuAlign_.alignType = MenuAlignType::CENTER;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    selectPattern->ToJsonOptionAlign(json, filter);
+    EXPECT_TRUE(json != nullptr);
+}
+
+/**
+ * @tc.name: ToJsonOptionAlign003
+ * @tc.desc: Test SelectPattern ToJsonOptionAlign with END align.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonOptionAlign003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->menuAlign_.alignType = MenuAlignType::END;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    selectPattern->ToJsonOptionAlign(json, filter);
+    EXPECT_TRUE(json != nullptr);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test SelectPattern OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetOptionBgColorByUser001
+ * @tc.desc: Test SelectPattern SetOptionBgColorByUser when color is not set by user.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetOptionBgColorByUser001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    Color color = Color::BLUE;
+    selectPattern->SetOptionBgColorByUser(color, props);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate001
+ * @tc.desc: Test SelectPattern OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->OnLanguageConfigurationUpdate();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ShowOptions001
+ * @tc.desc: Test SelectPattern ShowOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ShowOptions001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    int32_t index = 0;
+    selectPattern->ShowOptions(index);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetTextModifierApply001
+ * @tc.desc: Test SelectPattern SetTextModifierApply with textApply callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetTextModifierApply001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    std::function<void(WeakPtr<NG::FrameNode>)> textApply = [](WeakPtr<NG::FrameNode> node) {};
+    selectPattern->SetTextModifierApply(textApply);
+    EXPECT_TRUE(selectPattern->textApply_ != nullptr);
+}
+
+/**
+ * @tc.name: SetTextModifierApply002
+ * @tc.desc: Test SelectPattern SetTextModifierApply without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetTextModifierApply002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    std::function<void(WeakPtr<NG::FrameNode>)> textApply = nullptr;
+    selectPattern->SetTextModifierApply(textApply);
+    EXPECT_TRUE(selectPattern->textApply_ == nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionTextModifier001
+ * @tc.desc: Test SelectPattern SetSelectedOptionTextModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetSelectedOptionTextModifier001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->options_.push_back(option);
+    selectPattern->selected_ = 0;
+    std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply = [](WeakPtr<NG::FrameNode> node) {};
+    selectPattern->SetSelectedOptionTextModifier(textSelectOptionApply);
+    EXPECT_TRUE(selectPattern->textSelectOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionTextModifier002
+ * @tc.desc: Test SelectPattern SetSelectedOptionTextModifier with invalid selected index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetSelectedOptionTextModifier002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->selected_ = -1;
+    std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply = [](WeakPtr<NG::FrameNode> node) {};
+    selectPattern->SetSelectedOptionTextModifier(textSelectOptionApply);
+    EXPECT_TRUE(selectPattern->textSelectOptionApply_ != nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionBgColorByUser001
+ * @tc.desc: Test SelectPattern SetSelectedOptionBgColorByUser when showDefaultSelectedIcon is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetSelectedOptionBgColorByUser001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    auto layoutProps = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(theme, nullptr);
+    ASSERT_NE(props, nullptr);
+    ASSERT_NE(layoutProps, nullptr);
+    selectPattern->SetSelectedOptionBgColorByUser(theme, props, layoutProps);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetSelectedOptionBgColorByUser002
+ * @tc.desc: Test SelectPattern SetSelectedOptionBgColorByUser when showDefaultSelectedIcon is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetSelectedOptionBgColorByUser002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    auto layoutProps = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(theme, nullptr);
+    ASSERT_NE(props, nullptr);
+    ASSERT_NE(layoutProps, nullptr);
+    layoutProps->UpdateShowDefaultSelectedIcon(true);
+    selectPattern->SetSelectedOptionBgColorByUser(theme, props, layoutProps);
+    EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG

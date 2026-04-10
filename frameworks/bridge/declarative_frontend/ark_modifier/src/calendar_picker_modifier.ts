@@ -13,12 +13,78 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class CalendarPickerModifier extends ArkCalendarPickerComponent implements AttributeModifier<CalendarPickerAttribute> {
+class LazyArkCalendarPickerComponent extends ArkComponent {
+  static module: CalendarPickerComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkCalendarPickerComponent.module === undefined) {
+      LazyArkCalendarPickerComponent.module = globalThis.requireNapi('arkui.components.arkCalendarpicker');
+    }
+
+    this.lazyComponent = LazyArkCalendarPickerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  value(value: Date): this {
+    this.lazyComponent.value(value);
+    return this;
+  }
+
+  edgeAlign(alignType: CalendarAlign, offset?: Offset): this {
+    this.lazyComponent.edgeAlign(alignType, offset);
+    return this;
+  }
+
+  textStyle(value: PickerTextStyle): this {
+    this.lazyComponent.textStyle(value);
+    return this;
+  }
+
+  onChange(value: Callback<Date>): this {
+    this.lazyComponent.onChange(value);
+    return this;
+  }
+
+  padding(value: Padding | Length | LocalizedPadding): this {
+    this.lazyComponent.padding(value);
+    return this;
+  }
+
+  border(value: BorderOptions): this {
+    this.lazyComponent.border(value);
+    return this;
+  }
+
+  height(value: Length): this {
+    this.lazyComponent.height(value);
+    return this;
+  }
+
+  borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses): this {
+    this.lazyComponent.borderRadius(value);
+    return this;
+  }
+
+  borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors): this {
+    this.lazyComponent.borderColor(value);
+    return this;
+  }
+
+  markToday(value: boolean): this {
+    this.lazyComponent.markToday(value);
+    return this;
+  }
+}
+class CalendarPickerModifier extends LazyArkCalendarPickerComponent implements AttributeModifier<CalendarPickerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: CalendarPickerAttribute): void {

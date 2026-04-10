@@ -15,9 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "scroll_test_ng.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 namespace OHOS::Ace::NG {
 // using namespace testing;
 // using namespace testing::ext;
@@ -796,6 +796,22 @@ HWTEST_F(ScrollPatternThreeTestNg, SnapWithContentOffsetUpdate, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_END_OFFSET);
+}
+
+/**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    pattern_->SetIsAllowMouse(true);
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
 }
 
 /**

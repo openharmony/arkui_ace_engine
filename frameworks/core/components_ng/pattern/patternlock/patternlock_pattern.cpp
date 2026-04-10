@@ -16,6 +16,7 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -53,6 +54,7 @@ void PatternLockPattern::OnModifyDone()
     InitTouchEvent(gestureHub, touchDownListener_);
     InitPatternLockController();
     InitFocusEvent();
+    UpdateFocusPaintFromTheme();
     InitMouseEvent();
     InitAccessibilityHoverEvent();
     InitSkipUnselectedPoint();
@@ -608,9 +610,7 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(patternLockPaintProperty);
@@ -637,6 +637,21 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, foucusCircleRadius, foucusCircleRadius);
+}
+
+void PatternLockPattern::UpdateFocusPaintFromTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
+    CHECK_NULL_VOID(patternLockTheme);
+
+    focusHub->SetPaintColor(patternLockTheme->GetFocusColor());
+    if (focusHub->IsCurrentFocus()) {
+        focusHub->PaintFocusState(false);
+    }
 }
 
 void PatternLockPattern::OnFocusClick()
@@ -1019,9 +1034,7 @@ void PatternLockPattern::OnColorConfigurationUpdate()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+    auto theme = host->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(pops);
@@ -1044,5 +1057,6 @@ void PatternLockPattern::OnColorConfigurationUpdate()
                                                    !pops->GetActiveCircleColorSetByUserValue())) {
         UpdateActiveCircleColor(Color::TRANSPARENT);
     }
+    UpdateFocusPaintFromTheme();
 }
 } // namespace OHOS::Ace::NG

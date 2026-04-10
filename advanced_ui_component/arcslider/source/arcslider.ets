@@ -982,7 +982,7 @@ export struct ArcSlider {
           this.startRestoreAnimator();
           this.calcBlur();
         }
-      }, RESTORE_TIMEOUT)
+      }, RESTORE_TIMEOUT).toInt()
       this.isMaxOrMinAnimator();
     } else if (isTouchTypeMove && this.isFocus) {
       this.options.onTouch?.(event);

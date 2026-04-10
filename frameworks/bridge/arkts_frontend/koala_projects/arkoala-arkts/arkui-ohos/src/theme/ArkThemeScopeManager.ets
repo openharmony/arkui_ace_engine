@@ -311,7 +311,7 @@ export class ArkThemeScopeManager {
      * @param withThemeOptions WithTheme container`s options
      */
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ArkThemeBase) {
-        this.themeOptionsMap.set(withThemeId as int32, withThemeOptions);
+        this.themeOptionsMap.set(withThemeId.toInt(), withThemeOptions);
         // save theme scope id on scope enter
         this.lastThemeScopeId = withThemeId;
         if (this.handledIsFirstRender === true) {
@@ -647,7 +647,7 @@ export class ArkThemeScopeManager {
         if (handledColorMode.isNull() || handledColorMode.isUndefined()) {
             return;
         }
-        const colorModeValue = handledColorMode.toNumber() as int32;
+        const colorModeValue = handledColorMode.toNumber().toInt();
         let colorMode = ThemeColorMode.SYSTEM;
         if (colorModeValue === 0) {
             colorMode = ThemeColorMode.SYSTEM;

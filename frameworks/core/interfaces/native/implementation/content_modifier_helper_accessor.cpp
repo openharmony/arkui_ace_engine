@@ -470,6 +470,7 @@ void ContentModifierTextTimerImpl(Ark_NativePointer node,
         arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
         arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
         arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
+        arkConfig.startTime = Converter::ArkValue<Opt_Int32>(config.startTime_);
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {
             boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());

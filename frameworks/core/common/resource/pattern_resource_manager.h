@@ -20,11 +20,14 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include "base/memory/ace_type.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/calc_dimension.h"
 
 #include "core/common/resource/resource_object.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace {
 enum class ValueType {

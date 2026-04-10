@@ -101,6 +101,16 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
+void AssignCast(std::optional<ScrollDirectionalLockType>& dst, const Ark_ScrollDirectionalLockType& src)
+{
+    switch (src) {
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_ALL: dst = ScrollDirectionalLockType::ALL; break;
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_NESTED_SCROLL: dst = ScrollDirectionalLockType::NESTED_SCROLL; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollDirectionalLockType: %{public}d", src);
+    }
+}
+
+template<>
 ACE_FORCE_EXPORT void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
 {
     switch (src) {
@@ -1708,6 +1718,16 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
 }
 
 template<>
+void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src)
+{
+    switch (src) {
+        case ARK_SCROLLBAR_LAYOUT_POLICY_CONTENT: dst = ScrollbarLayoutPolicy::CONTENT; break;
+        case ARK_SCROLLBAR_LAYOUT_POLICY_SYSTEM: dst = ScrollbarLayoutPolicy::SYSTEM; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollbarLayoutPolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
 {
     switch (src) {
@@ -2065,6 +2085,7 @@ void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src)
     switch (src) {
         case ARK_HDR_TYPE_DEFAULT: dst = HdrType::DEFAULT; break;
         case ARK_HDR_TYPE_AIHDR: dst = HdrType::AIHDR; break;
+        case ARK_HDR_TYPE_EDR: dst = HdrType::EDR; break;
         default: LOGE("Unexpected enum value in Ark_HdrType: %{public}d", src);
     }
 }

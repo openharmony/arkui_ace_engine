@@ -114,6 +114,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/frameworks/text/interface/export/rosen_text/export/rosen_text",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
+          "//foundation/graphic/graphic_2d/utils/log",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
           "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
           "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",

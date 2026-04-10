@@ -17,7 +17,11 @@
 
 #include "accessor_test_base.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/interfaces/native/implementation/i_curve_peer.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -41,7 +45,7 @@ namespace Converter {
 void AssignArkValue(Ark_curves_ICurve& dst, const RefPtr<MockCurve>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<curves_ICurvePeer>();
-    dst->curve = src;
+    dst->handler = src;
 }
 } // namespace Converter
 namespace {
@@ -133,8 +137,64 @@ public:
     MOCK_METHOD(void, ScrollToEdge, (ScrollEdgeType, float));
 };
 
+class BindingFrameNodeIdController : public StubScrollController {
+public:
+    explicit BindingFrameNodeIdController(int32_t nodeId) : nodeId_(nodeId) {}
+    ~BindingFrameNodeIdController() override = default;
+
+    int32_t GetBindingFrameNodeId() const override
+    {
+        return nodeId_;
+    }
+
+private:
+    int32_t nodeId_ = -1;
+};
+
 const int64_t FAKE_RES_ID(1234);
 const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
+
+using CurveTestStep = std::pair<Ark_Union_curves_Curve_curves_ICurve, RefPtr<Curve>>;
+
+const std::vector<CurveTestStep>& GetScrollCurveTestPlan()
+{
+    static const std::vector<CurveTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_LINEAR),
+            Curves::LINEAR },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_EASE),
+            Curves::EASE },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_EASE_IN),
+            Curves::EASE_IN },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_EASE_OUT),
+            Curves::EASE_OUT },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_EASE_IN_OUT),
+            Curves::EASE_IN_OUT },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_FAST_OUT_SLOW_IN),
+            Curves::FAST_OUT_SLOW_IN },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_LINEAR_OUT_SLOW_IN),
+            Curves::LINEAR_OUT_SLOW_IN },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_FAST_OUT_LINEAR_IN),
+            Curves::FAST_OUT_LINEAR_IN },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_EXTREME_DECELERATION),
+            Curves::EXTREME_DECELERATION },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_SMOOTH),
+            Curves::SMOOTH },
+        { Converter::ArkUnion<Ark_Union_curves_Curve_curves_ICurve, Ark_curves_Curve>(
+            ARK_CURVES_CURVE_FRICTION),
+            Curves::FRICTION },
+    };
+    return testPlan;
+}
 } // namespace
 
 class ScrollerAccessorTest : public AccessorTestBase<GENERATED_ArkUIScrollerAccessor,
@@ -173,19 +233,19 @@ HWTEST_F(ScrollerAccessorTest, flingTest, TestSize.Level1)
     constexpr double validFlingValue2 = 55.6f;
     constexpr double invalidFlingValue = 0.0000001f;
 
-    auto arkFlingValid1 = ArkValue<Ark_Number>(validFlingValue1);
-    auto arkFlingValid2 = ArkValue<Ark_Number>(validFlingValue2);
-    auto arkFlingInvalid = ArkValue<Ark_Number>(invalidFlingValue);
+    auto arkFlingValid1 = ArkValue<Ark_Float64>(validFlingValue1);
+    auto arkFlingValid2 = ArkValue<Ark_Float64>(validFlingValue2);
+    auto arkFlingInvalid = ArkValue<Ark_Float64>(invalidFlingValue);
 
     ASSERT_NE(accessor_->fling, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue1)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid1);
+    accessor_->fling(vmContext_, peer_, arkFlingValid1);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue2)).Times(1);
-    accessor_->fling(peer_, &arkFlingValid2);
-    accessor_->fling(peer_, &arkFlingInvalid);
-    accessor_->fling(peer_, nullptr);
+    accessor_->fling(vmContext_, peer_, arkFlingValid2);
+    accessor_->fling(vmContext_, peer_, arkFlingInvalid);
+    accessor_->fling(vmContext_, peer_, 0.0);
 }
 
 /**
@@ -202,12 +262,12 @@ HWTEST_F(ScrollerAccessorTest, isAtEndTest, TestSize.Level1)
 
     mockScrollerController_->SetIsAtEnd(true);
     EXPECT_CALL(*mockScrollerController_, IsAtEnd()).Times(1).WillOnce(Return(arkIsAtEndTrue));
-    auto result = accessor_->isAtEnd(peer_);
+    auto result = accessor_->isAtEnd(vmContext_, peer_);
     EXPECT_EQ(result, arkIsAtEndTrue);
 
     mockScrollerController_->SetIsAtEnd(false);
     EXPECT_CALL(*mockScrollerController_, IsAtEnd()).Times(1).WillOnce(Return(arkIsAtEndFalse));
-    result = accessor_->isAtEnd(peer_);
+    result = accessor_->isAtEnd(vmContext_, peer_);
     EXPECT_EQ(result, arkIsAtEndFalse);
 }
 
@@ -230,11 +290,11 @@ HWTEST_F(ScrollerAccessorTest, scrollPageTest, TestSize.Level1)
     ASSERT_NE(accessor_->scrollPage, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextTrue, smooth)).Times(1);
-    accessor_->scrollPage(peer_, &options1);
+    accessor_->scrollPage(vmContext_, peer_, &options1);
 
     EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextFalse, smooth)).Times(1);
-    accessor_->scrollPage(peer_, &options2);
-    accessor_->scrollPage(peer_, nullptr);
+    accessor_->scrollPage(vmContext_, peer_, &options2);
+    accessor_->scrollPage(vmContext_, peer_, nullptr);
 }
 
 /**
@@ -249,12 +309,12 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeTest, TestSize.Level1)
     ASSERT_NE(accessor_->scrollEdge, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true)).Times(2);
-    accessor_->scrollEdge(peer_, ARK_EDGE_TOP, nullptr);
-    accessor_->scrollEdge(peer_, ARK_EDGE_START, &emptyScrollEdgeOptions);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_TOP, nullptr);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_START, &emptyScrollEdgeOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true)).Times(2);
-    accessor_->scrollEdge(peer_, ARK_EDGE_BOTTOM, &emptyScrollEdgeOptions);
-    accessor_->scrollEdge(peer_, ARK_EDGE_END, nullptr);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_BOTTOM, &emptyScrollEdgeOptions);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_END, nullptr);
 }
 
 /**
@@ -274,13 +334,13 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeTestOptionsValid, TestSize.Level1)
     constexpr float velocityValid = 100.45f;
 
     Ark_ScrollEdgeOptions scrollEdgeOptions;
-    scrollEdgeOptions.velocity = Converter::ArkValue<Opt_Number>(velocityValid);
+    scrollEdgeOptions.velocity = Converter::ArkValue<Opt_Float64>(velocityValid);
     Opt_ScrollEdgeOptions optScrollEdgeOptions = Converter::ArkValue<Opt_ScrollEdgeOptions>(scrollEdgeOptions);
 
     ASSERT_NE(accessor_->scrollEdge, nullptr);
 
     EXPECT_CALL(*mockScrollerController2, ScrollToEdge(ScrollEdgeType::SCROLL_TOP, velocityValid)).Times(1);
-    accessor_->scrollEdge(peer_, ARK_EDGE_START, &optScrollEdgeOptions);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_START, &optScrollEdgeOptions);
 
     peer_->SetController(mockScrollerControllerKeeper_);
 }
@@ -295,13 +355,13 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeTestOptionsInvalid, TestSize.Level1)
     constexpr float velocityInvalid = -100.45f;
 
     Ark_ScrollEdgeOptions scrollEdgeOptions;
-    scrollEdgeOptions.velocity = Converter::ArkValue<Opt_Number>(velocityInvalid);
+    scrollEdgeOptions.velocity = Converter::ArkValue<Opt_Float64>(velocityInvalid);
     Opt_ScrollEdgeOptions optScrollEdgeOptions = Converter::ArkValue<Opt_ScrollEdgeOptions>(scrollEdgeOptions);
 
     ASSERT_NE(accessor_->scrollEdge, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true)).Times(1);
-    accessor_->scrollEdge(peer_, ARK_EDGE_START, &optScrollEdgeOptions);
+    accessor_->scrollEdge(vmContext_, peer_, ARK_EDGE_START, &optScrollEdgeOptions);
 }
 
 /**
@@ -337,7 +397,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByTestX, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(expected, 0, false)).Times(1);
-        accessor_->scrollBy(peer_, &arkLength, &arkDy);
+        accessor_->scrollBy(vmContext_, peer_, &arkLength, &arkDy);
     }
 }
 
@@ -375,7 +435,7 @@ HWTEST_F(ScrollerAccessorTest, scrollByTestY, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(0, expected, false)).Times(1);
-        accessor_->scrollBy(peer_, &arkDx, &arkLength);
+        accessor_->scrollBy(vmContext_, peer_, &arkDx, &arkLength);
     }
 }
 
@@ -390,8 +450,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTest, TestSize.Level1)
     constexpr int32_t indexInvalid = -100;
     std::optional<float> emptyOptionsRes = std::nullopt;
 
-    Ark_Number arkIndexValid = Converter::ArkValue<Ark_Number>(indexValid);
-    Ark_Number arkIndexInvalid = Converter::ArkValue<Ark_Number>(indexInvalid);
+    Ark_Int32 arkIndexValid = Converter::ArkValue<Ark_Int32>(indexValid);
+    Ark_Int32 arkIndexInvalid = Converter::ArkValue<Ark_Int32>(indexInvalid);
     Opt_Boolean arkSmooth = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     Opt_ScrollAlign arkAlign = Converter::ArkValue<Opt_ScrollAlign>(Ark_Empty());
     Opt_ScrollToIndexOptions arkOptions = Converter::ArkValue<Opt_ScrollToIndexOptions>(Ark_Empty());
@@ -400,9 +460,9 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTest, TestSize.Level1)
 
     EXPECT_CALL(*mockScrollerController_,
         ScrollToIndex(indexValid, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndexValid, &arkSmooth, &arkAlign, &arkOptions);
-    accessor_->scrollToIndex(peer_, &arkIndexInvalid, &arkSmooth, &arkAlign, &arkOptions);
-    accessor_->scrollToIndex(peer_, nullptr, &arkSmooth, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndexValid, &arkSmooth, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndexInvalid, &arkSmooth, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, -1, &arkSmooth, &arkAlign, &arkOptions);
 }
 
 /**
@@ -415,7 +475,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestSmooth, TestSize.Level1)
     constexpr int32_t index = 100;
     std::optional<float> emptyOptionsRes = std::nullopt;
 
-    Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+    Ark_Int32 arkIndex = Converter::ArkValue<Ark_Int32>(index);
     Opt_Boolean arkSmoothEmpty = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     Opt_Boolean arkSmoothTrue = Converter::ArkValue<Opt_Boolean>(true);
     Opt_Boolean arkSmoothFalse = Converter::ArkValue<Opt_Boolean>(false);
@@ -425,12 +485,12 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestSmooth, TestSize.Level1)
     ASSERT_NE(accessor_->scrollToIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(3);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmoothEmpty, &arkAlign, &arkOptions);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmoothFalse, &arkAlign, &arkOptions);
-    accessor_->scrollToIndex(peer_, &arkIndex, nullptr, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmoothEmpty, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmoothFalse, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, nullptr, &arkAlign, &arkOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, true, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmoothTrue, &arkAlign, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmoothTrue, &arkAlign, &arkOptions);
 }
 
 /**
@@ -443,7 +503,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestAlign, TestSize.Level1)
     constexpr int32_t index = 100;
     std::optional<float> emptyOptionsRes = std::nullopt;
 
-    Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+    Ark_Int32 arkIndex = Converter::ArkValue<Ark_Int32>(index);
     Opt_Boolean arkSmooth = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     Opt_ScrollAlign arkAlignEmpty = Converter::ArkValue<Opt_ScrollAlign>(Ark_Empty());
     Opt_ScrollAlign arkAlignStart = Converter::ArkValue<Opt_ScrollAlign>(ARK_SCROLL_ALIGN_START);
@@ -455,20 +515,20 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestAlign, TestSize.Level1)
     ASSERT_NE(accessor_->scrollToIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(2);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignEmpty, &arkOptions);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, nullptr, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, &arkAlignEmpty, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, nullptr, &arkOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::START, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignStart, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, &arkAlignStart, &arkOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::CENTER, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignCenter, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, &arkAlignCenter, &arkOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::END, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignEnd, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, &arkAlignEnd, &arkOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::AUTO, emptyOptionsRes)).Times(1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignAuto, &arkOptions);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &arkSmooth, &arkAlignAuto, &arkOptions);
 }
 
 static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
@@ -488,7 +548,7 @@ static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
 HWTEST_F(ScrollerAccessorTest, scrollToIndexTestOptions, TestSize.Level1)
 {
     constexpr int32_t index = 0;
-    const auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+    const auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
     const auto optSmooth = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     const auto optAlign = Converter::ArkValue<Opt_ScrollAlign>(Ark_Empty());
     // valid
@@ -503,7 +563,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestOptions, TestSize.Level1)
         const auto optOptions = GetOptions(std::get<0>(plan), std::get<1>(plan));
         const std::optional<float> options = std::get<1>(plan);
         EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, options)).Times(1);
-        accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions);
+        accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &optSmooth, &optAlign, &optOptions);
     }
     // invalid
     const std::optional<float> emptyOptionsRes = std::nullopt;
@@ -515,9 +575,9 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestOptions, TestSize.Level1)
         arkOptionsEmpty2);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(3);
-    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptionsEmpty1);
-    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptionsEmpty2);
-    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, nullptr);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &optSmooth, &optAlign, &optOptionsEmpty1);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &optSmooth, &optAlign, &optOptionsEmpty2);
+    accessor_->scrollToIndex(vmContext_, peer_, arkIndex, &optSmooth, &optAlign, nullptr);
 }
 
 /**
@@ -530,22 +590,15 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
     double x = 10;
     double y = 20;
 
-    auto arkX = ArkValue<Ark_Number>(static_cast<float>(x));
-    auto arkY = ArkValue<Ark_Number>(static_cast<float>(y));
+    auto arkX = ArkValue<Ark_Float64>(x);
+    auto arkY = ArkValue<Ark_Float64>(y);
     auto arkIndex = ArkValue<Ark_Int32>(static_cast<int32_t>(x + y));
-    auto arkIndexInavid = ArkValue<Ark_Int32>(-1);
 
     ASSERT_NE(accessor_->getItemIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemIndex(x, y)).Times(1).WillOnce(Return(arkIndex));
-    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, &arkX, &arkY));
+    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, arkX, arkY));
     EXPECT_EQ(result, arkIndex);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, nullptr, &arkY));
-    EXPECT_EQ(result, arkIndexInavid);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, &arkX, nullptr));
-    EXPECT_EQ(result, arkIndexInavid);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, nullptr, nullptr));
-    EXPECT_EQ(result, arkIndexInavid);
 }
 
 /**
@@ -560,9 +613,9 @@ HWTEST_F(ScrollerAccessorTest, currentOffsetTest, TestSize.Level1)
     ASSERT_NE(accessor_->currentOffset, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetCurrentOffset()).Times(1).WillOnce(Return(expectedOffset));
-    auto arkOffsetResult = accessor_->currentOffset(peer_);
-    auto x = Converter::Convert<float>(arkOffsetResult.xOffset);
-    auto y = Converter::Convert<float>(arkOffsetResult.yOffset);
+    auto arkOffsetResult = accessor_->currentOffset(vmContext_, peer_);
+    auto x = Converter::Convert<float>(arkOffsetResult.value.xOffset);
+    auto y = Converter::Convert<float>(arkOffsetResult.value.yOffset);
     EXPECT_FLOAT_EQ(x, expectedOffset.GetX());
     EXPECT_FLOAT_EQ(y, expectedOffset.GetY());
 }
@@ -576,12 +629,12 @@ HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
 {
     auto expectedRect = Rect(2.5, 4.75, 10.43, 24);
     int32_t index = 5;
-    Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+    Ark_Int32 arkIndex = Converter::ArkValue<Ark_Int32>(index);
 
     ASSERT_NE(accessor_->getItemRect, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemRect(index)).Times(1).WillOnce(Return(expectedRect));
-    auto arkRectResult = accessor_->getItemRect(peer_, &arkIndex);
+    auto arkRectResult = accessor_->getItemRect(vmContext_, peer_, arkIndex);
     auto x = Converter::Convert<float>(arkRectResult.x);
     auto y = Converter::Convert<float>(arkRectResult.y);
     auto w = Converter::Convert<float>(arkRectResult.width);
@@ -604,24 +657,24 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestPosition, TestSize.Level1)
     bool canOverScroll = false;
     RefPtr<Curve> curve = Curves::EASE;
 
-    typedef std::pair<Ark_Union_Number_String, Dimension> OneTestStep;
+    typedef std::pair<Ark_Union_F64_String, Dimension> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1), Dimension(1, DimensionUnit::VP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0), Dimension(0, DimensionUnit::VP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(2.5f), Dimension(2.5, DimensionUnit::VP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-5px"), Dimension(-5, DimensionUnit::PX) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), Dimension(7, DimensionUnit::VP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), Dimension(65, DimensionUnit::FP) },
-        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0), Dimension(1, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(0.0), Dimension(0, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(2.5), Dimension(2.5, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("-5px"), Dimension(-5, DimensionUnit::PX) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("7vp"), Dimension(7, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("65fp"), Dimension(65, DimensionUnit::FP) },
+        { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
     };
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     for (const auto &[arkOffset, expected]: testPlan) {
         Ark_ScrollOptions options;
-        options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0);
+        options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(0.0);
         options.yOffset = arkOffset;
         options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(Ark_Empty());
         mockScrollerController_->SetScrollDirection(Axis::VERTICAL);
@@ -629,16 +682,16 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestPosition, TestSize.Level1)
         EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1).WillOnce(Return(Axis::VERTICAL));
         EXPECT_CALL(*mockScrollerController_, AnimateTo(expected, duration, curve, smooth, canOverScroll))
             .Times(1).WillOnce(Return(true));
-        accessor_->scrollTo(peer_, &options);
+        accessor_->scrollTo(vmContext_, peer_, &options);
 
         options.xOffset = arkOffset;
-        options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0);
+        options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(0.0);
         mockScrollerController_->SetScrollDirection(Axis::HORIZONTAL);
         mockScrollerController_->SetAnimateToResult(true);
         EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1).WillOnce(Return(Axis::HORIZONTAL));
         EXPECT_CALL(*mockScrollerController_, AnimateTo(expected, duration, curve, smooth, canOverScroll))
             .Times(1).WillOnce(Return(false));
-        accessor_->scrollTo(peer_, &options);
+        accessor_->scrollTo(vmContext_, peer_, &options);
     }
 }
 
@@ -656,35 +709,35 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestAnimation, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
+    options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(true);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, true, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(false);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, false, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(Ark_Empty());
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, false, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 
     Ark_ScrollAnimationOptions scrollAnimationOptions;
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(Ark_Empty());
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_curves_Curve_curves_ICurve>(Ark_Empty());
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, defaultDuration, curve, true, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 }
 
 /**
@@ -700,28 +753,28 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestCanOverScroll, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
+    options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     Ark_ScrollAnimationOptions scrollAnimationOptions;
-    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(Ark_Empty());
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_curves_Curve_curves_ICurve>(Ark_Empty());
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
 
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(true);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, smooth, true)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(false);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, smooth, false)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 }
 
 /**
@@ -736,28 +789,28 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestDuration, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
+    options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     Ark_ScrollAnimationOptions scrollAnimationOptions;
-    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(Ark_Empty());
+    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_curves_Curve_curves_ICurve>(Ark_Empty());
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
 
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(100.5f);
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(100);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
-    EXPECT_CALL(*mockScrollerController_, AnimateTo(position, 100.5f, curve, false, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    EXPECT_CALL(*mockScrollerController_, AnimateTo(position, 100.0f, curve, false, canOverScroll)).Times(1);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(-1.0f);
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(-1);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, 1000.0f, curve, true, canOverScroll)).Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
 }
 
 /**
@@ -773,43 +826,22 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestCurve, TestSize.Level1)
     bool canOverScroll = false;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
+    options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     Ark_ScrollAnimationOptions scrollAnimationOptions;
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
-
-    typedef std::pair<Ark_Union_Curve_ICurve, RefPtr<Curve>> OneTestStep;
-    const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_LINEAR), Curves::LINEAR },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE), Curves::EASE },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN), Curves::EASE_IN },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_OUT), Curves::EASE_OUT },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN_OUT),
-            Curves::EASE_IN_OUT },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_FAST_OUT_SLOW_IN),
-            Curves::FAST_OUT_SLOW_IN },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_LINEAR_OUT_SLOW_IN),
-            Curves::LINEAR_OUT_SLOW_IN },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_FAST_OUT_LINEAR_IN),
-            Curves::FAST_OUT_LINEAR_IN },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EXTREME_DECELERATION),
-            Curves::EXTREME_DECELERATION },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_SMOOTH), Curves::SMOOTH },
-        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_FRICTION), Curves::FRICTION },
-    };
-
-    for (const auto &[arkCurve, expected]: testPlan) {
-        scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(arkCurve);
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    for (const auto& [arkCurve, expected] : GetScrollCurveTestPlan()) {
+        scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_curves_Curve_curves_ICurve>(arkCurve);
         options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
             scrollAnimationOptions);
         EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
         EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, expected, smooth, canOverScroll))
             .Times(1);
-        accessor_->scrollTo(peer_, &options);
+        accessor_->scrollTo(vmContext_, peer_, &options);
     }
 }
 
@@ -826,24 +858,67 @@ HWTEST_F(ScrollerAccessorTest, scrollToTestICurve, TestSize.Level1)
     bool canOverScroll = false;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
+    options.yOffset = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(1.0);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     Ark_ScrollAnimationOptions scrollAnimationOptions;
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
 
     auto peer = Converter::ArkValue<Ark_curves_ICurve>(AceType::MakeRefPtr<MockCurve>(), nullptr);
     auto iCurve = Converter::Convert<RefPtr<Curve>>(peer);
 
-    scrollAnimationOptions.curve = Converter::ArkUnion<Opt_Union_Curve_ICurve, Ark_curves_ICurve>(peer);
+    scrollAnimationOptions.curve = Converter::ArkUnion<Opt_Union_curves_Curve_curves_ICurve, Ark_curves_ICurve>(peer);
     options.animation = Converter::ArkUnion<Opt_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
         scrollAnimationOptions);
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, iCurve, smooth, canOverScroll))
         .Times(1);
-    accessor_->scrollTo(peer_, &options);
+    accessor_->scrollTo(vmContext_, peer_, &options);
+}
+
+/**
+ * @tc.name: getFrameNodeTestUndefined
+ * @tc.desc: Test ScrollerAccessor::getFrameNode returns undefined when controller is not bound to a FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollerAccessorTest, getFrameNodeTestUndefined, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFrameNode, nullptr);
+
+    auto controller = AceType::MakeRefPtr<BindingFrameNodeIdController>(-1);
+    ASSERT_NE(controller, nullptr);
+    peer_->SetController(controller);
+
+    auto result = accessor_->getFrameNode(peer_);
+    EXPECT_EQ(result.tag, INTEROP_TAG_UNDEFINED);
+}
+
+/**
+ * @tc.name: getFrameNodeTestValid
+ * @tc.desc: Test ScrollerAccessor::getFrameNode returns the bound FrameNode when controller provides a valid node id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollerAccessorTest, getFrameNodeTestValid, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFrameNode, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "Scroll", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto controller = AceType::MakeRefPtr<BindingFrameNodeIdController>(frameNode->GetId());
+    ASSERT_NE(controller, nullptr);
+    peer_->SetController(controller);
+
+    auto result = accessor_->getFrameNode(peer_);
+    ASSERT_EQ(result.tag, INTEROP_TAG_OBJECT);
+    ASSERT_NE(result.value, nullptr);
+
+    auto actualFrameNode = FrameNodePeer::GetFrameNodeByPeer(result.value);
+    ASSERT_NE(actualFrameNode, nullptr);
+    EXPECT_EQ(actualFrameNode->GetId(), frameNode->GetId());
+    EXPECT_EQ(AceType::RawPtr(actualFrameNode), AceType::RawPtr(frameNode));
 }
 } // namespace OHOS::Ace::NG

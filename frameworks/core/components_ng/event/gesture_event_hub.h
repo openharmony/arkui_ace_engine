@@ -22,6 +22,7 @@
 #include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
@@ -47,6 +48,7 @@ struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 class CalcDimensionRect;
+class DragEvent;
 }
 
 namespace OHOS::Ace::NG {
@@ -134,6 +136,8 @@ struct PreparedAsyncCtxForAnimate {
 struct DragframeNodeInfo {
     WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
+    std::vector<WeakPtr<FrameNode>> autoHideFrameNodes;
+    bool autoHideExecuted = false;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -368,6 +372,11 @@ public:
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    std::vector<RefPtr<FrameNode>> ResolveAutoHideTargetsByUniqueId(
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent) const;
+    void HideAutoHideTargets(const std::vector<RefPtr<FrameNode>>& targets);
+    void ResetAutoHideDragInfo();
+    bool UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode) const;
     int32_t GetSelectItemSize();
     bool IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const;
     RefPtr<PixelMap> GetDragPreviewPixelMap();

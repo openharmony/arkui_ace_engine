@@ -20,13 +20,13 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/event/key_event.h"
-#include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
 
 namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 class FocusView;
+struct FocusAxisEvent;
 
 class KeyEventManager : public virtual AceType {
     DECLARE_ACE_TYPE(KeyEventManager, AceType);

@@ -32,7 +32,9 @@ import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater }
 import { CommonMethod } from './common'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-export class ArkToolBarItemPeer extends PeerNode {
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from "./common"
+
+export class ArkToolBarItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ToolBarItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -80,7 +82,7 @@ export interface ToolBarItemAttribute {
     }
 }
 
-export class ArkToolBarItemComponent extends ComponentBase implements ToolBarItemAttribute {
+export class ArkToolBarItemComponent extends ArkCommonMethodComponent implements ToolBarItemAttribute {
     getPeer(): ArkToolBarItemPeer {
         return (this.peer as ArkToolBarItemPeer)
     }

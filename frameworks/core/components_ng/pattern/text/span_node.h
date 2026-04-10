@@ -227,6 +227,7 @@ namespace OHOS::Ace::NG {
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
+class TextPattern;
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -327,8 +328,11 @@ public:
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+        const RefPtr<TextPattern>& textPattern) const;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
+    std::string GetFontWeightConfigs() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
@@ -520,7 +524,9 @@ public:
     // 用于属性字符串
     struct SpanResourceUpdater {
         RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
+        std::function<void(
+            const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&, const RefPtr<FrameNode>& frameNode)>
+            updateFunc;
     };
     void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
     void RemoveResourceObj(const std::string& key);

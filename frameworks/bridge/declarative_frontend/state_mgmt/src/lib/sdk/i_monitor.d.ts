@@ -51,4 +51,33 @@ interface MonitorOptions {
   * @since 20
   */
   isSynchronous?: boolean;
+  /**
+  * Used to determine whether the wildcard can be used
+  * in monitored path. The default value is false.
+  *
+  * @type { ?boolean } enableWildcard parameter
+  * @default false
+  * @syscap SystemCapability.ArkUI.ArkUI.Full
+  * @crossplatform
+  * @atomicservice
+  *
+  * @since 26
+  */
+  enableWildcard?: boolean;
+}
+
+interface MonitorDecoratorOptions {
+  /**
+  * Used to determine whether the wildcard can be used
+  * in monitored path. The default value is true.
+  *
+  * @type { ?boolean } enableWildcard parameter
+  * @default true
+  * @syscap SystemCapability.ArkUI.ArkUI.Full
+  * @crossplatform
+  * @atomicservice
+  *
+  * @since 26
+  */
+  enableWildcard?: boolean;
 }

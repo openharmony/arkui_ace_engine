@@ -28,7 +28,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -308,6 +308,15 @@ void SetPopupBorderLinearGradientInfo(const JSRef<JSObject>& popupObj, const Ref
     }
 }
 
+void SetPopupSystemMaterial(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    auto systemMaterialValue = popupObj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        popupParam->SetSystemMaterial(systemUiMaterial->Copy());
+    }
+}
+
 void ParsePopupMask(const RefPtr<PopupParam>& popupParam, bool maskValueBool, JSRef<JSVal>& maskValue)
 {
     if (!popupParam) {
@@ -505,6 +514,13 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (followTransformOfTargetValue->IsBoolean()) {
         popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
     }
+    auto colorModeValue = popupObj->GetProperty("colorMode");
+    if (colorModeValue->IsNumber()) {
+        auto colorMode = colorModeValue->ToNumber<int32_t>();
+        if (colorMode == static_cast<int>(AnchoredColorMode::FOLLOW_SYSTEM)) {
+            popupParam->SetColorMode(false);
+        }
+    }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     bool maskValueBool = false;
@@ -679,6 +695,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, INNER_BORDER_LINEAR_GRADIENT);
+    SetPopupSystemMaterial(popupObj, popupParam);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)

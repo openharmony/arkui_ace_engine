@@ -12,14 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <limits>
-
 #include "core/text/text_emoji_processor.h"
 
-#include "base/utils/utf_helper.h"
+#include <limits>
 #include <unicode/uchar.h>
 
 #include "unicode/unistr.h"
+
+#include "base/log/log_wrapper.h"
+#include "base/utils/utf_helper.h"
 
 namespace OHOS::Ace {
 namespace {

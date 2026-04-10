@@ -39,7 +39,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<QrcodeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -119,10 +119,12 @@ public:
 protected:
     QrcodeTheme() = default;
 
-private:
+protected:
     Color qrcodeColor_;
     Color backgroundColor_ = Color::WHITE;
     Color focusedColor_;
+
+private:
     QrcodeType qrcodeType_ { QrcodeType::RECT };
     Dimension qrcodeWidth_;
     Dimension qrcodeHeight_;

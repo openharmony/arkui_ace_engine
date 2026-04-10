@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 
 #include "base/image/image_perf.h"
@@ -40,8 +41,8 @@
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -455,7 +456,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
 {
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(host->GetId());
+        ImagePerf::GetPerfMonitor()->CompleteLoadComponent(host->GetId());
     }
 }
 
@@ -1030,7 +1031,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         if (pipeline && host->GetId() != INVALID_ID && src.IsValid()) {
-            pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
+            ImagePerf::GetPerfMonitor()->AddLoadComponent(host->GetId());
         }
     }
     ClearReloadFlagsAfterLoad();
@@ -1677,7 +1678,7 @@ void ImagePattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(host->GetId());
+        ImagePerf::GetPerfMonitor()->DeleteLoadComponent(host->GetId());
     }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (isNeedReset_) {
@@ -2523,6 +2524,11 @@ bool ImagePattern::hasSceneChanged()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
     return true;
+}
+
+void ImagePattern::TriggerThemeUpdate(int32_t themeScopeId)
+{
+    OnThemeScopeUpdate(themeScopeId);
 }
 
 void ImagePattern::SetOnProgressCallback(

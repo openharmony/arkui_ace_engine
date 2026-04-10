@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,31 +15,31 @@
 
 import { Position, SizeOptions, Length, ResourceColor }  from './arkui.component.units';
 
-interface ShapeSize {
+export interface ShapeSize {
 
     width?: double | string;
 
     height?: double | string;
 }
 
-interface RectShapeOptions extends ShapeSize {
+export interface RectShapeOptions extends ShapeSize {
 
     radius?: double | string | Array<double | string>;
 }
 
-interface RoundRectShapeOptions extends ShapeSize {
+export interface RoundRectShapeOptions extends ShapeSize {
 
     radiusWidth?: double | string;
 
     radiusHeight?: double | string;
 }
 
-interface PathShapeOptions {
+export interface PathShapeOptions {
 
     commands?: string;
 }
 
-class CommonShapeMethod {
+export class CommonShapeMethod {
     static { loadLibrary("shape_ani") }
 
     public native offset(offset: Position): this;
@@ -49,7 +49,7 @@ class CommonShapeMethod {
     public native position(position: Position): this;
 }
 
-class BaseShape extends CommonShapeMethod {
+export class BaseShape extends CommonShapeMethod {
 
    public native width(width: Length): this;
 

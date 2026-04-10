@@ -1371,6 +1371,16 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 
+void WebModelNG::SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "[SetNativeVideoPlayerConfig] enable=%{public}d, shouldOverlay=%{public}d", enable, shouldOverlay);
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
+}
+
 void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1488,6 +1498,14 @@ void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeig
 
 void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
 {
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
+}
+
+void WebModelNG::SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
@@ -2668,6 +2686,21 @@ void WebModelNG::SetEnableAutoFill(FrameNode* frameNode, bool isEnabled)
     webPattern->UpdateEnableAutoFill(isEnabled);
 }
 
+void WebModelNG::SetEnableDrag(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDrag(isEnabled);
+}
+ 	 
+void WebModelNG::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDrag(isEnabled);
+}
+
 void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
     const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold)
 {
@@ -2871,5 +2904,35 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnableDefaultContextMenu(isEnabled);
+}
+
+void WebModelNG::SetEnableScrollDirectionalLock(bool enabled, int32_t type)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
+}
+
+void WebModelNG::SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
+}
+
+void WebModelNG::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
+
+void WebModelNG::SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,10 @@
  */
 
 #include "click_spring_effect.h"
+#include "core/animation/animator.h"
+#include "core/animation/spring_motion.h"
+#include "core/pipeline/base/render_node.h"
+#include "core/pipeline/pipeline_context.h"
 #include "render_transform.h"
 
 namespace OHOS::Ace {
@@ -99,6 +103,26 @@ void ClickSpringEffect::MarkRender()
         return;
     }
     transform->SetPendingUpdateTransformLayer();
+}
+
+void ClickSpringEffect::SetRenderNode(const WeakPtr<RenderNode>& renderNode)
+{
+    renderNode_ = renderNode;
+}
+
+double ClickSpringEffect::GetScale() const
+{
+    return scale_;
+}
+
+void ClickSpringEffect::SetScale(double scale)
+{
+    scale_ = scale;
+}
+
+void ClickSpringEffect::SetController(const RefPtr<Animator>& controller)
+{
+    controller_ = controller;
 }
 
 } // namespace OHOS::Ace

@@ -26,15 +26,16 @@
 #include <utility>
 #include <functional>
 
-#include "base/log/ace_trace.h"
+#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "ui/properties/dirty_flag.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
+class UINode;
 
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}

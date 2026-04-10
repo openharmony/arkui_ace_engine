@@ -977,7 +977,7 @@ export struct AlertDialog {
             strokeWidth: LengthMetrics.px(0)
           })
           .fontSize(`${BODY_L}fp`)
-          .fontWeight(this.getFontWeight() as int)
+          .fontWeight(this.getFontWeight().toInt())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)

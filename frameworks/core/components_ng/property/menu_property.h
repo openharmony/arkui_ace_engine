@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MENU_PROPERTY_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"

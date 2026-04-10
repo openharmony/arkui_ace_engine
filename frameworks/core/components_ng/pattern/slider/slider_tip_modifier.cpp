@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/pattern/text/text_styles.h"
