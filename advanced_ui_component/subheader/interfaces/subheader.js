@@ -168,6 +168,9 @@ function __Text__secondaryTitleStyles(l11) {
     Text.maxLines(l11?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
     Text.align(l11?.alignment);
+    Text.fallbackLineSpacing(true);
+    Text.wordBreak(WordBreak.HYPHENATION);
+    Text.optimizeTrailingSpace(true);
 }
 
 function __Text__primaryTitleStyles(k11) {
@@ -183,6 +186,9 @@ function __Text__primaryTitleStyles(k11) {
     Text.maxLines(k11?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
     Text.align(k11?.alignment);
+    Text.fallbackLineSpacing(true);
+    Text.wordBreak(WordBreak.HYPHENATION);
+    Text.optimizeTrailingSpace(true);
 }
 
 class SubHeaderModifier {
