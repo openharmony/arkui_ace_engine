@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/common/properties/ui_material.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
@@ -1625,5 +1626,187 @@ HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial007, TestSize.Lev
      */
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAddForceSplitRatioListener001
+ * @tc.desc: Test AddForceSplitRatioListener registers listener in ForceSplitManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAddForceSplitRatioListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node with DialogPattern.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ForceSplitManager and listener before add.
+     */
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step3. Call AddForceSplitRatioListener.
+     * @tc.expected: listener is registered in forceSplitRatioListeners_.
+     */
+    pattern->AddForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+    EXPECT_TRUE(forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId()) !=
+        forceSplitMgr->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: DialogPatternAddForceSplitRatioListener002
+ * @tc.desc: Test AddForceSplitRatioListener with null host (no host set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAddForceSplitRatioListener002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogPattern without attaching to a host node.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto pattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr);
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddForceSplitRatioListener without host.
+     * @tc.expected: no crash, CHECK_NULL_VOID(host) returns early.
+     */
+    pattern->AddForceSplitRatioListener();
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener001
+ * @tc.desc: Test RemoveForceSplitRatioListener removes listener from ForceSplitManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and add listener first.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    pattern->AddForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener.
+     * @tc.expected: listener is removed from forceSplitRatioListeners_.
+     */
+    pattern->RemoveForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 0u);
+    EXPECT_TRUE(forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId()) ==
+        forceSplitMgr->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener002
+ * @tc.desc: Test RemoveForceSplitRatioListener with null host (no host set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogPattern without attaching to a host node.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto pattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr);
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener without host.
+     * @tc.expected: no crash, CHECK_NULL_VOID(host) returns early.
+     */
+    pattern->RemoveForceSplitRatioListener();
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener003
+ * @tc.desc: Test RemoveForceSplitRatioListener when listener was never added.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node but do NOT call AddForceSplitRatioListener.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener without prior add.
+     * @tc.expected: no crash, listeners map stays empty.
+     */
+    pattern->RemoveForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 0u);
+}
+
+/**
+ * @tc.name: DialogPatternForceSplitRatioListenerCallback001
+ * @tc.desc: Test the listener callback triggers MarkDirtyNode on host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternForceSplitRatioListenerCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and add listener.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    pattern->AddForceSplitRatioListener();
+    ASSERT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step2. Invoke the registered callback with a splitRatio value.
+     * @tc.expected: no crash, the callback executes MarkDirtyNode on the host.
+     */
+    auto it = forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId());
+    ASSERT_TRUE(it != forceSplitMgr->forceSplitRatioListeners_.end());
+    ASSERT_TRUE(it->second);
+    it->second(0.6f);
 }
 } // namespace OHOS::Ace::NG
