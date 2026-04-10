@@ -1691,14 +1691,6 @@ void SubwindowOhos::InitDialogWindowRSUIDirector(const RefPtr<Platform::AceConta
         if (!rsUiDirector->GetRSUIContext()) {
             rsUiDirector->Init(true, true);
         }
-        auto id = container->GetInstanceId();
-        rsUiDirector->SetUITaskRunner(
-            [taskExecutor = container->GetTaskExecutor(), id](
-                const std::function<void()>& task, uint32_t delay) {
-                ContainerScope scope(id);
-                taskExecutor->PostDelayedTask(
-                    task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
-            }, 0, true);
     }
 #endif
 }
