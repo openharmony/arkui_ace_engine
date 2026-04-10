@@ -15,7 +15,7 @@
 
 #include "core/common/visual_effect/transparency_utils.h"
 
-#include "commonlibrary/c_utils/base/include/errors.h"
+#include "errors.h"
 #include "ui/properties/ui_material_enums.h"
 
 #include "base/log/log_wrapper.h"
