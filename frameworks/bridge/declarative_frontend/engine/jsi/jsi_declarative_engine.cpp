@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
+#include <cstdio>
 #include <mutex>
 #include <optional>
 #include <regex>
@@ -221,6 +222,33 @@ shared_ptr<JsValue> RequireNativeModuleForCustomRuntime(const shared_ptr<JsRunti
     return runtime->NewNull();
 }
 
+bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& filePath)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    CHECK_NULL_RETURN(arkRuntime, false);
+    FILE* file = fopen(filePath.c_str(), "rb");
+    CHECK_NULL_RETURN(file, false);
+    if (!file) {
+        LOGF("Failed to open the file!");
+    }
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fclose(file);
+        return false;
+    }
+    long fileSize = ftell(file);
+    if (fileSize <= 0 || fseek(file, 0, SEEK_SET) != 0) {
+        fclose(file);
+        return false;
+    }
+    std::vector<uint8_t> content(static_cast<size_t>(fileSize));
+    if (fread(content.data(), 1, content.size(), file) != content.size()) {
+        fclose(file);
+        return false;
+    }
+    fclose(file);
+    return arkRuntime->EvaluateJsCode(content.data(), static_cast<int32_t>(content.size()), filePath);
+}
+
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
 #if defined(CROSS_PLATFORM)
@@ -228,11 +256,9 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
 #elif defined(PREVIEW)
-    std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
+    return EvaluateAbcFile(runtime, "./module/arkui/jsEnumStyle.abc");
 #else
-    return runtime->ExecuteJsBinForAOT("/etc/abc/framework/jsEnumStyle.abc");
+    return EvaluateAbcFile(runtime, "/etc/abc/framework/jsEnumStyle.abc");
 #endif
 }
 
@@ -282,11 +308,9 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
 #elif defined(PREVIEW)
-    std::string str("arkui_binary_arkComponent_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
+    return EvaluateAbcFile(runtime, "./module/arkui/arkComponent.abc");
 #else
-    return runtime->ExecuteJsBinForAOT("/etc/abc/framework/arkComponent.abc");
+    return EvaluateAbcFile(runtime, "/etc/abc/framework/arkComponent.abc");
 #endif
 }
 
