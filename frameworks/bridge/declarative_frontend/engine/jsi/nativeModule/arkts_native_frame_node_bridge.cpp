@@ -789,6 +789,18 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
     return valueArray;
 }
 
+ArkUINativeModuleValue FrameNodeBridge::GetCommonViewParentId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, -1));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NumberRef::New(vm, -1));
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->getCommonViewParentId(nativeNode);
+    return panda::NumberRef::New(vm, result);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::CreateNativeStrongRefWithPtrVal(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -867,6 +867,23 @@ ArkUINodeHandle GetCurrentPageRootNode(ArkUINodeHandle node)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(rootNode));
 }
 
+ArkUI_Int32 GetCommonViewParentId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    if (!AceType::InstanceOf<CustomMeasureLayoutNode>(frameNode)) {
+        return -1;
+    }
+    auto parent = frameNode->GetParent();
+    if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        return parent->GetId();
+    }
+    return -1;
+}
+
 ArkUI_Int32 GetNodeTag(ArkUINodeHandle node)
 {
     auto uiNode = reinterpret_cast<UINode*>(node);
@@ -1273,6 +1290,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .convertPositionFromWindow = ConvertPositionFromWindow,
         .getAccessibilityProvider = GetAccessibilityProvider,
         .getPageRootNode = GetPageRootNode,
+        .getCommonViewParentId = GetCommonViewParentId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -175,6 +175,7 @@ public:
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetCommonViewParentId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTsCard start
     static ArkUINativeModuleValue CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
