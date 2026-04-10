@@ -18,7 +18,7 @@
 
 #include "smart_layout_context.h"
 #include "smart_layout_node.h"
-#include "base/utils/macros.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 

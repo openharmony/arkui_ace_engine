@@ -15,6 +15,7 @@
 
 #include "smart_layout_node.h"
 #include "smart_layout_log.h"
+#include "smart_layout_constraints.h"
 
 namespace OHOS::Ace::NG {
 
@@ -78,10 +79,6 @@ bool SmartLayoutNode::SolveLayout()
     bool result = engine_->Solve();
     if (result) {
         SyncData();
-        auto results = engine_->GetResults();
-        for (const auto& var : results) {
-            SMT_LOGD("   %{public}s = %{public}f", var.name.c_str(), var.value);
-        }
     } else {
         SMT_LOGE("localsmt failed to find a solution for the given constraints");
     }
