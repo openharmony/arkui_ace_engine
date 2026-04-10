@@ -983,6 +983,9 @@ void NavigationTitleUtil::SetBackButtonText(const RefPtr<TitleBarNode>& titleBar
 
 void NavigationTitleUtil::InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
     CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);

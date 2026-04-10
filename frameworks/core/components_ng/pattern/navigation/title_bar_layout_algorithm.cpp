@@ -810,7 +810,8 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             titleWrapper->Layout();
             return;
         }
-        if (NavigationTitleUtil::CheckNeedFontPadding(titleBarNode)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            (NavigationTitleUtil::CheckNeedFontPadding(titleBarNode))) {
             MeasureContext context;
             context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
             context.fontSize = titleFontSize_;

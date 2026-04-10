@@ -1441,6 +1441,9 @@ void SideBarContainerPattern::ShowDialogWithNode()
     CHECK_NULL_VOID(accessibilityProperty);
     auto text = accessibilityProperty->GetAccessibilityText();
     do {
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            break;
+        }
         if (!text.empty()) {
             break;
         }
