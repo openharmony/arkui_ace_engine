@@ -220,7 +220,7 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
         if (!container || container->IsInDestroying()) {
             continue;
         }
-        if (!container->PostponedTaskForIgnore()) {
+        if (!container->PostponedTaskForIgnore(bundle->type)) {
             container->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
         }
     }

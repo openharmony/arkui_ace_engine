@@ -52,6 +52,7 @@ ace_unittest("list_test_ng") {
     "list_static_test_ng.cpp",
     "list_swipe_test_ng.cpp",
     "list_sync_load_test_ng.cpp",
+    "list_content_clip_test.cpp",
     "list_test_ng.cpp",
   ]
 

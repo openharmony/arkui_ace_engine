@@ -5675,17 +5675,45 @@ void FrameNode::PostTaskForIgnore()
     PostBundle(std::move(delayMeasureChildren_));
 }
 
-void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes, bool postByTraverse)
+void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes, bool postByTraverse, LayoutSafeAreaBundleType type)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     IgnoreLayoutSafeAreaBundle bundle;
     bundle.second = Claim(this);
     bundle.first = std::move(nodes);
+    bundle.type = type;
     pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), postByTraverse);
 }
 
-bool FrameNode::PostponedTaskForIgnore()
+void FrameNode::PostponedTaskForIgnoreDefault()
+{
+    for (auto&& node : delayLayoutChildren_) {
+        IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
+            .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE };
+        auto property = node->GetLayoutProperty();
+        if (property) {
+            options = property->GenIgnoreOpts();
+        }
+        ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options);
+        bool isRtl = false;
+        auto containerProperty = GetLayoutProperty();
+        if (containerProperty) {
+            isRtl = containerProperty->DecideMirror();
+        }
+        auto selfIgnoreAdjust = isRtl ? sae.MirrorOffset() : sae.Offset();
+        auto geometryNode = node->GetGeometryNode();
+        if (geometryNode) {
+            geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+            auto offset = geometryNode->GetMarginFrameOffset();
+            offset -= selfIgnoreAdjust;
+            geometryNode->SetMarginFrameOffset(offset);
+        }
+        node->Layout();
+    }
+}
+
+bool FrameNode::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
 {
     auto pattern = GetPattern();
     if (!pattern->PostponedTaskForIgnoreEnabled()) {
@@ -5693,31 +5721,9 @@ bool FrameNode::PostponedTaskForIgnore()
         return false;
     }
     if (pattern->PostponedTaskForIgnoreCustomized()) {
-        pattern->PostponedTaskForIgnore();
+        pattern->PostponedTaskForIgnore(type);
     } else {
-        for (auto&& node : delayLayoutChildren_) {
-            IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
-                .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE };
-            auto property = node->GetLayoutProperty();
-            if (property) {
-                options = property->GenIgnoreOpts();
-            }
-            ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options);
-            bool isRtl = false;
-            auto containerProperty = GetLayoutProperty();
-            if (containerProperty) {
-                isRtl = containerProperty->DecideMirror();
-            }
-            auto selfIgnoreAdjust = isRtl ? sae.MirrorOffset() : sae.Offset();
-            auto geometryNode = node->GetGeometryNode();
-            if (geometryNode) {
-                geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
-                auto offset = geometryNode->GetMarginFrameOffset();
-                offset -= selfIgnoreAdjust;
-                geometryNode->SetMarginFrameOffset(offset);
-            }
-            node->Layout();
-        }
+        PostponedTaskForIgnoreDefault();
     }
     delayLayoutChildren_.clear();
     return true;

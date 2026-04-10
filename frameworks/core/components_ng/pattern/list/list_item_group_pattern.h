@@ -385,6 +385,8 @@ public:
     RefPtr<FrameNode> GetListFrameNode() const;
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
+    VisibleContentInfo GetStartListItemIndex(float startPosFromMargin);
+    VisibleContentInfo GetEndListItemIndex(float endPosFromMargin);
     void ResetChildrenSize();
     bool IsInViewport(int32_t index) const;
 

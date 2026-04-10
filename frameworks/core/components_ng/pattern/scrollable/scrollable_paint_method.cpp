@@ -126,9 +126,9 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
             case ContentClipMode::SAFE_AREA: {
                 auto host = renderContext->GetHost();
                 CHECK_NULL_RETURN(host, false);
-                const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
+                const auto safeAreaPad = safeAreaPad_.value_or(host->GetAccumulatedSafeAreaExpand(true,
                     { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
-                    IgnoreStrategy::AXIS_INSENSITIVE);
+                    IgnoreStrategy::AXIS_INSENSITIVE));
 
                 auto size = geo->GetPaddingSize();
                 AddPaddingToSize(safeAreaPad, size);

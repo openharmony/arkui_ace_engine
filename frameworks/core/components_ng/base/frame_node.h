@@ -879,9 +879,11 @@ public:
 
     void PostTaskForIgnore();
 
-    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes = {}, bool postByTraverse = false);
+    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes = {}, bool postByTraverse = false,
+        LayoutSafeAreaBundleType type = LayoutSafeAreaBundleType::IGNORE_LAYOUT_SAFE_AREA);
 
-    bool PostponedTaskForIgnore();
+    bool PostponedTaskForIgnore(LayoutSafeAreaBundleType type);
+    void PostponedTaskForIgnoreDefault();
 
     void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
     {

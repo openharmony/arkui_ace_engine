@@ -815,7 +815,7 @@ public:
     {
         return false;
     }
-    virtual void PostponedTaskForIgnore() {}
+    virtual void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) {}
     virtual bool NeedCustomizeSafeAreaPadding()
     {
         return false;

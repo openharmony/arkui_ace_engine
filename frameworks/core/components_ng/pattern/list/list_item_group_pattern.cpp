@@ -396,6 +396,38 @@ VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
     return startInfo;
 }
 
+VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex(float startPosFromMargin)
+{
+    VisibleContentInfo startInfo;
+    if (headerMainSize_ == 0 && footerMainSize_ == 0 && GetTotalItemCount() == 0) {
+        startInfo.area = ListItemGroupArea::NONE_AREA;
+        return startInfo;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, startInfo);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, startInfo);
+    auto offset = geometryNode->GetPaddingOffset() - geometryNode->GetMarginFrameOffset();
+    float startPos = startPosFromMargin - GetMainAxisOffset(offset, axis_);
+    if (footerMainSize_ > 0 && GreatNotEqual(startPos, mainSize_ - footerMainSize_)) {
+        startInfo.area = ListItemGroupArea::IN_FOOTER_AREA;
+        return startInfo;
+    }
+    if (headerMainSize_ > 0 && LessNotEqual(startPos, headerMainSize_)) {
+        startInfo.area = ListItemGroupArea::IN_HEADER_AREA;
+        return startInfo;
+    }
+    startInfo.area = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    startInfo.indexInGroup = itemDisplayStartIndex_;
+    for (auto iter = itemPosition_.find(itemDisplayStartIndex_); iter != itemPosition_.end(); iter++) {
+        if (GreatOrEqual(iter->second.endPos, startPos)) {
+            startInfo.indexInGroup = iter->first;
+            return startInfo;
+        }
+    }
+    return startInfo;
+}
+
 VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
 {
     bool isFooter = endFooterPos_ < 0 ? true : false;
@@ -416,6 +448,39 @@ VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
         endArea = ListItemGroupArea::NONE_AREA;
     }
     VisibleContentInfo endInfo = { endArea, endItemIndexInGroup };
+    return endInfo;
+}
+
+VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex(float endPosFromMargin)
+{
+    VisibleContentInfo endInfo;
+    if (headerMainSize_ == 0 && footerMainSize_ == 0 && GetTotalItemCount() == 0) {
+        endInfo.area = ListItemGroupArea::NONE_AREA;
+        return endInfo;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, endInfo);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, endInfo);
+    auto offset = geometryNode->GetPaddingOffset() - geometryNode->GetMarginFrameOffset();
+    float endPos = endPosFromMargin - GetMainAxisOffset(offset, axis_);
+    if (headerMainSize_ > 0 && LessNotEqual(endPos, headerMainSize_)) {
+        endInfo.area = ListItemGroupArea::IN_HEADER_AREA;
+        return endInfo;
+    }
+    if (footerMainSize_ > 0 && GreatNotEqual(endPos, mainSize_ - footerMainSize_)) {
+        endInfo.area = ListItemGroupArea::IN_FOOTER_AREA;
+        return endInfo;
+    }
+    endInfo.area = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    endInfo.indexInGroup = itemDisplayEndIndex_;
+    for (auto index = itemDisplayEndIndex_; index >= itemDisplayStartIndex_; index--) {
+        auto iter = itemPosition_.find(index);
+        if (iter != itemPosition_.end() && LessOrEqual(iter->second.startPos, endPos)) {
+            endInfo.indexInGroup = iter->first;
+            return endInfo;
+        }
+    }
     return endInfo;
 }
 
