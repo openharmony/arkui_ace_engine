@@ -906,7 +906,8 @@ ArkUINativeModuleValue SideBarContainerBridge::SetSideBarOnChange(ArkUIRuntimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    bool isJsView =
+        !firstArg->IsUndefined() && !firstArg->IsNull() && firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     std::function<void(bool)> callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
                                              bool isOnChange) {
         panda::LocalScope pandaScope(vm);
@@ -964,13 +965,13 @@ ArkUINativeModuleValue SideBarContainerBridge::CreateSideBarContainer(ArkUIRunti
 void SideBarContainerBridge::RegisterSideBarContainerAttributes(
     panda::Local<panda::ObjectRef> object, panda::EcmaVM* vm)
 {
-    static const char* functionNames[] = { "create", "setSideBarWidth", "resetSideBarWidth", "setMinSideBarWidth",
+    const char* functionNames[] = { "create", "setSideBarWidth", "resetSideBarWidth", "setMinSideBarWidth",
         "resetMinSideBarWidth", "setControlButton", "resetControlButton", "setShowControlButton",
         "resetShowControlButton", "setAutoHide", "resetAutoHide", "setMaxSideBarWidth", "resetMaxSideBarWidth",
         "setMinContentWidth", "resetMinContentWidth", "setSideBarPosition", "resetSideBarPosition", "setShowSideBar",
         "resetShowSideBar", "setDivider", "resetDivider", "setSideBarOnChange", "resetSideBarOnChange" };
 
-    static panda::Local<panda::JSValueRef> funcValues[] = {
+    Local<panda::JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::CreateSideBarContainer),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetSideBarWidth),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetSideBarWidth),
