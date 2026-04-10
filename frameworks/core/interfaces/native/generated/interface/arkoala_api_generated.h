@@ -1897,6 +1897,8 @@ typedef struct OnHoverCallback OnHoverCallback;
 typedef struct Opt_OnHoverCallback Opt_OnHoverCallback;
 typedef struct OnHoverStatusChangeCallback OnHoverStatusChangeCallback;
 typedef struct Opt_OnHoverStatusChangeCallback Opt_OnHoverStatusChangeCallback;
+typedef struct OnInputmethodAttachedCallback OnInputmethodAttachedCallback;
+typedef struct Opt_OnInputmethodAttachedCallback Opt_OnInputmethodAttachedCallback;
 typedef struct OnIntelligentTrackingPreventionCallback OnIntelligentTrackingPreventionCallback;
 typedef struct Opt_OnIntelligentTrackingPreventionCallback Opt_OnIntelligentTrackingPreventionCallback;
 typedef struct OnItemDragStartCallback OnItemDragStartCallback;
@@ -13649,6 +13651,16 @@ typedef struct Opt_OnHoverStatusChangeCallback {
     Ark_Tag tag;
     OnHoverStatusChangeCallback value;
 } Opt_OnHoverStatusChangeCallback;
+typedef struct OnInputmethodAttachedCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId);
+} OnInputmethodAttachedCallback;
+typedef struct Opt_OnInputmethodAttachedCallback {
+    Ark_Tag tag;
+    OnInputmethodAttachedCallback value;
+} Opt_OnInputmethodAttachedCallback;
 typedef struct OnIntelligentTrackingPreventionCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -27597,6 +27609,8 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableScrollDirectionalLock)(Ark_NativePointer node,
                                            const Opt_Boolean* value,
                                            const Opt_ScrollDirectionalLockType* type);
+    void (*setOnInputmethodAttached)(Ark_NativePointer node,
+                                     const Opt_OnInputmethodAttachedCallback* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

@@ -2935,4 +2935,24 @@ void WebModelNG::SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutP
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
 }
+
+void WebModelNG::SetInputMethodAttachedId(std::function<void()>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetInputMethodAttachedId(
+    FrameNode* frameNode, std::function<void()>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG

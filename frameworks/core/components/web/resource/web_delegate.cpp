@@ -2446,6 +2446,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onMicrophoneCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnMicrophoneCaptureStateChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetMicrophoneCaptureStateChangedId(), oldContext);
+        onInputMethodAttachedV2_ = useNewPipe ? eventHub->GetOnInputMethodAttachedEvent() : nullptr;
     }
     return true;
 }
@@ -10184,6 +10185,21 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
+}
+
+void WebDelegate::OnInputMethodAttached()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onInputMethodAttachedV2 = delegate->onInputMethodAttachedV2_;
+            if (onInputMethodAttachedV2) {
+                onInputMethodAttachedV2(std::make_shared<InputMethodAttachedEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebInputMethodAttached");
 }
 
 void WebDelegate::SetOfflineWebActiveStatus(bool isActive)
