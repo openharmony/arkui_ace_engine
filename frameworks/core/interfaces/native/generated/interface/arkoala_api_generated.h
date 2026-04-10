@@ -9232,6 +9232,7 @@ typedef struct Ark_text_FontVariation {
     /* kind: Interface */
     Ark_String axis;
     Ark_Float64 value;
+    Opt_Boolean isNormalized;
 } Ark_text_FontVariation;
 typedef struct Opt_text_FontVariation {
     Ark_Tag tag;
@@ -21637,6 +21638,7 @@ typedef struct Ark_TextStyleInterface {
     Opt_SuperscriptStyle superscript;
     Opt_LengthMetrics strokeWidth;
     Opt_ResourceColor strokeColor;
+    Opt_Array_text_FontVariation fontVariations;
 } Ark_TextStyleInterface;
 typedef struct Opt_TextStyleInterface {
     Ark_Tag tag;
@@ -26297,6 +26299,8 @@ typedef struct GENERATED_ArkUISpanModifier {
     void (*setOnClick1)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* event,
                         const Opt_Float64* distanceThreshold);
+    void (*setFontVariations)(Ark_NativePointer node,
+                        const Opt_Array_text_FontVariation* value);
 } GENERATED_ArkUISpanModifier;
 
 typedef struct GENERATED_ArkUIStackModifier {
@@ -26668,6 +26672,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                  const Opt_SelectionMenuOptions* options);
     void (*setOrphanCharOptimization)(Ark_NativePointer node,
                                       const Opt_Boolean* value);
+    void (*setFontVariations)(Ark_NativePointer node,
+                        const Opt_Array_text_FontVariation* value);
 } GENERATED_ArkUITextModifier;
 
 typedef struct GENERATED_ArkUITextAreaModifier {
@@ -31153,6 +31159,7 @@ typedef struct GENERATED_ArkUITextStyleAccessor {
     Opt_SuperscriptStyle (*getSuperscript)(Ark_TextStyle peer);
     Opt_Float64 (*getStrokeWidth)(Ark_TextStyle peer);
     Opt_ResourceColor (*getStrokeColor)(Ark_TextStyle peer);
+    Opt_Array_text_FontVariation (*getFontVariations)(Ark_TextStyle peer);
 } GENERATED_ArkUITextStyleAccessor;
 
 typedef struct GENERATED_ArkUITextTimerControllerAccessor {

@@ -18754,6 +18754,26 @@ void impl_SpanAttribute_setOnHover(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetNodeModifiers()->getSpanModifier()->setOnHover(self, static_cast<Opt_HoverCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SpanAttribute_setOnHover, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SpanAttribute_setFontVariations(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_text_FontVariation valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBufOptLength = thisDeserializer.readInt32();
+            Array_text_FontVariation valueValueTempTmpBufOpt = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBufOpt)>::type,
+        std::decay<decltype(*valueValueTempTmpBufOpt.array)>::type>(&valueValueTempTmpBufOpt, valueValueTempTmpBufOptLength);
+            for (int valueValueTempTmpBufOptBufCounterI = 0; valueValueTempTmpBufOptBufCounterI < valueValueTempTmpBufOptLength; valueValueTempTmpBufOptBufCounterI++) {
+                valueValueTempTmpBufOpt.array[valueValueTempTmpBufOptBufCounterI] = text_FontVariation_serializer::read(thisDeserializer);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBufOpt;
+        }
+        Opt_Array_text_FontVariation valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSpanModifier()->setFontVariations(self, static_cast<Opt_Array_text_FontVariation*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SpanAttribute_setFontVariations, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SpanAttribute_setFont(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -21570,6 +21590,26 @@ void impl_TextAttribute_setOrphanCharOptimization(Ark_NativePointer thisPtr, KSe
         GetNodeModifiers()->getTextModifier()->setOrphanCharOptimization(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextAttribute_setOrphanCharOptimization, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextAttribute_setFontVariations(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_text_FontVariation valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBufOptLength = thisDeserializer.readInt32();
+            Array_text_FontVariation valueValueTempTmpBufOpt = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBufOpt)>::type,
+        std::decay<decltype(*valueValueTempTmpBufOpt.array)>::type>(&valueValueTempTmpBufOpt, valueValueTempTmpBufOptLength);
+            for (int valueValueTempTmpBufOptBufCounterI = 0; valueValueTempTmpBufOptBufCounterI < valueValueTempTmpBufOptLength; valueValueTempTmpBufOptBufCounterI++) {
+                valueValueTempTmpBufOpt.array[valueValueTempTmpBufOptBufCounterI] = text_FontVariation_serializer::read(thisDeserializer);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBufOpt;
+        }
+        Opt_Array_text_FontVariation valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextModifier()->setFontVariations(self, static_cast<Opt_Array_text_FontVariation*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextAttribute_setFontVariations, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextAttribute_setFont(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -42690,6 +42730,24 @@ KInteropReturnBuffer impl_TextStyle_getStrokeColor(Ark_NativePointer thisPtr) {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(TextStyle_getStrokeColor, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_TextStyle_getFontVariations(Ark_NativePointer thisPtr) {
+        Ark_TextStyle self = reinterpret_cast<Ark_TextStyle>(thisPtr);
+        const auto &retValue = GetAccessors()->getTextStyleAccessor()->getFontVariations(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(retValueTmpValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValueTmpValue.length; retValueTmpValueCounterI++) {
+                const Ark_text_FontVariation retValueTmpValueTmpElement = retValueTmpValue.array[retValueTmpValueCounterI];
+                text_FontVariation_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(TextStyle_getFontVariations, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_TextTimerController_construct() {
         return GetAccessors()->getTextTimerControllerAccessor()->construct();
 }

@@ -2797,6 +2797,12 @@ struct ArkUICustomSpanDrawInfo {
     float optionsBaseLine;
 };
 
+struct ArkUIFontVariation {
+    const char* axis;
+    float value;
+    ArkUIOptionalBool isNormalized;
+};
+
 struct ArkUITextStyle {
     uint32_t fontColor;
     std::string fontFamily;
@@ -4002,6 +4008,8 @@ struct ArkUITextModifier {
     void (*getCharacterRangeForGlyphRange)(
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
     void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
+    void (*setFontVariations)(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length);
+    void (*resetFontVariations)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -7876,6 +7884,8 @@ struct ArkUISpanModifier {
     void (*resetAccessibilityLevel)(ArkUINodeHandle node);
     void (*setSpanOnHover)(ArkUINodeHandle node, void* callback);
     void (*resetSpanOnHover)(ArkUINodeHandle node);
+    void (*setFontVariations)(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length);
+    void (*resetFontVariations)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {

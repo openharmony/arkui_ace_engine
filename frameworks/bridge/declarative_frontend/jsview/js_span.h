@@ -36,6 +36,7 @@ public:
     static void SetFontWeight(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
+    static void SetFontVariations(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);

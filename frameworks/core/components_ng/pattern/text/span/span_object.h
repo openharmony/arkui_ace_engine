@@ -152,6 +152,7 @@ private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     void AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+    void FontVariationsToString(std::stringstream& ss) const;
 
     Font font_;
 };

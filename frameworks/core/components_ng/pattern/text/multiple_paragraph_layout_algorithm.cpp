@@ -472,13 +472,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     }
     auto lineHeight = layoutProperty->GetLineHeight();
     if (lineHeight.has_value()) {
-        if (lineHeight->Unit() == DimensionUnit::PERCENT) {
-            modifier->SetLineHeight(lineHeight.value(), textStyle, true);
-        } else {
-            modifier->SetLineHeight(lineHeight.value(), textStyle);
-        }
+        modifier->SetLineHeight(lineHeight.value(), textStyle, lineHeight->Unit() == DimensionUnit::PERCENT);
     } else {
         modifier->SetLineHeight(textStyle.GetLineHeight(), textStyle, true);
+    }
+    auto fontVariations = layoutProperty->GetFontVariations();
+    if (fontVariations.has_value() && !fontVariations.value().empty()) {
+        modifier->SetFontVariations(fontVariations.value());
+    } else {
+        modifier->SetFontVariations(textStyle.GetFontVariations(), true);
     }
 }
 

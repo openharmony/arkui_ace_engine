@@ -1071,6 +1071,7 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
     fontStyle.UpdateEnableVariableFontWeight(textStyle->GetEnableVariableFontWeight());
     fontStyle.UpdateFontFamily(textStyle->GetFontFamilies());
     fontStyle.UpdateFontFeature(textStyle->GetFontFeatures());
+    fontStyle.UpdateFontVariations(textStyle->GetFontVariations());
     fontStyle.UpdateTextDecoration(textStyle->GetTextDecoration());
     fontStyle.UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
     fontStyle.UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());
