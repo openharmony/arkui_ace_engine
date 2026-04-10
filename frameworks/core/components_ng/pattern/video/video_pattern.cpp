@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,9 @@
 
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1140,6 +1143,18 @@ void VideoPattern::RegisterRenderContextCallBack()
         }
     };
     renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#if defined(ANDROID_PLATFORM) && defined (RS_ENABLE_VK)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        auto OnInitTypeCallBack = [weak = WeakClaim(this)](int32_t& type) {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface != nullptr) {
+                renderSurface->AddInitTypeCallBack(type);
+            }
+        };
+        renderContextForMediaPlayer_->AddInitTypeCallBack(OnInitTypeCallBack);
+    }
+#endif
 #endif
 }
 

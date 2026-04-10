@@ -18,6 +18,9 @@
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -334,6 +337,11 @@ void MediaPlayerImpl::ProcessSurfaceCreate()
 void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
 {
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        SetSurface();
+    }
+#endif
     if (resolutionChangeCallback_) {
         resolutionChangeCallback_();
     }
