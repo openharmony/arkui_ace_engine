@@ -88,6 +88,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_agent_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/web/web_command_wrapper.h"
 #include "core/components_ng/pattern/web/web_dom_document.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/view_data_common.h"
@@ -107,6 +108,8 @@
 #include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
+#include "web_util.h"
+#include "nweb_hisysevent.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -116,6 +119,7 @@ const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
 const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
 const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
+const std::string COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
 const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
@@ -123,6 +127,10 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const char INJECTION_SEND_COMMAND_ERROR[] = "INJECTION_SEND_COMMAND_ERROR";
+const char INJECTION_TYPE_JSON_INVALID[] = "INJECTION_EVENT_JSON_INVALID";
+const char INJECTION_TYPE_TARGET_NODE_NOT_FOUND[] = "INJECTION_EVENT_TARGET_NODE_NOT_FOUND";
+const char INJECTION_TYPE_SEND_COMMAND_ERROR[] = "INJECTION_EVENT_SEND_COMMAND_ERROR";
 const std::string ACC_PAGE_MODE_FULL = "FULL_SILENT";
 const std::string ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
 const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
@@ -4109,6 +4117,12 @@ void WebPattern::OnInitialScaleUpdate(float value)
 
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "Get json config ");
+    std::string json = OHOS::system::GetParameter(COMMAND_ACTION_JSON, "");
+    if (json != "") {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Get json config success. Content: %{public}s", json.c_str());
+        OnInjectionEvent(json);
+    }
     if (delegate_) {
         delegate_->UpdateMultiWindowAccess(value);
     }
@@ -9573,6 +9587,78 @@ RefPtr<AccessibilitySessionAdapter> WebPattern::GetAccessibilitySessionAdapter()
     return accessibilitySessionAdapter_;
 }
 
+int32_t WebPattern::OnInjectionEvent(const std::string &command)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnInjectionEvent");
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The command json is invalid");
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR,
+            INJECTION_TYPE_JSON_INVALID,
+            std::to_string(static_cast<int32_t>(WebCommandResult::JSON_IS_INVALID)));
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+    if (json->IsObject()) {
+        int result = SendCommandToNWeb(std::move(json));
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web exe the command result is : %{public}d" , result);
+        if (result >= static_cast<int>(WebCommandResult::JSON_IS_INVALID) &&
+            result <= static_cast<int>(WebCommandResult::JSON_INVALID_OFFSET)) {
+            NWeb::EventReport::ReportMSDPError(
+                INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_JSON_INVALID, std::to_string(result));
+        }
+        return result;
+    } else if (json->IsArray()) {
+        auto length = json->GetArraySize();
+        for (int32_t index = 0; index < length; ++index) {
+            auto item = json->GetArrayItem(index);
+            if (!item || !item->IsValid() || !item->IsObject()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "The command json in array acton is InValid");
+                return static_cast<int>(WebCommandResult::FAILED);
+            }
+            int32_t result = SendCommandToNWeb(std::move(item));
+            if (result > static_cast<int>(WebCommandResult::SUCCESS)) {
+                return static_cast<int>(WebCommandResult::FAILED);
+            }
+            TAG_LOGI(AceLogTag::ACE_WEB, "The command json in array acton is success");
+        }
+    }
+    return static_cast<int>(WebCommandResult::FAILED);
+}
+
+int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
+{
+    if (WebUtil::HasJSONDuplicateKeys(comJson->ToString())) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The command json is invalid.");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+
+    // Use WebCommandWrapper to build the command action from JSON
+    std::shared_ptr<NWebCommandActionImpl> commandAction;
+    int buildResult = WebCommandWrapper::BuildCommandFromJson(comJson, commandAction);
+    if (buildResult != WEB_COMMAND_BUILD_SUCCESS) {
+        return buildResult;
+    }
+
+    // Execute the command via delegate
+    if (delegate_) {
+        int result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
+        if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
+            auto xpathValue = comJson->GetValue("XPath");
+            std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
+            NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
+                std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
+        } else if (result > RET_SUCCESS) {
+            NWeb::EventReport::ReportMSDPError(
+                INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
+        }
+        return result;
+    }
+
+    TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: delegate_ is nullptr");
+    NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
+        std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
+    return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+}
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {
