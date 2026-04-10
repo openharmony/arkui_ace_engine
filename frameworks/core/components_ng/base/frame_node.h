@@ -1669,6 +1669,8 @@ private:
     void AddNodeToRegisterTouchTest();
     void RecordHitTestNodeInfo();
     void CleanupPipelineResources();
+    void NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node);
+    void NotifyLazyChildren();
 
     void MarkModifyDoneMultiThread();
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);

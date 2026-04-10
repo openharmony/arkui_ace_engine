@@ -83,6 +83,7 @@
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
@@ -2636,6 +2637,32 @@ void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
     }
 }
 
+void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    for (const auto& child : node->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(frameNode);
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            pattern->OnInActive();
+            continue;
+        }
+        auto layoutProperty = GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+            NotifyLazyChildrenOnInActive(child);
+        }
+    }
+}
+
+void FrameNode::NotifyLazyChildren()
+{
+    auto layoutProperty = GetLayoutProperty();
+    if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+        NotifyLazyChildrenOnInActive(Claim(this));
+    }
+}
+
 void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
     bool activeChanged = false;
@@ -2653,6 +2680,7 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         isActive_ = false;
         activeChanged = true;
         ClearCachedGlobalOffset();
+        NotifyLazyChildren();
     }
     CHECK_NULL_VOID(activeChanged);
 
