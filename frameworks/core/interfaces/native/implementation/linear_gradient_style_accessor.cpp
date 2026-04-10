@@ -59,7 +59,7 @@ Ark_LinearGradientOptions GetOptionsImpl(Ark_LinearGradientStyle peer)
     if (!peer->gradientOptions.has_value()) {
         return {};
     }
-    return Converter::ArkValue<Ark_LinearGradientOptions>(peer->gradientOptions.value());
+    return Converter::ArkValue<Ark_LinearGradientOptions>(peer->gradientOptions.value(), Converter::FC);
 }
 void SetOptionsImpl(Ark_LinearGradientStyle peer,
                     const Ark_LinearGradientOptions* options)

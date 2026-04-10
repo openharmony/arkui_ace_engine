@@ -80,6 +80,12 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     CHECK_NULL_RETURN(pattern, false);
     auto node = pattern->GetHost();
     CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+        if (searchNode && searchNode->GetTag() == V2::SEARCH_ETS_TAG) {
+            node = searchNode;
+        }
+    }
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     RectF visibleRect;
     RectF frameRect;
