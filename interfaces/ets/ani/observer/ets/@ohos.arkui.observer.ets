@@ -14,7 +14,7 @@
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
 HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
-import { UIContext } from "@ohos.arkui.UIContext"
+import { UIContext, SwiperContentInfo } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
@@ -158,6 +158,11 @@ import { Size } from '@ohos.arkui.node'
         public native offTextChange(callback?: Callback<TextChangeEventInfo>): void;
         public native onTextChange(identity: ObserverOptions, callback: Callback<TextChangeEventInfo>): void;
         public native offTextChange(identity: ObserverOptions, callback?: Callback<TextChangeEventInfo>): void;
+
+        public native onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void;
+        public native offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void;
+        public native onSwiperContentUpdate(config: ObserverOptions, callback: Callback<SwiperContentInfo>): void;
+        public native offSwiperContentUpdate(config: ObserverOptions, callback?: Callback<SwiperContentInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -638,5 +643,4 @@ import { Size } from '@ohos.arkui.node'
         uniqueId: int;
         content: string;
     }
-
  }

@@ -693,7 +693,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -782,7 +786,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1123,7 +1131,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1211,7 +1223,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
