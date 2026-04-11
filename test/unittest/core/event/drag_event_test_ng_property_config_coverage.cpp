@@ -915,4 +915,48 @@ HWTEST_F(DragEventTestNg, DragEventActuatorRestartDragTaskTest002, TestSize.Leve
     dragEventActuator->RestartDragTask(info);
     EXPECT_EQ(unknownPropertyValue, UNKNOWN);
 }
+
+/**
+ * @tc.name: DragEventActuatorSetFilterTest001
+ * @tc.desc: Test SetFilter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorSetFilterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    framenode->SetParent(parentNode);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto dragEventActuatorTwo = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuatorTwo, nullptr);
+    parentNode->depth_ = 1;
+
+    /**
+     * @tc.steps: step2. Execute SetFilter when rootNodeWeak_ is null.
+     */
+    MockContainer::SetUp();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    auto tmpRootNode = manager->rootNodeWeak_;
+    manager->rootNodeWeak_ = nullptr;
+    dragEventActuator->SetFilter(dragEventActuatorTwo);
+    MockContainer::TearDown();
+    EXPECT_EQ(manager->hasFilter_, false);
+    manager->rootNodeWeak_ = tmpRootNode;
+}
 } // namespace OHOS::Ace::NG
