@@ -520,6 +520,8 @@ int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnR
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        isOnRenderTree, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "isOnRenderTree parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
