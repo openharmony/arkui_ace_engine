@@ -340,7 +340,7 @@ export struct TipsDialog {
   textPart(): void {
     Scroll(this.contentScroller) {
       Column() {
-        if (this.title !== null) {
+        if (this.title !== null && this.title !== undefined) {
           Row() {
             Text(this.title)
               .fontSize(`${TITLE_S}fp`)
@@ -383,7 +383,7 @@ export struct TipsDialog {
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
   }
 
   aboutToAppear() {
@@ -828,8 +828,7 @@ export struct ConfirmDialog {
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .margin({
-        start: LengthMetrics.vp(SCROLL_BAR_OFFSET),
-        end: LengthMetrics.vp(SCROLL_BAR_OFFSET)
+        end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET)
       } as LocalizedMargin)
     }
   }
