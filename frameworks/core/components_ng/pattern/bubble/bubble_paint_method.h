@@ -46,9 +46,7 @@ public:
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintMask(canvas, paintWrapper);
-                if (!bubble->IsUserSetMaterial()) {
-                    bubble->ClipBubble(paintWrapper);
-                }
+                bubble->ClipBubble(paintWrapper);
                 bubble->PaintBorder(canvas, paintWrapper);
             }
         };
