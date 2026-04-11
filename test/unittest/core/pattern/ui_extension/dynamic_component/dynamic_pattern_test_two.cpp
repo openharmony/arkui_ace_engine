@@ -23,6 +23,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
@@ -796,7 +797,7 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest003, TestSize.L
             return AceType::MakeRefPtr<DynamicPattern>();
         });
     auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
-    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, WeakClaim(RawPtr(dynamicPattern)));
+    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, dynamicPattern);
 
     safeManager->UpdateAllDCAvoidArea(1, avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM);
     auto resultAreas = safeManager->GetAvoidArea();
@@ -832,7 +833,7 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest004, TestSize.L
     auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
     
     // allowOccupied_ is false
-    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, WeakClaim(RawPtr(dynamicPattern)));
+    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, dynamicPattern);
 
     bool result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
     EXPECT_FALSE(result);

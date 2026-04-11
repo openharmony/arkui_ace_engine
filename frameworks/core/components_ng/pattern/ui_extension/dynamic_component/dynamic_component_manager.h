@@ -17,6 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_DYNAMIC_COMPONENT_MANAGER_H
 
 #include "core/components_ng/base/frame_node.h"
+
+#ifdef WINDOW_SCENE_SUPPORTED
+#include <mutex>
+#include <shared_mutex>
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/common/window_animation_config.h"
@@ -28,6 +32,7 @@ enum class AvoidAreaType : uint32_t;
 enum class OccupiedAreaType : uint32_t;
 enum class WindowSizeChangeReason : uint32_t;
 } // namespace OHOS::Rosen
+#endif
 
 namespace OHOS::Ace::NG {
 class PlatformPattern;
@@ -62,6 +67,7 @@ public:
 
 class DynamicComponentSafeManager : public AceType {
     DECLARE_ACE_TYPE(DynamicComponentSafeManager, AceType);
+#ifdef WINDOW_SCENE_SUPPORTED
 public:
     void SetAvoidArea(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
     void SetOccupiedAreaChangeInfo(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
@@ -75,13 +81,18 @@ public:
         const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> GetAvoidAreaIntersection(
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+        OHOS::Ace::ViewportConfig viewportConfig);
 
+    mutable std::shared_mutex avoidAreasMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<PlatformPattern>> aliveDynamics_;
     OHOS::Ace::ViewportConfig viewportConfig_;
     OHOS::Ace::WindowSizeChangeReason reason_;
     std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction_;
     RefPtr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo_;
     std::map<OHOS::Rosen::AvoidAreaType, RefPtr<AvoidArea>> avoidAreas_;
+#endif
 };
 
 class ACE_EXPORT DynamicComponentManager {

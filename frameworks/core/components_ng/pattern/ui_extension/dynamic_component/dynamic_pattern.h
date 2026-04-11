@@ -90,11 +90,7 @@ public:
 
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
-    RefPtr<DynamicComponentRenderer> GetDynamicComponentRenderer() const
-    {
-        return dynamicComponentRenderer_;
-    }
-
+    std::shared_ptr<UIContent> GetUIContent() const;
     void SetAllowOccupied(bool allowOccupied)
     {
         allowOccupied_ = allowOccupied;

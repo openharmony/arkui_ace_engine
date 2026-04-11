@@ -21,6 +21,7 @@
 #include <list>
 #include <memory>
 #include <optional>
+#include <refbase.h>
 #include <vector>
 
 #include "base/memory/referenced.h"

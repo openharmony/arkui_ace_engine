@@ -39,6 +39,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1836,6 +1837,19 @@ void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
 RefPtr<EventManager> PipelineBase::GetEventManager() const
 {
     return eventManager_;
+}
+
+void NG::PipelineContext::SetDynamicComponentSafeManager(const RefPtr<NG::DynamicComponentSafeManager>& manager)
+{
+    dynamicComponentSafeManager_ = manager;
+}
+
+RefPtr<NG::DynamicComponentSafeManager> NG::PipelineContext::GetDynamicComponentSafeManager()
+{
+    if(!dynamicComponentSafeManager_) {
+        dynamicComponentSafeManager_ = AceType::MakeRefPtr<NG::DynamicComponentSafeManager>();
+    }
+    return dynamicComponentSafeManager_;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

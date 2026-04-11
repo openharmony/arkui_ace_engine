@@ -1697,6 +1697,7 @@ public:
     {
         return false;
     }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

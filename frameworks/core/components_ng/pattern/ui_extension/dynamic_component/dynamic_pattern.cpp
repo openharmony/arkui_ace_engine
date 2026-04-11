@@ -22,6 +22,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
 #include "core/common/container_handler.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/property/accessibility_property.h"
@@ -29,7 +30,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
 #include "parameters.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -776,4 +776,13 @@ void DynamicPattern::HandleMouseEvent(const MouseInfo& info)
     }
     PlatformPattern::HandleMouseEvent(info);
 }
+
+std::shared_ptr<UIContent> DynamicPattern::GetUIContent() const
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, nullptr);
+    auto render = AceType::DynamicCast<DynamicComponentRendererImpl>(dynamicComponentRenderer_);
+    CHECK_NULL_RETURN(render, nullptr);
+    return render->GetUIContent();
+}
+
 } // namespace OHOS::Ace::NG

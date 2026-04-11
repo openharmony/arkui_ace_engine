@@ -90,6 +90,7 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
@@ -136,6 +137,8 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
@@ -158,9 +161,6 @@
 #include "screen_session_manager_client.h"
 #include "parameters.h"
 #include "pointer_event.h"
-#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 namespace OHOS::Ace {
 namespace {

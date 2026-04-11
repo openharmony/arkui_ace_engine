@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -30,7 +31,6 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -765,7 +765,6 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             " subRSTransaction[%{public}d]", subRSUIContext != nullptr, subRSTransaction != nullptr);
         }
     }
-
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreaMap;
     sptr<OHOS::Rosen::OccupiedAreaChangeInfo> occupiedAreaChangeInfo = nullptr;
     auto pipeline = hostContainer->GetPipelineContext();
@@ -773,7 +772,8 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
             auto dynamicComponentSafeManager = ngPipeline->GetDynamicComponentSafeManager();
-            avoidAreaMap = dynamicComponentSafeManager->GetAvoidArea();
+            avoidAreaMap = dynamicComponentSafeManager->GetAvoidAreaIntersection(
+                dynamicComponentSafeManager->GetAvoidArea(), vpConfig);
             occupiedAreaChangeInfo = dynamicComponentSafeManager->GetOccupiedAreaChangeInfo();
         }
     }

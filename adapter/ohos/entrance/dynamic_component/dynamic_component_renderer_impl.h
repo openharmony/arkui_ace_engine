@@ -116,7 +116,6 @@ public:
     {
         return uiContent_;
     }
-
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
