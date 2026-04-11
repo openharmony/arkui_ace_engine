@@ -916,6 +916,7 @@ void HandleGestureEvent(ArkUINodeEvent* event)
         uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
     }
     uiEvent->apiVersion = event->apiVersion;
+    uiEvent->nodeId = event->nodeId;
     uiEvent->inputEvent = gestureEvent->eventData.rawPointerEvent;
     gestureEvent->eventData.rawPointerEvent = uiEvent;
     if (extraData->gesture) {

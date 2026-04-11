@@ -54,8 +54,8 @@ JSRef<JSObject> JsTouchTestDoneFunction::CreateGestureEventObject(const std::sha
     CommonUtils::SetBaseGestureEventInfo(obj, info);
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     int32_t maxFingerId = -1;
+    std::vector<JSRef<JSObject>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CommonUtils::CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
@@ -64,12 +64,11 @@ JSRef<JSObject> JsTouchTestDoneFunction::CreateGestureEventObject(const std::sha
                 maxFingerId = fingerInfo.fingerId_;
             }
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        JSRef<JSObject> element = CommonUtils::CreateFingerInfo(fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(idx++, element);
     }
     obj->SetPropertyObject("fingerList", fingerArr);

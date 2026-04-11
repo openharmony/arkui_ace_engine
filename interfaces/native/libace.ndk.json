@@ -456,6 +456,22 @@
         "name": "OH_ArkUI_PointerEvent_GetYByIndex"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalX"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalY"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetWindowXByIndex"
     },

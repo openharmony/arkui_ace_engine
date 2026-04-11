@@ -44,6 +44,19 @@ constexpr int32_t COUNT_PARAM_SIZE = 3;
 constexpr int32_t EVENT_HANDLE = 100000;
 constexpr int32_t POST_ONCE = 1;
 
+std::list<FingerInfo> BuildTouchFingerList(const TouchEvent& touchEvent, const WeakPtr<NG::FrameNode>& weakNode)
+{
+    std::list<FingerInfo> fingerList;
+    for (const auto& point : touchEvent.pointers) {
+        NG::PointF localPoint(point.x, point.y);
+        NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
+        fingerList.emplace_back(FingerInfo { point.originalId, point.operatingHand, Offset(point.x, point.y),
+            Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
+            Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool });
+    }
+    return fingerList;
+}
+
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
@@ -594,16 +607,7 @@ void EventManager::ExecuteTouchTestDoneCallback(
         info->SetForce(touchEvent.force);
         auto getEventTargetImpl = gestureEventHub->CreateGetEventTargetImpl();
         info->SetTarget(getEventTargetImpl ? getEventTargetImpl().value_or(EventTarget()) : EventTarget());
-        std::list<FingerInfo> fingerList;
-        for (const auto& point : touchEvent.pointers) {
-            NG::PointF localPoint(point.x, point.y);
-            NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
-            FingerInfo fingerInfo = { point.originalId, point.operatingHand, Offset(point.x, point.y),
-                Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
-                Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool };
-            fingerList.emplace_back(fingerInfo);
-        }
-        info->SetFingerList(fingerList);
+        info->SetFingerList(BuildTouchFingerList(touchEvent, weakNode));
         if (touchEvent.tiltX.has_value()) {
             info->SetTiltX(touchEvent.tiltX.value());
         }

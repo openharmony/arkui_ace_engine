@@ -20,7 +20,9 @@ namespace OHOS::Ace::Framework::CommonUtils {
 
 JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo)
 {
-    JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> fingerInfoObj = objectTemplate->NewInstance();
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
@@ -37,6 +39,9 @@ JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo)
         "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
     fingerInfoObj->SetProperty<double>(
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
+    fingerInfoObj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
+    fingerInfoObj->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
     return fingerInfoObj;
 }
 
@@ -117,22 +122,21 @@ JSRef<JSObject> CreateFingerInfosObject(const std::shared_ptr<BaseGestureEvent>&
 {
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     std::vector<JSRef<JSObject>> validFingers;
+    std::vector<JSRef<JSObject>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
             validFingers.emplace_back(element);
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     for (size_t i = 0; i < validFingers.size(); ++i) {
         fingerArr->SetValueAt(i, validFingers[i]);
     }
     auto idx = validFingers.size();
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(idx++, element);
     }
     obj->SetPropertyObject("fingerInfos", fingerArr);

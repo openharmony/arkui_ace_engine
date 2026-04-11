@@ -7832,8 +7832,8 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     SetCommonAttributes(obj, vm, info);
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     int32_t maxFingerId = -1;
+    std::vector<Local<panda::ObjectRef>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
@@ -7842,12 +7842,11 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
                 maxFingerId = fingerInfo.fingerId_;
             }
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        auto element = CreateFingerInfo(vm, fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
@@ -7925,8 +7924,8 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(EcmaVM* vm, const s
 
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     int32_t maxFingerId = -1;
+    std::vector<Local<panda::ObjectRef>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
@@ -7935,12 +7934,11 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(EcmaVM* vm, const s
                 maxFingerId = fingerInfo.fingerId_;
             }
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        auto element = CreateFingerInfo(vm, fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
@@ -7956,22 +7954,21 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfosInfo(
 {
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     std::vector<Local<panda::ObjectRef>> validFingers;
+    std::vector<Local<panda::ObjectRef>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
             validFingers.emplace_back(element);
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     for (size_t i = 0; i < validFingers.size(); ++i) {
         fingerArr->SetValueAt(vm, fingerArr, i, validFingers[i]);
     }
     auto idx = validFingers.size();
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        auto element = CreateFingerInfo(vm, fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerInfos"), fingerArr);
@@ -8095,18 +8092,19 @@ Local<panda::ObjectRef> CommonBridge::CreateRecognizerObject(EcmaVM* vm, const R
     return recognizerObj->GetLocalHandle();
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEvent& info)
+Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEvent* infoPtr)
 {
-    if (info.GetFingerList().empty()) {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    if (infoPtr->GetFingerList().empty()) {
         return panda::ObjectRef::New(vm);
     }
-    auto fingerInfo = info.GetFingerList().back();
+    auto fingerInfo = infoPtr->GetFingerList().back();
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
     const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY",
-                           "globalDisplayX", "globalDisplayY"};
+                           "globalDisplayX", "globalDisplayY", "getCurrentLocalPosition" };
     Local<JSValueRef> values[] = {
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY())),
@@ -8116,8 +8114,12 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEv
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY())),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition),
     };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    auto tapInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    tapInfoObj->SetNativePointerFieldCount(vm, 1);
+    tapInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr));
+    return tapInfoObj;
 }
 
 Local<panda::ArrayRef> CommonBridge::CreateTouchRecognizersObject(
@@ -8202,7 +8204,7 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
     const OHOS::Ace::Offset& globalDisplayLocation  = fingerInfo.globalDisplayLocation_;
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY",
-                           "globalDisplayX", "globalDisplayY", "hand" };
+                           "globalDisplayX", "globalDisplayY", "hand", "getCurrentLocalPosition" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, fingerInfo.fingerId_),
         panda::NumberRef::New(vm, globalLocation.GetX() / density),
         panda::NumberRef::New(vm, globalLocation.GetY() / density),
@@ -8212,8 +8214,12 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
         panda::NumberRef::New(vm, screenLocation.GetY() / density),
         panda::NumberRef::New(vm, globalDisplayLocation.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayLocation.GetY() / density),
-        panda::NumberRef::New(vm, fingerInfo.operatingHand_) };
-        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::NumberRef::New(vm, fingerInfo.operatingHand_),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPositionForFinger) };
+    auto fingerInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    fingerInfoObj->SetNativePointerFieldCount(vm, 1);
+    fingerInfoObj->SetNativePointerField(vm, 0, const_cast<FingerInfo*>(&fingerInfo));
+    return fingerInfoObj;
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)
@@ -8639,7 +8645,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTargetDisplayId())));
     if (infoPtr->GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !infoPtr->GetFingerList().empty()) {
-        auto tapGuestureInfo = CreateTapGestureInfo(vm, *infoPtr);
+        auto tapGuestureInfo = CreateTapGestureInfo(vm, infoPtr);
         obj->Set(
             vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), tapGuestureInfo);
     }
@@ -8650,8 +8656,8 @@ Local<panda::ArrayRef> CommonBridge::CreateFingerListArray(EcmaVM* vm, GestureEv
 {
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     int32_t maxFingerId = -1;
+    std::vector<Local<panda::ObjectRef>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
@@ -8660,12 +8666,11 @@ Local<panda::ArrayRef> CommonBridge::CreateFingerListArray(EcmaVM* vm, GestureEv
                 maxFingerId = fingerInfo.fingerId_;
             }
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        auto element = CreateFingerInfo(vm, fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);
     }
     return fingerArr;
@@ -8675,22 +8680,21 @@ Local<panda::ArrayRef> CommonBridge::CreateFingerInfosArray(EcmaVM* vm, GestureE
 {
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     std::vector<Local<panda::ObjectRef>> validFingers;
+    std::vector<Local<panda::ObjectRef>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         auto element = CreateFingerInfo(vm, fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
             validFingers.emplace_back(element);
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     for (size_t i = 0; i < validFingers.size(); ++i) {
         fingerArr->SetValueAt(vm, fingerArr, i, validFingers[i]);
     }
     auto idx = validFingers.size();
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        auto element = CreateFingerInfo(vm, fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(vm, fingerArr, idx++, element);
     }
     return fingerArr;
@@ -9822,7 +9826,7 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
     const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY",
-                           "globalDisplayX", "globalDisplayY"};
+                           "globalDisplayX", "globalDisplayY", "getCurrentLocalPosition" };
     density = density != 0 ? density : 1;
     Local<JSValueRef> values[] = {
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())),
@@ -9833,8 +9837,12 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY())),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition),
     };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    auto tapLocationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    tapLocationObj->SetNativePointerFieldCount(vm, 1);
+    tapLocationObj->SetNativePointerField(vm, 0, static_cast<void*>(info.get()));
+    return tapLocationObj;
 }
 
 ArkUINativeModuleValue CommonBridge::ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -11008,7 +11016,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "getPinchAxisScaleValue", "target",
         "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState",
         "axisVertical", "axisHorizontal", "axisPinch", "globalDisplayX", "globalDisplayY", "targetDisplayId",
-        "eventHandleId", "hasAxis" };
+        "eventHandleId", "hasAxis", "getCurrentLocalPosition" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -11036,7 +11044,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
         panda::NumberRef::New(vm, infoPtr->GetEventHandleId()),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis) };
+        panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(

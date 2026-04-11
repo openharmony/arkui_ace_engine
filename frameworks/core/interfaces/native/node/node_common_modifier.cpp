@@ -10157,6 +10157,19 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseUnion(frameNode, false);
 }
 
+ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
+    const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit)
+{
+    double density = usePXUnit ? 1 : PipelineBase::GetCurrentDensity();
+    auto node = AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    if (!node) {
+        return ArkUIOffsetType { localOffset.xComponent, localOffset.yComponent };
+    }
+    PointF point = { windowOffset.xComponent * density, windowOffset.yComponent * density };
+    NGGestureRecognizer::Transform(point, AceType::WeakClaim(node.GetRawPtr()), true);
+    return ArkUIOffsetType { point.GetX() / density, point.GetY() / density };
+}
+
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11795,6 +11808,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
+        .getCurrentLocation = GetCurrentLocation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

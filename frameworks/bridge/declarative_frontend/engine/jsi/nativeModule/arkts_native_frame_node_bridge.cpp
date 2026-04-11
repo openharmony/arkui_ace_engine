@@ -40,6 +40,7 @@
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -249,6 +250,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return touchInfoObj;
@@ -1136,7 +1139,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
     const char* keys[] = { "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y", "timestamp",
-        "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY" };
+        "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY", "getCurrentLocalPosition" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
         panda::NumberRef::New(vm, globalOffset.GetX() / density),
@@ -1150,7 +1153,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, infoPtr->GetForce()), panda::NumberRef::New(vm, infoPtr->GetDeviceId()),
         panda::NumberRef::New(vm, GetOperatingHand(*infoPtr)),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
@@ -1278,6 +1282,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
         panda::NumberRef::New(vm, infoPtr->GetEventHandleId()));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
@@ -1697,6 +1703,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, *infoPtr));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetEventHandleId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     auto pressedButtonArr = panda::ArrayRef::New(vm);
     uint32_t idx = 0;
     for (const auto& button : infoPtr->GetPressedButtons()) {

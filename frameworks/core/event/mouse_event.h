@@ -146,6 +146,8 @@ class MouseInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(MouseInfo, BaseEventInfo);
 
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     MouseInfo() : BaseEventInfo("onMouse") {}
     ~MouseInfo() override = default;
 
@@ -215,6 +217,18 @@ public:
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
+    }
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+    MouseInfo& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
+        return *this;
     }
     const Offset& GetGlobalLocation() const
     {
@@ -288,6 +302,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
@@ -305,6 +320,8 @@ class HoverInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(HoverInfo, BaseEventInfo);
 
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     HoverInfo() : BaseEventInfo("onHover") {}
     ~HoverInfo() override = default;
 
@@ -334,6 +351,20 @@ public:
     HoverInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
     {
         globalDisplayLocation_ = globalDisplayLocation;
+        return *this;
+    }
+
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+
+    HoverInfo& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
         return *this;
     }
 
@@ -368,6 +399,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
 
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
