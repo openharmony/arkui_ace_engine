@@ -161,6 +161,8 @@ public:
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     ACE_FORCE_EXPORT static void ExecutePreDragAction(
         const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
+    static void ExecutePreDragActionWithFrameNode(
+        const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode);
     static void ExecutePreDragFunc(const RefPtr<FrameNode>& node, const PreDragStatus preDragStatus,
         const PreDragStatus onPreDragStatus);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);

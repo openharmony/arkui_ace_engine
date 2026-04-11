@@ -1444,10 +1444,48 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 
 void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode)
 {
-    auto preDragFrameNode =
-        frameNode ? frameNode : DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_VOID(preDragFrameNode);
-    auto instanceId = preDragFrameNode->GetInstanceId();
+    auto targetInstanceId = -1;
+    if (frameNode) {
+        targetInstanceId = frameNode->GetInstanceId();
+    } else {
+        targetInstanceId = DragDropGlobalController::GetInstance().GetPrepareDragFrameNodeId();
+    }
+
+    if (targetInstanceId == -1) {
+        return;
+    }
+
+    auto currentInstanceId = Container::CurrentId();
+    if (targetInstanceId == currentInstanceId) {
+        auto prepareDragFrameNode = frameNode ? frameNode :
+            DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+        if (prepareDragFrameNode) {
+            ExecutePreDragActionWithFrameNode(preDragStatus, prepareDragFrameNode);
+        }
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetContextByContainerId(targetInstanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [preDragStatus, targetInstanceId]() {
+            ContainerScope scope(targetInstanceId);
+            auto frameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+            if (frameNode) {
+                ExecutePreDragActionWithFrameNode(preDragStatus, frameNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+}
+
+void DragEventActuator::ExecutePreDragActionWithFrameNode(
+    const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto instanceId = frameNode->GetInstanceId();
     ContainerScope scope(instanceId);
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
@@ -1456,7 +1494,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
-    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1482,7 +1520,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         }
     }
 
-    ExecutePreDragFunc(preDragFrameNode, preDragStatus, onPreDragStatus);
+    ExecutePreDragFunc(frameNode, preDragStatus, onPreDragStatus);
 }
 
 void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
@@ -1493,19 +1531,7 @@ void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
     CHECK_NULL_VOID(eventHub);
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
-    if (preDragStatus == PreDragStatus::PREVIEW_LIFT_FINISHED ||
-        preDragStatus == PreDragStatus::PREVIEW_LANDING_FINISHED) {
-        auto mainPipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_VOID(mainPipeline);
-        auto taskScheduler = mainPipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask(
-            [onPreDragStatus, callback = onPreDragFunc]() {
-                CHECK_NULL_VOID(callback);
-                callback(onPreDragStatus);
-            },
-            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
-    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+    if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
         onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
