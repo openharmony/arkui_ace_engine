@@ -35253,6 +35253,21 @@ void impl_IUIContext_setCustomKeyboardContinueFeature(Ark_Int32 feature) {
         GetAccessors()->getIUIContextAccessor()->setCustomKeyboardContinueFeature(static_cast<Ark_CustomKeyboardContinueFeature>(feature));
 }
 KOALA_INTEROP_DIRECT_V1(IUIContext_setCustomKeyboardContinueFeature, Ark_Int32)
+KInteropReturnBuffer impl_IUIContext_addLocalInputEventMonitor(Ark_Int32 eventMask, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        InputEventListener listenerValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_RawInputEventWrapper event, const Callback_InputEventInterceptResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_INPUTEVENTLISTENER)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RawInputEventWrapper event, const Callback_InputEventInterceptResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_INPUTEVENTLISTENER))))};;
+        const auto &retValue = GetAccessors()->getIUIContextAccessor()->addLocalInputEventMonitor(eventMask, static_cast<InputEventListener*>(&listenerValueTemp));
+        SerializerBase _retSerializer {};
+        InputEventMonitor_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(IUIContext_addLocalInputEventMonitor, KInteropReturnBuffer, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_IUIContext_removeLocalInputEventMonitor(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_InputEventMonitor monitorValueTemp = InputEventMonitor_serializer::read(thisDeserializer);;
+        GetAccessors()->getIUIContextAccessor()->removeLocalInputEventMonitor(static_cast<Ark_InputEventMonitor*>(&monitorValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(IUIContext_removeLocalInputEventMonitor, KSerializerBuffer, int32_t)
 void impl_IUIContext_enableEventPassthrough(KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 eventType) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto enabledValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -38924,6 +38939,99 @@ void impl_RadialGradientStyle_setOptions(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getRadialGradientStyleAccessor()->setOptions(self, static_cast<Ark_RadialGradientOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RadialGradientStyle_setOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RawInputEventWrapper_construct(KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 eventValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_Union_MouseEvent_TouchEventProxy_KeyEvent eventValueTempTmpBuf = {};
+        eventValueTempTmpBuf.selector = eventValueTempTmpBufUnionSelector;
+        if (eventValueTempTmpBufUnionSelector == 0) {
+            eventValueTempTmpBuf.selector = 0;
+            eventValueTempTmpBuf.value0 = static_cast<Ark_MouseEvent>(MouseEvent_serializer::read(thisDeserializer));
+        } else if (eventValueTempTmpBufUnionSelector == 1) {
+            eventValueTempTmpBuf.selector = 1;
+            eventValueTempTmpBuf.value1 = TouchEventProxy_serializer::read(thisDeserializer);
+        } else if (eventValueTempTmpBufUnionSelector == 2) {
+            eventValueTempTmpBuf.selector = 2;
+            eventValueTempTmpBuf.value2 = static_cast<Ark_KeyEvent>(KeyEvent_serializer::read(thisDeserializer));
+        } else {
+            INTEROP_FATAL("One of the branches for eventValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_Union_MouseEvent_TouchEventProxy_KeyEvent eventValueTemp =
+            static_cast<Ark_Union_MouseEvent_TouchEventProxy_KeyEvent>(eventValueTempTmpBuf);
+        ;
+        return GetAccessors()->getRawInputEventWrapperAccessor()->construct(
+            static_cast<Ark_Union_MouseEvent_TouchEventProxy_KeyEvent*>(&eventValueTemp));
+}
+KOALA_INTEROP_DIRECT_2(RawInputEventWrapper_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RawInputEventWrapper_getFinalizer()
+{
+        return GetAccessors()->getRawInputEventWrapperAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(RawInputEventWrapper_getFinalizer, Ark_NativePointer)
+Ark_Boolean impl_RawInputEventWrapper_isMouseEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        return GetAccessors()->getRawInputEventWrapperAccessor()->isMouseEvent(self);
+}
+KOALA_INTEROP_DIRECT_1(RawInputEventWrapper_isMouseEvent, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_RawInputEventWrapper_isTouchEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        return GetAccessors()->getRawInputEventWrapperAccessor()->isTouchEvent(self);
+}
+KOALA_INTEROP_DIRECT_1(RawInputEventWrapper_isTouchEvent, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_RawInputEventWrapper_isKeyEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        return GetAccessors()->getRawInputEventWrapperAccessor()->isKeyEvent(self);
+}
+KOALA_INTEROP_DIRECT_1(RawInputEventWrapper_isKeyEvent, Ark_Boolean, Ark_NativePointer)
+KInteropReturnBuffer impl_RawInputEventWrapper_asMouseEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        const auto& retValue = GetAccessors()->getRawInputEventWrapperAccessor()->asMouseEvent(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            MouseEvent_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(RawInputEventWrapper_asMouseEvent, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_RawInputEventWrapper_asTouchEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        const auto& retValue = GetAccessors()->getRawInputEventWrapperAccessor()->asTouchEvent(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            TouchEventProxy_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(RawInputEventWrapper_asTouchEvent, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_RawInputEventWrapper_asKeyEvent(Ark_NativePointer thisPtr)
+{
+        Ark_RawInputEventWrapper self = reinterpret_cast<Ark_RawInputEventWrapper>(thisPtr);
+        const auto& retValue = GetAccessors()->getRawInputEventWrapperAccessor()->asKeyEvent(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            KeyEvent_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(RawInputEventWrapper_asKeyEvent, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_RenderingContextSettings_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto antialiasValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

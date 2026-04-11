@@ -27,7 +27,7 @@ void IndexerElement::PerformBuild()
 
 bool IndexerElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::UP && keyEvent.action != KeyAction::CANCEL) {
         return false;
     }
     RefPtr<RenderIndexer> renderIndexer = AceType::DynamicCast<RenderIndexer>(renderNode_);

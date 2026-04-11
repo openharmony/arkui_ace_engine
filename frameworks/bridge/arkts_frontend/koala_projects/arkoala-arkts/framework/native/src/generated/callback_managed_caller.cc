@@ -1961,6 +1961,31 @@ void CallManagedCallback_IMEClient_VoidSync(Ark_VMContext vmContext, Ark_Int32 r
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void CallManagedCallback_InputEventInterceptResult_Void(Ark_Int32 resourceId, Ark_InputEventInterceptResult value)
+{
+    CallbackBuffer callbackBuffer = { {}, {} };
+    const Ark_CallbackResource callbackResourceSelf = { resourceId, holdManagedCallbackResource,
+        releaseManagedCallbackResource };
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase(
+        (KSerializerBuffer) & (callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID);
+    argsSerializer.writeInt32(resourceId);
+    InputEventInterceptResult_serializer::write(argsSerializer, value);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedCallback_InputEventInterceptResult_VoidSync(
+    Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_InputEventInterceptResult value)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID);
+    argsSerializer.writeInt32(resourceId);
+    InputEventInterceptResult_serializer::write(argsSerializer, value);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void CallManagedCallback_InsertValue_Boolean(Ark_Int32 resourceId, Ark_InsertValue data,
                                              synthetic_Callback_Boolean_Void continuation)
 {
@@ -6624,6 +6649,34 @@ void CallManagedImageOnCompleteCallbackSync(Ark_VMContext vmContext, Ark_Int32 r
     {
         argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
     }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void CallManagedInputEventListener(Ark_Int32 resourceId, Ark_RawInputEventWrapper event, Callback_InputEventInterceptResult_Void continuation)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_INPUTEVENTLISTENER);
+    argsSerializer.writeInt32(resourceId);
+    RawInputEventWrapper_serializer::write(argsSerializer, event);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedInputEventListenerSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RawInputEventWrapper event, Callback_InputEventInterceptResult_Void continuation)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_INPUTEVENTLISTENER);
+    argsSerializer.writeInt32(resourceId);
+    RawInputEventWrapper_serializer::write(argsSerializer, event);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -11483,6 +11536,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_I64_Void);
     case KIND_CALLBACK_IMECLIENT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_IMEClient_Void);
+    case KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_InputEventInterceptResult_Void);
     case KIND_CALLBACK_INSERTVALUE_BOOLEAN:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_InsertValue_Boolean);
     case KIND_CALLBACK_INSERTVALUE_VOID:
@@ -11784,6 +11839,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedImageErrorCallback);
     case KIND_IMAGEONCOMPLETECALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedImageOnCompleteCallback);
+    case KIND_INPUTEVENTLISTENER:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedInputEventListener);
     case KIND_INTERCEPTIONCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedInterceptionCallback);
     case KIND_INTERCEPTIONMODECALLBACK:
@@ -12220,6 +12277,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_I64_VoidSync);
     case KIND_CALLBACK_IMECLIENT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_IMEClient_VoidSync);
+    case KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_InputEventInterceptResult_VoidSync);
     case KIND_CALLBACK_INSERTVALUE_BOOLEAN:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_InsertValue_BooleanSync);
     case KIND_CALLBACK_INSERTVALUE_VOID:
@@ -12522,6 +12581,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedImageErrorCallbackSync);
     case KIND_IMAGEONCOMPLETECALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedImageOnCompleteCallbackSync);
+    case KIND_INPUTEVENTLISTENER:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedInputEventListenerSync);
     case KIND_INTERCEPTIONCALLBACK:
         return reinterpret_cast<Ark_NativePointer>(CallManagedInterceptionCallbackSync);
     case KIND_INTERCEPTIONMODECALLBACK:

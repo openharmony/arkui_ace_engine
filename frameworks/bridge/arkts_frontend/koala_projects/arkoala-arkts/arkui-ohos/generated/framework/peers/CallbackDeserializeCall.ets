@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, PopupStateChangeParam } from './../../component/common'
+import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
 import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
 import { extractors } from '#handwritten'
@@ -784,6 +784,12 @@ export function deserializeAndCallCallback_IMEClient_Void(thisDeserializer: Dese
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<IMEClient, void>)
     let data: IMEClient = (IMEClient_serializer.read(thisDeserializer) as IMEClient)
     call(data)
+}
+export function deserializeAndCallCallback_InputEventInterceptResult_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as ((value: InputEventInterceptResult) => void))
+    let value: InputEventInterceptResult = InputEventInterceptResult_serializer.read(thisDeserializer)
+    call(value)
 }
 export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -2458,6 +2464,28 @@ export function deserializeAndCallImageOnCompleteCallback(thisDeserializer: Dese
     }
     let loadEvent: ImageCompleteEvent | undefined = loadEventTmpBuf
     call(loadEvent)
+}
+export function deserializeAndCallInputEventListener(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as InputEventListener)
+    let event: RawInputEventWrapper = (RawInputEventWrapper_serializer.read(thisDeserializer) as RawInputEventWrapper)
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (value: InputEventInterceptResult):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        InputEventInterceptResult_serializer.write(continuationBufferBufArgsSerializer, value);
+        InteropNativeModule._CallCallbackSync(10, 445679290, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((value: InputEventInterceptResult) => void) = continuationBufferClosure
+    const callResult = call(event)
+    continuationResult(callResult)
 }
 export function deserializeAndCallInterceptionCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4415,6 +4443,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_I32_VOID: return deserializeAndCallCallback_I32_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_I64_VOID: return deserializeAndCallCallback_I64_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_IMECLIENT_VOID: return deserializeAndCallCallback_IMEClient_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID: return deserializeAndCallCallback_InputEventInterceptResult_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_INSERTVALUE_BOOLEAN: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_INSERTVALUE_VOID: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_ITEMDRAGINFO_I32_I32_BOOLEAN_VOID: return deserializeAndCallCallback_ItemDragInfo_I32_I32_Boolean_Void(thisDeserializer);
@@ -4565,6 +4594,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_IMAGECOMPLETECALLBACK: return deserializeAndCallImageCompleteCallback(thisDeserializer);
         case CallbackKind.KIND_IMAGEERRORCALLBACK: return deserializeAndCallImageErrorCallback(thisDeserializer);
         case CallbackKind.KIND_IMAGEONCOMPLETECALLBACK: return deserializeAndCallImageOnCompleteCallback(thisDeserializer);
+        case CallbackKind.KIND_INPUTEVENTLISTENER: return deserializeAndCallInputEventListener(thisDeserializer);
         case CallbackKind.KIND_INTERCEPTIONCALLBACK: return deserializeAndCallInterceptionCallback(thisDeserializer);
         case CallbackKind.KIND_INTERCEPTIONMODECALLBACK: return deserializeAndCallInterceptionModeCallback(thisDeserializer);
         case CallbackKind.KIND_INTERCEPTIONSHOWCALLBACK: return deserializeAndCallInterceptionShowCallback(thisDeserializer);

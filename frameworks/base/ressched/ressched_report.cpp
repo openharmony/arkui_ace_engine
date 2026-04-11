@@ -430,6 +430,7 @@ void ResSchedReport::OnKeyEvent(const KeyEvent& event)
             HandleKeyDown(event);
             break;
         case KeyAction::UP:
+        case KeyAction::CANCEL:
             HandleKeyUp(event);
             break;
         default:

@@ -5844,6 +5844,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSystemBarEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "postFrameCallback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::PostFrameCallback));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "addLocalInputEventMonitor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::AddLocalInputEventMonitor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeLocalInputEventMonitor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::RemoveLocalInputEventMonitor));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFocusScopeId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFocusScopeId));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFocusScopeId"),

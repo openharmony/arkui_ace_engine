@@ -37,6 +37,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/base/thread/mock_background_task_executor.cpp",
     "$ace_root/frameworks/base/thread/task_executor.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
 
     "$ace_root/test/mock/frameworks/core/accessibility/accessibility_manager_ng.cpp",
 

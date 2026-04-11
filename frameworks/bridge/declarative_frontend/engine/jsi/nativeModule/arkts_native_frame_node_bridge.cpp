@@ -1405,7 +1405,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
     const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode",
         "timestamp", "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
         "isScrollLockOn" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyType())),
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, infoPtr->GetJsKeyType()),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyCode())),
         panda::StringRef::NewFromUtf8(vm, infoPtr->GetKeyText().c_str()),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeySource())),

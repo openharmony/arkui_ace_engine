@@ -181,6 +181,7 @@ void ReporterImpl::HandleInputEventInspectorReporting(const KeyEvent& event) con
             keyReport.SetAction("Down");
             break;
         case KeyAction::UP:
+        case KeyAction::CANCEL:
             keyReport.SetAction("Up");
             break;
         default: {

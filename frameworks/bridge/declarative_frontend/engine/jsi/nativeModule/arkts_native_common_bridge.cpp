@@ -32,11 +32,13 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_raw_input_event_wrapper.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_gesture.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/common/input_event_monitor_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/event/focus_axis_event.h"
@@ -121,6 +123,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr int32_t INPUT_EVENT_MONITOR_POINTER_FIELD_COUNT = 1;
 
 int32_t NormalizeExpectedUpdateInterval(double expectedUpdateInterval)
 {
@@ -10565,6 +10568,88 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayMillis);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::AddLocalInputEventMonitor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto undefined = panda::JSValueRef::Undefined(vm);
+    Local<JSValueRef> eventMaskArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> listenerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!eventMaskArg->IsNumber() || !listenerArg->IsFunction(vm)) {
+        return undefined;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, undefined);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, undefined);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, undefined);
+    auto monitorManager = eventManager->GetInputMonitorManager();
+    CHECK_NULL_RETURN(monitorManager, undefined);
+    auto containerId = Container::CurrentIdSafely();
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    panda::Local<panda::FunctionRef> listener = listenerArg->ToObject(vm);
+    auto handler = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, listener), false),
+                       id = containerId, node = frameNode](
+                       const RawInputEventWrapper& wrapper) -> InputEventInterceptAction {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(id);
+        auto function = func.Lock();
+        CHECK_EQUAL_RETURN(function.IsEmpty(), true, InputEventInterceptAction::CONTINUE);
+        CHECK_EQUAL_RETURN(function->IsFunction(vm), false, InputEventInterceptAction::CONTINUE);
+        PipelineContext::SetCallBackNode(node);
+        auto eventObj = ArkTSNativeRawInputEventWrapper::Create(wrapper, vm);
+        panda::Local<panda::JSValueRef> params[SIZE_OF_ONE] = { eventObj };
+        auto result = function->Call(vm, function.ToLocal(), params, SIZE_OF_ONE);
+        if (!result->IsObject(vm)) {
+            return InputEventInterceptAction::CONTINUE;
+        }
+        auto action = result->ToObject(vm)->Get(vm, "action");
+        return action->IsNumber() &&
+                       action->Int32Value(vm) == static_cast<int32_t>(InputEventInterceptAction::BLOCK)
+                   ? InputEventInterceptAction::BLOCK
+                   : InputEventInterceptAction::CONTINUE;
+    };
+    auto identity = monitorManager->AddLocalInputMonitor(eventMaskArg->ToNumber(vm)->Uint32Value(vm),
+        std::move(handler));
+    CHECK_NULL_RETURN(identity, undefined);
+    auto monitorObj = panda::ObjectRef::New(vm);
+    auto holder = AceType::MakeRefPtr<InputEventMonitorHolder>(identity);
+    auto* nativeStrongRef = new NativeStrongRef(holder);
+    monitorObj->SetNativePointerFieldCount(vm, INPUT_EVENT_MONITOR_POINTER_FIELD_COUNT);
+    monitorObj->SetNativePointerField(vm, NUM_0, nativeStrongRef, &DestructorInterceptor<NativeStrongRef>);
+    return monitorObj;
+}
+
+ArkUINativeModuleValue CommonBridge::RemoveLocalInputEventMonitor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> monitorArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    if (!monitorArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, panda::JSValueRef::Undefined(vm));
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, panda::JSValueRef::Undefined(vm));
+    auto monitorManager = eventManager->GetInputMonitorManager();
+    CHECK_NULL_RETURN(monitorManager, panda::JSValueRef::Undefined(vm));
+    auto monitorObj = monitorArg->ToObject(vm);
+    if (monitorObj->GetNativePointerFieldCount(vm) < INPUT_EVENT_MONITOR_POINTER_FIELD_COUNT) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto* nativeStrongRef = reinterpret_cast<NativeStrongRef*>(monitorObj->GetNativePointerField(vm, NUM_0));
+    CHECK_NULL_RETURN(nativeStrongRef, panda::JSValueRef::Undefined(vm));
+    auto holder = AceType::DynamicCast<InputEventMonitorHolder>(nativeStrongRef->strongRef);
+    CHECK_NULL_RETURN(holder, panda::JSValueRef::Undefined(vm));
+    monitorManager->RemoveLocalInputMonitor(holder->GetIdentity());
     return panda::JSValueRef::Undefined(vm);
 }
 

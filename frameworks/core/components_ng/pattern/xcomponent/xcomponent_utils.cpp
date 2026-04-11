@@ -184,6 +184,7 @@ OH_NativeXComponent_KeyAction XComponentUtils::ConvertNativeXComponentKeyAction(
         case KeyAction::DOWN:
             return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_DOWN;
         case KeyAction::UP:
+        case KeyAction::CANCEL:
             return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UP;
         default:
             return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
