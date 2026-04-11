@@ -2559,8 +2559,8 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
     auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
     if (!jsWebConsoleLog) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebConsoleLogEventToJSValue jsWebConsoleLog is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebConsoleLogEventToJSValue jsWebConsoleLog is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(messageObj), static_cast<void *>(jsWebConsoleLog.GetRawPtr()));
@@ -2588,8 +2588,8 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
     if (!jsWebDialog) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "WebDialogEventToJSValue jsWebDialog is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDialogEventToJSValue jsWebDialog is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     jsWebDialog->SetResult(eventInfo.GetResult());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebDialog.GetRawPtr()));
@@ -2726,8 +2726,8 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "LoadInterceptEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadInterceptEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetLoadInterceptEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -2758,8 +2758,8 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
     if (!geolocationEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebGeolocationShowEventToJSValue geolocationEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebGeolocationShowEventToJSValue geolocationEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     geolocationEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(geolocationObj), static_cast<void *>(geolocationEvent.GetRawPtr()));
@@ -3009,8 +3009,8 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "LoadOverrideEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(requestObj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadOverrideEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(requestObj);
     }
     requestEvent->SetLoadOverrideEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -3967,8 +3967,8 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetErrorEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -3976,8 +3976,8 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
     if (!errorEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue errorEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue errorEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     errorEvent->SetEvent(eventInfo);
 
@@ -4016,8 +4016,8 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetHttpErrorEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -4025,8 +4025,8 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
     auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
     if (!responseEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue responseEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue responseEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     responseEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(responseObj), static_cast<void *>(responseEvent.GetRawPtr()));
@@ -4113,8 +4113,8 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequestEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequestEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetOnInterceptRequestEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -4171,16 +4171,16 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetOnOverrideErrorPageEvent(eventInfo);
 
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
     if (!errorEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue errorEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue errorEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     errorEvent->SetOverrideErrorPageEvent(eventInfo);
 
@@ -4286,8 +4286,8 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
     if (!fileSelectorParam) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorParam is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorParam is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     fileSelectorParam->SetParam(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(fileSelectorParam.GetRawPtr()));
@@ -4295,8 +4295,8 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
     if (!fileSelectorResult) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorResult is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorResult is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     fileSelectorResult->SetResult(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(fileSelectorResult.GetRawPtr()));
@@ -4427,8 +4427,8 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
     auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
     if (!contextMenuParam) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuParam is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuParam is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     contextMenuParam->SetParam(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(contextMenuParam.GetRawPtr()));
@@ -4436,8 +4436,8 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
     auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
     if (!contextMenuResult) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuResult is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuResult is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     contextMenuResult->SetResult(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(contextMenuResult.GetRawPtr()));
@@ -5095,8 +5095,8 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
     if (!permissionEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "PermissionRequestEventToJSValue permissionEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "PermissionRequestEventToJSValue permissionEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     permissionEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(permissionObj), static_cast<void*>(permissionEvent.GetRawPtr()));
@@ -5142,8 +5142,8 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "ScreenCaptureRequestEventToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "ScreenCaptureRequestEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -5407,8 +5407,8 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     if (!handler) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewEventToJSValue handler is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewEventToJSValue handler is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     handler->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void *>(handler.GetRawPtr()));
@@ -5442,8 +5442,8 @@ JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     if (!handler) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewExtEventToJSValue handler is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewExtEventToJSValue handler is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     handler->SetEvent(eventInfo);
 
@@ -6612,8 +6612,8 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadTouchToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadTouchToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetResult(eventInfo.GetResult());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
@@ -6655,8 +6655,8 @@ JSRef<JSVal> NativeEmbeadMouseToJSValue(const NativeEmbeadMouseInfo& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedMouseRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedMouseRequest>());
     if (!requestEvent) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadMouseToJSValue requestEvent is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadMouseToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     requestEvent->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("result", requestObj);
@@ -7264,8 +7264,8 @@ JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& event
     JSRef<JSObject> webKeyboardControllerObj = JSClass<JSWebKeyboardController>::NewInstance();
     auto webKeyboardController = Referenced::Claim(webKeyboardControllerObj->Unwrap<JSWebKeyboardController>());
     if (!webKeyboardController) {
-       TAG_LOGE(AceLogTag::ACE_WEB, "InterceptKeyboardEventToJSValue webKeyboardController is nullptr");
-       return JSRef<JSVal>::Cast(obj);
+        TAG_LOGE(AceLogTag::ACE_WEB, "InterceptKeyboardEventToJSValue webKeyboardController is nullptr");
+        return JSRef<JSVal>::Cast(obj);
     }
     webKeyboardController->SeWebKeyboardController(eventInfo.GetCustomKeyboardHandler());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(webKeyboardControllerObj),
