@@ -8709,6 +8709,7 @@ struct ArkUIFrameNodeModifier {
         ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
     ArkUI_AccessibilityProvider* (*getAccessibilityProvider)(ArkUINodeHandle node);
     ArkUINodeHandle (*getPageRootNode)(ArkUI_Int32 instanceId);
+    ArkUI_Int32 (*getCommonViewParentId)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

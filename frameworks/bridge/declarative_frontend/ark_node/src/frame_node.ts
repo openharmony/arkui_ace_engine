@@ -688,7 +688,14 @@ class FrameNode {
     if (key === undefined) {
       return undefined;
     }
-    let value = __getCustomProperty__(this._nodeId, key);
+    let nodeId = this._nodeId;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const commonViewParentId = getUINativeModule().frameNode.getCommonViewParentId(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    if (commonViewParentId !== -1 && commonViewParentId !== undefined) {
+      nodeId = commonViewParentId;
+    }
+    let value = __getCustomProperty__(nodeId, key);
     if (value === undefined) {
       const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
       value = valueStr === undefined ? undefined : valueStr;
