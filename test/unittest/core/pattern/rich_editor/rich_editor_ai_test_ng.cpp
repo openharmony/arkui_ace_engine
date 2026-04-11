@@ -246,6 +246,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -256,6 +259,9 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
     options.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(options);
 
+    /**
+     * @tc.steps: step2. update selector
+     */
     richEditorPattern->textSelector_.Update(0, 5);
     AIWriteInfo info;
     richEditorPattern->GetAIWriteInfo(info);

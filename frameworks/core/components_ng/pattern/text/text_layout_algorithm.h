@@ -30,11 +30,11 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class TextContentModifier;
+class Paragraph;
 
 struct DragSpanPosition {
     int32_t dragStart { 0 };
