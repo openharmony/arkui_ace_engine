@@ -358,6 +358,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+        CHECK_NULL_VOID(prepareDragFrameNode);
         if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
             (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
             info.GetSourceDevice() != SourceType::MOUSE && !actuator->isForDragDrop_)) {
@@ -1153,8 +1154,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imagePattern->SetSyncLoad(true);
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProps);
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
@@ -1294,6 +1297,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto props = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(props);
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
     BindClickEvent(columnNode);
@@ -1652,7 +1656,9 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         pattern->ShowAIEntityMenuForCancel();
         return;
     }
-    auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
+    auto geometryNode = dragNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto dragFrame = geometryNode->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();
     auto pixelMap = gestureHub->GetPixelMap();

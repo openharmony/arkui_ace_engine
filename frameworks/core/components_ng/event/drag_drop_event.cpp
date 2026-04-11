@@ -71,7 +71,9 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
         dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
         dragPanDistanceTouch = appTheme->GetPanDistanceThresholdForDragDrop();
     }
-    auto frameNode = gestureEventHub.Upgrade()->GetFrameNode();
+    auto gestureHub = gestureEventHub.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     dragDropInitiatingHandler_ = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
