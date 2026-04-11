@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
         CHECK_NULL_VOID(paintProperty);
         auto host = paintProperty->GetHost();
         auto themeScopeId = host ? host->GetThemeScopeId() : 0;
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+        auto progressTheme = host->GetTheme<ProgressTheme>(true);
         CHECK_NULL_VOID(progressTheme);
         loadingProgressModifier_->SetEnableLoading(paintProperty->GetEnableLoadingValue(true));
         loadingProgressModifier_->SetContentOffset(paintWrapper->GetContentOffset());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,12 +51,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         }
         return std::nullopt;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return MeasureContentForApiNine(contentConstraint, layoutWrapper);
     }
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -131,7 +129,9 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(progressLayoutProperty->GetThemeScopeId());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
@@ -193,7 +193,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     Dimension margin = progressTheme->GetTextMargin();
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(childWrapper, DEFALT_CAPSULE_WIDTH.ConvertToPx());

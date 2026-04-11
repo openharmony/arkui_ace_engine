@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,8 +160,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
-            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
-                                                                 : theme->GetTrackSelectedColor();
+            ProcessColor(colorVal);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
                     ? theme->GetRingProgressEndSideColor() : colorVal;
@@ -372,9 +371,15 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
-                   : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressBgColor()
-                                                             : theme->GetTrackBgColor();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
+                : (g_progressType == ProgressType::RING) ? theme->GetRingProgressParseFailedBgColor()
+                                                        : theme->GetTrackParseFailedBgColor();
+        } else {
+            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
+                : (g_progressType == ProgressType::RING) ? theme->GetRingProgressBgColor()
+                                                        : theme->GetTrackBgColor();
+        }
     }
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
 }
@@ -461,7 +466,7 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->SetFontColor(fontColorVal);
-    
+
     if (SystemProperties::ConfigChangePerform()) {
         ProgressModel::GetInstance()->SetCapsuleStyleFontColor(state);
     }
@@ -803,6 +808,18 @@ void JSProgress::ProcessCapsuleContent(const JSRef<JSObject>& paramObject)
         } else {
             ProgressModel::GetInstance()->SetText(std::nullopt);
         }
+    }
+}
+
+void JSProgress::ProcessColor(Color& colorVal)
+{
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        colorVal = (g_progressType == ProgressType::CAPSULE)
+            ? theme->GetCapsuleParseFailedSelectColor() : theme->GetTrackParseFailedSelectedColor();
+    } else {
+        colorVal = (g_progressType == ProgressType::CAPSULE)
+            ? theme->GetCapsuleSelectColor() : theme->GetTrackSelectedColor();
     }
 }
 } // namespace OHOS::Ace::Framework

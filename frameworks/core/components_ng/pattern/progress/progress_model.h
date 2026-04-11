@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,9 @@ public:
     virtual void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) = 0;
     virtual void SetValue(double value) = 0;
     virtual void SetColor(const Color& value) = 0;
+    virtual void ResetColor() = 0;
     virtual void SetBackgroundColor(const Color& value) = 0;
+    virtual void ResetBackgroundColor() = 0;
     virtual void SetBackgroundColorByUser(bool value) = 0;
     virtual void SetStrokeWidth(const Dimension& value) = 0;
     virtual void SetScaleCount(int32_t value) = 0;
