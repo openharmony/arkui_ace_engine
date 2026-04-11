@@ -25737,6 +25737,12 @@ typedef struct GENERATED_ArkUISaveButtonModifier {
                            const Opt_Boolean* value);
     void (*setUserCancelEvent)(Ark_NativePointer node,
                                const Opt_Boolean* value);
+    void (*setSymbolIconColor)(Ark_NativePointer node,
+                               const Opt_Array_ResourceColor* value);
+    void (*setSymbolRenderingStrategy)(Ark_NativePointer node,
+                                       const Opt_SymbolRenderingStrategy* value);
+    void (*setSymbolFontWeight)(Ark_NativePointer node,
+                                const Opt_Union_I32_FontWeight_String_Resource* value);
 } GENERATED_ArkUISaveButtonModifier;
 
 typedef struct GENERATED_ArkUIScreenModifier {

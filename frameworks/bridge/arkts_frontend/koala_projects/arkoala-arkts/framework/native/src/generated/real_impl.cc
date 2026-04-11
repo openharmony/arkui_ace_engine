@@ -10196,6 +10196,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
             SaveButtonAttributeModifier::SetStateEffectImpl,
             SaveButtonAttributeModifier::SetUserCancelEventImpl,
+            SaveButtonAttributeModifier::SetSymbolIconColorImpl,
+            SaveButtonAttributeModifier::SetSymbolRenderingStrategyImpl,
+            SaveButtonAttributeModifier::SetSymbolFontWeightImpl,
         };
         return &ArkUISaveButtonModifierImpl;
     }

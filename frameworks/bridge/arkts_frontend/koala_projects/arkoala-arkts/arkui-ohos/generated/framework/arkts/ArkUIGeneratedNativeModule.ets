@@ -1702,6 +1702,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SaveButtonAttribute_setUserCancelEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setSymbolIconColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setSymbolRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setSymbolFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Screen_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ScreenInterface_setScreenOptions(ptr: KPointer, screenId: KLong): void
