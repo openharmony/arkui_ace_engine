@@ -1544,7 +1544,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CHECK_NULL_RETURN(scroll, nullptr);
     MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
-
+    UpdateMenuScrollBarAndMaxHeight(menuNode, menuParam);
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
@@ -1646,6 +1646,24 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
     }
 }
 
+void MenuView::UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    if (menuParam.scrollBar.has_value()) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->SetScrollBar(menuParam.scrollBar);
+            menuPattern->ApplyScrollBarToScrollNode();
+        }
+    }
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        if (menuParam.maxHeight.has_value()) {
+            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+        }
+    }
+}
+
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
@@ -1660,13 +1678,6 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     SetMenuSystemMaterial(menuNode, menuParam);
     menuNode->MarkModifyDone();
 
-    if (menuParam.scrollBar.has_value()) {
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        if (menuPattern) {
-            menuPattern->SetScrollBar(menuParam.scrollBar);
-            menuPattern->ApplyScrollBarToScrollNode();
-        }
-    }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1675,9 +1686,6 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        if (menuParam.maxHeight.has_value()) {
-            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
-        }
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
             if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {
