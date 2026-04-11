@@ -155,7 +155,7 @@ double Expr::Value() const
         return 0;
     }
     if (primaryName_.empty()) {
-        std::cout << "value() only works on simple Variable Expr";
+        std::cout << "value() only works on simple variable Expr";
         return 0;
     }
     return engine_->GetVariable(primaryName_);
