@@ -375,6 +375,7 @@ void TextOverlayComponent::AddOptionForMenu()
         optionComponent->SetClickEvent(clickEvent);
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(clickEvent, [weak = WeakClaim(this), index]() {
             auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
             overlay->OnOptionClick(index);
         });
         menu_->AppendSelectOption(optionComponent);

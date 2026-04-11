@@ -5843,7 +5843,7 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems002, TestSize.Level1)
 HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
+     * @tc.steps: step1. Create SelectOverlayNode.
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -5862,16 +5862,28 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems003, TestSize.Level1)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
 
+    /**
+     * @tc.steps: step2. Prepare MenuItems1.
+     */
+
     std::vector<MenuOptionsParam> menuOptionItems;
     MenuOptionsParam menuItem1;
     menuItem1.content = "item1";
     menuItem1.id = "item1";
     menuOptionItems.emplace_back(menuItem1);
 
+    /**
+     * @tc.steps: step3. Prepare MenuItems2.
+     */
+
     MenuOptionsParam menuItem2;
     menuItem2.content = "item2";
     menuItem2.id = "item2";
     menuOptionItems.emplace_back(menuItem2);
+
+    /**
+     * @tc.steps: step4. Prepare MenuItems3.
+     */
 
     MenuOptionsParam menuItem3;
     menuItem3.content = "item3";
@@ -5881,7 +5893,7 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems003, TestSize.Level1)
     float maxWidth = 100.0f; // 设置较小的 maxWidth
 
     /**
-     * @tc.steps: step2. Call AddCreateMenuItems and verify the return value.
+     * @tc.steps: step5. Call AddCreateMenuItems and verify the return value.
      * @tc.expected: The function returns an index less than the total number of menu items.
      */
     int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, infoPtr, maxWidth);

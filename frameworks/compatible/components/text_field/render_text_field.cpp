@@ -2803,6 +2803,7 @@ void RenderTextField::Insert(const std::string& text)
         context->GetTaskExecutor()->PostTask(
             [weakPtr = WeakClaim(this), text] {
                 const auto& textField = weakPtr.Upgrade();
+                CHECK_NULL_VOID(textField);
                 auto value = textField->GetEditingValue();
                 auto textEditingValue = std::make_shared<TextEditingValue>();
                 textEditingValue->text = value.GetBeforeSelection() + text + value.GetAfterSelection();
