@@ -212,9 +212,9 @@ private:
     void FireLifecycleOnPopByVisibleDiff(
         const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages,
         bool needShowNext, PageTransitionType hideTransitionType, PageTransitionType showTransitionType);
-    void EnsureSplitRightPageIfNeeded();
-    bool HasRouterPushLeftState() const;
-    bool ShouldCurrentPushUseRouterPushLeft(const RefPtr<FrameNode>& newPageNode) const;
+    void EnsureSplitSecondaryPageIfNeeded();
+    bool HasRouterPushPageToPrimaryState() const;
+    bool ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const;
     RefPtr<FrameNode> GetLastPageInStack() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages(
@@ -228,7 +228,7 @@ private:
     RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
     RouterVisiblePages GetRouterVisiblePages();
     RouterVisiblePages ResolveRouterVisiblePagesFromStackPages(
-        const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& rightFallbackPage) const;
+        const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& secondaryFallbackPage) const;
     RouterVisiblePages GetRouterVisiblePagesExcluding(const std::vector<RefPtr<FrameNode>>& excludedPages);
     // Transition-end should follow the final actually visible result.
     // Prefer the right visible page, otherwise fall back to the left visible page.
@@ -262,7 +262,7 @@ private:
     void ClearRouterPageState(const RefPtr<FrameNode>& page);
     bool ShouldMovePageToPrimaryForTransition(
         const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage, bool onlyWhenSplit = true) const;
-    bool FinalizeRouterPushLeftStackChange(
+    bool FinalizeRouterStackChange(
         const RouterVisiblePages& beforeVisible, const RouterVisiblePages& afterVisible, bool needTransition);
     void NormalizeRouterColumnsAfterStackChange();
     void NormalizeRouterColumnsAfterStackChange(const RouterVisiblePages& afterVisible);

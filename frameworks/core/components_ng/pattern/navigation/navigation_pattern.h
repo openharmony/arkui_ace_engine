@@ -717,7 +717,7 @@ public:
         isPrimaryPopToSecondaryScene_ = isPop;
     }
     void FireForceSplitLifecycleForModeChange();
-    bool ShouldUseNewForceSplitModeChangeLifecycleFlow();
+    bool ShouldUseNewForceSplitModeChangeLifecycleFlow() const;
     // Snapshot of the current shopping-mode display state derived from logical stacks.
     // shownPages/activePages are physical NavDestination nodes, while relatedVisible/relatedActive
     // model the special RelatedPage that does not belong to the physical navigation stack.
@@ -959,7 +959,7 @@ private:
     void ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop);
     void ReportTopDestinationInForceSplit();
 
-    bool ShouldUseNewForceSplitLifecycleFlow();
+    bool ShouldUseNewForceSplitLifecycleFlow() const;
     void CollectForceSplitLifecycleCandidates(std::vector<RefPtr<NavDestinationGroupNode>>& candidates,
         const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination);
@@ -973,7 +973,7 @@ private:
     ForceSplitLifecycleDiff BuildForceSplitLifecycleDiff(
         const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination);
-    void UpdateAdjustConstraintTypeForRightPushLeftAnimation(bool isNeedAnimation);
+    void UpdateAdjustConstraintTypeForForceSplitAnimation(bool isNeedAnimation);
     void FireForceSplitWillHideLifecycle(const ForceSplitLifecycleDiff& diff);
     void FireForceSplitWillShowLifecycle(const ForceSplitLifecycleDiff& diff);
     void FireForceSplitHideLifecycle(const ForceSplitLifecycleDiff& diff,

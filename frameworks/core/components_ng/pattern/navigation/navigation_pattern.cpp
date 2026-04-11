@@ -347,8 +347,8 @@ void NavigationPattern::RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>
     navContentNode->RemoveChildSilently(proxyNode);
     navContentNode->AddChild(node, childIndex, true);
     // Moving a page back from the primary column to the navigation content changes its parent
-    // layout constraint from the left-column width to the right-column width. The content node
-    // must remeasure its whole subtree, otherwise the page may keep the old left-column size
+    // layout constraint from the primary-column width to the secondary-column width. The content node
+    // must remeasure its whole subtree, otherwise the page may keep the old primary-column size
     // after the split home source switches back to navBar/homeDestination.
     navContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
@@ -1165,12 +1165,12 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
 {
     /**
      * When the following conditions are met:
-     * 1. The left home carrier or current top primary page was touched
-     * 2. After stack synchronization, that left-side anchor still remains in the stack (except navBar home)
+     * 1. The home carrier or current top primary page was touched
+     * 2. After stack synchronization, that primary-side anchor still remains in the stack (except navBar home)
      * 3. The latest top NavDestination does not exist in the previous stack
      *
      * This will trigger the following logic:
-     * The NavDestination between the left-side anchor and the first newly added NavDestination will be removed.
+     * The NavDestination between the primary-side anchor and the first newly added NavDestination will be removed.
      */
     auto homeNode = forceSplitHomeDest_.Upgrade();
     auto touchedPrimaryNode = touchedPrimaryColumnDest_.Upgrade();
@@ -1931,7 +1931,7 @@ RefPtr<NavDestinationGroupNode> NavigationPattern::GetTopRelatedDestination()
     return nullptr;
 }
 
-bool NavigationPattern::ShouldUseNewForceSplitLifecycleFlow()
+bool NavigationPattern::ShouldUseNewForceSplitLifecycleFlow() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, false);
@@ -1942,7 +1942,7 @@ bool NavigationPattern::ShouldUseNewForceSplitLifecycleFlow()
     return forceSplitMgr->IsForceSplitSupported(false) && forceSplitSuccess_ && forceSplitMgr->CanPushPageToPrimary();
 }
 
-bool NavigationPattern::ShouldUseNewForceSplitModeChangeLifecycleFlow()
+bool NavigationPattern::ShouldUseNewForceSplitModeChangeLifecycleFlow() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, false);
@@ -2093,7 +2093,7 @@ NavigationPattern::ForceSplitLifecycleDiff NavigationPattern::BuildForceSplitLif
     return BuildForceSplitLifecycleDiff(beforeState, afterState);
 }
 
-void NavigationPattern::UpdateAdjustConstraintTypeForRightPushLeftAnimation(bool isNeedAnimation)
+void NavigationPattern::UpdateAdjustConstraintTypeForForceSplitAnimation(bool isNeedAnimation)
 {
     if (!forceSplitSuccess_ || !isNeedAnimation) {
         return;
@@ -2544,7 +2544,6 @@ bool NavigationPattern::ReplaceTransition(const RefPtr<NavDestinationGroupNode>&
     });
     return newUseCustomTransition;
 }
-
 
 bool NavigationPattern::HandleForceSplitTransitionWithoutAnimation(
     const RefPtr<NavigationGroupNode>& navigationNode,
@@ -3018,7 +3017,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void NavigationPattern::AbortAnimation(RefPtr<NavigationGroupNode>& hostNode)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Aborting navigation animations");
-    hostNode->StopRightPushLeftAnimations();
+    hostNode->StopForceSplitAnimations();
     hostNode->CleanSplitPushAnimations();
     hostNode->CleanSplitPopAnimations();
     if (!hostNode->GetPushAnimations().empty()) {
@@ -4429,7 +4428,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition don't need animation in forceSplit mode");
         isNotNeedAnimation = true;
     }
-    UpdateAdjustConstraintTypeForRightPushLeftAnimation(!isNotNeedAnimation);
+    UpdateAdjustConstraintTypeForForceSplitAnimation(!isNotNeedAnimation);
 
     std::string fromNavDestinationName = "";
     std::string toNavDestinationName = "";
@@ -5490,7 +5489,7 @@ void NavigationPattern::CollectActiveNodes(std::vector<RefPtr<NavDestinationGrou
 {
     destNodes.clear();
     // active/inactive only care about the current logical stack tops:
-    // right side first (more top in physical stack), then left side.
+    // secondary side first (more top in physical stack), then primary side.
     if (ShouldUseNewForceSplitLifecycleFlow()) {
         RefPtr<NavDestinationGroupNode> primaryTopNode =
             primaryNodes_.empty() ? nullptr : primaryNodes_.back().Upgrade();
@@ -6375,6 +6374,7 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
     CHECK_NULL_VOID(primaryContentNode);
     auto primaryProperty = primaryContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(primaryProperty);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Adjust node for split display when layout");
     ResetSecondaryPushPrimarySceneState();
 
     auto forceSplitHomeDest = forceSplitHomeDest_.Upgrade();
@@ -6397,8 +6397,6 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
         }
         allDestNodes.push_back(destNode);
     }
-    int32_t primaryLastStandardIndex = -1;
-    int32_t secondaryLastStandardIndex = -1;
     for (int32_t idx = 0; idx < static_cast<int32_t>(allDestNodes.size()); ++idx) {
         auto destNode = allDestNodes[idx];
         auto columnType = destNode->GetColumnType();
@@ -6413,20 +6411,13 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
          * 3. Home NavDestination;
          * 4. NavDestination with ForceSplitPageColumnType::PRIMARY.
          */
-        auto destMode = destNode->GetNavDestinationMode();
         if (!hasHomePage || (forceSplitHomeDest && idx <= homePageIndex) ||
             columnType == ForceSplitPageColumnType::PRIMARY) {
             if (!destNode->IsShowInPrimaryPartition()) {
                 ReplaceNodeWithProxyNodeIfNeeded(navContentNode, destNode);
             }
-            if (destMode == NavDestinationMode::STANDARD) {
-                primaryLastStandardIndex = static_cast<int32_t>(primaryNodes_.size());
-            }
             primaryNodes_.push_back(destNode);
             continue;
-        }
-        if (destMode == NavDestinationMode::STANDARD) {
-            secondaryLastStandardIndex = static_cast<int32_t>(secondaryNodes_.size());
         }
         if (destNode->IsShowInPrimaryPartition()) {
             // hide/show navBar may switch the logical home source without changing split mode.
@@ -6462,6 +6453,7 @@ void NavigationPattern::AdjustNodeForStackDisplayReconfigure()
     CHECK_NULL_VOID(primaryContentNode);
     auto primaryProperty = primaryContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(primaryProperty);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Adjust node for stack display when layout");
     ResetSecondaryPushPrimarySceneState();
 
     primaryNodes_.clear();
@@ -6505,14 +6497,7 @@ void NavigationPattern::HandleSplitDisplaySyncWithoutHome(const RefPtr<FrameNode
 {
     CHECK_NULL_VOID(navigationStack_);
     CHECK_NULL_VOID(navContentNode);
-    isSecondaryPushToPrimaryScene_ = false;
-    isPrimaryPopToSecondaryScene_ = false;
-    splitPushExitNode_ = nullptr;
-    splitPushMoveNode_ = nullptr;
-    splitPushEnterNode_ = nullptr;
-    splitPopExitNode_ = nullptr;
-    splitPopMoveNode_ = nullptr;
-    splitPopEnterNode_ = nullptr;
+    ResetSecondaryPushPrimarySceneState();
     primaryNodes_.clear();
     secondaryNodes_.clear();
     auto curAllNodes = navigationStack_->GetAllNavDestinationNodes();
@@ -6555,8 +6540,8 @@ NavigationPattern::SplitDisplaySyncScenario NavigationPattern::BuildSplitDisplay
         [target = preTop.value()](const std::pair<std::string, RefPtr<UINode>>& item) {
             return item.first == target.first && item.second == target.second;
         });
-    bool rightPageTriggered = touchedSecondaryDest && touchedSecondaryDest == scenario.preTopDest;
-    if (it != curAllNodes.end() && rightPageTriggered &&
+    bool secondaryPageTriggered = touchedSecondaryDest && touchedSecondaryDest == scenario.preTopDest;
+    if (it != curAllNodes.end() && secondaryPageTriggered &&
         IsTransitionShouldMovePageToPrimary(scenario.preTopDest, scenario.curTopDest) &&
         scenario.preTopDest->GetNavDestinationType() == NavDestinationType::DETAIL &&
         !scenario.preTopDest->IsShowInPrimaryPartition() &&
@@ -6579,14 +6564,7 @@ void NavigationPattern::RebuildSplitDisplayNodes(const RefPtr<NavDestinationNode
     CHECK_NULL_VOID(navContentNode);
     CHECK_NULL_VOID(primaryContentNode);
     CHECK_NULL_VOID(navigationStack_);
-    isSecondaryPushToPrimaryScene_ = false;
-    isPrimaryPopToSecondaryScene_ = false;
-    splitPushExitNode_ = nullptr;
-    splitPushMoveNode_ = nullptr;
-    splitPushEnterNode_ = nullptr;
-    splitPopExitNode_ = nullptr;
-    splitPopMoveNode_ = nullptr;
-    splitPopEnterNode_ = nullptr;
+    ResetSecondaryPushPrimarySceneState();
     primaryNodes_.clear();
     secondaryNodes_.clear();
     auto curAllNodes = navigationStack_->GetAllNavDestinationNodes();
@@ -6670,7 +6648,7 @@ void NavigationPattern::UpdateSplitDisplayVisibility(const RefPtr<NavigationGrou
     } else if (!isSecondaryPushToPrimaryScene_) {
         navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
     } else {
-        // Keep the left home carrier as-is during right-push-left push. The exiting navBar/home node
+        // Keep the primary home carrier as-is during split push. The exiting navBar/home node
         // is hidden later by split push finish (or by the no-animation split handler), not here.
     }
 
@@ -6844,7 +6822,7 @@ void NavigationPattern::AdjustNodeForStackSyncWhenSplitDisplay(
     ReorderPrimaryNodes(primaryContentNode, primaryNodes_);
     UpdateSplitDisplayVisibility(navNode, navBarProperty, navContentProperty, primaryProperty);
     // In split mode we still want stable pages to reach their final visibility early, otherwise
-    // stack-sync-only changes (for example ordinary right-column push without right-push-left)
+    // stack-sync-only changes (for example ordinary secondary-column push without split push)
     // may leave stale pages visible. But the previous top may also be preserved by remainChild
     // for the later ordinary transition; pass it in explicitly so stack sync does not hide it early.
     auto deferredTransitionNode = !preTop.has_value() ? nullptr :
@@ -6864,14 +6842,7 @@ void NavigationPattern::AdjustNodeForStackSyncWhenStackDisplay()
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
     auto forceSplitHomeDest = forceSplitHomeDest_.Upgrade();
-    isSecondaryPushToPrimaryScene_ = false;
-    isPrimaryPopToSecondaryScene_ = false;
-    splitPushExitNode_ = nullptr;
-    splitPushMoveNode_ = nullptr;
-    splitPushEnterNode_ = nullptr;
-    splitPopExitNode_ = nullptr;
-    splitPopMoveNode_ = nullptr;
-    splitPopEnterNode_ = nullptr;
+    ResetSecondaryPushPrimarySceneState();
     primaryNodes_.clear();
     secondaryNodes_.clear();
     auto curAllNodes = navigationStack_->GetAllNavDestinationNodes();

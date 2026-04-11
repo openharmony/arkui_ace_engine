@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1653,7 +1653,7 @@ void ParallelStageManager::OnModeChangeInVirtualStackBasedSplit(const RefPtr<Fra
         // compute pre visible pages/new visible pages, then only notify the delta.
         auto preVisiblePages = GetRouterVisiblePagesForCurrentStackTree();
         // While we stay in stack mode, stack operations may legitimately leave historical PRIMARY column ownership
-        // on pages that are no longer supposed to stay on the left side once split mode is restored.
+        // on pages that are no longer supposed to stay on the primary side once split mode is restored.
         // Before calculating the split-mode visible result, normalize the current stack against the split rules first.
         NormalizeRouterColumnsAfterStackChange();
         UpdateRouterSplitPlaceholder();
@@ -1692,7 +1692,7 @@ void ParallelStageManager::OnWindowStateChangeInVirtualStackBasedSplit(bool show
         pattern->OnHide(true);
     };
     // In split mode, window foreground/background callbacks must follow the actual visible result:
-    // show: left first, then right; hide: right first, then left.
+    // show: primary first, then secondary; hide: secondary first, then primary.
     if (show) {
         fireShow(primaryPage);
         if (detailPage != primaryPage) {
@@ -1709,14 +1709,11 @@ void ParallelStageManager::OnWindowStateChangeInVirtualStackBasedSplit(bool show
 bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNode>& newPageNode,
     bool isNewLifecycle, bool needHideLast, bool needTransition)
 {
-    // usePushLeftFlow answers one narrow question:
-    // whether this push should enter the new right-push-left column flow.
-    // If false, the push still follows the ordinary left-start-right / right-start-right lifecycle order.
     auto currentTopPage = GetLastPageInStack();
     auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
-    auto rightPageTriggered = touchedSecondaryPage && touchedSecondaryPage == currentTopPage;
-    auto usePushLeftFlow =
-        !isNewPageReplacing_ && rightPageTriggered && ShouldCurrentPushUseRouterPushLeft(newPageNode);
+    auto secondaryPageTriggered = touchedSecondaryPage && touchedSecondaryPage == currentTopPage;
+    auto usePushToPrimaryFlow =
+        !isNewPageReplacing_ && secondaryPageTriggered && ShouldCurrentPushPageToPrimary(newPageNode);
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto newTopPattern = newPageNode->GetPattern<ParallelPagePattern>();
@@ -1730,8 +1727,8 @@ bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNo
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
-    if (usePushLeftFlow) {
-        // Push-left column ownership must be written before we compute the final visible result,
+    if (usePushToPrimaryFlow) {
+        // Router page column must be written before we compute the final visible result,
         // but the actual column-node cache is rebuilt later after the new page is mounted.
         UpdateRouterColumnsOnPush(currentTopPage, newPageNode);
     }
@@ -1756,9 +1753,9 @@ bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNo
     // so newVisiblePages is derived from the actual node structure instead of a synthetic prediction.
     InvalidateRouterColumnNodes();
     auto homePage = GetHomePage();
-    bool needMountRightFallback = !usePushLeftFlow && !homePage && fallbackPage &&
+    bool needMountPrimaryFallback = !usePushToPrimaryFlow && !homePage && fallbackPage &&
         stageNode_->GetChildIndex(fallbackPage) < 0;
-    if (needMountRightFallback) {
+    if (needMountPrimaryFallback) {
         fallbackPage->MountToParent(stageNode_);
         topRelatedOrPhPage = fallbackPage;
     }
@@ -1768,11 +1765,11 @@ bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNo
     // then build the total child. Build will trigger page create and onAboutToAppear
     newPageNode->Build(nullptr);
 
-    // Router split mode only keeps delayed hide semantics for the dedicated right-push-left column animation.
+    // Router split mode only keeps delayed hide semantics for the dedicated secondary-push-to-primary column animation.
     // Ordinary split push does not start the old page transition, so pages leaving the visible result must hide
     // immediately with transitionType=NONE.
     auto useRouterColumnAnimation =
-        needTransition && usePushLeftFlow && CheckIfMovePageToPrimaryIsAllowed(preVisiblePages, newVisiblePages);
+        needTransition && usePushToPrimaryFlow && CheckIfMovePageToPrimaryIsAllowed(preVisiblePages, newVisiblePages);
     if (needHideLast && lastPage) {
         auto hideTransitionType = GetRouterPushHideTransitionType(useRouterColumnAnimation);
         FireRouterHideByVisibleDiff(preVisiblePages, newVisiblePages, hideTransitionType);
@@ -1785,8 +1782,7 @@ bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNo
         stageNode_->GetChildIndex(topRelatedOrPhPage) >= 0) {
         stageNode_->RemoveChild(topRelatedOrPhPage);
     }
-    if (usePushLeftFlow) {
-        // Only right-push-left results participate in split column animation.
+    if (usePushToPrimaryFlow) {
         animated = useRouterColumnAnimation && StartRouterSplitAnimation(preVisiblePages, newVisiblePages);
     }
 
@@ -1811,11 +1807,11 @@ bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNo
 
 bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bool needTransition)
 {
-    // Pop should only stay in push-left flow when the current split relation already contains
-    // a pushed-left detail page. Unlike push, reverse-right-push-left pop may be triggered by
-    // edge-swipe/system back, so it must not depend on a right-column touch source.
+    // Pop should only stay in push-to-primary flow when the current split relation already contains
+    // a pushed-primary detail page. Unlike push, pop-to-secondary may be triggered by
+    // edge-swipe/system back, so it must not depend on a secondary-column touch source.
     auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
-    auto needPushLeftStateHandling = !isNewPageReplacing_ && HasRouterPushLeftState();
+    auto needPushPageToPrimaryStateHandling = !isNewPageReplacing_ && HasRouterPushPageToPrimaryState();
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
@@ -1848,7 +1844,8 @@ bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bo
 
     auto newVisiblePages = ResolveRouterVisiblePagesFromStackPages(remainingStackPages, relatedOrPhPage);
     auto movePageToSecondaryIsAllowed = CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
-    auto useRouterColumnAnimation = needTransition && needPushLeftStateHandling && movePageToSecondaryIsAllowed;
+    auto useRouterColumnAnimation =
+        needTransition && needPushPageToPrimaryStateHandling && movePageToSecondaryIsAllowed;
     auto hideTransitionType = GetRouterPopHideTransitionType(useRouterColumnAnimation);
     auto showTransitionType = GetRouterPopShowTransitionType(useRouterColumnAnimation);
     FireLifecycleOnPopByVisibleDiff(
@@ -1861,16 +1858,16 @@ bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bo
     FireAutoSave(preTopPage, newTopPage);
 
     bool animated = false;
-    if (needPushLeftStateHandling) {
-        // Being in a push-left stack only means we need push-left-aware visible prediction and column cleanup.
-        // Whether this pop really becomes reverse-right-push-left is decided by the final visible diff.
+    if (needPushPageToPrimaryStateHandling) {
+        // Being in a push-primary stack only means we need push-primary-aware visible prediction and column cleanup.
+        // Whether this pop really becomes pop-to-secondary is decided by the final visible diff.
         ClearRouterPageState(preTopPage);
         if (!useRouterColumnAnimation) {
             preTopPage->SetChildrenInDestroying();
             stageNode_->RemoveChild(preTopPage);
             InvalidateRouterColumnNodes();
         }
-        animated = FinalizeRouterPushLeftStackChange(preVisiblePages, newVisiblePages, needTransition);
+        animated = FinalizeRouterStackChange(preVisiblePages, newVisiblePages, needTransition);
         if (useRouterColumnAnimation && !animated) {
             preTopPage->SetChildrenInDestroying();
             stageNode_->RemoveChild(preTopPage);
@@ -1880,7 +1877,7 @@ bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bo
         preTopPage->SetChildrenInDestroying();
         stageNode_->RemoveChild(preTopPage);
         InvalidateRouterColumnNodes();
-        EnsureSplitRightPageIfNeeded();
+        EnsureSplitSecondaryPageIfNeeded();
     }
 
     auto lastHomePage = GetHomePage();
@@ -1897,9 +1894,9 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
 {
     // back(index/url) may remove multiple pages in one shot.
     // The new flow still follows the rule "visible diff decides show/hide, detach decides aboutToDisappear".
-    // Like ordinary pop, reverse-right-push-left back may come from system/gesture back instead of a page click.
+    // Like ordinary pop, pop-to-secondary back may come from system/gesture back instead of a page click.
     auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
-    auto needPushLeftStateHandling = !isNewPageReplacing_ && HasRouterPushLeftState();
+    auto needPushPageToPrimaryStateHandling = !isNewPageReplacing_ && HasRouterPushPageToPrimaryState();
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
 
@@ -1942,7 +1939,8 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
     }
     auto newVisiblePages = ResolveRouterVisiblePagesFromStackPages(remainingStackPages, relatedOrPhPage);
     auto movePageToSecondaryIsAllowed = CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
-    auto useRouterColumnAnimation = needTransition && needPushLeftStateHandling && movePageToSecondaryIsAllowed;
+    auto useRouterColumnAnimation =
+        needTransition && needPushPageToPrimaryStateHandling && movePageToSecondaryIsAllowed;
     auto hideTransitionType = GetRouterPopHideTransitionType(useRouterColumnAnimation);
     auto showTransitionType = GetRouterPopShowTransitionType(useRouterColumnAnimation);
     FireLifecycleOnPopByVisibleDiff(
@@ -1962,7 +1960,7 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
         // Detached pages will later report aboutToDisappear through the normal PagePattern detach path.
         pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
-        if (needPushLeftStateHandling) {
+        if (needPushPageToPrimaryStateHandling) {
             ClearRouterPageState(pageNode);
         }
         removedAnyPage = true;
@@ -1971,15 +1969,15 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
         InvalidateRouterColumnNodes();
     }
     bool animated = false;
-    if (needPushLeftStateHandling) {
-        animated = FinalizeRouterPushLeftStackChange(preVisiblePages, newVisiblePages, needTransition);
+    if (needPushPageToPrimaryStateHandling) {
+        animated = FinalizeRouterStackChange(preVisiblePages, newVisiblePages, needTransition);
         if (useRouterColumnAnimation && !animated && preVisiblePages.detail) {
             preVisiblePages.detail->SetChildrenInDestroying();
             stageNode_->RemoveChild(preVisiblePages.detail);
             InvalidateRouterColumnNodes();
         }
     } else {
-        EnsureSplitRightPageIfNeeded();
+        EnsureSplitSecondaryPageIfNeeded();
     }
 
     auto lastHomePage = GetHomePage();
@@ -2008,7 +2006,7 @@ bool ParallelStageManager::CleanPageStackInVirtualStackBasedSplit(const RefPtr<P
 
     RouterVisiblePages newVisiblePages;
     // clean() keeps only the current stack top. In split mode that leaves a single stack page on
-    // the primary side, with placeholder/related as the right-side fallback when available.
+    // the primary side, with placeholder/related as the secondary-side fallback when available.
     newVisiblePages.primary = remainingTopPage;
     newVisiblePages.detail = relatedOrPhPage;
     FireRouterHideByVisibleDiff(preVisiblePages, newVisiblePages);
@@ -2045,11 +2043,11 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
     auto currentTopPage = !stackPages.empty() ? stackPages.back() : nullptr;
     CHECK_NULL_RETURN(currentTopPage, false);
     auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
-    auto rightPageTriggered = touchedSecondaryPage && touchedSecondaryPage == currentTopPage;
+    auto secondaryPageTriggered = touchedSecondaryPage && touchedSecondaryPage == currentTopPage;
     if (currentTopPage == node) {
         return true;
     }
-    auto needPushLeftStateHandling = rightPageTriggered && (HasRouterPushLeftState() ||
+    auto needPushPageToPrimaryStateHandling = secondaryPageTriggered && (HasRouterPushPageToPrimaryState() ||
         ShouldMovePageToPrimaryForTransition(currentTopPage, node, false));
     auto lastPage = GetLastPage();
     CHECK_NULL_RETURN(lastPage, false);
@@ -2059,7 +2057,7 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
     }
     auto preVisiblePages = GetRouterVisiblePages();
     auto relatedOrPhPage = GetRelatedOrPlaceHolderPage();
-    if (needPushLeftStateHandling) {
+    if (needPushPageToPrimaryStateHandling) {
         if (ShouldMovePageToPrimaryForTransition(currentTopPage, node)) {
             SetPageColumnType(currentTopPage, ForceSplitPageColumnType::PRIMARY);
         }
@@ -2070,7 +2068,7 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
     // and only after that decide hide/show from the actual resulting visible pages.
     node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size()) - 1);
     InvalidateRouterColumnNodes();
-    if (needPushLeftStateHandling) {
+    if (needPushPageToPrimaryStateHandling) {
         NormalizeRouterColumnsAfterStackChange();
     } else {
         RebuildRouterColumnNodesIfNeeded();
@@ -2084,17 +2082,17 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
         newVisiblePages.detail = relatedOrPhPage;
     }
 
-    auto isPushLeftDiff = needPushLeftStateHandling &&
+    auto isPushToPrimary = needPushPageToPrimaryStateHandling &&
         CheckIfMovePageToPrimaryIsAllowed(preVisiblePages, newVisiblePages);
-    auto isReversePushLeftDiff =
-        needPushLeftStateHandling && CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
+    auto isPopToSecondary =
+        needPushPageToPrimaryStateHandling && CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
     auto hideTransitionType = PageTransitionType::NONE;
     auto showTransitionType = PageTransitionType::NONE;
     if (needTransition) {
-        if (isPushLeftDiff) {
+        if (isPushToPrimary) {
             hideTransitionType = GetRouterPushHideTransitionType(true);
             showTransitionType = GetRouterPushShowTransitionType(true);
-        } else if (isReversePushLeftDiff) {
+        } else if (isPopToSecondary) {
             hideTransitionType = GetRouterPopHideTransitionType(true);
             showTransitionType = GetRouterPopShowTransitionType(true);
         }
@@ -2104,9 +2102,9 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
     }
     FireRouterShowByVisibleDiff(preVisiblePages, newVisiblePages, showTransitionType);
     bool animated = false;
-    if (!needPushLeftStateHandling) {
-        EnsureSplitRightPageIfNeeded();
-    } else if (needTransition && (isPushLeftDiff || isReversePushLeftDiff)) {
+    if (!needPushPageToPrimaryStateHandling) {
+        EnsureSplitSecondaryPageIfNeeded();
+    } else if (needTransition && (isPushToPrimary || isPopToSecondary)) {
         animated = StartRouterSplitAnimation(preVisiblePages, newVisiblePages);
     }
 
@@ -2281,7 +2279,7 @@ void ParallelStageManager::FireLifecycleOnPopByVisibleDiff(
     FireRouterShowByVisibleDiff(preVisiblePages, newVisiblePages, showTransitionType);
 }
 
-void ParallelStageManager::EnsureSplitRightPageIfNeeded()
+void ParallelStageManager::EnsureSplitSecondaryPageIfNeeded()
 {
     CHECK_NULL_VOID(stageNode_);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
@@ -2305,14 +2303,14 @@ void ParallelStageManager::EnsureSplitRightPageIfNeeded()
     }
 }
 
-bool ParallelStageManager::HasRouterPushLeftState() const
+bool ParallelStageManager::HasRouterPushPageToPrimaryState() const
 {
     auto manager = const_cast<ParallelStageManager*>(this);
     manager->RebuildRouterColumnNodesIfNeeded();
     if (manager->primaryNodes_.empty() || manager->secondaryNodes_.empty()) {
         return false;
     }
-    // Only treat it as push-left state when a non-home page has really been moved into the primary column.
+    // Only treat it as push-page-to-primary state when a non-home page has really been moved into the primary column.
     for (const auto& weakNode : manager->primaryNodes_) {
         auto node = weakNode.Upgrade();
         if (!node || !stageNode_ || stageNode_->GetChildIndex(node) < 0) {
@@ -2329,7 +2327,7 @@ bool ParallelStageManager::HasRouterPushLeftState() const
     return false;
 }
 
-bool ParallelStageManager::ShouldCurrentPushUseRouterPushLeft(const RefPtr<FrameNode>& newPageNode) const
+bool ParallelStageManager::ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const
 {
     if (!IsVirtualStackBasedSplit()) {
         return false;
@@ -2339,10 +2337,8 @@ bool ParallelStageManager::ShouldCurrentPushUseRouterPushLeft(const RefPtr<Frame
     }
     auto currentTopPage = GetLastPageInStack();
     CHECK_NULL_RETURN(currentTopPage, false);
-    auto shouldPushLeftByTransition = ShouldMovePageToPrimaryForTransition(currentTopPage, newPageNode, false);
-    auto hasPushLeftState = HasRouterPushLeftState();
-    auto result = shouldPushLeftByTransition || hasPushLeftState;
-    return result;
+    return ShouldMovePageToPrimaryForTransition(currentTopPage, newPageNode, false) ||
+        HasRouterPushPageToPrimaryState();
 }
 
 RefPtr<FrameNode> ParallelStageManager::GetLastPageInStack() const
@@ -2488,7 +2484,7 @@ bool ParallelStageManager::ShouldMovePageToPrimaryForTransition(
     return forceSplitMgr->IsTransitionShouldMovePageToPrimary(fromInfo->GetPageUrl(), toInfo->GetPageUrl());
 }
 
-bool ParallelStageManager::FinalizeRouterPushLeftStackChange(
+bool ParallelStageManager::FinalizeRouterStackChange(
     const RouterVisiblePages& beforeVisible, const RouterVisiblePages& afterVisible, bool needTransition)
 {
     NormalizeRouterColumnsAfterStackChange(afterVisible);
@@ -2565,15 +2561,15 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::GetRouterVisibleP
 {
     RouterVisiblePages visiblePages;
     CHECK_NULL_RETURN(stageNode_, visiblePages);
-    RefPtr<FrameNode> rightFallbackPage = nullptr;
+    RefPtr<FrameNode> secondaryFallbackPage = nullptr;
     auto relatedOrPlaceholderPage = const_cast<ParallelStageManager*>(this)->GetRelatedOrPlaceHolderPage();
     if (relatedOrPlaceholderPage && stageNode_->GetChildIndex(relatedOrPlaceholderPage) >= 0) {
-        rightFallbackPage = relatedOrPlaceholderPage;
+        secondaryFallbackPage = relatedOrPlaceholderPage;
     }
     visiblePages.primary = GetTopPrimaryColumnPage();
     visiblePages.detail = GetTopSecondaryColumnPage();
     if (!visiblePages.detail) {
-        visiblePages.detail = rightFallbackPage;
+        visiblePages.detail = secondaryFallbackPage;
     }
     if (!visiblePages.primary) {
         visiblePages.primary = GetLastPageInStack();
@@ -2597,7 +2593,7 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::GetRouterVisibleP
 }
 
 ParallelStageManager::RouterVisiblePages ParallelStageManager::ResolveRouterVisiblePagesFromStackPages(
-    const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& rightFallbackPage) const
+    const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& secondaryFallbackPage) const
 {
     RouterVisiblePages visiblePages;
     CHECK_NULL_RETURN(stageNode_, visiblePages);
@@ -2621,7 +2617,7 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::ResolveRouterVisi
         if (!stackPages.empty()) {
             visiblePages.primary = stackPages.back();
         }
-        visiblePages.detail = rightFallbackPage;
+        visiblePages.detail = secondaryFallbackPage;
         return visiblePages;
     }
 
@@ -2658,7 +2654,7 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::ResolveRouterVisi
     if (!secondaryPages.empty()) {
         visiblePages.detail = secondaryPages.back();
     } else {
-        visiblePages.detail = rightFallbackPage;
+        visiblePages.detail = secondaryFallbackPage;
     }
     if (visiblePages.primary == visiblePages.detail) {
         visiblePages.primary.Reset();
@@ -2675,13 +2671,13 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::GetRouterVisibleP
         return std::find(excludedPages.begin(), excludedPages.end(), page) != excludedPages.end();
     };
     auto stackPages = CollectRouterStackPages(excludedPages);
-    RefPtr<FrameNode> rightFallbackPage = nullptr;
+    RefPtr<FrameNode> secondaryFallbackPage = nullptr;
     auto relatedOrPlaceholderPage = GetRelatedOrPlaceHolderPage();
     if (relatedOrPlaceholderPage && !isExcluded(relatedOrPlaceholderPage) &&
         stageNode_->GetChildIndex(relatedOrPlaceholderPage) >= 0) {
-        rightFallbackPage = relatedOrPlaceholderPage;
+        secondaryFallbackPage = relatedOrPlaceholderPage;
     }
-    return ResolveRouterVisiblePagesFromStackPages(stackPages, rightFallbackPage);
+    return ResolveRouterVisiblePagesFromStackPages(stackPages, secondaryFallbackPage);
 }
 
 bool ParallelStageManager::CheckIfMovePageToPrimaryIsAllowed(
@@ -3042,7 +3038,7 @@ bool ParallelStageManager::StartRouterSplitAnimation(
     // do not actively finish pages from the previous session here.
     // Each page owns its own finish timing and only settles in its own animation finish callback.
     ClearCurrentRouterAnimationState();
-    // Router split animation currently only covers right-push-left and reverse-right-push-left.
+    // Router split animation currently only covers secondary-push-to-primary and primary-pop-to-secondary.
     return StartSplitPushAnimation(preVisiblePages, newVisiblePages) ||
         StartSplitPopAnimation(preVisiblePages, newVisiblePages);
 }

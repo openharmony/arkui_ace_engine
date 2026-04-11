@@ -417,7 +417,7 @@ public:
         const RefPtr<FrameNode>& pushExitNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     void StartSplitPopAnimation(
         const RefPtr<FrameNode>& popEnterNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
-    void StopRightPushLeftAnimations();
+    void StopForceSplitAnimations();
     void CleanSplitPushAnimations()
     {
         splitPushAnimations_.clear();
@@ -468,7 +468,7 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
     bool HandleBackForHomeOrRelatedDestination();
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
 
     //-------for force split------- begin------
@@ -478,8 +478,8 @@ private:
     bool CreateSplitPopAnimation(
         const TransitionUnitInfo& popEnterInfo, const TransitionUnitInfo& preInfo,
         const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback);
-    void UpdateRightPushLeftTransitionAuxiliaryState(bool hasRunningAnimation);
-    void UpdateContentClipForRightPushLeftAnimation(bool enableClip);
+    void UpdateForceSplitTransitionAuxiliaryState(bool hasRunningAnimation);
+    void UpdateContentClipForForceSplitAnimation(bool enableClip);
     //-------for force split------- end  ------
 
     std::optional<bool> useHomeDestination_;
@@ -521,9 +521,9 @@ private:
     std::list<std::shared_ptr<AnimationUtils::Animation>> splitPushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> splitPopAnimations_;
     // Divider opacity and content clip are shared by split-push/split-pop animations.
-    // Use one counter so continuous right-push-left transitions only recover them after
+    // Use one counter so continuous split push/pop transitions only recover them after
     // the last running animation finishes.
-    int32_t rightPushLeftRunningAnimationCount_ = 0;
+    int32_t forceSplitRunningAnimationCount_ = 0;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

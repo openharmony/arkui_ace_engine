@@ -197,7 +197,7 @@ void NavBarNode::SplitTransitionPushStart(ForceSplitTransitionType type)
         }
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_MOVE || type == ForceSplitTransitionType::TRANSITION_IN) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
     }
 }
 
@@ -213,7 +213,7 @@ void NavBarNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
         float isRTL = GetLanguageDirection();
         renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
     }
 }
 
@@ -261,7 +261,7 @@ void NavBarNode::SplitTransitionPopStart(ForceSplitTransitionType type)
         float isRTL = GetLanguageDirection();
         renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_OUT || type == ForceSplitTransitionType::TRANSITION_MOVE) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
     }
 }
 
@@ -272,7 +272,7 @@ void NavBarNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
     if (type == ForceSplitTransitionType::TRANSITION_IN) {
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_OUT || type == ForceSplitTransitionType::TRANSITION_MOVE) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
     }
 }
 

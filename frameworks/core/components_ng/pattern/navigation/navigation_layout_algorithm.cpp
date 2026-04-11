@@ -179,8 +179,11 @@ float LayoutPrimaryContentNode(LayoutWrapper* layoutWrapper, const RefPtr<Naviga
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty)
 {
     CHECK_NULL_RETURN(hostNode, 0.0f);
-    auto primaryContentNode = hostNode->GetPrimaryContentNode();
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetPrimaryContentNode());
     CHECK_NULL_RETURN(primaryContentNode, 0.0f);
+    if (!primaryContentNode->IsVisible()) {
+        return 0.0f;
+    }
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
     bool isNavBarInRight = AceApplicationInfo::GetInstance().IsRightToLeft();
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
@@ -831,8 +834,11 @@ void NavigationLayoutAlgorithm::MeasurePrimaryContentNode(
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& primaryNodeSize)
 {
     CHECK_NULL_VOID(hostNode);
-    auto primaryContentNode = hostNode->GetPrimaryContentNode();
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
+    if (!primaryContentNode->IsVisible()) {
+        return;
+    }
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     bool isAutoHeight = IsAutoHeight(navigationLayoutProperty);
     auto index = hostNode->GetChildIndexById(primaryContentNode->GetId());
@@ -1047,15 +1053,16 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutNavBarOrHomeDestination(
                 layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
         }
+        navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
     } else {
         navBarPosition = pattern->IsForceSplitUseNavBar() ? NavBarPosition::START :
             navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
         OffsetF navBarOffset(0.0, 0.0);
         navBarOrPrimarNodeWidth = LayoutNavBarOrHomeDestination(
             layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
-    }
-    if (pattern->IsForceSplitSuccess()) {
-        navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
+        if (pattern->IsForceSplitSuccess()) {
+            LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
+        }
     }
 
     float dividerWidth = 0.0f;
