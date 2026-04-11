@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Rosen {
 namespace Drawing {
