@@ -23410,7 +23410,9 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue = valueHolderForDetents!
-            if (valueHolderForDetentsTmpValue instanceof SingleLengthDetent) {
+            // instructive change start
+            if (valueHolderForDetentsTmpValue instanceof SingleLengthDetent && valueHolderForDetentsTmpValue.length === 1) {
+            // instructive change end
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDetentsTmpValueForIdx0 = valueHolderForDetentsTmpValue as SingleLengthDetent
                 const valueHolderForDetentsTmpValueForIdx0_0 = valueHolderForDetentsTmpValueForIdx0[0]
@@ -23435,7 +23437,9 @@ export class SheetOptions_serializer {
                         global_resource_Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
                     }
                 }
-            } else if (valueHolderForDetentsTmpValue instanceof DoubleLengthDetents) {
+            // instructive change start
+            } else if (valueHolderForDetentsTmpValue instanceof DoubleLengthDetents && valueHolderForDetentsTmpValue.length === 2) {
+            // instructive change end
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDetentsTmpValueForIdx1 = valueHolderForDetentsTmpValue as DoubleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx1_0 = valueHolderForDetentsTmpValueForIdx1[0]
@@ -23488,7 +23492,9 @@ export class SheetOptions_serializer {
                 } else {
                     valueSerializer.writeInt8(RuntimeType.UNDEFINED)
                 }
-            } else if (valueHolderForDetentsTmpValue instanceof TripleLengthDetents) {
+            // instructive change start
+            } else if (valueHolderForDetentsTmpValue instanceof TripleLengthDetents && valueHolderForDetentsTmpValue.length === 3) {
+            // instructive change end
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDetentsTmpValueForIdx2 = valueHolderForDetentsTmpValue as TripleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx2_0 = valueHolderForDetentsTmpValueForIdx2[0]
