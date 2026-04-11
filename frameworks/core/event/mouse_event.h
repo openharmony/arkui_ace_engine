@@ -122,6 +122,11 @@ struct MouseEvent final : public PointerEvent {
         return targetDisplayId;
     }
 
+    void SetPointerEvent(const std::shared_ptr<const MMI::PointerEvent>& ptrEvent)
+    {
+        pointerEvent = ptrEvent;
+    }
+
     MouseEvent CloneWith(float scale) const;
     MouseEvent CreateScaleEvent(float scale) const;
     TouchEvent CreateTouchPoint() const;
