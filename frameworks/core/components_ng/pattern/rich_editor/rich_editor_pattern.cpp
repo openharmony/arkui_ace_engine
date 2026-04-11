@@ -28,6 +28,7 @@
 #include <string>
 #include <utility>
 
+#include "base/log/event_report.h"
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/offset.h"
 #include "base/log/ace_trace.h"

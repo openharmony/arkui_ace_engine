@@ -15,6 +15,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
