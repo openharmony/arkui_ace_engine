@@ -37,6 +37,20 @@ struct GridDeclare {
     }
   }
 
+  onDidBuild(): void {
+    if (this.defaultGridScroller.getFrameNode() != undefined) {
+      console.log("defaultScroller getFrameNode is not empty, the nodeType is " + this.defaultGridScroller.getFrameNode()?.getNodeType());
+    } else {
+      console.log("defaultScroller getFrameNode is empty");
+    }
+
+    if (this.dynamicScroller.getFrameNode() != undefined) {
+      console.log("dynamicScroller getFrameNode is not empty, the nodeType is " + this.dynamicScroller.getFrameNode()?.getNodeType());
+    } else {
+      console.log("dynamicScroller getFrameNode is empty");
+    }
+  }
+
   private bindGridController(): void {
     const frameNode = this.getUIContext().getFrameNodeById(GridDeclare.GRID_ID);
     if (!frameNode) {
