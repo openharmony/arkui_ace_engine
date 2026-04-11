@@ -16,7 +16,9 @@
 #include "core/components/scroll/render_multi_child_scroll.h"
 
 #include "core/common/vibrator/vibrator_proxy.h"
+#include "core/components/box/render_box.h"
 #include "core/components/list/list_compatible_modifier_helper.h"
+#include "compatible/components/refresh/render_refresh.h"
 
 namespace OHOS::Ace {
 namespace {

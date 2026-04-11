@@ -27,6 +27,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/box/render_box.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"

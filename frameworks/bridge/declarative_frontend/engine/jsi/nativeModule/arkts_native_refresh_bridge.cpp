@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "compatible/components/refresh/refresh_controller.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;

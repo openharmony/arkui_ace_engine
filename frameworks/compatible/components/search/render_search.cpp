@@ -15,6 +15,8 @@
 
 #include "compatible/components/search/render_search.h"
 
+#include "core/components/text/render_text.h"
+
 namespace OHOS::Ace {
 namespace {
 
