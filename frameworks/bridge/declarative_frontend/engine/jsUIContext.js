@@ -1186,6 +1186,12 @@ class CursorController {
             cursorControl.setCursor(value);
         });
     }
+
+    setCustomCursor(value, focusX, focusY) {
+        withInstanceId(this.instanceId_, () => {
+            cursorControl.setCustomCursor(value, focusX || 0, focusY || 0);
+        });
+    }
 }
 
 class ContextMenuController {

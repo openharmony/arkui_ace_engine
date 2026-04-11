@@ -926,8 +926,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
-    bool isBypass, MouseStyleChangeReason reason)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> format,
+    int32_t windowId, bool isByPass, MouseStyleChangeReason reason)
 {
     return true;
 }
@@ -1122,7 +1122,7 @@ bool PipelineContext::NeedSoftKeyboard()
     return false;
 }
 
-void PipelineContext::SetCursor(int32_t cursorValue) {}
+void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) {}
 
 void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 

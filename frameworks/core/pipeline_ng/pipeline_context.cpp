@@ -4956,8 +4956,8 @@ void PipelineContext::DispatchMouseEvent(std::unordered_map<int, MouseEvent>& id
     }
 }
 
-bool PipelineContext::ChangeMouseStyle(
-    int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass, MouseStyleChangeReason reason)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> format,
+    int32_t windowId, bool isByPass, MouseStyleChangeReason reason)
 {
     CHECK_NULL_RETURN(eventManager_, false);
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
@@ -6353,14 +6353,24 @@ std::string PipelineContext::GetCurrentExtraInfo()
     return node ? node->GetCurrentCustomNodeInfo() : std::string();
 }
 
-void PipelineContext::SetCursor(int32_t cursorValue)
+void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue)
 {
-    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::LASER_CURSOR_DOT_RED)) {
-        auto mouseFormat = static_cast<MouseFormat>(cursorValue);
-        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
-        CHECK_NULL_VOID(mouseStyleManager);
-        mouseStyleManager->SetUserSetCursor(true);
-        ChangeMouseStyle(-1, mouseFormat, GetFocusWindowId(), false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_VOID(mouseStyleManager);
+    mouseStyleManager->SetUserSetCursor(true);
+    const auto windowId = GetFocusWindowId();
+    if (std::holds_alternative<int32_t>(cursorValue)) {
+        int32_t cursorInt = std::get<int32_t>(cursorValue);
+        if (cursorInt >= 0 && cursorInt <= static_cast<int32_t>(MouseFormat::LASER_CURSOR_DOT_RED)) {
+            ChangeMouseStyle(
+                -1, static_cast<MouseFormat>(cursorInt), windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+        }
+    } else {
+        auto& customCursorInfo = std::get<CustomCursorInfo>(cursorValue);
+        if (!customCursorInfo.pixelMap) {
+            return;
+        }
+        ChangeMouseStyle(-1, customCursorInfo, windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
 

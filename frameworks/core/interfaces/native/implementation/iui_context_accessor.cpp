@@ -516,6 +516,33 @@ void EnableEventPassthroughImpl(const Opt_Boolean* enabled, Ark_RawInputEventTyp
             break;
     }
 }
+void SetCustomCursorImpl(Ark_image_PixelMap value, const Opt_Int32* focusX, const Opt_Int32* focusY)
+{
+    auto pixelMap = Converter::Convert<RefPtr<PixelMap>>(value);
+    CHECK_NULL_VOID(pixelMap);
+
+    auto optX = Converter::OptConvertPtr<int32_t>(focusX);
+    auto optY = Converter::OptConvertPtr<int32_t>(focusY);
+    int32_t x = optX.value_or(0);
+    int32_t y = optY.value_or(0);
+    if (x < 0 || x >= pixelMap->GetWidth()) {
+        x = 0;
+    }
+    if (y < 0 || y >= pixelMap->GetHeight()) {
+        y = 0;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline->GetTaskExecutor()) {
+        return;
+    }
+    pipeline->GetTaskExecutor()->PostSyncTask(
+        [pipeline, pixelMap, x, y]() {
+            CustomCursorInfo customCursorInfo { pixelMap, x, y };
+            pipeline->SetCursor(customCursorInfo);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCustomCursor");
+}
 } // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -532,6 +559,7 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
         IUIContextAccessor::EnableEventPassthroughImpl,
+        IUIContextAccessor::SetCustomCursorImpl,
     };
     return &IUIContextAccessorImpl;
 }

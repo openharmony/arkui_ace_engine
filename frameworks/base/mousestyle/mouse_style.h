@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
 #include <list>
+#include <variant>
 
 #include "base/memory/ace_type.h"
 #include "base/image/pixel_map.h"
@@ -79,6 +80,7 @@ enum class MouseFormat : int32_t {
     CURSOR_NONE = 1001,
     CONTEXT_MENU = 1002,
     ALIAS = 1003,
+    CUSTOM_CURSOR = 1004,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {
@@ -94,6 +96,26 @@ public:
     virtual void SetCustomCursor(
         int32_t windowId, int32_t focusX, int32_t focusY, std::shared_ptr<Media::PixelMap> pixelMap) const {};
     virtual void SetPointerVisible(MouseFormat pointerStyle) const {};
+    virtual void SetUeaCustomCursor(
+        int32_t realHostWindowId, RefPtr<PixelMap> pixelMap, int32_t focusX, int32_t focusY) const {};
+};
+
+struct CustomCursorInfo {
+    RefPtr<PixelMap> pixelMap;
+    int32_t focusX = 0;
+    int32_t focusY = 0;
+
+    bool operator==(const CustomCursorInfo& other) const
+    {
+        return ((!pixelMap && !other.pixelMap) ||
+                   (pixelMap && other.pixelMap && pixelMap->GetPixels() == other.pixelMap->GetPixels())) &&
+               focusX == other.focusX && focusY == other.focusY;
+    }
+
+    bool operator!=(const CustomCursorInfo& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 enum class MouseStyleChangeReason {
@@ -107,8 +129,8 @@ enum class MouseStyleChangeReason {
 struct MouseStyleChangeLog {
     int32_t windowId;
     int32_t changeNodeId;
-    MouseFormat beforeMouseStyle;
-    MouseFormat afterMouseStyle;
+    std::variant<MouseFormat, CustomCursorInfo> beforeMouseStyle;
+    std::variant<MouseFormat, CustomCursorInfo> afterMouseStyle;
     MouseStyleChangeReason reason;
 };
 
@@ -117,7 +139,7 @@ class ACE_EXPORT MouseStyleManager : public AceType {
 
 public:
     MouseStyleManager() = default;
-    bool SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFormat mouseFormat,
+    bool SetMouseFormat(int32_t windowId, int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> mouseFormat,
         bool isByPass, MouseStyleChangeReason reason);
     
     void VsyncMouseFormat();
@@ -156,14 +178,21 @@ public:
 
     MouseFormat GetCurrentMouseStyle() const
     {
-        return mouseFormat_;
+        if (std::holds_alternative<CustomCursorInfo>(mouseFormat_)) {
+            return MouseFormat::CUSTOM_CURSOR;
+        }
+        return std::get<MouseFormat>(mouseFormat_);
     }
 
 private:
+    void ProcessVsyncMouseStyleChanges(int32_t& windowId, int32_t& changeNodeId, MouseStyleChangeReason& changeReason);
+    bool IsMouseStyleChanged() const;
+    void ApplyMouseStyleChange(int32_t windowId);
+
     bool userSetCursor_ = false;
     std::optional<int32_t> mouseStyleNodeId_;
-    MouseFormat lastVsyncMouseFormat_ = MouseFormat::DEFAULT;
-    MouseFormat mouseFormat_ = MouseFormat::DEFAULT;
+    std::variant<MouseFormat, CustomCursorInfo> lastVsyncMouseFormat_ = MouseFormat::DEFAULT;
+    std::variant<MouseFormat, CustomCursorInfo> mouseFormat_ = MouseFormat::DEFAULT;
     std::list<MouseStyleChangeLog> vsyncMouseStyleChanges_;
     std::list<MouseStyleChangeLog> mouseStyleChangeLogs_;
 };

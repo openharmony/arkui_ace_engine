@@ -15688,6 +15688,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     Ark_RawInputEventType eventType)
     {
     }
+    void SetCustomCursorImpl(Ark_image_PixelMap value,
+                             const Opt_Int32* focusX,
+                             const Opt_Int32* focusY)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -22929,6 +22934,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
             IUIContextAccessor::EnableEventPassthroughImpl,
+            IUIContextAccessor::SetCustomCursorImpl,
         };
         return &IUIContextAccessorImpl;
     }

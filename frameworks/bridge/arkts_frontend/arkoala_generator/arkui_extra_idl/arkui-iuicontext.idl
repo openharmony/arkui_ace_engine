@@ -17,6 +17,7 @@ import arkui.component.common.KeyEvent as KeyEvent;
 import arkui.component.Scroller as Scroller;
 import ohos.arkui.UIContext;
 import arkui.component.enums.RawInputEventType as RawInputEventType;
+import ohos.multimedia.image.image.PixelMap;
 
 [Entity=Class]
 interface MagnifierExtender {
@@ -38,5 +39,6 @@ interface IUIContext {
     static void bindTabsToNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller scrollerchildScroller);
     static void unbindTabsFromNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
     static void setCustomKeyboardContinueFeature(CustomKeyboardContinueFeature feature);
+    static void setCustomCursor(image.PixelMap value, optional i32 focusX, optional i32 focusY);
     static void enableEventPassthrough((boolean or undefined) enabled, RawInputEventType eventType);
 };
