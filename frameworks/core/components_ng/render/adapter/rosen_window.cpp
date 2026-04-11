@@ -148,6 +148,21 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
         if (rsUIcontext) {
             rsUIcontext->AttachFromUI();
         }
+        auto container = Container::GetContainer(id_);
+        if (container && container->IsSubContainer()) {
+            bool hasTaskRunner = rsUIcontext && rsUIcontext->HasTaskRunner();
+            if (!hasTaskRunner) {
+                rsUIDirector_->SetUITaskRunner(
+                    [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
+                        ContainerScope scope(id);
+                        CHECK_NULL_VOID(taskExecutor);
+                        taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
+                            "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
+                    },
+                    0, true);
+            }
+            return;
+        }
         rsUIDirector_->SetUITaskRunner(
             [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
                 ContainerScope scope(id);
