@@ -55,14 +55,6 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(buttonTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isFloatingWindow = container->IsFloatingWindow();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE && !isFloatingWindow) {
-        showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
-    }
-
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
     auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
@@ -82,6 +74,12 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto datePickerPattern = pickerNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
+    uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
+    if (datePickerPattern->IsWindowFullscreen() &&
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE)) {
+            showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
+    }
+
     if (datePickerPattern->GetIsUserSetDividerSpacingFont()) {
         dividerSpacingFontScale_ = ReCalcItemHeightScale(datePickerPattern->GetDividerSpacing());
     }
