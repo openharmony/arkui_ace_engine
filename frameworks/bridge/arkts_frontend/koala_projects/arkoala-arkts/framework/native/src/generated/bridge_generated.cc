@@ -14385,6 +14385,88 @@ void impl_SaveButtonAttribute_setUserCancelEvent(Ark_NativePointer thisPtr, KSer
         GetNodeModifiers()->getSaveButtonModifier()->setUserCancelEvent(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setUserCancelEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SaveButtonAttribute_setSymbolIconColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_ResourceColor valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBufOptLength = thisDeserializer.readInt32();
+            Array_ResourceColor valueValueTempTmpBufOpt = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBufOpt)>::type,
+        std::decay<decltype(*valueValueTempTmpBufOpt.array)>::type>(&valueValueTempTmpBufOpt, valueValueTempTmpBufOptLength);
+            for (int valueValueTempTmpBufOptBufCounterI = 0; valueValueTempTmpBufOptBufCounterI < valueValueTempTmpBufOptLength; valueValueTempTmpBufOptBufCounterI++) {
+                const Ark_Int8 valueValueTempTmpBufOptTempBufUnionSelector = thisDeserializer.readInt8();
+                Ark_ResourceColor valueValueTempTmpBufOptTempBuf = {};
+                valueValueTempTmpBufOptTempBuf.selector = valueValueTempTmpBufOptTempBufUnionSelector;
+                if (valueValueTempTmpBufOptTempBufUnionSelector == 0) {
+                    valueValueTempTmpBufOptTempBuf.selector = 0;
+                    valueValueTempTmpBufOptTempBuf.value0 = static_cast<Ark_arkui_component_enums_Color>(thisDeserializer.readInt32());
+                } else if (valueValueTempTmpBufOptTempBufUnionSelector == 1) {
+                    valueValueTempTmpBufOptTempBuf.selector = 1;
+                    valueValueTempTmpBufOptTempBuf.value1 = thisDeserializer.readInt32();
+                } else if (valueValueTempTmpBufOptTempBufUnionSelector == 2) {
+                    valueValueTempTmpBufOptTempBuf.selector = 2;
+                    valueValueTempTmpBufOptTempBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+                } else if (valueValueTempTmpBufOptTempBufUnionSelector == 3) {
+                    valueValueTempTmpBufOptTempBuf.selector = 3;
+                    valueValueTempTmpBufOptTempBuf.value3 = Resource_serializer::read(thisDeserializer);
+                } else {
+                    INTEROP_FATAL("One of the branches for valueValueTempTmpBufOptTempBuf has to be chosen through deserialisation.");
+                }
+                valueValueTempTmpBufOpt.array[valueValueTempTmpBufOptBufCounterI] = static_cast<Ark_ResourceColor>(valueValueTempTmpBufOptTempBuf);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBufOpt;
+        }
+        Opt_Array_ResourceColor valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSaveButtonModifier()->setSymbolIconColor(self, static_cast<Opt_Array_ResourceColor*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setSymbolIconColor, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SaveButtonAttribute_setSymbolRenderingStrategy(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SymbolRenderingStrategy valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = static_cast<Ark_SymbolRenderingStrategy>(thisDeserializer.readInt32());
+        }
+        Opt_SymbolRenderingStrategy valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSaveButtonModifier()->setSymbolRenderingStrategy(self, static_cast<Opt_SymbolRenderingStrategy*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setSymbolRenderingStrategy, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SaveButtonAttribute_setSymbolFontWeight(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_I32_FontWeight_String_Resource valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 valueValueTempTmpBufOptUnionSelector = thisDeserializer.readInt8();
+            Ark_Union_I32_FontWeight_String_Resource valueValueTempTmpBufOpt = {};
+            valueValueTempTmpBufOpt.selector = valueValueTempTmpBufOptUnionSelector;
+            if (valueValueTempTmpBufOptUnionSelector == 0) {
+                valueValueTempTmpBufOpt.selector = 0;
+                valueValueTempTmpBufOpt.value0 = thisDeserializer.readInt32();
+            } else if (valueValueTempTmpBufOptUnionSelector == 1) {
+                valueValueTempTmpBufOpt.selector = 1;
+                valueValueTempTmpBufOpt.value1 = static_cast<Ark_FontWeight>(thisDeserializer.readInt32());
+            } else if (valueValueTempTmpBufOptUnionSelector == 2) {
+                valueValueTempTmpBufOpt.selector = 2;
+                valueValueTempTmpBufOpt.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (valueValueTempTmpBufOptUnionSelector == 3) {
+                valueValueTempTmpBufOpt.selector = 3;
+                valueValueTempTmpBufOpt.value3 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBufOpt has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_FontWeight_String_Resource>(valueValueTempTmpBufOpt);
+        }
+        Opt_Union_I32_FontWeight_String_Resource valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSaveButtonModifier()->setSymbolFontWeight(self, static_cast<Opt_Union_I32_FontWeight_String_Resource*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setSymbolFontWeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Screen_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getScreenModifier()->construct(id, flags);
 }

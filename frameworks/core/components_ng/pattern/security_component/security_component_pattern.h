@@ -134,6 +134,7 @@ private:
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
     void HandleEnabled();
+    std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value) const;
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
