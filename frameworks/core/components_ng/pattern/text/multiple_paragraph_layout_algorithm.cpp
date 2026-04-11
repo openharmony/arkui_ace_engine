@@ -667,7 +667,8 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
-        std::optional<float> maxWidth = GetMaxMeasureSize(contentConstraint).Width();
+        // RichEditor may adjust paragraph width later via LayoutPolicy.
+        auto maxWidth = GetCustomSpanMeasureMaxWidth(contentConstraint, layoutWrapper);
         std::optional<LayoutCalPolicy> layoutPolicy;
         auto layoutPolicyValue = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
         if (layoutPolicyValue != LayoutCalPolicy::NO_MATCH) {
