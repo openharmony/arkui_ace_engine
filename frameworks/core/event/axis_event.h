@@ -89,6 +89,11 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
         eventType = UIInputEventType::AXIS;
     }
 
+    void SetPointerEvent(const std::shared_ptr<const MMI::PointerEvent>& ptrEvent)
+    {
+        pointerEvent = ptrEvent;
+    }
+
     AxisEvent CreateScaleEvent(float scale) const;
     AxisEvent CloneWith(float scale) const;
     Offset GetOffset() const;

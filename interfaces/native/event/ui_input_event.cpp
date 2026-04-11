@@ -5061,8 +5061,7 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_CreateClonedPointerEvent(
             break;
         }
         default: {
-            RETURN_RET_WITH_STATUS_CHECK(
-                ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+            RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
     }
     RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
@@ -5122,12 +5121,14 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIIn
         RETURN_RET_WITH_STATUS_CHECK(
             ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
     }
-
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
             if (touchEvent) {
-                auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
                 fullImpl->getNodeModifiers()->getCommonModifier()->destroyTouchEvent(touchEvent);
             }
             break;
@@ -5135,6 +5136,7 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIIn
         case C_MOUSE_EVENT_ID: {
             auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
             if (mouseEvent) {
+                fullImpl->getNodeModifiers()->getCommonModifier()->destroyMouseEvent(mouseEvent);
                 if (mouseEvent->pressedButtons) {
                     delete[] mouseEvent->pressedButtons;
                     mouseEvent->pressedButtons = nullptr;
@@ -5151,6 +5153,7 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIIn
         case C_AXIS_EVENT_ID: {
             auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
             if (axisEvent) {
+                fullImpl->getNodeModifiers()->getCommonModifier()->destroyAxisEvent(axisEvent);
                 if (axisEvent->pressedKeyCodes) {
                     delete[] axisEvent->pressedKeyCodes;
                     axisEvent->pressedKeyCodes = nullptr;
@@ -5161,8 +5164,7 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIIn
             break;
         }
         default: {
-            RETURN_RET_WITH_STATUS_CHECK(
-                ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+            RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
     }
     delete event;

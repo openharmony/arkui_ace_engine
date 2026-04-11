@@ -427,6 +427,7 @@ struct ArkUIMouseEvent {
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int32 eventHandleId;
     ArkUI_Bool isNewReferee;
+    void* rawPointerEvent;
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
      *
@@ -459,6 +460,7 @@ struct ArkUIAxisEvent {
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int64 deviceId;
     ArkUI_Uint32 axes;
+    void* rawPointerEvent;
     ArkUI_Int32 eventHandleId;
     ArkUI_Bool isNewReferee;
     ArkUI_Int32* pressedKeyCodes;
@@ -3560,6 +3562,8 @@ struct ArkUICommonModifier {
     void (*createClonedMouseEvent)(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIMouseEvent* arkUIMouseEvent);
     void (*createClonedAxisEvent)(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent);
     void (*destroyTouchEvent)(ArkUITouchEvent* arkUITouchEvent);
+    void (*destroyMouseEvent)(ArkUIMouseEvent* arkUIMouseEvent);
+    void (*destroyAxisEvent)(ArkUIAxisEvent* arkUIAxisEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*setNodeBackdropBlur)(

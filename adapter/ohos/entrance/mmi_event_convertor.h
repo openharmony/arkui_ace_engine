@@ -117,9 +117,21 @@ bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
 
+void SetClonedMousePointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIMouseEvent* arkUIMouseEventCloned);
+
+void SetClonedAxisPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIAxisEvent* arkUIAxisEventCloned);
+
 void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned);
 
+void SetPostMousePointerEvent(MouseEvent& mouseEvent, ArkUIMouseEvent* arkUIMouseEventCloned);
+
+void SetPostAxisPointerEvent(AxisEvent& axisEvent, ArkUIAxisEvent* arkUIAxisEventCloned);
+
 void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent);
+
+void DestroyMouseRawPointerEvent(ArkUIMouseEvent* arkUIMouseEvent);
+
+void DestroyAxisRawPointerEvent(ArkUIAxisEvent* arkUIAxisEvent);
 
 TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 

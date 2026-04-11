@@ -9511,6 +9511,8 @@ ArkUI_Int32 PostMouseEventWithStrategy(
     for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
         mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
     }
+    ArkUIMouseEvent* arkUIMouseEventCloned = const_cast<ArkUIMouseEvent*>(arkUIMouseEvent);
+    NG::SetPostMousePointerEvent(mouseEvent, arkUIMouseEventCloned);
     return PostMouseEventToFrameNode(node, mouseEvent);
 }
 
@@ -9552,6 +9554,10 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.scrollStep = arkUIAxisEvent->scrollStep;
     axisEvent.horizontalAxis = arkUIAxisEvent->horizontalAxis;
     axisEvent.verticalAxis = arkUIAxisEvent->verticalAxis;
+    axisEvent.screenX = arkUIAxisEvent->actionTouchPoint.screenX * density;
+    axisEvent.screenY = arkUIAxisEvent->actionTouchPoint.screenY * density;
+    ArkUIAxisEvent* arkUIAxisEventCloned = const_cast<ArkUIAxisEvent*>(arkUIAxisEvent);
+    NG::SetPostAxisPointerEvent(axisEvent, arkUIAxisEventCloned);
     return PostAxisEventToFrameNode(node, axisEvent);
 }
 
@@ -9643,6 +9649,18 @@ void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
     arkUITouchEvent = nullptr;
 }
 
+void DestroyMouseEvent(ArkUIMouseEvent* arkUIMouseEvent)
+{
+    CHECK_NULL_VOID(arkUIMouseEvent);
+    NG::DestroyMouseRawPointerEvent(arkUIMouseEvent);
+}
+
+void DestroyAxisEvent(ArkUIAxisEvent* arkUIAxisEvent)
+{
+    CHECK_NULL_VOID(arkUIAxisEvent);
+    NG::DestroyAxisRawPointerEvent(arkUIAxisEvent);
+}
+
 void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
 {
     if (!arkUITouchEventCloned || !arkUITouchEvent) {
@@ -9718,6 +9736,8 @@ void CreateClonedMouseEvent(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIM
     arkUIMouseEventCloned->stopPropagation = arkUIMouseEvent->stopPropagation;
     arkUIMouseEventCloned->eventHandleId = arkUIMouseEvent->eventHandleId;
     arkUIMouseEventCloned->isNewReferee = arkUIMouseEvent->isNewReferee;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEvent->rawPointerEvent);
+    NG::SetClonedMousePointerEvent(pointerEvent, arkUIMouseEventCloned);
 }
 
 void CreateClonedAxisEvent(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent)
@@ -9747,6 +9767,9 @@ void CreateClonedAxisEvent(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxis
     arkUIAxisEventCloned->axes = arkUIAxisEvent->axes;
     arkUIAxisEventCloned->eventHandleId = arkUIAxisEvent->eventHandleId;
     arkUIAxisEventCloned->isNewReferee = arkUIAxisEvent->isNewReferee;
+    arkUIAxisEventCloned->pinchAxisScale = arkUIAxisEvent->pinchAxisScale;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEvent->rawPointerEvent);
+    NG::SetClonedAxisPointerEvent(pointerEvent, arkUIAxisEventCloned);
 }
 
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
@@ -11207,6 +11230,7 @@ ArkUINodeEvent CreateNodeEventFromTouchEvent(int32_t nodeId, void* extraParam, T
     // deviceid
     event.touchEvent.deviceId = eventInfo.GetDeviceId();
     event.touchEvent.stopPropagation = false;
+    event.touchEvent.eventHandleId = eventInfo.GetEventHandleId();
     return event;
 }
 
@@ -11683,6 +11707,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .createClonedMouseEvent = CreateClonedMouseEvent,
         .createClonedAxisEvent = CreateClonedAxisEvent,
         .destroyTouchEvent = DestroyTouchEvent,
+        .destroyMouseEvent = DestroyMouseEvent,
+        .destroyAxisEvent = DestroyAxisEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
@@ -12906,6 +12932,7 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.interceptResult = 0;
         touchEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         touchEvent.touchEvent.deviceId = eventInfo.GetDeviceId();
+        touchEvent.touchEvent.eventHandleId = eventInfo.GetEventHandleId();
         SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
@@ -13129,6 +13156,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
             pressedButtonList.push_back(static_cast<int32_t>(*it));
         }
         event.mouseEvent.pressedButtons = pressedButtonList.data();
+        event.mouseEvent.rawPointerEvent = info.GetPointerEvent().get();
+        event.mouseEvent.eventHandleId = info.GetEventHandleId();
         SetOnMouseInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.mouseEvent.stopPropagation);
@@ -13192,6 +13221,9 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
         event.axisEvent.axes = info.GetAxes();
+        event.axisEvent.eventHandleId = info.GetEventHandleId();
+        event.axisEvent.rawPointerEvent =
+            const_cast<void*>(reinterpret_cast<const void*>(info.GetPointerEvent().get()));
 
         SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
