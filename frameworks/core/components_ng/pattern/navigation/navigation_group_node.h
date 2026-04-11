@@ -388,10 +388,49 @@ public:
         return isStaticPlaceholder_;
     }
 
+    //-------for force split------- begin------
+    void SetDividerWidth(float width)
+    {
+        dividerWidth_ = width;
+    }
+    float GetDividerWidth() const
+    {
+        return dividerWidth_;
+    }
+    void SetPrimaryPartitionWidth(float width)
+    {
+        primaryPartitionWidth_ = width;
+    }
+    float GetPrimaryPartitionWidth() const
+    {
+        return primaryPartitionWidth_;
+    }
+    void SetSecondaryPartitionWidth(float width)
+    {
+        secondaryPartitionWidth_ = width;
+    }
+    float GetSecondaryPartitionWidth() const
+    {
+        return secondaryPartitionWidth_;
+    }
+    void StartSplitPushAnimation(
+        const RefPtr<FrameNode>& pushExitNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void StartSplitPopAnimation(
+        const RefPtr<FrameNode>& popEnterNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void StopRightPushLeftAnimations();
+    void CleanSplitPushAnimations()
+    {
+        splitPushAnimations_.clear();
+    }
+    void CleanSplitPopAnimations()
+    {
+        splitPopAnimations_.clear();
+    }
     std::vector<RefPtr<NavDestinationGroupNode>> TakePrimaryNodesToBeRemoved()
     {
         return std::move(primaryNodesToBeRemoved_);
     }
+    //-------for force split------- end  ------
 
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
@@ -432,6 +471,17 @@ private:
     void ContentChangeReport(RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
 
+    //-------for force split------- begin------
+    bool CreateSplitPushAnimation(
+        const TransitionUnitInfo& pushExitInfo, const TransitionUnitInfo& preInfo,
+        const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback);
+    bool CreateSplitPopAnimation(
+        const TransitionUnitInfo& popEnterInfo, const TransitionUnitInfo& preInfo,
+        const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback);
+    void UpdateRightPushLeftTransitionAuxiliaryState(bool hasRunningAnimation);
+    void UpdateContentClipForRightPushLeftAnimation(bool enableClip);
+    //-------for force split------- end  ------
+
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;
     RefPtr<UINode> customHomeDestination_;
@@ -465,6 +515,15 @@ private:
     RefPtr<UINode> forceSplitPlaceHolderNode_;
     RefPtr<UINode> relatedPageCustomNode_;
     RefPtr<UINode> relatedPageDestinationNode_;
+    float dividerWidth_ = 0.0f;
+    float primaryPartitionWidth_ = 0.0f;
+    float secondaryPartitionWidth_ = 0.0f;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> splitPushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> splitPopAnimations_;
+    // Divider opacity and content clip are shared by split-push/split-pop animations.
+    // Use one counter so continuous right-push-left transitions only recover them after
+    // the last running animation finishes.
+    int32_t rightPushLeftRunningAnimationCount_ = 0;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

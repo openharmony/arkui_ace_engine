@@ -24,7 +24,6 @@
 #include "base/json/json_util.h"
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
-#include "base/utils/string_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"

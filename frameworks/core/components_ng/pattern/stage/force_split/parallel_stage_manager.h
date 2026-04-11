@@ -197,8 +197,8 @@ private:
     void FireParallelPageHide(const RefPtr<UINode>& node, PageTransitionType transitionType);
     void ReportPageTransitionEnd(const RefPtr<FrameNode>& page);
 
-    void RebuildRouterColumnNodesIfNeeded();
-    void InvalidateRouterColumnNodes();
+    void RebuildRouterColumnNodesIfNeeded() const;
+    void InvalidateRouterColumnNodes() const;
     bool IsVirtualStackBasedSplit() const;
     void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
     void OnWindowStateChangeInVirtualStackBasedSplit(bool show);

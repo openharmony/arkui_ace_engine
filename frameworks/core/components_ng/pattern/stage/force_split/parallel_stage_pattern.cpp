@@ -291,7 +291,7 @@ void ParallelStagePattern::UpdateDividerNodeInVirtualStackBasedSplit(const RefPt
     CreateDividerNodeIfNeeded();
     if (dividerNode_) {
         auto renderContext = dividerNode_->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
     }
     TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split mode");
@@ -316,7 +316,7 @@ void ParallelStagePattern::UpdateDividerNode(
             CreateDividerNodeIfNeeded();
             if (dividerNode_) {
                 auto renderContext = dividerNode_->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, false);
+                CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
             }
             TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split display");

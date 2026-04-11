@@ -645,7 +645,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
             auto host = navigationPattern->GetHost();
             if (host && IsForceSplitSupported(host->GetContext()) && isSplitDisplayChange) {
-                navigationPattern->FireRelatedDestinationLifecycleForModeChange();
+                if (navigationPattern->ShouldUseNewForceSplitModeChangeLifecycleFlow()) {
+                    navigationPattern->FireForceSplitLifecycleForModeChange();
+                } else {
+                    navigationPattern->FireRelatedDestinationLifecycleForModeChange();
+                }
             }
             navigationPattern->OnNavBarStateChange(modeChange);
             navigationPattern->OnNavigationModeChange(modeChange);
@@ -677,6 +681,9 @@ void NavigationLayoutAlgorithm::SizeCalculationForForceSplit(
     realNavBarWidth_ = primaryWidth;
     realContentWidth_ = secondaryWidth;
     realDividerWidth_ = dividerWidth;
+    hostNode->SetDividerWidth(dividerWidth);
+    hostNode->SetPrimaryPartitionWidth(primaryWidth);
+    hostNode->SetSecondaryPartitionWidth(secondaryWidth);
 }
 
 void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
@@ -739,6 +746,9 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGrou
         primaryNodeSize_ = navBarSize_;
         realNavBarWidth_ = primaryWidth;
         realContentWidth_ = secondaryWidth;
+        hostNode->SetDividerWidth(dividerWidth);
+        hostNode->SetPrimaryPartitionWidth(primaryWidth);
+        hostNode->SetSecondaryPartitionWidth(secondaryWidth);
     } else if (isHideNavbar) {
         CHECK_NULL_VOID(hostNode);
         auto targetNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
@@ -996,12 +1006,12 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (IsNavBarVisible(hostNode)) {
             MeasureNavBarOrHomeDestination(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
         }
-        MeasurePrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_);
     } else {
         SizeCalculation(layoutWrapper, hostNode, navigationLayoutProperty, size);
         MeasureNavBarOrHomeDestination(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
     }
     if (pattern->IsForceSplitSuccess()) {
+        MeasurePrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_);
         MeasureForceSplitPlaceHolderNode(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
         MeasureRelatedPageNode(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
     }
@@ -1037,13 +1047,15 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutNavBarOrHomeDestination(
                 layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
         }
-        navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
     } else {
         navBarPosition = pattern->IsForceSplitUseNavBar() ? NavBarPosition::START :
             navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
         OffsetF navBarOffset(0.0, 0.0);
         navBarOrPrimarNodeWidth = LayoutNavBarOrHomeDestination(
             layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
+    }
+    if (pattern->IsForceSplitSuccess()) {
+        navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
     }
 
     float dividerWidth = 0.0f;

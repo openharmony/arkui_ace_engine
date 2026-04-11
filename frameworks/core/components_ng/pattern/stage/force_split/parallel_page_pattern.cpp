@@ -93,7 +93,6 @@ void ParallelPagePattern::InitOnTouchEvent()
                 stageManager->GetTopPrimaryColumnPage() == host ? host : nullptr);
             stageManager->SetTouchedSecondaryColumnPage(
                 stageManager->GetTopSecondaryColumnPage() == host ? host : nullptr);
-            return;
         }
         stageManager->SetHomePageTouched(pattern->GetPageType() == RouterPageType::HOME_PAGE);
     };

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1117,13 +1117,13 @@ bool ParallelStageManager::OnHomePageDetected(
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
 
-    auto useNewArchitecture = UseNewArchitecture();
+    auto isVirtualStackBasedSplit = IsVirtualStackBasedSplit();
     auto preHomePage = GetHomePage();
     CHECK_NULL_RETURN(homePage, false);
     auto homePattern = homePage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(homePattern, false);
     homePattern->SetPageType(RouterPageType::HOME_PAGE);
-    if (useNewArchitecture) {
+    if (isVirtualStackBasedSplit) {
         auto preVisiblePages = GetRouterVisiblePages();
         homePattern->SetColumnType(ForceSplitPageColumnType::PRIMARY);
         UpdateRouterSplitPlaceholder();
@@ -1286,7 +1286,7 @@ bool ParallelStageManager::ExchangePageFocus(bool &initFlag)
     auto lastPage = GetLastPage();
     CHECK_NULL_RETURN(lastPage, false);
     RefPtr<FrameNode> primaryColumnPage = nullptr;
-    if (UseNewArchitecture()) {
+    if (IsVirtualStackBasedSplit()) {
         primaryColumnPage = GetTopPrimaryColumnPage();
     } else {
         primaryColumnPage = GetHomePage();
@@ -1334,7 +1334,7 @@ RefPtr<FrameNode> ParallelStageManager::GetFocusPage() const
     CHECK_NULL_RETURN(stageNode, nullptr);
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, nullptr);
-    auto useNewArchitecture = UseNewArchitecture();
+    auto isVirtualStackBasedSplit = IsVirtualStackBasedSplit();
     const auto& children = stageNode->GetChildren();
     if (children.empty()) {
         return nullptr;
@@ -1350,7 +1350,7 @@ RefPtr<FrameNode> ParallelStageManager::GetFocusPage() const
         if (frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus()) {
             return frameNode;
         }
-        if (useNewArchitecture) {
+        if (isVirtualStackBasedSplit) {
             auto primaryColumnPage = GetTopPrimaryColumnPage();
             if (primaryColumnPage) {
                 return primaryColumnPage;
@@ -1454,8 +1454,8 @@ void ParallelStageManager::SyncPageSafeArea(bool KeyboardSafeArea)
     }
     stageNode_->MarkDirtyNode(changeType);
     RefPtr<FrameNode> needSyncPage = nullptr;
-    auto useNewArchitecture = UseNewArchitecture();
-    if (useNewArchitecture) {
+    auto isVirtualStackBasedSplit = IsVirtualStackBasedSplit();
+    if (isVirtualStackBasedSplit) {
         needSyncPage = GetTopPrimaryColumnPage();
         CHECK_NULL_VOID(needSyncPage);
     } else {
@@ -1465,7 +1465,7 @@ void ParallelStageManager::SyncPageSafeArea(bool KeyboardSafeArea)
             needSyncPage = GetLastPage();
         }
     }
-    if (useNewArchitecture && needSyncPage == lastPage) {
+    if (isVirtualStackBasedSplit && needSyncPage == lastPage) {
         return;
     }
     MarkDirtyPageAndOverlay(needSyncPage, changeType);
@@ -1516,7 +1516,7 @@ int32_t ParallelStageManager::UpdateSecondaryPageNeedRemoved(bool needClearSecon
         return 0;
     }
     RefPtr<FrameNode> stopPage = nullptr;
-    if (UseNewArchitecture()) {
+    if (IsVirtualStackBasedSplit()) {
         stopPage = GetTouchedPrimaryColumnPage();
     }
     bool stopPageFound = false;
@@ -1571,7 +1571,7 @@ std::vector<RefPtr<FrameNode>> ParallelStageManager::GetTopPagesWithTransition()
     CHECK_NULL_RETURN(stagePattern, pages);
     if (stagePattern->GetIsSplit()) {
         RefPtr<FrameNode> page = nullptr;
-        if (UseNewArchitecture()) {
+        if (IsVirtualStackBasedSplit()) {
             page = GetTopPrimaryColumnPage();
         } else {
             page = stagePattern->GetHomePage();
@@ -2133,12 +2133,12 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
     return true;
 }
 
-void ParallelStageManager::InvalidateRouterColumnNodes()
+void ParallelStageManager::InvalidateRouterColumnNodes() const
 {
     routerColumnNodesDirty_ = true;
 }
 
-void ParallelStageManager::RebuildRouterColumnNodesIfNeeded()
+void ParallelStageManager::RebuildRouterColumnNodesIfNeeded() const
 {
     if (!routerColumnNodesDirty_) {
         return;
@@ -2331,7 +2331,7 @@ bool ParallelStageManager::HasRouterPushLeftState() const
 
 bool ParallelStageManager::ShouldCurrentPushUseRouterPushLeft(const RefPtr<FrameNode>& newPageNode) const
 {
-    if (!UseNewArchitecture()) {
+    if (!IsVirtualStackBasedSplit()) {
         return false;
     }
     if (isNewPageReplacing_) {
@@ -2591,13 +2591,9 @@ ParallelStageManager::RouterVisiblePages ParallelStageManager::GetRouterVisibleP
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, visiblePages);
     if (!stagePattern->GetIsSplit()) {
-        visiblePages = GetRouterVisiblePagesForCurrentStackTree();
-        return visiblePages;
+        return GetRouterVisiblePagesForCurrentStackTree();
     }
-    visiblePages = GetRouterVisiblePagesForCurrentSplitTree();
-    if (!visiblePages.primary) {
-    }
-    return visiblePages;
+    return GetRouterVisiblePagesForCurrentSplitTree();
 }
 
 ParallelStageManager::RouterVisiblePages ParallelStageManager::ResolveRouterVisiblePagesFromStackPages(
