@@ -20,7 +20,7 @@ import {
   ConstraintSizeOptions, TextAttribute, CommonMethod, Rectangle, TextOverflow, KeyType, ClickEvent, TouchEvent, Margin,
   TouchType, HorizontalAlign, FlexDirection, ItemAlign, ButtonOptions, HoverEffect, FlexAlign, VerticalAlign, Image,
   SymbolGlyph, Text, Select, Stack, ForEach, LoadingProgress, Padding, MeasureResult, ButtonType, ButtonStyleMode,
-  CustomLayout, AccessibilityRoleType
+  CustomLayout, AccessibilityRoleType, WordBreak, TextAttribute
 } from '@ohos.arkui.component';
 import { TextModifier } from '@ohos.arkui.modifier'
 
@@ -134,23 +134,29 @@ export class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
-function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
+function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttribute {
   this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'));
   this.fontWeight(fontStyle?.fontWeight);
   this.maxLines(fontStyle?.maxLines);
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
+  this.fallbackLineSpacing(true);
+  this.wordBreak(WordBreak.HYPHENATION);
+  this.optimizeTrailingSpace(true);
   return this;
 }
 
-function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
+function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttribute {
   this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'));
   this.fontWeight(fontStyle?.fontWeight);
   this.maxLines(fontStyle?.maxLines);
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
+  this.fallbackLineSpacing(true);
+  this.wordBreak(WordBreak.HYPHENATION);
+  this.optimizeTrailingSpace(true);
   return this;
 }
 
