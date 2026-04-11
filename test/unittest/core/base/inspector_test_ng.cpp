@@ -51,6 +51,15 @@ namespace {
 std::string key = "key";
 const std::string TEXT_NODE_TYPE = "Text";
 const std::string TEST_TEXT = "SomeText";
+constexpr char INSPECTOR_MSG_NEED_FREE_NODES_TRUE[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\", \"isNeedFreeNodes\":true}}";
+constexpr char INSPECTOR_MSG_NEED_FREE_NODES_FALSE[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\", \"isNeedFreeNodes\":false}}";
+constexpr char INSPECTOR_MSG_NO_NEED_FREE_NODES_PARAM[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\"}}";
+constexpr char INSPECTOR_MSG_INVALID[] = "invalid message";
+constexpr char INSPECTOR_MSG_INVALID_PARAMS[] =
+    "{\"method\":\"ArkUI.tree\", \"paramss\":{\"windowId\":\"10\", \"isNeedFreeNodes\":true}}";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
@@ -763,6 +772,106 @@ HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
     result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
     EXPECT_EQ(result.first, 10);
     EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: InspectorTestNg029
+ * @tc.desc: Test the operation of ParseNeedFreeNodes with valid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg029, TestSize.Level1)
+{
+    std::string inspectorMsg = INSPECTOR_MSG_NEED_FREE_NODES_TRUE;
+    auto result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, true);
+
+    inspectorMsg = INSPECTOR_MSG_NEED_FREE_NODES_FALSE;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_NO_NEED_FREE_NODES_PARAM;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: InspectorTestNg030
+ * @tc.desc: Test the operation of ParseNeedFreeNodes with invalid message
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg030, TestSize.Level1)
+{
+    std::string inspectorMsg = "";
+    auto result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_INVALID;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_INVALID_PARAMS;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: InspectorTestNg031
+ * @tc.desc: Test the operation of GetFreeNodesInspector in normal context
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg031, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(childNode);
+
+    bool needThrow = false;
+    InspectorFilter filter;
+    filter.EnableFreeNodes();
+    auto expected = Inspector::GetInspector(true, filter, needThrow);
+    EXPECT_EQ(needThrow, false);
+
+    auto result = Inspector::GetFreeNodesInspector();
+    EXPECT_EQ(result, expected);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue != nullptr) {
+        auto typeValue = jsonValue->GetString("type");
+        EXPECT_EQ(typeValue, "root");
+    }
+}
+
+/**
+ * @tc.name: InspectorTestNg032
+ * @tc.desc: Test the operation of GetFreeNodesInspector when context is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg032, TestSize.Level1)
+{
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+
+    auto result = Inspector::GetFreeNodesInspector();
+    MockPipelineContext::pipeline_ = pipelineBak;
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue != nullptr) {
+        auto typeValue = jsonValue->GetValue(INSPECTOR_TYPE);
+        ASSERT_NE(typeValue, nullptr);
+        EXPECT_STREQ(typeValue->GetString().c_str(), "root");
+    }
 }
 
 
