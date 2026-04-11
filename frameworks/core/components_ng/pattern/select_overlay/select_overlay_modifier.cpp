@@ -290,9 +290,11 @@ void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto textOverlayTheme = host->GetTheme<TextOverlayTheme>(true);
     CHECK_NULL_VOID(textOverlayTheme);
     iconColor_ = textOverlayTheme->GetMoreOrBackIconColor();
     DrawbBackArrow(drawingContext);

@@ -650,16 +650,16 @@ protected:
     Color buttonClickedColor_;
     Color buttonHoverColor_;
     Color symbolColor_;
+    Color handleColor_;
+    Color handleColorInner_;
+    Color iconColor_;
+    Color menuIconColor_;
+    Color moreOrBackIconColor_;
+    Color previewFailedFontColor_;
+    Color menuBackgroundColor_;
 
 private:
     Border menuBorder_;
-    Color iconColor_;
-    Color menuIconColor_;
-    Color menuBackgroundColor_;
-    Color handleColor_;
-    Color handleColorInner_;
-    Color moreOrBackIconColor_;
-    Color previewFailedFontColor_;
     Edge menuPadding_;
     Edge menuButtonPadding_;
     Dimension handleDiameter_;

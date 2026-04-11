@@ -56,7 +56,11 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintWrapper);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    auto caller = info_.callerFrameNode.Upgrade();
+    auto textOverlayTheme = caller ? caller->GetTheme<TextOverlayTheme>(true) : nullptr;
+    if (!textOverlayTheme) {
+        textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    }
     CHECK_NULL_VOID(textOverlayTheme);
     if (!IsModeSwitchComplete()) {
         return;

@@ -61,8 +61,18 @@ public:
         if (auto themeColors = theme.Colors(); themeColors) {
             menuButtonTextStyle_.SetTextColor(themeColors->FontPrimary());
             symbolColor_ = themeColors->FontPrimary();
-            buttonClickedColor_ = themeColors->InteractivePressed();
             buttonHoverColor_ = themeColors->InteractiveHover();
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                buttonClickedColor_ = themeColors->InteractiveClick();
+                handleColor_ = themeColors->IconEmphasize();
+                handleColorInner_ = themeColors->CompBackgroundPrimary();
+                menuIconColor_ = themeColors->FontSecondary();
+                iconColor_ = themeColors->IconPrimary();
+                moreOrBackIconColor_ = themeColors->IconPrimary();
+                menuBackgroundColor_ = themeColors->CompBackgroundPrimary();
+            } else {
+                buttonClickedColor_ = themeColors->InteractivePressed();
+            }
         }
     }
 
