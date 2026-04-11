@@ -107,6 +107,48 @@ void ResetSymbolSpanFontWeight(ArkUINodeHandle node)
     SymbolSpanModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
 }
 
+void SetSymbolSpanVariableFontWeight(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::SetVariableFontWeight(frameNode, value);
+}
+
+void ResetSymbolSpanVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::ResetVariableFontWeight(frameNode);
+}
+
+void SetSymbolSpanEnableVariableFontWeight(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::SetEnableVariableFontWeight(frameNode, value);
+}
+
+void ResetSymbolSpanEnableVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::ResetEnableVariableFontWeight(frameNode);
+}
+
+void SetSymbolSpanEnableDeviceFontWeightCategory(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(frameNode, value);
+}
+
+void ResetSymbolSpanEnableDeviceFontWeightCategory(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::ResetEnableDeviceFontWeightCategory(frameNode);
+}
+
 void SetSymbolSpanRenderingStrategy(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -162,6 +204,12 @@ const ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         .setSymbolSpanFontWeightStr = SetSymbolSpanFontWeightStr,
         .setSymbolSpanFontWeight = SetSymbolSpanFontWeight,
         .resetSymbolSpanFontWeight = ResetSymbolSpanFontWeight,
+        .setSymbolSpanVariableFontWeight = SetSymbolSpanVariableFontWeight,
+        .resetSymbolSpanVariableFontWeight = ResetSymbolSpanVariableFontWeight,
+        .setSymbolSpanEnableVariableFontWeight = SetSymbolSpanEnableVariableFontWeight,
+        .resetSymbolSpanEnableVariableFontWeight = ResetSymbolSpanEnableVariableFontWeight,
+        .setSymbolSpanEnableDeviceFontWeightCategory = SetSymbolSpanEnableDeviceFontWeightCategory,
+        .resetSymbolSpanEnableDeviceFontWeightCategory = ResetSymbolSpanEnableDeviceFontWeightCategory,
         .setSymbolSpanRenderingStrategy = SetSymbolSpanRenderingStrategy,
         .resetSymbolSpanRenderingStrategy = ResetSymbolSpanRenderingStrategy,
         .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,
@@ -185,6 +233,12 @@ const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
         .setSymbolSpanFontWeightStr = SetSymbolSpanFontWeightStr,
         .setSymbolSpanFontWeight = SetSymbolSpanFontWeight,
         .resetSymbolSpanFontWeight = ResetSymbolSpanFontWeight,
+        .setSymbolSpanVariableFontWeight = SetSymbolSpanVariableFontWeight,
+        .resetSymbolSpanVariableFontWeight = ResetSymbolSpanVariableFontWeight,
+        .setSymbolSpanEnableVariableFontWeight = SetSymbolSpanEnableVariableFontWeight,
+        .resetSymbolSpanEnableVariableFontWeight = ResetSymbolSpanEnableVariableFontWeight,
+        .setSymbolSpanEnableDeviceFontWeightCategory = SetSymbolSpanEnableDeviceFontWeightCategory,
+        .resetSymbolSpanEnableDeviceFontWeightCategory = ResetSymbolSpanEnableDeviceFontWeightCategory,
         .setSymbolSpanRenderingStrategy = SetSymbolSpanRenderingStrategy,
         .resetSymbolSpanRenderingStrategy = ResetSymbolSpanRenderingStrategy,
         .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,

@@ -975,7 +975,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
     if (fontStyle || textLineStyle) {
         UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
         if (fontStyle && fontStyle->HasFontWeight()) {
-            symbolSpanStyle.SetEnableVariableFontWeight(false);
+            symbolSpanStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
         }
         if (frameNode) {
             FontRegisterCallback(frameNode, symbolSpanStyle);

@@ -2167,7 +2167,7 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     constructor(nativePtr: KNode, classType?: ModifierType);
     fontColor(value: Array<ResourceColor | ColorMetrics> | undefined): SymbolGlyphAttribute;
     fontSize(value: number | string | Resource): SymbolGlyphAttribute;
-    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
@@ -2180,7 +2180,7 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
     constructor(nativePtr: KNode, classType?: ModifierType);
     fontColor(value: ResourceColor[]): SymbolSpanAttribute;
     fontSize(value: number | string | Resource): SymbolSpanAttribute;
-    fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolSpanAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
 }
