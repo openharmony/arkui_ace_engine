@@ -135,10 +135,13 @@ public:
     void UpdateTextClockFontSize(const CalcDimension& fontSize);
     void UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies);
     void UpdateTextClockFormat(const std::string& format);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void SetFontColor(FrameNode* frameNode, const Color& value);
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool UpdateThemeFontColor(RefPtr<FrameNode>& host);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;

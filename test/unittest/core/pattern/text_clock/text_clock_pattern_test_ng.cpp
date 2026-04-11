@@ -63,6 +63,7 @@ const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 inline const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
 inline const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
+constexpr int32_t NEW_THEME_SCOPE_ID = 200;
 } // namespace
 
 struct TestProperty {
@@ -927,6 +928,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
 
     TestProperty testProperty;
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
@@ -950,12 +952,14 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     layoutProperty->UpdateTextColorSetByUser(false);
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
+    host->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
     auto pipeline = host->GetContextWithCheck();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetIsSystemColorChange(true);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = host->GetTheme<TextTheme>(true);
     ASSERT_NE(theme, nullptr);
-    Color testColor = theme->GetTextStyle().GetTextColor();
+    Color testColor = theme->GetTextClockFontColor();
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
 
