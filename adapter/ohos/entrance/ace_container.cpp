@@ -1751,7 +1751,17 @@ UIContentErrorCode AceContainer::RunPage(
 
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     // The page fault occurs when an SO is loaded due to componentization.
-    DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad(); // Manually triggered PageFault here.To be modifier
+    auto context = aceContainer->GetPipelineContext();
+    if (context && context->GetTaskExecutor()) {
+        context->GetTaskExecutor()->PostTask(
+            []() {
+                // Manually triggered PageFault here.To be modifier
+                DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad();
+            },
+            TaskExecutor::TaskType::UI, "ArkUITriggerPageFaultForPreLoad");
+    } else {
+        LOGW("Failed to get context or task executor, cannot trigger page fault for preload.");
+    }
 #endif
     if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter && isStageModel &&
         !CheckUrlValid(content, container->GetHapPath())) {
