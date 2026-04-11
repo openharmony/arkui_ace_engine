@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ColorMetrics, LengthMetrics } from '@ohos.arkui.node';
+import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { KeyCode } from '@kit.InputKit';
 import mediaquery from '@ohos.mediaquery';
@@ -203,6 +203,7 @@ interface ChipTheme {
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
+const HOT_SPOT_MIN_HEIGHT: number = 32;
 
 interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
@@ -693,6 +694,7 @@ export struct ChipComponent {
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
+    .responseRegion(this.getChipResponseRegion())
     .scale(this.chipScale)
     .opacity(this.chipOpacity)
     .accessibilityGroup(true)
@@ -706,8 +708,8 @@ export struct ChipComponent {
         return;
       }
       let isDeleteChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
-      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false && 
-      !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
+      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false &&
+        !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChip();
       }
@@ -735,7 +737,8 @@ export struct ChipComponent {
   }
 
   private getCloseIconAccessibilityLevel(): string {
-    if (this.closeOptions?.accessibilityLevel === 'no' || this.closeOptions?.accessibilityLevel === 'no-hide-descendants') {
+    if (this.closeOptions?.accessibilityLevel === 'no' ||
+      this.closeOptions?.accessibilityLevel === 'no-hide-descendants') {
       return this.closeOptions.accessibilityLevel;
     }
     return 'yes';
@@ -990,6 +993,35 @@ export struct ChipComponent {
     return constraintSize;
   }
 
+  private getChipHeight(): number {
+    let height: Length;
+    if (typeof this.chipSize !== 'string') {
+      if (typeof this.chipSize?.height !== 'undefined' && this.isValidLength(this.chipSize.height)) {
+        height = this.chipSize.height;
+      } else {
+        height = this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+      }
+    } else if (this.chipSize === ChipSize.SMALL) {
+      height = this.isChipActivated() ? this.theme.chipNode.activatedSmallHeight : this.theme.chipNode.smallHeight;
+    } else {
+      height = this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+    }
+    return this.parseLength(height) ?? HOT_SPOT_MIN_HEIGHT;
+  }
+
+  private getChipResponseRegion(): Rectangle | undefined {
+    const chipHeight = this.getChipHeight();
+    if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
+      return {
+        x: 0,
+        y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
+        width: '100%',
+        height: HOT_SPOT_MIN_HEIGHT
+      };
+    }
+    return undefined;
+  }
+
   getChipMaxWidth(): Length | undefined {
     if (this.fontSizeScale >= this.theme.chipNode.suitAgeScale) {
       return void 0;
@@ -1188,10 +1220,10 @@ export struct ChipComponent {
   }
 
   deleteChip() {
-    animateTo({ curve: Curve.Sharp, duration: 150 }, () => {
+    this.getUIContext().animateTo({ curve: Curve.Sharp, duration: 150 }, () => {
       this.chipOpacity = 0;
     });
-    animateTo({
+    this.getUIContext().animateTo({
       curve: Curve.FastOutLinearIn,
       duration: 150,
       onFinish: () => {
@@ -1204,7 +1236,9 @@ export struct ChipComponent {
 
   getChipOnClicked(): Callback<ClickEvent> | undefined {
     if (this.onClicked) {
-      return this.onClicked.bind(this);
+      return (event: ClickEvent) => {
+        this.onClicked!();
+      }
     }
     return void 0;
   }
@@ -1366,6 +1400,48 @@ export struct ChipComponent {
 
   private isNeedShowCloseIconMargin(): boolean {
     return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
+  }
+
+  private parseLength(length: Length): number | undefined {
+    if (typeof length === 'number') {
+      return length;
+    }
+    if (typeof length === 'string') {
+      if (/(\d+)(vp|px|lpx|fp)?/.test(length)) {
+        const value = parseFloat(RegExp.$1);
+        const unit = RegExp.$2;
+        if (unit === 'vp' || unit === '') {
+          return value;
+        } else if (unit === 'px') {
+          return this.getUIContext().px2vp(value);
+        } else if (unit === 'fp') {
+          return this.getUIContext().px2vp(this.getUIContext().fp2px(value));
+        } else if (unit === 'lpx') {
+          return this.getUIContext().px2vp(this.getUIContext().lpx2px(value));
+        } else {
+          return undefined;
+        }
+      }
+      return undefined;
+    }
+    if (typeof length === 'object') {
+      try {
+        const metrics = LengthMetrics.resource(length as Resource);
+        if (metrics.unit === LengthUnit.VP) {
+          return metrics.value;
+        } else if (metrics.unit === LengthUnit.PX) {
+          return this.getUIContext().px2vp(metrics.value);
+        } else if (metrics.unit === LengthUnit.FP) {
+          return this.getUIContext().px2vp(this.getUIContext().fp2px(metrics.value));
+        } else {
+          return this.getUIContext().px2vp(this.getUIContext().lpx2px(metrics.value));
+        }
+      } catch (error) {
+        console.error('Failed to parse length because the type of resource is invalid');
+        return undefined;
+      }
+    }
+    return undefined;
   }
 
   build() {
