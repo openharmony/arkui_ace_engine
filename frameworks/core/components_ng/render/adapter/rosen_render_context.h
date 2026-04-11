@@ -52,12 +52,14 @@
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 
 namespace OHOS::Ace::NG {
 class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
+class GestureDebugBoundaryModifier;
 class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
@@ -251,6 +253,8 @@ public:
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
+    void SetShadowPath(const std::string path) override;
+    void ResetShadowPath() override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -329,7 +333,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
-    void SetUnionSpacing(float spacing);
+    void SetUnionSpacing(float spacing) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -450,6 +454,7 @@ public:
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
+    void SetHDRColorHeadRoom(float headRoom);
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     void SetRotation(float rotationX, float rotationY, float rotationZ) override;
@@ -484,6 +489,7 @@ public:
     void SetMarkNodeGroup(bool isNodeGroup) override;
     int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
+    void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
     void SyncPartialRsProperties() override;
@@ -570,6 +576,13 @@ public:
     void UpdateCustomBackground() override;
 
     void UpdateOverlayText() override;
+
+    void UpdateDistortionParam(const DistortionParam& param) override;
+
+    void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
+
+    void SetMaterialWithQualityLevel(
+        const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -786,8 +799,7 @@ protected:
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint16_t flag);
-    void OnePixelRounding();
-    void OnePixelRounding(uint16_t flag = 0);
+    void OnePixelRounding(uint16_t flag);
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
@@ -810,6 +822,7 @@ protected:
 #endif
     void DetachModifiers();
     void MarkNeedDrawNode(bool condition);
+    void RemoveTransparencyCallback();
 
     void OnEmitterPropertyUpdate();
 
@@ -852,6 +865,7 @@ protected:
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
 
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
+    std::shared_ptr<GestureDebugBoundaryModifier> gestureDebugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<TransitionModifier> transitionModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;

@@ -382,7 +382,7 @@ void MarqueePattern::StopAndResetAnimation()
 void MarqueePattern::ExecuteStopMarquee()
 {
     float offsetX = 0.0f;
-    if (!hasStart_ || GetTextOffset() != offsetX) {
+    if (!hasStart_ || GetTextOffsetOnly() != offsetX) {
         return;
     }
     hasStart_ = false;
@@ -470,6 +470,27 @@ float MarqueePattern::GetTextOffset()
         lastAnimationOffset_.has_value()) {
         offsetX = lastAnimationOffset_.value().GetX();
         lastAnimationOffset_ = std::nullopt;
+    }
+    return offsetX;
+}
+
+float MarqueePattern::GetTextOffsetOnly()
+{
+    float offsetX = 0.0f;
+    if (!IsRunMarquee()) {
+        return offsetX;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offsetX);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offsetX);
+    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, offsetX);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
+        lastAnimationOffset_.has_value()) {
+        offsetX = lastAnimationOffset_.value().GetX();
     }
     return offsetX;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,6 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 struct MenuItemLabelFontStyle {
@@ -166,7 +164,7 @@ public:
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+        auto theme = context ? context->GetTheme<SelectTheme>(host->GetThemeScopeId()) : nullptr;
         auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
         auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
         auto contentFontJsonObject = JsonUtil::Create(true);

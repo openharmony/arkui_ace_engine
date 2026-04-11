@@ -15,18 +15,11 @@
  
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_VIEW_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_VIEW_STATIC_H
- 
-#include <string>
- 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/pattern/text/text_styles.h"
- 
+
+#include <cstdint>
+
+#include "base/utils/macros.h"
+
 namespace OHOS::Ace::NG {
  
 enum class MenuHoverScaleStatus {

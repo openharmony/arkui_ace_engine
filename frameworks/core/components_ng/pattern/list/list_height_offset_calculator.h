@@ -16,20 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_HEIGHT_OFFSET_CALCULATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_HEIGHT_OFFSET_CALCULATOR_H
 
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_position_map.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
+class FrameNode;
+class ListItemGroupPattern;
+class ListPositionMap;
+class UINode;
+
 class ListHeightOffsetCalculator {
 public:
     ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space, int32_t lanes,

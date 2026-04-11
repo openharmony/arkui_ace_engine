@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class PolylineModifier extends ArkPolylineComponent implements AttributeModifier<PolylineAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

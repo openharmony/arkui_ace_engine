@@ -15,9 +15,10 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2034,16 +2035,21 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step3. call GetMagnifierController
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->isShowMagnifier_ = true;
+    /**
+     * @tc.steps: step4. call GetShowMagnifier
+     */
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, true);
 
 
     /**
-     * @tc.steps: step3. GetMagnifierController
+     * @tc.steps: step5. GetMagnifierController
      *
      */
     result = controller->GetShowMagnifier();

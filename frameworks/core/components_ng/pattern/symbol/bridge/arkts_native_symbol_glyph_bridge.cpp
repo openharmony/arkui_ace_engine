@@ -22,7 +22,6 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "frameworks/base/geometry/calc_dimension.h"

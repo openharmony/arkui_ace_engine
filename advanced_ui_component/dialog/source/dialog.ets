@@ -211,8 +211,12 @@ export struct TipsDialog {
           }
           .padding({ top: TIP_TEXT_TOP_PADDING() })
         } else {
-          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-            this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                this.checkBoxPart();
+              }
+            }
           }
         }
       });
@@ -222,7 +226,7 @@ export struct TipsDialog {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;
@@ -243,6 +247,8 @@ export struct TipsDialog {
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
     }
     .accessibilityGroup(true)
@@ -311,6 +317,8 @@ export struct TipsDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -333,6 +341,8 @@ export struct TipsDialog {
                 }
               })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }
         }
       }
@@ -509,6 +519,8 @@ export struct SelectDialog {
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -524,6 +536,8 @@ export struct SelectDialog {
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
+                      .wordBreak(WordBreak.HYPHENATION)
+                      .optimizeTrailingSpace(true)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -771,6 +785,8 @@ export struct ConfirmDialog {
             })
             .width('100%')
             .fallbackLineSpacing(true)
+            .wordBreak(WordBreak.HYPHENATION)
+            .optimizeTrailingSpace(true)
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -804,6 +820,8 @@ export struct ConfirmDialog {
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
+        .wordBreak(WordBreak.HYPHENATION)
+        .optimizeTrailingSpace(true)
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked))
@@ -950,6 +968,8 @@ export struct AlertDialog {
             }
           })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1338,6 +1358,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .width('100%')
 
@@ -1358,6 +1380,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .width('100%')
     }
@@ -1992,6 +2016,8 @@ export struct LoadingDialog {
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)

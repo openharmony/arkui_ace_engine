@@ -14,7 +14,7 @@
  */
 
 #include "mock_asset.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #define private public
 #define protected public

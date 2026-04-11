@@ -20,10 +20,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
@@ -138,6 +138,30 @@ void OverlayManagerDialogTestNg::SetUpTestCase()
         } else {
             return nullptr;
         }
+    });
+    EXPECT_CALL(*themeManager,
+        GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DragBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<DragBarTheme>();
+            } else if (type == IconTheme::TypeId()) {
+                return AceType::MakeRefPtr<IconTheme>();
+            } else if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else if (type == PickerTheme::TypeId()) {
+                return AceType::MakeRefPtr<PickerTheme>();
+            } else if (type == SelectTheme::TypeId()) {
+                return AceType::MakeRefPtr<SelectTheme>();
+            } else if (type == MenuTheme::TypeId()) {
+                return AceType::MakeRefPtr<MenuTheme>();
+            } else if (type == ToastTheme::TypeId()) {
+                return AceType::MakeRefPtr<ToastTheme>();
+            } else if (type == SheetTheme::TypeId()) {
+                return AceType::MakeRefPtr<SheetTheme>();
+            } else if (type == TextTheme::TypeId()) {
+                return AceType::MakeRefPtr<TextTheme>();
+            } else {
+                return nullptr;
+            }
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }

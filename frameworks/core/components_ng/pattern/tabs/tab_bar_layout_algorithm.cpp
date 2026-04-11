@@ -55,9 +55,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -263,9 +261,7 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     if (axis_ == Axis::HORIZONTAL) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
-        auto pipelineContext = host->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        auto tabTheme = host->GetTheme<TabTheme>(true);
         CHECK_NULL_VOID(tabTheme);
         ScrollableBarModeOptions defaultOptions;
         defaultOptions.margin = tabTheme->GetTabBarDefaultMargin();
@@ -344,7 +340,7 @@ bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, false);
 
     if (GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetSubTabBarBigFontSizeScale())) {
@@ -364,7 +360,7 @@ bool TabBarLayoutAlgorithm::GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(host, isBarAdaptiveHeight);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, isBarAdaptiveHeight);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, isBarAdaptiveHeight);
     if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
         GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
@@ -382,7 +378,7 @@ bool TabBarLayoutAlgorithm::GetNoMinHeightLimit(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(host, isNoMinHeightLimit);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, isNoMinHeightLimit);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, isNoMinHeightLimit);
     if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
         GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
@@ -397,9 +393,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     CHECK_NULL_RETURN(layoutProperty, {});
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, {});
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, {});
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, {});
     auto focusBoardPadding = tabTheme->GetBoardFocusPadding().ConvertToPx();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -712,9 +706,7 @@ void TabBarLayoutAlgorithm::SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper,
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     CHECK_NULL_VOID(tabBarPattern->GetTabBarStyle(index) == TabBarStyle::SUBTABBATSTYLE);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID (childWrapper);
@@ -850,9 +842,7 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);

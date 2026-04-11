@@ -26,9 +26,10 @@ namespace OHOS::Ace::NG {
 
 class ACE_FORCE_EXPORT DialogView {
 public:
-    static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
-    static RefPtr<FrameNode> CreateDialogNode(
-        const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode);
+    static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr,
+        const RefPtr<UINode>& themeNode = nullptr);
+    static RefPtr<FrameNode> CreateDialogNode(const int32_t nodeId, const DialogProperties& param,
+        const RefPtr<UINode>& customNode = nullptr, const RefPtr<UINode>& themeNode = nullptr);
     static bool IsSupportBlurStyle(const RefPtr<FrameNode>& node, bool isShowInSubwindow);
 private:
     static void SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog);

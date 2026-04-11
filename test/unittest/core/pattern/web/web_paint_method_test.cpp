@@ -19,9 +19,9 @@
 
 #include "gtest/gtest.h"
 
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/render/mock_render_surface.h"
-#include "test/mock/core/render/mock_rosen_render_surface.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/components_ng/render/adapter/mock_rosen_render_surface.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/alignment.h"

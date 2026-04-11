@@ -71,6 +71,7 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+struct TextDetectConfig;
 }
 
 namespace OHOS::NWeb {
@@ -648,6 +649,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDefaultContextMenu, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDrag, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollbarLayoutPolicy, ScrollbarLayoutPolicy);
 
     bool IsFocus() const
     {
@@ -808,6 +811,7 @@ public:
     {
         return isImeStatus_ == VkState::VK_SHOW;
     }
+    bool OnNestedScrollV2(float& x, float& y);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     void EnableScrollDirectionalLock(bool enabled,
@@ -925,9 +929,12 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
+    void OnDirectionConfigurationUpdate() override;
+    void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
-
+    std::string GetLayoutModeStr();
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void AddExtraInfoWithParamConfig(
@@ -1093,6 +1100,9 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
+    void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1228,6 +1238,7 @@ private:
     void OnForceEnableZoomUpdate(bool value);
     void OnEnableAutoFillUpdate(bool isEnabled);
     void OnEnableDefaultContextMenuUpdate(bool isEnabled);
+    void OnEnableDragUpdate(bool isEnabled);
 
     int GetWebId();
 
@@ -1709,6 +1720,7 @@ private:
     // Directional lock properties
     bool isDirectionalLockEnabled_ = true;
     ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
+    ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

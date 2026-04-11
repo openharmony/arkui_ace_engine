@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -85,6 +85,7 @@ constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr int32_t NODE_ID = 1;
+constexpr int32_t TARGET_ID = 3;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -109,6 +110,7 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
+    static RefPtr<FrameNode> CreateTargetNode();
 };
 
 void MenuItemTestNg::SetUpTestCase() {}
@@ -121,6 +123,7 @@ void MenuItemTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
@@ -192,6 +195,15 @@ RefPtr<FrameNode> MenuItemTestNg::GetPreviewMenuWrapper(
     auto menuWrapperNode =
         MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
     return menuWrapperNode;
+}
+
+RefPtr<FrameNode> MenuItemTestNg::CreateTargetNode()
+{
+    std::vector<SelectParam> selectParam = { { "content1", "icon1" },
+        { "content2", "" }, { "", "icon3" }, { "", "" } };
+    auto wrapperNode = MenuView::Create(std::move(selectParam), TARGET_ID, EMPTY_TEXT);
+    CHECK_NULL_RETURN(wrapperNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
 }
 
 /**
@@ -834,7 +846,7 @@ HWTEST_F(MenuItemTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -1472,5 +1484,212 @@ HWTEST_F(MenuItemTestNg, CreateWithDimensionFpResourceObj002, TestSize.Level1)
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(layoutProperty->GetLabelFontSize().has_value());
     EXPECT_EQ(layoutProperty->GetLabelFontSize().value(), result2);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest001
+ * @tc.desc: Test OnThemeScopeUpdate. when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, OnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    menuItemPattern->isSelectOption_ = true;
+    menuItemPattern->isSelected_ = true;
+
+    auto ret = menuItemPattern->OnThemeScopeUpdate(menuItem->GetThemeScopeId());
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest002
+ * @tc.desc: Test OnThemeScopeUpdate. when version is 20.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, OnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto ret = menuItemPattern->OnThemeScopeUpdate(menuItem->GetThemeScopeId());
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest003
+ * @tc.desc: Test OnThemeScopeUpdate. when version is 26, ScopeId = 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, OnThemeScopeUpdateTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto ret = menuItemPattern->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest004
+ * @tc.desc: Test OnThemeScopeUpdate. when version is 26, ScopeId = 1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, OnThemeScopeUpdateTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    menuItemPattern->isSelectOption_ = true;
+    menuItemPattern->isSelected_ = true;
+
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+    menuItemPattern->label_ = labelNode;
+
+    auto menu = menuItemPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    menuProperty->UpdateFontColor(Color::RED);
+
+    auto ret = menuItemPattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest005
+ * @tc.desc: Test OnThemeScopeUpdate. when version is 26, ScopeId = 1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, OnThemeScopeUpdateTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    menuItemPattern->isSelectOption_ = true;
+    menuItemPattern->isSelected_ = true;
+
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+    menuItemPattern->label_ = labelNode;
+    auto host = menuItemPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto itemProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+    itemProperty->UpdateFontColor(Color::RED);
+
+    auto ret = menuItemPattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: MenuItemModelNGCreateTestNg001
+ * @tc.desc: Verify MenuItemModelNG::Create when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemModelNGCreateTestNg001, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG menuItemModelInstance;
+    menuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(menuItemEventHub, nullptr);
+    menuItemPattern->OnClick();
+    ASSERT_TRUE(menuItemPattern->IsSelected());
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

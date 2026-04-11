@@ -19,6 +19,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"

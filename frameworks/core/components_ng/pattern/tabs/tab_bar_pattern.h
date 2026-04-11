@@ -642,6 +642,7 @@ public:
 
     void ResetOnForceMeasure(int32_t index);
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;
@@ -805,8 +806,6 @@ private:
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
-    void LoadCompleteManagerStartCollect(int32_t index);
-    void LoadCompleteManagerStopCollect();
     void NotifyTabBarItemsChange();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;

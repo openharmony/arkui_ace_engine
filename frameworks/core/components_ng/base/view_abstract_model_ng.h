@@ -1430,7 +1430,8 @@ public:
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override
+            onAreaChanged,
+        int32_t minInterval) override
     {
         auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
                                       const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
@@ -1438,7 +1439,11 @@ public:
                 Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
                 Offset(origin.GetX(), origin.GetY()));
         };
-        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        if (minInterval > 0) {
+            ViewAbstract::SetOnAreaChangedWithInterval(std::move(areaChangeCallback), minInterval);
+        } else {
+            ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        }
     }
 
     void SetOnSizeChanged(
@@ -1582,19 +1587,7 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
-    static void ResetKeyboardShortcutAll(FrameNode* frameNode)
-    {
-        CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->ClearSingleKeyboardShortcutAll();
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto eventManager = pipeline->GetEventManager();
-        CHECK_NULL_VOID(eventManager);
-        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
-        return;
-    }
+    static void ResetKeyboardShortcutAll(FrameNode* frameNode);
 
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override
     {

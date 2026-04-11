@@ -20,6 +20,7 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
+#include "core/components/calendar/calendar_theme_wrapper.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "compatible/components/clock/clock_theme.h"
 #include "core/components/close_icon/close_icon_theme.h"
@@ -71,6 +72,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme_wrapper.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
@@ -80,6 +82,7 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/select/select_theme_wrapper.h"
@@ -90,19 +93,26 @@
 #include "core/components_ng/pattern/checkbox/checkbox_theme_wrapper.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
+#include "core/components_ng/pattern/dialog/dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
+#include "core/components_ng/pattern/patternlock/patternlock_theme_wrapper.h"
+#include "core/components_ng/pattern/qrcode/qrcode_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
+#include "core/components_ng/pattern/bubble/popup_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme_wrapper.h"
+#include "core/components_ng/pattern/indexer/indexer_theme_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_theme_wrapper.h"
+#include "core/components_ng/pattern/tabs/tab_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -198,21 +208,31 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
+        { DialogTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DialogThemeWrapper::WrapperBuilder> },
         { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
+        { V2::PatternLockTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PatternLockThemeWrapper::WrapperBuilder> },
         { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
         { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> },
+        { PopupTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PopupThemeWrapper::WrapperBuilder> },
         { PickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PickerThemeWrapper::WrapperBuilder> },
+        { NG::ContainerPickerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ContainerPickerThemeWrapper::WrapperBuilder> },
         { ProgressTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ProgressThemeWrapper::WrapperBuilder> },
+        { QrcodeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::QRCodeThemeWrapper::WrapperBuilder> },
         { SelectTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SelectThemeWrapper::WrapperBuilder> },
         { NavigationBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::NavigationBarThemeWrapper::WrapperBuilder> },
         { AgingAdapationDialogTheme::TypeId(),
             &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
+        { CalendarTheme::TypeId(), &ThemeWrapperBuildFunc<CalendarThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
+        { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
+        { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
+        { SwiperIndicatorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwiperThemeWrapper::WrapperBuilder> },
+        { NG::MenuTheme::TypeId(), &ThemeWrapperBuildFunc<NG::MenuThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

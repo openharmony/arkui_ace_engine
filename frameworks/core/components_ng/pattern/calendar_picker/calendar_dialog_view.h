@@ -66,9 +66,13 @@ private:
         const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId);
     static RefPtr<FrameNode> CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
         const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent);
+    static bool MountCalendarMonthFramesToSwiper(int32_t calendarNodeId, const CalendarSettingData& settingData,
+        const DialogEvent& changeEvent, const RefPtr<FrameNode>& calendarNode, const RefPtr<FrameNode>& swiperNode,
+        TextDirection textDirection);
     static RefPtr<FrameNode> CreateCalendarSwiperNode();
     static RefPtr<FrameNode> CreateCalendarMonthNode(int32_t calendarNodeId,
-        const CalendarSettingData& settingData, const DialogEvent& changeEvent);
+        const CalendarSettingData& settingData, const DialogEvent& changeEvent,
+        const RefPtr<FrameNode>& calendarNode);
     static void UpdateCalendarMonthData(const RefPtr<FrameNode>& calendarDialogNode,
         const RefPtr<FrameNode>& calendarNode, const CalendarMonth& currentMonth);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
@@ -85,7 +89,7 @@ private:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
         const std::vector<ButtonInfo>& buttonInfos);
-    static void SetCalendarPaintProperties(const CalendarSettingData& settingData);
+    static void SetCalendarPaintProperties(const CalendarSettingData& settingData, RefPtr<FrameNode>& themeNode);
     static void InitOnRequestDataEvent(
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
     static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,

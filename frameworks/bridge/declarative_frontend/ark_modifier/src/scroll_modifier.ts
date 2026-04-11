@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ScrollModifier extends ArkScrollComponent implements AttributeModifier<ScrollAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

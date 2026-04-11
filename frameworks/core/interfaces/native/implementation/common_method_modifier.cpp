@@ -99,6 +99,7 @@
 
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+#include "core/common/event_manager.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -487,6 +488,12 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
+    }
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
     }
 };
 
@@ -4040,8 +4047,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
-void SetOnAreaChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Area_Area_Void* value)
+void SetOnAreaChange0Impl(Ark_NativePointer node, const Opt_Callback_Area_Area_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4093,6 +4099,63 @@ void SetOnAreaChangeImpl(Ark_NativePointer node,
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+void SetOnAreaChange1Impl(Ark_NativePointer node,
+                          const AreaChangeCallback* event,
+                          const Opt_AreaChangeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    auto onEvent = [arkCallback = CallbackHelper(*event), weakNode = AceType::WeakClaim(frameNode)](
+                       const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ConvContext ctx;
+        PipelineContext::SetCallBackNode(weakNode);
+
+        auto previousOffset = oldRect.GetOffset();
+        Ark_Area previous;
+        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()), &ctx);
+        previous.height = Converter::ArkValue<Ark_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()), &ctx);
+        previous.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()), &ctx);
+        previous.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()), &ctx);
+        previous.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()), &ctx);
+        previous.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()), &ctx);
+
+        auto currentOffset = rect.GetOffset();
+        Ark_Area current;
+        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()), &ctx);
+        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()), &ctx);
+        current.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()), &ctx);
+        current.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()), &ctx);
+        current.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()), &ctx);
+        current.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()), &ctx);
+
+        arkCallback.InvokeSync(previous, current);
+    };
+
+    auto areaChangeCallback = [areaChangeFunc = std::move(onEvent)](const RectF& oldRect,
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+
+    int32_t expectedUpdateInterval = (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED)
+        ? Converter::GetOpt(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION)
+        : DEFAULT_DURATION;
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    ViewAbstract::SetOnAreaChangedWithInterval(frameNode, std::move(areaChangeCallback), expectedUpdateInterval);
 }
 void SetVisibilityImpl(Ark_NativePointer node,
                        const Opt_Visibility* value)
@@ -6795,7 +6858,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDisAppearImpl,
         CommonMethodModifier::SetOnAttachImpl,
         CommonMethodModifier::SetOnDetachImpl,
-        CommonMethodModifier::SetOnAreaChangeImpl,
+        CommonMethodModifier::SetOnAreaChange0Impl,
         CommonMethodModifier::SetVisibilityImpl,
         CommonMethodModifier::SetFlexGrowImpl,
         CommonMethodModifier::SetFlexShrinkImpl,
@@ -6912,6 +6975,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"

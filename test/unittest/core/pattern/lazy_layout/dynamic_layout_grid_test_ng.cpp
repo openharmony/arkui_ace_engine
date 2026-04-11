@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #undef protected
 #undef private
 

@@ -19,7 +19,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 namespace {

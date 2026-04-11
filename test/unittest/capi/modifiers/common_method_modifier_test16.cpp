@@ -20,8 +20,8 @@
 #include "generated/type_helpers.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/unittest/capi/stubs/mock_subwindow_bind.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 
+#include "base/image/drawing_color_filter.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
@@ -236,6 +237,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
 
     TextDecoration GetTextDecorationFirst() const
     {

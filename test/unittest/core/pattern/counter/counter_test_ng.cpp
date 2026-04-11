@@ -21,9 +21,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/dimension.h"
@@ -808,6 +808,10 @@ HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
     EXPECT_EQ(result, RET_FAILED);
 
     jsonCommand = R"({")";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = "";
     result = counterPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
 }

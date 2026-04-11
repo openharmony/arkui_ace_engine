@@ -18,14 +18,14 @@
 #include "gtest/gtest.h"
 #define private public
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/base/mock_drag_window.h"
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/base/window/mock_drag_window.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/drag_event/drag_event_test_ng_issue_utils.h"
 
 #include "base/image/pixel_map.h"

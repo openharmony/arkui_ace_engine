@@ -29,7 +29,9 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "frameworks/base/log/log_wrapper.h"
@@ -50,6 +52,7 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
 bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<OHOS::Ace::EffectOption>& result);
 bool GetLevelMode(ani_env* env, ani_object object, OHOS::Ace::LevelMode& result);
 bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode& result);
+bool GetSystemMaterial(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& result);
 void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment);
 bool GetOnLanguageChange(OHOS::Ace::DialogProperties& dialogProps);
 bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
@@ -59,6 +62,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
 std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 bool GetActionMenuButtons(ani_env *env, ani_object object, std::vector<OHOS::Ace::ButtonInfo>& result);
 bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
+bool GetActionMenuOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index);
 std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
     std::shared_ptr<PromptActionAsyncContext>& asyncContext);

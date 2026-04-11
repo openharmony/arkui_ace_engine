@@ -22,7 +22,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -30,6 +30,7 @@
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/property/grid_property.h"

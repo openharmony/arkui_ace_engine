@@ -18,7 +18,7 @@
 #define private public
 #define protected public
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

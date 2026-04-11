@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
 #define private public
 #define protected public
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #undef protected
@@ -2206,7 +2207,8 @@ HWTEST_F(WaterFlowSWTest, WaterFlowSWReMeasureTest001, TestSize.Level1)
      */
     auto layoutAlgorithm = AceType::DynamicCast<WaterFlowLayoutSW>(pattern_->CreateLayoutAlgorithm());
     EXPECT_TRUE(layoutAlgorithm);
-    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    auto algoWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
+    algoWrapper->Measure(AceType::RawPtr(frameNode_));
     EXPECT_FALSE(layoutAlgorithm->isLayouted_);
 
     // Record initial index range
@@ -2225,7 +2227,7 @@ HWTEST_F(WaterFlowSWTest, WaterFlowSWReMeasureTest001, TestSize.Level1)
     layoutProperty_->UpdateLayoutConstraint(contentConstraint);
 
     // Verify that prevStartIndex_ and prevEndIndex_ are set correctly before measure
-    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    algoWrapper->Measure(AceType::RawPtr(frameNode_));
 
     // Verify index range has changed
     int32_t newStartIndex = layoutAlgorithm->info_->StartIndex();
@@ -2235,7 +2237,7 @@ HWTEST_F(WaterFlowSWTest, WaterFlowSWReMeasureTest001, TestSize.Level1)
     EXPECT_TRUE(newStartIndex != initialStartIndex || newEndIndex != initialEndIndex);
 
     // Complete layout to trigger ClearUnlayoutedItems
-    layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
+    algoWrapper->Layout(AceType::RawPtr(frameNode_));
     EXPECT_TRUE(layoutAlgorithm->isLayouted_);
 }
 
@@ -2605,5 +2607,47 @@ HWTEST_F(WaterFlowSWTest, TrailingCallbackClamp001, TestSize.Level1)
     ASSERT_TRUE(scrollEffect);
     EXPECT_GE(scrollEffect->trailingCallback_(), 1.0);
     EXPECT_GE(scrollEffect->initTrailingCallback_(), 1.0);
+}
+
+/**
+ * @tc.name: LayoutWithoutMeasure001
+ * @tc.desc: Verify sliding window layout skips safely when a fresh algorithm enters Layout before Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, LayoutWithoutMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with sliding window state ready.
+     * @tc.expected: Shared layout info is valid before recreating the algorithm.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+
+    ASSERT_FALSE(info_->lanes_.empty());
+    ASSERT_TRUE(info_->isDataValid_);
+
+    /**
+     * @tc.steps: step2. Reset layout algorithm and fetch a fresh SW algorithm instance.
+     * @tc.expected: The fresh algorithm has not executed Measure and keeps props_ empty.
+     */
+    frameNode_->ResetLayoutAlgorithm();
+    auto algoWrapper = frameNode_->GetLayoutAlgorithm(true);
+    auto algo = AceType::DynamicCast<WaterFlowLayoutSW>(algoWrapper->GetLayoutAlgorithm());
+    ASSERT_TRUE(algo);
+    ASSERT_EQ(algo->props_, nullptr);
+    ASSERT_FALSE(algo->GetHasMeasured());
+
+    /**
+     * @tc.steps: step3. Trigger ignore-layout path directly.
+     * @tc.expected: Layout guard skips safely without crashing or mutating fresh algorithm state.
+     */
+    frameNode_->SetIgnoreLayoutProcess(true);
+    frameNode_->Layout();
+    frameNode_->ResetIgnoreLayoutProcess();
+
+    EXPECT_EQ(algo->props_, nullptr);
+    EXPECT_EQ(info_->startIndex_, 0);
 }
 } // namespace OHOS::Ace::NG

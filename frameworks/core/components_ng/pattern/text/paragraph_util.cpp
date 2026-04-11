@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)

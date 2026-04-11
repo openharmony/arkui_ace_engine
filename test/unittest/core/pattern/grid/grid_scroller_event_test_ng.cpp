@@ -15,8 +15,9 @@
 
 #include "grid_test_ng.h"
 
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 

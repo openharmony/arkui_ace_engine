@@ -270,11 +270,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    std::u16string selectTextContent;
-    pattern->GetContentBySpans(selectTextContent);
-    std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(selectStart),
-        static_cast<int32_t>(selectEnd - selectStart));
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
+    std::string selectData = GetSelectedText();
     pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
 }
 

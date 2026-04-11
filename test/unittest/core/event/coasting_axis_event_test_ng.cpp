@@ -18,9 +18,10 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/utils/system_properties.h"
 #include "frameworks/core/event/coasting_axis_event_generator.h"

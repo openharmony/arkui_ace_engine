@@ -1313,6 +1313,7 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1393,6 +1394,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnMicrophoneCaptureStateChanged(int originalState, int newState);
+    void OnInputMethodAttached();
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1493,6 +1495,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 
@@ -1549,6 +1552,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1718,6 +1723,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
     EventCallbackV2 onCameraCaptureStateChangedV2_;
     EventCallbackV2 onMicrophoneCaptureStateChangedV2_;
+    EventCallbackV2 onInputMethodAttachedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

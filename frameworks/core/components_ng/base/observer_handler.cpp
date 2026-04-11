@@ -656,14 +656,19 @@ void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
 
 void UIObserverHandler::NotifySwiperContentUpdate(const SwiperContentInfo& info)
 {
-    CHECK_NULL_VOID(swiperContentUpdateHandleFunc_);
-    swiperContentUpdateHandleFunc_(info);
+    if (swiperContentUpdateHandleFunc_) {
+        swiperContentUpdateHandleFunc_(info);
+    }
+    if (swiperContentUpdateHandleFuncForAni_) {
+        swiperContentUpdateHandleFuncForAni_(info);
+    }
 }
 
 bool UIObserverHandler::IsSwiperContentObserverEmpty()
 {
-    CHECK_NULL_RETURN(swiperContentObservrEmptyFunc_, true);
-    return swiperContentObservrEmptyFunc_();
+    auto dynamicSwiperContentObservrEmpty =
+        swiperContentObservrEmptyFunc_ == nullptr || swiperContentObservrEmptyFunc_();
+    return dynamicSwiperContentObservrEmpty && swiperContentUpdateHandleFuncForAni_ == nullptr;
 }
 
 void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
@@ -825,6 +830,11 @@ void UIObserverHandler::SetHandleTextChangeEventFuncForAni(TextChangeEventHandle
 void UIObserverHandler::SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func)
 {
     swiperContentUpdateHandleFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetHandleSwiperContentUpdateFuncForAni(SwiperContentUpdateHandleFuncForAni&& func)
+{
+    swiperContentUpdateHandleFuncForAni_ = std::move(func);
 }
 
 void UIObserverHandler::SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func)

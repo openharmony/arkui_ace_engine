@@ -579,6 +579,70 @@ public:
             holder.end());
     }
 
+    void RegisterSwiperContentUpdateCallback(ani_ref& cb)
+    {
+        if (std::find(unspecifiedSwiperContentUpdateListeners_.begin(),
+                unspecifiedSwiperContentUpdateListeners_.end(), cb) !=
+                unspecifiedSwiperContentUpdateListeners_.end()) {
+            return;
+        }
+        hasSetSwiperContentUpdateCallback_ = true;
+        unspecifiedSwiperContentUpdateListeners_.emplace_back(cb);
+    }
+
+    void UnRegisterSwiperContentUpdateCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            for (auto& callback : unspecifiedSwiperContentUpdateListeners_) {
+                env->GlobalReference_Delete(callback);
+            }
+            unspecifiedSwiperContentUpdateListeners_.clear();
+            return;
+        }
+
+        unspecifiedSwiperContentUpdateListeners_.erase(std::remove_if(unspecifiedSwiperContentUpdateListeners_.begin(),
+            unspecifiedSwiperContentUpdateListeners_.end(),
+                [env, cb, this](ani_ref cb1) {
+                    auto result = AniEqual(env, cb, cb1);
+                    if (result) {
+                        env->GlobalReference_Delete(cb1);
+                    }
+                    return result;
+                }),
+            unspecifiedSwiperContentUpdateListeners_.end());
+    }
+
+    void RegisterSwiperContentUpdateCallback(std::string id, ani_ref& cb)
+    {
+        auto iter = specifiedSwiperContentUpdateListeners_.find(id);
+        if (iter == specifiedSwiperContentUpdateListeners_.end()) {
+            hasSetSwiperContentUpdateCallback_ = true;
+            specifiedSwiperContentUpdateListeners_.emplace(id, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterSwiperContentUpdateCallback(ani_env* env, std::string id, ani_ref& cb)
+    {
+        auto iter = specifiedSwiperContentUpdateListeners_.find(id);
+        if (iter == specifiedSwiperContentUpdateListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
     void RegisterTabChangeCallback(ani_ref& cb)
     {
         if (std::find(unspecifiedTabChangeListeners_.begin(), unspecifiedTabChangeListeners_.end(), cb) !=
@@ -1161,6 +1225,39 @@ public:
         }
     }
 
+    void HandleSwiperContentUpdate(ani_env* env, const NG::SwiperContentInfo& info)
+    {
+        if (!hasSetSwiperContentUpdateCallback_) {
+            return;
+        }
+        auto unspecifiedHolder = unspecifiedSwiperContentUpdateListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateSwiperContentUpdateEventInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+
+        auto iter = specifiedSwiperContentUpdateListeners_.find(info.id);
+        if (iter == specifiedSwiperContentUpdateListeners_.end()) {
+            return;
+        }
+
+        auto holder = iter->second;
+        std::vector<ani_ref> cbParamsWithId;
+        ani_ref fnReturnValWithId;
+        ani_object resWithId;
+        CreateSwiperContentUpdateEventInfo(env, info, resWithId);
+        cbParamsWithId.emplace_back(resWithId);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParamsWithId.size(), cbParamsWithId.data(), &fnReturnValWithId);
+        }
+    }
+
     static ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
     {
         ani_boolean isEquals = false;
@@ -1727,6 +1824,61 @@ private:
         env->Object_SetPropertyByName_Ref(res, "content", content);
     }
 
+    void CreateSwiperContentUpdateEventInfo(ani_env* env, const NG::SwiperContentInfo& info, ani_object& res)
+    {
+        static const char* className = "@ohos.arkui.UIContext.SwiperContentInfoImpl";
+        static const char* swiperItemClassName = "@ohos.arkui.UIContext.SwiperItemInfoImpl";
+        ani_class cls;
+        if (ANI_OK != env->FindClass(className, &cls)) {
+            LOGE("failed to find class");
+            return;
+        }
+
+        ani_method ctor;
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
+            LOGE("failed to find constructor");
+            return;
+        }
+
+        if (ANI_OK != env->Object_New(cls, ctor, &res)) {
+            LOGE("failed to create object");
+            return;
+        }
+
+        ani_string id {};
+        env->String_NewUTF8(info.id.c_str(), info.id.size(), &id);
+        env->Object_SetPropertyByName_Ref(res, "id", id);
+        env->Object_SetPropertyByName_Int(res, "uniqueId", static_cast<ani_int>(info.uniqueId));
+        ani_array swiperItemInfos;
+        auto arraySize = info.swiperItemInfos.size();
+        ani_ref undefined {};
+        env->GetUndefined(&undefined);
+        env->Array_New(arraySize, undefined, &swiperItemInfos);
+        
+        ani_class swiperItemClass {};
+        if (ANI_OK != env->FindClass(swiperItemClassName, &swiperItemClass)) {
+            LOGE("failed to find class");
+            return;
+        }
+
+        ani_method swiperItemCtor {};
+        if (ANI_OK != env->Class_FindMethod(swiperItemClass, "<ctor>", ":", &swiperItemCtor)) {
+            LOGE("failed to find constructor");
+            return;
+        }
+
+        ani_object item {};
+        for (uint32_t index = 0; index < arraySize; index++) {
+            env->Object_New(swiperItemClass, swiperItemCtor, &item);
+            env->Object_SetPropertyByName_Int(item, "uniqueId",
+                static_cast<ani_int>(info.swiperItemInfos[index].uniqueId));
+            env->Object_SetPropertyByName_Int(item, "index",
+                static_cast<ani_int>(info.swiperItemInfos[index].index));
+            env->Array_Set(swiperItemInfos, index, item);
+        }
+        env->Object_SetPropertyByName_Ref(res, "swiperItemInfos", swiperItemInfos);
+    }
+
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
 
@@ -1760,6 +1912,10 @@ private:
     bool hasSetTextChangeCallback_ = false;
     std::list<ani_ref> unspecifiedTextChangeListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedTextChangeListeners_;
+
+    bool hasSetSwiperContentUpdateCallback_ = false;
+    std::list<ani_ref> unspecifiedSwiperContentUpdateListeners_;
+    std::unordered_map<std::string, std::list<ani_ref>> specifiedSwiperContentUpdateListeners_;
 };
 
 std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
@@ -2718,6 +2874,80 @@ static void OffTabChangeWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     observer->UnRegisterTabChangeCallback(env, tabsId, fnObjGlobalRef);
 }
 
+static void OnSwiperContentUpdate([[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    observer->RegisterSwiperContentUpdateCallback(fnObjGlobalRef);
+}
+
+static void OffSwiperContentUpdate([[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    observer->UnRegisterSwiperContentUpdateCallback(env, fnObjGlobalRef);
+}
+
+static void OnSwiperContentUpdateWithOptions([[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref id;
+    env->Object_GetPropertyByName_Ref(options, "id", &id);
+    std::string nodeId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(id));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterSwiperContentUpdateCallback(nodeId, fnObjGlobalRef);
+}
+
+static void OffSwiperContentUpdateWithOptions([[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref id;
+    env->Object_GetPropertyByName_Ref(options, "id", &id);
+    std::string nodeId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(id));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->UnRegisterSwiperContentUpdateCallback(env, nodeId, fnObjGlobalRef);
+}
+
 static void OnTextChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
@@ -3070,6 +3300,26 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
     } while (false);
 
+    do {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get ani vm in CreateObserver, status:%{public}d", static_cast<int32_t>(status));
+            break;
+        }
+        auto swiperContentUpdateCallback = [observer, vm](const NG::SwiperContentInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in CreateObserver, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
+            observer->HandleSwiperContentUpdate(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleSwiperContentUpdateFuncForAni(swiperContentUpdateCallback);
+    } while (false);
+
     auto windowSizeBreakpointChangeCallback = [observer, env](
         int32_t instanceId, const WindowSizeBreakpoint& breakpoint) {
         observer->HandleWindowSizeBreakpointChange(env, instanceId, breakpoint);
@@ -3291,6 +3541,17 @@ bool ANI_ConstructorForAni(ani_env* env)
             reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationSizeChangeByUniqueId) },
         ani_native_function { "offNavDestinationSizeChangeByUniqueId", "iC{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationSizeChangeByUniqueId) },
+
+        ani_native_function { "onSwiperContentUpdate", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnSwiperContentUpdate) },
+        ani_native_function { "offSwiperContentUpdate", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffSwiperContentUpdate) },
+        ani_native_function { "onSwiperContentUpdate",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnSwiperContentUpdateWithOptions) },
+        ani_native_function { "offSwiperContentUpdate",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffSwiperContentUpdateWithOptions) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;

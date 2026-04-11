@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/text_model.h"
 
 #ifdef WEB_SUPPORTED
 #include "arkweb_utils.h"
@@ -2427,6 +2428,33 @@ void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                  const Opt_ScrollbarLayoutPolicy* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<ScrollbarLayoutPolicy>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetScrollbarLayoutPolicy(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+void SetEnableDragImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDrag(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEvent* value)
 {
 #ifdef WEB_SUPPORTED
@@ -3095,6 +3123,26 @@ void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
     WebModelStatic::SetCameraCaptureStateChangedId(frameNode, onCameraCaptureStateChange);
 #endif // WEB_SUPPORTED
 }
+
+void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                  const Opt_OnInputmethodAttachedCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onInputMethodAttached = [callback = CallbackHelper(*optValue), weakNode, instanceId]() {
+        OnInputmethodAttached(callback, weakNode, instanceId, nullptr);
+    };
+    WebModelStatic::SetInputMethodAttachedId(frameNode, std::move(onInputMethodAttached));
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -3246,10 +3294,13 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetEnableDragImpl,
+        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
+        WebAttributeModifier::SetOnInputmethodAttachedImpl,
     };
     return &ArkUIWebModifierImpl;
 }

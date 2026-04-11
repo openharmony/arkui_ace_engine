@@ -24,13 +24,13 @@
 #define protected public
 #include "core/components_ng/gestures/gesture_info.h"
 #define private public
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 #undef private
 #undef protected
 #define private public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "nweb_handler.h"
 #include "core/common/ai/image_analyzer_manager.h"

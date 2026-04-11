@@ -23,32 +23,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::W700,
-    FontWeight::W400,
-    FontWeight::W900,
-    FontWeight::W100,
-    FontWeight::W500,
-    FontWeight::W400,
-};
 constexpr float ROUND_VALUE = 0.5f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 32.0_vp;
 constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
 constexpr double MIN_TEXTFADEOUT_DELTA = 1.0;
-
-inline FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
-}
 } // namespace
 
 TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)

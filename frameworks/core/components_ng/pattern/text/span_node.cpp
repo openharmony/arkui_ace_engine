@@ -95,6 +95,54 @@ std::string SpanItem::GetFont() const
     return jsonValue->ToString();
 }
 
+std::string SpanItem::GetFontWeightConfigs() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableVariableFontWeight",
+        fontStyle->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
+    jsonValue->Put("enableDeviceFontWeightCategory",
+        fontStyle->GetEnableDeviceFontWeightCategory().value_or(true) ? "true" : "false");
+    return jsonValue->ToString();
+}
+
+void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+    const RefPtr<TextPattern>& textPattern) const
+{
+    json->PutExtAttr("font", GetFont().c_str(), filter);
+    json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
+    json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
+        fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+        fontStyle->GetTextDecorationStyle()).c_str(), filter);
+    json->PutExtAttr("letterSpacing",
+        fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("textCase",
+        V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
+    if (spanItemType == SpanItemType::SYMBOL) {
+        const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+        auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+        json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+    } else {
+        Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
+        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+            .value_or(defaultFontColor)).ColorToString().c_str(), filter);
+    }
+    json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
+    json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("variableFontWeight",
+        std::to_string(fontStyle->GetVariableFontWeight().value_or(0)).c_str(), filter);
+    json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("renderingStrategy",
+        GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
+    json->PutExtAttr(
+        "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect",
+        GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+    json->PutExtAttr("textShadow", jsonShadow, filter);
+    json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
+}
+
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
@@ -107,36 +155,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     auto textPattern = DynamicCast<TextPattern>(pattern);
     CHECK_NULL_VOID(textPattern);
     if (fontStyle) {
-        json->PutExtAttr("font", GetFont().c_str(), filter);
-        json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
-        json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
-            fontStyle->GetTextDecorationStyle()).c_str(), filter);
-        json->PutExtAttr("letterSpacing",
-            fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("textCase",
-            V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
-        if (spanItemType == SpanItemType::SYMBOL) {
-            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
-            auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
-        } else {
-            Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
-            json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-                .value_or(defaultFontColor)).ColorToString().c_str(), filter);
-        }
-        json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
-        json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
-        json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
-        json->PutExtAttr("renderingStrategy",
-            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-        json->PutExtAttr(
-            "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
-        json->Put("symbolEffect",
-            GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
-        json->PutExtAttr("textShadow", jsonShadow, filter);
+        ToJsonForFontStyle(json, filter, textPattern);
     }
     auto dim = Dimension();
     if (textLineStyle) {
@@ -1234,6 +1253,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
     COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
+    COPY_TEXT_STYLE(fontStyle, FontSizeScale, UpdateFontSizeScale);
     COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
     COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
     COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
@@ -1359,6 +1379,7 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
     WRITE_TEXT_STYLE_TLV(
         fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
@@ -1450,6 +1471,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
             case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
                 sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
                 break;

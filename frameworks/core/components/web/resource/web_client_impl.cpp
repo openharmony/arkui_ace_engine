@@ -1516,6 +1516,14 @@ bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& 
     return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+bool WebClientImpl::OnNestedScrollV2(float& x, float& y)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedScrollV2(x, y);
+}
+
 void WebClientImpl::OnLoadStarted(const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1543,21 +1551,20 @@ void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
 }
 
 bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
-    OHOS::NWeb::SslError error,
-    const std::string& url,
-    const std::string& originalUrl,
-    const std::string& referrer,
-    bool isFatalError,
-    bool isMainFrame,
-    const std::vector<std::string>& certChainData)
+    std::shared_ptr<NWeb::NWebAllSslErrorInfo> nwebAllSslError)
 {
+    if (nwebAllSslError == nullptr) {
+        return false;
+    }
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
 
     bool jsResult = false;
     auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
-        static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame, certChainData);
+        static_cast<int32_t>(nwebAllSslError->GetError()), nwebAllSslError->GetUrl(),
+        nwebAllSslError->GetOriginalUrl(), nwebAllSslError->GetReferrer(), nwebAllSslError->GetIsFatalError(),
+        nwebAllSslError->GetIsMainFrame(), nwebAllSslError->GetCertChainData());
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -1805,5 +1812,13 @@ void WebClientImpl::OnMediaCastEnter()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnMediaCastEnter();
+}
+
+void WebClientImpl::OnInputMethodAttached()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnInputMethodAttached();
 }
 } // namespace OHOS::Ace

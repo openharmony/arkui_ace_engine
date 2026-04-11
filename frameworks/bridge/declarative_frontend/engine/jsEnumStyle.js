@@ -1873,6 +1873,12 @@ let ThemeColorMode;
   ThemeColorMode[ThemeColorMode.DARK = 2] = 'DARK';
 })(ThemeColorMode || (ThemeColorMode = {}));
 
+let AnchoredColorMode;
+(function (AnchoredColorMode) {
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_SYSTEM = 0] = 'FOLLOW_SYSTEM';
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_TARGET = 1] = 'FOLLOW_TARGET';
+})(AnchoredColorMode || (AnchoredColorMode = {}));
+
 let AdaptiveColor;
 (function (AdaptiveColor) {
   AdaptiveColor[AdaptiveColor.Default = 0] = 'Default';
@@ -2165,6 +2171,12 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.DEFAULT = 0] = 'DEFAULT';
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
+
+let ScrollbarLayoutPolicy;
+(function (ScrollbarLayoutPolicy) {
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.CONTENT = 0] = 'CONTENT';
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.SYSTEM = 1] = 'SYSTEM';
+})(ScrollbarLayoutPolicy || (ScrollbarLayoutPolicy = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -4572,7 +4584,6 @@ let MarqueeState;
   MarqueeState[MarqueeState.START = 0] = 'START';
   MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
   MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
-  MarqueeState[MarqueeState.STOP = 3] = 'STOP';
 })(MarqueeState || (MarqueeState = {}));
 
 let MarqueeStartPolicy;
@@ -5085,6 +5096,7 @@ let ColorSpace;
 (function (ColorSpace) {
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+  ColorSpace[ColorSpace.BT2020 = 2] = 'BT2020';
 })(ColorSpace || (ColorSpace = {}));
 
 let AudioSessionType;
@@ -5183,6 +5195,12 @@ let PresetFillType;
   PresetFillType[PresetFillType.BREAKPOINT_SM1MD2LG3 = 1] = 'BREAKPOINT_SM1MD2LG3';
   PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
 })(PresetFillType || (PresetFillType = {}));
+
+let RawInputEventType;
+(function (RawInputEventType) {
+  RawInputEventType[RawInputEventType.TOUCH = 0] = 'TOUCH';
+  RawInputEventType[RawInputEventType.MOUSE = 1] = 'MOUSE';
+})(RawInputEventType || (RawInputEventType = {}));
 
 let SystemProperties;
 (function (SystemProperties) {

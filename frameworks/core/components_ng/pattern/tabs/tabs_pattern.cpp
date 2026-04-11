@@ -24,7 +24,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -49,7 +48,9 @@ void TabsPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    host->GetRenderContext()->SetClipToFrame(!tabTheme->GetIsChangeFocusTextStyle());
     // expand to navigation bar by default
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
         { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
@@ -835,14 +836,6 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
             }
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
-        auto host = GetHost();
-        if (host) {
-            auto pipeline = host->GetContextWithCheck();
-            if (pipeline) {
-                std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(index);
-                pipeline->GetLoadCompleteManager()->StartCollect(url);
-            }
-        }
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }
@@ -1017,9 +1010,7 @@ void TabsPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TabTheme>();
+    auto theme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(theme);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -1045,9 +1036,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TabTheme>();
+    auto theme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(theme);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -1063,6 +1052,31 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
     }
     UpdateTabBarOverlap(tabsLayoutProperty);
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto theme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_RETURN(theme, false);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(tabsLayoutProperty, false);
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() || !tabsLayoutProperty->GetDividerColorSetByUserValue()) {
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.color = theme->GetDividerColor();
+        auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+        CHECK_NULL_RETURN(dividerFrameNode, false);
+        auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_RETURN(dividerRenderProperty, false);
+        dividerRenderProperty->UpdateDividerColor(currentDivider.color);
+    }
+    return false;
 }
 
 void TabsPattern::UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty)

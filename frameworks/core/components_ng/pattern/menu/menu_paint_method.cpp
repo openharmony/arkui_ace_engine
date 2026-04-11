@@ -29,6 +29,11 @@ CanvasDrawFunction MenuPaintMethod::GetContentDrawFunction(PaintWrapper* paintWr
         if (!props->GetEnableArrow().has_value() || !props->GetEnableArrow().value()) {
             return;
         }
+#if defined(ENABLE_ROSEN_BACKEND)
+        if (props->GetIsUserSetMaterial().value_or(false)) {
+            return;
+        }
+#endif
         auto clipPath = props->GetClipPath().value_or("");
         if (clipPath == "") {
             return;

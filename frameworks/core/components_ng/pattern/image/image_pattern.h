@@ -35,7 +35,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/render/canvas_image.h"
+
 #include "core/drawable/drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 
@@ -43,6 +43,7 @@
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
 class PixelMap;
+struct CanvasImage;
 }
 
 namespace OHOS::Ace::NG {
@@ -268,6 +269,9 @@ public:
     {
         needLoadAlt_ = needLoadAlt;
     }
+
+    // Public method for ImageAnimator to trigger theme updates
+    void TriggerThemeUpdate(int32_t themeScopeId);
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 

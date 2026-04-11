@@ -21,7 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +53,7 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void OnMenuClick();
+    void OnMenuClick(std::map<std::string, std::string>& params);
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
     void SetOnBackPressedConsumed();
@@ -69,7 +69,7 @@ public:
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
     void SetMenuBarVisible(bool visible);
-    void OnThirdCloseEvent();
+    void OnThirdCloseEvent(int32_t code);
 
     void SetLastRectChangeTime(int64_t time)
     {
@@ -90,6 +90,7 @@ public:
     }
 
     void SetRectChangeCallback(RectChangeFunc&& callback);
+    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
 protected:
     virtual ~AppBarView()
     {
@@ -108,12 +109,11 @@ private:
     void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    void CreateServicePanel(bool firstTry);
+    void CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params = {});
     void DestroyServicePanel();
     void FireExtensionHostParams();
-    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
     void InitAbilityContextCallback();
-    void FireAbilityCloseEvent();
+    void FireAbilityCloseEvent(int32_t code);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     void AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode);

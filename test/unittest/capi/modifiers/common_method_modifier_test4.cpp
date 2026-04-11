@@ -19,7 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -777,6 +777,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::optional<std::string> resultStr;
     auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 
@@ -821,6 +822,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestInvalidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::optional<std::string> resultStr;
     auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 

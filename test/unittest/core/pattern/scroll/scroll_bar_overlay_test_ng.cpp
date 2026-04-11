@@ -14,7 +14,7 @@
  */
 #include "scroll_test_ng.h"
 #include "base/memory/ace_type.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 

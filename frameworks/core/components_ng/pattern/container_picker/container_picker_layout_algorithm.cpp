@@ -31,6 +31,7 @@ const float UNDEFINED_SIZE = -1.0f;
 const int32_t ITEM_COUNTS = 10;
 const float HORIZONTAL_ANGLE = 180.0f;
 const float VERTICAL_ANGLE = 90.0f;
+const int32_t DEFAULT_CACHE_COUNT = 10; // default cache count.
 } // namespace
 
 void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -484,6 +485,46 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(layoutWrapper, paddingOffset, pos);
+    }
+
+    SetLazyLoad(layoutWrapper);
+}
+
+void ContainerPickerLayoutAlgorithm::SetLazyLoad(LayoutWrapper* layoutWrapper)
+{
+    if (!itemPosition_.empty() && !prevItemPosition_.empty() &&
+        itemPosition_.begin()->first == prevItemPosition_.begin()->first) {
+        return;
+    }
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pickerPattern = hostNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto lazyNode = pickerPattern->FindLazyForEachNode(hostNode);
+    if (totalItemCount_ > 0 && lazyNode.has_value() && !itemPosition_.empty()) {
+        pickerPattern->SetLazyLoadIsLoop();
+        auto displayCount = static_cast<int32_t>(itemPosition_.size());
+        int32_t firstActive = -1;
+        int32_t lastActive = -1;
+        int32_t cacheBefore = DEFAULT_CACHE_COUNT;
+        int32_t cacheAfter = DEFAULT_CACHE_COUNT;
+        if (isLoop_) {
+            firstActive = ContainerPickerUtils::GetLoopIndex(itemPosition_.begin()->first, totalItemCount_);
+            lastActive = ContainerPickerUtils::GetLoopIndex(itemPosition_.rbegin()->first, totalItemCount_);
+            auto balancedCacheCount = (totalItemCount_ - displayCount) / 2;
+            auto trailingExtraCacheCount = (totalItemCount_ - displayCount) % 2;
+            cacheBefore = std::min(DEFAULT_CACHE_COUNT, balancedCacheCount);
+            cacheAfter = std::min(DEFAULT_CACHE_COUNT, balancedCacheCount + trailingExtraCacheCount);
+        } else {
+            firstActive = itemPosition_.begin()->first;
+            lastActive = itemPosition_.rbegin()->first;
+            cacheBefore = std::min(DEFAULT_CACHE_COUNT, firstActive);
+            cacheAfter = std::min(DEFAULT_CACHE_COUNT, totalItemCount_ - 1 - lastActive);
+        }
+        hostNode->SetActiveChildRange(firstActive, lastActive, cacheBefore, cacheAfter);
+        auto setCache = std::min(DEFAULT_CACHE_COUNT, std::max(cacheBefore, cacheAfter));
+        hostNode->SetCacheCount(setCache);
+        layoutWrapper->SetLongPredictTask();
     }
 }
 

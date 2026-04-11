@@ -954,7 +954,7 @@ public:
         }
     }
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
-    void TerminateUIExtensionInner() override;
+    void TerminateUIExtensionInner(int32_t code) override;
 
 private:
     virtual bool MaybeRelease() override;
@@ -1005,9 +1005,6 @@ private:
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
-
-    void LoadCompleteManagerStartCollect(const std::string& url) override;
-    void LoadCompleteManagerStopCollect() override;
 
     void InitForceSplitManager();
 

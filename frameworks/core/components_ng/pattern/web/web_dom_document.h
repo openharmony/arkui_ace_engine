@@ -38,6 +38,7 @@ constexpr char WEB_DOM_JSON_CHILDREN[] = "$children-web";
 constexpr char WEB_DOM_JSON_TITLE[] = "title";
 constexpr char WEB_DOM_JSON_URL[] = "url";
 constexpr char WEB_DOM_JSON_TYPE_OUTER[] = "web";
+constexpr char WEB_DOM_JSON_LAYOUTMODE[] = "layoutMode";
 
 constexpr char WEB_NATIVE_OBJ_DOM[] = "_arkWebDomTree";
 constexpr char WEB_NATIVE_FUNC_INIT[] = "init";

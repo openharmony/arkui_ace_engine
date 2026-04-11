@@ -171,6 +171,7 @@ template("ace_core_source_set") {
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
+      "common/visual_effect/transparency_utils.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -749,6 +750,7 @@ template("ace_core_ng_source_set") {
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
+      "common/visual_effect/transparency_utils.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -841,6 +843,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/shadow.cpp",
       "components/common/properties/shadow_config.cpp",
+      "components/common/properties/text_enums.cpp",
       "components/common/properties/text_style.cpp",
       "components/common/properties/text_style_parser.cpp",
       "components/common/properties/ui_material.cpp",

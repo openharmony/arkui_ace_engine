@@ -51,6 +51,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -2435,6 +2436,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChange", &JSWeb::OnCameraCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChange", &JSWeb::OnMicrophoneCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onInputmethodAttached", &JSWeb::OnInputMethodAttached);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -2499,6 +2501,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
     JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
+    JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
+    JSClass<JSWeb>::StaticMethod("scrollbarLayoutPolicy", &JSWeb::ScrollbarLayoutPolicy);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -6040,6 +6044,27 @@ void JSWeb::OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMicrophoneCaptureStateChangedId(jsCallback);
 }
 
+void JSWeb::OnInputMethodAttached(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        func->Execute();
+    };
+    WebModel::GetInstance()->SetInputMethodAttachedId(std::move(jsCallback));
+}
+
 void JSWeb::MediaOptions(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
@@ -7807,6 +7832,25 @@ void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
     bool isEnabled = objFirst->ToBoolean();
     int32_t type = objSecond->ToNumber<int32_t>();
     WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
+}
+
+void JSWeb::EnableDrag(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableDrag(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDrag(isEnabled);
+}
+
+void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
+    WebModel::GetInstance()->SetScrollbarLayoutPolicy(layoutPolicy);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

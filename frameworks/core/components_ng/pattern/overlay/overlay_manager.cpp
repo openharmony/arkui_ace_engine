@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <string>
 #include <utility>
@@ -88,6 +89,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string DETACHED_FREE_ROOT_PROXY = "DetachedFreeRootProxy";
 // should be moved to theme.
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
@@ -197,6 +199,7 @@ OverlayManager::~OverlayManager()
     tipsInfoList_.clear();
     tipsEnterAndLeaveInfoMap_.clear();
     tipsStatusList_.clear();
+    detachedProxyMap_.clear();
 }
 
 bool OverlayManager::CheckMenuManager()
@@ -4068,6 +4071,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
+    SetDetachedFreeRootProxy(buildNode, targetId);
     if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
@@ -4620,6 +4624,7 @@ void OverlayManager::RemoveModal(int32_t targetId)
             modalStack_.push(*modal);
         }
     }
+    ResetDetachedFreeRootProxy(targetId);
 }
 
 void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
@@ -8012,4 +8017,87 @@ void OverlayManager::UpdateImageGeneratorSheetScale(
             nullptr, nullptr, nullptr, nullptr, std::move(sheetSpringBackInner));
     }, nullptr, nullptr, sheetNode->GetContextRefPtr());
 }
+
+void OverlayManager::SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId)
+{
+    if (node && node->GetTag() == DETACHED_FREE_ROOT_PROXY) {
+        if (detachedProxyMap_.find(targetId) != detachedProxyMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY,
+                "DetachedFreeRootProxy for targetId %{public}d already exists, replacing.", targetId);
+        }
+        detachedProxyMap_[targetId] = node;
+    }
+}
+
+void OverlayManager::ResetDetachedFreeRootProxy(int32_t targetId)
+{
+    if (detachedProxyMap_.empty()) {
+        return;
+    }
+
+    auto iter = detachedProxyMap_.find(targetId);
+    if (iter != detachedProxyMap_.end()) {
+        detachedProxyMap_.erase(iter);
+    }
+}
+
+PopupInfo OverlayManager::GetPopupInfo(int32_t targetId) const
+{
+    auto it = popupMap_.find(targetId);
+    if (it == popupMap_.end()) {
+        return {};
+    }
+    return it->second;
+}
+
+void OverlayManager::ErasePopupInfo(int32_t targetId)
+{
+    if (popupMap_.find(targetId) != popupMap_.end()) {
+        popupMap_.erase(targetId);
+    }
+}
+
+void OverlayManager::CallOnHideDialogCallback()
+{
+    if (onHideDialogCallback_) {
+        onHideDialogCallback_();
+    }
+}
+
+bool OverlayManager::FireBackPressEvent() const
+{
+    if (backPressEvent_) {
+        return backPressEvent_();
+    }
+    return false;
+}
+
+void OverlayManager::ResetContextMenuDragHideFinished()
+{
+    isContextMenuDragHideFinished_ = false;
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::ResetContextMenuRestartDragVector()
+{
+    dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+}
+
+void OverlayManager::UpdateDragMoveVector(const NG::OffsetF& offset)
+{
+    lastDragMoveVector_ = dragMoveVector_;
+    dragMoveVector_ = offset;
+}
+
+bool OverlayManager::SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+{
+    if (overlayInfo_.has_value()) {
+        return false;
+    }
+    overlayInfo_ = overlayInfo;
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@ package arkui.component.idlize;
 import arkui.component.common.KeyEvent as KeyEvent;
 import arkui.component.Scroller as Scroller;
 import ohos.arkui.UIContext;
+import arkui.component.enums.RawInputEventType as RawInputEventType;
 
 [Entity=Class]
 interface MagnifierExtender {
@@ -37,4 +38,5 @@ interface IUIContext {
     static void bindTabsToNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller scrollerchildScroller);
     static void unbindTabsFromNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
     static void setCustomKeyboardContinueFeature(CustomKeyboardContinueFeature feature);
+    static void enableEventPassthrough((boolean or undefined) enabled, RawInputEventType eventType);
 };

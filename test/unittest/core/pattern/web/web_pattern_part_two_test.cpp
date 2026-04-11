@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef private
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "cJSON.h"
 
 #include "core/components_ng/base/view_stack_processor.h"

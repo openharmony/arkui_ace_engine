@@ -20,19 +20,8 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
-      "counter:counter",
-      "foldsplitcontainer:foldSplitContainer",
       "fullscreenlaunchcomponent:fullScreenLaunch",
-      "segmentbutton:segmentButton",
-      "segmentbuttonv2:SegmentButtonV2",
-      "selectionmenu:selectionMenu",
-      "multinavigation:multiNavigation",
-      "chip:chip",
-      "chipgroup:chipGroup",
-      "popup:popup",
-      "arcbutton:arcButton",
       #"formmenu:formMenu",
-      "arcslider:arcSlider",
       "downloadfilebutton:downloadFileButton",
     ]
   }

@@ -57,6 +57,7 @@ extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
 extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
 extern const char ENABLE_DEBUG_STATEMGR_KEY[];
+enum class UiMaterialLevel;
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -285,6 +286,11 @@ public:
     static bool GetDebugBoundaryEnabled()
     {
         return debugBoundaryEnabled_.load();
+    }
+
+    static bool GetGestureDebugBoundaryEnabled()
+    {
+        return gestureDebugBoundaryEnabled_;
     }
 
     static bool GetDebugOffsetLogEnabled()
@@ -575,10 +581,6 @@ public:
 
     static bool GetIsUseMemoryMonitor();
 
-    static int32_t GetComponentLoadNumber();
-
-    static int32_t GetStopCollectTimeWait();
-
     static bool IsFormAnimationLimited();
 
     static bool GetResourceDecoupling();
@@ -725,7 +727,6 @@ public:
 
     static int32_t GetDragDropFrameworkStatus();
     static int32_t GetTouchAccelarate();
-    static int32_t GetPageLoadTimethreshold();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -776,6 +777,8 @@ public:
     {
         return isOpenYuvDecode_;
     }
+
+    static UiMaterialLevel GetUiMaterialLevel();
 
     static void ReadSystemParametersCallOnce();
 
@@ -834,6 +837,7 @@ private:
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
+    static bool gestureDebugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
@@ -879,7 +883,6 @@ private:
     static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
-    static int32_t pageLoadTimethreshold_;
     static bool pageTransitionFrzEnabled_;
     static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;

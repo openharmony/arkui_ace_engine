@@ -211,7 +211,11 @@ export struct TipsDialogV2 {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              this.checkBoxPart();
+            }
+          }
         }
       });
     }
@@ -236,6 +240,8 @@ export struct TipsDialogV2 {
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
     }
     .accessibilityGroup(true)
@@ -305,6 +311,8 @@ export struct TipsDialogV2 {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -327,6 +335,8 @@ export struct TipsDialogV2 {
                 }
               })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }
         }
       }
@@ -518,6 +528,8 @@ export struct SelectDialogV2 {
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .optimizeTrailingSpace(true)
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -533,6 +545,8 @@ export struct SelectDialogV2 {
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
+                      .wordBreak(WordBreak.HYPHENATION)
+                      .optimizeTrailingSpace(true)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -757,6 +771,8 @@ export struct ConfirmDialogV2 {
             })
             .width('100%')
             .fallbackLineSpacing(true)
+            .wordBreak(WordBreak.HYPHENATION)
+            .optimizeTrailingSpace(true)
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -789,6 +805,8 @@ export struct ConfirmDialogV2 {
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
+        .wordBreak(WordBreak.HYPHENATION)
+        .optimizeTrailingSpace(true)
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
@@ -912,6 +930,8 @@ export struct AlertDialogV2 {
             }
           })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
@@ -1281,6 +1301,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .width('100%')
 
@@ -1301,6 +1323,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
       }
       .width('100%')
     }
@@ -1795,6 +1819,8 @@ export struct LoadingDialogV2 {
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .optimizeTrailingSpace(true)
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)

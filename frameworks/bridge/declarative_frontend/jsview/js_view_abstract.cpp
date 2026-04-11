@@ -76,6 +76,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -90,6 +91,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
@@ -6583,8 +6585,10 @@ bool JSViewAbstract::ParseColorMetricsToColor(
         resObj = JSViewAbstract::GetResourceObject(jsResObj);
     }
     if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
-        auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
-        result.SetValue(colorVal->ToNumber<uint32_t>());
+        if (!ParseHDRColorToColor(colorObj, result)) {
+            auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
+            result.SetValue(colorVal->ToNumber<uint32_t>());
+        }
 
         auto resourceIdProp = colorObj->GetProperty("getResourceId");
         if (resourceIdProp->IsFunction()) {
@@ -6593,14 +6597,51 @@ bool JSViewAbstract::ParseColorMetricsToColor(
         }
 
         auto colorSpaceVal = JSRef<JSFunc>::Cast(colorSpaceProp)->Call(colorObj, 0, nullptr);
-        if (colorSpaceVal->IsNumber() &&
-            colorSpaceVal->ToNumber<uint32_t>() == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
-            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        if (colorSpaceVal->IsNumber()) {
+            uint32_t colorSpaceValue = colorSpaceVal->ToNumber<uint32_t>();
+            if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+                result.SetColorSpace(ColorSpace::DISPLAY_P3);
+            } else if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::BT2020)) {
+                result.SetColorSpace(ColorSpace::BT2020);
+            } else {
+                result.SetColorSpace(ColorSpace::SRGB);
+            }
         } else {
             result.SetColorSpace(ColorSpace::SRGB);
         }
 
         return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseHDRColorToColor(const JSRef<JSObject>& colorObj, Color& result)
+{
+    auto isHDRProp = colorObj->GetProperty("isHDR");
+    auto getColorSpace = colorObj->GetProperty("getColorSpace");
+    if (!isHDRProp->IsFunction() || !getColorSpace->IsFunction()) {
+        return false;
+    }
+    auto isHDRVal = JSRef<JSFunc>::Cast(isHDRProp)->Call(colorObj, 0, nullptr);
+    auto colorSpaceVal = JSRef<JSFunc>::Cast(getColorSpace)->Call(colorObj, 0, nullptr);
+    uint32_t colorSpaceValue = colorSpaceVal->ToNumber<uint32_t>();
+    if ((isHDRVal->IsBoolean() && isHDRVal->ToBoolean()) ||
+        colorSpaceValue == static_cast<uint32_t>(ColorSpace::BT2020)) {
+        auto redProp = colorObj->GetProperty("redValue_");
+        auto greenProp = colorObj->GetProperty("greenValue_");
+        auto blueProp = colorObj->GetProperty("blueValue_");
+        auto headRoomProp = colorObj->GetProperty("headRoom_");
+        auto alphaProp = colorObj->GetProperty("alpha_");
+        if (redProp->IsNumber() && greenProp->IsNumber() && blueProp->IsNumber() &&
+            headRoomProp->IsNumber() && alphaProp->IsNumber()) {
+            auto redValue = redProp->ToNumber<double>();
+            auto greenValue = greenProp->ToNumber<double>();
+            auto blueValue = blueProp->ToNumber<double>();
+            auto headRoomValue = headRoomProp->ToNumber<double>();
+            auto alphaValue = alphaProp->ToNumber<double>();
+            result = Color::FromFloat(redValue, greenValue, blueValue, alphaValue, headRoomValue);
+            return true;
+        }
     }
     return false;
 }
@@ -8308,17 +8349,34 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         return;
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(jsVal));
+    int32_t minInterval = 0;
+    if (info.Length() > 1) {
+        minInterval = DEFAULT_DURATION;
+        if (info[1]->IsNumber()) {
+            ParseJsInteger(info[1], minInterval);
+        } else if (info[1]->IsObject()) {
+            auto options = JSRef<JSObject>::Cast(info[1]);
+            auto intervalVal = options->GetProperty("expectedUpdateInterval");
+            if (intervalVal->IsNumber()) {
+                ParseJsInteger(intervalVal, minInterval);
+            }
+        }
+        if (minInterval < 0) {
+            minInterval = DEFAULT_DURATION;
+        }
+    }
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WeakPtr<NG::FrameNode> weakFrameNode = AceType::WeakClaim(frameNode);
     auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction),
-                             node = frameNode](
+                             node = weakFrameNode](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
         PipelineContext::SetCallBackNode(node);
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged), minInterval);
 }
 
 void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)

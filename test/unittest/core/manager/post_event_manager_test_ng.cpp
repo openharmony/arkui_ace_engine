@@ -21,9 +21,10 @@
 #include "core/event/touch_event.h"
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -793,6 +794,32 @@ HWTEST_F(PostEventManagerTestNg, PostTouchEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostTouchEventWithStrategyTest001
+ * @tc.desc: test PostTouchEventWithStrategy func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventWithStrategyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    TouchEvent touchEvent;
+    touchEvent.type = Ace::TouchType::DOWN;
+    postEventManager_->passThroughResult_ = true;
+    postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(touchEvent));
+
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
  * @tc.name: PostTouchEventTest002
  * @tc.desc: test PostTouchEvent func.
  * @tc.type: FUNC
@@ -846,6 +873,31 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest001, TestSize.Level1)
     MouseEvent mouseEvent;
     postEventManager_->passThroughResult_ = true;
     postEventManager_->PostMouseEvent(uiNode, std::move(mouseEvent));
+
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PostAxisEventWithStrategy001
+ * @tc.desc: test PostAxisEventWithStrategy func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventWithStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    AxisEvent axisEvent;
+    postEventManager_->passThroughResult_ = true;
+    postEventManager_->PostAxisEventWithStrategy(uiNode, std::move(axisEvent));
 
     EXPECT_FALSE(postEventManager_->passThroughResult_);
 }

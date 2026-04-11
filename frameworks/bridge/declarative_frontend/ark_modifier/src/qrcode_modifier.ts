@@ -13,12 +13,43 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class QRCodeModifier extends ArkQRCodeComponent implements AttributeModifier<QRCodeAttribute> {
+class LazyArkQRCodeComponent extends ArkComponent {
+  static module: QRCodeComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkQRCodeComponent.module === undefined) {
+     LazyArkQRCodeComponent.module = globalThis.requireNapi('arkui.components.arkqrcode');
+   }
+
+   this.lazyComponent = LazyArkQRCodeComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  color(value: ResourceColor): LazyArkQRCodeComponent {
+   this.lazyComponent.color(value);
+   return this;
+  }
+
+  backgroundColor(value: ResourceColor): this {
+    this.lazyComponent.backgroundColor(value);
+    return this;
+  }
+
+  contentOpacity(value: number | Resource): LazyArkQRCodeComponent {
+   this.lazyComponent.contentOpacity(value);
+   return this;
+  }
+}
+
+class QRCodeModifier extends LazyArkQRCodeComponent implements AttributeModifier<QRCodeAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: QRCodeAttribute): void {

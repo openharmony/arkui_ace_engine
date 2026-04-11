@@ -28,6 +28,7 @@
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 #include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "frameworks/core/common/clipboard/clipboard_proxy.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/multimodalinput/axis_event.h"
@@ -40,6 +41,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
+#include "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h"
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif

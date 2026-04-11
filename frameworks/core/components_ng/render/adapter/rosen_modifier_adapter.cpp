@@ -19,6 +19,8 @@
 
 #include "core/animation/native_curve_helper.h"
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
+#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 

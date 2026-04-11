@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {

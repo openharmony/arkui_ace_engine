@@ -80,9 +80,7 @@ public:
 
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        auto pickerTheme = host->GetTheme<PickerTheme>(true);
         CHECK_NULL_VOID(pickerTheme);
         Dimension defaultDividerWidth = pickerTheme->GetDividerThickness();
         Color defaultDividerColor = pickerTheme->GetDividerColor();

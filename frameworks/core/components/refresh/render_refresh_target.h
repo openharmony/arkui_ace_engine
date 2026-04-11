@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_ADAPTER_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_ADAPTER_BASE_H
 
-#include "compatible/components/refresh/render_refresh.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/pipeline/base/render_node.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
+
+class RenderRefresh;
+class RenderNode;
+class Scrollable;
 
 struct ArkUIRefreshModifierCompatible {
     void (*updateScrollableOffset)(RefPtr<RenderNode> refresh, double delta);

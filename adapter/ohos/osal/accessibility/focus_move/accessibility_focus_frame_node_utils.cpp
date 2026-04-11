@@ -17,6 +17,7 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {

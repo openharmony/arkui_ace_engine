@@ -17,6 +17,7 @@
 #include "grid_row_layout_algorithm.h"
 
 #include "grid_row_event_hub.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {

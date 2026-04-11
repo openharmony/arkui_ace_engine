@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/ime_client_peer.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
@@ -339,6 +340,24 @@ void SetOnCopyImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    SearchModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
+}
 void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -354,6 +373,24 @@ void SetOnCutImpl(Ark_NativePointer node, const Opt_Callback_String_Void* value)
         arkCallback.InvokeSync(textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
+}
+void SetOnWillCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelNG::SetOnWillCut(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    SearchModelNG::SetOnWillCut(frameNode, std::move(onCallback));
 }
 void SetOnPasteImpl(Ark_NativePointer node, const Opt_OnPasteCallback* value)
 {
@@ -865,7 +902,9 @@ const GENERATED_ArkUISearchModifier* GetSearchStaticModifier()
         SearchAttributeModifier::SetOnTextSelectionChangeImpl,
         SearchAttributeModifier::SetOnContentScrollImpl,
         SearchAttributeModifier::SetOnCopyImpl,
+        SearchAttributeModifier::SetOnWillCopyImpl,
         SearchAttributeModifier::SetOnCutImpl,
+        SearchAttributeModifier::SetOnWillCutImpl,
         SearchAttributeModifier::SetOnPasteImpl,
         SearchAttributeModifier::SetCopyOptionImpl,
         SearchAttributeModifier::SetMaxLengthImpl,

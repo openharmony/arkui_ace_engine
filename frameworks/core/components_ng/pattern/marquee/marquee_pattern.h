@@ -159,6 +159,7 @@ private:
     float CalculateStart();
     float CalculateEnd();
     float GetTextOffset();
+    float GetTextOffsetOnly();
     std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();

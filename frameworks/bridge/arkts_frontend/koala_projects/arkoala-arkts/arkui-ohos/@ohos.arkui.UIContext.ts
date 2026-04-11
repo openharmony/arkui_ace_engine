@@ -67,6 +67,7 @@ import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { RawInputEventType } from 'arkui/component/enums';
 
 export const enum GestureActionPhase {
     WILL_START = 0,
@@ -341,6 +342,10 @@ export class ComponentSnapshot {
     public getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error('getWithRange not implemented in ComponentSnapshot!')
+    }
+
+    public getSizeLimitation(): componentSnapshot.SnapshotSizeLimitation {
+        throw Error('getSizeLimitation not implemented in ComponentSnapshot!')
     }
 }
 
@@ -1282,6 +1287,12 @@ export class UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    public enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.enableEventPassthrough(enabled, eventType);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
     public setRouter(router: RouterExt) {
         if (this.router_ === undefined) {
             this.router_ = new RouterImpl(this.instanceId_)
@@ -1614,6 +1625,27 @@ export class UIObserver {
         }
     }
 
+    public onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(callback);
+        }
+    }
+    public offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(callback);
+        }
+    }
+    public onSwiperContentUpdate(config: uiObserver.ObserverOptions, callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(config, callback);
+        }
+    }
+    public offSwiperContentUpdate(config: uiObserver.ObserverOptions, callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(config, callback);
+        }
+    }
+
     public onBeforePanStart(callback: PanListenerCallback): void {
         let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_.toInt(), callback);
         ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanStart', callback);
@@ -1713,6 +1745,28 @@ export interface PageInfo {
         navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 export interface ContentCoverController {}
+
+export interface SwiperContentInfo {
+    id: string;
+    uniqueId: int;
+    swiperItemInfos: Array<SwiperItemInfo>;
+}
+
+export interface SwiperItemInfo {
+    uniqueId: int;
+    index: int;
+}
+
+export class SwiperContentInfoImpl implements SwiperContentInfo {
+    id: string = '';
+    uniqueId: int = -1;
+    swiperItemInfos: Array<SwiperItemInfo> = new Array<SwiperItemInfo>();
+}
+
+export class SwiperItemInfoImpl implements SwiperItemInfo {
+    uniqueId: int = -1;
+    index: int = -1;
+}
 
 export class Magnifier {
     bind(id: string): void {}

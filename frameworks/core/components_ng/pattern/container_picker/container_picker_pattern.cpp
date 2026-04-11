@@ -16,14 +16,20 @@
 
 #include <sys/time.h>
 
+#include "core/components_ng/render/drawing.h"
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -57,10 +63,10 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     ACE_UINODE_TRACE(host);
     auto layoutAlgorithm = MakeRefPtr<ContainerPickerLayoutAlgorithm>();
     CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
-    totalItemCount_ = host->TotalChildCount();
+    totalItemCount_ = GetRealTotalItemCount();
     isLoop_ = IsLoop();
 
-    layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
+    layoutAlgorithm->SetTotalItemCount(totalItemCount_);
     layoutAlgorithm->SetPrevTotalItemCount(prevTotalItemCount_);
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
 
@@ -255,8 +261,10 @@ void ContainerPickerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     containerPickerId_ = host->GetId();
-    totalItemCount_ = host->TotalChildCount();
+    totalItemCount_ = GetRealTotalItemCount();
     isLoop_ = IsLoop();
+    SetLazyLoadIsLoop();
+    SetLazyForEachLongPredict(requestLongPredict_);
     InitOrRefreshHapticController();
     SetAccessibilityAction();
     InitDisabled();
@@ -267,6 +275,84 @@ void ContainerPickerPattern::OnModifyDone()
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
+}
+
+int32_t ContainerPickerPattern::GetRealTotalItemCount() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value() && targetNode.value()) {
+        return targetNode.value()->FrameCount();
+    }
+    return host->TotalChildCount();
+}
+
+void ContainerPickerPattern::SetLazyForEachLongPredict(bool useLazyLoad) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetRequestLongPredict(useLazyLoad);
+    }
+}
+
+void ContainerPickerPattern::SetLazyLoadIsLoop() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto isLoop = IsLoop();
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        if (lazyForEachNode) {
+            lazyForEachNode->SetIsLoop(isLoop);
+        }
+        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        if (repeatVirtualNode) {
+            repeatVirtualNode->SetIsLoop(isLoop);
+        }
+        auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
+        if (repeatVirtualNode2) {
+            repeatVirtualNode2->SetIsLoop(isLoop);
+        }
+        auto arkoalaLazyNode = AceType::DynamicCast<ArkoalaLazyNode>(targetNode.value());
+        if (arkoalaLazyNode) {
+            arkoalaLazyNode->SetIsLoop(isLoop);
+        }
+    }
+}
+
+std::optional<RefPtr<UINode>> ContainerPickerPattern::FindLazyForEachNode(
+    RefPtr<UINode> baseNode, bool isSelfNode) const
+{
+    CHECK_NULL_RETURN(baseNode, std::nullopt);
+    if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
+        return baseNode;
+    }
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+    if (AceType::DynamicCast<RepeatVirtualScroll2Node>(baseNode)) {
+        return baseNode;
+    }
+    if (AceType::DynamicCast<ArkoalaLazyNode>(baseNode)) {
+        return baseNode;
+    }
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+    auto children = baseNode->GetChildren();
+    for (const auto& child : children) {
+        auto targetNode = FindLazyForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+    return std::nullopt;
 }
 
 void ContainerPickerPattern::InitDisabled()
@@ -346,9 +432,7 @@ void ContainerPickerPattern::SetDefaultTextStyle(bool isUpdateTextStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<ContainerPickerTheme>();
+    auto theme = host->GetTheme<ContainerPickerTheme>(true);
     CHECK_NULL_VOID(theme);
     Color defaultColor = theme->GetFontColor();
     for (const auto& item : itemPosition_) {
@@ -376,6 +460,11 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node, Color d
             textLayoutProperty->UpdateTextColor(defaultColor);
             isModified_ = true;
             isUseDefaultFontColor_ = true;
+        } else if (textLayoutProperty->GetTextColor().value() != defaultColor && isUseDefaultFontColor_) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textLayoutProperty->UpdateTextColor(defaultColor);
+                isModified_ = true;
+            }
         }
 
         if (isModified_) {
@@ -1367,6 +1456,69 @@ void ContainerPickerPattern::OnColorConfigurationUpdate()
     }
 }
 
+void ContainerPickerPattern::SyncSelectionIndicatorWithTheme(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto theme = host->GetTheme<ContainerPickerTheme>(true);
+    CHECK_NULL_VOID(theme);
+
+    const auto& style = indicatorStyle_;
+    const auto indicatorType = layoutProperty->GetIndicatorType().value_or(
+        static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+
+    if (indicatorType == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.isDefaultDividerColor) {
+            layoutProperty->UpdateIndicatorDividerColor(theme->GetIndicatorDividerColor());
+        }
+    } else {
+        if (style.isDefaultBackgroundColor) {
+            layoutProperty->UpdateIndicatorBackgroundColor(theme->GetIndicatorBackgroundColor());
+        }
+    }
+}
+
+bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->SetNeedCallChildrenUpdate(false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    bool result = false;
+    auto layoutProperty = host->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+
+    const auto& style = indicatorStyle_;
+    const auto indicatorType = layoutProperty->GetIndicatorType().value_or(
+        static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+    // Re-sync when a color property is unset, or divider/background color still follows theme (isDefault*) but layout
+    // holds a stale snapshot—WithTheme default colors must refresh. Non-color indicator attrs are not considered here.
+    bool needThemeResync = !layoutProperty->HasIndicatorDividerColor() ||
+                           !layoutProperty->HasIndicatorBackgroundColor();
+    if (indicatorType == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.isDefaultDividerColor && layoutProperty->HasIndicatorDividerColor()) {
+            needThemeResync = true;
+        }
+    } else {
+        if (style.isDefaultBackgroundColor && layoutProperty->HasIndicatorBackgroundColor()) {
+            needThemeResync = true;
+        }
+    }
+
+    if (needThemeResync) {
+        SyncSelectionIndicatorWithTheme(themeScopeId);
+        result = true;
+        host->SetNeedCallChildrenUpdate(true);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    return result;
+}
+
 void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj)
 {
     auto pickerNode = GetHost();
@@ -1378,9 +1530,7 @@ void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceO
     if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, strokeWidth)) {
         property->UpdateIndicatorDividerWidth(strokeWidth);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorDividerWidth(theme->GetStrokeWidth());
     }
@@ -1397,9 +1547,7 @@ void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceO
     if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
         property->UpdateIndicatorDividerColor(color);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorDividerColor(theme->GetIndicatorDividerColor());
     }
@@ -1446,9 +1594,7 @@ void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<Resour
     if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
         property->UpdateIndicatorBackgroundColor(color);
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<ContainerPickerTheme>();
+        auto theme = pickerNode->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorBackgroundColor(theme->GetIndicatorBackgroundColor());
     }

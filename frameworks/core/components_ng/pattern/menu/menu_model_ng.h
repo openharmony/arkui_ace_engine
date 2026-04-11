@@ -67,6 +67,7 @@ public:
         const MenuDimensionType menuDimensionType);
     static void CreateWithFontFamilyResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         MenuFamilyType type);
+    static void UpdateFontColorSetByUser(bool setByUser);
 
 private:
     static void SetMenuDimensionValue(MenuDimensionType type, RefPtr<NG::FrameNode>& node, CalcDimension& result);

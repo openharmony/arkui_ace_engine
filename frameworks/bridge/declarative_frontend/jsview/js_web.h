@@ -175,6 +175,8 @@ public:
     static void JSBackToTop(const JSCallbackInfo& info);
     static void OnCameraCaptureStateChanged(const JSCallbackInfo& args);
     static void OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args);
+    static void EnableDrag(const JSCallbackInfo& args);
+    static void OnInputMethodAttached(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo);
@@ -245,6 +247,7 @@ public:
     static void EnableAutoFill(const JSCallbackInfo& args);
     static void EnableDefaultContextMenu(const JSCallbackInfo& args);
     static void EnableScrollDirectionalLock(const JSCallbackInfo& args);
+    static void ScrollbarLayoutPolicy(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

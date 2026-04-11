@@ -772,7 +772,7 @@ void RenderTextField::AddOutOfRectCallbackToContext()
 {
     auto context = GetContext().Upgrade();
     CHECK_NULL_VOID(context);
-    OutOfRectTouchCallback outRectCallback = [weak = WeakClaim(this)]() {
+    std::function<void()> outRectCallback = [weak = WeakClaim(this)]() {
         auto render = weak.Upgrade();
         if (render) {
             if (render->isOverlayShowed_) {
@@ -784,7 +784,7 @@ void RenderTextField::AddOutOfRectCallbackToContext()
             render->OnEditChange(false);
         }
     };
-    OutOfRectGetRectCallback getRectCallback = [weak = WeakClaim(this)](std::vector<Rect>& resRectList) {
+    std::function<void(std::vector<Rect>&)> getRectCallback = [weak = WeakClaim(this)](std::vector<Rect>& resRectList) {
         auto render = weak.Upgrade();
         if (render) {
             render->GetFieldAndOverlayTouchRect(resRectList);
@@ -2803,6 +2803,7 @@ void RenderTextField::Insert(const std::string& text)
         context->GetTaskExecutor()->PostTask(
             [weakPtr = WeakClaim(this), text] {
                 const auto& textField = weakPtr.Upgrade();
+                CHECK_NULL_VOID(textField);
                 auto value = textField->GetEditingValue();
                 auto textEditingValue = std::make_shared<TextEditingValue>();
                 textEditingValue->text = value.GetBeforeSelection() + text + value.GetAfterSelection();

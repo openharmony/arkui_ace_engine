@@ -377,6 +377,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         callbackFunction(info);
         HandleReports(info, type);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::ROTATION);
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }

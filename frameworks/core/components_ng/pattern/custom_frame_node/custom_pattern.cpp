@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/accessibility/native_interface_accessibility_provider.h"

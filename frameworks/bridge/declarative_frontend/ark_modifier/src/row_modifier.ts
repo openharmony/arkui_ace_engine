@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class RowModifier extends ArkRowComponent implements AttributeModifier<RowAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

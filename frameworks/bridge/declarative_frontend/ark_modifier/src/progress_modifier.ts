@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ProgressModifier extends ArkProgressComponent implements AttributeModifier<ProgressAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

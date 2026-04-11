@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "core/components/toast/toast_component.h"
+#include "core/image/image_provider.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -64,19 +65,16 @@ PluginFrontendDelegate::PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskE
     const EventCallback& asyncEventCallback, const EventCallback& syncEventCallback,
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
-    const UpdateApplicationStateCallback& updateApplicationStateCallback,
-    const TimerCallback& timerCallback, const MediaQueryCallback& mediaQueryCallback,
-    const RequestAnimationCallback& requestAnimationCallback, const JsCallback& jsCallback,
-    const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
+    const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
+    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
-    const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
-    const OnNewWantCallBack& onNewWantCallBack, const OnActiveCallBack& onActiveCallBack,
-    const OnInactiveCallBack& onInactiveCallBack, const OnMemoryLevelCallBack& onMemoryLevelCallBack,
-    const OnStartContinuationCallBack& onStartContinuationCallBack,
+    const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
+    const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
+    const OnMemoryLevelCallBack& onMemoryLevelCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
     const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
-    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
-    const OnSaveDataCallBack& onSaveDataCallBack,
+    const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
     const OnRestoreDataCallBack& onRestoreDataCallBack)
     : loadJs_(loadCallback), dispatcherCallback_(transferCallback), asyncEvent_(asyncEventCallback),
       syncEvent_(syncEventCallback), updatePage_(updatePageCallback), resetStagingPage_(resetLoadingPageCallback),
@@ -84,20 +82,16 @@ PluginFrontendDelegate::PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskE
       updateApplicationState_(updateApplicationStateCallback), timer_(timerCallback),
       mediaQueryCallback_(mediaQueryCallback), requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
-      onConfigurationUpdated_(onConfigurationUpdatedCallBack),
-      onSaveAbilityState_(onSaveAbilityStateCallBack), onRestoreAbilityState_(onRestoreAbilityStateCallBack),
-      onNewWant_(onNewWantCallBack), onActive_(onActiveCallBack),
+      onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
+      onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack), onActive_(onActiveCallBack),
       onInactive_(onInactiveCallBack), onMemoryLevel_(onMemoryLevelCallBack),
       onStartContinuationCallBack_(onStartContinuationCallBack),
       onCompleteContinuationCallBack_(onCompleteContinuationCallBack),
-      onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack),
-      onSaveDataCallBack_(onSaveDataCallBack),
-      onRestoreDataCallBack_(onRestoreDataCallBack),
-      manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
+      onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack), onSaveDataCallBack_(onSaveDataCallBack),
+      onRestoreDataCallBack_(onRestoreDataCallBack), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
-{
-}
+{}
 
 PluginFrontendDelegate::~PluginFrontendDelegate()
 {
@@ -189,8 +183,8 @@ void PluginFrontendDelegate::GetConfigurationCommon(const std::string& filePath,
     }
 }
 
-void PluginFrontendDelegate::LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
-    std::unique_ptr<JsonValue>& currentResourceData)
+void PluginFrontendDelegate::LoadResourceConfiguration(
+    std::map<std::string, std::string>& mediaResourceFileMap, std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
     if (assetManager_) {
@@ -265,8 +259,8 @@ void PluginFrontendDelegate::SetJsMessageDispatcher(const RefPtr<JsMessageDispat
         TaskExecutor::TaskType::JS, "ArkUIPluginSetJsMessageDispatcher");
 }
 
-void PluginFrontendDelegate::TransferComponentResponseData(int32_t callbackId, int32_t code,
-    std::vector<uint8_t>&& data)
+void PluginFrontendDelegate::TransferComponentResponseData(
+    int32_t callbackId, int32_t code, std::vector<uint8_t>&& data)
 {
     auto pipelineContext = pipelineContextHolder_.Get();
     WeakPtr<PipelineBase> contextWeak(pipelineContext);
@@ -284,8 +278,7 @@ void PluginFrontendDelegate::TransferComponentResponseData(int32_t callbackId, i
         TaskExecutor::TaskType::UI, "ArkUIPluginTransferComponentResponseData");
 }
 
-void PluginFrontendDelegate::TransferJsResponseData(
-    int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
+void PluginFrontendDelegate::TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     if (groupJsBridge_ && groupJsBridge_->ForwardToWorker(callbackId)) {
         groupJsBridge_->TriggerModuleJsCallback(callbackId, code, std::move(data));
@@ -327,8 +320,7 @@ void PluginFrontendDelegate::TransferJsPluginGetError(
         TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
 }
 
-void PluginFrontendDelegate::TransferJsEventData(int32_t callbackId, int32_t code,
-    std::vector<uint8_t>&& data) const
+void PluginFrontendDelegate::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     taskExecutor_->PostTask(
         [callbackId, code, data = std::move(data), groupJsBridge = groupJsBridge_]() mutable {
@@ -350,8 +342,7 @@ void PluginFrontendDelegate::LoadPluginJsCode(std::string&& jsCode) const
         TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
 }
 
-void PluginFrontendDelegate::LoadPluginJsByteCode(
-    std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
+void PluginFrontendDelegate::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
 {
     if (groupJsBridge_ == nullptr) {
         LOGE("groupJsBridge_ is nullptr");
@@ -381,8 +372,8 @@ bool PluginFrontendDelegate::OnPageBackPress()
     return result;
 }
 
-void PluginFrontendDelegate::NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
-    const std::string& key, const std::string& value)
+void PluginFrontendDelegate::NotifyAppStorage(
+    const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value)
 {
     taskExecutor_->PostTask(
         [jsEngineWeak, key, value] {
@@ -423,9 +414,7 @@ void PluginFrontendDelegate::OnForeground()
 void PluginFrontendDelegate::OnConfigurationUpdated(const std::string& data)
 {
     taskExecutor_->PostSyncTask(
-        [onConfigurationUpdated = onConfigurationUpdated_, data] {
-            onConfigurationUpdated(data);
-        },
+        [onConfigurationUpdated = onConfigurationUpdated_, data] { onConfigurationUpdated(data); },
         TaskExecutor::TaskType::JS, "ArkUIPluginConfigurationUpdated");
 }
 
@@ -517,20 +506,13 @@ void PluginFrontendDelegate::GetPluginsUsed(std::string& data)
 
 void PluginFrontendDelegate::OnActive()
 {
-    taskExecutor_->PostTask(
-        [onActive = onActive_]() {
-            onActive();
-        },
-        TaskExecutor::TaskType::JS, "ArkUIPluginActive");
+    taskExecutor_->PostTask([onActive = onActive_]() { onActive(); }, TaskExecutor::TaskType::JS, "ArkUIPluginActive");
 }
 
 void PluginFrontendDelegate::OnInactive()
 {
     taskExecutor_->PostTask(
-        [onInactive = onInactive_]() {
-            onInactive();
-        },
-        TaskExecutor::TaskType::JS, "ArkUIPluginInactive");
+        [onInactive = onInactive_]() { onInactive(); }, TaskExecutor::TaskType::JS, "ArkUIPluginInactive");
 }
 
 void PluginFrontendDelegate::OnNewRequest(const std::string& data)
@@ -545,8 +527,8 @@ void PluginFrontendDelegate::CallPopPage()
 
 void PluginFrontendDelegate::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); },
-        TaskExecutor::TaskType::JS, "ArkUIPluginResetStagingPage");
+    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS,
+        "ArkUIPluginResetStagingPage");
 }
 
 void PluginFrontendDelegate::OnApplicationDestroy(const std::string& packageName)
@@ -558,47 +540,34 @@ void PluginFrontendDelegate::OnApplicationDestroy(const std::string& packageName
 
 void PluginFrontendDelegate::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    taskExecutor_->PostTask(
-        [updateApplicationState = updateApplicationState_, packageName, state] {
-            updateApplicationState(packageName, state);
-        },
+    taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
+                                state] { updateApplicationState(packageName, state); },
         TaskExecutor::TaskType::JS, "ArkUIPluginUpdateApplicationState");
 }
 
 void PluginFrontendDelegate::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    taskExecutor_->PostTask(
-        [onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow, data] {
-            onWindowDisplayModeChanged(isShownInMultiWindow, data);
-        },
+    taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
+                                data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
         TaskExecutor::TaskType::JS, "ArkUIPluginWindowDisplayModeChanged");
 }
 
 void PluginFrontendDelegate::OnSaveAbilityState(std::string& data)
 {
-    taskExecutor_->PostSyncTask(
-        [onSaveAbilityState = onSaveAbilityState_, &data] {
-            onSaveAbilityState(data);
-        },
+    taskExecutor_->PostSyncTask([onSaveAbilityState = onSaveAbilityState_, &data] { onSaveAbilityState(data); },
         TaskExecutor::TaskType::JS, "ArkUIPluginSaveAbilityState");
 }
 
 void PluginFrontendDelegate::OnRestoreAbilityState(const std::string& data)
 {
-    taskExecutor_->PostTask(
-        [onRestoreAbilityState = onRestoreAbilityState_, data] {
-            onRestoreAbilityState(data);
-        },
+    taskExecutor_->PostTask([onRestoreAbilityState = onRestoreAbilityState_, data] { onRestoreAbilityState(data); },
         TaskExecutor::TaskType::JS, "ArkUIPluginRestoreAbilityState");
 }
 
 void PluginFrontendDelegate::OnNewWant(const std::string& data)
 {
     taskExecutor_->PostTask(
-        [onNewWant = onNewWant_, data] {
-            onNewWant(data);
-        },
-        TaskExecutor::TaskType::JS, "ArkUIPluginNewWant");
+        [onNewWant = onNewWant_, data] { onNewWant(data); }, TaskExecutor::TaskType::JS, "ArkUIPluginNewWant");
 }
 
 void PluginFrontendDelegate::FireAsyncEvent(
@@ -714,10 +683,10 @@ void PluginFrontendDelegate::PostponePageTransition()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
-          auto delegate = weak.Upgrade();
-          CHECK_NULL_VOID(delegate);
-          auto pipelineContext = delegate->pipelineContextHolder_.Get();
-          pipelineContext->PostponePageTransition();
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            pipelineContext->PostponePageTransition();
         },
         TaskExecutor::TaskType::UI, "ArkUIPluginPostponePageTransition");
 }
@@ -726,10 +695,10 @@ void PluginFrontendDelegate::LaunchPageTransition()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
-          auto delegate = weak.Upgrade();
-          CHECK_NULL_VOID(delegate);
-          auto pipelineContext = delegate->pipelineContextHolder_.Get();
-          pipelineContext->LaunchPageTransition();
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            pipelineContext->LaunchPageTransition();
         },
         TaskExecutor::TaskType::UI, "ArkUIPluginLaunchPageTransition");
 }
@@ -937,8 +906,7 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
-                taskExecutor->PostTask(
-                    [callback, successType]() { callback(0, successType); },
+                taskExecutor->PostTask([callback, successType]() { callback(0, successType); },
                     TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogSuccess");
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
@@ -958,9 +926,8 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto completeEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask(
-                    [callback]() { callback(MIN_ROUT_COUNT, 0); },
-                    TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogComplete");
+                taskExecutor->PostTask([callback]() { callback(MIN_ROUT_COUNT, 0); }, TaskExecutor::TaskType::JS,
+                    "ArkUIPluginShowDialogComplete");
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -1105,8 +1072,7 @@ UIContentErrorCode PluginFrontendDelegate::LoadPage(
     return UIContentErrorCode::NO_ERRORS;
 }
 
-void PluginFrontendDelegate::LoadJS(
-    const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage)
+void PluginFrontendDelegate::LoadJS(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage)
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, isMainPage] {
@@ -1168,8 +1134,7 @@ void PluginFrontendDelegate::OnMediaQueryUpdate(bool isSynchronous)
         TaskExecutor::TaskType::JS, "ArkUIPluginMediaQueryUpdate");
 }
 
-void PluginFrontendDelegate::OnPageReady(
-    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
+void PluginFrontendDelegate::OnPageReady(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
 {
     // Pop all JS command and execute them in UI thread.
     auto jsCommands = std::make_shared<std::vector<RefPtr<JsCommand>>>();
@@ -1225,8 +1190,7 @@ void PluginFrontendDelegate::OnPrePageChange(const RefPtr<JsAcePage>& page)
     }
 }
 
-void PluginFrontendDelegate::FlushPageCommand(
-    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
+void PluginFrontendDelegate::FlushPageCommand(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
 {
     CHECK_NULL_VOID(page);
     if (page->FragmentCount() == 1) {
@@ -1250,15 +1214,14 @@ void PluginFrontendDelegate::SetCurrentPage(int32_t pageId)
     if (page != nullptr) {
         jsAccessibilityManager_->SetVersion(AccessibilityVersion::JS_DECLARATIVE_VERSION);
         jsAccessibilityManager_->SetRunningPage(page);
-        taskExecutor_->PostTask([updatePage = updatePage_, page] { updatePage(page); },
-            TaskExecutor::TaskType::JS, "ArkUIPluginSetCurrentPage");
+        taskExecutor_->PostTask([updatePage = updatePage_, page] { updatePage(page); }, TaskExecutor::TaskType::JS,
+            "ArkUIPluginSetCurrentPage");
     } else {
         LOGE("PluginFrontendDelegate SetCurrentPage page is null.");
     }
 }
 
-void PluginFrontendDelegate::OnPushPageSuccess(
-    const RefPtr<JsAcePage>& page, const std::string& url)
+void PluginFrontendDelegate::OnPushPageSuccess(const RefPtr<JsAcePage>& page, const std::string& url)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
@@ -1387,8 +1350,7 @@ void PluginFrontendDelegate::PopPage()
         TaskExecutor::TaskType::UI, "ArkUIPluginPopPage");
 }
 
-void PluginFrontendDelegate::PopPageTransitionListener(
-    const TransitionEvent& event, int32_t destroyPageId)
+void PluginFrontendDelegate::PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId)
 {
     if (event == TransitionEvent::POP_END) {
         OnPageDestroy(destroyPageId);
@@ -1434,8 +1396,7 @@ void PluginFrontendDelegate::ClearInvisiblePages()
         TaskExecutor::TaskType::UI, "ArkUIPluginClearInvisiblePages");
 }
 
-void PluginFrontendDelegate::OnReplacePageSuccess(
-    const RefPtr<JsAcePage>& page, const std::string& url)
+void PluginFrontendDelegate::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, const std::string& url)
 {
     CHECK_NULL_VOID(page);
     std::lock_guard<std::mutex> lock(mutex_);
@@ -1448,8 +1409,7 @@ void PluginFrontendDelegate::OnReplacePageSuccess(
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url, false, {}, {} });
 }
 
-void PluginFrontendDelegate::ReplacePage(
-    const RefPtr<JsAcePage>& page, const std::string& url)
+void PluginFrontendDelegate::ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url)
 {
     // Pop all JS command and execute them in UI thread.
     auto jsCommands = std::make_shared<std::vector<RefPtr<JsCommand>>>();
@@ -1638,8 +1598,7 @@ bool PluginFrontendDelegate::GetSystemFont(const std::string& fontName, FontInfo
     return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
-void PluginFrontendDelegate::HandleImage(
-    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
+void PluginFrontendDelegate::HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
     if (src.empty() || !callback) {
         return;
@@ -1650,11 +1609,11 @@ void PluginFrontendDelegate::HandleImage(
             [callback = std::move(jsCallback), success, width, height] { callback(success, width, height); },
             TaskExecutor::TaskType::JS, "ArkUIPluginHandleImage");
     };
-    pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
+    ImageProvider::TryLoadImageInfo(pipelineContextHolder_.Get(), src, std::move(loadCallback));
 }
 
-void PluginFrontendDelegate::PushJsCallbackToRenderNode(NodeId id, double ratio,
-    std::function<void(bool, double)>&& callback)
+void PluginFrontendDelegate::PushJsCallbackToRenderNode(
+    NodeId id, double ratio, std::function<void(bool, double)>&& callback)
 {
     LOGW("Not implement in declarative frontend.");
 }

@@ -20,7 +20,6 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {

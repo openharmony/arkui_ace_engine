@@ -48,7 +48,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
     private monitorIdsDelayedUpdate__?: Set<number>;
-    private monitorIdsDelayedUpdateForAddMonitor__?: Set<number>;
+    private monitorIdsDelayedUpdateForAddMonitorBased__?: Set<number>;
     private computedIdsDelayedUpdate__?: Set<number>;
 
     public defaultConsumerV2__?: Map<string, string>;
@@ -83,15 +83,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         return this.monitorIdsDelayedUpdate__;
     }
 
-    get monitorIdsDelayedUpdateForAddMonitor_(): Set<number> | undefined {
-        return this.monitorIdsDelayedUpdateForAddMonitor__;
+    private get monitorIdsDelayedUpdateForAddMonitorBased_(): Set<number> | undefined {
+        return this.monitorIdsDelayedUpdateForAddMonitorBased__;
     }
 
     getOrCreateMonitorIdsDelayedUpdateForAddMonitor(): Set<number> {
-        if (!this.monitorIdsDelayedUpdateForAddMonitor__) {
-            this.monitorIdsDelayedUpdateForAddMonitor__ = new Set<number>();
+        if (!this.monitorIdsDelayedUpdateForAddMonitorBased__) {
+            this.monitorIdsDelayedUpdateForAddMonitorBased__ = new Set<number>();
         }
-        return this.monitorIdsDelayedUpdateForAddMonitor__;
+        return this.monitorIdsDelayedUpdateForAddMonitorBased__;
     }
 
     get computedIdsDelayedUpdate(): Set<number> | undefined {
@@ -139,6 +139,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         try {
             ObserveV2.getObserve().constructComputed(this, this.constructor.name);
             ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+            ObserveV2.getObserve().constructMonitorsWithOptions(this, this.constructor.name);
             ObserveV2.getObserve().constructSyncMonitors(this, this.constructor.name);
         } catch (error) {
             stateMgmtConsole.applicationError(`Exception occurred when constructor @Computed or @Monitor`, error.message);
@@ -229,7 +230,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
                 }
             }
-        }, 'aboutToReuseInternal', this.constructor.name);
+        }, 'aboutToReuseInternal', this.constructor.name, this.id__());
         ObserveV2.getObserve().updateDirty2(true, true);
         ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
@@ -428,11 +429,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
     public initialRenderView(): void {
         stateMgmtProfiler.begin(`ViewV2: initialRenderView`);
-        // Register callback for instanceId changes
-        // Only register when enableSwitchInstance is true which set in config.json5
-        if (getEnableSwitchInstance()) {
-          this.__registerUpdateJSInstanceCallback__Internal(this.__onJSInstanceIdUpdate__Internal.bind(this));
-        }
         if (this.isReusable_ === true) {
             const isReusableAllowed = this.allowReusableV2Descendant();
             if (!isReusableAllowed) {
@@ -455,7 +451,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
         this.monitorIdsDelayedUpdate?.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_?.clear()
+        this.monitorIdsDelayedUpdateForAddMonitorBased_?.clear()
         ObserveV2.getObserve().resetMonitorValues();
 
         this.resetAllMonitorsOnReuse();
@@ -477,7 +473,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // because this would be an incompatible change its currently only added for @SyncMonitor 
     // for @Monitor, from addMonitor API remain to be done (in OH 7.0 release?!)
     public resetAllMonitorsOnReuse(): void {
-        const refs = this[ObserveV2.SYNC_MONITOR_REFS] as object | undefined;
+        const refs = this[ObserveV2.MONITOR_WITH_OPTIONS_OR_SYNC_MONITOR_REFS] as object | undefined;
         if (refs === undefined) {
             return;
         }
@@ -555,34 +551,37 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
         const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
-            stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
+            try {
+                stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
-            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                compilerAssignedUpdateFunc(elmtId, isFirstRender);
 
-            // After first render, new bindings (pending) need to be recorded
-            // immediately, as they may fire changes before the next idle time,
-            // e.g. in the onAreaChange handler
-            if (isFirstRender) {
-                ObserveV2.getObserve().runIdleTasks();
+                // After first render, new bindings (pending) need to be recorded
+                // immediately, as they may fire changes before the next idle time,
+                // e.g. in the onAreaChange handler
+                if (isFirstRender) {
+                    ObserveV2.getObserve().runIdleTasks();
+                }
+
+                if (!isFirstRender) {
+                    _popFunc();
+                }
+
+                let node = this.getNodeById(elmtId);
+                if (node !== undefined) {
+                    (node as ArkComponent).cleanStageValue();
+                }
+
+                ObserveV2.getObserve().stopRecordDependencies();
+                ViewStackProcessor.StopGetAccessRecording();
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+                stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
+            } finally {
+                this.restoreInstanceId();
             }
-
-            if (!isFirstRender) {
-                _popFunc();
-            }
-
-            let node = this.getNodeById(elmtId);
-            if (node !== undefined) {
-                (node as ArkComponent).cleanStageValue();
-            }
-
-            ObserveV2.getObserve().stopRecordDependencies();
-            ViewStackProcessor.StopGetAccessRecording();
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
-            this.restoreInstanceId();
         };
 
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -664,8 +663,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
             this.syncInstanceId();
-            this.markNeedUpdate();
-            this.restoreInstanceId();
+            try {
+                this.markNeedUpdate();
+            } finally {
+                this.restoreInstanceId();
+            }
         }
         this.dirtDescendantElementIds_.add(elmtId);
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
@@ -827,14 +829,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
-        if (this.monitorIdsDelayedUpdateForAddMonitor_?.size) {
-            ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitor_);
+        if (this.monitorIdsDelayedUpdateForAddMonitorBased_?.size) {
+            let funcsToRun = ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitorBased_);
+            ObserveV2.getObserve().runAddMonitorBasedFunctions(funcsToRun)
         }
-        if (ObserveV2.getObserve().monitorFuncsToRun_.size) {
-            const monitorFuncs = ObserveV2.getObserve().monitorFuncsToRun_;
-            ObserveV2.getObserve().monitorFuncsToRun_ = new Set<number>();
-            ObserveV2.getObserve().runMonitorFunctionsForAddMonitor(monitorFuncs)
-        } 
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
           if(this.dirtDescendantElementIds_.size === 0) {
@@ -849,7 +847,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate?.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_?.clear();
+        this.monitorIdsDelayedUpdateForAddMonitorBased_?.clear();
         this.computedIdsDelayedUpdate?.clear();
         stateMgmtProfiler.end();
     }
@@ -987,7 +985,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     dependentElmtIds.forEach((elmtId) => {
                         if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
                             retVal += ` ` + ObserveV2.getObserve().getElementInfoById(elmtId);
-                        } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+                        } else if (elmtId < MonitorV2.MIN_MONITOR_ORIG_ID) {
                             retVal += ` @Computed[${elmtId}]`;
                         } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
                             retVal += ` @Monitor[${elmtId}]`;

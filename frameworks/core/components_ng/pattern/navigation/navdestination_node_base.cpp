@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/utils/utf_helper.h"
 #include "base/json/json_util.h"

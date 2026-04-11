@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_CONTROLLER_H
 
-#include "core/pipeline/base/render_node.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
+
+class RenderNode;
 
 enum class RefreshStatus {
     // The default status.

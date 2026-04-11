@@ -17,14 +17,16 @@
 
 #include <vector>
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
@@ -110,6 +112,28 @@ void LazyGridLayoutTest::CreateWaterFlow(WaterFlowLayoutMode mode)
     ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
     ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
     model.SetLayoutMode(mode);
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+}
+
+void LazyGridLayoutTest::CreateList()
+{
+    ListModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+    listFrameNode_ = scrollableFrameNode_;
+    listPattern_ = listFrameNode_->GetPattern<ListPattern>();
+}
+
+void LazyGridLayoutTest::CreateScroll()
+{
+    ScrollModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
     scrollableFrameNode_ = GetMainFrameNode();
     scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
 }
@@ -1240,6 +1264,1178 @@ HWTEST_F(LazyGridLayoutTest, OnVisibleIndexesChangeTest003, TestSize.Level1)
 
     EXPECT_EQ(indexStart, -1);
     EXPECT_EQ(indexEnd, -1);
+}
+
+/**
+ * @tc.name: IsVerticalContainer001
+ * @tc.desc: Verify IsVerticalContainer returns false for null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, IsVerticalContainer001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    RefPtr<UINode> nullNode = nullptr;
+    bool result = pattern_->IsVerticalContainer(nullNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsVerticalContainer002
+ * @tc.desc: Verify IsVerticalContainer returns false for WaterFlow (not LIST/SCROLL tag)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, IsVerticalContainer002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateLazyGridLayout(Axis::VERTICAL);
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    bool result = pattern_->IsVerticalContainer(scrollableFrameNode_);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsVerticalContainer003
+ * @tc.desc: Verify IsVerticalContainer returns true for vertical List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, IsVerticalContainer003, TestSize.Level1)
+{
+    ListModelNG listModel;
+    listModel.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    auto listNode = GetMainFrameNode();
+    EXPECT_NE(listNode, nullptr);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    EXPECT_NE(listPattern, nullptr);
+    EXPECT_EQ(listPattern->GetAxis(), Axis::VERTICAL);
+    CreateLazyGridLayout(Axis::VERTICAL);
+    EXPECT_NE(pattern_, nullptr);
+    CreateDone();
+
+    bool result = pattern_->IsVerticalContainer(listNode);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsVerticalContainer004
+ * @tc.desc: Verify IsVerticalContainer returns true for vertical Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, IsVerticalContainer004, TestSize.Level1)
+{
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    auto scrollNode = GetMainFrameNode();
+    EXPECT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_NE(scrollPattern, nullptr);
+    EXPECT_EQ(scrollPattern->GetAxis(), Axis::VERTICAL);
+    CreateLazyGridLayout(Axis::VERTICAL);
+    EXPECT_NE(pattern_, nullptr);
+    CreateDone();
+
+    bool result = pattern_->IsVerticalContainer(scrollNode);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsVerticalContainer005
+ * @tc.desc: Verify IsVerticalContainer returns false for non-scrollable container
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, IsVerticalContainer005, TestSize.Level1)
+{
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    auto scrollNode = GetMainFrameNode();
+    EXPECT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_NE(scrollPattern, nullptr);
+    EXPECT_EQ(scrollPattern->GetAxis(), Axis::VERTICAL);
+    CreateLazyGridLayout(Axis::VERTICAL);
+    EXPECT_NE(pattern_, nullptr);
+    CreateDone();
+
+    StackModelNG stackModel;
+    stackModel.Create();
+    auto stackNode = GetMainFrameNode();
+    EXPECT_NE(stackNode, nullptr);
+    CreateDone();
+
+    bool result = pattern_->IsVerticalContainer(stackNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LazyGridInList001
+ * @tc.desc: Verify LazyVGrid works in vertical List without abort
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList001, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    EXPECT_GE(listFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList002
+ * @tc.desc: Verify List with LazyVGrid can scroll and offset updates
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList002, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+
+    EXPECT_NE(listPattern_, nullptr);
+    EXPECT_NE(scrollablePattern_, nullptr);
+
+    double initialOffset = scrollablePattern_->GetTotalOffset();
+    scrollablePattern_->UpdateCurrentOffset(-200.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(listFrameNode_);
+    double offsetAfterScroll = scrollablePattern_->GetTotalOffset();
+
+    EXPECT_NE(initialOffset, offsetAfterScroll);
+    EXPECT_GT(offsetAfterScroll, initialOffset);
+}
+
+/**
+ * @tc.name: LazyGridInList003
+ * @tc.desc: Verify LazyVGrid with different columns template in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList003, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(66));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    EXPECT_GE(listFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList004
+ * @tc.desc: Verify LazyVGrid with gaps in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList004, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(10.0));
+    gridModel.SetColumnGap(Dimension(15.0));
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridInList005
+ * @tc.desc: Verify LazyVGrid with repeat(auto-fit) in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList005, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("repeat(auto-fit, 80)");
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridInList006
+ * @tc.desc: Verify empty LazyVGrid works in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList006, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    EXPECT_GE(listFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList007
+ * @tc.desc: Verify scroll back to top works in List with LazyVGrid
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList007, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-300.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(listFrameNode_);
+    double offsetDown = scrollablePattern_->GetTotalOffset();
+
+    scrollablePattern_->UpdateCurrentOffset(300.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(listFrameNode_);
+    double offsetUp = scrollablePattern_->GetTotalOffset();
+
+    EXPECT_GT(offsetDown, 0.0);
+    EXPECT_EQ(offsetUp, 0.0);
+}
+
+/**
+ * @tc.name: LazyGridInList008
+ * @tc.desc: Verify multiple LazyVGrid children in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList008, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel1;
+    gridModel1.Create();
+    gridModel1.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 8; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    LazyVGridLayoutModel gridModel2;
+    gridModel2.Create();
+    gridModel2.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    auto children = listFrameNode_->GetChildren();
+    EXPECT_GE(children.size(), 2u);
+}
+
+// ==================== LazyVGrid in Scroll Tests ====================
+
+/**
+ * @tc.name: LazyGridInScroll001
+ * @tc.desc: Verify LazyVGrid works in vertical Scroll without abort
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll001, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInScroll002
+ * @tc.desc: Verify Scroll with LazyVGrid can scroll and offset updates
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll002, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollablePattern_, nullptr);
+
+    double initialOffset = scrollablePattern_->GetTotalOffset();
+    scrollablePattern_->UpdateCurrentOffset(-200.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    double offsetAfterScroll = scrollablePattern_->GetTotalOffset();
+
+    EXPECT_NE(initialOffset, offsetAfterScroll);
+    EXPECT_GT(offsetAfterScroll, initialOffset);
+}
+
+/**
+ * @tc.name: LazyGridInScroll003
+ * @tc.desc: Verify Scroll with LazyVGrid can scroll back to top
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll003, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-250.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    double offsetDown = scrollablePattern_->GetTotalOffset();
+
+    scrollablePattern_->UpdateCurrentOffset(250.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    double offsetUp = scrollablePattern_->GetTotalOffset();
+
+    EXPECT_GT(offsetDown, 0.0);
+    EXPECT_EQ(offsetUp, 0.0);
+}
+
+/**
+ * @tc.name: LazyGridInScroll005
+ * @tc.desc: Verify LazyVGrid with 3 columns in Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll005, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(66));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInScroll006
+ * @tc.desc: Verify LazyVGrid with columnGap in Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll006, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetColumnGap(Dimension(10.0));
+
+    for (int i = 0; i < 12; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(95));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInScroll007
+ * @tc.desc: Verify LazyVGrid with rowGap and columnGap in Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll007, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+    gridModel.SetRowGap(Dimension(8.0));
+    gridModel.SetColumnGap(Dimension(12.0));
+
+    for (int i = 0; i < 18; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(60));
+        ViewAbstract::SetHeight(CalcLength(70));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridInScroll008
+ * @tc.desc: Verify LazyVGrid with large dataset in Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll008, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 50; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    auto scrollNode = GetMainFrameNode();
+    EXPECT_NE(scrollNode, nullptr);
+    CreateDone();
+    auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_NE(scrollPattern, nullptr);
+
+    scrollPattern->UpdateCurrentOffset(-400.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollNode);
+    double offsetAfterScroll = scrollPattern->GetTotalOffset();
+
+    EXPECT_GT(offsetAfterScroll, 0.0);
+}
+
+/**
+ * @tc.name: LazyGridInScroll009
+ * @tc.desc: Verify LazyVGrid with variable item sizes in Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll009, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        float height = (i % 3 == 0) ? 120.0f : 80.0f;
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(height));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInScroll010
+ * @tc.desc: Verify Scroll axis verification for LazyVGrid container
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInScroll010, TestSize.Level1)
+{
+    CreateScroll();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(90));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollablePattern_, nullptr);
+    EXPECT_EQ(scrollablePattern_->GetAxis(), Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: LazyGridColumnsTemplate001
+ * @tc.desc: Verify LazyVGrid with single column template
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridColumnsTemplate001, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr");
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(200));
+        ViewAbstract::SetHeight(CalcLength(60));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridColumnsTemplate003
+ * @tc.desc: Verify LazyVGrid with mixed fixed and fr columns
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridColumnsTemplate003, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("50px 1fr 50px");
+
+    for (int i = 0; i < 12; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(70));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridGaps001
+ * @tc.desc: Verify LazyVGrid with only rowGap
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridGaps001, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(16.0));
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    auto frameNode = GetMainFrameNode();
+    CreateDone();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_GE(frameNode->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridGaps003
+ * @tc.desc: Verify LazyVGrid with VP dimension gaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridGaps003, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(12.0, DimensionUnit::VP));
+    gridModel.SetColumnGap(Dimension(8.0, DimensionUnit::VP));
+
+    for (int i = 0; i < 12; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(90));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridItemSize002
+ * @tc.desc: Verify LazyVGrid with tall items
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridItemSize002, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 12; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(150));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridItemSize004
+ * @tc.desc: Verify LazyVGrid with small items
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridItemSize004, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+
+    for (int i = 0; i < 24; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(50));
+        ViewAbstract::SetHeight(CalcLength(50));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList009
+ * @tc.desc: Verify List axis verification for LazyVGrid container
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList009, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(90));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listPattern_, nullptr);
+    EXPECT_EQ(scrollablePattern_->GetAxis(), Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: LazyGridInList010
+ * @tc.desc: Verify LazyVGrid with different columnGap in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList010, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+    gridModel.SetColumnGap(Dimension(16.0));
+
+    for (int i = 0; i < 15; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(60));
+        ViewAbstract::SetHeight(CalcLength(75));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    EXPECT_GE(listFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList011
+ * @tc.desc: Verify LazyVGrid with only rowGap in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList011, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(20.0));
+
+    for (int i = 0; i < 12; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(85));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridInList012
+ * @tc.desc: Verify LazyVGrid with large items in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList012, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr");
+
+    for (int i = 0; i < 8; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(200));
+        ViewAbstract::SetHeight(CalcLength(120));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-200.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks(listFrameNode_);
+    double offset = scrollablePattern_->GetTotalOffset();
+
+    EXPECT_GT(offset, 0.0);
+}
+
+/**
+ * @tc.name: LazyGridInList013
+ * @tc.desc: Verify LazyVGrid with 4 columns in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList013, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(50));
+        ViewAbstract::SetHeight(CalcLength(60));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+    EXPECT_GE(listFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridInList014
+ * @tc.desc: Verify LazyVGrid with mixed size items in List
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList014, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 16; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        float height = (i % 4 == 0) ? 140.0f : 70.0f;
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(height));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridInList015
+ * @tc.desc: Verify List with LazyVGrid maintains children hierarchy
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridInList015, TestSize.Level1)
+{
+    CreateList();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 10; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(80));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(listFrameNode_, nullptr);
+
+    auto children = listFrameNode_->GetChildren();
+    EXPECT_GT(children.size(), 0u);
+
+    for (auto& child : children) {
+        EXPECT_NE(child, nullptr);
+    }
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase001
+ * @tc.desc: Verify LazyVGrid with single item
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase001, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    StackModelNG stackModel;
+    stackModel.Create();
+    ViewAbstract::SetWidth(CalcLength(100));
+    ViewAbstract::SetHeight(CalcLength(100));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase002
+ * @tc.desc: Verify LazyVGrid with two items (exactly one row)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase002, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 2; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase003
+ * @tc.desc: Verify LazyVGrid with three items (one full row + partial)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase003, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 3; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(90));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase004
+ * @tc.desc: Verify LazyVGrid with exactly one full row of 3 columns
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase004, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr");
+
+    for (int i = 0; i < 3; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(66));
+        ViewAbstract::SetHeight(CalcLength(66));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase005
+ * @tc.desc: Verify LazyVGrid with very small item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase005, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(20));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase006
+ * @tc.desc: Verify LazyVGrid with very large item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase006, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+
+    for (int i = 0; i < 6; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(100));
+        ViewAbstract::SetHeight(CalcLength(200));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: LazyGridEdgeCase007
+ * @tc.desc: Verify LazyVGrid with 5 columns template
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridEdgeCase007, TestSize.Level1)
+{
+    CreateWaterFlow();
+
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+
+    for (int i = 0; i < 25; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(40));
+        ViewAbstract::SetHeight(CalcLength(40));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
 }
 
 /**

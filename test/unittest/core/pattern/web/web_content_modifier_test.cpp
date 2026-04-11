@@ -18,8 +18,8 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/web/web_content_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
-#include "test/mock/core/render/mock_render_surface.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;

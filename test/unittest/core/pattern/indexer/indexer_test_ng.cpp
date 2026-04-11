@@ -15,10 +15,10 @@
 
 #include "indexer_test_ng.h"
 
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 void IndexerTestNg::SetUpTestSuite()
@@ -30,6 +30,7 @@ void IndexerTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_INDEXER);
     auto indexerTheme = IndexerTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(indexerTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(indexerTheme));
 
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     MockPipelineContext::GetCurrent()->fontManager_ = fontManager;
@@ -385,5 +386,30 @@ HWTEST_F(IndexerTestNg, IndexerSetColorByUser001, TestSize.Level0)
     EXPECT_FALSE(paintProperty->GetPopupTitleBackground().has_value());
     g_isConfigChangePerform = false;
     CreateDone();
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: OnThemeScopeUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 2);
+    auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+
+    model.SetColor(std::optional<Color>(Color::RED));
+    model.SetColorByUser(false);
+    pattern_->OnThemeScopeUpdate(0);
+    EXPECT_EQ(indexerLayoutProperty->GetColor(), Color::RED);
+
+    auto oriApiVersion = frameNode_->apiVersion_;
+    frameNode_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    model.SetColor(std::optional<Color>(Color::RED));
+    model.SetColorByUser(false);
+    pattern_->OnThemeScopeUpdate(0);
+    EXPECT_NE(indexerLayoutProperty->GetColor(), Color::RED);
+
+    frameNode_->apiVersion_ = oriApiVersion;
 }
 } // namespace OHOS::Ace::NG

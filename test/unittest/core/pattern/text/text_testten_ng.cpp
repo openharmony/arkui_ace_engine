@@ -17,9 +17,9 @@
 #include "gtest/gtest.h"
 #include "text_base.h"
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
  #include "core/components_ng/pattern/text/span/tlv_util.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -1354,44 +1354,5 @@ HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
     pattern->selectOverlay_->ApplySelectAreaWithKeyboard(area);
     EXPECT_EQ(area.Top(), 0.0f);
     EXPECT_EQ(area.Height(), 10.0f);
-}
-
-/**
- * @tc.name: FireOnMarqueeStateChange002
- * @tc.desc: test FireOnMarqueeStateChange
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTenPatternNg, FireOnMarqueeStateChange002, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
-    TextMarqueeState state = TextMarqueeState::STOP;
-    bool isStop = false;
-    auto onChangeStop = [&isStop](int32_t state) { isStop = true; };
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
-    eventHub->SetOnMarqueeStateChange(onChangeStop);
-    pattern->FireOnMarqueeStateChange(state);
-    EXPECT_FALSE(isStop);
-    pattern->hasStart_ = true;
-    pattern->FireOnMarqueeStateChange(state);
-    EXPECT_TRUE(isStop);
-}
-
-/**
- * @tc.name: FireOnMarqueeStateChange003
- * @tc.desc: test FireOnMarqueeStateChange
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTenPatternNg, FireOnMarqueeStateChange003, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
-    TextMarqueeState state = TextMarqueeState::START;
-    bool isStop = false;
-    auto onChangeStop = [&isStop](int32_t state) { isStop = true; };
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
-    eventHub->SetOnMarqueeStateChange(onChangeStop);
-    pattern->FireOnMarqueeStateChange(state);
-    EXPECT_TRUE(isStop);
 }
 } // namespace OHOS::Ace::NG

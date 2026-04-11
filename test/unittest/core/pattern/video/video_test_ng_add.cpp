@@ -26,10 +26,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_media_player.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
@@ -1444,6 +1444,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent001, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1473,6 +1474,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent002, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1502,6 +1504,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent003, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1530,6 +1533,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent004, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1558,6 +1562,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent005, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1586,6 +1591,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent006, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1614,6 +1620,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent007, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1642,6 +1649,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent008, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1670,6 +1678,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent009, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1698,6 +1707,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent010, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1736,6 +1746,7 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent011, TestSize.Level1)
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 

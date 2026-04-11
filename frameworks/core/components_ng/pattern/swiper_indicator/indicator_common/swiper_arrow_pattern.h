@@ -55,15 +55,17 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto swiperTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<SwiperArrowLayoutProperty> GetSwiperArrowLayoutProperty() const
     {

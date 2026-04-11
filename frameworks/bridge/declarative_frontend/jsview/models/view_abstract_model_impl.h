@@ -253,7 +253,7 @@ public:
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport) override {};
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override;
+            onAreaChanged, int32_t minInterval = 0) override;
     void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 

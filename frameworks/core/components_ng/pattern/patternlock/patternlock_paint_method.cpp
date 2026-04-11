@@ -19,7 +19,12 @@ namespace OHOS::Ace::NG {
 void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(patternlockModifier_);
-    GetThemeProp();
+    CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    GetThemeProp(host);
     auto paintProperty = DynamicCast<PatternLockPaintProperty>(paintWrapper->GetPaintProperty());
 
     CHECK_NULL_VOID(paintProperty);
@@ -64,11 +69,10 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->UpdateBoundsRect();
 }
 
-void PatternLockPaintMethod::GetThemeProp()
+void PatternLockPaintMethod::GetThemeProp(const RefPtr<FrameNode>& host)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(host);
+    auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     regularColor_ = patternLockTheme->GetRegularColor();
     selectedColor_ = patternLockTheme->GetSelectedColor();

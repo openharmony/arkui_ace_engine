@@ -17,6 +17,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -35,6 +38,49 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TEST_CLOSE_EVENT_CODE = 2001;
+constexpr int32_t TEST_CLOSE_EVENT_CODE_NEXT = 2002;
+constexpr int32_t TEST_CLOSE_EVENT_CODE_NEGATIVE = -2003;
+
+class CloseEventMockContainer : public MockContainer {
+    DECLARE_ACE_TYPE(CloseEventMockContainer, MockContainer);
+
+public:
+    explicit CloseEventMockContainer(RefPtr<PipelineBase> pipelineContext = nullptr) : MockContainer(pipelineContext) {}
+
+    void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override
+    {
+        terminateCallback_ = std::move(callback);
+    }
+
+    void TerminateUIExtensionInner(int32_t code) override
+    {
+        terminateCalled_ = true;
+        terminateCode_ = code;
+    }
+
+    AbilityRuntimeContextCallback terminateCallback_;
+    bool terminateCalled_ = false;
+    int32_t terminateCode_ = 0;
+};
+
+class ScopedContainerOverride {
+public:
+    explicit ScopedContainerOverride(const RefPtr<MockContainer>& container) : oldContainer_(MockContainer::container_)
+    {
+        MockContainer::container_ = container;
+    }
+
+    ~ScopedContainerOverride()
+    {
+        MockContainer::container_ = oldContainer_;
+    }
+
+private:
+    RefPtr<MockContainer> oldContainer_;
+};
+} // namespace
 
 class AtomicServicePatternCloseEventTest : public testing::Test {
 public:
@@ -50,7 +96,8 @@ public:
 void AtomicServicePatternCloseEventTest::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-    MockContainer::SetUp(PipelineBase::GetCurrentContext());
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -61,6 +108,7 @@ void AtomicServicePatternCloseEventTest::SetUpTestSuite()
 
 void AtomicServicePatternCloseEventTest::TearDownTestSuite()
 {
+    MockContainer::Current()->pipelineContext_ = nullptr;
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockContainer::TearDown();
     MockPipelineContext::TearDown();
@@ -143,11 +191,11 @@ HWTEST_F(AtomicServicePatternCloseEventTest, FireArkuiAbilityCloseEvent001, Test
             eventParam = param;
         });
 
-    pattern->FireAbilityCloseEvent();
+    pattern->FireAbilityCloseEvent(TEST_CLOSE_EVENT_CODE);
 
     EXPECT_EQ(callbackCount, 1);
     EXPECT_EQ(eventName, ARKUI_ABILITY_CLOSE_EVENT);
-    EXPECT_EQ(eventParam, "true");
+    EXPECT_EQ(eventParam, std::to_string(TEST_CLOSE_EVENT_CODE));
 }
 
 /**
@@ -160,7 +208,7 @@ HWTEST_F(AtomicServicePatternCloseEventTest, FireArkuiAbilityCloseEvent002, Test
     auto pattern = AceType::MakeRefPtr<AtomicServicePattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetCustomAppBarNode(nullptr);
-    pattern->FireAbilityCloseEvent();
+    pattern->FireAbilityCloseEvent(TEST_CLOSE_EVENT_CODE_NEGATIVE);
     SUCCEED();
 }
 
@@ -179,7 +227,7 @@ HWTEST_F(AtomicServicePatternCloseEventTest, AppBarViewFireArkuiAbilityCloseEven
 
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     ASSERT_NE(appBar, nullptr);
-    appBar->FireAbilityCloseEvent();
+    appBar->FireAbilityCloseEvent(TEST_CLOSE_EVENT_CODE);
     SUCCEED();
 }
 
@@ -212,7 +260,7 @@ HWTEST_F(AtomicServicePatternCloseEventTest, AppBarViewFireArkuiAbilityCloseEven
     ASSERT_NE(taskExecutor, nullptr);
     mockPipeline->SetTaskExecutor(taskExecutor);
 
-    appBar->FireAbilityCloseEvent();
+    appBar->FireAbilityCloseEvent(TEST_CLOSE_EVENT_CODE);
     EXPECT_EQ(callbackCount, 0);
 }
 
@@ -252,9 +300,84 @@ HWTEST_F(AtomicServicePatternCloseEventTest, AppBarViewFireArkuiAbilityCloseEven
     ASSERT_NE(taskExecutor, nullptr);
     mockPipeline->SetTaskExecutor(taskExecutor);
 
-    appBar->FireAbilityCloseEvent();
+    appBar->FireAbilityCloseEvent(TEST_CLOSE_EVENT_CODE_NEXT);
     EXPECT_EQ(callbackCount, 1);
     EXPECT_EQ(eventName, ARKUI_ABILITY_CLOSE_EVENT);
-    EXPECT_EQ(eventParam, "true");
+    EXPECT_EQ(eventParam, std::to_string(TEST_CLOSE_EVENT_CODE_NEXT));
+}
+
+/**
+ * @tc.name: AppBarViewOnThirdCloseEvent001
+ * @tc.desc: Verify OnThirdCloseEvent forwards code to UI extension termination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AtomicServicePatternCloseEventTest, AppBarViewOnThirdCloseEvent001, TestSize.Level1)
+{
+    auto closeEventContainer = AceType::MakeRefPtr<CloseEventMockContainer>(PipelineBase::GetCurrentContext());
+    ASSERT_NE(closeEventContainer, nullptr);
+    closeEventContainer->SetIsUIExtensionWindow(true);
+    ScopedContainerOverride scopedContainer(closeEventContainer);
+
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+
+    appBar->OnThirdCloseEvent(TEST_CLOSE_EVENT_CODE);
+
+    EXPECT_TRUE(closeEventContainer->terminateCalled_);
+    EXPECT_EQ(closeEventContainer->terminateCode_, TEST_CLOSE_EVENT_CODE);
+}
+
+/**
+ * @tc.name: AppBarViewInitAbilityContextCallback001
+ * @tc.desc: Verify registered ability context callback dispatches close code event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AtomicServicePatternCloseEventTest, AppBarViewInitAbilityContextCallback001, TestSize.Level1)
+{
+    auto closeEventContainer = AceType::MakeRefPtr<CloseEventMockContainer>(PipelineBase::GetCurrentContext());
+    ASSERT_NE(closeEventContainer, nullptr);
+    ScopedContainerOverride scopedContainer(closeEventContainer);
+
+    auto mockPipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(mockPipeline, nullptr);
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(false);
+    ASSERT_NE(taskExecutor, nullptr);
+    mockPipeline->SetTaskExecutor(taskExecutor);
+
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto customNode = CustomAppBarNode::CreateCustomAppBarNode(-107, "close_event_callback");
+    ASSERT_NE(customNode, nullptr);
+    pattern->SetCustomAppBarNode(customNode);
+
+    int32_t callbackCount = 0;
+    std::string eventName;
+    std::string eventParam;
+    customNode->SetCustomCallback(
+        [&callbackCount, &eventName, &eventParam](const std::string& name, const std::string& param) {
+            ++callbackCount;
+            eventName = name;
+            eventParam = param;
+        });
+
+    appBar->InitAbilityContextCallback();
+    ASSERT_TRUE(static_cast<bool>(closeEventContainer->terminateCallback_));
+
+    closeEventContainer->terminateCallback_(TEST_CLOSE_EVENT_CODE_NEGATIVE);
+
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_EQ(eventName, ARKUI_ABILITY_CLOSE_EVENT);
+    EXPECT_EQ(eventParam, std::to_string(TEST_CLOSE_EVENT_CODE_NEGATIVE));
 }
 } // namespace OHOS::Ace::NG

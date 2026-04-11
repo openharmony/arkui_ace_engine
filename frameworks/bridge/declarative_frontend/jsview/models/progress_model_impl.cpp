@@ -18,6 +18,8 @@
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/progress/progress_component.h"
+#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

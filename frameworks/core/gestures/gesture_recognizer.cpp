@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/common/event_manager.h"
 
 namespace OHOS::Ace {
 namespace {

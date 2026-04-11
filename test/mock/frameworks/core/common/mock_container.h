@@ -163,6 +163,9 @@ public:
         return true;
     }
 
+    void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override {}
+    void TerminateUIExtensionInner(int32_t code) override {}
+
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(int32_t, GetInstanceId, (), (const, override));
@@ -188,8 +191,6 @@ public:
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
     MOCK_METHOD(bool, IsSubWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
-    MOCK_METHOD(void, LoadCompleteManagerStartCollect, (const std::string& url), (override));
-    MOCK_METHOD(void, LoadCompleteManagerStopCollect, (), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
     static bool mockIsNeedModifySize_;

@@ -18,20 +18,28 @@
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/event_manager.h"
+#include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -44,6 +52,8 @@ namespace OHOS::Ace {
 static bool g_setBoolStatus = false;
 class MockAccessibilityManager : public AccessibilityManager {
 public:
+    using ActionArguments = std::map<std::string, std::string>;
+
     MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
     MOCK_METHOD(void, SendWebAccessibilityAsyncEvent,
         (const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::WebPattern>& webPattern), (override));
@@ -96,7 +106,7 @@ public:
             const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, ExecuteExtensionActionNG,
-        (int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action,
+        (int64_t elementId, const ActionArguments& actionArguments, int32_t action,
             const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset),
         (override));
     MOCK_METHOD(bool, TransferAccessibilityAsyncEvent,
@@ -169,6 +179,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    pipeline_->InitManagers();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -206,11 +217,6 @@ std::string PipelineContext::GetModuleName() const
 std::string PipelineContext::GetWindowName() const
 {
     return "";
-}
-
-const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
-{
-    return loadCompleteMgr_;
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -281,11 +287,11 @@ PipelineContext::PipelineContext()
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
-    if (!loadCompleteMgr_) {
-        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
-    }
     if (!contentChangeMgr_) {
         contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
+    }
+    if (!recycleManager_) {
+        recycleManager_ = std::make_unique<RecycleManager>();
     }
 }
 
@@ -438,6 +444,15 @@ const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreen
     return inspectorOffscreenNodesMgr_;
 }
 
+void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId) {}
+
+void PipelineContext::UpdateIdUpdateZOrderIndex() {}
+
+size_t PipelineContext::GetIdUpdateZOrderIndex() const
+{
+    return 0;
+}
+
 void PipelineContext::Destroy()
 {
     dragDropManager_.Reset();
@@ -507,7 +522,12 @@ void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
-void PipelineContext::SetRootRect(double width, double height, double offset) {}
+void PipelineContext::SetRootRect(double width, double height, double offset)
+{
+    rootWidth_ = width;
+    rootHeight_ = height;
+    MarkLpxDirtyNodes();
+}
 
 void PipelineContext::FlushBuild() {}
 
@@ -534,6 +554,7 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
         return;
     }
+    FlushAsyncLoadTask();
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -850,6 +871,16 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 void PipelineContext::StopWindowAnimation() {}
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
+
+double PipelineContext::CalcPageWidth(double rootWidth) const
+{
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
+        return rootWidth;
+    }
+
+    CHECK_NULL_RETURN(forceSplitMgr_, rootWidth);
+    return rootWidth * forceSplitMgr_->GetSplitRatio();
+}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
@@ -1240,6 +1271,88 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     }
     CHECK_NULL_RETURN(rootNode_, nullptr);
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+void PipelineContext::AddAsyncLoadTask(std::function<void()>&& task)
+{
+    asyncLoadTasks_.emplace_back(task);
+}
+
+void PipelineContext::FlushAsyncLoadTask()
+{
+    auto asyncLoadTasks = std::move(asyncLoadTasks_);
+    for (auto& task : asyncLoadTasks) {
+        task();
+    }
+}
+
+bool PipelineContext::IsTabJustTriggerOnKeyEvent() const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->IsTabJustTriggerOnKeyEvent();
+}
+
+bool PipelineContext::SetMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->SetMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode(int32_t id)
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode(id);
+    }
+    return false;
+}
+
+bool PipelineContext::FreeMouseStyleHoldNode()
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    if (mouseStyleManager) {
+        return mouseStyleManager->FreeMouseStyleHoldNode();
+    }
+    return false;
+}
+
+const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
+{
+    return forceSplitMgr_;
+}
+
+const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
+{
+    return formVisibleMgr_;
+}
+
+const RefPtr<FormEventManager>& PipelineContext::GetFormEventManager() const
+{
+    return formEventMgr_;
+}
+
+const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
+{
+    return formGestureMgr_;
+}
+
+const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
+{
+    return recycleManager_;
+}
+
+void PipelineContext::InitManagers()
+{
+    forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    formEventMgr_ = MakeRefPtr<FormEventManager>();
+    formGestureMgr_ = MakeRefPtr<FormGestureManager>();
 }
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
@@ -1688,10 +1801,42 @@ RefPtr<NG::MagnifierController> NG::PipelineContext::GetMagnifierController() co
     return magnifierController_;
 }
 
+void NG::PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.emplace(node);
+}
+
+void NG::PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
+{
+    lpxDirtyNodes_.erase(node);
+}
+
+void NG::PipelineContext::MarkLpxDirtyNodes()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
+
+void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
+{
+    eventManager_ = eventManager;
+}
+
+RefPtr<EventManager> PipelineBase::GetEventManager() const
+{
+    return eventManager_;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 

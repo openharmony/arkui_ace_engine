@@ -148,6 +148,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             buffer.set(bufferKeyVar, bufferValueVar)
         }
         const returnResult: Record<string, RecordData> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private onAsyncReceiverRegister_serialize(callback_: ohos_base_Callback<UIExtensionProxy>): void {

@@ -29,7 +29,7 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();

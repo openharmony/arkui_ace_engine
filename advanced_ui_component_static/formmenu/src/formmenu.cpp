@@ -77,13 +77,13 @@ ani_object WrapBusinessError(ani_env *env, const std::string &msg)
         return nullptr;
     }
 
-    status = env->FindClass("escompat.Error", &cls);
+    status = env->FindClass("std.core.Error", &cls);
     if (status != ANI_OK) {
         LOGE("FindClass failed, status: %{public}d", status);
         return nullptr;
     }
 
-    status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &method);
     if (status != ANI_OK) {
         LOGE("Class_FindMethod failed, status: %{public}d", status);
         return nullptr;
@@ -144,7 +144,7 @@ ani_object CreateBusinessError(ani_env *env, ani_int code, const std::string& ms
         LOGE("FindClass failed %{public}d", status);
         return nullptr;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", "iC{std.core.Error}:", &method);
     if (status != ANI_OK) {
         LOGE("Class_FindMethod failed %{public}d", status);
         return nullptr;

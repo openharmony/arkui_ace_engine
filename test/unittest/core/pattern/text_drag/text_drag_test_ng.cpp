@@ -23,8 +23,8 @@
 #define private public
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #undef private
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"

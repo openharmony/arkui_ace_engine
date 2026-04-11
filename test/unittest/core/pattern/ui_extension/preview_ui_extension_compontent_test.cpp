@@ -51,12 +51,12 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -124,7 +124,7 @@ RefPtr<PreviewUIExtensionPattern> PreviewUIExtensionComponentTestNg::CreatePrevi
     auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
     auto placeholderNode = FrameNode::GetOrCreateFrameNode(
         "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    
+
     NG::UIExtensionConfig config;
     config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
     config.placeholderNode = placeholderNode;
@@ -1059,7 +1059,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, GetAccessibilityRectInfo, TestSize.L
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<PreviewUIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
- 
+
     /**
       * @tc.steps: step2. test RegisterEventProxyFlagCallback
     */

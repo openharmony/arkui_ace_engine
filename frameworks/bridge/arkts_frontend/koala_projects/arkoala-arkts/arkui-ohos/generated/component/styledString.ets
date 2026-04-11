@@ -80,6 +80,7 @@ export class BackgroundColorStyle implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: TextBackgroundStyle = TextBackgroundStyle_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -190,6 +191,7 @@ export class DecorationStyle implements MaterializedBase {
             buffer = (bufferOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const returnResult: ResourceColor | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getStyle_serialize(): TextDecorationStyle | undefined {
@@ -201,6 +203,7 @@ export class DecorationStyle implements MaterializedBase {
             buffer = TextDecorationStyle.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: TextDecorationStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -347,6 +350,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSize_serialize(): SizeOptions | undefined {
@@ -358,6 +362,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = SizeOptions_serializer.read(retvalDeserializer)
         }
         const returnResult: SizeOptions | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getVerticalAlign_serialize(): ImageSpanAlignment | undefined {
@@ -369,6 +374,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = ImageSpanAlignment.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: ImageSpanAlignment | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getObjectFit_serialize(): ImageFit | undefined {
@@ -380,6 +386,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = ImageFit.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: ImageFit | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle | undefined {
@@ -391,6 +398,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = ImageAttachmentLayoutStyle_serializer.read(retvalDeserializer)
         }
         const returnResult: ImageAttachmentLayoutStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getColorFilter_serialize(): ColorFilterType | undefined {
@@ -411,6 +419,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = (bufferOpt as ColorFilter | DrawingColorFilter)
         }
         const returnResult: ColorFilterType | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSupportSvg2_serialize(): boolean | undefined {
@@ -422,6 +431,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult: boolean | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSizeInVp_serialize(): SizeOptions | undefined {
@@ -433,6 +443,7 @@ export class ImageAttachment implements MaterializedBase {
             buffer = SizeOptions_serializer.read(retvalDeserializer)
         }
         const returnResult: SizeOptions | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -514,6 +525,7 @@ export class LeadingMarginSpan implements MaterializedBase {
         }
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((context: arkui_Graphics_DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void) = bufferClosure
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnDraw_callback_serialize(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void)): void {
@@ -544,6 +556,7 @@ export class LeadingMarginSpan implements MaterializedBase {
         }
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: (() => arkui_component_units_LengthMetrics) = bufferClosure
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setGetLeadingMargin_callback_serialize(getLeadingMargin_callback: (() => arkui_component_units_LengthMetrics)): void {
@@ -728,6 +741,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = TextAlign.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: TextAlign | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextVerticalAlign_serialize(): TextVerticalAlign | undefined {
@@ -739,6 +753,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = TextVerticalAlign.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: TextVerticalAlign | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextIndent_serialize(): double | undefined {
@@ -750,6 +765,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getMaxLines_serialize(): int32 | undefined {
@@ -761,6 +777,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getOverflow_serialize(): TextOverflow | undefined {
@@ -772,6 +789,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = TextOverflow.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: TextOverflow | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getWordBreak_serialize(): WordBreak | undefined {
@@ -783,6 +801,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = WordBreak.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: WordBreak | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLeadingMargin_serialize(): double | LeadingMarginPlaceholder | undefined {
@@ -803,6 +822,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = (bufferOpt as double | LeadingMarginPlaceholder)
         }
         const returnResult: double | LeadingMarginPlaceholder | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getParagraphSpacing_serialize(): double | undefined {
@@ -814,6 +834,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getTextDirection_serialize(): TextDirection | undefined {
@@ -825,6 +846,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = TextDirection.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: TextDirection | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLeadingMarginSpan_serialize(): LeadingMarginSpan | undefined {
@@ -836,6 +858,7 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = (LeadingMarginSpan_serializer.read(retvalDeserializer) as LeadingMarginSpan)
         }
         const returnResult: LeadingMarginSpan | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -929,6 +952,7 @@ export class StyledString implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
@@ -943,6 +967,7 @@ export class StyledString implements MaterializedBase {
             buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
         }
         const returnResult: ArrayBuffer | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
@@ -963,6 +988,7 @@ export class StyledString implements MaterializedBase {
             buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
         }
         const returnResult: ArrayBuffer | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString | undefined> {
@@ -998,6 +1024,7 @@ export class StyledString implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
@@ -1022,6 +1049,7 @@ export class StyledString implements MaterializedBase {
             buffer = bufferOpt
         }
         const returnResult: Array<SpanStyle> | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private equals_serialize(other: StyledString): boolean {
@@ -1046,6 +1074,7 @@ export class StyledString implements MaterializedBase {
             buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
         }
         const returnResult: StyledString | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getLength_serialize(): int32 {
@@ -1113,6 +1142,7 @@ export class TextShadowStyle implements MaterializedBase {
             return ShadowOptions_serializer.read(retvalDeserializer);
         })
         const returnResult: Array<ShadowOptions> = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -1224,6 +1254,7 @@ export class TextStyle implements MaterializedBase {
             buffer = (bufferOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const returnResult: ResourceColor | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFontFamily_serialize(): string | undefined {
@@ -1235,6 +1266,7 @@ export class TextStyle implements MaterializedBase {
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFontSize_serialize(): double | undefined {
@@ -1246,6 +1278,7 @@ export class TextStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFontWeight_serialize(): int32 | undefined {
@@ -1257,6 +1290,7 @@ export class TextStyle implements MaterializedBase {
             buffer = retvalDeserializer.readInt32()
         }
         const returnResult: int32 | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFontStyle_serialize(): FontStyle | undefined {
@@ -1268,6 +1302,7 @@ export class TextStyle implements MaterializedBase {
             buffer = FontStyle.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: FontStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getFontConfigs_serialize(): FontConfigs | undefined {
@@ -1279,6 +1314,7 @@ export class TextStyle implements MaterializedBase {
             buffer = FontConfigs_serializer.read(retvalDeserializer)
         }
         const returnResult: FontConfigs | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getSuperscript_serialize(): SuperscriptStyle | undefined {
@@ -1290,6 +1326,7 @@ export class TextStyle implements MaterializedBase {
             buffer = SuperscriptStyle.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: SuperscriptStyle | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getStrokeWidth_serialize(): double | undefined {
@@ -1301,6 +1338,7 @@ export class TextStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getStrokeColor_serialize(): ResourceColor | undefined {
@@ -1325,6 +1363,7 @@ export class TextStyle implements MaterializedBase {
             buffer = (bufferOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const returnResult: ResourceColor | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
 }
@@ -1361,6 +1400,7 @@ export class UrlStyle implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._UrlStyle_getUrl(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
 }

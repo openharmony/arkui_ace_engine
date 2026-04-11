@@ -15,7 +15,7 @@
 
 #include "text_base.h"
 
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"

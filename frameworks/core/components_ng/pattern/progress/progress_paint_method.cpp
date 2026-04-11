@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 
 namespace OHOS::Ace::NG {

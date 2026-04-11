@@ -31,11 +31,13 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -50,6 +52,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -372,6 +375,18 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
+void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
+{
+    CHECK_NULL_VOID(columnNode);
+    if (dialogProperties.systemMaterial &&
+        MaterialUtils::CheckMaterialValid(dialogProperties.systemMaterial->GetType())) {
+        auto renderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties.systemMaterial));
+    }
+}
+
 void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
     const DialogProperties& props, bool isCustomBorder, RefPtr<DialogTheme> dialogTheme)
 {
@@ -406,12 +421,14 @@ void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
         contentRenderContext->UpdateBackShadow(shadow);
     }
+    SetDialogSystemMaterial(contentNode, props);
     contentRenderContext->SetClipToBounds(true);
 }
 
 // set render context properties of content frame
 void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
+    CHECK_NULL_VOID(contentNode);
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
@@ -631,8 +648,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     ACE_UINODE_TRACE(dialog);
     auto pipeline = dialog->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
+    CHECK_NULL_VOID(dialogTheme_);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
     if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
@@ -643,7 +659,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
         CHECK_NULL_VOID(extraMaskNodeContext);
         auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(maskLayoutProps);
-        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme_->GetMaskColorEnd()));
         extraMaskNodeContext->UpdateZIndex(-1);
         extraMaskNode->MountToParent(dialog);
         extraMaskNode_ = extraMaskNode;
@@ -978,9 +994,9 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipeline = buttonNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto theme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     if (!isSuitableForElderly_) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
@@ -1167,9 +1183,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, textNode);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, textNode);
-    auto textTheme = context->GetTheme<TextTheme>();
+    auto textTheme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_RETURN(textTheme, textNode);
     if (textTheme->GetIsTextFadeout()) {
         textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
@@ -1394,13 +1408,13 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
-Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
+Shadow DialogPattern::GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
     CHECK_NULL_RETURN(frameNode, shadow);
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, shadow);
-    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    auto shadowTheme = frameNode->GetTheme<ShadowTheme>(true);
     CHECK_NULL_RETURN(shadowTheme, shadow);
     auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
@@ -1479,17 +1493,35 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    dialogTheme_ = dialogTheme;
+    UpdateDialogTheme();
     UpdateTitleAndContentColor();
     UpdateMaskColor();
-    UpdateWrapperBackgroundStyle(host, dialogTheme);
+    UpdateWrapperBackgroundStyle(host, dialogTheme_);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    OnColorConfigurationUpdate();
+    return true;
+}
+
+void DialogPattern::UpdateDialogTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogThemeNode_) {
+        host->AllowUseParentTheme(false);
+        host->SetThemeScopeId(dialogThemeNode_->GetThemeScopeIdForTheme(true));
+    }
+    dialogTheme_ = host->GetTheme<DialogTheme>(true);
 }
 
 void DialogPattern::UpdateMaskColor()

@@ -23,11 +23,13 @@
 #include "bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/common_text_constants.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<AlertDialogModel> AlertDialogModel::instance_ = nullptr;
@@ -423,6 +425,15 @@ void ParseAlertLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
     properties.levelOrder = std::make_optional(order);
 }
 
+void ParseAlertSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto systemMaterialValue = obj->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -456,6 +467,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                                     parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
                                     parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
                                     parseDialogLevelMode = ParseAlertDialogLevelMode,
+                                    parseSystemMaterial = ParseAlertSystemMaterial,
                                     node = dialogNode](DialogProperties& dialogProps) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
@@ -471,6 +483,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             parseOffset(dialogProps, obj);
             parseMaskRect(dialogProps, obj);
             parseDialogLevelMode(dialogProps, obj);
+            parseSystemMaterial(dialogProps, obj);
         };
         properties.onLanguageChange = std::move(onLanguageChange);
 
@@ -545,6 +558,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse transition.
         properties.transitionEffect = ParseJsTransitionEffect(args);
         ParseAlertLevelOrder(properties, obj);
+        ParseAlertSystemMaterial(properties, obj);
         JSViewAbstract::SetDialogProperties(obj, properties);
         JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
         JSViewAbstract::SetDialogBlurStyleOption(obj, properties);

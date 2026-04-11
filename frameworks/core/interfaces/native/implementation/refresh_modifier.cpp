@@ -15,6 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"

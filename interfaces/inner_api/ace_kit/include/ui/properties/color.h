@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_PROPERTIES_COLOR_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,20 @@ union ColorParam {
 enum ColorSpace {
     SRGB = 0,
     DISPLAY_P3 = 1,
+    BT2020 = 2,
+};
+
+struct ColorWithHeadRoom {
+    float red = 0.f;
+    float green = 0.f;
+    float blue = 0.f;
+    float alpha = 1.f;
+    float headRoom = 1.f;
+    bool operator==(const ColorWithHeadRoom& other) const
+    {
+        return red == other.red && green == other.green && blue == other.blue &&
+               alpha == other.alpha && headRoom == other.headRoom;
+    }
 };
 
 // Predefined dynamic color placeholders. Backend render service resolves these into concrete colors.
@@ -105,6 +120,7 @@ public:
     constexpr explicit Color(uint32_t value, ColorSpace colorSpace)
         : colorValue_(ColorParam { .value = value }), colorSpace_(colorSpace)
     {}
+    explicit Color(ColorWithHeadRoom colorWithHeadRoom) : colorWithHeadRoom_(colorWithHeadRoom) {}
     ~Color() = default;
 
     static Color FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
@@ -113,6 +129,7 @@ public:
     // Need to change the input parameters, it is more appropriate to use the passed value here.
     static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK,
         Color defaultColor = Color::BLACK);
+    static Color FromFloat(double red, double green, double blue, double opacity, double headRoom = 1.0f);
     static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
     static bool ParseColorString(const std::string& colorStr, Color& color, const Color& defaultColor,
         uint32_t maskAlpha = COLOR_ALPHA_MASK);
@@ -143,6 +160,11 @@ public:
     uint32_t GetValue() const
     {
         return colorValue_.value;
+    }
+
+    std::optional<ColorWithHeadRoom> GetHeadRoomColor() const
+    {
+        return colorWithHeadRoom_;
     }
 
     void SetColorSpace(ColorSpace colorSpace)
@@ -191,9 +213,10 @@ public:
     {
         if (IsPlaceholder() || color.IsPlaceholder()) {
             return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_ &&
-                   colorValue_.value == color.GetValue();
+                   colorValue_.value == color.GetValue() && colorWithHeadRoom_ == color.GetHeadRoomColor();
         }
-        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
+        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace() &&
+               colorWithHeadRoom_ == color.GetHeadRoomColor();
     }
 
     bool operator!=(const Color& color) const
@@ -274,6 +297,7 @@ private:
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
+    std::optional<ColorWithHeadRoom> colorWithHeadRoom_;
     uint32_t resourceId_ = 0;
     ColorSpace colorSpace_ = ColorSpace::SRGB;
     ColorPlaceholder placeholder_ = ColorPlaceholder::NONE; // Dynamic placeholder kind, NONE means concrete color.

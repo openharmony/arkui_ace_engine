@@ -17,12 +17,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -76,6 +76,7 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    static RefPtr<Theme> CreateTheme(ThemeType type);
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -89,6 +90,29 @@ void OverlayManagerTwoTestNg::TearDown()
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
 }
 
+RefPtr<Theme> OverlayManagerTwoTestNg::CreateTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 void OverlayManagerTwoTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -100,6 +124,9 @@ void OverlayManagerTwoTestNg::SetUpTestSuite()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return CreateTheme(type);
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DragBarTheme::TypeId()) {
             return AceType::MakeRefPtr<DragBarTheme>();
@@ -2353,7 +2380,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ResetDragMoveVector, TestSize.Level1)
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuAnimation(menuNode, overlayManager);
-    
+
     EXPECT_EQ(overlayManager->dragMoveVector_, OffsetF(0.0f, 0.0f));
     EXPECT_EQ(overlayManager->lastDragMoveVector_, OffsetF(0.0f, 0.0f));
 }

@@ -19,19 +19,22 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/animation/spring_motion.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/event/focus_type.h"
-#include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class ForEachBaseNode;
 class InspectorFilter;
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace::NG {
 
 enum class ListItemSwipeIndex {
     SWIPER_END = -1,
@@ -39,12 +42,6 @@ enum class ListItemSwipeIndex {
     SWIPER_START = 1,
     SWIPER_ACTION = 2,
 };
-
-using ItemState = uint32_t;
-inline constexpr ItemState ITEM_STATE_NORMAL = 0;
-inline constexpr ItemState ITEM_STATE_PRESSED = 1;
-inline constexpr ItemState ITEM_STATE_FOCUSED = 1 << 1;
-inline constexpr ItemState ITEM_STATE_HOVERED = 1 << 2;
 
 using PendingSwipeFunc = std::function<void()>;
 
@@ -62,7 +59,7 @@ public:
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
     {}
-    ~ListItemPattern() override = default;
+    ~ListItemPattern() override;
 
     void OnRecycle() override;
 
@@ -73,35 +70,20 @@ public:
         return false;
     }
 
-    void BeforeCreateLayoutWrapper() override
-    {
-        if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
-            shallowBuilder_->ExecuteDeepRender();
-            shallowBuilder_.Reset();
-        }
-    }
+    void BeforeCreateLayoutWrapper() override;
 
-    void OnCollectRemoved() override
-    {
-        shallowBuilder_.Reset();
-    }
+    void OnCollectRemoved() override;
 
     bool RenderCustomChild(int64_t deadline) override;
 
     FocusPattern GetFocusPattern() const override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<ListItemLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<ListItemEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -187,10 +169,7 @@ public:
         indexInListItemGroup_ = index;
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ListItemAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     V2::ListItemStyle GetListItemStyle()
     {
@@ -219,20 +198,8 @@ public:
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
     bool ClickJudge(const PointF& localPoint);
 
-    void InitDragManager(RefPtr<ForEachBaseNode> forEach)
-    {
-        if (!dragManager_) {
-            dragManager_ = MakeRefPtr<ListItemDragManager>(GetHost(), forEach);
-            dragManager_->InitDragDropEvent();
-        }
-    }
-    void DeInitDragManager()
-    {
-        if (dragManager_) {
-            dragManager_->DeInitDragDropEvent();
-            dragManager_ = nullptr;
-        }
-    }
+    void InitDragManager(RefPtr<ForEachBaseNode> forEach);
+    void DeInitDragManager();
 
     SwipeActionState GetSwipeActionState();
 

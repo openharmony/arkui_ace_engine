@@ -19,6 +19,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/constants.h"
@@ -948,20 +949,16 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto parent = frameNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent && parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-    }
-    if (!parent) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
-            frameNode->GetTag().c_str(), frameNode->GetDepth());
-        return;
-    }
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto rootNode = manager->GetRootNode().Upgrade();
+    if (!rootNode) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
+            frameNode->GetTag().c_str(), frameNode->GetDepth());
+        return;
+    }
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
 #ifdef WEB_SUPPORTED
@@ -989,11 +986,11 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             auto windowScene = manager->FindWindowScene(frameNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
         } else {
-            columnNode->MountToParent(parent);
+            columnNode->MountToParent(rootNode);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
             manager->SetFilterColumnNode(columnNode);
-            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         AnimationOption option;
         BlurStyleOption styleOption;

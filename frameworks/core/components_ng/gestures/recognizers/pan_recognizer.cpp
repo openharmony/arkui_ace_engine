@@ -913,6 +913,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::PAN);
     HandleReports(info, type);
 
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {

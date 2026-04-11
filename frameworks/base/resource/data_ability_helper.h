@@ -35,6 +35,13 @@ public:
     virtual int64_t GetMovingPhotoCoverPosition(const std::string& columnName, const std::string& value,
         std::vector<std::string>& columns) { return -1; }
     virtual std::string GetMovingPhotoImagePath(const std::string& uri) { return ""; }
+
+    // Observer management methods
+    virtual int32_t RegisterDataShareSmartEdgeStateObserver() { return -1; }
+    virtual int32_t UnregisterDataShareObservers() { return -1; }
+    virtual bool IsInSmartEdgeState() { return false; }
+    virtual void SetSmartEdgeStateInfo(bool isSmartEdgeState) {}
+    virtual bool QuerySmartEdgeState() { return false; }
 };
 
 } // namespace OHOS::Ace

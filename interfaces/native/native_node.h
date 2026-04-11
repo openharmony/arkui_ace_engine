@@ -595,8 +595,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * case 1: .value[0...15].f32: 16 floating-point numbers. The .size should not be 0, and it is expected to be 16. \n
- 	 * case 2: .object is a pointer to ArkUI_Matrix4 and the .size should be 0. \n
+     * .value[0...15].f32: 16 floating-point numbers. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .data[0...15].f32: 16 floating-point numbers. \n
@@ -9334,6 +9333,7 @@ typedef enum {
      *
      */
     NODE_TEXT_ON_DETECT_RESULT_UPDATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+
     /**
      * @brief Defines the long press event for span
      *
@@ -9343,6 +9343,47 @@ typedef enum {
      *@since 20
      */
     NODE_TEXT_SPAN_ON_LONG_PRESS = 1001,
+
+    /**
+     * @brief Defines the event triggered when the text selection position changes.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start position of the text selection area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end position of the text selection area. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_ON_TEXT_SELECTION_CHANGE = 1002,
+
+    /**
+     * @brief Defines the event triggered when the copy button on the pasteboard, which displays when the text box
+     * is long pressed, is clicked.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_ON_COPY = 1003,
+
+    /**
+     * @brief Defines the event triggered before copying text.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_ON_WILL_COPY = 1004,
+
     /**
      * @brief Defines the image loading success event.
      *
@@ -9452,6 +9493,19 @@ typedef enum {
      * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is pasted
      *
      */
+     /**
+      * @brief Defines the event triggered when the paste button on the pasteboard, which displays when the text box
+      * is long pressed, is clicked.
+      * \n
+      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+      * {@link ArkUI_StringAsyncEvent}. \n
+      * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+      * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is pasted
+      * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+      * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+      *
+      * @since 26.0.0
+      */
     NODE_TEXT_INPUT_ON_PASTE,
     /**
      * @brief Defines the event triggered when the text selection position changes.
@@ -9592,6 +9646,44 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_INPUT_ON_WILL_CHANGE = 7014,
+    /**
+     * @brief Defines the event triggered when the copy button on the pasteboard, which displays when text is
+     * selected, is clicked.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_ON_COPY = 7015,
+    /**
+     * @brief Defines the event triggered before copying text.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_ON_WILL_COPY = 7016,
+    /**
+     * @brief Defines the event triggered before cutting text.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is cut.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_ON_WILL_CUT = 7017,
 
     /**
      * @brief Defines the event triggered when the input in the text box changes.
@@ -9614,6 +9706,19 @@ typedef enum {
      * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
      * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is pasted
      *
+     */
+    /**
+     * @brief Defines the event triggered when the paste button on the pasteboard, which displays when the text box is
+     * long pressed, is clicked.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is pasted.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
      */
     NODE_TEXT_AREA_ON_PASTE,
     /**
@@ -9690,6 +9795,7 @@ typedef enum {
       *
       */
     NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
+
     /**
      * @brief Defines the event triggered when text is about to be entered.
      *
@@ -9702,6 +9808,7 @@ typedef enum {
      * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
      */
     NODE_TEXT_AREA_ON_WILL_INSERT = 8008,
+
     /**
      * @brief Defines the event triggered when text is entered.
      *
@@ -9712,6 +9819,7 @@ typedef enum {
      * <b>OH_ArkUI_NodeEvent_GetStringValue</b>.
      */
     NODE_TEXT_AREA_ON_DID_INSERT = 8009,
+
     /**
      * @brief Defines the event triggered when text is about to be deleted.
      *
@@ -9727,6 +9835,7 @@ typedef enum {
      * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
      */
     NODE_TEXT_AREA_ON_WILL_DELETE = 8010,
+
     /**
      * @brief Defines the event triggered when text is deleted.
      *
@@ -9740,6 +9849,7 @@ typedef enum {
      * <b>OH_ArkUI_NodeEvent_GetStringValue</b>.
      */
     NODE_TEXT_AREA_ON_DID_DELETE = 8011,
+
     /**
      * @brief Defines the event triggered when content (including preview text) changes in the <b>TextArea</b>
      * component.
@@ -9753,6 +9863,7 @@ typedef enum {
      * @since 16
      */
     NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT = 8012,
+
     /**
      * @brief Defines the event triggered before content changes
      *
@@ -9765,6 +9876,61 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_AREA_ON_WILL_CHANGE = 8013,
+
+    /**
+     * @brief Defines the event triggered when the copy button on the pasteboard, which displays when the text box
+     * is long pressed, is clicked.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_ON_COPY = 8014,
+
+    /**
+     * @brief Defines the event triggered before copying text.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is copied.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_ON_WILL_COPY = 8015,
+
+    /**
+     * @brief Defines the event triggered when the cut button on the pasteboard, which displays when the text box
+     * is long pressed, is clicked.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is cut.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_ON_CUT = 8016,
+
+    /**
+     * @brief Defines the event triggered before cutting text.
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is cut.
+     * @return Returns <b>true</b> if the system event is intercepted; returns <b>false</b> otherwise.
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_ON_WILL_CUT = 8017,
+
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -12377,6 +12543,18 @@ int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* s
     OH_PixelmapNative** pixelmap);
 
 /**
+ * @brief Query the size limitation of the component snapshot.
+ *
+ * @param maxWidth Maximum width limit of the component snapshot, in px.
+ * @param maxHeight Maximum height limit of the component snapshot, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Invalid function parameter.
+ * @since 26.0.0
+ */
+int32_t OH_ArkUI_GetNodeSnapshotSizeLimitation(int32_t* maxWidth, int32_t* maxHeight);
+
+/**
  * @brief Set the cross-language option of the target node handle.
  *
  * @param node The target node handle.
@@ -12635,6 +12813,38 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
 
 /**
+* @brief Registers a callback for listening for component dimension and area changes.
+*
+* This function can be called for a valid {@link ArkUI_NodeHandle} node at any time. \n
+* The newly registered callback will replace the previously registered callback for this event and will take effect from the next frame. \n
+* 
+* When the callback is no longer needed, call {@link OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent} to unregister it. \n
+* Otherwise, the callback will be automatically unregistered when the node is released.
+*
+* @param node Pointer to {@link ArkUI_NodeHandle}.
+* @param expectedUpdateInterval Expected calculation interval, in milliseconds.
+* @param userData Pointer to custom data.
+* @param callback Event callback.
+* @return Result code. \n
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful. \n
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs. \n
+* @since 26.0.0
+*/
+int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node,
+    float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event));
+
+/**
+* @brief Unregisters the callback bound to the dimensions and area changes of a component.
+*
+* @param node Pointer to {@link ArkUI_NodeHandle}.
+* @return Result code. \n
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful. \n
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs. \n
+* @since 26.0.0
+*/
+int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node);
+
+/**
  * @brief Converts a point's coordinates with transform from the target node's coordinate system 
  * to the current window's coordinate system.
  *
@@ -12784,6 +12994,24 @@ int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
  * @since 24
  */
 int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
+
+/**
+ * @brief Retrieves the latest error message, which includes the error code, method name, and error cause.
+ * When other interfaces return an error code, they save the corresponding error message,
+ * and this interface can retrieve the currently stored error message.
+ * The information returned by this interface may evolve with versions and is intended solely for
+ * output to aid in analysis and troubleshooting. It should not be used for logical decisions.
+ *
+ * The returned string is a thread-local string created by the system. Different threads maintain
+ * independent error messages, and other threads do not overwrite the current thread's result.
+ * The pointer remains valid until the current thread records another error or exits. The caller must
+ * not modify its content. If any editing is required, create a copy of the string content yourself.
+ * No memory deallocation is required by the caller.
+ * 
+ * @return Returns the most recent error message.
+ * @since 26.0.0
+ */
+const char* OH_ArkUI_NativeModule_GetErrorMessage();
 
 #ifdef __cplusplus
 }

@@ -15,6 +15,7 @@
 #include "accessibility_frame_node_utils.h"
 #include "base/log/log_wrapper.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

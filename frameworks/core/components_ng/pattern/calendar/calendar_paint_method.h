@@ -30,6 +30,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
+class PipelineContext;
 
 struct CalendarPaintParams {
     PickerDate startDate;
@@ -47,10 +48,10 @@ public:
         : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay), startDate_(startDate), endDate_(endDate),
           isCalendarDialog_(isCalendarDialog) {};
     CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay, const CalendarPaintParams& params,
-        bool isCalendarDialog = false)
+        bool isCalendarDialog = false, RefPtr<FrameNode> themeNode = nullptr)
         : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay), startDate_(params.startDate),
           endDate_(params.endDate), markToday_(params.markToday), disabledDateRange_(params.disabledDateRange),
-          isCalendarDialog_(isCalendarDialog) {};
+          isCalendarDialog_(isCalendarDialog), themeNode_(themeNode) {};
     ~CalendarPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -61,6 +62,19 @@ private:
     void DrawDates(RSCanvas& canvas, const Offset& offset);
     bool IsTextHeightSmaller();
     bool CalTextHeight(const Offset& dayOffset, const CalendarDay& day);
+    void InitAppFontFamilies(const RefPtr<PipelineContext>& pipelineContext);
+    void ApplyCalendarThemeColors(const RefPtr<CalendarPaintProperty>& paintProperty,
+        const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeMetrics(const RefPtr<CalendarPaintProperty>& paintProperty,
+        const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeLayoutMetricsBase(
+        const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeLayoutMetricsOffsets(
+        const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeTextAndBackgroundColors(const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeFontScaleDependent(const RefPtr<PipelineContext>& pipelineContext,
+        const RefPtr<CalendarTheme>& theme);
+    void ApplyCalendarThemeFlags(const RefPtr<CalendarPaintProperty>& paintProperty);
     void SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty);
     void DrawCalendar(RSCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day);
     void DrawTodayArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
@@ -175,6 +189,7 @@ private:
     SizeF frameSize_;
 
     std::vector<std::string> appFontFamilies_;
+    RefPtr<FrameNode> themeNode_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPaintMethod);
 };

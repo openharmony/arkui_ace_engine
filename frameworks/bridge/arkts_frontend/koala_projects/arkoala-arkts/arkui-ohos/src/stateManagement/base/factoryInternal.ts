@@ -19,7 +19,7 @@ import { IBackingValue } from './iBackingValue';
 import { DecoratorBackingValue } from './backingValue';
 import { MutableKeyedStateMeta, MutableStateMeta } from './mutableStateMeta';
 import { StateMgmtTool, InterfaceProxyHandler } from '#stateMgmtTool';
-import { InteropDecoratorBackingValue } from '../interop/interopBackingValue';
+import { InteropDecoratorBackingValue, InteropV2DecoratorBackingValue} from '../interop/interopBackingValue';
 
 export class FactoryInternalImpl implements IFactoryInternal {
     public mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
@@ -39,5 +39,8 @@ export class FactoryInternalImpl implements IFactoryInternal {
     }
     public mkInteropDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
         return new InteropDecoratorBackingValue<T>(info, initValue);
+    }
+    public mkInteropV2DecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
+        return new InteropV2DecoratorBackingValue<T>(info, initValue);
     }
 }

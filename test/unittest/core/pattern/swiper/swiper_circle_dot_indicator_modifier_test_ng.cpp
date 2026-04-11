@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "swiper_test_ng.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 
 namespace OHOS::Ace::NG {

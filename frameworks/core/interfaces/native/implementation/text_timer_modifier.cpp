@@ -33,6 +33,7 @@ struct TextTimerOptions {
     std::optional<bool> isCountDown;
     std::optional<int64_t> count;
     std::optional<Ark_TextTimerController> controller;
+    std::optional<int32_t> startTime;
 };
 
 namespace Converter {
@@ -43,6 +44,7 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
     dst.isCountDown = Converter::OptConvert<bool>(src.isCountDown);
     dst.count = Converter::OptConvert<int64_t>(src.count);
     dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
+    dst.startTime = Converter::OptConvert<int32_t>(src.startTime);
     return dst;
 }
 } // namespace Converter
@@ -71,6 +73,7 @@ void SetTextTimerOptionsImpl(Ark_NativePointer node,
         opts->count.reset();
     }
     TextTimerModelStatic::SetInputCount(frameNode, opts->count);
+    TextTimerModelStatic::SetStartTime(frameNode, opts->startTime);
 
     CHECK_NULL_VOID(opts->controller);
     auto textTimerController = TextTimerModelNG::InitTextController(frameNode);

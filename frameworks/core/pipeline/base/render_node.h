@@ -35,7 +35,7 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/state_attributes.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_raw_recognizer.h"
@@ -565,8 +565,8 @@ public:
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
-    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
-        WeakPtr<RenderNode>& hoverNode);
+    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint,
+        std::list<WeakPtr<RenderNode>>& result, WeakPtr<RenderNode>& hoverNode);
 
     virtual bool AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
         const AxisDirection direction);

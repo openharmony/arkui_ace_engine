@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class GridItemModifier extends ArkGridItemComponent implements AttributeModifier<GridItemAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

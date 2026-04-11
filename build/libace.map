@@ -254,6 +254,7 @@
       "OHOS::Ace::ComposedElement::UnregisterForPartialUpdates()";
       "OHOS::Ace::ComposedElement::Update()";
       "OHOS::Ace::ComposedElement::UpdateChild(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&, OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::ConvertFontWeight(OHOS::Ace::FontWeight)";
       "OHOS::Ace::Constants::ConvertSkColor(OHOS::Ace::Color)";
       "OHOS::Ace::Constants::ConvertSkRect(OHOS::Rosen::Drawing::RectF const&)";
       "OHOS::Ace::Constants::ConvertTxtFontStyle(OHOS::Ace::FontStyle)";
@@ -1006,7 +1007,7 @@
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::NG::DatePickerPattern::GetFormatString(OHOS::Ace::PickerDateF)";
       "OHOS::Ace::NG::DialogManager::GetMainPipelineContext(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
-      "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::NG::DialogView::IsSupportBlurStyle(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::DividerPainter::DrawLine(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&) const";
       "OHOS::Ace::NG::DragAnimationHelper::ShowGatherAnimationWithMenu(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
@@ -2602,6 +2603,10 @@
       "OHOS::Ace::RosenUniversalPainter::DrawRRectBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::RRect const&, unsigned int, double)";
       "OHOS::Ace::RoundToMaxPrecision(double)";
       "OHOS::Ace::RsNodeAdapter::CreateSurfaceNode(OHOS::Rosen::RSSurfaceNodeConfig const&)";
+      "OHOS::Ace::SelectionInfo::GetSelection() const";
+      "OHOS::Ace::SelectionInfo::SetSelectionStart(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetSelectionEnd(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetResultObjectList(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&)";
       "OHOS::Ace::Scheduler::AddKeyFrame(float, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::Animate(OHOS::Ace::AnimationOption const&, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()>, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::CloseImplicitAnimation()";
@@ -3561,6 +3566,7 @@
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetAccessibilityManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
+      OHOS::Ace::PipelineBase::GetEventManager*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
       OHOS::Ace::PipelineBase::GetCurrentDensity*;
       OHOS::Ace::PipelineBase::GetImageCache*;
@@ -3655,6 +3661,7 @@
       OHOS::Ace::UIContentImpl::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::UiMaterial::*;
+      OHOS::Ace::UiMaterialMapKeyHasher::*;
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::UtfUtils::*;

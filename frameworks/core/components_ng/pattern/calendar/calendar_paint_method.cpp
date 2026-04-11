@@ -537,18 +537,20 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
     }
 }
 
-void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty)
+void CalendarPaintMethod::InitAppFontFamilies(const RefPtr<PipelineContext>& pipelineContext)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_VOID(theme);
-
     auto fontManager = pipelineContext->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty())) {
         appFontFamilies_ = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
     }
+}
 
+void CalendarPaintMethod::ApplyCalendarThemeColors(
+    const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(theme);
     weekColor_ = ToRSColor(paintProperty->GetWeekColor().value_or(theme->GetCalendarTheme().weekColor));
     dayColor_ = ToRSColor(paintProperty->GetDayColor().value_or(theme->GetCalendarTheme().dayColor));
     lunarColor_ = ToRSColor(paintProperty->GetLunarColor().value_or(theme->GetCalendarTheme().lunarColor));
@@ -582,7 +584,23 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     dayFontWeight_ = StringUtils::StringToFontWeight(theme->GetCalendarTheme().dayFontWeight);
     lunarDayFontWeight_ = StringUtils::StringToFontWeight(theme->GetCalendarTheme().lunarDayFontWeight);
     workStateFontWeight_ = StringUtils::StringToFontWeight(theme->GetCalendarTheme().workStateFontWeight);
+}
 
+void CalendarPaintMethod::ApplyCalendarThemeMetrics(
+    const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(theme);
+    ApplyCalendarThemeLayoutMetricsBase(paintProperty, theme);
+    ApplyCalendarThemeLayoutMetricsOffsets(paintProperty, theme);
+    ApplyCalendarThemeTextAndBackgroundColors(theme);
+}
+
+void CalendarPaintMethod::ApplyCalendarThemeLayoutMetricsBase(
+    const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(theme);
     topPadding_ = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
     weekFontSize_ = paintProperty->GetWeekFontSize().value_or(theme->GetCalendarTheme().weekFontSize).ConvertToPx();
     dayFontSize_ = paintProperty->GetDayFontSize().value_or(theme->GetCalendarTheme().dayFontSize).ConvertToPx();
@@ -626,7 +644,13 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     dailySixRowSpace_ = paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx() <= 0
                             ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
                             : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
+}
 
+void CalendarPaintMethod::ApplyCalendarThemeLayoutMetricsOffsets(
+    const RefPtr<CalendarPaintProperty>& paintProperty, const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(theme);
     gregorianDayHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                                    ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
                                    : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
@@ -649,6 +673,11 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                                            .value_or(theme->GetCalendarTheme().workStateVerticalMovingDistance)
                                            .ConvertToPx();
     dayRadius_ = paintProperty->GetDayRadiusValue(theme->GetCalendarDayRadius()).ConvertToPx();
+}
+
+void CalendarPaintMethod::ApplyCalendarThemeTextAndBackgroundColors(const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(theme);
     textNonCurrentMonthColor_ = ToRSColor(theme->GetTextNonCurrentMonthColor());
     textNonCurrentMonthTodayColor_ = ToRSColor(theme->GetTextNonCurrentMonthTodayColor());
     textSelectedDayColor_ = ToRSColor(theme->GetTextSelectedDayColor());
@@ -660,7 +689,13 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     backgroundDisabledMarkTodayColor_ = ToRSColor(theme->GetBackgroundDisabledMarkTodayColor());
     backgroundHoverColor_ = ToRSColor(theme->GetBackgroundHoverColor());
     backgroundPressColor_ = ToRSColor(theme->GetBackgroundPressColor());
+}
 
+void CalendarPaintMethod::ApplyCalendarThemeFontScaleDependent(
+    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<CalendarTheme>& theme)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
         Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
@@ -670,6 +705,11 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     }
 
     calendarDayKeyFocusedPenWidth_ = theme->GetCalendarDayKeyFocusedPenWidth().ConvertToPx();
+}
+
+void CalendarPaintMethod::ApplyCalendarThemeFlags(const RefPtr<CalendarPaintProperty>& paintProperty)
+{
+    CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasShowLunar()) {
         showLunar_ = paintProperty->GetShowLunarValue();
     }
@@ -681,6 +721,22 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     if (paintProperty->HasOffDays()) {
         offDays_ = paintProperty->GetOffDaysValue();
     }
+}
+
+void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty)
+{
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme =
+        themeNode_ ? themeNode_->GetTheme<CalendarTheme>(true) : pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+
+    InitAppFontFamilies(pipelineContext);
+    ApplyCalendarThemeColors(paintProperty, theme);
+    ApplyCalendarThemeMetrics(paintProperty, theme);
+    ApplyCalendarThemeFontScaleDependent(pipelineContext, theme);
+    ApplyCalendarThemeFlags(paintProperty);
     currentMonth_.month = obtainedMonth_.month;
 }
 

@@ -17,7 +17,7 @@
 
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

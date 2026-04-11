@@ -17,75 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_H
 
 #include "advanced_text_style.h"
+#include "text_enums.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
-#include "ui/common/layout/constants.h"
 
 #include "base/geometry/dimension.h"
-#include "base/utils/linear_map.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class SymbolEffectOptions;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
-// The normal weight is W400, the larger the number after W, the thicker the font will be.
-// BOLD is equal to W700 and NORMAL is equal to W400, lighter is W100, BOLDER is W900.
-enum class FontWeight {
-    W100 = 0,
-    W200,
-    W300,
-    W400,
-    W500,
-    W600,
-    W700,
-    W800,
-    W900,
-    BOLD,
-    NORMAL,
-    BOLDER,
-    LIGHTER,
-    MEDIUM,
-    REGULAR,
-};
-namespace {
-const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::W700,       // FontWeight::BOLD
-    FontWeight::W400,       // FontWeight::NORMAL
-    FontWeight::W900,       // FontWeight::BOLDER,
-    FontWeight::W100,       // FontWeight::LIGHTER
-    FontWeight::W500,       // FontWeight::MEDIUM
-    FontWeight::W400,       // FontWeight::REGULAR
-};
-// The fontWeight default value, W400 corresponds to 400
-constexpr int32_t DEFAULT_FONT_WEIGHT_INT32 = 400;
-// Default multiple, which is used to calculate the fontWeight
-constexpr int32_t DEFAULT_MULTIPLE = 100;
-
-inline FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    int index = static_cast<int>(fontWeight);
-    if (index >= 0 && index < static_cast<int>(sizeof(FONT_WEIGHT_CONVERT_MAP) / sizeof(FontWeight))) {
-        return FONT_WEIGHT_CONVERT_MAP[index];
-    }
-    // 返回默认值，例如 FontWeight::W400
-    return FontWeight::W400;
-}
-} // namespace
 
 struct DimensionWithActual {
     constexpr DimensionWithActual() = default;
@@ -112,200 +58,6 @@ struct DimensionWithActual {
     Dimension value;
     float actualValue = 0.0f;
 };
-
-constexpr uint32_t DEFAULT_MAX_FONT_FAMILY_LENGTH = Infinity<uint32_t>();
-
-enum class FontStyle {
-    NORMAL,
-    ITALIC,
-    NONE
-};
-
-enum class SuperscriptStyle {
-    NORMAL,
-    SUPERSCRIPT,
-    SUBSCRIPT,
-    NONE
-};
-
-namespace StringUtils {
-inline std::string ToString(const FontStyle& fontStyle)
-{
-    static const LinearEnumMapNode<FontStyle, std::string> table[] = {
-        { FontStyle::NORMAL, "NORMAL" },
-        { FontStyle::ITALIC, "ITALIC" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
-    return iter != -1 ? table[iter].value : "";
-}
-
-inline std::string ToStringNDK(const FontStyle& fontStyle)
-{
-    static const LinearEnumMapNode<FontStyle, std::string> table[] = {
-        { FontStyle::NORMAL, "normal" },
-        { FontStyle::ITALIC, "italic" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-enum class TextBaseline {
-    ALPHABETIC,
-    IDEOGRAPHIC,
-    TOP,
-    BOTTOM,
-    MIDDLE,
-    HANGING,
-};
-
-namespace StringUtils {
-inline std::string ToString(const TextBaseline& textBaseline)
-{
-    static const LinearEnumMapNode<TextBaseline, std::string> table[] = {
-        { TextBaseline::ALPHABETIC, "ALPHABETIC" },
-        { TextBaseline::IDEOGRAPHIC, "IDEOGRAPHIC" },
-        { TextBaseline::TOP, "TOP" },
-        { TextBaseline::BOTTOM, "BOTTOM" },
-        { TextBaseline::MIDDLE, "MIDDLE" },
-        { TextBaseline::HANGING, "HANGING" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textBaseline);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-enum class TextCase {
-    NORMAL = 0,
-    LOWERCASE,
-    UPPERCASE,
-};
-
-namespace StringUtils {
-inline std::string ToString(const TextCase& textCase)
-{
-    static const LinearEnumMapNode<TextCase, std::string> table[] = {
-        { TextCase::NORMAL, "NORMAL" },
-        { TextCase::LOWERCASE, "LOWERCASE" },
-        { TextCase::UPPERCASE, "UPPERCASE" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textCase);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-enum class EllipsisMode {
-    HEAD,
-    MIDDLE,
-    TAIL,
-    MULTILINE_HEAD,
-    MULTILINE_MIDDLE,
-};
-
-enum class TextFlipDirection {
-    DOWN = 0,
-    UP,
-};
-namespace StringUtils {
-std::string ToString(const TextFlipDirection& textFlipDirection);
-std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList);
-
-ACE_FORCE_EXPORT std::string ToString(const TextDirection& textDirection);
-} // namespace StringUtils
-
-namespace StringUtils {
-inline std::string ToString(const EllipsisMode& ellipsisMode)
-{
-    static const LinearEnumMapNode<EllipsisMode, std::string> table[] = {
-        { EllipsisMode::HEAD, "HEAD" },
-        { EllipsisMode::MIDDLE, "MIDDLE" },
-        { EllipsisMode::TAIL, "TAIL" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), ellipsisMode);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD, HYPHENATION };
-namespace StringUtils {
-inline std::string ToString(const WordBreak& wordBreak)
-{
-    static const LinearEnumMapNode<WordBreak, std::string> table[] = {
-        { WordBreak::NORMAL, "NORMAL" },
-        { WordBreak::BREAK_ALL, "BREAK_ALL" },
-        { WordBreak::BREAK_WORD, "BREAK_WORD" },
-        { WordBreak::HYPHENATION, "HYPHENATION" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), wordBreak);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-/// Where to vertically align the placeholder relative to the surrounding text.
-enum class PlaceholderAlignment {
-    /// Match the baseline of the placeholder with the baseline.
-    BASELINE,
-
-    /// Align the bottom edge of the placeholder with the baseline such that the
-    /// placeholder sits on top of the baseline.
-    ABOVEBASELINE,
-
-    /// Align the top edge of the placeholder with the baseline specified in
-    /// such that the placeholder hangs below the baseline.
-    BELOWBASELINE,
-
-    /// Align the top edge of the placeholder with the top edge of the font.
-    /// When the placeholder is very tall, the extra space will hang from
-    /// the top and extend through the bottom of the line.
-    TOP,
-
-    /// Align the bottom edge of the placeholder with the top edge of the font.
-    /// When the placeholder is very tall, the extra space will rise from
-    /// the bottom and extend through the top of the line.
-    BOTTOM,
-
-    /// Align the middle of the placeholder with the middle of the text. When the
-    /// placeholder is very tall, the extra space will grow equally from
-    /// the top and bottom of the line.
-    MIDDLE,
-
-    /// Same alignment as Text.
-    FOLLOW_PARAGRAPH,
-};
-
-namespace StringUtils {
-inline std::string ToString(const PlaceholderAlignment& placeholderAlignment)
-{
-    static const LinearEnumMapNode<PlaceholderAlignment, std::string> table[] = {
-        { PlaceholderAlignment::BASELINE, "BASELINE" },
-        { PlaceholderAlignment::ABOVEBASELINE, "ABOVEBASELINE" },
-        { PlaceholderAlignment::BELOWBASELINE, "BELOWBASELINE" },
-        { PlaceholderAlignment::TOP, "TOP" },
-        { PlaceholderAlignment::BOTTOM, "BOTTOM" },
-        { PlaceholderAlignment::MIDDLE, "MIDDLE" },
-        { PlaceholderAlignment::FOLLOW_PARAGRAPH, "FOLLOW_PARAGRAPH" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), placeholderAlignment);
-    return iter != -1 ? table[iter].value : "";
-}
-} // namespace StringUtils
-
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
-
-namespace StringUtils {
-inline std::string ToString(const SpanItemType& spanItemType)
-{
-    static const LinearEnumMapNode<SpanItemType, std::string> table[] = {
-        { SpanItemType::NORMAL, "NORMAL" },
-        { SpanItemType::IMAGE, "IMAGE" },
-        { SpanItemType::CustomSpan, "CustomSpan" },
-        { SpanItemType::SYMBOL, "SYMBOL" },
-        { SpanItemType::PLACEHOLDER, "PLACEHOLDER" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), spanItemType);
-    return iter != -1 ? table[iter].value : "";
-}
-}
 
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
@@ -340,13 +92,6 @@ struct PlaceholderRun {
     {
         return !(value == *this);
     }
-};
-
-enum class BorderRadiusIndex {
-    TOPLEFT = 0,
-    TOPRIGHT = 1,
-    BOTTOMLEFT = 2,
-    BOTTOMRIGHT = 3
 };
 
 struct TextBackgroundStyle {
@@ -402,70 +147,6 @@ struct TextBackgroundStyle {
     }
 
     std::unordered_map<std::string, ResourceUpdater> textBackgroundStyleResMap_;
-};
-
-enum class TextStyleAttribute {
-    RE_CREATE = -1,
-    FONT_SIZE = 0,
-    FONT_WEIGHT = 1,
-    FONT_STYLE = 3,
-    FONT_FAMILIES = 4,
-    LETTER_SPACING = 5,
-    WORD_SPACING = 6,
-    HEIGHT_ONLY = 7,
-    HEIGHT_SCALE = 8,
-    FONT_FEATURES = 9,
-    FONT_VARIATIONS = 10,
-    BASELINE_SHIFT = 11,
-
-    DECRATION = 12,
-    DECORATION_COLOR = 13,
-    DECORATION_STYLE = 14,
-    DECORATION_THICKNESS_SCALE = 15,
-    BACKGROUND_RECT = 16,
-    STYLE_ID = 17,
-    FONT_COLOR = 18,
-    SHADOWS = 19,
-    HALF_LEADING = 20,
-    FOREGROUND_BRUSH = 21,
-    MAX_TEXT_STYLE
-};
-
-enum class ParagraphStyleAttribute {
-    RE_CREATE = -1,
-    FONT_SIZE = 0,
-    DIRECTION = 1,
-    MAXLINES = 2,
-
-    HALF_LEADING = 8,
-    BREAKSTRAGY = 19,
-
-    WORD_BREAKTYPE = 20,
-    ELLIPSIS = 21,
-    ELLIPSE_MODAL = 22,
-    TEXT_ALIGN = 23,
-    SPACING = 24,
-    SPACING_IS_END = 25,
-    TEXT_HEIGHT_BEHAVIOR = 26,
-
-    MAX_TEXT_STYLE
-};
-
-enum class SymbolStyleAttribute {
-    RE_CREATE = -1,
-    // EffectStrategy
-    EFFECT_STRATEGY = 0,
-    // SymbolEffectOptions
-    ANIMATION_MODE = 1,
-    ANIMATION_START = 2,
-    COMMONSUB_TYPE = 3,
-    // RenderColors(SymbolColorList)
-    COLOR_LIST = 4,
-    // RenderStrategy
-    RENDER_MODE = 5,
-    GRADIENT_COLOR = 6,
-    SYMBOL_SHADOW = 7,
-    MAX_SYMBOL_STYLE,
 };
 
 // For textStyle
@@ -866,6 +547,7 @@ public:
         return map_ ? map_->size() : 0;
     }
     std::unique_ptr<std::unordered_map<K, V>> map_;
+
 private:
     void CopyMap(const ResourceMap<K, V>& other)
     {
@@ -876,6 +558,8 @@ private:
         }
     }
 };
+
+ACE_FORCE_EXPORT FontWeight ConvertFontWeight(FontWeight fontWeight);
 
 class ACE_EXPORT TextStyle final {
 public:
@@ -892,11 +576,11 @@ public:
     ACE_FORCE_EXPORT bool operator==(const TextStyle& rhs) const;
     ACE_FORCE_EXPORT bool operator!=(const TextStyle& rhs) const;
 
-    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
-        const NG::InspectorFilter& filter);
+    static void ToJsonValue(
+        std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style, const NG::InspectorFilter& filter);
 
-    static std::string GetDeclarationString(
-        const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
+    static std::string GetDeclarationString(const std::optional<Color>& color,
+        const std::vector<TextDecoration>& textDecorations,
         const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale);
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
@@ -966,7 +650,7 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
- 	    OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
+        OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
@@ -1090,8 +774,7 @@ public:
 
     TextDecoration GetTextDecorationFirst() const
     {
-        return GetTextDecoration().size() > 0 ?
-            GetTextDecoration()[0] : TextDecoration::NONE;
+        return GetTextDecoration().size() > 0 ? GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
     const Dimension& GetParagraphSpacing() const
@@ -1401,88 +1084,23 @@ private:
 
 namespace StringUtils {
 
-inline std::pair<bool, FontWeight> ParseFontWeight(const std::string& weight,
-    FontWeight defaultFontWeight = FontWeight::NORMAL)
-{
-    static const LinearMapNode<FontWeight> fontWeightTable[] = {
-        { "100", FontWeight::W100 },
-        { "200", FontWeight::W200 },
-        { "300", FontWeight::W300 },
-        { "400", FontWeight::W400 },
-        { "500", FontWeight::W500 },
-        { "600", FontWeight::W600 },
-        { "700", FontWeight::W700 },
-        { "800", FontWeight::W800 },
-        { "900", FontWeight::W900 },
-        { "bold", FontWeight::BOLD },
-        { "bolder", FontWeight::BOLDER },
-        { "lighter", FontWeight::LIGHTER },
-        { "medium", FontWeight::MEDIUM },
-        { "normal", FontWeight::NORMAL },
-        { "regular", FontWeight::REGULAR },
-    };
-    auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
-    return weightIter != -1 ? std::make_pair(true, fontWeightTable[weightIter].value)
-                            : std::make_pair(false, defaultFontWeight);
-}
+ACE_FORCE_EXPORT std::pair<bool, FontWeight> ParseFontWeight(
+    const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL);
 
-inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
-{
-    return ParseFontWeight(weight, defaultFontWeight).second;
-}
+ACE_FORCE_EXPORT FontWeight StringToFontWeight(
+    const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL);
 
-inline WordBreak StringToWordBreak(const std::string& wordBreak)
-{
-    static const LinearMapNode<WordBreak> wordBreakTable[] = {
-        { "hyphenation", WordBreak::HYPHENATION },
-        { "break-all", WordBreak::BREAK_ALL },
-        { "break-word", WordBreak::BREAK_WORD },
-        { "normal", WordBreak::NORMAL },
-    };
-    auto wordBreakIter = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak.c_str());
-    return wordBreakIter != -1 ? wordBreakTable[wordBreakIter].value : WordBreak::BREAK_WORD;
-}
+ACE_FORCE_EXPORT WordBreak StringToWordBreak(const std::string& wordBreak);
 
-inline std::string FontWeightToString(const FontWeight& fontWeight)
-{
-    static const std::unordered_map<FontWeight, std::string> fontWeightTable = {
-        { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
-        { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
-        { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
-        { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
-        { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
-    };
-    auto weightIter = fontWeightTable.find(fontWeight);
-    return weightIter != fontWeightTable.end() ? weightIter->second : "";
-}
+ACE_FORCE_EXPORT int32_t GetFontWeightNumericValue(FontWeight fontWeight);
 
-inline std::string ToString(const FontWeight& fontWeight)
-{
-    return FontWeightToString(fontWeight);
-}
+ACE_FORCE_EXPORT std::string FontWeightToString(const FontWeight& fontWeight);
 
-inline int32_t GetFontWeightNumericValue(FontWeight fontWeight)
-{
-    FontWeight converted = ConvertFontWeight(fontWeight);
-    int32_t index = static_cast<int32_t>(converted);
-    int32_t result = DEFAULT_FONT_WEIGHT_INT32;
-    if (index >= 0 && index <= static_cast<int32_t>(FontWeight::W900)) {
-        result = (index + 1) * DEFAULT_MULTIPLE;
-    }
-    return result;
-}
+ACE_FORCE_EXPORT std::string ToString(const FontWeight& fontWeight);
 
-inline std::string SymbolColorListToString(const std::vector<Color>& colorList)
-{
-    std::string symbolColorList = "";
-    if (!colorList.empty()) {
-        symbolColorList = colorList[0].ColorToString();
-        for (uint32_t i = 1; i < colorList.size(); ++i) {
-            symbolColorList += ", " + colorList[i].ColorToString();
-        }
-    }
-    return symbolColorList;
-}
+ACE_FORCE_EXPORT std::string SymbolColorListToString(const std::vector<Color>& colorList);
+
+ACE_FORCE_EXPORT std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList);
 } // namespace StringUtils
 } // namespace OHOS::Ace
 

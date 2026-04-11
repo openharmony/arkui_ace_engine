@@ -24,8 +24,8 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
@@ -41,9 +41,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -629,7 +628,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg017, TestSize.Level1)
     rootNode->AddChild(frameNode);
     auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
     EXPECT_EQ(frameNode, searchedNode);
-    
+
     // tc.steps:    add offScreencreenNode to off screencreen node with inspector id text1
     // tc.expected: expect the function GetFrameNodeByKey get the offScreencreenNode
     auto offScreencreenNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
@@ -638,12 +637,12 @@ HWTEST_F(InspectorTestNg, InspectorTestNg017, TestSize.Level1)
     Inspector::AddOffscreenNode(offScreencreenNode);
     searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
     EXPECT_EQ(offScreencreenNode, searchedNode);
-    
+
     // tc.steps:    execute GetFrameNodeByKey when skipoffscreenNodes set true
     // tc.expected: expect the function GetFrameNodeByKey get the frameNode
     searchedNode = Inspector::GetFrameNodeByKey(inspectorId, false, true);
     EXPECT_EQ(frameNode, searchedNode);
-    
+
     // tc.steps:    execute GetFrameNodeByKey when remove offScreencreenNode
     // tc.expected: expect the function GetFrameNodeByKey get the frameNode
     Inspector::RemoveOffscreenNode(offScreencreenNode);
@@ -673,20 +672,20 @@ HWTEST_F(InspectorTestNg, InspectorTestNg018, TestSize.Level1)
     std::string searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
     auto searchedNode = JsonUtil::ParseJsonString(searchedNodeStr);
     EXPECT_TRUE(searchedNode->IsValid());
-    
+
     std::string nodeType = searchedNode->GetString(INSPECTOR_TYPE);
     EXPECT_EQ(nodeType, TEXT_NODE_TYPE);
-    
+
     int32_t nodeId = searchedNode->GetInt(INSPECTOR_ID);
     EXPECT_EQ(textNodeId, nodeId);
-    
+
     std::string debugLine = searchedNode->GetString(INSPECTOR_DEBUGLINE);
     EXPECT_EQ(debugLine, "");
-    
+
     auto attrJson = searchedNode->GetObject(INSPECTOR_ATTRS);
     std::string accessibilityTextAttr = attrJson->GetString("accessibilityText");
     EXPECT_EQ(accessibilityTextAttr, "");
-    
+
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityText(TEST_TEXT);
     searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
@@ -1528,7 +1527,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest001, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     EXPECT_TRUE(filter->FilterEmpty());
 }
- 
+
 /**
 * @tc.name: InspectorFilterTest002
 * @tc.desc: Test the operation of FilterEmptyInitially
@@ -1574,7 +1573,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest005, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
     filter->AddFilterAttr("content");
-    
+
     EXPECT_TRUE(filter->CheckFixedAttr(FIXED_ATTR_ID));
     EXPECT_TRUE(filter->CheckFixedAttr(FIXED_ATTR_CONTENT));
     EXPECT_FALSE(filter->CheckFixedAttr(FIXED_ATTR_SRC));
@@ -1589,7 +1588,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest006, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-    
+
     EXPECT_TRUE(filter->CheckExtAttr("custom_attr"));
     EXPECT_FALSE(filter->CheckExtAttr("other_attr"));
 }
@@ -1603,7 +1602,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest007, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
-    
+
     EXPECT_TRUE(filter->CheckFilterAttr(FIXED_ATTR_ID, nullptr));
     EXPECT_FALSE(filter->CheckFilterAttr(FIXED_ATTR_CONTENT, nullptr));
 }
@@ -1617,7 +1616,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest008, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-    
+
     EXPECT_TRUE(filter->CheckFilterAttr(FIXED_ATTR_ID, "custom_attr"));
     EXPECT_FALSE(filter->CheckFilterAttr(FIXED_ATTR_ID, "other_attr"));
 }
@@ -1632,7 +1631,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest009, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
     filter->AddFilterAttr("content");
-   
+
    EXPECT_TRUE(filter->IsFastFilter());
 }
 
@@ -1645,7 +1644,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest010, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-   
+
     EXPECT_FALSE(filter->IsFastFilter());
 }
 
@@ -1659,7 +1658,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest011, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     std::string id = "test_id";
     filter->SetFilterID(id);
-   
+
     EXPECT_EQ(id, filter->GetFilterID());
 }
 
@@ -1714,7 +1713,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     stageNode->AddChild(pageA);
     auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
-    
+
     auto button = FrameNode::CreateFrameNode("button", id3, AceType::MakeRefPtr<Pattern>(), true);
     pageA->AddChild(button);
 
@@ -1726,7 +1725,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     std::string tree = Inspector::GetInspector();
     auto jsonRoot  = JsonUtil::ParseJsonString(tree);
     ASSERT_NE(jsonRoot, nullptr);
-    
+
     auto children = jsonRoot->GetValue("$children");
     ASSERT_TRUE(children->IsArray());
     auto hasInternalIds = HasInternalIds(children);
@@ -1736,7 +1735,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     tree = Inspector::GetInspector();
     jsonRoot  = JsonUtil::ParseJsonString(tree);
     ASSERT_NE(jsonRoot, nullptr);
-    
+
     children = jsonRoot->GetValue("$children");
     ASSERT_TRUE(children->IsArray());
     hasInternalIds = HasInternalIds(children);

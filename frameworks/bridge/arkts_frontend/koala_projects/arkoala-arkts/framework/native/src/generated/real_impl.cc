@@ -1984,7 +1984,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_VoidCallback* value)
     {
     }
-    void SetOnAreaChangeImpl(Ark_NativePointer node,
+    void SetOnAreaChange0Impl(Ark_NativePointer node,
                              const Opt_Callback_Area_Area_Void* value)
     {
     }
@@ -2503,6 +2503,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetDebugLineImpl(Ark_NativePointer node,
                           const Ark_String* sourceLine,
                           const Opt_String* moduleName)
+    {
+    }
+    void SetOnAreaChange1Impl(Ark_NativePointer node,
+                              const AreaChangeCallback* event,
+                              const Opt_AreaChangeOptions* options)
     {
     }
     } // CommonMethodModifier
@@ -5383,8 +5388,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -6739,6 +6752,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_synthetic_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetCaretColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
@@ -6985,8 +7002,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_synthetic_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_synthetic_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -7360,8 +7385,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Callback_String_Void* value)
     {
     }
+    void SetOnWillCopyImpl(Ark_NativePointer node,
+                           const Opt_Callback_String_Boolean* value)
+    {
+    }
     void SetOnCutImpl(Ark_NativePointer node,
                       const Opt_Callback_String_Void* value)
+    {
+    }
+    void SetOnWillCutImpl(Ark_NativePointer node,
+                          const Opt_Callback_String_Boolean* value)
     {
     }
     void SetOnPasteImpl(Ark_NativePointer node,
@@ -8700,6 +8733,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_Boolean* value)
     {
     }
+    void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                      const Opt_ScrollbarLayoutPolicy* value)
+    {
+    }
     void SetAiSessionOptionsImpl(Ark_NativePointer node,
                                  const Opt_Array_AISessionEvent* value)
     {
@@ -8719,6 +8756,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
                                             const Opt_Boolean* value,
                                             const Opt_ScrollDirectionalLockType* type)
+    {
+    }
+    void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                               const Opt_OnInputmethodAttachedCallback* value)
     {
     }
     } // WebAttributeModifier
@@ -9062,7 +9103,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
             CommonMethodModifier::SetOnDetachImpl,
-            CommonMethodModifier::SetOnAreaChangeImpl,
+            CommonMethodModifier::SetOnAreaChange0Impl,
             CommonMethodModifier::SetVisibilityImpl,
             CommonMethodModifier::SetFlexGrowImpl,
             CommonMethodModifier::SetFlexShrinkImpl,
@@ -9179,6 +9220,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityGroupImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
             CommonMethodModifier::SetDebugLineImpl,
+            CommonMethodModifier::SetOnAreaChange1Impl,
         };
         return &ArkUICommonMethodModifierImpl;
     }
@@ -10266,7 +10308,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetOnTextSelectionChangeImpl,
             SearchAttributeModifier::SetOnContentScrollImpl,
             SearchAttributeModifier::SetOnCopyImpl,
+            SearchAttributeModifier::SetOnWillCopyImpl,
             SearchAttributeModifier::SetOnCutImpl,
+            SearchAttributeModifier::SetOnWillCutImpl,
             SearchAttributeModifier::SetOnPasteImpl,
             SearchAttributeModifier::SetCopyOptionImpl,
             SearchAttributeModifier::SetMaxLengthImpl,
@@ -10668,7 +10712,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetWordBreakImpl,
             TextAttributeModifier::SetLineBreakStrategyImpl,
             TextAttributeModifier::SetOnCopyImpl,
-            TextAttributeModifier::SetCaretColorImpl,
+            TextAttributeModifier::SetOnWillCopyImpl,
             TextAttributeModifier::SetSelectedBackgroundColorImpl,
             TextAttributeModifier::SetEllipsisModeImpl,
             TextAttributeModifier::SetEnableDataDetectorImpl,
@@ -10733,7 +10777,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetOnContentScrollImpl,
             TextAreaAttributeModifier::SetOnEditChangeImpl,
             TextAreaAttributeModifier::SetOnCopyImpl,
+            TextAreaAttributeModifier::SetOnWillCopyImpl,
             TextAreaAttributeModifier::SetOnCutImpl,
+            TextAreaAttributeModifier::SetOnWillCutImpl,
             TextAreaAttributeModifier::SetOnPasteImpl,
             TextAreaAttributeModifier::SetCopyOptionImpl,
             TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
@@ -10836,7 +10882,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetFontWeightImpl,
             TextInputAttributeModifier::SetFontFamilyImpl,
             TextInputAttributeModifier::SetOnCopyImpl,
+            TextInputAttributeModifier::SetOnWillCopyImpl,
             TextInputAttributeModifier::SetOnCutImpl,
+            TextInputAttributeModifier::SetOnWillCutImpl,
             TextInputAttributeModifier::SetOnPasteImpl,
             TextInputAttributeModifier::SetCopyOptionImpl,
             TextInputAttributeModifier::SetShowPasswordIconImpl,
@@ -11228,10 +11276,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+            WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
             WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
             WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
+            WebAttributeModifier::SetOnInputmethodAttachedImpl,
         };
         return &ArkUIWebModifierImpl;
     }
@@ -15634,6 +15684,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
     }
+    void EnableEventPassthroughImpl(const Opt_Boolean* enabled,
+                                    Ark_RawInputEventType eventType)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -17966,8 +18020,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRotationImpl(Ark_RenderNode peer,
-                         const Ark_Vector3* rotation,
-                         Ark_Int32 unitValue)
+                         const Ark_Vector3* rotation)
     {
     }
     void SetTransformImpl(Ark_RenderNode peer,
@@ -22875,6 +22928,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::EnableEventPassthroughImpl,
         };
         return &IUIContextAccessorImpl;
     }

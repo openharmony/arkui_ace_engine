@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 
+#include "core/components_ng/render/drawing.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "2d_graphics/include/recording/draw_cmd_list.h"
 #include "render_service_client/core/ui/rs_ui_director.h"

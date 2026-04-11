@@ -105,6 +105,16 @@ int32_t OH_ArkUI_GetNodeSnapshot(
     }
 }
 
+int32_t OH_ArkUI_GetNodeSnapshotSizeLimitation(int32_t* maxWidth, int32_t* maxHeight)
+{
+    CHECK_NULL_RETURN(maxWidth, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(maxHeight, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_INTERNAL_ERROR);
+    auto result = impl->getSnapshotAPI()->getSizeLimitation(maxWidth, maxHeight);
+    return result;
+}
+
 #ifdef __cplusplus
 };
 #endif

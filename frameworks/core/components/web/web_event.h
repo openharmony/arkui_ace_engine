@@ -2507,6 +2507,14 @@ private:
     int32_t originalState_ = 0;
     int32_t newState_ = 0;
 };
+
+class ACE_EXPORT InputMethodAttachedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(InputMethodAttachedEvent, BaseEventInfo);
+
+public:
+    InputMethodAttachedEvent() : BaseEventInfo("InputMethodAttached") {}
+    ~InputMethodAttachedEvent() = default;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

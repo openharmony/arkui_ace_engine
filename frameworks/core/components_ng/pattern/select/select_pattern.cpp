@@ -31,7 +31,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -204,8 +204,7 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(selectPaintProperty);
     auto material = renderContext->GetSystemMaterial();
     if (selectPaintProperty->HasBackgroundColor() ||
-        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
+        (material && MaterialUtils::CheckMaterialValid(material->GetType()))) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -2266,6 +2265,14 @@ bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         selectRenderContext->UpdateBackgroundColor(selectTheme->GetButtonBackgroundColor());
         result = true;
     }
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto menuNode = GetMenuNode();
+        CHECK_NULL_RETURN(menuNode, false);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        menuPattern->OnThemeScopeUpdate(themeScopeId);
+        result = true;
+    }
     return result;
 }
 
@@ -2393,6 +2400,12 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
 
 void SelectPattern::SetMenuBackgroundColor(const Color& color)
 {
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.backgroundColor = color;
+    wrapperPattern->SetMenuParam(params);
     menuBackgroundColor_ = color;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
@@ -2404,6 +2417,12 @@ void SelectPattern::SetMenuBackgroundColor(const Color& color)
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
 {
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.blurStyleOption = blurStyle;
+    wrapperPattern->SetMenuParam(params);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     ACE_UINODE_TRACE(menu);

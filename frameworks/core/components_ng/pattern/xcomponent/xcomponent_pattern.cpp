@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -510,12 +511,18 @@ void XComponentPattern::RegisterRenderContextCallBack()
     };
     renderContextForSurface_->AddUpdateCallBack(OnUpdateCallBack);
 
-#ifdef IOS_PLATFORM
+#if defined(CROSS_PLATFORM)
     auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->renderSurface_) {
+#if defined(IOS_PLATFORM)
             pattern->renderSurface_->GetTextureIsVideo(type);
+#elif defined(ANDROID_PLATFORM)
+            if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+                pattern->renderSurface_->AddInitTypeCallBack(type);
+            }
+#endif
         }
     };
     renderContextForSurface_->AddInitTypeCallBack(OnInitTypeCallback);
@@ -900,6 +907,12 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
             static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+            !nativeWindow_ && drawSize_.IsPositive() && !isXComponentSizeInit_) {
+            XComponentSizeInit();
+        }
+#endif
         if (handlingSurfaceRenderContext_) {
             handlingSurfaceRenderContext_->SetBounds(
                 paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -985,10 +998,26 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 #endif
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            if (isInitializingNativeWindow_) {
+                return;
+            }
+            isInitializingNativeWindow_ = true;
+            uint32_t w = static_cast<uint32_t>(textureWidth * viewScale);
+            uint32_t h = static_cast<uint32_t>(textureHeight * viewScale);
+            renderSurface_->SetExtSurfaceBoundsSync(0, 0, w, h);
+        }
+#endif
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
             static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
         nativeWindow_ = renderSurface_->GetNativeWindow();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            isInitializingNativeWindow_ = false;
+        }
+#endif
     }
 }
 
@@ -2027,6 +2056,15 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     CHECK_NULL_VOID(host);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+#if defined(ANDROID_PLATFORM)
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+        isInitializingNativeWindow_) {
+        return;
+    }
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() && !nativeWindow_) {
+        InitNativeWindow(width, height);
+    }
+#endif
     if (needResizeNativeWindow) {
         AdjustNativeWindowSize(width, height);
     }
@@ -2036,6 +2074,11 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
         UpdateSdrRatioIfNeed();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+            nativeXComponentImpl_->SetSurface(nativeWindow_);
+        }
+#endif
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);

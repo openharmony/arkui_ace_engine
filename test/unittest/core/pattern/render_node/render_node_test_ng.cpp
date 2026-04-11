@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_paint_property.h"
@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/render_node/render_node_layout_property.h"
 #include "core/components_ng/pattern/render_node/render_node_layout_algorithm.h"
 #include "core/components_ng/base/frame_node.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
@@ -149,6 +149,26 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithm001, TestSize.Level1)
     geometryNode->SetFrameSize(frameSize2);
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: RenderNodeModifierSetRotation001
+ * @tc.desc: Verify RenderContext::SetRotation keeps the three-parameter signature and can be invoked safely.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeModifierSetRotation001, TestSize.Level1)
+{
+    using SetRotationMethod = void (RenderContext::*)(float, float, float);
+    SetRotationMethod setRotation = &RenderContext::SetRotation;
+
+    auto frameNode = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* renderContextPtr = AceType::RawPtr(renderContext);
+    ASSERT_NE(renderContextPtr, nullptr);
+    (renderContextPtr->*setRotation)(-45.5f, 30.25f, 0.75f);
+    SUCCEED();
 }
 
 /**

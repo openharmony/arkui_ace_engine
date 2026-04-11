@@ -27,6 +27,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -997,6 +998,7 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
         return;
     }
     auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
@@ -1712,10 +1714,6 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option, fl
                 if (NearEqual(modifier->GetTextRacePercent(), modifier->marqueeRaceMaxPercent_)) {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
                     modifier->marqueeCount_++;
-                }
-                if (!modifier->AllowTextRace() &&
-                    NearEqual(modifier->GetTextRacePercent(), modifier->marqueeRaceMaxPercent_)) {
-                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::STOP);
                 }
                 if (!modifier->AllowTextRace()) {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);

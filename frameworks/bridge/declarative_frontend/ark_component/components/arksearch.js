@@ -601,6 +601,19 @@ function loadComponent() {
       }
     }
     SearchOnSubmitModifier.identity = Symbol('searchOnSubmit');
+    class SearchOnWillCopyModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().search.resetOnWillCopy(node);
+        } else {
+          getUINativeModule().search.setOnWillCopy(node, this.value);
+        }
+      }
+    }
+    SearchOnWillCopyModifier.identity = Symbol('searchOnWillCopy');
     class SearchOnCopyModifier extends ModifierWithKey {
       constructor(value) {
         super(value);
@@ -614,6 +627,19 @@ function loadComponent() {
       }
     }
     SearchOnCopyModifier.identity = Symbol('searchOnCopy');
+    class SearchOnWillCutModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().search.resetOnWillCut(node);
+        } else {
+          getUINativeModule().search.setOnWillCut(node, this.value);
+        }
+      }
+ 	 }
+ 	 SearchOnWillCutModifier.identity = Symbol('searchOnWillCut');
     class SearchOnCutModifier extends ModifierWithKey {
       constructor(value) {
         super(value);
@@ -1114,8 +1140,16 @@ function loadComponent() {
           SearchOnTextSelectionChangeModifier, callback);
         return this;
       }
+      onWillCopy(callback) {
+        modifierWithKey(this._modifiersWithKeys, SearchOnWillCopyModifier.identity, SearchOnWillCopyModifier, callback);
+        return this;
+      }
       onCopy(callback) {
         modifierWithKey(this._modifiersWithKeys, SearchOnCopyModifier.identity, SearchOnCopyModifier, callback);
+        return this;
+      }
+      onWillCut(callback) {
+        modifierWithKey(this._modifiersWithKeys, SearchOnWillCutModifier.identity, SearchOnWillCutModifier, callback);
         return this;
       }
       onCut(callback) {
@@ -1509,8 +1543,14 @@ class JSSearch extends JSViewAbstract {
   static enableKeyboardOnFocus(value) {
     getUINativeModule().search.setEnableKeyboardOnFocus(true, value);
   }
+  static onWillCopy(callback) {
+      getUINativeModule().search.setOnWillCopy(true, callback);
+  }
   static onCopy(callback) {
     getUINativeModule().search.setOnCopy(true, callback);
+  }
+  static onWillCut(callback) {
+    getUINativeModule().search.setOnWillCut(true, callback);
   }
   static onCut(callback) {
     getUINativeModule().search.setOnCut(true, callback);

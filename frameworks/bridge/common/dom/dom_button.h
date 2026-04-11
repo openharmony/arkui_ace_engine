@@ -25,6 +25,10 @@
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components/declaration/button/button_declaration.h"
 
+namespace OHOS::Ace {
+class LoadingProgressComponent;
+}
+
 namespace OHOS::Ace::Framework {
 
 class DOMButton final : public DOMNode {

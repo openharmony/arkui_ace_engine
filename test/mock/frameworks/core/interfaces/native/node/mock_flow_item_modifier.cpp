@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 namespace OHOS::Ace::NG {

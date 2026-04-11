@@ -14,6 +14,7 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/common/event_manager.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"

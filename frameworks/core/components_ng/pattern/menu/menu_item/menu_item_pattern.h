@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ public:
         auto pipelineContext = host->GetContext();
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         if (isOptionPattern_) {
-            auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+            auto selectTheme = host->GetTheme<SelectTheme>(true);
             CHECK_NULL_RETURN(selectTheme, focusPattern);
             auto focusStyleType =
                 static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetOptionFocusStyleType_()));
@@ -257,6 +257,7 @@ public:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     bool HasSelectIcon() const
     {
@@ -596,6 +597,14 @@ friend class ServiceCollaborationMenuAceHelper;
     void UpdateOptionStyle();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
     void OnAttachToMainTree() override;
+    void UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuProperty,
+        RefPtr<MenuItemLayoutProperty>& itemProperty, RefPtr<SelectTheme> &menuTheme, bool isLabel);
+    void UpdateStartIconByThemeColor(RefPtr<SelectTheme> &menuTheme);
+    void UpdateEndIconByThemeColor(RefPtr<SelectTheme> &menuTheme);
+    void UpdateexpandIconByThemeColor(RefPtr<SelectTheme> &menuTheme);
+    void UpdateSelectIconByThemeColor(RefPtr<SelectTheme> &menuTheme);
+    void UpdateCheckMarkIconByThemeColor(RefPtr<SelectTheme> &menuTheme);
+    void UpdateSymbolColorList(RefPtr<TextLayoutProperty>& props, const std::vector<Color>& color);
 
     std::list<TouchRegion> hoverRegions_;
 

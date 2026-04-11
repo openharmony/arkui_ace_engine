@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
 #include <array>
@@ -544,17 +545,22 @@ bool TextFieldPattern::ReportCommandResult(int32_t nodeId, const std::string& ev
     return true;
 }
 
-void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
-    const std::string& value, int32_t start, int32_t end)
+void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+    int32_t end)
 {
     auto json = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(json);
-    json->Put("event", dataStr.c_str());
-    json->Put("value", value.c_str());
-    json->Put("start", start);
-    json->Put("end", end);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
-        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    auto valueStr = contentController_->GetSelectedValue(start, end);
+    std::string value = UtfUtils::Str16DebugToStr8(valueStr);
+    if (contentController_->lastReportSelectionText_ != value) {
+        contentController_->lastReportSelectionText_ = value;
+        json->Put("event", dataStr.c_str());
+        json->Put("value", value.c_str());
+        json->Put("start", start);
+        json->Put("end", end);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+    }
 }
 
 void TextFieldPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
@@ -605,7 +611,7 @@ bool TextFieldPattern::HandleSetCaretPositionCommand(int32_t position, int32_t h
     position = std::clamp(position, 0, length);
     SetCaretPosition(position, true);
     ReportCaretPositionChangeEvent(hostId, position);
-    ReportSelectionChangeEvent(hostId, "selectionChange", "", position, position);
+    ReportSelectionChangeEvent(hostId, "selectionChange", position, position);
     return true;
 }
 
@@ -1675,8 +1681,7 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
     UpdateCaretInfoToController();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto value = contentController_->GetSelectedValue(start, end);
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", UtfUtils::Str16DebugToStr8(value), start, end);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", start, end);
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -1965,6 +1970,20 @@ bool TextFieldPattern::IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManag
     return isCloseCustomKeyboard || isNoContinueFeatureClose;
 }
 
+bool TextFieldPattern::QuerySmartEdgeState()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dataProviderManager = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProviderManager, false);
+    return dataProviderManager->QuerySmartEdgeState();
+}
+
+bool TextFieldPattern::ShouldKeepSelectionOnWindowBlur()
+{
+    return blurReason_ != BlurReason::FOCUS_SWITCH && QuerySmartEdgeState();
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -1989,13 +2008,12 @@ void TextFieldPattern::HandleBlurEvent()
     ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
     ModifyInnerStateInBlurEvent();
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
-    CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    ProcessMagnifierInBlurEvent();
+    auto shouldKeepSelection = ShouldKeepSelectionOnWindowBlur();
+    ProcessMenuAndSelectionInBlurEvent(shouldKeepSelection);
     StopTwinkling();
     HandleCrossPlatformInBlurEvent();
-    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    ProcessCaretIndexInBlurEvent(shouldKeepSelection);
     NotifyOnEditChanged(false);
     ResetFloatingCursorState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2082,6 +2100,29 @@ void TextFieldPattern::HandleCrossPlatformInBlurEvent()
         CloseKeyboard(true);
     }
 #endif
+}
+
+void TextFieldPattern::ProcessMagnifierInBlurEvent()
+{
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+}
+
+void TextFieldPattern::ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection)
+{
+    if (!shouldKeepSelection) {
+        CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    } else if (IsSelected() && selectOverlay_) {
+        selectOverlay_->HideMenu(true);
+    }
+}
+
+void TextFieldPattern::ProcessCaretIndexInBlurEvent(bool shouldKeepSelection)
+{
+    if (!shouldKeepSelection) {
+        selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    }
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -2287,8 +2328,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
-    auto value = contentController_->GetTextValue();
-    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", value, 0, textSize);
+    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", 0, textSize);
 }
 
 void TextFieldPattern::HandleOnPasswordVault()
@@ -2318,15 +2358,22 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (value.empty()) {
         return;
     }
-    clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    bool isAllowCopy = true;
+    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    if (eventHub) {
+        isAllowCopy = eventHub->FireOnWillCopy(value);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy, isAllowCopy=%{public}d", isAllowCopy);
+    if (isAllowCopy) {
+        clipboard_->SetData(UtfUtils::Str16DebugToStr8(value), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    }
     if (isUsingExternalKeyboard || selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay(true);
     } else {
         selectOverlay_->HideMenu();
         selectOverlay_->UpdatePasteMenu();
     }
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(eventHub && isAllowCopy);
     eventHub->FireOnCopy(value);
 }
 
@@ -2652,6 +2699,22 @@ void TextFieldPattern::HandleOnCut()
     }
     UpdateEditingValueToRecord();
     auto selectedText = contentController_->GetSelectedValue(start, end);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    bool isAllowCut = true;
+    if (eventHub) {
+        isAllowCut = eventHub->FireOnWillCut(selectedText);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCut, isAllowCut=%{public}d", isAllowCut);
+    if (!isAllowCut) {
+        if (selectOverlay_->IsShowMouseMenu()) {
+            CloseSelectOverlay(true);
+        } else {
+            selectOverlay_->HideMenu();
+        }
+        return;
+    }
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value size is %{private}zu",
             UtfUtils::Str16DebugToStr8(selectedText).size());
@@ -2659,9 +2722,6 @@ void TextFieldPattern::HandleOnCut()
             layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
     DeleteRange(start, end, false);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCut(selectedText);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
@@ -3806,9 +3866,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         UpdateCaretInfoToController();
         auto startIndex = selectController_->GetStartIndex();
         auto endIndex = selectController_->GetEndIndex();
-        auto value = contentController_->GetTextValue();
-        auto valueStr = value.substr(static_cast<int32_t>(startIndex), static_cast<int32_t>(endIndex - startIndex));
-        ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
     }
     if (IsSelected()) {
         StopTwinkling();
@@ -4877,10 +4935,7 @@ void TextFieldPattern::HandleLongPressSelectionAndReport(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto value = contentController_->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(start),
-        static_cast<int32_t>(end - start));
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, start, end);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", start, end);
 }
 
 bool TextFieldPattern::BetweenSelectedPosition(GestureEvent& info)
@@ -5518,10 +5573,7 @@ void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
     CHECK_NULL_VOID(host);
     auto startIndex = selectController_->GetStartIndex();
     auto endIndex = selectController_->GetEndIndex();
-    auto value = contentController_->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
-        static_cast<int32_t>(endIndex - startIndex));
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
@@ -7808,10 +7860,7 @@ void TextFieldPattern::AfterSelection()
     UpdateCaretInfoToController();
     auto startIndex = selectController_->GetStartIndex();
     auto endIndex = selectController_->GetEndIndex();
-    auto value = contentController_->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
-        static_cast<int32_t>(endIndex - startIndex));
-    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", valueStr, startIndex, endIndex);
+    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::HandleSelectionUp()
@@ -10987,6 +11036,18 @@ void TextFieldPattern::SetThemeAttr()
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
     inlineFocusState_ = false;
+}
+
+RefPtr<Clipboard> TextFieldPattern::GetClipboard()
+{
+    if (!clipboard_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, clipboard_);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, clipboard_);
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    }
+    return clipboard_;
 }
 
 const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const

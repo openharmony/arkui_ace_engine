@@ -39,6 +39,8 @@ template("ace_core_pipeline_ng_source_set") {
 
       # ui scheduler
       "ui_task_scheduler.cpp",
+
+      "compatible_manager.cpp",
     ]
 
     configs = [ "$ace_root:ace_config" ]

@@ -312,8 +312,8 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
     bool ParseCommand(const std::string& command);
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+        int32_t end);
 
     int32_t GetInstanceId() const override
     {
@@ -1520,17 +1520,7 @@ public:
         return isTransparent_;
     }
 
-    RefPtr<Clipboard> GetClipboard() override
-    {
-        if (!clipboard_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, clipboard_);
-            auto context = host->GetContext();
-            CHECK_NULL_RETURN(context, clipboard_);
-            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-        }
-        return clipboard_;
-    }
+    RefPtr<Clipboard> GetClipboard() override;
 
     const Dimension& GetAvoidSoftKeyboardOffset() const override;
 
@@ -2274,6 +2264,9 @@ private:
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
+    void ProcessMagnifierInBlurEvent();
+    void ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection);
+    void ProcessCaretIndexInBlurEvent(bool shouldKeepSelection);
 
     void TwinklingByFocus();
 
@@ -2350,6 +2343,8 @@ private:
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
     void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
+    bool QuerySmartEdgeState();
+    bool ShouldKeepSelectionOnWindowBlur();
 
     RectF frameRect_;
     RectF textRect_;

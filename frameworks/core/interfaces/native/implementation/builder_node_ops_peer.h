@@ -15,8 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_BUILDER_NODE_OPS_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_BUILDER_NODE_OPS_PEER_H
 
-#include <vector>
-
 #include "ui/base/referenced.h"
 
 #include "core/components_ng/base/frame_node.h"

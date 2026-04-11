@@ -77,7 +77,6 @@ interface SimpleSegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
   buttonPadding: Resource;
   itemSelectedBackgroundColor: ResourceColor;
   itemBorderRadius: Resource;
-  itemShadow: ShadowStyle;
 }
 
 interface SegmentButtonV2ItemRect {
@@ -96,7 +95,7 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
   buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
   hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
-  buttonPadding: $r('sys.float.padding_level1'),
+  buttonPadding: $r('sys.float.padding_level2'),
   itemSelectedBackgroundColor: $r('sys.color.segment_button_v2_tab_selected_item_background'),
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
@@ -119,7 +118,6 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
     start: LengthMetrics.resource($r('sys.float.padding_level4')),
     end: LengthMetrics.resource($r('sys.float.padding_level4')),
   },
-  itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleSmallest: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleLargest: LARGEST_MAX_FONT_SCALE,
@@ -133,7 +131,7 @@ const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
   buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
   hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
-  buttonPadding: $r('sys.float.padding_level1'),
+  buttonPadding: $r('sys.float.padding_level2'),
   itemSelectedBackgroundColor: $r('sys.color.comp_background_emphasize'),
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
@@ -156,7 +154,6 @@ const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
     start: LengthMetrics.resource($r('sys.float.padding_level4')),
     end: LengthMetrics.resource($r('sys.float.padding_level4')),
   },
-  itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleSmallest: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleLargest: LARGEST_MAX_FONT_SCALE,
@@ -848,7 +845,7 @@ struct SimpleSegmentButtonV2 {
   }
 
   private getItemBackplateShadow(): ShadowOptions | ShadowStyle | undefined {
-    return this.itemShadow ?? this.theme.itemShadow
+    return this.itemShadow;
   }
 
   private getButtonBackgroundBlurStyle(): BlurStyle | undefined {

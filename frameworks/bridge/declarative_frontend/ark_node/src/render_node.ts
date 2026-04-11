@@ -185,6 +185,7 @@ declare enum Color {
 declare enum ColorSpace {
   SRGB = 0,
   DISPLAY_P3 = 1,
+  BT2020 = 2,
 }
 
 declare type ResourceColor = Color | number | string | Resource;
@@ -202,12 +203,22 @@ class ColorMetrics {
   private resourceId_: number;
   private colorSpace_: ColorSpace;
   private res_: Resource | undefined;
+  private isHDR_: boolean;
+  private redValue_: number;
+  private greenValue_: number;
+  private blueValue_: number;
+  private headRoom_: number;
   private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
     this.res_ = res === undefined ? undefined : res;
+    this.isHDR_ = false;
+    this.redValue_ = 0.0;
+    this.greenValue_ = 0.0;
+    this.blueValue_ = 0.0;
+    this.headRoom_ = 1.0;
   }
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
@@ -235,6 +246,9 @@ class ColorMetrics {
     let alphaInt = Math.round(alpha * MAX_CHANNEL_VALUE);
     const colorMetrics = new ColorMetrics(redInt, greenInt, blueInt, alphaInt);
     colorMetrics.setColorSpace(colorSpace);
+    if (colorSpace === ColorSpace.BT2020) {
+      colorMetrics.setColorWithHeadRoom(red, green, blue);
+    }
     return colorMetrics;
   }
 
@@ -364,12 +378,81 @@ class ColorMetrics {
     return this.resourceId_;
   }
   setColorSpace(colorSpace: ColorSpace): void {
-    if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
+    if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace ||
+      ColorSpace.BT2020 === colorSpace) {
       this.colorSpace_ = colorSpace;
     }
   }
   getColorSpace(): ColorSpace {
     return this.colorSpace_;
+  }
+  setColorWithHeadRoom(red: number, green: number, blue: number, headRoom: number = 1.0): void {
+    this.redValue_ = red;
+    this.greenValue_ = green;
+    this.blueValue_ = blue;
+    this.headRoom_ = headRoom;
+  }
+  setIsHDR(isHDR: boolean): void {
+    this.isHDR_ = isHDR;
+  }
+  isHDR(): boolean {
+    return this.isHDR_;
+  }
+  getRedValue(): number {
+    return this.redValue_ * this.headRoom_;
+  }
+  getGreenValue(): number {
+    return this.greenValue_ * this.headRoom_;
+  }
+  getBlueValue(): number {
+    return this.blueValue_ * this.headRoom_;
+  }
+  getHeadRoomValue(): number {
+    return this.headRoom_;
+  }
+  static createHDRColorWithLinearExposure(linearExposure: number, colorSpace: ColorSpace,
+    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    const clampedLinearExposure = Math.max(linearExposure, 1);
+    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
+    colorMetrics.setIsHDR(true);
+    colorMetrics.setColorSpace(colorSpace);
+    const clampedRed = Math.min(Math.max(red, 0), 1);
+    const clampedGreen = Math.min(Math.max(green, 0), 1);
+    const clampedBlue = Math.min(Math.max(blue, 0), 1);
+    colorMetrics.setColorWithHeadRoom(clampedRed, clampedGreen, clampedBlue, clampedLinearExposure);
+    return colorMetrics;
+  }
+  static createHDRColorWithLogExposure(exposure: number, colorSpace: ColorSpace,
+    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    const clampedExposure = Math.max(exposure, 0);
+    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
+    colorMetrics.setIsHDR(true);
+    colorMetrics.setColorSpace(colorSpace);
+    const linearExposure = Math.pow(2.0, clampedExposure);
+    const clampedRed = Math.min(Math.max(red, 0), 1);
+    const clampedGreen = Math.min(Math.max(green, 0), 1);
+    const clampedBlue = Math.min(Math.max(blue, 0), 1);
+    colorMetrics.setColorWithHeadRoom(clampedRed, clampedGreen, clampedBlue, linearExposure);
+    return colorMetrics;
+  }
+  static createHDRColor(colorSpace: ColorSpace,
+    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
+    colorMetrics.setIsHDR(true);
+    colorMetrics.setColorSpace(colorSpace);
+    const clampedRed = Math.max(red, 0);
+    const clampedGreen = Math.max(green, 0);
+    const clampedBlue = Math.max(blue, 0);
+    const maxValue = Math.max(clampedRed, clampedGreen, clampedBlue);
+    let headRoom = 1.0;
+    if (maxValue > 1.0) {
+      headRoom = maxValue;
+    }
+    colorMetrics.setColorWithHeadRoom(clampedRed / headRoom, clampedGreen / headRoom, clampedBlue / headRoom, headRoom);
+    return colorMetrics;
   }
 }
 
@@ -559,7 +642,7 @@ class RenderNode {
       this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
       this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
     }
-    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
+    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
   }
   set scale(scale: Vector2) {
     if (scale === undefined || scale === null) {

@@ -2446,6 +2446,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onMicrophoneCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnMicrophoneCaptureStateChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetMicrophoneCaptureStateChangedId(), oldContext);
+        onInputMethodAttachedV2_ = useNewPipe ? eventHub->GetOnInputMethodAttachedEvent() : nullptr;
     }
     return true;
 }
@@ -9610,6 +9611,13 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
     return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+bool WebDelegate::OnNestedScrollV2(float& x, float& y)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedScrollV2(x, y);
+}
+
 void WebDelegate::OnStatusBarClick()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnStatusBarClick");
@@ -9766,6 +9774,18 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
         borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
 }
 
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetScrollbarLayoutPolicy(static_cast<int32_t>(policy));
+}
+
+void WebDelegate::SetIsSystemRtlEnable(bool enable)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetIsSystemRtlEnable(enable);
+}
+
 void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
@@ -9910,6 +9930,25 @@ void WebDelegate::SetEnableAutoFill(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableAutoFill");
 }
 
+void WebDelegate::SetEnableDrag(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->SetEnableDrag(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableDrag");
+}
+
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -9958,7 +9997,7 @@ void WebDelegate::OnMediaCastEnter()
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);
-    nweb_->SetForceEnableZoom(isEnabled);
+    nweb_->SetForceEnableZoomPublic(isEnabled);
 }
 
 void WebDelegate::OnExtensionDisconnect(int32_t connectId)
@@ -10146,6 +10185,21 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
+}
+
+void WebDelegate::OnInputMethodAttached()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onInputMethodAttachedV2 = delegate->onInputMethodAttachedV2_;
+            if (onInputMethodAttachedV2) {
+                onInputMethodAttachedV2(std::make_shared<InputMethodAttachedEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebInputMethodAttached");
 }
 
 void WebDelegate::SetOfflineWebActiveStatus(bool isActive)

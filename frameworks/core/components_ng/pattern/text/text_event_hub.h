@@ -42,6 +42,19 @@ public:
         }
     }
 
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+    {
+        onWillCopy_ = std::move(func);
+    }
+
+    bool FireOnWillCopy(const std::u16string& value)
+    {
+        if (onWillCopy_) {
+            return onWillCopy_(value);
+        }
+        return true;
+    }
+
     void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
     {
         onSelectionChange_ = std::move(func);
@@ -67,6 +80,7 @@ public:
     }
 
 private:
+    std::function<bool(const std::u16string&)> onWillCopy_;
     std::function<void(const std::u16string&)> onCopy_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
     std::function<void(int32_t)> onMarqueeStateChange_;

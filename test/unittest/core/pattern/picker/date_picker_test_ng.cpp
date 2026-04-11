@@ -16,11 +16,11 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -81,6 +81,8 @@ const std::string AM = "AM ";
 const std::string COLON = ":";
 const std::string ZERO = "0";
 const std::string SPACE = " ";
+const Dimension FONT_SIZE_VALUE_DIMENSION = Dimension(20.1, DimensionUnit::PX);
+const std::vector<std::string> FONT_FAMILY_CURSIVE = { "cursive" };
 void InitDatePickerSettingData(DatePickerSettingData& settingData)
 {
     settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
@@ -264,7 +266,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Lev
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
-    EXPECT_FALSE(pickerProperty->HasDisappearColor());
+    EXPECT_TRUE(pickerProperty->HasDisappearColor());
     EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
@@ -327,6 +329,28 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle004, TestSize.Lev
     settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
     auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
     EXPECT_EQ(isUserSet, true);
+}
+
+/**
+ * @tc.name: DatePickerModelSetDisappearTextStyle005
+ * @tc.desc: Test DatePickerTestNg SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle005, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.fontWeight = Ace::FontWeight::BOLD;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    data.textColor = Color::RED;
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
 }
 
 /**
@@ -413,6 +437,28 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle004, TestSize.Level0
 }
 
 /**
+ * @tc.name: DatePickerModelSetNormalTextStyle005
+ * @tc.desc: Test DatePickerTestNg SetNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle005, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.fontWeight = Ace::FontWeight::BOLD;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    data.textColor = Color::RED;
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+}
+
+/**
  * @tc.name: DatePickerModelSetSelectedTextStyle001
  * @tc.desc: Test DatePickerModel SetSelectedTextStyle.
  * @tc.type: FUNC
@@ -493,6 +539,65 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle004, TestSize.Leve
     settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
     auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
     EXPECT_EQ(isUserSet, true);
+}
+
+/**
+ * @tc.name: DatePickerModelSetSelectedTextStyle005
+ * @tc.desc: Test DatePickerTestNg SetSeletedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle005, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.fontWeight = Ace::FontWeight::BOLD;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+ 
+    data.textColor = Color::RED;
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+}
+ 
+/**
+ * @tc.name: DatePickerModelSetSelectedTextStyle006
+ * @tc.desc: Test DatePickerTestNg SetSeletedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle006, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.fontWeight = Ace::FontWeight::BOLD;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, data);
+    ASSERT_NE(frameNode, nullptr);
+}
+ 
+/**
+ * @tc.name: DatePickerModelSetDefaultAttributes001
+ * @tc.desc: Test DatePickerTestNg SetDefaultAttributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDefaultAttributes001, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+ 
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+ 
+    auto frameNode = DatePickerModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    DatePickerModelNG::SetDefaultAttributes(frameNode, theme);
 }
 
 /**
@@ -2385,4 +2490,96 @@ HWTEST_F(DatePickerTestNg, DatePickerEventTest001, TestSize.Level0)
     datePickerModelNG.SetOnChange(frameNode, [](const BaseEventInfo* info) {});
     EXPECT_NE(eventHub->changeEvent_, nullptr);
 }
+
+/**
+ * @tc.name: DatePickerPatternOnThemeScopeUpdateTest001
+ * @tc.desc: test DatePickerPattern OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternOnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+ 
+    auto theme = pipelineContext->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+ 
+    /**
+     * @tc.steps: step3. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    
+    auto host = datePickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_FALSE(datePickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: DatePickerPatternOnThemeScopeUpdateTest002
+ * @tc.desc: test DatePickerPattern OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternOnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    
+    auto theme = pipelineContext->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+ 
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+ 
+    /**
+     * @tc.steps: step3. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    
+    auto host = datePickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_TRUE(datePickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+ 
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    datePickerPattern->UpdateSelectedTextStyle(textStyle);
+    datePickerPattern->UpdateNormalTextStyle(textStyle);
+    datePickerPattern->UpdateDisappearTextStyle(textStyle);
+    EXPECT_FALSE(datePickerPattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
+}
+
 } // namespace OHOS::Ace::NG

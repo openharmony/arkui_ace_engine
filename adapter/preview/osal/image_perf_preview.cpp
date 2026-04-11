@@ -39,4 +39,16 @@ void ImagePerfPreview::EndRecordImageLoadStat(
          ", imageType: %{public}s, width: %{public}d, height: %{public}d, state: %{public}d",
         id, imageType.c_str(), size.first, size.second, state);
 }
+
+void ImagePerfPreview::AddLoadComponent(int32_t nodeId)
+{
+}
+
+void ImagePerfPreview::DeleteLoadComponent(int32_t nodeId)
+{
+}
+
+void ImagePerfPreview::CompleteLoadComponent(int32_t nodeId)
+{
+}
 } // namespace OHOS::Ace

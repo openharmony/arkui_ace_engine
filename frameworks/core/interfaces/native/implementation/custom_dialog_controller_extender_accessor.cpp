@@ -68,6 +68,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetImersiveMode(value->immersiveMode);
     peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
+    peer->SetSystemMaterial(value->systemMaterial);
 
     return AceType::RawPtr(peer);
 }

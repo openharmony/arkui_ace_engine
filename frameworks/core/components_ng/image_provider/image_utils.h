@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "core/common/container.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class ImageUtils {

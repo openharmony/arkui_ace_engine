@@ -43,6 +43,9 @@ OHOS::AbilityRuntime::Context* context_ = nullptr;
 std::atomic<bool> UIContent::successFlag_{false};
 std::mutex UIContent::mtx_;
 std::string UIContent::angleConfigJson_ = "";
+std::atomic<bool> UIContent::setUICorrectionConfigSuccessFlag_{false};
+std::mutex UIContent::setUICorrectionConfigMutex_;
+std::string UIContent::uiCorrectionConfigJson_ = "";
 
 UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
 {
@@ -224,5 +227,29 @@ std::string UIContent::GetCurrentUIStackInfo()
     }
 
     return content;
+}
+
+bool UIContent::SetUICorrectionConfig(const std::string& configStr)
+{
+    if (setUICorrectionConfigSuccessFlag_.load(std::memory_order_acquire)) {
+        LOGI("UIContent set ui correction config has successed!");
+        return true;
+    }
+    std::lock_guard<std::mutex> lock(setUICorrectionConfigMutex_);
+    if (setUICorrectionConfigSuccessFlag_.load(std::memory_order_relaxed)) {
+        return true;
+    }
+    if (configStr.empty()) {
+        LOGE("UIContent Can not set empty ui correction config!");
+        return false;
+    }
+    UIContent::uiCorrectionConfigJson_ = configStr;
+    setUICorrectionConfigSuccessFlag_.store(true, std::memory_order_release);
+    return true;
+}
+
+const std::string& UIContent::GetUICorrectionConfig()
+{
+    return UIContent::uiCorrectionConfigJson_;
 }
 } // namespace OHOS::Ace
