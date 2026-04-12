@@ -186,6 +186,8 @@ function openInterop(): void {
     registerTransferCompatibleUpdatableBuilderCallback();
     registerNavPathStackCallback();
     registerLocalStorageSetProxy();
+    registerIsCloneableObjectFunc();
+    registerCloneCloneableObjectFunc();
 }
 
 function closeInterop(): void {
@@ -1183,4 +1185,25 @@ class InteropState {
     public isEnabled() {
         return this._opened;
     }
+}
+
+export function registerIsCloneableObjectFunc(): void {
+    const isCloneableObjectFunc = (obj: Object): boolean => {
+        return typeof obj === 'object' && obj instanceof Cloneable;
+    }
+    const global = ESValue.getGlobal();
+    const registerFunc = global.getProperty('__Interop_RegisterIsCloneableObject_internal_');
+    registerFunc.invoke(isCloneableObjectFunc);
+}
+
+export function registerCloneCloneableObjectFunc(): void {
+    const cloneCloneableObjectFunc = (obj: Object): Cloneable | null | undefined => {
+        if (typeof obj === 'object' && obj instanceof Cloneable) {
+            return deepcopy(obj);
+        }
+        return undefined;
+    }
+    const global = ESValue.getGlobal();
+    const registerFunc = global.getProperty('__Interop_RegisterCloneCloneableObject_internal_');
+    registerFunc.invoke(cloneCloneableObjectFunc);
 }

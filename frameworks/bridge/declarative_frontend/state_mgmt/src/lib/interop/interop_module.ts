@@ -87,6 +87,8 @@ class InteropExtractorModule {
     static createCompatibleStaticState?: (value: Object) => Object;
     static transferCompatibleUpdatableBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
     static localStorageSetProxy?: (storage: Object, proxy: Object) => void;
+    static isCloneableObject?: (obj: Object) => boolean;
+    static cloneCloneableObject?: (obj: Object) => Object | null | undefined;
 }
 
 class StaticInteropHook {
@@ -141,4 +143,12 @@ function registerTransferCompatibleUpdatableBuilderCallback(callback: (builder: 
 
 function registerLocalStorageSetProxy(callback: (storage: Object, proxy: Object) => void): void {
      InteropExtractorModule.localStorageSetProxy = callback;
+}
+
+function __Interop_RegisterIsCloneableObject_internal_(callback: (obj: Object) => boolean): void {
+    InteropExtractorModule.isCloneableObject = callback;
+}
+
+function __Interop_RegisterCloneCloneableObject_internal_(callback: (obj: Object) => Object | null | undefined): void {
+    InteropExtractorModule.cloneCloneableObject = callback;
 }
