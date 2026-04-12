@@ -3652,12 +3652,15 @@ struct CJUINodeContentEvent {
 };
 
 struct CJUINodeContentModifier {
-    ArkUI_Int32 (*addChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
-    ArkUI_Int32 (*insertChild)(ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position);
-    ArkUI_Int32 (*removeChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
+    ArkUI_Int32 (*addChild)(
+        ArkUINodeContentHandle content, ArkUINodeHandle child, void* errorInfoPtr);
+    ArkUI_Int32 (*insertChild)(
+        ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position, void* errorInfoPtr);
+    ArkUI_Int32 (*removeChild)(ArkUINodeContentHandle content, ArkUINodeHandle child, void* errorInfoPtr);
     ArkUI_Int32 (*registerEvent)(
-        ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event));
-    ArkUI_Int32 (*setUserData)(ArkUINodeContentHandle content, void* userData);
+        ArkUINodeContentHandle content, void* userData,
+        void (*receiver)(ArkUINodeContentEvent* event), void* errorInfoPtr);
+    ArkUI_Int32 (*setUserData)(ArkUINodeContentHandle content, void* userData, void* errorInfoPtr);
     void* (*getUserData)(ArkUINodeContentHandle content);
 };
 
@@ -4031,19 +4034,24 @@ struct CJUIExtendedNodeAPI {
 struct CJUINodeAdapterAPI {
     ArkUINodeAdapterHandle (*create)();
     void (*dispose)(ArkUINodeAdapterHandle handle);
-    ArkUI_Int32 (*setTotalNodeCount)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size);
+    ArkUI_Int32 (*setTotalNodeCount)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size, void* errorInfoPtr);
     ArkUI_Uint32 (*getTotalNodeCount)(ArkUINodeAdapterHandle handle);
     ArkUI_Int32 (*registerEventReceiver)(
-        ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event));
+        ArkUINodeAdapterHandle handle, void* userData,
+        void (*receiver)(ArkUINodeAdapterEvent* event), void* errorInfoPtr);
     void (*unregisterEventReceiver)(ArkUINodeAdapterHandle handle);
 
-    ArkUI_Int32 (*notifyItemReloaded)(ArkUINodeAdapterHandle handle);
-    ArkUI_Int32 (*notifyItemChanged)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
-    ArkUI_Int32 (*notifyItemRemoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
+    ArkUI_Int32 (*notifyItemReloaded)(ArkUINodeAdapterHandle handle, void* errorInfoPtr);
+    ArkUI_Int32 (*notifyItemChanged)(
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr);
+    ArkUI_Int32 (*notifyItemRemoved)(
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr);
     ArkUI_Int32 (*notifyItemInserted)(
-        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount);
-    ArkUI_Int32 (*notifyItemMoved)(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to);
-    ArkUI_Int32 (*getAllItem)(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr);
+    ArkUI_Int32 (*notifyItemMoved)(
+        ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to, void* errorInfoPtr);
+    ArkUI_Int32 (*getAllItem)(
+        ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size, void* errorInfoPtr);
 
     ArkUI_Bool (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
     void (*detachHostNode)(ArkUINodeHandle host);

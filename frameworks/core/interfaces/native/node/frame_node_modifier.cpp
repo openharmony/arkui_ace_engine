@@ -31,6 +31,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/native/error_message_macros.h"
 #include "interfaces/native/native_type.h"
 
 namespace OHOS::Ace::NG {
@@ -228,11 +229,19 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
 }
 
 ArkUI_Int32 ConvertPositionToWindow(
-    ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp,
+    void* errorInfoPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!frameNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE, errorInfoPtr, "Frame node is not on the main tree");
+        return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
     auto offset = frameNode->ConvertPositionToWindow(
         { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[0]) : (*position)[0],
             useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[1]) : (*position)[1] },
@@ -243,11 +252,19 @@ ArkUI_Int32 ConvertPositionToWindow(
 }
 
 ArkUI_Int32 ConvertPositionFromWindow(
-    ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp,
+    void* errorInfoPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!frameNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE, errorInfoPtr, "Frame node is not on the main tree");
+        return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
     auto offset = frameNode->ConvertPositionToWindow(
         { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[0]) : (*windowPosition)[0],
             useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[1]) : (*windowPosition)[1] },
@@ -293,30 +310,51 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 e
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
-ArkUI_Int32 GetFirstChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+ArkUI_Int32 GetFirstChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index, void* errorInfoPtr)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    if (!currentNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (!frameNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto child = frameNode->GetFrameNodeChildByIndex(0, false, false);
-    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    if (!child) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "First child node not found");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
     *index = frameNode->GetFrameNodeIndex(childRef, true);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetLastChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+ArkUI_Int32 GetLastChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index, void* errorInfoPtr)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    if (!currentNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (!frameNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     size_t size = static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
-    CHECK_NULL_RETURN(size > 0, ERROR_CODE_PARAM_INVALID);
+    if (!(size > 0)) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Last child node not found");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, false);
-    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    if (!child) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Last child node not found");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
     *index = frameNode->GetFrameNodeIndex(childRef, true);
@@ -730,14 +768,19 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     return 0;
 }
 
-ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
+ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting, void* errorInfoPtr)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    if (!currentNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     
     auto pos = std::find(CROSS_LANGUAGE_NODE_TYPE_ARRAY.begin(),
         CROSS_LANGUAGE_NODE_TYPE_ARRAY.end(), currentNode->GetTag());
     if (pos == CROSS_LANGUAGE_NODE_TYPE_ARRAY.end()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node type does not support cross-language options");
         return ERROR_CODE_PARAM_INVALID;
     }
     
@@ -1062,20 +1105,33 @@ void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
     ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
 }
 
-ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
+ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name, void* errorInfoPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!frameNode) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Frame node is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     if (!frameNode->IsOnMainTree()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            errorInfoPtr, "Frame node is not on the main tree");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
     }
     auto context = frameNode->GetAttachedContext();
-    CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!context) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            errorInfoPtr, "Frame node attached context is null");
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
     if (!context->CheckThreadSafe()) {
         LOGF_ABORT("GetWindowInfoByNode doesn't run on UI thread");
     }
     auto window = context->GetWindow();
-    CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!window) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE, errorInfoPtr, "Host window is null");
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
     std::string windowName = window->GetWindowName();
     size_t nameSize = windowName.size();
     *name = new char[nameSize + 1];
@@ -1084,13 +1140,21 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index)
+ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index,
+    void* errorInfoPtr)
 {
     auto* moveNode = reinterpret_cast<UINode*>(node);
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
-    CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    if (moveNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Move node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (toNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Target parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (moveNode->IsAdopted()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Move node has already been adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     static const std::vector<const char*> nodeTypeArray = {
@@ -1100,6 +1164,8 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
     if (pos == nodeTypeArray.end()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Move node type does not support moveTo");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto pipeline = moveNode->GetContextRefPtr();
