@@ -37,6 +37,7 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
 const util = requireNapi('util');
+const deviceInfo = requireNapi('deviceInfo');
 const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
 const SMALLEST_MIN_FONT_SCALE = 0;
@@ -2512,7 +2513,45 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     this.initParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
     this.initParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
     this.initParam('languageDirection', params && 'languageDirection' in params ? params.languageDirection : undefined);
+    this.useAdaptiveLineHeight = false;
+    this.environmentCallbackID = undefined;
+    this.environmentCallback = {
+      onConfigurationUpdated: configuration => {
+        this.updateLanguageLineHeight();
+      },
+      onMemoryLevel() {},
+    };
     this.finalizeConstruction();
+  }
+  updateLanguageLineHeight() {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButtonV2] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButtonV2] failed to get text_fallback_line_spacing resource`);
+    }
+  }
+  aboutToAppear() {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+  aboutToDisappear() {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -2567,6 +2606,8 @@ class SegmentButtonV2ItemContent extends ViewV2 {
             Text.maxFontScale(this.getItemMaxFontScale());
             Text.minFontScale(this.getItemMinFontScale());
             Text.attributeModifier.bind(this)(this.item.textModifier);
+            Text.includeFontPadding(this.useAdaptiveLineHeight);
+            Text.fallbackLineSpacing(this.useAdaptiveLineHeight);
           }, Text);
           Text.pop();
         });

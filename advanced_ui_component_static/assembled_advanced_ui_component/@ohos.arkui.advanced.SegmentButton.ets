@@ -94,6 +94,10 @@ import {
   UIUtils,
   PropRef
 } from '@ohos.arkui.stateManagement';
+import { EnvironmentCallback } from '@kit.AbilityKit';
+import deviceInfo from '@ohos.deviceInfo';
+import { Configuration } from '@ohos.app.ability.Configuration';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 
 import curves from '@ohos.curves';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
@@ -808,6 +812,20 @@ struct MultiSelectItemArray {
   }
 }
 
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
+  private segmentButtonItem: SegmentButtonItem;
+
+  constructor(segmentButtonItem: SegmentButtonItem) {
+    this.segmentButtonItem = segmentButtonItem;
+  }
+
+  onConfigurationUpdated(config: Configuration) {
+    this.segmentButtonItem.updateLanguageLineHeight();
+  }
+
+  onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
+}
+
 @Component
 struct SegmentButtonItem {
   @Link selectedIndexes: int[];
@@ -829,6 +847,43 @@ struct SegmentButtonItem {
   @Consume buttonItemsPosition: LocalizedEdges[];
   @Link buttonItemsRealHeight: number[];
   public onCalculateBorderRadius?: () => void
+  @State useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: int;
+ 	private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
+  }
+
+  aboutToAppear(): void {
+    this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding !== undefined) {
@@ -866,10 +921,6 @@ struct SegmentButtonItem {
   onFocusIndex(a: string): void {
     this.isTextInMarqueeCondition =
       this.isSegmentFocusStyleCustomized && (this.focusIndex === this.index || this.hover);
-  }
-
-  aboutToAppear(): void {
-    this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
   }
 
   isDefaultSelectedFontColor(): boolean {
@@ -942,6 +993,8 @@ struct SegmentButtonItem {
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+ 	        .fallbackLineSpacing(this.useAdaptiveLineHeight)
       }
     }
     .id("SegmentButtonItem")

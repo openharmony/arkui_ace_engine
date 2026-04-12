@@ -677,6 +677,7 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolWidth = new ObservedPropertySimplePU(0, this, 'suffixSymbolWidth');
     this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
     this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
+    this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
     this.isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
     this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
     this.onClose = undefined;
@@ -690,6 +691,7 @@ export class ChipComponent extends ViewPU {
     this.environmentCallback = {
       onConfigurationUpdated: configuration => {
         this.fontSizeScale = configuration.fontSizeScale ?? 1;
+        this.updateLanguageLineHeight();
       },
       onMemoryLevel() {},
     };
@@ -729,6 +731,9 @@ export class ChipComponent extends ViewPU {
     }
     if (params.fontSizeScale !== undefined) {
       this.fontSizeScale = params.fontSizeScale;
+    }
+    if (params.useAdaptiveLineHeight !== undefined) {
+      this.useAdaptiveLineHeight = params.useAdaptiveLineHeight;
     }
     if (params.isSuffixIconFocusStyleCustomized !== undefined) {
       this.isSuffixIconFocusStyleCustomized = params.isSuffixIconFocusStyleCustomized;
@@ -818,6 +823,7 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolWidth.purgeDependencyOnElmtId(rmElmtId);
     this.__breakPoint.purgeDependencyOnElmtId(rmElmtId);
     this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeInFocus.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
@@ -850,6 +856,7 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolWidth.aboutToBeDeleted();
     this.__breakPoint.aboutToBeDeleted();
     this.__fontSizeScale.aboutToBeDeleted();
+    this.__useAdaptiveLineHeight.aboutToBeDeleted();
     this.__chipNodeInFocus.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -1028,11 +1035,32 @@ export class ChipComponent extends ViewPU {
   set fontSizeScale(newValue) {
     this.__fontSizeScale.set(newValue);
   }
+  get useAdaptiveLineHeight() {
+    return this.__useAdaptiveLineHeight.get();
+  }
+  set useAdaptiveLineHeight(newValue) {
+    this.__useAdaptiveLineHeight.set(newValue);
+  }
   get chipNodeInFocus() {
     return this.__chipNodeInFocus.get();
   }
   set chipNodeInFocus(newValue) {
     this.__chipNodeInFocus.set(newValue);
+  }
+  updateLanguageLineHeight() {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return;
+    }
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[Chip] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[Chip] failed to get text_fallback_line_spacing resource`);
+    }
   }
   aboutToAppear() {
     this.smListener.on('change', mediaQueryResult => {
@@ -1050,6 +1078,7 @@ export class ChipComponent extends ViewPU {
         this.breakPoint = BreakPointsType.LG;
       }
     });
+    this.updateLanguageLineHeight();
     let abilityContext = this.getUIContext().getHostContext();
     if (abilityContext) {
       this.fontSizeScale = abilityContext.config?.fontSizeScale ?? 1;
@@ -1217,6 +1246,8 @@ export class ChipComponent extends ViewPU {
       Text.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
       Text.minFontScale(ObservedObject.GetRawObject(this.minFontScale));
       Text.margin(this.getLabelMargin());
+      Text.includeFontPadding(this.useAdaptiveLineHeight);
+      Text.fallbackLineSpacing(this.useAdaptiveLineHeight);
     }, Text);
     Text.pop();
     this.observeComponentCreation2((elmtId, isInitialRender) => {
