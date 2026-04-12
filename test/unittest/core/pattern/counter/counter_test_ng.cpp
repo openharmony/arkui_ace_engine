@@ -815,4 +815,26 @@ HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
     result = counterPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
 }
+
+/**
+ * @tc.name: CounterPatternUpdateTextColorTest001
+ * @tc.desc: Test UpdateTextColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterPatternUpdateTextColorTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    const Color testColor = Color::RED;
+    pattern_->UpdateTextColor(textNode, testColor);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->HasTextColor());
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::BLACK), testColor);
+}
 } // namespace OHOS::Ace::NG
