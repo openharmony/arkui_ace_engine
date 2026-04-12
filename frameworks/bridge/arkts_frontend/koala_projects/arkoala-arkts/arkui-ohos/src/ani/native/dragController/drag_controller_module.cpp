@@ -1252,7 +1252,7 @@ bool GetPropertyIntByName(ani_env *env, ani_object config, const char *name, int
         return false;
     }
     ani_int value_obj = 0;
-    if (ANI_OK != env->Object_CallMethodByName_Int(obj, "unboxed", ":i", &value_obj)) {
+    if (ANI_OK != env->Object_CallMethodByName_Int(obj, "toInt", ":i", &value_obj)) {
         return false;
     }
     value = static_cast<int>(value_obj);
