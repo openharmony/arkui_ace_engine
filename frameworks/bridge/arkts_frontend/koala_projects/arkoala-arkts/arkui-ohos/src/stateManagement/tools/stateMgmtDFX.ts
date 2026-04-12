@@ -109,7 +109,7 @@ export class StateMgmtDFX {
      * @returns The IObservedObject if the value is observed, otherwise undefined
      */
     public static getObservedObjectFromValue(value: Any): IObservedObject | undefined {
-        if (!value || typeof value !== 'object') {
+        if (!value || !(value instanceof Object)) {
             return undefined;
         }
 
