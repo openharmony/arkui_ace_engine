@@ -4599,16 +4599,16 @@ typedef struct Opt_CustomKeyboardContinueFeature {
     Ark_CustomKeyboardContinueFeature value;
 } Opt_CustomKeyboardContinueFeature;
 typedef enum Ark_DataOperationType {
-ARK_DATA_OPERATION_TYPE_ADD,
-ARK_DATA_OPERATION_TYPE_DELETE,
-ARK_DATA_OPERATION_TYPE_EXCHANGE,
-ARK_DATA_OPERATION_TYPE_MOVE,
-ARK_DATA_OPERATION_TYPE_CHANGE,
-ARK_DATA_OPERATION_TYPE_RELOAD,
+    ARK_DATA_OPERATION_TYPE_ADD,
+    ARK_DATA_OPERATION_TYPE_DELETE,
+    ARK_DATA_OPERATION_TYPE_EXCHANGE,
+    ARK_DATA_OPERATION_TYPE_MOVE,
+    ARK_DATA_OPERATION_TYPE_CHANGE,
+    ARK_DATA_OPERATION_TYPE_RELOAD,
 } Ark_DataOperationType;
 typedef struct Opt_DataOperationType {
-Ark_Tag tag;
-Ark_DataOperationType value;
+    Ark_Tag tag;
+    Ark_DataOperationType value;
 } Opt_DataOperationType;
 typedef enum Ark_DataPanelType {
     ARK_DATA_PANEL_TYPE_LINE = 0,
