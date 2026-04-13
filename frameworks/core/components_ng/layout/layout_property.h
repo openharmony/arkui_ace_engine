@@ -254,7 +254,7 @@ public:
 
     IgnoreLayoutSafeAreaOpts GenIgnoreOpts() const;
 
-    virtual void ExpandConstraintWithSafeArea();
+    virtual void ExpandConstraintWithSafeArea(RefPtr<FrameNode>& host);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -332,8 +332,10 @@ public:
 
     PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true, bool roundPixel = true);
     PaddingPropertyF CreatePaddingAndBorder(bool includeSafeAreaPadding = true, bool forceReCreate = false);
-    PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
-        float borderHorizontalDefault, float borderVerticalDefault);
+    PaddingPropertyF CreatePaddingAndBorderInner(RefPtr<FrameNode>& host,
+        bool includeSafeAreaPadding, bool forceReCreate);
+    PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault,
+        float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault);
     BorderWidthPropertyF CreateBorder(bool isRoundPixel = false);
 
     MarginPropertyF CreateMargin();
@@ -417,6 +419,7 @@ public:
         const std::optional<LayoutConstraintF>& preContentConstraint);
 
     PaddingPropertyF GetOrCreateSafeAreaPadding(bool forceReCreate = false);
+    PaddingPropertyF GetOrCreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool forceReCreate = false);
 
     void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
     {
@@ -495,15 +498,15 @@ protected:
 private:
     // This will call after ModifyLayoutConstraint.
     void CheckSelfIdealSize(const SizeF& originMax);
-    void CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint);
+    void CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const LayoutConstraintF& parentConstraint);
 
     void CheckAspectRatio();
-    void CheckBorderAndPadding();
+    void CheckBorderAndPadding(RefPtr<FrameNode>& host);
     void ConstraintContentByPadding();
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding(bool adjustingRound = false);
-
+    PaddingPropertyF CreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool adjustingRound = false);
     const std::string PixelRoundToJsonValue() const;
 
     void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

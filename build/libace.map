@@ -1355,6 +1355,7 @@
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingAndBorder(bool, bool)";
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingAndBorderWithDefault(float, float, float, float)";
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingWithoutBorder(bool, bool)";
+      "OHOS::Ace::NG::LayoutProperty::ExpandConstraintWithSafeArea(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&)";
       "OHOS::Ace::NG::LayoutProperty::ExpandConstraintWithSafeArea()";
       "OHOS::Ace::NG::LayoutProperty::FromJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>> const&)";
       "OHOS::Ace::NG::LayoutProperty::GenIgnoreOpts() const";
@@ -1393,6 +1394,7 @@
       "OHOS::Ace::NG::LayoutWrapper::GetAccumulatedSafeAreaExpand(bool, OHOS::Ace::NG::IgnoreLayoutSafeAreaOpts, OHOS::Ace::NG::IgnoreStrategy)";
       "OHOS::Ace::NG::LayoutWrapper::GetHostNode() const";
       "OHOS::Ace::NG::LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool, bool) const";
+      "OHOS::Ace::NG::LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&) const";
       "OHOS::Ace::NG::LayoutWrapper::IsIgnoreOptsValid()";
       "OHOS::Ace::NG::LayoutWrapper::ResetSafeAreaPadding()";
       "OHOS::Ace::NG::LayoutWrapper::SkipMeasureContent() const";

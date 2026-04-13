@@ -16,6 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MEMORY_MONITOR_DEF_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MEMORY_MONITOR_DEF_H
 
+#ifndef ACE_DEBUG
+#define VERIFY_CLASSNAME(classname, p)
+#define VERIFY_DECLARED_CLASS(classname)
+#define DECLARE_CLASS_TYPE_SIZE(classname)
+#define DECLARE_CLASS_GET_TYPE_SIZE(classname)
+#else
 #define VERIFY_CLASSNAME(classname, p) \
     OHOS::Ace::VerifyClass<std::is_same_v<classname, std::remove_cv_t<std::remove_pointer_t<decltype(p)>>>>::Success()
 
@@ -47,4 +53,5 @@ struct VerifyClass<true> {
 };
 
 } // namespace OHOS::Ace
+#endif // ACE_DEBUG
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MEMORY_MONITOR_DEF_H

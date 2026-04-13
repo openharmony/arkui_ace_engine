@@ -55,10 +55,17 @@ public:
                 rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
             }
         }
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Update(rawPtr, static_cast<Referenced*>(rawPtr));
         }
+#endif
         return RefPtr<T>(rawPtr);
+    }
+    template<class T>
+    static RefPtr<T> Transfer(T* rawPtr)
+    {
+        return RefPtr<T>(rawPtr, false);
     }
     template<class T>
     static WeakPtr<T> WeakClaim(T* rawPtr)
@@ -106,9 +113,11 @@ protected:
     explicit Referenced()
         : refCounter_(RefCounter::Create())
     {
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Add(this);
         }
+#endif
     }
 
     virtual ~Referenced()
@@ -116,9 +125,11 @@ protected:
         // Decrease weak reference count held by 'Referenced' itself.
         refCounter_->DecWeakRef();
         refCounter_ = nullptr;
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Remove(this);
         }
+#endif
     }
 
     virtual bool MaybeRelease()
@@ -194,6 +205,10 @@ public:
     void Reset()
     {
         Swap(RefPtr());
+    }
+    void Release()
+    {
+        rawPtr_ = nullptr;
     }
 
     typename LifeCycleCheckable::PtrHolder<T> operator->() const

@@ -72,23 +72,23 @@ RefPtr<NG::UINode> GetInitialParent(const RefPtr<NG::UINode>& uiNode)
 }
 
 bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result)
+    std::queue<NG::UINode*>& nodes, NG::FrameNode*& result)
 {
     for (const auto& child : children) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child.GetRawPtr());
         if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
             if (frameNode->GetAccessibilityId() == id) {
-                result = AceType::DynamicCast<NG::FrameNode>(child);
+                result = frameNode;
                 return true;
             }
         }
-        nodes.push(child);
+        nodes.push(child.GetRawPtr());
     }
     return false;
 }
 
 bool FindFrameNodeByCondition(const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>&result, FindCondition condition)
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result, FindCondition condition)
 {
     for (const auto& child : children) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
@@ -281,39 +281,40 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId
     if (root->GetAccessibilityId() == id) {
         return root;
     }
-    std::queue<RefPtr<NG::UINode>> nodes;
-    nodes.push(root);
-    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
+    std::queue<NG::UINode*> nodes;
+    nodes.push(root.GetRawPtr());
+    NG::FrameNode* frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        if (current->HasVirtualNodeAccessibilityProperty()) {
-            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
-            CHECK_NULL_CONTINUE(fnode);
+        auto hasVirtualNodeAccessibilityProperty = current->HasVirtualNodeAccessibilityProperty();
+        if (!hasVirtualNodeAccessibilityProperty) {
+            const auto& children = current->GetChildren(true);
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return AceType::Claim(frameNodeResult);
+            }
+        }
+
+        auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+        CHECK_NULL_CONTINUE(fnode);
+
+        if (hasVirtualNodeAccessibilityProperty) {
             auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
             const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
             if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
                 CHECK_NULL_RETURN(frameNodeResult, nullptr);
                 frameNodeResult->SetAccessibilityNodeVirtual();
-                frameNodeResult->SetAccessibilityVirtualNodeParent(current);
-                return frameNodeResult;
-            }
-        } else {
-            const auto& children = current->GetChildren(true);
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
+                frameNodeResult->SetAccessibilityVirtualNodeParent(AceType::Claim(current));
+                return AceType::Claim(frameNodeResult);
             }
         }
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
-        if (!frameNode) {
-            continue;
-        }
-        auto overlayNode = frameNode->GetOverlayNode();
+
+        auto overlayNode = fnode->GetOverlayNode();
         if (overlayNode) {
             const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
             if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
+                return AceType::Claim(frameNodeResult);
             }
         }
     }

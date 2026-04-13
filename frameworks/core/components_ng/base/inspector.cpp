@@ -849,21 +849,30 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
 
 RefPtr<UINode> Inspector::GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach)
 {
-    std::queue<RefPtr<UINode>> elements;
-    elements.push(root);
-    RefPtr<UINode> inspectorElement;
-    while (!elements.empty()) {
-        auto current = elements.front();
-        elements.pop();
-        if (key == current->GetInspectorId().value_or("")) {
-            return current;
-        }
-
-        const auto& children = current->GetChildren(notDetach);
-        for (const auto& child : children) {
-            elements.push(child);
-        }
+    bool keyIsNull = key == "";
+    const auto& id = root->GetInspectorId();
+    if (id ? key == *id : keyIsNull) {
+        return root;
     }
+    std::vector<const std::list<RefPtr<UINode>>*> groups;
+    std::vector<const std::list<RefPtr<UINode>>*> groupsNext;
+    // reserve 32-elements space to avoid memory allocation in future
+    groups.reserve(32);
+    groupsNext.reserve(32);
+    groups.emplace_back(&root->GetChildren(notDetach));
+    do {
+        for (auto& g : groups) {
+            for (auto& n : *g) {
+                const auto& id = n->GetInspectorId();
+                if (id ? key == *id : keyIsNull) {
+                    return n;
+                }
+                groupsNext.emplace_back(&n->GetChildren(notDetach));
+            }
+        }
+        groups.swap(groupsNext);
+        groupsNext.clear();
+    } while (groups.size());
     return nullptr;
 }
 

@@ -363,8 +363,10 @@ public:
     void GetPointTransformRotate(PointF& point) override;
 
     Matrix4 GetMatrixWithTransformRotate() override;
+    Matrix4 GetMatrixWithTransformRotateInner();
 
     void GetPointWithTransform(PointF& point) override;
+    void GetPointWithTransformInner(PointF& point);
 
     void ClearDrawCommands() override;
 
@@ -779,6 +781,7 @@ protected:
     void UpdateGraphic(std::shared_ptr<T>& modifier, D data);
 
     RectF AdjustPaintRect();
+    RectF AdjustPaintRectInner(RefPtr<FrameNode>& frameNode);
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
@@ -793,15 +796,17 @@ protected:
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;
+    Matrix4 GetMatrix();
+    Matrix4 GetMatrixInner();
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     float OnePixelValueRounding(float value);
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
-    void RoundToPixelGrid();
-    void RoundToPixelGrid(bool isRound, uint16_t flag);
-    void OnePixelRounding(uint16_t flag);
-    Matrix4 GetMatrix();
+    void RoundToPixelGrid(RefPtr<FrameNode>& frameNode);
+    void RoundToPixelGrid(RefPtr<FrameNode>& frameNode, bool isRound, uint16_t flag);
+    void OnePixelRounding(RefPtr<FrameNode>& frameNode, uint16_t flag = 0);
+
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
@@ -949,7 +954,7 @@ protected:
 
 private:
     void ModifyCustomBackground();
-    bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
+    bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode>& rsNode);
 
     uint32_t backgroundTaskId_ = 0;
     static std::timed_mutex taskMtx_;

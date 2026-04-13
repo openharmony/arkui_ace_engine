@@ -60,7 +60,7 @@ public:
     template<class E>
     RefPtr<E> GetSpecificItemById(ElementIdType elmtId)
     {
-        return AceType::DynamicCast<E>(GetNodeById(elmtId));
+        return AceType::DynamicTransfer<E>(GetNodeById(elmtId));
     }
 
     bool AddElementProxy(const WeakPtr<V2::ElementProxy>& element);

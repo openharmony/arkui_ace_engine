@@ -62,6 +62,28 @@ class FrameNode;
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+
+namespace NG {
+class FrameNode;
+}
+
+template<>
+inline NG::FrameNode* AceType::DynamicCast<NG::FrameNode, NG::UINode>(NG::UINode* rawPtr)
+{
+    if (rawPtr && rawPtr->GetNodeType() == NG::UINodeType::FRAME_NODE) {
+        return reinterpret_cast<NG::FrameNode*>(rawPtr);
+    }
+    return nullptr;
+}
+
+template<>
+inline const NG::FrameNode* AceType::DynamicCast<NG::FrameNode, NG::UINode>(const NG::UINode* rawPtr)
+{
+    if (rawPtr && rawPtr->GetNodeType() == NG::UINodeType::FRAME_NODE) {
+        return reinterpret_cast<const NG::FrameNode*>(rawPtr);
+    }
+    return nullptr;
+}
 }
 
 namespace OHOS::Ace::Recorder {
@@ -337,6 +359,12 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]", GetPatternTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
+
+    template<typename T>
+    T* GetRawPattern() const
+    {
+        return DynamicCast<T>(pattern_.GetRawPtr());
     }
 
     template<typename T>
@@ -1634,9 +1662,9 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
+    const CacheVisibleRectResult& GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
-    CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+    const CacheVisibleRectResult& CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
         uint64_t timestamp);
 

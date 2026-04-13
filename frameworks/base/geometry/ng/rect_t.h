@@ -114,6 +114,16 @@ public:
         return GreatNotEqual(height_, 0) ? y_ + height_ : y_;
     }
 
+    std::pair<T, T> LeftAndRight() const
+    {
+        return GreatNotEqual(width_, 0) ? std::make_pair(x_, x_ + width_) : std::make_pair(x_ + width_, x_);
+    }
+
+    std::pair<T, T> TopAndBottom() const
+    {
+        return GreatNotEqual(height_, 0) ? std::make_pair(y_, y_ + height_) : std::make_pair(y_ + height_, y_);
+    }
+
     T GetX() const
     {
         return x_;
@@ -212,15 +222,24 @@ public:
         return NonPositive(width_) || NonPositive(height_);
     }
 
-    RectT Constrain(const RectT& other)
+    RectT& ConstrainInplace(const RectT& other)
     {
+        auto&& [oLeft, oRight] = other.LeftAndRight();
+        auto&& [oTop, oBottom] = other.TopAndBottom();
         T right = Right();
         T bottom = Bottom();
-        T left = std::clamp(x_, other.Left(), other.Right());
-        T top = std::clamp(y_, other.Top(), other.Bottom());
-        right = std::clamp(right, other.Left(), other.Right()) - left;
-        bottom = std::clamp(bottom, other.Top(), other.Bottom()) - top;
-        return RectT(left, top, right, bottom);
+        x_ = std::clamp(x_, oLeft, oRight);
+        y_ = std::clamp(y_, oTop, oBottom);
+        width_ = std::clamp(right, oLeft, oRight) - x_;
+        height_ = std::clamp(bottom, oTop, oBottom) - y_;
+        return *this;
+    }
+
+    RectT Constrain(const RectT& other) const
+    {
+        RectT rect(other);
+        rect.ConstrainInplace(other);
+        return rect;
     }
 
     RectT& operator+=(const OffsetT<T>& offset)
