@@ -19,6 +19,7 @@ import { KeyCode } from '@kit.InputKit';
 import mediaquery from '@ohos.mediaquery';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import common from '@ohos.app.ability.common';
+import deviceInfo from '@ohos.deviceInfo';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -442,7 +443,7 @@ export struct ChipComponent {
         breakPointSmMaxWidth: 156,
         breakPointMdMaxWidth: 280,
         breakPointLgMaxWidth: 400
-      }
+      },
     }
   };
   @Prop chipSize?: ChipSize | SizeOptions = ChipSize.NORMAL;
@@ -474,6 +475,7 @@ export struct ChipComponent {
   @State suffixSymbolWidth: number = 0;
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
+  @State useAdaptiveLineHeight: boolean = false;
   private isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
   private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
   public onClose?: VoidCallback;
@@ -487,10 +489,27 @@ export struct ChipComponent {
   private environmentCallback: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale ?? 1;
+      this.updateLanguageLineHeight();
     },
     onMemoryLevel() {
     }
   };
+
+  updateLanguageLineHeight(): void {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return;
+    }
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[Chip] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[Chip] failed to get text_fallback_line_spacing resource`);
+    }
+  }
 
   aboutToAppear(): void {
     this.smListener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
@@ -508,6 +527,7 @@ export struct ChipComponent {
         this.breakPoint = BreakPointsType.LG;
       }
     });
+    this.updateLanguageLineHeight();
     let abilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext | undefined;
     if (abilityContext) {
       this.fontSizeScale = abilityContext.config?.fontSizeScale ?? 1;
@@ -600,6 +620,8 @@ export struct ChipComponent {
           .maxFontScale(this.maxFontScale)
           .minFontScale(this.minFontScale)
           .margin(this.getLabelMargin())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+          .fallbackLineSpacing(this.useAdaptiveLineHeight)
 
         if (this.hasSuffixSymbol()) {
           Button({ type: ButtonType.Normal }) {

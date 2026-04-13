@@ -37,6 +37,7 @@ const util = globalThis.requireNapi('util');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const I18n = requireNapi('i18n');
+const deviceInfo = requireNapi('deviceInfo');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
 const DEFAULT_MAX_FONT_SCALE = 1;
@@ -893,8 +894,16 @@ class SegmentButtonItem extends ViewPU {
     );
     this.__isTextInMarqueeCondition = new ObservedPropertySimplePU(false, this, 'isTextInMarqueeCondition');
     this.__isButtonTextFadeout = new ObservedPropertySimplePU(false, this, 'isButtonTextFadeout');
+    this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
     this.groupId = '';
     this.__hover = new SynchedPropertySimpleOneWayPU(params.hover, this, 'hover');
+    this.environmentCallbackID = undefined;
+    this.environmentCallback = {
+      onConfigurationUpdated: configuration => {
+        this.updateLanguageLineHeight();
+      },
+      onMemoryLevel() {},
+    };
     this.setInitiallyProvidedValue(params);
     this.declareWatch('focusIndex', this.onFocusIndex);
     this.declareWatch('hover', this.onFocusIndex);
@@ -913,8 +922,17 @@ class SegmentButtonItem extends ViewPU {
     if (params.isButtonTextFadeout !== undefined) {
       this.isButtonTextFadeout = params.isButtonTextFadeout;
     }
+    if (params.useAdaptiveLineHeight !== undefined) {
+      this.useAdaptiveLineHeight = params.useAdaptiveLineHeight;
+    }
     if (params.groupId !== undefined) {
       this.groupId = params.groupId;
+    }
+    if (params.environmentCallbackID !== undefined) {
+      this.environmentCallbackID = params.environmentCallbackID;
+    }
+    if (params.environmentCallback !== undefined) {
+      this.environmentCallback = params.environmentCallback;
     }
   }
   updateStateVars(params) {
@@ -940,6 +958,7 @@ class SegmentButtonItem extends ViewPU {
     this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(rmElmtId);
     this.__isTextInMarqueeCondition.purgeDependencyOnElmtId(rmElmtId);
     this.__isButtonTextFadeout.purgeDependencyOnElmtId(rmElmtId);
+    this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
     this.__hover.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
@@ -955,6 +974,7 @@ class SegmentButtonItem extends ViewPU {
     this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
     this.__isTextInMarqueeCondition.aboutToBeDeleted();
     this.__isButtonTextFadeout.aboutToBeDeleted();
+    this.__useAdaptiveLineHeight.aboutToBeDeleted();
     this.__hover.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -1022,11 +1042,29 @@ class SegmentButtonItem extends ViewPU {
   set isButtonTextFadeout(newValue) {
     this.__isButtonTextFadeout.set(newValue);
   }
+  get useAdaptiveLineHeight() {
+    return this.__useAdaptiveLineHeight.get();
+  }
+  set useAdaptiveLineHeight(newValue) {
+    this.__useAdaptiveLineHeight.set(newValue);
+  }
   get hover() {
     return this.__hover.get();
   }
   set hover(newValue) {
     this.__hover.set(newValue);
+  }
+  updateLanguageLineHeight() {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
   }
   getTextPadding() {
     if (this.options.localizedTextPadding) {
@@ -1065,6 +1103,22 @@ class SegmentButtonItem extends ViewPU {
   }
   aboutToAppear() {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+  aboutToDisappear() {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
   isDefaultSelectedFontColor() {
     if (this.options.type === 'tab') {
@@ -1147,6 +1201,8 @@ class SegmentButtonItem extends ViewPU {
             Text.maxLines(1);
             Text.textAlign(TextAlign.Center);
             Text.padding(this.getTextPadding());
+            Text.includeFontPadding(this.useAdaptiveLineHeight);
+            Text.fallbackLineSpacing(this.useAdaptiveLineHeight);
           }, Text);
           Text.pop();
         });
