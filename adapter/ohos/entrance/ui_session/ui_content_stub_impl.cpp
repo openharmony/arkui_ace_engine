@@ -20,7 +20,8 @@
 namespace OHOS::Ace {
 
 int32_t UIContentServiceStubImpl::GetInspectorTree(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config,
+    [[maybe_unused]] int32_t timeout)
 {
     UiSessionManager::GetInstance()->GetInspectorTree(config);
     return NO_ERROR;
@@ -232,7 +233,8 @@ int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventC
 }
 
 int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config,
+    [[maybe_unused]] int32_t timeout)
 {
     UiSessionManager::GetInstance()->GetVisibleInspectorTree(config);
     return NO_ERROR;
