@@ -3350,7 +3350,6 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
         napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
-    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     auto localRef = NapiValueToLocalValue(nativeValue->GetNapiValue());
     std::shared_ptr<JsValue> jsValue = std::make_shared<ArkJSValue>(arkRuntime, localRef);
     if (jsValue->IsObject(arkRuntime)) {
