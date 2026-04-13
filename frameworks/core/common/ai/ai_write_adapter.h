@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_WRITE_H
 
 #include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "base/memory/ace_type.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/versions.h"
