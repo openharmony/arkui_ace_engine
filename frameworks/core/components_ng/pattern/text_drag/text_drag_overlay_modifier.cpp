@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/text/text_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float DEFAULT_LIGHT_HEIGHT = 600.0f;

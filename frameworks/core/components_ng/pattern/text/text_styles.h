@@ -24,6 +24,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 

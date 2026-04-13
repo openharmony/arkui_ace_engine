@@ -21,7 +21,6 @@
 #include <optional>
 #include <string>
 
-#include "base/log/event_report.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
