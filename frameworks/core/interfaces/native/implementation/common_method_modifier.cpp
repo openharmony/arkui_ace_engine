@@ -2022,6 +2022,10 @@ RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
     if (showAtAnchorOpt.has_value()) {
         popupParam->SetAnchorType(showAtAnchorOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
     return popupParam;
 }
 

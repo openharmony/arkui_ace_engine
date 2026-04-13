@@ -21793,6 +21793,7 @@ typedef struct Ark_TipsOptions {
     Opt_Dimension arrowWidth;
     Opt_Dimension arrowHeight;
     Opt_TipsAnchorType showAtAnchor;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_TipsOptions;
 typedef struct Opt_TipsOptions {
     Ark_Tag tag;
