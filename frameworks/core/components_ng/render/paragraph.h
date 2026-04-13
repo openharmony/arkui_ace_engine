@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ime/constant.h"
 #include "core/common/ime/text_range.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -28,6 +29,10 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_v2/inspector/utils.h"
+
+#ifndef USE_ROSEN_DRAWING
+class SkCanvas;
+#endif
 
 namespace OHOS::Ace::NG {
 struct DrawingContext;

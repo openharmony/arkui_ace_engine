@@ -37,6 +37,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/event_manager.h"
 #include "core/event/crown_event.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/common/font_manager.h"
 #include "core/focus/focus_node.h"
 #include "core/common/layout_inspector.h"
@@ -3707,6 +3708,16 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     CHECK_NULL_VOID(containerModalElement);
     containerModalElement->SetAppIcon(icon);
+}
+
+void PipelineContext::SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
+{
+    textOverlayManager_ = textOverlayManager;
+}
+
+RefPtr<TextOverlayManager> PipelineContext::GetTextOverlayManager() const
+{
+    return textOverlayManager_;
 }
 
 } // namespace OHOS::Ace

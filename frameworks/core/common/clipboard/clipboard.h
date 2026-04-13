@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_H
 
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+
+class PixelMap;
 
 class Clipboard : public AceType {
     DECLARE_ACE_TYPE(Clipboard, AceType);
