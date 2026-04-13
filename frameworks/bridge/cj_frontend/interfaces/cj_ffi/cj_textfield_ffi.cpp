@@ -305,6 +305,23 @@ void FfiOHOSAceFrameworkTextFieldSetFontFeature(const char* value)
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(value));
 }
 
+void FfiOHOSAceFrameworkTextFieldSetWidth(double value, uint32_t unit)
+{
+    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    Dimension width(value, static_cast<DimensionUnit>(unit));
+    if (width.Unit() == DimensionUnit::AUTO) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+        return;
+    }
+
+    if (LessNotEqual(width.Value(), 0.0)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(width);
+}
+
 void FfiOHOSAceFrameworkTextFieldSetLineHeight(double value, int32_t unit)
 {
     Dimension size(value, static_cast<DimensionUnit>(unit));
