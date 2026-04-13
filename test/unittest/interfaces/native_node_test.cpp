@@ -24,6 +24,7 @@
 #include "native_styled_string.h"
 #include "event_converter.h"
 #include "interfaces/inner_api/ace/node_module_inner.h"
+#include "interfaces/native/native_styled_string.h"
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/styled_string.h"
@@ -14472,5 +14473,26 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildAt002, T
     EXPECT_EQ(nodeAPI->insertChildAt(parentNode, child, 0), OHOS::Ace::ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR);
 
     nodeAPI->disposeNode(child);
+}
+
+/**
+ * @tc.name: OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+    auto* layoutManager = nodeAPI->getAttribute(text, NODE_TEXT_LAYOUT_MANAGER);
+    if (!layoutManager) {
+        return;
+    }
+    ArkUI_TextLayoutManager* manager = (ArkUI_TextLayoutManager*)layoutManager->object;
+    OH_Drawing_PositionAndAffinity* outPos;
+    EXPECT_EQ(OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(manager, 150, 50, &outPos),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
 }
 } // namespace OHOS::Ace
