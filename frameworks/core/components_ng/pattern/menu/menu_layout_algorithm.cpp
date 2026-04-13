@@ -3960,7 +3960,7 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     const auto& menuParam = menuWrapperPattern->GetMenuParam();
-    if (menuParam.systemMaterial) {
+    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
         auto menuSDFShape = GetMenuSDFShape(didNeedArrow);
         auto menuNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(menuNode);

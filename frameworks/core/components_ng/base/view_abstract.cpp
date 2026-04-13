@@ -5822,13 +5822,17 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
-        ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
+    if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
+        ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
     }
-    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+    renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
 
 void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)

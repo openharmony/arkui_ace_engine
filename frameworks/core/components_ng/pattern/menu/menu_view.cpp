@@ -1129,7 +1129,7 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
 {
     CHECK_NULL_VOID(menuNode);
     bool isSetMenuSystemMaterial = false;
-    if (menuParam.systemMaterial && MaterialUtils::CheckMaterialValid(menuParam.systemMaterial->GetType())) {
+    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
@@ -1420,7 +1420,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
+        (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial) || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     menuWrapperPattern->SetMenuParam(menuParam);
@@ -1610,6 +1610,10 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
         menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
         ResourceParseUtils::SetNeedReload(isReloading);
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled() && !menuParamValue.systemMaterial) {
+        menuParamValue.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    }
 }
 
 void MenuView::UpdateMenuParam(
@@ -1677,7 +1681,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
+        (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial) || !menuParam.enableArrow.value_or(false))) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);

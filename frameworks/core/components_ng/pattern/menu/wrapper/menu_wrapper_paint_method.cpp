@@ -69,7 +69,7 @@ CanvasDrawFunction MenuWrapperPaintMethod::GetOverlayDrawFunction(PaintWrapper* 
         auto wrapperPattern = GetMenuWrapperPatternFromPaintWrapper(paintWrapper);
         CHECK_NULL_VOID(wrapperPattern);
         const auto& menuParam = wrapperPattern->GetMenuParam();
-        if (menuParam.systemMaterial ||
+        if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial) ||
             (!menuTheme->GetDoubleBorderEnable() && !wrapperPattern->GetHasCustomOutlineWidth())) {
             return;
         }

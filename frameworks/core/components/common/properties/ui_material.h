@@ -22,6 +22,7 @@
 #include "ui/properties/ui_material.h"
 #include "ui/properties/ui_material_structs.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/property/border_property.h"
 
@@ -83,11 +84,21 @@ public:
     static Shadow GetImmersiveShadow(float dipScale);
     static Shadow GetImmersiveEmptyShadow();
     static bool GetGlobalMaterialLevel(UiMaterialLevel& result);
+    static MaterialState GetConfiguredMaterialState();
+    static MaterialType GetConfiguredMaterialType();
+    static bool IsMaterialDisabled();
+    static bool IsMaterialEnabled();
+    static bool IsEmptyMaterial(const RefPtr<UiMaterial>& material);
+    static RefPtr<UiMaterial> GetInitMaterial(const UiMaterialStyle style);
+    static bool IsEnableMaterialParam(const RefPtr<UiMaterial>& material);
+    static const UiMaterial* PreProcessMaterial(const UiMaterial* material);
 
 private:
     static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
     static bool ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& options, UiMaterialLevel systemLevel,
         UiMaterialTransparency systemTransparency);
+    static MaterialState ParseMaterialState(const std::string& value);
+    static MaterialType ParseMaterialType(const std::string& value);
 };
 } // namespace OHOS::Ace
 

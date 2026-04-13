@@ -70,6 +70,11 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
         props->ResetSelectedOptionTextModifierSetByUser();
         props->ResetArrowModifierSetByUser();
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled()) {
+        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(material));
+    }
 }
 
 void SelectModelNG::SetSelected(int32_t idx)

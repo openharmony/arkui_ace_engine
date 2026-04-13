@@ -178,7 +178,7 @@ bool SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<P
 {
     CHECK_NULL_RETURN(bubbleNode, false);
     auto systemMaterial = param->GetSystemMaterial();
-    if (systemMaterial && MaterialUtils::CheckMaterialValid(systemMaterial->GetType())) {
+    if (MaterialUtils::IsEnableMaterialParam(systemMaterial)) {
         auto renderContext = bubbleNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateBackBlurStyle(std::nullopt);

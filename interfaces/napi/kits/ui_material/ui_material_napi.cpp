@@ -220,6 +220,36 @@ napi_value UiMaterialNapi::JSGetImmersiveLevel(napi_env env, napi_callback_info 
     return result;
 }
 
+napi_value UiMaterialNapi::JSGetMaterialInfo(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    auto state = MaterialUtils::GetConfiguredMaterialState();
+    napi_value napiState = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(state), &napiState);
+    napi_set_named_property(env, result, "state", napiState);
+    auto type = MaterialUtils::GetConfiguredMaterialType();
+    napi_value napiType = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(type), &napiType);
+    napi_set_named_property(env, result, "type", napiType);
+    return result;
+}
+
+napi_value UiMaterialNapi::JSGetEmpty(napi_env env, napi_callback_info info)
+{
+    napi_value constructor = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &constructor, nullptr);
+    napi_value result = nullptr;
+    napi_new_instance(env, constructor, 0, nullptr, &result);
+    UiMaterial* nativeMaterial = nullptr;
+    napi_status status =
+        napi_unwrap_s(env, result, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&nativeMaterial));
+    if (status == napi_ok && nativeMaterial) {
+        nativeMaterial->SetEmpty(true);
+    }
+    return result;
+}
+
 void UiMaterialNapi::Destructor(napi_env env, void* nativeObject, void* finalize)
 {
     UiMaterial* uiMaterial = reinterpret_cast<UiMaterial*>(nativeObject);
@@ -234,6 +264,7 @@ napi_status UiMaterialNapi::EnumMaterialTypeInit(napi_env env, napi_value export
     const std::vector<struct JsEnumInt> enumStructs = {
         { "NONE", 0 },
         { "SEMI_TRANSPARENT", 1 },
+        { "IMMERSIVE", 2 },
     };
     return EnumInit(env, exports, enumClassName, enumStructs);
 }
@@ -262,6 +293,17 @@ napi_status UiMaterialNapi::EnumImmersiveLevelInit(napi_env env, napi_value expo
     return EnumInit(env, exports, enumClassName, enumStructs);
 }
 
+napi_status UiMaterialNapi::EnumMaterialStateInit(napi_env env, napi_value exports)
+{
+    const char* enumClassName = "MaterialState";
+    const std::vector<struct JsEnumInt> enumStructs = {
+        { "DEFAULT", 0 },
+        { "ENABLE", 1 },
+        { "DISABLE", 2 },
+    };
+    return EnumInit(env, exports, enumClassName, enumStructs);
+}
+
 napi_status UiMaterialNapi::ImmersiveMaterialInit(napi_env env, napi_value exports)
 {
     napi_property_descriptor static_prop[] = {};
@@ -277,12 +319,18 @@ napi_status UiMaterialNapi::ImmersiveMaterialInit(napi_env env, napi_value expor
 
 napi_value UiMaterialNapi::Init(napi_env env, napi_value exports)
 {
-    napi_property_descriptor static_prop[] = {};
+    napi_property_descriptor static_prop[] = {
+        { "empty", nullptr, nullptr, JSGetEmpty, nullptr, nullptr, napi_static, nullptr },
+    };
     napi_value constructor = nullptr;
-    napi_property_descriptor properties[] = { DECLARE_NAPI_FUNCTION("getGlobalMaterialLevel", JSGetImmersiveLevel) };
+    napi_property_descriptor properties[] = {
+        DECLARE_NAPI_FUNCTION("getGlobalMaterialLevel", JSGetImmersiveLevel),
+        DECLARE_NAPI_FUNCTION("getMaterialInfo", JSGetMaterialInfo),
+    };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     napi_status status = napi_define_class(
-        env, "Material", NAPI_AUTO_LENGTH, MaterialConstructor, nullptr, 0, static_prop, &constructor);
+        env, "Material", NAPI_AUTO_LENGTH, MaterialConstructor, nullptr,
+        sizeof(static_prop) / sizeof(static_prop[0]), static_prop, &constructor);
     if (status != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "UIMaterial define class failed, %{public}d", status);
         return nullptr;
@@ -291,6 +339,7 @@ napi_value UiMaterialNapi::Init(napi_env env, napi_value exports)
     NAPI_CALL(env, EnumMaterialTypeInit(env, exports));
     NAPI_CALL(env, EnumImmersiveStyleInit(env, exports));
     NAPI_CALL(env, EnumImmersiveLevelInit(env, exports));
+    NAPI_CALL(env, EnumMaterialStateInit(env, exports));
     NAPI_CALL(env, ImmersiveMaterialInit(env, exports));
     return exports;
 }

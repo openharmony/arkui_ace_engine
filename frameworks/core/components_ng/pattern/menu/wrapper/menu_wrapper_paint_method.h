@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
