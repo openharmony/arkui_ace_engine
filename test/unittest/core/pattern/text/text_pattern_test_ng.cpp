@@ -2109,10 +2109,14 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged005, TestSize.Level1)
  */
 HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->magnifierController_ =
         AceType::MakeRefPtr<MagnifierController>(AccessibilityManagerNG::WeakClaim(AceType::RawPtr(textPattern)));
     textPattern->OnColorConfigurationUpdate();
@@ -2126,10 +2130,14 @@ HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
  */
 HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->magnifierController_ = nullptr;
     textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textPattern->magnifierController_->colorModeChange_, true);
