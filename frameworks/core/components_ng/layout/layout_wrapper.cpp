@@ -150,7 +150,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
-        auto pageCurrentOffset = GetPageCurrentOffset();
+        auto pageCurrentOffset = GetPageCurrentOffset(host);
         auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
         auto keyboardOffset = manager->GetKeyboardOffset();
         auto lastChild = host->GetLastChild();
@@ -219,20 +219,33 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
     CHECK_NULL_RETURN(host, offset);
     auto parent = host->GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
-        auto parentRenderContext = parent->GetRenderContext();
+        auto& parentRenderContext = parent->GetRenderContext();
         if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
             parentRenderContext->GetPositionProperty()->HasPosition()) {
-            auto parentLayoutProp = parent->GetLayoutProperty();
+            auto& parentLayoutProp = parent->GetLayoutProperty();
             CHECK_NULL_RETURN(parentLayoutProp, offset);
-            auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
+            auto& parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
             CHECK_NULL_RETURN(parentLayoutConstraint.has_value(), offset);
             auto renderPosition = FrameNode::ContextPositionConvertToPX(
                 parentRenderContext, parentLayoutConstraint.value().percentReference);
             offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
         } else {
-            offset += parent->GetFrameRectWithSafeArea().GetOffset();
+            offset += parent->GetFrameRectWithSafeAreaInner(parent).GetOffset();
         }
         parent = parent->GetAncestorNodeOfFrame(checkBoundary);
+    }
+    return offset;
+}
+
+OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(
+    RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode) const
+{
+    OffsetF offset {};
+    CHECK_NULL_RETURN(host, offset);
+    auto parent = parentNode;
+    while (parent) {
+        offset += parent->GetFrameRectWithSafeAreaInner(parent).GetOffset();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return offset;
 }
@@ -246,17 +259,22 @@ RectF LayoutWrapper::GetFrameRectWithoutSafeArea() const
 
 RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
 {
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, RectF());
-    RectF rect {};
     auto host = GetHostNode();
+    return GetFrameRectWithSafeAreaInner(host, checkPosition);
+}
+
+RectF LayoutWrapper::GetFrameRectWithSafeAreaInner(RefPtr<FrameNode>& host, bool checkPosition) const
+{
+    RectF rect {};
     CHECK_NULL_RETURN(host, rect);
-    auto renderContext = host->GetRenderContext();
+    auto&& geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    auto& renderContext = host->GetRenderContext();
     if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
         renderContext->GetPositionProperty()->HasPosition()) {
-        auto layoutProp = host->GetLayoutProperty();
+        auto& layoutProp = host->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProp, rect);
-        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        auto& layoutConstraint = layoutProp->GetLayoutConstraint();
         CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
         auto renderPosition =
             FrameNode::ContextPositionConvertToPX(renderContext, layoutConstraint.value().percentReference);
@@ -272,14 +290,18 @@ void LayoutWrapper::AdjustNotExpandNode()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    AdjustNotExpandNodeInner(host);
+}
+
+void LayoutWrapper::AdjustNotExpandNodeInner(RefPtr<FrameNode>& host)
+{
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto& safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto parent = host->GetAncestorNodeOfFrame(false);
-    auto renderContext = host->GetRenderContext();
+    auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto geometryNode = GetGeometryNode();
+    auto&& geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto adjustedRect = geometryNode->GetFrameRect();
     if (safeAreaManager->IsSafeAreaValid()) {
@@ -289,9 +311,10 @@ void LayoutWrapper::AdjustNotExpandNode()
     pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
     renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
     if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
+        auto parent = host->GetAncestorNodeOfFrame(false);
         ACE_SAFE_AREA_SCOPED_TRACE("AdjustNotExpandNode[%s][self:%d][parent:%d][key:%s][paintRectRect:%s]",
             host->GetTag().c_str(), host->GetId(),
-            host->GetAncestorNodeOfFrame(false) ? host->GetAncestorNodeOfFrame(false)->GetId() : 0,
+            parent ? parent->GetId() : 0,
             host->GetInspectorIdValue("").c_str(), renderContext->GetPaintRectWithoutTransform().ToString().c_str());
     }
 }
@@ -300,34 +323,35 @@ void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
+    auto& pattern = host->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (pattern->CustomizeExpandSafeArea()) {
         return;
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto& safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     const auto& layoutProperty = GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive) {
-        AdjustNotExpandNode();
+        AdjustNotExpandNodeInner(host);
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
     opts->switchToNone = false;
-    auto geometryNode = GetGeometryNode();
+    auto&& geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto parent = host->GetAncestorNodeOfFrame(false);
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
-        keyboardAdjust = ExpandIntoKeyboard();
+        keyboardAdjust = ExpandIntoKeyboard(host, parent);
     }
 
     // get frame in global offset
-    auto parentGlobalOffset = GetParentGlobalOffsetWithSafeArea();
+    auto parentGlobalOffset = GetParentGlobalOffsetWithSafeAreaInner(host, parent);
     auto parentAdjust = geometryNode->GetParentAdjust();
     if (!safeAreaManager->IsSafeAreaValid()) {
         parentAdjust = RectF();
@@ -335,32 +359,31 @@ void LayoutWrapper::ExpandSafeArea()
     auto frame = geometryNode->GetFrameRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
 
-    ExpandHelper(opts, frame);
+    ExpandHelper(host, opts, frame);
 
     AdjustFixedSizeNode(frame);
-    auto parent = host->GetAncestorNodeOfFrame(false);
-    auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
+    auto parentScrollable = (parent && parent->GetRawPattern<ScrollablePattern>());
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
     frame -= parentGlobalOffset;
     // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
-    AdjustChildren(diff, parentScrollable);
+    AdjustChildren(host, diff, parentScrollable);
 
     if (parentScrollable) {
-        AdjustNotExpandNode();
+        AdjustNotExpandNodeInner(host);
         return;
     }
     auto selfAdjust = frame - geometryNode->GetFrameRect();
     geometryNode->SetSelfAdjust(selfAdjust);
     pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
-    auto renderContext = host->GetRenderContext();
+    auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
     if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
         ACE_SAFE_AREA_SCOPED_TRACE(
             "ExpandSafeAreaFinish[%s][self:%d][parent:%d][key:%s][opt:%s][paintRectRect:%s][selfAdjust:%s]",
             host->GetTag().c_str(), host->GetId(),
-            host->GetAncestorNodeOfFrame(false) ? host->GetAncestorNodeOfFrame(false)->GetId() : 0,
+            parent ? parent->GetId() : 0,
             host->GetInspectorIdValue("").c_str(), opts->ToString().c_str(),
             renderContext->GetPaintRectWithoutTransform().ToString().c_str(), selfAdjust.ToString().c_str());
     }
@@ -611,10 +634,9 @@ bool LayoutWrapper::PredictMeasureResult(
     return false;
 }
 
-void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
+void LayoutWrapper::ExpandHelper(RefPtr<FrameNode>& host, const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
 {
     CHECK_NULL_VOID(opts);
-    auto host = GetHostNode();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -639,9 +661,9 @@ void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts
 void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
 {
     // reset if User has fixed size
-    auto layoutProperty = GetLayoutProperty();
+    auto&& layoutProperty = GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = GetGeometryNode();
+    auto&& geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     if (layoutProperty->HasFixedWidth()) {
         frame.SetWidth(geometryNode->GetFrameRect().Width());
@@ -654,22 +676,21 @@ void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
     }
 }
 
-void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
+void LayoutWrapper::AdjustChildren(RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable)
 {
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
+    auto& pattern = host->GetPattern();
     if (pattern && pattern->ConsumeChildrenAdjustment(offset)) {
         return;
     }
-    for (const auto& childUI : GetHostNode()->GetChildren()) {
+    for (const auto& childUI : host->GetChildren()) {
         AdjustChild(childUI, offset, parentScrollable);
     }
 }
 
-void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, bool parentScrollable)
+void LayoutWrapper::AdjustChild(const RefPtr<UINode>& childUI, const OffsetF& offset,
+    bool parentScrollable)
 {
-    auto child = DynamicCast<FrameNode>(childUI);
+    auto child = DynamicCast<FrameNode>(RawPtr(childUI));
     if (!child) {
         if (!childUI->IsSyntaxNode()) {
             return;
@@ -679,27 +700,26 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, b
         }
         return;
     }
-    auto childGeo = child->GetGeometryNode();
+    auto&& childGeo = child->GetGeometryNode();
     auto parentAdjust = childGeo->GetParentAdjust();
     if (parentAdjust.GetOffset() != offset) {
-        AddChildToExpandListIfNeeded(AceType::WeakClaim(AceType::RawPtr(child)));
+        AddChildToExpandListIfNeeded(*child);
     }
     if (!parentScrollable) {
         childGeo->SetParentAdjust(RectF(offset, SizeF()));
     }
 }
 
-void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+void LayoutWrapper::AddChildToExpandListIfNeeded(FrameNode& host)
 {
-    auto host = node.Upgrade();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    WeakPtr<FrameNode> node = AceType::WeakClaim(&host);
+    auto pipeline = host.GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto& safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     bool canAdd = safeAreaManager->AddNodeToExpandListIfNeeded(node);
     CHECK_NULL_VOID(canAdd);
-    auto task = [weak = node]() {
+    auto task = [weak = std::move(node)]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         DirtySwapConfig emptyConfig;
@@ -708,16 +728,16 @@ void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
     pipeline->AddSyncGeometryNodeTask(task);
 }
 
-OffsetF LayoutWrapper::ExpandIntoKeyboard()
+OffsetF LayoutWrapper::ExpandIntoKeyboard(RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode)
 {
-    auto pageOffset = GetPageCurrentOffset();
+    auto pageOffset = GetPageCurrentOffset(host);
     if (GreatOrEqual(pageOffset, 0.0f)) {
         return OffsetF();
     }
     // if parent already expanded into keyboard, offset shouldn't be applied again
-    auto parent = GetHostNode()->GetAncestorNodeOfFrame(false);
+    auto parent = parentNode;
     while (parent) {
-        auto pattern = parent->GetPattern();
+        auto& pattern = parent->GetPattern();
         if (pattern && pattern->CheckCustomAvoidKeyboard()) {
             // if parent need avoid keyboard and child need expand into keyboard,
             // keep child expand into keyboard
@@ -731,16 +751,14 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         }
         parent = parent->GetAncestorNodeOfFrame(false);
     }
-    auto host = GetHostNode();
     CHECK_NULL_RETURN(host, OffsetF());
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     return OffsetF(0.0f, -pipeline->GetSafeAreaManager()->GetKeyboardOffset());
 }
 
-float LayoutWrapper::GetPageCurrentOffset()
+float LayoutWrapper::GetPageCurrentOffset(RefPtr<FrameNode>& host)
 {
-    auto host = GetHostNode();
     CHECK_NULL_RETURN(host, 0.0f);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);

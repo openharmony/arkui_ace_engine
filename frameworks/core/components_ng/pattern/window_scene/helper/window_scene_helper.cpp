@@ -343,12 +343,22 @@ bool WindowSceneHelper::IsWindowPattern(const RefPtr<FrameNode>& node)
     return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
 
+bool WindowSceneHelper::IsWindowPattern(uint32_t type)
+{
+    return type > static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
+}
+
 bool WindowSceneHelper::HasWindowSession(const RefPtr<FrameNode>& node)
 {
     if (!node) {
         return false;
     }
     return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::HasWindowSession(uint32_t type)
+{
+    return type > static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
 }
 
 bool WindowSceneHelper::IsTransformScene(uint32_t type)

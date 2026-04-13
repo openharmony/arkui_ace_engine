@@ -200,6 +200,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckBorderAndPadding001, TestSize.Level0)
      * @tc.steps1 Create a layoutProperty.
      */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto host = layoutProperty->GetHost();
 
     /**
      * @tc.steps2: call CheckBorderAndPadding.push selfIdealSize is {1,-1}.
@@ -207,7 +208,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckBorderAndPadding001, TestSize.Level0)
      */
     layoutConstraintF.selfIdealSize = { 1, -1 };
     layoutProperty->layoutConstraint_ = layoutConstraintF;
-    layoutProperty->CheckBorderAndPadding();
+    layoutProperty->CheckBorderAndPadding(host);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 1);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Height(), 0);
 
@@ -217,7 +218,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckBorderAndPadding001, TestSize.Level0)
      */
     layoutConstraintF.selfIdealSize = { -1, 1 };
     layoutProperty->layoutConstraint_ = layoutConstraintF;
-    layoutProperty->CheckBorderAndPadding();
+    layoutProperty->CheckBorderAndPadding(host);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 0);
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Height(), 1);
 

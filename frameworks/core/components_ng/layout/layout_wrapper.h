@@ -193,6 +193,8 @@ public:
     }
 
     virtual OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
+    virtual OffsetF GetParentGlobalOffsetWithSafeAreaInner(RefPtr<FrameNode>& host,
+        RefPtr<FrameNode>& parentNode) const;
 
     virtual bool SkipMeasureContent() const;
 
@@ -247,7 +249,7 @@ public:
     void ExpandSafeArea();
     void AdjustNotExpandNode();
     void AdjustFixedSizeNode(RectF& frame);
-    void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
+    void ExpandHelper(RefPtr<FrameNode>& host, const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
     ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false,
         IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
             .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
@@ -266,7 +268,8 @@ public:
 
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
-    void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
+    RectF GetFrameRectWithSafeAreaInner(RefPtr<FrameNode>& host, bool checkPosition = false) const;
+    void AddChildToExpandListIfNeeded(FrameNode& host);
     void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
     RectF GetBackGroundAccumulatedSafeAreaExpand();
 
@@ -331,9 +334,9 @@ protected:
     void ApplyConstraint(LayoutConstraintF constraint);
 
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
-    OffsetF ExpandIntoKeyboard();
+    OffsetF ExpandIntoKeyboard(RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode);
     bool CheckValidSafeArea();
-    float GetPageCurrentOffset();
+    float GetPageCurrentOffset(RefPtr<FrameNode>& host);
 
     void SetIgnoreLayoutProcess(bool switchTo)
     {
@@ -375,8 +378,9 @@ protected:
     bool escapeDelayForIgnore_ = false;
     bool isScrollableAxis_ = false;
 private:
-    void AdjustChildren(const OffsetF& offset, bool parentScrollable);
-    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);
+    void AdjustChildren(RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable);
+    void AdjustChild(const RefPtr<UINode>& node, const OffsetF& offset, bool parentScrollable);
+    void AdjustNotExpandNodeInner(RefPtr<FrameNode>& host);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

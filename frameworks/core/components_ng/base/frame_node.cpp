@@ -592,6 +592,7 @@ FrameNode::FrameNode(
         ownedTid_ = static_cast<uint64_t>(gettid());
 #endif
     }
+    uiNodeType_ = UINodeType::FRAME_NODE;
 }
 
 void FrameNode::OnDelete()
@@ -3300,8 +3301,9 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
     }
     auto parent = GetParent();
     while (parent) {
-        auto parentFrame = DynamicCast<FrameNode>(parent);
-        if (parentFrame) {
+        if (parent->GetNodeType() == UINodeType::FRAME_NODE) {
+            auto parentFrame = Transfer(reinterpret_cast<FrameNode*>(parent.GetRawPtr()));
+            parent.Release();
             return parentFrame;
         }
         parent = parent->GetParent();
@@ -4244,7 +4246,7 @@ bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ac
         return ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
                 ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT &&
-                     child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
+                    child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
                     isExclusiveEventForChild));
     }
     return false;
@@ -4495,12 +4497,10 @@ std::pair<float, float> FrameNode::ContextPositionConvertToPX(
     std::pair<float, float> position;
     CHECK_NULL_RETURN(context, position);
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
-    position.first =
-        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetX(), scaleProperty, percentReference.Width())
-            .value_or(0.0);
-    position.second =
-        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
-            .value_or(0.0);
+    position.first = ConvertToPxDefault(context->GetPositionProperty()->GetPosition()->GetX(),
+        scaleProperty, percentReference.Width());
+    position.second = ConvertToPxDefault(context->GetPositionProperty()->GetPosition()->GetY(),
+        scaleProperty, percentReference.Height());
     return position;
 }
 
@@ -7233,14 +7233,14 @@ void FrameNode::GetVisibleRectWithClip(
     }
 }
 
-CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
+const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
     auto innerScale = scale;
-    if (renderContext_) {
-        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+    if (renderContext_->HasTransformMatrix()) {
+        auto& matrix4 = renderContext_->GetTransformMatrixValue();
         innerScale = { innerScale.x * static_cast<float>(matrix4.GetScaleX()),
             innerScale.y * static_cast<float>(matrix4.GetScaleY()) };
     }
@@ -7252,73 +7252,85 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
         return cachedVisibleRectResult_.second;
     }
 
-    CacheVisibleRectResult result;
+    const CacheVisibleRectResult* result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
-        auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        result = CalculateCacheVisibleRect(
+        const auto& parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
+        result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     } else {
-        CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
-        result = CalculateCacheVisibleRect(
+        const auto& parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
+        result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
     if (logFlag) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
             "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
             "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
-            tag_.c_str(), nodeId_, result.windowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
-            result.innerVisibleRect.ToString().c_str(), result.frameRect.ToString().c_str(),
-            result.innerBoundaryRect.ToString().c_str());
+            tag_.c_str(), nodeId_, result->windowOffset.ToString().c_str(), result->visibleRect.ToString().c_str(),
+            result->innerVisibleRect.ToString().c_str(), result->frameRect.ToString().c_str(),
+            result->innerBoundaryRect.ToString().c_str());
     }
-    return result;
+    return *result;
 }
 
-CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+const CacheVisibleRectResult& FrameNode::CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
     const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
     uint64_t timestamp)
 {
-    auto parentRenderContext = parentUi->GetRenderContext();
-    OffsetF windowOffset;
-    OffsetF innerWindowOffset;
-    auto offset = rectToParent.GetOffset();
-    auto innerOffset = rectToParent.GetOffset();
-    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+    cachedVisibleRectResult_.first = timestamp;
+    auto& res = cachedVisibleRectResult_.second;
+
+    auto& windowOffset = res.windowOffset;
+    windowOffset = rectToParent.GetOffset();
+    auto& parentRenderContext = parentUi->GetRenderContext();
+    if (parentRenderContext) {
         auto parentScale = parentRenderContext->GetTransformScale();
-        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+        if (parentScale) {
+            auto& v = parentScale.value();
+            windowOffset.Multiply(v.x, v.y);
+        }
     }
-    windowOffset = parentCacheVisibleRect.windowOffset + offset;
+    windowOffset.Add(parentCacheVisibleRect.windowOffset);
 
-    innerOffset = OffsetF(innerOffset.GetX() * parentCacheVisibleRect.innerCumulativeScale.x,
-        innerOffset.GetY() * parentCacheVisibleRect.innerCumulativeScale.y);
-    innerWindowOffset = parentCacheVisibleRect.innerWindowOffset + innerOffset;
+    auto& rect = res.frameRect;
+    rect = {
+        windowOffset.GetX(),
+        windowOffset.GetY(),
+        rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x,
+        rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y
+    };
+    auto& visibleRect = res.visibleRect;
+    visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
 
-    RectF rect;
-    rect.SetOffset(windowOffset);
-    rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
-    rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
+    auto& innerWindowOffset = res.innerWindowOffset;
+    innerWindowOffset = rectToParent.GetOffset();
+    auto& parentInnerScale = parentCacheVisibleRect.innerCumulativeScale;
+    innerWindowOffset.Multiply(parentInnerScale.x, parentInnerScale.y).Add(parentCacheVisibleRect.innerWindowOffset);
 
-    RectF innerRect;
-    innerRect.SetOffset(innerWindowOffset);
-    innerRect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x);
-    innerRect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y);
+    auto& innerRect = res.innerFrameRect;
+    innerRect = {
+        innerWindowOffset.GetX(),
+        innerWindowOffset.GetY(),
+        rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x,
+        rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y
+    };
 
-    auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
-    auto innerVisibleRect = innerRect;
-    auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
+    auto& innerBoundaryRect = res.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
-        innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
+        innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(
+            parentCacheVisibleRect.innerBoundaryRect);
+    } else {
+        innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     }
+
+    auto& innerVisibleRect = res.innerVisibleRect;
     innerVisibleRect = innerRect.Constrain(innerBoundaryRect);
 
-    VectorF cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
+    res.cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
         pairScale.first.y * parentCacheVisibleRect.cumulativeScale.y };
-    VectorF innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
+    res.innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
         pairScale.second.y * parentCacheVisibleRect.innerCumulativeScale.y };
-    cachedVisibleRectResult_ = { timestamp,
-        { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale, rect,
-            innerRect, innerBoundaryRect } };
-    return { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale,
-        rect, innerRect, innerBoundaryRect };
+    return res;
 }
 
 bool FrameNode::IsContextTransparent()
@@ -7363,8 +7375,8 @@ CacheMatrixInfo& FrameNode::GetOrRefreshMatrixFromCache(bool forceRefresh)
         getCacheNanoTime_ + MATRIX_CACHE_TIME_THRESHOLD < nanoTimestamp) {
         cacheMatrixInfo_.revertMatrix = renderContext_->GetRevertMatrix();
         cacheMatrixInfo_.paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
-        cacheMatrixInfo_.localMatrix = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0) *
-                                       cacheMatrixInfo_.revertMatrix;
+        cacheMatrixInfo_.localMatrix = Matrix4::CreateTranslate(-rect.GetOffset().GetX(),
+            -rect.GetOffset().GetY(), 0).MatrixMultiply(cacheMatrixInfo_.revertMatrix);
         isTransformNotChanged_ = true;
         getCacheNanoTime_ = nanoTimestamp;
         prePaintRect_ = rect;
