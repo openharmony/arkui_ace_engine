@@ -2514,14 +2514,6 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     // WebModelNG::SetSetKeyboardAppearance(frameNode, convValue);
 }
-void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
-                                  const Opt_OnInputmethodAttachedCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetOnInputmethodAttached(frameNode, convValue);
-}
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -3318,7 +3310,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
-        WebAttributeModifier::SetOnInputmethodAttachedImpl,
     };
     return &ArkUIWebModifierImpl;
 }

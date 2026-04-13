@@ -5761,7 +5761,6 @@ typedef enum Ark_MarqueeState {
     ARK_MARQUEE_STATE_START = 0,
     ARK_MARQUEE_STATE_BOUNCE = 1,
     ARK_MARQUEE_STATE_FINISH = 2,
-    ARK_MARQUEE_STATE_STOP = 3,
 } Ark_MarqueeState;
 typedef struct Opt_MarqueeState {
     Ark_Tag tag;
@@ -26645,6 +26644,8 @@ typedef struct GENERATED_ArkUISpanModifier {
                         const Opt_Callback_ClickEvent_Void* value);
     void (*setOnHover)(Ark_NativePointer node,
                        const Opt_HoverCallback* value);
+    void (*setFontVariations)(Ark_NativePointer node,
+                              const Opt_Array_text_FontVariation* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* value,
                     const Opt_FontConfigs* fontConfigs);
@@ -27014,6 +27015,8 @@ typedef struct GENERATED_ArkUITextModifier {
                              const Opt_TextDirection* value);
     void (*setOrphanCharOptimization)(Ark_NativePointer node,
                                       const Opt_Boolean* value);
+    void (*setFontVariations)(Ark_NativePointer node,
+                              const Opt_Array_text_FontVariation* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -27967,8 +27970,6 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableScrollDirectionalLock)(Ark_NativePointer node,
                                            const Opt_Boolean* value,
                                            const Opt_ScrollDirectionalLockType* type);
-    void (*setOnInputmethodAttached)(Ark_NativePointer node,
-                                     const Opt_OnInputmethodAttachedCallback* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {
@@ -29699,14 +29700,14 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
-    Ark_InputEventMonitor (*addLocalInputEventMonitor)(Ark_Int32 eventMask,
-                                                       const InputEventListener* listener);
-    void (*removeLocalInputEventMonitor)(const Ark_InputEventMonitor* monitor);
-    void (*enableEventPassthrough)(const Opt_Boolean* enabled,
-                                   Ark_RawInputEventType eventType);
     void (*setCustomCursor)(Ark_image_PixelMap value,
                             const Opt_Int32* focusX,
                             const Opt_Int32* focusY);
+    void (*enableEventPassthrough)(const Opt_Boolean* enabled,
+                                   Ark_RawInputEventType eventType);
+    Ark_InputEventMonitor (*addLocalInputEventMonitor)(Ark_Int32 eventMask,
+                                                       const InputEventListener* listener);
+    void (*removeLocalInputEventMonitor)(const Ark_InputEventMonitor* monitor);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

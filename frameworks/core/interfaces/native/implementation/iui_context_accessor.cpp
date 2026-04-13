@@ -812,10 +812,10 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+        IUIContextAccessor::SetCustomCursorImpl,
+        IUIContextAccessor::EnableEventPassthroughImpl,
         IUIContextAccessor::AddLocalInputEventMonitorImpl,
         IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
-        IUIContextAccessor::EnableEventPassthroughImpl,
-        IUIContextAccessor::SetCustomCursorImpl,
     };
     return &IUIContextAccessorImpl;
 }

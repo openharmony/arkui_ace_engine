@@ -3319,6 +3319,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_PickerTextStyle_TextPickerTextStyle& src)
 {
     switch (src.selector) {
@@ -3739,6 +3755,8 @@ ASSIGN_OPT(Opt_Indicator)
 ASSIGN_OPT(Opt_IndicatorComponentController)
 ASSIGN_OPT(Opt_InnerGestureTriggerInfo)
 ASSIGN_OPT(Opt_InputEventInterceptAction)
+ASSIGN_OPT(Opt_InputEventInterceptResult)
+ASSIGN_OPT(Opt_InputEventMonitor)
 ASSIGN_OPT(Opt_InputEventSubTypeMask)
 ASSIGN_OPT(Opt_InputMethodExtraConfig)
 ASSIGN_OPT(Opt_InputType)
@@ -3917,6 +3935,7 @@ ASSIGN_OPT(Opt_PulseSymbolEffect)
 ASSIGN_OPT(Opt_RadialGradientStyle)
 ASSIGN_OPT(Opt_RadioIndicatorType)
 ASSIGN_OPT(Opt_RawInputEventType)
+ASSIGN_OPT(Opt_RawInputEventWrapper)
 ASSIGN_OPT(Opt_RectResult)
 ASSIGN_OPT(Opt_RectShape)
 ASSIGN_OPT(Opt_RefreshStatus)
@@ -4384,6 +4403,7 @@ ASSIGN_OPT(Opt_Callback_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32)
 ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32_I32_I32)
 ASSIGN_OPT(Opt_Callback_IMEClient_Void)
+ASSIGN_OPT(Opt_Callback_InputEventInterceptResult_Void)
 ASSIGN_OPT(Opt_Callback_InsertValue_Boolean)
 ASSIGN_OPT(Opt_Callback_InsertValue_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void)
@@ -4534,6 +4554,7 @@ ASSIGN_OPT(Opt_ImageCompleteCallback)
 ASSIGN_OPT(Opt_ImageErrorCallback)
 ASSIGN_OPT(Opt_ImageOnCompleteCallback)
 ASSIGN_OPT(Opt_Initializer)
+ASSIGN_OPT(Opt_InputEventListener)
 ASSIGN_OPT(Opt_InterceptionCallback)
 ASSIGN_OPT(Opt_InterceptionModeCallback)
 ASSIGN_OPT(Opt_InterceptionShowCallback)
@@ -5439,6 +5460,7 @@ ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
 ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
 ASSIGN_OPT(Opt_Union_Length_GutterOption)
 ASSIGN_OPT(Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions)
+ASSIGN_OPT(Opt_Union_MouseEvent_TouchEventProxy_KeyEvent)
 ASSIGN_OPT(Opt_Union_PickerTextStyle_TextPickerTextStyle)
 ASSIGN_OPT(Opt_CalendarDialogOptions)
 ASSIGN_OPT(Opt_DatePickerDialogOptions)

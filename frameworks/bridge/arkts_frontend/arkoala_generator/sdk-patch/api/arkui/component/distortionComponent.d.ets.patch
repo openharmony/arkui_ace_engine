@@ -1,8 +1,8 @@
 diff --git a/api/arkui/component/distortionComponent.d.ets b/api/arkui/component/distortionComponent.d.ets
-index 4ec3ebd..1bed11c 100644
+index a5b07a3..33e19ca 100644
 --- a/api/arkui/component/distortionComponent.d.ets
 +++ b/api/arkui/component/distortionComponent.d.ets
-@@ -113,7 +113,8 @@ export declare interface DistortionComponentOptions {
+@@ -112,7 +112,8 @@ export declare interface DistortionComponentOptions {
   * @stagemodelonly
   * @since 26.0.0
   */
@@ -12,7 +12,7 @@ index 4ec3ebd..1bed11c 100644
  
  /**
   * Defines a DistortionComponent that provides spatial distortion visual effects.
-@@ -126,9 +127,10 @@ export declare interface DistortionComponentAttribute extends CommonMethod {}
+@@ -125,9 +126,10 @@ export declare interface DistortionComponentAttribute extends CommonMethod {}
   * @stagemodelonly
   * @since 26.0.0
   */

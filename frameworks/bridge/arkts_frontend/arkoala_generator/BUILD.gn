@@ -138,7 +138,12 @@ action("runner_gen_code") {
 }
 
 if (!build_ohos_sdk) {
-  action("idlize_gen") {
+  config("idlize_gen_config") {
+    include_dirs = [
+      "$idlize_gen_bridges_output_path",
+    ]
+  }
+  action("idlize_install") {
     script = "gn/command/deploy.py"
     args = [
       "--source",
@@ -148,7 +153,7 @@ if (!build_ohos_sdk) {
       "--config",
       rebase_path("./generation_config/instructive-config.json"),
       "--stamp",
-      rebase_path("$target_out_dir/idlize_gen_stamp"),
+      rebase_path("$target_out_dir/idlize_install_stamp"),
     ]
     deps = [
       ":runner_gen_code",
@@ -157,13 +162,20 @@ if (!build_ohos_sdk) {
       ":runner_gen_code",
     ]
     outputs = [
-      "$target_out_dir/idlize_gen_stamp",
+      "$target_out_dir/idlize_install_stamp",
     ]
   }
 } else {
   # dummy dep for native build. Bridges must not be built in that until problem
   # with node 18 is resolved in ohos-sdk and YZ CIs.
-  group("idlize_gen") {
+  group("idlize_install") {
     deps = []
+  }
+}
+
+source_set("idlize_gen") {
+  public_deps = [ ":idlize_install" ]
+  if (!build_ohos_sdk) {
+    public_configs = [ ":idlize_gen_config" ]
   }
 }

@@ -1055,13 +1055,12 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetOrphanCharOptimizationImpl,
+        TextAttributeModifier::SetFontVariationsImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
-        TextAttributeModifier::SetOrphanCharOptimizationImpl,
-        TextAttributeModifier::SetFontVariationsImpl,
     };
     return &ArkUITextModifierImpl;
 }

@@ -510,8 +510,7 @@
         "PinchGestureHandler",
         "TapGestureHandler",
         "RotationGestureHandler",
-        "SwipeGestureHandler",
-        "RawInputEventWrapper"
+        "SwipeGestureHandler"
     ],
     "boundProperties": {
         "Checkbox": [

@@ -382,11 +382,11 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
         SpanAttributeModifier::SetIdImpl,
         SpanAttributeModifier::SetOnClick0Impl,
         SpanAttributeModifier::SetOnHoverImpl,
+        SpanAttributeModifier::SetFontVariationsImpl,
         SpanAttributeModifier::SetFontImpl,
         SpanAttributeModifier::SetFontWeightImpl,
         SpanAttributeModifier::SetOnClick1Impl,
         SpanAttributeModifier::SetDebugLineImpl,
-        SpanAttributeModifier::SetFontVariationsImpl,
     };
     return &ArkUISpanModifierImpl;
 }

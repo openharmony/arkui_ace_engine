@@ -52,13 +52,9 @@ build_component_ng("calendar_picker_pattern_ng") {
     }    
   }
 
-  deps = [
-    "../../../../bridge/arkts_frontend/arkoala_generator:idlize_gen",
-  ]
-
   if (!build_ohos_sdk) {
     if (!is_arkui_x) {
-      deps += [
+      deps = [
         "$ace_root/interfaces/inner_api/ui_session:ui_session",
       ]
     }
