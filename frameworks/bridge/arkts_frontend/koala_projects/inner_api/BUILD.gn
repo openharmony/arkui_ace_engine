@@ -40,6 +40,7 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/component/tabs.d.ets",
     "./arkui/component/text.d.ets",
     "./arkui/component/idlize.d.ets",
+    "./arkui/component/securityUIExtensionComponent.d.ets"
   ]
   sources += [
     "./@koalaui/common.d.ets",
@@ -50,8 +51,8 @@ ohos_copy("copy_arkui_ets") {
   sources += [ "./@koalaui/interop/Finalizable.d.ets" ]
   sources += [ "./@koalaui/interop/SerializerBase.d.ets" ]
   sources += [
-    "./@koalaui/runtime/annotations.d.ets",
     "./@koalaui/runtime/internals.d.ets",
+    "./@koalaui/runtime/annotations.d.ets",
     "./@koalaui/runtime/memo/node.d.ets",
     "./@koalaui/runtime/memo/remember.d.ets",
     "./@koalaui/runtime/states/Disposable.d.ets",
