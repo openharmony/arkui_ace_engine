@@ -289,6 +289,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         }
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEevent.value1->GetEventInfo();
+            CHECK_NULL_RETURN(mouseEventInfo, errValue);
             auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             result = postEventManager->PostMouseEvent(peer->realNode_, std::move(mouseEvent));
@@ -296,6 +297,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         }
         case SELECTOR_ID_2: {
             auto axisEventInfo = arkEevent.value2->GetEventInfo();
+            CHECK_NULL_RETURN(axisEventInfo, errValue);
             auto axisEvent = axisEventInfo->ConvertToAxisEvent();
             axisEvent.pressedCodes = axisEventInfo->GetPressedKeyCodes();
             result = postEventManager->PostAxisEvent(peer->realNode_, std::move(axisEvent));
