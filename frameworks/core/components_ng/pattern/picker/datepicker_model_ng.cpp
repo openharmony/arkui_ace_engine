@@ -452,9 +452,9 @@ PickerTextStyle DatePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 
 void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
         ParseDisappearTextStyleResObj(frameNode, value);
@@ -506,9 +506,9 @@ PickerTextStyle DatePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 
 void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
         ParseNormalTextStyleResObj(frameNode, value);
@@ -560,9 +560,9 @@ PickerTextStyle DatePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 
 void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(theme);
 
     if (SystemProperties::ConfigChangePerform()) {
         ParseSelectedTextStyleResObj(frameNode, value);

@@ -2299,7 +2299,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);

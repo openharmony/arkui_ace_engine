@@ -705,7 +705,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);

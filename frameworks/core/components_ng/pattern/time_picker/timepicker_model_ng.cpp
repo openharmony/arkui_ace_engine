@@ -166,9 +166,7 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(
         TimePickerUtil::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
 
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, timePickerNode);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>(timePickerNode->GetThemeScopeId());
+    auto pickerTheme = timePickerNode->GetTheme<PickerTheme>(timePickerNode->GetThemeScopeId());
     CHECK_NULL_RETURN(pickerTheme, timePickerNode);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();

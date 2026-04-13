@@ -1307,5 +1307,8 @@ HWTEST_F(TextPickerModelTestNg, SetDefaultAttributes001, TestSize.Level1)
     auto frameNode = TextPickerModelNG::CreateFrameNode(0);
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetDefaultAttributes(frameNode, theme);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasFontSize());
 }
 } // namespace OHOS::Ace::NG
