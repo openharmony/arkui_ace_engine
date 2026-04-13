@@ -227,6 +227,7 @@ private:
     void ReportSelectEvent();
     void ReportPoupSelectEvent();
     void UpdateThemeColor();
+    void ApplyPopupSystemMaterial();
     void ReportSelectChangeData(int32_t nodeId, int32_t currentIndex);
     std::vector<int32_t> collapsedItemNums_;
     int32_t collapsedIndex_ = 0;
