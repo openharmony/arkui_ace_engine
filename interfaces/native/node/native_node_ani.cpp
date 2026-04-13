@@ -24,12 +24,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/node_content_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
+#include "error_message_macros.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";
 constexpr char GET_PARAM_WITH_NAVDESTINATION_ID_METHOD[] = "getParamWithNavDestinationId";
 
-int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHOS::Ace::NG::FrameNode** frameNode)
+int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHOS::Ace::NG::FrameNode** frameNode,
+    const char* functionName)
 {
     ani_class pointerClass;
     env->FindClass("std.core.Long", &pointerClass);
@@ -37,6 +39,8 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     ani_status status = env->Object_InstanceOf(frameNodePeerObj, pointerClass, &isPointer);
     if (status != ANI_OK || !isPointer) {
         LOGE("fail to get frameNodePeerObj value in builderNode");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName,
+            "frameNodePeerObj is not a std.core.Long object");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -44,12 +48,14 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     status = env->Object_CallMethodByName_Long(frameNodePeerObj, "toLong", ":l", &frameNodePeerPtr);
     if (status != ANI_OK) {
         LOGE("fail to unbox frameNodePeerObj");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName, "Failed to unbox frameNodePeerObj");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
     auto* frameNodePeer = reinterpret_cast<OHOS::Ace::FrameNodePeer*>(frameNodePeerPtr);
     if (frameNodePeer == nullptr) {
         LOGE("fail to get frameNodePeer value in builderNode");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName, "Frame node peer is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *frameNode = OHOS::Ace::AceType::RawPtr(frameNodePeer->node);
@@ -59,20 +65,23 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     }
     if (*frameNode == nullptr) {
         LOGE("fail to get frameNode value in builderNode");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName, "Frame node is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-int32_t GetNodeHandleFromFrameNode(ani_env* env, ani_object frameNodePeerObj, ArkUI_NodeHandle* handle)
+int32_t GetNodeHandleFromFrameNode(
+    ani_env* env, ani_object frameNodePeerObj, ArkUI_NodeHandle* handle, const char* functionName)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     OHOS::Ace::NG::FrameNode* frameNode = nullptr;
-    int32_t result = GetFrameNodeFromAniObject(env, frameNodePeerObj, &frameNode);
+    int32_t result = GetFrameNodeFromAniObject(env, frameNodePeerObj, &frameNode, functionName);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
         return result;
     }
     if (frameNode == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName, "Frame node is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(frameNode);
@@ -94,20 +103,24 @@ int32_t GetNodeHandleFromFrameNode(ani_env* env, ani_object frameNodePeerObj, Ar
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-int32_t GetNodeHandleFromBuilderNode(ani_env* env, ani_object builderNode, ArkUI_NodeHandle* handle)
+int32_t GetNodeHandleFromBuilderNode(
+    ani_env* env, ani_object builderNode, ArkUI_NodeHandle* handle, const char* functionName)
 {
     ani_ref frameNodePeerRef;
     if (env->Object_GetFieldByName_Ref(builderNode, "nodePtr_", &frameNodePeerRef) != ANI_OK) {
         LOGE("fail to get nodePtr in builderNode");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName,
+            "Failed to get nodePtr_ from builderNode");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_object frameNodePeerObj = static_cast<ani_object>(frameNodePeerRef);
     OHOS::Ace::NG::FrameNode* frameNode = nullptr;
-    int32_t result = GetFrameNodeFromAniObject(env, frameNodePeerObj, &frameNode);
+    int32_t result = GetFrameNodeFromAniObject(env, frameNodePeerObj, &frameNode, functionName);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
         return result;
     }
     if (frameNode == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName, "Frame node is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -115,12 +128,16 @@ int32_t GetNodeHandleFromBuilderNode(ani_env* env, ani_object builderNode, ArkUI
     if (frameNode->GetTag() == "BuilderProxyNode") {
         // need to get the really frameNode.
         if (!impl) {
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, functionName,
+                "Native impl library not found");
             return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
         }
         auto* child = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
             reinterpret_cast<ArkUINodeHandle>(frameNode), 0, true);
         if (!child) {
             LOGE("fail to get child in BuilderProxyNode");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, functionName,
+                "Failed to get child from BuilderProxyNode");
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(child);
@@ -189,20 +206,23 @@ int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object
 {
     if (env == nullptr) {
         LOGE("env is nullptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_ref frameNodePeerRef;
     if (env->Object_GetFieldByName_Ref(value, "nodePtr_", &frameNodePeerRef) == ANI_OK) {
         ani_object frameNodePeerObj = static_cast<ani_object>(frameNodePeerRef);
-        return GetNodeHandleFromFrameNode(env, frameNodePeerObj, handle);
+        return GetNodeHandleFromFrameNode(env, frameNodePeerObj, handle, __FUNCTION__);
     }
 
     ani_ref builderNodeRef;
     if (env->Object_GetFieldByName_Ref(value, "builderNode_", &builderNodeRef) == ANI_OK) {
         // Component Content case.
         ani_object builderNode = static_cast<ani_object>(builderNodeRef);
-        return GetNodeHandleFromBuilderNode(env, builderNode, handle);
+        return GetNodeHandleFromBuilderNode(env, builderNode, handle, __FUNCTION__);
     }
+    SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Ani value does not contain nodePtr_ or builderNode_");
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
@@ -210,11 +230,13 @@ int32_t OH_ArkUI_NativeModule_GetContextFromAniValue(ani_env* env, ani_object co
 {
     if (env == nullptr) {
         LOGE("env is nullptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_int instanceId = -1;
     if (env->Object_GetFieldByName_Int(context, "instanceId_", &instanceId) != ANI_OK) {
         LOGE("fail to get Context value");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get instanceId_ from context");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *handle = new ArkUI_Context({ .id = instanceId });
@@ -226,11 +248,14 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
 {
     if (env == nullptr) {
         LOGE("env is nullptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_ref nodeContentPeerRef;
     if (env->Object_GetFieldByName_Ref(nodeContent, "nativePtr_", &nodeContentPeerRef) != ANI_OK) {
         LOGE("fail to get nativePtr_ from nodeContent");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Failed to get nativePtr_ from nodeContent");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_object nodeContentPeerObj = static_cast<ani_object>(nodeContentPeerRef);
@@ -240,6 +265,8 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     ani_status status = env->Object_InstanceOf(nodeContentPeerObj, pointerClass, &isPointer);
     if (status != ANI_OK || !isPointer) {
         LOGE("nodeContentPeerObj class is error");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "nativePtr_ is not a std.core.Long object");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -247,12 +274,14 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "toLong", ":l", &nodeContentPeerPtr);
     if (status != ANI_OK) {
         LOGE("unbox nodeContentPeerObj fail");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to unbox nativePtr_");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
     auto* nodeContentPeer = reinterpret_cast<OHOS::Ace::NodeContentPeer*>(nodeContentPeerPtr);
     if (nodeContentPeer == nullptr) {
         LOGE("fail to get nodeContentPeer");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node content peer is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *content = reinterpret_cast<ArkUI_NodeContentHandle>(OHOS::Ace::AceType::RawPtr(nodeContentPeer->content));

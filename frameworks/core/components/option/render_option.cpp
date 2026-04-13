@@ -16,6 +16,7 @@
 #include "core/components/option/render_option.h"
 
 #include "core/components/select_popup/render_select_popup.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

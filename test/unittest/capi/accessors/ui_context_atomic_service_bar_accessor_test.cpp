@@ -14,6 +14,7 @@
  */
 
 #include "accessor_test_base.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

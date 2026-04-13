@@ -72,6 +72,8 @@ void SheetPopupTestNg::SetUpTestCase()
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_EIGHTEEN);

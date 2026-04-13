@@ -24,7 +24,6 @@
 
 namespace OHOS::Ace {
 
-
 class ACE_FORCE_EXPORT ErrorMessageManager {
 public:
     static ErrorMessageManager& GetInstance();
@@ -40,12 +39,6 @@ private:
     ErrorMessageManager& operator=(const ErrorMessageManager&) = delete;
 };
 
-inline void SetErrorMessageIfNeeded(int32_t errorCode, const char* functionName, const char* errorMessage)
-{
-    if (functionName) {
-        ErrorMessageManager::GetInstance().SetLastError(ArkUIErrorInfo { errorCode, functionName, errorMessage });
-    }
-}
 
 } // namespace OHOS::Ace
 

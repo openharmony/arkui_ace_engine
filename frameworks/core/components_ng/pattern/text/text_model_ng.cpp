@@ -255,6 +255,17 @@ void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
 }
 
+void TextModelNG::SetFontVariations(FrameNode* frameNode, const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontVariations, value, frameNode);
+}
+
+void TextModelNG::ResetFontVariations(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+}
+
 void TextModelNG::SetMinFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
@@ -278,6 +289,16 @@ void TextModelNG::SetVariableFontWeight(int32_t value)
 void TextModelNG::SetEnableVariableFontWeight(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value);
+}
+
+void TextModelNG::SetFontVariations(const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontVariations, value);
+}
+
+void TextModelNG::ResetFontVariations()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -1423,6 +1444,13 @@ FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
 {
     FONT_FEATURES_LIST value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
+    return value;
+}
+
+FONT_VARIATIONS_LIST TextModelNG::GetFontVariations(FrameNode* frameNode)
+{
+    FONT_VARIATIONS_LIST value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontVariations, value, frameNode, value);
     return value;
 }
 

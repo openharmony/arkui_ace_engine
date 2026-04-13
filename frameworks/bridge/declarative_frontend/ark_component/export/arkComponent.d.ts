@@ -57,6 +57,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     initialize(...args: Object[]);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
+    onGestureCollectIntercept(callback: (recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention): this;
     outline(value: OutlineOptions): this;
     outlineColor(value: ResourceColor | EdgeColors): this;
     outlineRadius(value: Dimension | OutlineRadiuses): this;
@@ -718,6 +719,11 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     fontFamily(value: string | Resource): SpanAttribute;
     letterSpacing(value: number | string): SpanAttribute;
     textCase(value: TextCase): SpanAttribute;
+    fontVariations(value: Array<{
+        axis: string;
+        value: number;
+        isNormalized?: boolean;
+    }>): SpanAttribute;
 }
 declare class ArkSideBarContainerComponent extends ArkComponent implements SideBarContainerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -783,6 +789,11 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     textIndent(value: Length): TextAttribute;
     wordBreak(value: WordBreak): TextAttribute;
     lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
+    fontVariations(value: Array<{
+        axis: string;
+        value: number;
+        isNormalized?: boolean;
+    }>): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
     textSelectable(value: TextSelectableMode): TextAttribute;
@@ -1925,6 +1936,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollStop(event: () => void): this;
     fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     childrenMainSize(value: ChildrenMainSize): this;
+    backPressCloseSwipeAction(value: boolean): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2153,7 +2165,7 @@ declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor 
 
 declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    fontColor(value: ResourceColor[]): SymbolGlyphAttribute;
+    fontColor(value: Array<ResourceColor | ColorMetrics> | undefined): SymbolGlyphAttribute;
     fontSize(value: number | string | Resource): SymbolGlyphAttribute;
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;

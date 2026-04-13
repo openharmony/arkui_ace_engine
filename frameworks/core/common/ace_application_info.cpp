@@ -16,6 +16,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 

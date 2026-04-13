@@ -116,6 +116,26 @@ std::string SymbolColorListToString(const std::vector<Color>& colorList)
     return symbolColorList;
 }
 
+std::string SymbolColorListToJsonString(const std::vector<Color>& colorList)
+{
+    std::string symbolColorList;
+    for (uint32_t i = 0; i < colorList.size(); ++i) {
+        if (i > 0) {
+            symbolColorList += ", ";
+        }
+        symbolColorList += colorList[i].ColorToString();
+        auto hdrColor = colorList[i].GetHeadRoomColor();
+        if (hdrColor.has_value()) {
+            std::ostringstream oss;
+            oss << "|HDR:" << hdrColor->red << "," << hdrColor->green << "," << hdrColor->blue << ","
+                << hdrColor->alpha << "," << hdrColor->headRoom;
+            oss << "|CS:" << static_cast<int32_t>(colorList[i].GetColorSpace());
+            symbolColorList += oss.str();
+        }
+    }
+    return symbolColorList;
+}
+
 std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList)
 {
     std::string symbolColorList = "";
@@ -167,6 +187,7 @@ TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSi
 bool TextStyle::operator==(const TextStyle& rhs) const
 {
     return propFontFamilies_ == rhs.propFontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
+           fontVariations_ == rhs.fontVariations_ &&
            propTextDecorationStyle_ == rhs.propTextDecorationStyle_ && preferFontSizes_ == rhs.preferFontSizes_ &&
            fontSize_.value == rhs.fontSize_.value && adaptMinFontSize_.value == rhs.adaptMinFontSize_.value &&
            adaptMaxFontSize_.value == rhs.adaptMaxFontSize_.value &&

@@ -14,6 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
+type SpanFontVariation = { axis: string; value: number; isNormalized?: boolean };
+
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
@@ -252,6 +254,20 @@ class SpanFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
       getUINativeModule().span.resetFontWeight(node);
     } else {
       getUINativeModule().span.setFontWeight(node, this.value.value, this.value?.enableVariableFontWeight, this.value?.enableDeviceFontWeightCategory);
+    }
+  }
+}
+
+class SpanFontVariationsModifier extends ModifierWithKey<Array<SpanFontVariation>> {
+  constructor(value: Array<SpanFontVariation>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('spanFontVariations');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetFontVariations(node);
+    } else {
+      getUINativeModule().span.setFontVariations(node, this.value!);
     }
   }
 }
@@ -1021,6 +1037,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
+    return this;
+  }
+  fontVariations(value: Array<SpanFontVariation>): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
     return this;
   }
 }

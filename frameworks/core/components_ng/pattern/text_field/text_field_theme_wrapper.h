@@ -62,7 +62,22 @@ public:
             inlineBgColor_ = colors->BackgroundPrimary();
             cursorColor_ =  colors->Brand();
             symbolColor_ = colors->IconPrimary();
-            textColorDisable_ = colors->IconTertiary();
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textColorDisable_ = colors->FontTertiary();
+                selectedColor_ = colors->CompEmphasizeSecondary();
+                focusPlaceholderColor_ = colors->FontSecondary();
+                disableTextColor_ = colors->FontTertiary();
+                hoverColor_ = colors->InteractiveHover();
+                pressColor_ = colors->InteractiveClick();
+                countTextStyle_.SetTextColor(colors->FontTertiary());
+                overCountTextStyle_.SetTextColor(colors->Warning());
+                overCountBorderColor_ = colors->Warning();
+                overCounterColor_ = colors->Warning();
+                previewUnderlineColor_ = colors->FontEmphasize();
+                previewBoardColor_ = colors->CompBackgroundSecondary();
+            } else {
+                textColorDisable_ = colors->IconTertiary();
+            }
         }
     }
 

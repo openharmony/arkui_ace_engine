@@ -37,7 +37,6 @@
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
@@ -98,6 +97,7 @@ constexpr int32_t DEFAULT_DELAY_THP = 300; // 300ms
 struct FontInfo;
 struct FontConfigJsonInfo;
 struct FrameMetrics;
+class Clipboard;
 class Frontend;
 class OffscreenCanvas;
 class Window;
@@ -935,7 +935,7 @@ public:
         return IsCurrentInForceSplitMode();
     }
 
-    double CalcPageWidth(double rootWidth) const;
+    virtual double CalcPageWidth(double rootWidth) const;
 
     double GetPageWidth() const;
 
@@ -1408,7 +1408,7 @@ public:
     }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
-    virtual void SetCursor(int32_t cursorValue) {}
+    virtual void SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) {}
 
     virtual void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 

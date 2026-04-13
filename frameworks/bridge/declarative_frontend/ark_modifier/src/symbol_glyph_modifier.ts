@@ -33,7 +33,7 @@ class LazyArkSymbolGlyphComponent extends ArkComponent {
    return this;
   }
 
-  fontColor(value: Array<ResourceColor>): this {
+  fontColor(value: Array<ResourceColor | ColorMetrics> | undefined): this {
    this.lazyComponent.fontColor(value);
    return this;
   }

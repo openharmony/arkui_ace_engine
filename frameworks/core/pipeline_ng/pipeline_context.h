@@ -96,6 +96,7 @@ class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
+class BackPressHandlerManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -524,6 +525,8 @@ public:
         return sharedTransitionManager_;
     }
 
+    const RefPtr<BackPressHandlerManager>& GetBackPressHandlerManager();
+
     RefPtr<FrameNode> GetPageRootNode();
     // Helper functions for in-order traversal of UINode children
     RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
@@ -606,8 +609,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
-        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    bool ChangeMouseStyle(int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> format, int32_t windowId = 0,
+        bool isByPass = false, MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -875,7 +878,7 @@ public:
     std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
-    void SetCursor(int32_t cursorValue) override;
+    void SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) override;
 
     void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) override;
 
@@ -950,6 +953,8 @@ public:
     }
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
+
+    double CalcPageWidth(double rootWidth) const override;
 
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
 
@@ -1742,6 +1747,7 @@ private:
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
     CompatibleManager compatibleManager_;
     std::list<TouchEvent> compatibleTouchEvents_;
+    RefPtr<BackPressHandlerManager> backPressHandlerManager_;
 };
 
 /**

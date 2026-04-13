@@ -51,6 +51,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (panRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSPanRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPanRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(panRecognizer);
         return recognizerObj;
     }
@@ -58,6 +59,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (pinchRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSPinchRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSPinchRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(pinchRecognizer);
         return recognizerObj;
     }
@@ -65,6 +67,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (tapRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSTapRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSTapRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(tapRecognizer);
         return recognizerObj;
     }
@@ -72,6 +75,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (longPressRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSLongPressRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSLongPressRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(longPressRecognizer);
         return recognizerObj;
     }
@@ -79,6 +83,7 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (rotationRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSRotationRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSRotationRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(rotationRecognizer);
         return recognizerObj;
     }
@@ -86,11 +91,13 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     if (swipeRecognizer) {
         JSRef<JSObject> recognizerObj = JSClass<JSSwipeRecognizer>::NewInstance();
         auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSSwipeRecognizer>());
+        CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
         currentRecognizer->Update(swipeRecognizer);
         return recognizerObj;
     }
     JSRef<JSObject> recognizerObj = JSClass<JSGestureRecognizer>::NewInstance();
     auto currentRecognizer = Referenced::Claim(recognizerObj->Unwrap<JSGestureRecognizer>());
+    CHECK_NULL_RETURN(currentRecognizer, recognizerObj);
     currentRecognizer->Update(target);
     return recognizerObj;
 }

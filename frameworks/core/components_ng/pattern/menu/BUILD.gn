@@ -107,7 +107,7 @@ build_component_ng("menu_pattern_ng") {
       external_deps = [
         "accessibility:accessibility_common",
         "ability_base:want",
-        ]
+      ]
     }
   }
 }

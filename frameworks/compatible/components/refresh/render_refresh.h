@@ -16,31 +16,39 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_RENDER_REFRESH_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_RENDER_REFRESH_H
 
+#include <functional>
+#include <string>
+
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "core/animation/animation.h"
-#include "core/animation/animator.h"
-#include "core/components/box/box_component.h"
-#include "core/components/box/render_box.h"
-#include "core/components/display/render_display.h"
-#include "core/components/progress/loading_progress_component.h"
-#include "core/components/progress/render_loading_progress.h"
-#include "compatible/components/refresh/refresh_component.h"
 #include "compatible/components/refresh/refresh_controller.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components/text/render_text.h"
-#include "core/components/text/text_component.h"
-#include "core/gestures/drag_recognizer.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+template<typename T>
+class Animation;
+class Animator;
+class BoxComponent;
+class Component;
+class Decoration;
+class DisplayComponent;
+class DragRecognizer;
+class LoadingProgressComponent;
+class RenderBox;
+class RenderDisplay;
+class RenderLoadingProgress;
+class RenderText;
+class TextComponent;
 
 class RenderRefresh : public RenderNode {
     DECLARE_ACE_TYPE(RenderRefresh, RenderNode);
 
 public:
     RenderRefresh();
-    ~RenderRefresh() override = default;
+    ~RenderRefresh() override;
 
     static RefPtr<RenderNode> Create();
     void UpdateTouchRect() override;
@@ -101,11 +109,7 @@ protected:
         return showLastTime_;
     }
 
-    bool IsWatch() const
-    {
-        return SystemProperties::GetDeviceType() == DeviceType::WATCH ||
-               SystemProperties::GetDeviceType() == DeviceType::WEARABLE;
-    }
+    bool IsWatch() const;
 
 private:
     void CalcLoadingParams(const RefPtr<Component>& component);

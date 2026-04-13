@@ -729,4 +729,49 @@ HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest005, TestSize.Leve
     fingersRecognizer->CheckCurrentFingers();
     EXPECT_NE(fingersRecognizer, nullptr);
 }
+
+/**
+ * @tc.name: UpdateTouchPointWithAxisEventTest002
+ * @tc.desc: Test UpdateTouchPointWithAxisEvent with eventHandleId <= 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, UpdateTouchPointWithAxisEventTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+
+    AxisEvent event;
+    event.id = 1;
+    event.x = 10.0;
+    event.y = 10.0;
+    event.screenX = 10.0;
+    event.screenY = 10.0;
+    event.globalDisplayX = 10.0;
+    event.globalDisplayY = 10.0;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::PEN;
+    event.originalId = 1;
+    event.eventHandleId = 0;
+    event.passThrough = true;
+    event.postEventNodeId = 123;
+
+    fingersRecognizer->UpdateTouchPointWithAxisEvent(event);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].id, 1);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].x, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].y, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].screenX, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].screenY, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].globalDisplayX, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].globalDisplayY, 10.0);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].sourceType, SourceType::MOUSE);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].sourceTool, SourceTool::PEN);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].originalId, 1);
+    EXPECT_FALSE(fingersRecognizer->touchPoints_[1].passThrough);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].postEventNodeId, 0);
+
+    event.eventHandleId = 1;
+    fingersRecognizer->UpdateTouchPointWithAxisEvent(event);
+    EXPECT_TRUE(fingersRecognizer->touchPoints_[1].passThrough);
+    EXPECT_EQ(fingersRecognizer->touchPoints_[1].postEventNodeId, 123);
+}
 }; // namespace OHOS::Ace::NG

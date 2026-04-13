@@ -157,6 +157,8 @@ protected:
     void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
     ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper) override;
+    std::optional<float> GetCustomSpanMeasureMaxWidth(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) const override;
 
 private:
     void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize);
@@ -184,10 +186,10 @@ private:
     void UpdateConstraintByLayoutPolicy(
         const SizeF& textSize, LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     void UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
-        SizeF& maxSize);
+        SizeF& maxSize) const;
     void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth, float maxMeasureWidth);
-    bool IsWidthAdaptive(LayoutWrapper* layoutWrapper);
-    bool IsWidthFix(LayoutWrapper* layoutWrapper);
+    bool IsWidthAdaptive(LayoutWrapper* layoutWrapper) const;
+    bool IsWidthFix(LayoutWrapper* layoutWrapper) const;
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
         std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph,
         std::optional<TextStyle>& firstValidTextStyle);

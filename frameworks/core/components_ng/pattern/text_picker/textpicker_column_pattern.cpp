@@ -130,7 +130,7 @@ void TextPickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
+    auto theme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
@@ -1203,9 +1203,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
@@ -2320,9 +2318,9 @@ void TextPickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
 void TextPickerColumnPattern::UpdateUserSetSelectColor()
 {
     isUserSetSelectColor_ = true;
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     UpdateSelectedTextColor(pickerTheme);
 }

@@ -45,6 +45,7 @@ public:
         const DragDropInitiatingStatus& dragStatus);
     void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode);
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
+    int32_t GetPrepareDragFrameNodeId() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
     void SetEnableDropDisallowedBadge(bool enableDisallowStatusShowing);
@@ -93,6 +94,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropGlobalController);
     RefPtr<FrameNode> currentDragNode_ = nullptr;
     WeakPtr<FrameNode> prepareDragFrameNode_;
+    int32_t prepareDragFrameNodeId_ = -1;
     WeakPtr<FrameNode> menuLiftingTargetNode_;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 

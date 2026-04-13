@@ -700,6 +700,11 @@ void IndexerModelNG::SetPopupBackgroundBlurStyle(FrameNode* frameNode, const Blu
     ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackgroundBlurStyle, indexerBlurStyle, frameNode);
 }
 
+void IndexerModelNG::SetPopupBackgroundBlurStyleByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupBackgroundBlurStyleByUser, isByUser, frameNode);
+}
+
 void IndexerModelNG::SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color)
 {
     if (color.has_value()) {

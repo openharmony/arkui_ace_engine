@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,9 @@ public:
     void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) override;
     void SetValue(double value) override;
     void SetColor(const Color& value) override;
+    void ResetColor() override;
     void SetBackgroundColor(const Color& value) override;
+    void ResetBackgroundColor() override;
     void SetBackgroundColorByUser(bool value) override;
     void SetStrokeWidth(const Dimension& value) override;
     void SetScaleCount(int32_t value) override;

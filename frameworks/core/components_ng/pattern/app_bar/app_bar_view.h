@@ -69,7 +69,7 @@ public:
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
     void SetMenuBarVisible(bool visible);
-    void OnThirdCloseEvent();
+    void OnThirdCloseEvent(int32_t code);
 
     void SetLastRectChangeTime(int64_t time)
     {
@@ -113,7 +113,7 @@ private:
     void DestroyServicePanel();
     void FireExtensionHostParams();
     void InitAbilityContextCallback();
-    void FireAbilityCloseEvent();
+    void FireAbilityCloseEvent(int32_t code);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     void AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode);

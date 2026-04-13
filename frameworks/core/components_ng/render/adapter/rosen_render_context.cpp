@@ -49,6 +49,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
@@ -73,6 +74,7 @@
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
+#include "core/components_ng/render/adapter/rosen_effect_converter.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
@@ -331,6 +333,7 @@ RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
     DetachModifiers();
+    RemoveTransparencyCallback();
     auto host = GetHost();
     if (host) {
         host->RemoveExtraCustomProperty("RS_NODE");
@@ -345,6 +348,14 @@ void RosenRenderContext::DetachModifiers()
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
+    }
+}
+
+void RosenRenderContext::RemoveTransparencyCallback()
+{
+    auto id = GetTransparencyCallbackId();
+    if (id.has_value()) {
+        TransparencyUtils::UnRegisterTransparencyListener(id.value());
     }
 }
 
@@ -1038,12 +1049,38 @@ void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsCo
     rsColor.SetColorSpace(colorSpace);
 }
 
+void RosenRenderContext::ColorToRSColorHDR(const Color& color, Rosen::RSColor& rsColor)
+{
+    auto colorWithHeadRoomOptional = color.GetHeadRoomColor();
+    if (colorWithHeadRoomOptional.has_value()) {
+        auto colorWithHeadRoom = colorWithHeadRoomOptional.value();
+        GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+        if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
+            colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+        }
+        if (ColorSpace::BT2020 == color.GetColorSpace()) {
+            colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_BT2020;
+        }
+        rsColor = Rosen::RSColor(colorWithHeadRoom.red, colorWithHeadRoom.green, colorWithHeadRoom.blue,
+            colorWithHeadRoom.alpha, colorSpace, colorWithHeadRoom.headRoom);
+        return;
+    }
+    rsColor = ACE_UNLIKELY(color.IsPlaceholder())
+                  ? Rosen::RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()))
+                  : Rosen::RSColor::FromArgbInt(color.GetValue());
+    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
+        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+    }
+    rsColor.SetColorSpace(colorSpace);
+}
+
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundColorUpdate, value);
     CHECK_NULL_VOID(rsNode_);
     OHOS::Rosen::RSColor rsColor;
-    ColorToRSColor(value, rsColor);
+    ColorToRSColorHDR(value, rsColor);
     rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }
@@ -8632,5 +8669,13 @@ void RosenRenderContext::UpdateForegroundFilterDistortionParam(const DistortionP
             param.barrelDistortion.x, param.barrelDistortion.y, param.barrelDistortion.z, param.barrelDistortion.w);
     }
     rsNode_->SetForegroundNGFilter(distortionFilter);
+}
+
+void RosenRenderContext::SetMaterialWithQualityLevel(
+    const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
+{
+    FREE_RS_CONTEXT_CHECK(SetMaterialWithQualityLevel, materialFilter, quality);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetMaterialWithQualityLevel(materialFilter, static_cast<Rosen::FilterQuality>(quality));
 }
 } // namespace OHOS::Ace::NG

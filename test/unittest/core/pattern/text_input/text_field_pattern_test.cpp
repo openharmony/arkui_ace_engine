@@ -18,6 +18,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2006,7 +2007,13 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
+    /**
+     * @tc.step: step7. AddTouchLocationInfo
+     */
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    /**
+     * @tc.step: step8. AddChangedTouchLocationInfo
+     */
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(controller->GetShowMagnifier());

@@ -15,6 +15,7 @@
 
 #include "arkoala_api_generated.h"
 #include "core/common/event_manager.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -24,6 +25,20 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
+
+namespace {
+bool IsNodeBelongsTo(const RefPtr<FrameNode>& startNode, int32_t uniqueId)
+{
+    auto node = startNode;
+    while (node) {
+        if (node->GetId() == uniqueId) {
+            return true;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return false;
+}
+} // namespace
   
 namespace TouchRecognizerAccessor {
 void DestroyPeerImpl(Ark_TouchRecognizer peer)
@@ -60,10 +75,12 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_TouchRecognizer peer)
         auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->construct();
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        scrollableTargetInfoPeer->uniqueId = attachNode->GetId();
         result = scrollableTargetInfoPeer;
     } else {
         auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->construct();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->uniqueId = attachNode->GetId();
         eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
     }
@@ -103,7 +120,11 @@ void CancelTouchImpl(Ark_TouchRecognizer peer)
 Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
                                 Ark_Int32 uniqueId)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, false);
+    auto target = peer->target_.Upgrade();
+    CHECK_NULL_RETURN(target, false);
+    auto node = AceType::DynamicCast<FrameNode>(target->GetAttachedNode().Upgrade());
+    return Converter::ArkValue<Ark_Boolean>(IsNodeBelongsTo(node, uniqueId));
 }
 } // TouchRecognizerAccessor
 const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()

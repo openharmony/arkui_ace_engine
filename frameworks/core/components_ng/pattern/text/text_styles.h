@@ -24,6 +24,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -206,6 +207,7 @@ class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr Dimension TEXT_DEFAULT_STROKE_WIDTH = 0.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
+using FONT_VARIATIONS_LIST = Ace::FONT_VARIATIONS_LIST;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
@@ -218,6 +220,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDeviceFontWeightCategory, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontVariations, FONT_VARIATIONS_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);

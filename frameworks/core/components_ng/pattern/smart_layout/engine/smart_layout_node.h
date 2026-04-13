@@ -20,7 +20,6 @@
 #include "localsmt/localsmt.h"
 #include "smart_layout_context.h"
 #include "smart_layout_types.h"
-#include "smart_layout_constraints.h"
 
 namespace OHOS::Ace::NG {
 

@@ -20,11 +20,26 @@
 
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace {
 namespace {
 int32_t g_id = 0;
 } // namespace
+
+Container::Container() = default;
+
+Container::~Container() = default;
+
+void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+{
+    appBar_ = appBar;
+}
+
+RefPtr<NG::AppBarView> Container::GetAppBar() const
+{
+    return appBar_;
+}
 
 RefPtr<MockContainer> MockContainer::container_;
 ColorMode MockContainer::mockColorMode_ = ColorMode::LIGHT;
@@ -223,6 +238,18 @@ std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
 }
 
 RefPtr<Container> Container::GetFocused()
+{
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->IsWindowFocused()) {
+            focusContainer = container;
+        }
+    });
+    return focusContainer;
+}
+
+RefPtr<Container> Container::GetNormalFocused()
 {
     RefPtr<Container> focusContainer;
     AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {

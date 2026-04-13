@@ -29,10 +29,12 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from './styledString'
+import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, Font as arkui_component_units_Font, ResourceStr, Dimension, BorderRadiuses, BorderRadiuses_serializer } from './units'
-import { FontConfigs_serializer, FontWeightConfigs_serializer, FontConfigs, FontWeightConfigs } from './textCommon'
+import { FontConfigs_serializer, FontWeightConfigs_serializer, FontVariation, FontConfigs, FontWeightConfigs } from './textCommon'
 import { Color as arkui_component_enums_Color, FontStyle, TextCase, FontWeight, InteractionHand } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { default as text } from '@ohos.graphics.text'
 import { AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from '#handwritten'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -360,6 +362,22 @@ export class ArkSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SpanAttribute_setOnHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFontVariationsAttribute(value: Array<FontVariation> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: FontVariation = valueTmpValue[valueTmpValueCounterI]
+                text_FontVariation_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setFontVariations(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(value: arkui_component_units_Font | undefined, fontConfigs?: FontConfigs): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -514,6 +532,9 @@ export interface SpanAttribute {
     onHover(value: HoverCallback | undefined): this {
         throw new Error('Unimplemented method onHover')
     }
+    fontVariations(value: Array<FontVariation> | undefined): this {
+        throw new Error('Unimplemented method fontVariations')
+    }
     font(value: arkui_component_units_Font | undefined, fontConfigs?: FontConfigs): this {
         throw new Error('Unimplemented method font')
     }
@@ -642,6 +663,11 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     public onHover(value: HoverCallback | undefined): this {
         const value_casted = value as (HoverCallback | undefined)
         this.getPeer()?.setOnHoverAttribute(value_casted)
+        return this
+    }
+    public fontVariations(value: Array<FontVariation> | undefined): this {
+        const value_casted = value as (Array<FontVariation> | undefined)
+        this.getPeer()?.setFontVariationsAttribute(value_casted)
         return this
     }
     public font(value: arkui_component_units_Font | undefined, fontConfigs?: FontConfigs): this {

@@ -1251,6 +1251,17 @@ public:
         return declaration_->GetMicrophoneCaptureStateChangedId();
     }
 
+    void SetInputMethodAttachedId(const EventMarker& inputMethodAttachedId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetInputMethodAttachedId(inputMethodAttachedId);
+    }
+
+    const EventMarker& GetInputMethodAttachedId() const
+    {
+        return declaration_->GetInputMethodAttachedId();
+    }
+
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
     {
         CHECK_NULL_VOID(declaration_);

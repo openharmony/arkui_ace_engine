@@ -1797,13 +1797,14 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
     }
 
     // If back or escape is clicked and overlay is showing, pop overlay firstly.
-    if (event.action == KeyAction::UP && (event.code == KeyCode::KEY_BACK || event.code == KeyCode::KEY_ESCAPE)) {
+    if ((event.action == KeyAction::UP || event.action == KeyAction::CANCEL) &&
+        (event.code == KeyCode::KEY_BACK || event.code == KeyCode::KEY_ESCAPE)) {
         if (isOverlayShowed_) {
             PopTextOverlay();
             return false;
         }
     }
-    if (event.action == KeyAction::UP &&
+    if ((event.action == KeyAction::UP || event.action == KeyAction::CANCEL) &&
         ((event.code == KeyCode::KEY_SHIFT_LEFT || event.code == KeyCode::KEY_SHIFT_RIGHT) ||
             (event.code == KEY_META_OR_CTRL_LEFT || event.code == KEY_META_OR_CTRL_RIGHT))) {
         return HandleKeyEvent(event);
@@ -2803,6 +2804,7 @@ void RenderTextField::Insert(const std::string& text)
         context->GetTaskExecutor()->PostTask(
             [weakPtr = WeakClaim(this), text] {
                 const auto& textField = weakPtr.Upgrade();
+                CHECK_NULL_VOID(textField);
                 auto value = textField->GetEditingValue();
                 auto textEditingValue = std::make_shared<TextEditingValue>();
                 textEditingValue->text = value.GetBeforeSelection() + text + value.GetAfterSelection();

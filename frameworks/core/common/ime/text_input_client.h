@@ -24,7 +24,6 @@
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/event/key_event.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {

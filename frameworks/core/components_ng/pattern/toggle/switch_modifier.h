@@ -192,6 +192,38 @@ public:
         }
     }
 
+    void SetPointAlpha(float alpha)
+    {
+        pointAlpha_ = alpha;
+    }
+
+    float GetPointAlpha() const
+    {
+        return pointAlpha_;
+    }
+
+    void SetPointScale(float scale)
+    {
+        if (animatePointScale_) {
+            animatePointScale_->Set(scale);
+        }
+    }
+
+    float GetPointScale() const
+    {
+        return animatePointScale_ ? animatePointScale_->Get() : 1.0f;
+    }
+
+    void SetHasSystemMaterial(bool has)
+    {
+        hasSystemMaterial_ = has;
+    }
+
+    bool GetHasSystemMaterial() const
+    {
+        return hasSystemMaterial_;
+    }
+
     void SetFocusPointColor(Color color)
     {
         pointColor_ = color;
@@ -357,6 +389,9 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
+    RefPtr<AnimatablePropertyFloat> animatePointScale_;
+    float pointAlpha_ = 1.0f;
+    bool hasSystemMaterial_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

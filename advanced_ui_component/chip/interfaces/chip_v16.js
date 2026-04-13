@@ -17,8 +17,10 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
+const deviceInfo = requireNapi('deviceInfo');
 
 export var ChipSize;
 (function (ChipSize) {
@@ -47,6 +49,7 @@ export var AccessibilitySelectedType;
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
+const HOT_SPOT_MIN_HEIGHT = 32;
 class LengthMetricsUtils {
   constructor() {}
   static getInstance() {
@@ -118,7 +121,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'library/src/main/ets/components/MainPage.ets', line: 278, col: 3 }
+            { page: 'components/src/main/ets/components/Chip.ets', line: 280, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -1113,6 +1116,7 @@ export class ChipComponent extends ViewPU {
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
+      Button.responseRegion(this.getChipResponseRegion());
       Button.scale(ObservedObject.GetRawObject(this.chipScale));
       Button.opacity(this.chipOpacity);
       Button.accessibilityGroup(true);
@@ -1287,10 +1291,34 @@ export class ChipComponent extends ViewPU {
             Button.accessibilityDescription(this.getCloseIconAccessibilityDescription());
             Button.accessibilityLevel(this.getCloseIconAccessibilityLevel());
             Button.responseRegion({
-              x: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_x'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              y: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_y'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              width: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              height: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+              x: {
+                id: -1,
+                type: 10002,
+                params: ['sys.float.chip_touch_hot_zone_x'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+              },
+              y: {
+                id: -1,
+                type: 10002,
+                params: ['sys.float.chip_touch_hot_zone_y'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+              },
+              width: {
+                id: -1,
+                type: 10002,
+                params: ['sys.float.chip_touch_hot_zone_width'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+              },
+              height: {
+                id: -1,
+                type: 10002,
+                params: ['sys.float.chip_touch_hot_zone_height'],
+                bundleName: '__harDefaultBundleName__',
+                moduleName: '__harDefaultModuleName__',
+              },
             });
             Button.onClick(() => {
               if (!this.isChipEnabled()) {
@@ -1574,6 +1602,35 @@ export class ChipComponent extends ViewPU {
     }
     return constraintSize;
   }
+  getChipHeight() {
+    let height;
+    if (typeof this.chipSize !== 'string') {
+      if (typeof this.chipSize?.height !== 'undefined' && this.isValidLength(this.chipSize.height)) {
+        height = this.chipSize.height;
+      } else {
+        height = this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+      }
+    } else if (this.chipSize === ChipSize.SMALL) {
+      height = this.isChipActivated() ? this.theme.chipNode.activatedSmallHeight : this.theme.chipNode.smallHeight;
+    } else {
+      height = this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+    }
+    return this.parseLength(height) ?? HOT_SPOT_MIN_HEIGHT;
+  }
+  getChipResponseRegion() {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      const chipHeight = this.getChipHeight();
+      if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
+        return {
+          x: 0,
+          y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
+          width: '100%',
+          height: HOT_SPOT_MIN_HEIGHT,
+        };
+      }
+    }
+    return undefined;
+  }
   getChipMaxWidth() {
     if (this.fontSizeScale >= this.theme.chipNode.suitAgeScale) {
       return void 0;
@@ -1758,10 +1815,10 @@ export class ChipComponent extends ViewPU {
     return this.label?.text ?? '';
   }
   deleteChip() {
-    Context.animateTo({ curve: Curve.Sharp, duration: 150 }, () => {
+    this.getUIContext().animateTo({ curve: Curve.Sharp, duration: 150 }, () => {
       this.chipOpacity = 0;
     });
-    Context.animateTo(
+    this.getUIContext().animateTo(
       {
         curve: Curve.FastOutLinearIn,
         duration: 150,
@@ -1776,7 +1833,9 @@ export class ChipComponent extends ViewPU {
   }
   getChipOnClicked() {
     if (this.onClicked) {
-      return this.onClicked.bind(this);
+      return event => {
+        this.onClicked();
+      };
     }
     return void 0;
   }
@@ -1920,6 +1979,47 @@ export class ChipComponent extends ViewPU {
   }
   isNeedShowCloseIconMargin() {
     return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
+  }
+  parseLength(length) {
+    if (typeof length === 'number') {
+      return length;
+    }
+    if (typeof length === 'string') {
+      if (/(\d+)(vp|px|lpx|fp)?/.test(length)) {
+        const value = parseFloat(RegExp.$1);
+        const unit = RegExp.$2;
+        if (unit === 'vp' || unit === '') {
+          return value;
+        } else if (unit === 'px') {
+          return this.getUIContext().px2vp(value);
+        } else if (unit === 'fp') {
+          return this.getUIContext().px2vp(this.getUIContext().fp2px(value));
+        } else if (unit === 'lpx') {
+          return this.getUIContext().px2vp(this.getUIContext().lpx2px(value));
+        } else {
+          return undefined;
+        }
+      }
+      return undefined;
+    }
+    if (typeof length === 'object') {
+      try {
+        const metrics = LengthMetrics.resource(length);
+        if (metrics.unit === LengthUnit.VP) {
+          return metrics.value;
+        } else if (metrics.unit === LengthUnit.PX) {
+          return this.getUIContext().px2vp(metrics.value);
+        } else if (metrics.unit === LengthUnit.FP) {
+          return this.getUIContext().px2vp(this.getUIContext().fp2px(metrics.value));
+        } else {
+          return this.getUIContext().px2vp(this.getUIContext().lpx2px(metrics.value));
+        }
+      } catch (error) {
+        console.error('Failed to parse length because the type of resource is invalid');
+        return undefined;
+      }
+    }
+    return undefined;
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {

@@ -798,7 +798,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level0)
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     auto layoutConstraint = LayoutConstraintF();
-    layoutConstraint.selfIdealSize.SetWidth(20);
+    layoutConstraint.parentIdealSize.SetWidth(20);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
@@ -825,6 +825,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level0)
      * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
      *                  and Layout function.
      */
+    timePickerRowPattern->isWindowFullscreen_ = true;
+    timePickerRowPattern->SetColumn(minuteColumn);
     TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
     timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
     timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);

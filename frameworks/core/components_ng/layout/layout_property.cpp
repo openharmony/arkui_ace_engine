@@ -211,6 +211,7 @@ void LayoutProperty::Reset()
     propIsBindOverlay_.reset();
     backgroundIgnoresLayoutSafeAreaEdges_.reset();
     localizedBackgroundIgnoresLayoutSafeAreaEdges_.reset();
+    userDefinedHeightConfigured_ = false;
     CleanDirty();
 }
 
@@ -455,12 +456,15 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     localizedBackgroundIgnoresLayoutSafeAreaEdges_ =
         layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
     isUserSetBackgroundColor_ = layoutProperty->isUserSetBackgroundColor_;
+    userDefinedHeightConfigured_ = layoutProperty->userDefinedHeightConfigured_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 {
     if (!calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+        userDefinedHeightConfigured_ = userDefinedHeightConfigured_ ||
+            (constraint.selfIdealSize.has_value() && constraint.selfIdealSize->Height().has_value());
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         return;
     }
@@ -470,6 +474,8 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     calcLayoutConstraint_->selfIdealSize = constraint.selfIdealSize;
     calcLayoutConstraint_->maxSize = constraint.maxSize;
     calcLayoutConstraint_->minSize = constraint.minSize;
+    userDefinedHeightConfigured_ = userDefinedHeightConfigured_ ||
+        (constraint.selfIdealSize.has_value() && constraint.selfIdealSize->Height().has_value());
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
@@ -1448,6 +1454,9 @@ void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value)
 {
     if (!calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    }
+    if (value.Height().has_value()) {
+        userDefinedHeightConfigured_ = true;
     }
     if (calcLayoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;

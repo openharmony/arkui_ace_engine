@@ -426,8 +426,21 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
     return true;
 }
 
+std::optional<float> RichEditorLayoutAlgorithm::GetCustomSpanMeasureMaxWidth(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) const
+{
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    // RichEditor defers some width constraint handling to paragraph layout, so pre-apply the same policy here
+    // to keep CustomSpan::onMeasure maxWidth consistent with the real paragraph layout width.
+    UpdateMaxSizeByLayoutPolicy(contentConstraint, layoutWrapper, maxSize);
+    if (NearEqual(maxSize.Width(), std::numeric_limits<float>::max())) {
+        return std::numeric_limits<float>::infinity();
+    }
+    return maxSize.Width();
+}
+
 void RichEditorLayoutAlgorithm::UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint,
-    LayoutWrapper* layoutWrapper, SizeF& maxSize)
+    LayoutWrapper* layoutWrapper, SizeF& maxSize) const
 {
     auto parentIdealWidth = contentConstraint.parentIdealSize.Width();
     bool isNotSetComponentWidth = parentIdealWidth.has_value() && NearEqual(maxSize.Width(), parentIdealWidth.value());
@@ -449,7 +462,7 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphByLayoutPolicy(LayoutWrapper* l
     }
 }
 
-bool RichEditorLayoutAlgorithm::IsWidthFix(LayoutWrapper* layoutWrapper)
+bool RichEditorLayoutAlgorithm::IsWidthFix(LayoutWrapper* layoutWrapper) const
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -458,7 +471,7 @@ bool RichEditorLayoutAlgorithm::IsWidthFix(LayoutWrapper* layoutWrapper)
     return layoutPolicy.has_value() && layoutPolicy->IsWidthFix();
 }
 
-bool RichEditorLayoutAlgorithm::IsWidthAdaptive(LayoutWrapper* layoutWrapper)
+bool RichEditorLayoutAlgorithm::IsWidthAdaptive(LayoutWrapper* layoutWrapper) const
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();

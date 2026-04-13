@@ -15,7 +15,10 @@
 
 #include "core/components/refresh/render_refresh_target.h"
 
+#include "compatible/components/refresh/render_refresh.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components/scroll/scrollable.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 

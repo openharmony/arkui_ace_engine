@@ -46,6 +46,15 @@ ace_unittest("event_manager_test_ng") {
   }
 }
 
+ace_unittest("input_event_monitor_manager_test_ng") {
+  module_name = "CommonEvent-Input"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
+    "input_event_monitor_manager_test_ng.cpp",
+  ]
+}
+
 ace_unittest("click_event_test_ng") {
   module_name = "PickerSet-Picker"
   type = "new"
@@ -265,6 +274,7 @@ group("core_event_unittest") {
     ":focus_hub_test_ng",
     ":gesture_event_hub_test_ng",
     ":input_event_hub_test_ng",
+    ":input_event_monitor_manager_test_ng",
     ":input_event_test_ng",
     ":long_press_event_test_ng",
     ":mouse_style_manager_test_ng",

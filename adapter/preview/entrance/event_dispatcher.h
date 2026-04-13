@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/singleton.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #endif

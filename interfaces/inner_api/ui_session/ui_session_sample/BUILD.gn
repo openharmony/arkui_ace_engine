@@ -61,6 +61,7 @@ ohos_shared_library("ui_sa") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "window_manager:libwm",
+    "eventhandler:libeventhandler",
   ]
   deps = [ "$ace_root/interfaces/inner_api/ui_session:ui_session" ]
   deps += [

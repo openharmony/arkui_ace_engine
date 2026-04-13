@@ -25,6 +25,7 @@
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/platform_window.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;

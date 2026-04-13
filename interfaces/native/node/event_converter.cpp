@@ -35,6 +35,7 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN = 2;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE = 7;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD = 9;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK = 10;
+constexpr int32_t ORIGIN_MOUSE_ACTION_UNKNOWN = 0;
 constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
@@ -444,6 +445,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_COASTING_AXIS_EVENT;
         case NODE_ON_CHILD_TOUCH_TEST:
             return ON_CHILD_TOUCH_TEST;
+        case NODE_ON_GESTURE_COLLECT_INTERCEPT:
+            return ON_GESTURE_COLLECT_INTERCEPT;
         case NODE_ON_DIGITAL_CROWN:
             return ON_DIGITAL_CROWN;
         case NODE_ON_CUSTOM_OVERFLOW_SCROLL:
@@ -788,6 +791,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_COASTING_AXIS_EVENT;
         case ON_CHILD_TOUCH_TEST:
             return NODE_ON_CHILD_TOUCH_TEST;
+        case ON_GESTURE_COLLECT_INTERCEPT:
+            return NODE_ON_GESTURE_COLLECT_INTERCEPT;
         case ON_DIGITAL_CROWN:
             return NODE_ON_DIGITAL_CROWN;
         case ON_CUSTOM_OVERFLOW_SCROLL:
@@ -933,6 +938,13 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case CHILD_TOUCH_TEST_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchTestInfo.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case GESTURE_COLLECT_INTERCEPT_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind =
+                static_cast<ArkUIEventSubKind>(origin->gestureCollectInterceptInfo.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -1127,6 +1139,44 @@ int32_t ConvertToOriginMouseButtonType(int32_t buttonType)
             break;
     }
     return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_NONE);
+}
+
+int32_t ConvertToOriginMouseActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_MOUSE_EVENT_ACTION_UNKNOWN:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_UNKNOWN);
+        case UI_MOUSE_EVENT_ACTION_PRESS:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_PRESS);
+        case UI_MOUSE_EVENT_ACTION_RELEASE:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_RELEASE);
+        case UI_MOUSE_EVENT_ACTION_MOVE:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_MOVE);
+        case UI_MOUSE_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
+}
+
+int32_t ConvertToOriginAxisActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_AXIS_EVENT_ACTION_NONE:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_NONE);
+        case UI_AXIS_EVENT_ACTION_BEGIN:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_BEGIN);
+        case UI_AXIS_EVENT_ACTION_UPDATE:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_UPDATE);
+        case UI_AXIS_EVENT_ACTION_END:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_END);
+        case UI_AXIS_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
 }
 
 int32_t ConvertToCAxisActionType(int32_t originActionType)
@@ -1470,6 +1520,21 @@ OH_ArkUI_TextEditorChangeEvent* OH_ArkUI_NodeEvent_GetTextEditorOnWillChangeEven
     CHECK_NULL_RETURN(origin, nullptr);
     auto* changeEvent = reinterpret_cast<OH_ArkUI_TextEditorChangeEvent*>(&origin->textEditorChangeEvent);
     return changeEvent;
+}
+
+ArkUI_GestureCollectInterceptInfo* OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo(ArkUI_NodeEvent* nodeEvent)
+{
+    if (!nodeEvent) {
+        return nullptr;
+    }
+    if (nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+        return nullptr;
+    }
+    auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_GestureCollectInterceptInfo*>(&originNodeEvent->gestureCollectInterceptInfo);
 }
 #ifdef __cplusplus
 };

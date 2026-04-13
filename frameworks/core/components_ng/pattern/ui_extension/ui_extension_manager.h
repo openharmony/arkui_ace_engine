@@ -22,10 +22,11 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/singleton.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS {

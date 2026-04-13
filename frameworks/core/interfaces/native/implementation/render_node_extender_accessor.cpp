@@ -215,8 +215,7 @@ void SetTranslationImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 }
 void SetRotationImpl(Ark_RenderNode peer,
-                     const Ark_Vector3* rotation,
-                     Ark_Int32 unitValue)
+                     const Ark_Vector3* rotation)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetRotation !");
@@ -230,11 +229,7 @@ void SetRotationImpl(Ark_RenderNode peer,
     CHECK_NULL_VOID(frameNode);
     const auto& renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    Dimension first = Dimension(rotationX, unit);
-    Dimension second = Dimension(rotationY, unit);
-    Dimension third = Dimension(rotationZ, unit);
-    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
+    renderContext->SetRotation(rotationX, rotationY, rotationZ);
     renderContext->RequestNextFrame();
 }
 void SetTransformImpl(Ark_RenderNode peer,

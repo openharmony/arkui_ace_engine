@@ -20,16 +20,23 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 enum class RouterPageType : int32_t {
-    PRIMARY_PAGE = 0,
-    SECONDARY_PAGE = 1,
+    HOME_PAGE = 0,
+    DETAIL_PAGE = 1,
     PLACEHOLDER_PAGE = 2,
     RELATED_PAGE = 3
+};
+
+enum class SplitTransitionPhase : int32_t {
+    NONE = 0,
+    START,
+    END,
 };
 
 // ParallelPagePattern is the base class for page root render node.
@@ -57,6 +64,16 @@ public:
         return type_;
     }
 
+    void SetColumnType(ForceSplitPageColumnType columnType)
+    {
+        columnType_ = columnType;
+    }
+
+    ForceSplitPageColumnType GetColumnType() const
+    {
+        return columnType_;
+    }
+
     bool IsPageBuildCompleted() const
     {
         return isPageBuildCompleted_;
@@ -76,7 +93,28 @@ public:
 
     void RemoveOnTouchEvent();
 
+    void PrepareSplitTransition(int32_t animationId, PageTransitionType type);
+    void UpdateSplitTransitionState(PageTransitionType type, SplitTransitionPhase phase);
+
+    void OnSplitTransitionStart(PageTransitionType type);
+
+    void OnSplitTransitionEnd(PageTransitionType type);
+
+    bool OnSplitTransitionFinish(int32_t animationId, PageTransitionType type);
+
+    void AbortSplitTransition();
+
     void NotifyAboutToDisappear();
+    bool IsInSplitTransitionLayout() const;
+    PageTransitionType GetSplitTransitionType() const
+    {
+        return splitTransitionType_;
+    }
+    SplitTransitionPhase GetSplitTransitionPhase() const
+    {
+        return splitTransitionPhase_;
+    }
+    ForceSplitPageColumnType GetSplitTransitionColumnType() const;
     void SetNeedNotifyRelatedPageAboutToDisappear(bool need)
     {
         needNotifyRelatedPageAboutToDisappear_ = need;
@@ -84,15 +122,22 @@ public:
 
 private:
     bool IsShowOrHideAllowed();
+    void HandleSplitTransitionStage(PageTransitionType type, bool isStart);
+    void CaptureSplitTransitionVisualState();
     void BeforeCreateLayoutWrapper() override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
-    RouterPageType type_ = RouterPageType::SECONDARY_PAGE;
+    RouterPageType type_ = RouterPageType::DETAIL_PAGE;
+    ForceSplitPageColumnType columnType_ = ForceSplitPageColumnType::NONE;
     bool isPageBuildCompleted_ = false;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     bool needNotifyRelatedPageAboutToAppear_ = true;
     bool needNotifyRelatedPageAboutToDisappear_ = false;
+    OffsetF splitTransitionVisualOffset_;
+    bool hasSplitTransitionVisualOffset_ = false;
+    PageTransitionType splitTransitionType_ = PageTransitionType::NONE;
+    SplitTransitionPhase splitTransitionPhase_ = SplitTransitionPhase::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPagePattern);
 };

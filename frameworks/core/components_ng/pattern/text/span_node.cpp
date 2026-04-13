@@ -79,6 +79,21 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
     }
     return jsonShadows;
 }
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
+}
 } // namespace
 
 std::string SpanItem::GetFont() const
@@ -95,6 +110,56 @@ std::string SpanItem::GetFont() const
     return jsonValue->ToString();
 }
 
+std::string SpanItem::GetFontWeightConfigs() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableVariableFontWeight",
+        fontStyle->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
+    jsonValue->Put("enableDeviceFontWeightCategory",
+        fontStyle->GetEnableDeviceFontWeightCategory().value_or(true) ? "true" : "false");
+    return jsonValue->ToString();
+}
+
+void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+    const RefPtr<TextPattern>& textPattern) const
+{
+    json->PutExtAttr("font", GetFont().c_str(), filter);
+    json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
+    json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
+        fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+        fontStyle->GetTextDecorationStyle()).c_str(), filter);
+    json->PutExtAttr("letterSpacing",
+        fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("textCase",
+        V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
+    if (spanItemType == SpanItemType::SYMBOL) {
+        const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+        auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+        json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+    } else {
+        Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
+        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+            .value_or(defaultFontColor)).ColorToString().c_str(), filter);
+    }
+    json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
+    json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("variableFontWeight",
+        std::to_string(fontStyle->GetVariableFontWeight().value_or(0)).c_str(), filter);
+    json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        fontStyle->GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
+    json->PutExtAttr("renderingStrategy",
+        GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
+    json->PutExtAttr(
+        "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect",
+        GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+    json->PutExtAttr("textShadow", jsonShadow, filter);
+    json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
+}
+
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
@@ -107,36 +172,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     auto textPattern = DynamicCast<TextPattern>(pattern);
     CHECK_NULL_VOID(textPattern);
     if (fontStyle) {
-        json->PutExtAttr("font", GetFont().c_str(), filter);
-        json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
-        json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
-            fontStyle->GetTextDecorationStyle()).c_str(), filter);
-        json->PutExtAttr("letterSpacing",
-            fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("textCase",
-            V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
-        if (spanItemType == SpanItemType::SYMBOL) {
-            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
-            auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
-        } else {
-            Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
-            json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-                .value_or(defaultFontColor)).ColorToString().c_str(), filter);
-        }
-        json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
-        json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
-        json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
-        json->PutExtAttr("renderingStrategy",
-            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-        json->PutExtAttr(
-            "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
-        json->Put("symbolEffect",
-            GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
-        json->PutExtAttr("textShadow", jsonShadow, filter);
+        ToJsonForFontStyle(json, filter, textPattern);
     }
     auto dim = Dimension();
     if (textLineStyle) {
@@ -847,6 +883,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, Superscript, Superscript);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, FontVariations, FontVariations);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
@@ -1227,6 +1264,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, FontVariations, UpdateFontVariations);
     COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
     COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
     COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);

@@ -2906,6 +2906,18 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelNG::SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISessionCallback&& onCreateAISession,
+    AISessionCallback&& onExecuteAIAction, AISessionCallback&& onDestroyAISession)
+{
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+#endif
+}
+
 void WebModelNG::SetEnableScrollDirectionalLock(bool enabled, int32_t type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2934,5 +2946,25 @@ void WebModelNG::SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutP
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
+
+void WebModelNG::SetInputMethodAttachedId(std::function<void()>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetInputMethodAttachedId(
+    FrameNode* frameNode, std::function<void()>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

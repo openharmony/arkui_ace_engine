@@ -1639,6 +1639,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicro
   }
 }
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnInputMethodAttachedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    } else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+
 class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1663,6 +1677,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetEnableDefaultContextMenu(node);
     } else {
       getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+
+class WebAiSessionOptionsModifier extends ModifierWithKey<Array<AISessionEvent>> {
+  constructor(value: Array<AISessionEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webAiSessionOptionsModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
     }
   }
 }
@@ -2311,6 +2339,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
+  aiSessionOptions(value: Array<AISessionEvent>): this {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
   enableScrollDirectionalLock(value: boolean, type: number): this {
     let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
     if (!isUndefined(value) && !isNull(value)) {
@@ -2320,9 +2352,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
       arkEnableScrollDirectionalLock.type = type;
     }
     if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
     } else {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
     }
     return this;
   }
@@ -2336,6 +2368,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   scrollbarLayoutPolicy(value: number): this {
     modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
     return this;
   }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -205,9 +205,25 @@ def open_new_resource_index(file_path):
     return third_data
 
 
+def is_new_module(file_path):
+    if not os.path.exists(file_path):
+        raise Exception("not found:" + file_path)
+    
+    with open(file_path, "rb") as fp:
+        version = fp.read(128)
+        version_str = version.decode('utf-8').rstrip('\x00')
+        return version_str.startswith("RestoolV2")
+
+
 def dump(file_path, out_path):
     out_file = os.open(out_path, os.O_WRONLY | os.O_CREAT, 0o664)
-    third_data = open_new_resource_index(file_path)
+    
+    if is_new_module(file_path):
+        from resource_index_v2 import open_new_resource_index_v2
+        third_data = open_new_resource_index_v2(file_path)
+    else:
+        third_data = open_new_resource_index(file_path)
+    
     for key_, ids_ in third_data.items():
         key_str = parse_limit_key(key_)
         if "zh_CN" == key_str:

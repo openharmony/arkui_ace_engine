@@ -45,16 +45,19 @@ void ListItemPattern::OnAttachToMainTreeMultiThread()
         SetListItemDefaultAttributes(host);
     }
 }
-void ListItemPattern::CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback)
+bool ListItemPattern::CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
+    bool shouldSkipClose =
+        !host || !host->IsOnMainTree() || !host->IsActive() || GetSwipeActionState() == SwipeActionState::COLLAPSED;
     host->PostAfterAttachMainTreeTask([onFinishCallback, weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->onFinishEvent_ = onFinishCallback;
         pattern->ResetSwipeStatus(true);
     });
+    return shouldSkipClose;
 }
 
 void ListItemPattern::SetListItemStyleMultiThread(V2::ListItemStyle style)

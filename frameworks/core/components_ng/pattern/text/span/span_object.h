@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 
@@ -152,6 +151,7 @@ private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     void AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+    void FontVariationsToString(std::stringstream& ss) const;
 
     Font font_;
 };

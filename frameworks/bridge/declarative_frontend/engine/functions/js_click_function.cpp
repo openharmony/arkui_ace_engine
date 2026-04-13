@@ -36,7 +36,9 @@ void JsClickFunction::Execute()
 
 void JsClickFunction::Execute(const ClickInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objectTemplate->NewInstance();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -67,7 +69,9 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
+    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
 }
@@ -125,7 +129,9 @@ void JsWeakClickFunction::Execute()
 
 void JsWeakClickFunction::Execute(const ClickInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objectTemplate->NewInstance();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -155,6 +161,9 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
+    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
 
     JSRef<JSVal> param = obj;
     JsWeakFunction::ExecuteJS(1, &param);
@@ -193,6 +202,8 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
@@ -236,6 +247,8 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());

@@ -37,6 +37,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_32 = 32;
 constexpr int DEFAULT_LENGTH = 4;
+
 void SetSpanContent(ArkUINodeHandle node, const char* value)
 {
     CHECK_NULL_VOID(value);
@@ -615,6 +616,29 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     SpanModelNG::ResetTextShadow(frameNode);
 }
 
+void SetFontVariations(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FONT_VARIATIONS_LIST fontVariations;
+    for (int32_t i = 0; i < length; i++) {
+        ArkUIFontVariation fontVariation = value[i];
+        std::optional<bool> isNormalized;
+        if (fontVariation.isNormalized.isSet) {
+            isNormalized = fontVariation.isNormalized.value;
+        }
+        fontVariations.push_back({ fontVariation.axis ? fontVariation.axis : "", fontVariation.value, isNormalized });
+    }
+    SpanModelNG::SetFontVariations(frameNode, fontVariations);
+}
+
+void ResetFontVariations(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::ResetFontVariations(frameNode);
+}
+
 void SetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -764,6 +788,8 @@ const ArkUISpanModifier* GetSpanModifier()
         .resetAccessibilityLevel = ResetAccessibilityLevel,
         .setSpanOnHover = SetSpanOnHover,
         .resetSpanOnHover = ResetSpanOnHover,
+        .setFontVariations = SetFontVariations,
+        .resetFontVariations = ResetFontVariations,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

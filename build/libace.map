@@ -2110,6 +2110,9 @@
       "OHOS::Ace::NG::TextSelectOverlay::PreProcessOverlay(OHOS::Ace::NG::OverlayRequest const&)";
       "OHOS::Ace::NG::TextSelectOverlay::UpdateClipHandleViewPort(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::TextSelectOverlay::UpdateSelectorOnHandleMove(OHOS::Ace::NG::OffsetT<float> const&, bool)";
+      "OHOS::Ace::NG::TokenThemeStorage::GetInstance()";
+      "OHOS::Ace::NG::TokenThemeStorage::GetTheme(int)";
+      "OHOS::Ace::NG::TokenThemeStorage::ObtainSystemTheme(OHOS::Ace::ColorMode)";
       "OHOS::Ace::NG::ToolbarManager::OnChangeSideBarColor()";
       "OHOS::Ace::NG::ToolbarManager::OnToolBarManagerModifyDone()";
       "OHOS::Ace::NG::ToolbarManager::SetSideBarDividerInfo(OHOS::Ace::NG::ToolbarInfo const&)";
@@ -2603,6 +2606,10 @@
       "OHOS::Ace::RosenUniversalPainter::DrawRRectBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::RRect const&, unsigned int, double)";
       "OHOS::Ace::RoundToMaxPrecision(double)";
       "OHOS::Ace::RsNodeAdapter::CreateSurfaceNode(OHOS::Rosen::RSSurfaceNodeConfig const&)";
+      "OHOS::Ace::SelectionInfo::GetSelection() const";
+      "OHOS::Ace::SelectionInfo::SetSelectionStart(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetSelectionEnd(int32_t)";
+      "OHOS::Ace::SelectionInfo::SetResultObjectList(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&)";
       "OHOS::Ace::Scheduler::AddKeyFrame(float, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::Animate(OHOS::Ace::AnimationOption const&, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()>, std::__h::function<void ()> const&)";
       "OHOS::Ace::Scheduler::CloseImplicitAnimation()";

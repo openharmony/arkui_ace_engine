@@ -447,6 +447,7 @@ HWTEST_F(MenuAnimationTestNg, CheckAndShowAnimation002, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->menuAnimationDuration_ = 100;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     wrapperPattern->CheckAndShowAnimation();
     EXPECT_FALSE(wrapperPattern->isFirstShow_);
@@ -494,7 +495,7 @@ HWTEST_F(MenuAnimationTestNg, GetAnimationOffset001, TestSize.Level1)
     ASSERT_NE(selectTheme, nullptr);
     auto defaultDimension = Dimension(30.0, DimensionUnit::PX);
     selectTheme->menuAnimationOffset_ = defaultDimension;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step2. execute GetAnimationOffset
      * @tc.expected: property is set as expected

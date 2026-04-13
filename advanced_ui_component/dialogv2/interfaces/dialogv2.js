@@ -427,6 +427,8 @@ export class TipsDialogV2 extends ViewV2 {
             Text.focusable(false);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
+            Text.wordBreak(WordBreak.HYPHENATION);
+            Text.optimizeTrailingSpace(true);
           }, Text);
           Text.pop();
         });
@@ -491,6 +493,8 @@ export class TipsDialogV2 extends ViewV2 {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
+            Text.wordBreak(WordBreak.HYPHENATION);
+            Text.optimizeTrailingSpace(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -527,6 +531,8 @@ export class TipsDialogV2 extends ViewV2 {
               }
             });
             Text.fallbackLineSpacing(true);
+            Text.wordBreak(WordBreak.HYPHENATION);
+            Text.optimizeTrailingSpace(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -885,6 +891,8 @@ export class SelectDialogV2 extends ViewV2 {
             Text.fontColor(this.fontColorWithTheme);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
+            Text.wordBreak(WordBreak.HYPHENATION);
+            Text.optimizeTrailingSpace(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -970,6 +978,8 @@ export class SelectDialogV2 extends ViewV2 {
               Text.layoutWeight(1);
               Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
               Text.fallbackLineSpacing(true);
+              Text.wordBreak(WordBreak.HYPHENATION);
+              Text.optimizeTrailingSpace(true);
             }, Text);
             Text.pop();
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1315,6 +1325,8 @@ export class ConfirmDialogV2 extends ViewV2 {
       });
       Text.width('100%');
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     Column.pop();
@@ -1376,6 +1388,8 @@ export class ConfirmDialogV2 extends ViewV2 {
       Text.layoutWeight(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -1685,6 +1699,8 @@ export class AlertDialogV2 extends ViewV2 {
         }
       });
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     Scroll.pop();
@@ -2333,6 +2349,8 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.width('100%');
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -2369,6 +2387,8 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.width('100%');
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -3096,6 +3116,8 @@ export class LoadingDialogV2 extends ViewV2 {
       });
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fallbackLineSpacing(true);
+      Text.wordBreak(WordBreak.HYPHENATION);
+      Text.optimizeTrailingSpace(true);
     }, Text);
     Text.pop();
     this.observeComponentCreation2((elmtId, isInitialRender) => {

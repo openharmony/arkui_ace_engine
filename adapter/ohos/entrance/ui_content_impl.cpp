@@ -131,6 +131,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
@@ -5647,10 +5648,11 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit:%{public}d "
-        "needUpdateViewport:%{public}d", isForceSplit, needUpdateViewport);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}d needUpdateViewport:%{public}d",
+             isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5658,12 +5660,12 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewpo
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, needUpdateViewport]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, mode, needUpdateViewport]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, needUpdateViewport);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, mode, needUpdateViewport);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
@@ -5702,8 +5704,13 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+        forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
         forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
             config.splitDividerColorDark);
+        forceSplitMgr->SetBehaviorMode(config.behaviorMode);
+        forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
+        forceSplitMgr->SetTransPages(std::move(config.transPages));
         if (!(appConfig->isRouter)) {
             navManager->SetForceSplitNavigationId(config.navigationId);
             navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
@@ -5729,8 +5736,13 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
+    forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
     forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
         config.splitDividerColorDark);
+    forceSplitMgr->SetBehaviorMode(config.behaviorMode);
+    forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
+    forceSplitMgr->SetTransPages(std::move(config.transPages));
     if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);

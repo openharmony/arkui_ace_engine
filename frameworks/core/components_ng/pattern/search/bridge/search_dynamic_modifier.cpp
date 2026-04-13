@@ -333,11 +333,20 @@ void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
     const auto* colorPtr = reinterpret_cast<const Color*>(color);
-    NG::IconOptions cancelIconOptions = isThemeColor && SystemProperties::ConfigChangePerform() ?
-        NG::IconOptions(
-            Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
-        NG::IconOptions(
-            *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    NG::IconOptions cancelIconOptions;
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        cancelIconOptions = isThemeColor ?
+            NG::IconOptions(
+                Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+            NG::IconOptions(*colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)),
+                std::string(src), "", "");
+    } else {
+        cancelIconOptions = isThemeColor && SystemProperties::ConfigChangePerform() ?
+            NG::IconOptions(
+                Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+            NG::IconOptions(
+                *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    }
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -448,14 +457,30 @@ void SetSearchSearchIcon(
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (SystemProperties::ConfigChangePerform()) {
+            pattern->UnRegisterResource("searchIconSize");
+            pattern->UnRegisterResource("searchIconSrc");
+            pattern->UnRegisterResource("searchIconColor");
+        }
+    }
     Color iconColor;
     if (value->color != INVALID_COLOR_VALUE) {
         FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
     }
-
-    NG::IconOptions cancelInconOptions = NG::IconOptions(
-        iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
-    SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
+    NG::IconOptions searchIconOptions;
+    if (value->color == INVALID_COLOR_VALUE &&
+        frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        searchIconOptions = NG::IconOptions(Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
+            std::string(value->src), "", "");
+    } else {
+        searchIconOptions = NG::IconOptions(iconColor,
+            Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
+            std::string(value->src), "", "");
+    }
+    SearchModelNG::SetSearchImageIcon(frameNode, searchIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RegisterSearchIconResources(pattern, value, imageIconRes, iconColor, false);
@@ -1820,7 +1845,7 @@ void SetSearchBackgroundColor(ArkUINodeHandle node, uint32_t color)
     SearchModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
-void RetSetSearchBackgroundColor(ArkUINodeHandle node)
+void ResetSearchBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
@@ -2402,7 +2427,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchCustomKeyboardWithBuilder = ResetSearchCustomKeyboardWithBuilder,
         .setSearchBorderRadius = SetSearchBorderRadius,
         .setSearchBackgroundColor = SetSearchBackgroundColor,
-        .resetSearchBackgroundColor = RetSetSearchBackgroundColor,
+        .resetSearchBackgroundColor = ResetSearchBackgroundColor,
         .setBackBorder = SetBackBorder,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

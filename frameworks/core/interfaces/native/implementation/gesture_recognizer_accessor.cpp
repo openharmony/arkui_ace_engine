@@ -25,6 +25,19 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
+namespace {
+bool IsNodeBelongsTo(const RefPtr<FrameNode>& startNode, int32_t uniqueId)
+{
+    auto node = startNode;
+    while (node) {
+        if (node->GetId() == uniqueId) {
+            return true;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return false;
+}
+} // namespace
 namespace GestureRecognizerAccessor {
 void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
@@ -103,10 +116,12 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
         auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->construct();
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        scrollableTargetInfoPeer->uniqueId = attachNode->GetId();
         result = scrollableTargetInfoPeer;
     } else {
         auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->construct();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->uniqueId = attachNode->GetId();
         eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
     }
@@ -143,7 +158,11 @@ void PreventBeginImpl(Ark_GestureRecognizer peer)
 Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
                                 Ark_Int32 uniqueId)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, false);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, false);
+    auto node = recognizer->GetAttachedNode().Upgrade();
+    return Converter::ArkValue<Ark_Boolean>(IsNodeBelongsTo(node, uniqueId));
 }
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()

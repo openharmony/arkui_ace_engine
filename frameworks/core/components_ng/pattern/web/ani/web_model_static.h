@@ -261,6 +261,8 @@ public:
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, const std::optional<bool>& isEnable,
         const std::optional<ScrollDirectionalLockType>& type);
     static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy policy);
+    static void SetInputMethodAttachedId(
+        FrameNode* frameNode, std::function<void()>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

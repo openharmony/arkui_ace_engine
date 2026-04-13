@@ -340,6 +340,27 @@ void SetDebugLineImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
     // SpanModelNG::SetSetDebugLine(frameNode, convValue);
 }
+void SetFontVariationsImpl(Ark_NativePointer node, const Opt_Array_text_FontVariation* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue.has_value() || optValue->length == 0) {
+        SpanModelNG::ResetFontVariations(frameNode);
+        return;
+    }
+    FONT_VARIATIONS_LIST fontVariations;
+    fontVariations.reserve(optValue->length);
+    for (Ark_Int32 i = 0; i < optValue->length; ++i) {
+        const auto& item = optValue->array[i];
+        fontVariations.push_back({
+            Converter::Convert<std::string>(item.axis),
+            static_cast<float>(item.value),
+            Converter::OptConvert<bool>(item.isNormalized)
+        });
+    }
+    SpanModelNG::SetFontVariations(frameNode, fontVariations);
+}
 } // SpanAttributeModifier
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
 {
@@ -365,6 +386,7 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
         SpanAttributeModifier::SetFontWeightImpl,
         SpanAttributeModifier::SetOnClick1Impl,
         SpanAttributeModifier::SetDebugLineImpl,
+        SpanAttributeModifier::SetFontVariationsImpl,
     };
     return &ArkUISpanModifierImpl;
 }

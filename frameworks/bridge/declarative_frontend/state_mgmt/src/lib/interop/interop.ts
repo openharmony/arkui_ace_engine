@@ -93,29 +93,23 @@ function deepCopyStaticProxy(
             copy.add(recursiveCopy(setValue));
         });
     } else {
-        const toJSON: Function | undefined = globalThis.Panda?.STValue?.toJSON;
-        const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
-        if (typeof toJSON === 'function') {
-            const json: string = toJSON(obj);
-            if (typeof json === 'string') {
-                const jsonObj: Object = JSON.parse(json);
-                if (typeof jsonObj === 'object' && jsonObj !== null) {
-                    copy = {};
-                    copiedObjects.set(obj, copy);
-                    Object.keys(jsonObj).forEach((objKey: any) => {
-                        copy[objKey] = recursiveCopy(obj[objKey]);
-                    });
-                } else {
-                    throw err;
-                }
-            } else {
-                throw err;
+        try {
+            if (InteropExtractorModule.isCloneableObject?.(obj)) {
+                copy = InteropExtractorModule.cloneCloneableObject?.(obj);
+                copiedObjects.set(obj, copy);
+                return copy;
             }
-        } else {
-            throw err;
+            copy = {};
+            copiedObjects.set(obj, copy);
+            Object.keys(JSON.parse(globalThis.Panda?.STValue?.toJSON?.(obj))).forEach(
+                (objKey: any) => {
+                    copy[objKey] = recursiveCopy(obj[objKey]);
+                }
+            );
+        } catch (e) {
+            throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
         }
     }
-
     return copy;
 }
 

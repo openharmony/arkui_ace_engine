@@ -61,6 +61,7 @@ struct WebEvent : Event {
     EventMarker onLoadFinishedEventId;
     EventMarker cameraCaptureStateChangedId;
     EventMarker microphoneCaptureStateChangedId;
+    EventMarker inputMethodAttachedId;
 };
 
 struct WebMethod : Method {
@@ -496,6 +497,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.geolocationShowEventId;
+    }
+
+    void SetInputMethodAttachedId(const EventMarker& inputMethodAttachedId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.inputMethodAttachedId = inputMethodAttachedId;
+    }
+
+    const EventMarker& GetInputMethodAttachedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.inputMethodAttachedId;
     }
 
 protected:

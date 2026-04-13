@@ -17,6 +17,7 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
 #include <cstdint>
 

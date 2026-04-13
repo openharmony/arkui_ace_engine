@@ -156,6 +156,16 @@ enum TransitionEffectType {
     TRANSITION_EFFECT_ASYMMETRIC,
 };
 
+struct GestureCollectTouchRecognizerHandle {
+    TouchEventTarget* target = nullptr;
+};
+
+struct GestureCollectTouchRecognizerData {
+    std::vector<std::unique_ptr<GestureCollectTouchRecognizerHandle>> storage;
+    std::unique_ptr<void*[]> handles;
+    int32_t count = 0;
+};
+
 const std::vector<AnimationDirection> DIRECTION_LIST = {
     AnimationDirection::NORMAL,
     AnimationDirection::REVERSE,
@@ -9361,6 +9371,18 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
+    touchEvent.rollAngle= arkUITouchEvent->rollAngle;
+    touchEvent.tiltX = arkUITouchEvent->actionTouchPoint.tiltX;
+    touchEvent.tiltY = arkUITouchEvent->actionTouchPoint.tiltY;
+    touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
+    touchEvent.width = arkUITouchEvent->actionTouchPoint.contactAreaWidth;
+    touchEvent.height = arkUITouchEvent->actionTouchPoint.contactAreaHeight;
+    if (arkUITouchEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUITouchEvent->keyCodesLength; ++i) {
+            touchEvent.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(arkUITouchEvent->pressedKeyCodes[i]));
+        }
+    }
+
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
@@ -9377,6 +9399,7 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
         point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
+        point.operatingHand = touchPointes[index].operatingHand;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
@@ -9414,12 +9437,14 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
     touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
     touchEvent.targetDisplayId = arkUITouchEvent->targetDisplayId;
     ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    touchEvent.modifierKeyState = arkUITouchEvent->modifierKeyState;
     auto density = PipelineBase::GetCurrentDensity();
     for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
         TouchPoint point;
@@ -9431,6 +9456,7 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         point.globalDisplayX = touchPointes[index].globalDisplayX * density;
         point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
+        point.operatingHand = touchPointes[index].operatingHand;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
@@ -9485,11 +9511,18 @@ ArkUI_Int32 PostMouseEventWithStrategy(
 
     mouseEvent.rawDeltaX = arkUIMouseEvent->rawDeltaX;
     mouseEvent.rawDeltaY = arkUIMouseEvent->rawDeltaY;
+    if (arkUIMouseEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUIMouseEvent->keyCodesLength; ++i) {
+            mouseEvent.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(arkUIMouseEvent->pressedKeyCodes[i]));
+        }
+    }
 
     int32_t* pressedButtons = arkUIMouseEvent->pressedButtons;
     for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
         mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
     }
+    ArkUIMouseEvent* arkUIMouseEventCloned = const_cast<ArkUIMouseEvent*>(arkUIMouseEvent);
+    NG::SetPostMousePointerEvent(mouseEvent, arkUIMouseEventCloned);
     return PostMouseEventToFrameNode(node, mouseEvent);
 }
 
@@ -9507,6 +9540,11 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     } else {
         axisEvent.isNewReferee = false;
     }
+    if (arkUIAxisEvent->pressedKeyCodes) {
+        for (int32_t i = 0; i < arkUIAxisEvent->keyCodesLength; ++i) {
+            axisEvent.pressedCodes.emplace_back(static_cast<KeyCode>(arkUIAxisEvent->pressedKeyCodes[i]));
+        }
+    }
     axisEvent.sourceType = static_cast<SourceType>(arkUIAxisEvent->sourceType);
     axisEvent.sourceTool = static_cast<SourceTool>(arkUIAxisEvent->actionTouchPoint.toolType);
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIAxisEvent->timeStamp));
@@ -9515,6 +9553,7 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.deviceId = arkUIAxisEvent->deviceId;
     axisEvent.targetDisplayId = arkUIAxisEvent->targetDisplayId;
     axisEvent.action = static_cast<AxisAction>(arkUIAxisEvent->action);
+    axisEvent.modifierKeyState = arkUIAxisEvent->modifierKeyState;
     axisEvent.x = arkUIAxisEvent->actionTouchPoint.windowX;
     axisEvent.y = arkUIAxisEvent->actionTouchPoint.windowY;
     auto density = PipelineBase::GetCurrentDensity();
@@ -9525,6 +9564,10 @@ ArkUI_Int32 PostAxisEventWithStrategy(
     axisEvent.scrollStep = arkUIAxisEvent->scrollStep;
     axisEvent.horizontalAxis = arkUIAxisEvent->horizontalAxis;
     axisEvent.verticalAxis = arkUIAxisEvent->verticalAxis;
+    axisEvent.screenX = arkUIAxisEvent->actionTouchPoint.screenX * density;
+    axisEvent.screenY = arkUIAxisEvent->actionTouchPoint.screenY * density;
+    ArkUIAxisEvent* arkUIAxisEventCloned = const_cast<ArkUIAxisEvent*>(arkUIAxisEvent);
+    NG::SetPostAxisPointerEvent(axisEvent, arkUIAxisEventCloned);
     return PostAxisEventToFrameNode(node, axisEvent);
 }
 
@@ -9608,8 +9651,24 @@ void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
         delete[] arkUITouchEvent->touchPointes;
         arkUITouchEvent->touchPointes = nullptr;
     }
+    if (arkUITouchEvent->pressedKeyCodes) {
+        delete[] arkUITouchEvent->pressedKeyCodes;
+        arkUITouchEvent->pressedKeyCodes = nullptr;
+    }
     delete arkUITouchEvent;
     arkUITouchEvent = nullptr;
+}
+
+void DestroyMouseEvent(ArkUIMouseEvent* arkUIMouseEvent)
+{
+    CHECK_NULL_VOID(arkUIMouseEvent);
+    NG::DestroyMouseRawPointerEvent(arkUIMouseEvent);
+}
+
+void DestroyAxisEvent(ArkUIAxisEvent* arkUIAxisEvent)
+{
+    CHECK_NULL_VOID(arkUIAxisEvent);
+    NG::DestroyAxisRawPointerEvent(arkUIAxisEvent);
 }
 
 void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
@@ -9687,6 +9746,8 @@ void CreateClonedMouseEvent(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIM
     arkUIMouseEventCloned->stopPropagation = arkUIMouseEvent->stopPropagation;
     arkUIMouseEventCloned->eventHandleId = arkUIMouseEvent->eventHandleId;
     arkUIMouseEventCloned->isNewReferee = arkUIMouseEvent->isNewReferee;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEvent->rawPointerEvent);
+    NG::SetClonedMousePointerEvent(pointerEvent, arkUIMouseEventCloned);
 }
 
 void CreateClonedAxisEvent(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent)
@@ -9716,6 +9777,9 @@ void CreateClonedAxisEvent(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxis
     arkUIAxisEventCloned->axes = arkUIAxisEvent->axes;
     arkUIAxisEventCloned->eventHandleId = arkUIAxisEvent->eventHandleId;
     arkUIAxisEventCloned->isNewReferee = arkUIAxisEvent->isNewReferee;
+    arkUIAxisEventCloned->pinchAxisScale = arkUIAxisEvent->pinchAxisScale;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEvent->rawPointerEvent);
+    NG::SetClonedAxisPointerEvent(pointerEvent, arkUIAxisEventCloned);
 }
 
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
@@ -10101,6 +10165,19 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetUseUnion(frameNode, false);
+}
+
+ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
+    const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit)
+{
+    double density = usePXUnit ? 1 : PipelineBase::GetCurrentDensity();
+    auto node = AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    if (!node) {
+        return ArkUIOffsetType { localOffset.xComponent, localOffset.yComponent };
+    }
+    PointF point = { windowOffset.xComponent * density, windowOffset.yComponent * density };
+    NGGestureRecognizer::Transform(point, AceType::WeakClaim(node.GetRawPtr()), true);
+    return ArkUIOffsetType { point.GetX() / density, point.GetY() / density };
 }
 
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
@@ -11047,8 +11124,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.globalDisplayX = globalDisplayLocation.GetX() / density;
     touchPoint.globalDisplayY = globalDisplayLocation.GetY() / density;
     touchPoint.pressure = locationInfo.GetForce();
-    touchPoint.contactAreaWidth = locationInfo.GetSize();
-    touchPoint.contactAreaHeight = locationInfo.GetSize();
+    touchPoint.contactAreaWidth = locationInfo.GetWidth();
+    touchPoint.contactAreaHeight = locationInfo.GetHeight();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
@@ -11176,6 +11253,7 @@ ArkUINodeEvent CreateNodeEventFromTouchEvent(int32_t nodeId, void* extraParam, T
     // deviceid
     event.touchEvent.deviceId = eventInfo.GetDeviceId();
     event.touchEvent.stopPropagation = false;
+    event.touchEvent.eventHandleId = eventInfo.GetEventHandleId();
     return event;
 }
 
@@ -11652,6 +11730,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .createClonedMouseEvent = CreateClonedMouseEvent,
         .createClonedAxisEvent = CreateClonedAxisEvent,
         .destroyTouchEvent = DestroyTouchEvent,
+        .destroyMouseEvent = DestroyMouseEvent,
+        .destroyAxisEvent = DestroyAxisEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
@@ -11738,6 +11818,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
+        .getCurrentLocation = GetCurrentLocation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -12710,6 +12791,91 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
 }
 
+std::vector<ArkUIGestureRecognizer*> CollectResponseRecognizers(
+    const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
+{
+    std::vector<ArkUIGestureRecognizer*> responseRecognizers;
+    responseRecognizers.reserve(recognizers.size());
+    for (const auto& recognizer : recognizers) {
+        if (!recognizer) {
+            continue;
+        }
+        auto gestureInfo = recognizer->GetGestureInfo();
+        if (gestureInfo && gestureInfo->GetDisposeTag()) {
+            continue;
+        }
+        auto* arkRecognizer = NodeModifier::CreateGestureRecognizer(recognizer);
+        if (arkRecognizer) {
+            responseRecognizers.emplace_back(arkRecognizer);
+        }
+    }
+    return responseRecognizers;
+}
+
+GestureCollectTouchRecognizerData CollectTouchRecognizers(const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+{
+    GestureCollectTouchRecognizerData data;
+    data.storage.reserve(touchRecognizers.size());
+    if (!touchRecognizers.empty()) {
+        data.handles = std::make_unique<void*[]>(touchRecognizers.size());
+    }
+    for (const auto& touchRecognizer : touchRecognizers) {
+        if (!touchRecognizer) {
+            continue;
+        }
+        auto handle = std::make_unique<GestureCollectTouchRecognizerHandle>();
+        handle->target = AceType::RawPtr(touchRecognizer);
+        data.handles[data.count++] = handle.get();
+        data.storage.emplace_back(std::move(handle));
+    }
+    return data;
+}
+
+GestureCollectIntervention NormalizeGestureCollectIntervention(int32_t intervention)
+{
+    if (intervention < static_cast<int32_t>(GestureCollectIntervention::CONTINUE) ||
+        intervention > static_cast<int32_t>(GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS)) {
+        return GestureCollectIntervention::CONTINUE;
+    }
+    return static_cast<GestureCollectIntervention>(intervention);
+}
+
+void SetOnGestureCollectIntercept(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onGestureCollectIntercept =
+        [frameNode, nodeId, extraParam](const std::vector<RefPtr<NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> GestureCollectIntervention {
+        ArkUINodeEvent event;
+        event.kind = GESTURE_COLLECT_INTERCEPT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+
+        auto responseRecognizers = CollectResponseRecognizers(recognizers);
+        auto touchRecognizerData = CollectTouchRecognizers(touchRecognizers);
+
+        ArkUIGestureCollectInterceptInfo gestureCollectInterceptInfo;
+        gestureCollectInterceptInfo.subKind = ON_GESTURE_COLLECT_INTERCEPT;
+        gestureCollectInterceptInfo.responseLinkRecognizer =
+            responseRecognizers.empty() ? nullptr : responseRecognizers.data();
+        gestureCollectInterceptInfo.count = static_cast<int32_t>(responseRecognizers.size());
+        gestureCollectInterceptInfo.touchRecognizers =
+            touchRecognizerData.count == 0 ? nullptr : touchRecognizerData.handles.get();
+        gestureCollectInterceptInfo.touchRecognizerCnt = touchRecognizerData.count;
+        gestureCollectInterceptInfo.intervention = static_cast<int32_t>(GestureCollectIntervention::CONTINUE);
+        event.gestureCollectInterceptInfo = gestureCollectInterceptInfo;
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+
+        return NormalizeGestureCollectIntervention(event.gestureCollectInterceptInfo.intervention);
+    };
+
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, std::move(onGestureCollectIntercept));
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 ArkUI_CrownAction ToArkUICrownAction(CrownAction action)
 {
@@ -12875,6 +13041,7 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.interceptResult = 0;
         touchEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         touchEvent.touchEvent.deviceId = eventInfo.GetDeviceId();
+        touchEvent.touchEvent.eventHandleId = eventInfo.GetEventHandleId();
         SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
@@ -13098,6 +13265,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
             pressedButtonList.push_back(static_cast<int32_t>(*it));
         }
         event.mouseEvent.pressedButtons = pressedButtonList.data();
+        event.mouseEvent.rawPointerEvent = info.GetPointerEvent().get();
+        event.mouseEvent.eventHandleId = info.GetEventHandleId();
         SetOnMouseInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.mouseEvent.stopPropagation);
@@ -13161,6 +13330,9 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
         event.axisEvent.axes = info.GetAxes();
+        event.axisEvent.eventHandleId = info.GetEventHandleId();
+        event.axisEvent.rawPointerEvent =
+            const_cast<void*>(reinterpret_cast<const void*>(info.GetPointerEvent().get()));
 
         SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
@@ -13415,6 +13587,13 @@ void ResetOnChildTouchTest(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
+}
+
+void ResetOnGestureCollectIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, nullptr);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

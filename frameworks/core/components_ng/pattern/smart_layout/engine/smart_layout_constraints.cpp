@@ -21,14 +21,14 @@ void SmartLayoutConstraints::AddSizeScaleConstraint(SmartLayoutNode& parent,
     double sumOfAllChildHeight, double maxChildWidth)
 {
     auto* engine = parent.GetEngine();
-    if (engine == nullptr || sumOfAllChildHeight <= 0 || maxChildWidth <= 0) {
+    if (engine == nullptr || LessOrEqual(sumOfAllChildHeight, 0.0) || LessOrEqual(maxChildWidth, 0.0)) {
         return;
     }
     const auto& context = parent.GetContext();
 
     double sizeScale = 1.0;
-    bool heightOverflow = sumOfAllChildHeight > context.size.Height();
-    bool widthOverflow = maxChildWidth > context.size.Width();
+    bool heightOverflow = GreatNotEqual(sumOfAllChildHeight, context.size.Height());
+    bool widthOverflow = GreatNotEqual(maxChildWidth, context.size.Width());
     if (heightOverflow && !widthOverflow) {
         sizeScale = context.size.Height() / sumOfAllChildHeight;
     } else if (!heightOverflow && widthOverflow) {
@@ -46,14 +46,14 @@ void SmartLayoutConstraints::AddRowSizeScaleConstraint(SmartLayoutNode& parent,
     double sumOfAllChildWidth, double maxChildHeight)
 {
     auto* engine = parent.GetEngine();
-    if (engine == nullptr || sumOfAllChildWidth <= 0 || maxChildHeight <= 0) {
+    if (engine == nullptr || LessOrEqual(sumOfAllChildWidth, 0.0) || LessOrEqual(maxChildHeight, 0.0)) {
         return;
     }
     const auto& context = parent.GetContext();
 
     double sizeScale = 1.0;
-    bool widthOverflow = sumOfAllChildWidth > context.size.Width();
-    bool heightOverflow = maxChildHeight > context.size.Height();
+    bool widthOverflow = GreatNotEqual(sumOfAllChildWidth, context.size.Width());
+    bool heightOverflow = GreatNotEqual(maxChildHeight, context.size.Height());
     if (widthOverflow && !heightOverflow) {
         sizeScale = context.size.Width() / sumOfAllChildWidth;
     } else if (!widthOverflow && heightOverflow) {

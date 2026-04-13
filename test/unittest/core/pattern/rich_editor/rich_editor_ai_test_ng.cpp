@@ -97,6 +97,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level2)
     richEditorPattern->textSelector_.Update(0, 5);
     auto mockContainer = MockContainer::Current();
     mockContainer->SetIsSceneBoardWindow(true);
+    /**
+ 	 * @tc.steps: step1. test IsShowAIWrite
+ 	 */
     EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
@@ -118,6 +121,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
     richEditorController->AddTextSpan(options);
     richEditorPattern->textSelector_.Update(0, 5);
     MockContainer::TearDown();
+    /**
+ 	 * @tc.steps: step1. test IsShowAIWrite
+ 	 */
     EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
@@ -240,6 +246,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -250,6 +259,9 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
     options.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(options);
 
+    /**
+     * @tc.steps: step2. update selector
+     */
     richEditorPattern->textSelector_.Update(0, 5);
     AIWriteInfo info;
     richEditorPattern->GetAIWriteInfo(info);
@@ -422,10 +434,16 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo002, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, CanStartAITask001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
+    /**
+     * @tc.steps: step2. set richEditor enable data detect
+     */
     richEditorPattern->textDetectEnable_ = true;
     bool ret = false;
     ret = richEditorPattern->CanStartAITask();

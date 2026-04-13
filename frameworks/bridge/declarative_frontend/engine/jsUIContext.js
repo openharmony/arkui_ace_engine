@@ -971,6 +971,18 @@ class UIContext {
         });
     }
 
+    addLocalInputEventMonitor(eventMask, listener) {
+        return withInstanceId(this.instanceId_, () => {
+            return getUINativeModule().common.addLocalInputEventMonitor(eventMask, listener);
+        });
+    }
+
+    removeLocalInputEventMonitor(monitor) {
+        withInstanceId(this.instanceId_, () => {
+            getUINativeModule().common.removeLocalInputEventMonitor(monitor);
+        });
+    }
+
     getPageRootNode() {
         if (!this.isAvailable()) {
             throw new BusinessError(120007, 'The UIContext is not available');
@@ -1184,6 +1196,12 @@ class CursorController {
     setCursor(value) {
         withInstanceId(this.instanceId_, () => {
             cursorControl.setCursor(value);
+        });
+    }
+
+    setCustomCursor(value, focusX, focusY) {
+        withInstanceId(this.instanceId_, () => {
+            cursorControl.setCustomCursor(value, focusX || 0, focusY || 0);
         });
     }
 }
@@ -1873,6 +1891,21 @@ function __removeAvailableInstanceId__(instanceId) {
     __availableInstanceIds__.delete(instanceId);
 }
 
+const RESOURCE_TYPE = new Map([
+    ['color', 10001],
+    ['float', 10002],
+    ['string', 10003],
+    ['plural', 10004],
+    ['boolean', 10005],
+    ['intarray', 10006],
+    ['integer', 10007],
+    ['pattern', 10008],
+    ['strarray', 10009],
+    ['media', 20000],
+    ['RAWFILE', 30000],
+    ['symbol', 40000]
+]);
+
 function __getResourceId__(params) {
     let resName = '';
     if (params.params.length > 0) {
@@ -1883,5 +1916,20 @@ function __getResourceId__(params) {
 
     const re = new RegExp('^\\[\\S+]');
     resName = resName.replace(re, 'app'); // Process [hsp].type.name. GetResId only accept app or sys format.
-    return getUINativeModule().resource.getResourceId(resName, bundleName, moduleName);
+    const resId = getUINativeModule().resource.getResourceId(resName, bundleName, moduleName);
+    const rawParams = ObservedObject.GetRawObject(params);
+    if (resId > 0 && Array.isArray(rawParams.params) && rawParams.params.length > 0) {
+        Object.defineProperty(rawParams, 'id', { value: resId, writable: true, configurable: true, enumerable: true });
+        if (rawParams.params[0] === resName) {
+            rawParams.params.shift();
+        }
+        const matched = resName.match(/^(app|sys)\.([^.]+)\.(.+)$/);
+        if (matched) {
+            const mappedType = RESOURCE_TYPE.get(matched[2]);
+            if (mappedType !== undefined) {
+                rawParams.type = mappedType;
+            }
+        }
+    }
+    return resId;
 }

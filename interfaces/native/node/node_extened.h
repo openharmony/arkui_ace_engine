@@ -224,6 +224,7 @@ struct ArkUI_ActiveChildrenInfo {
 
 struct ArkUI_CrossLanguageOption {
     bool attributeSetting;
+    OH_ArkUI_CrossLanguageOperatingStatus treeOperatingStatus;
 };
 
 struct ArkUI_VisibleAreaEventOptions {

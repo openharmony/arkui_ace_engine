@@ -34,9 +34,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr char PLACEHOLDER_PAGE_URL[] = "placeholder";
 constexpr char PLACEHOLDER_PAGE_PATH[] = "placeholder.js";
-constexpr int32_t PRIMARY_PAGE_NODE_THRESHOLD = 100;
+constexpr int32_t HOME_PAGE_NODE_THRESHOLD = 100;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
-const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "root"};
+const std::vector<std::string> HOME_PAGE_PREFIX = {"main", "home", "index", "root"};
 }
 
 void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
@@ -104,11 +104,11 @@ void ParallelPageRouterManager::LoadPage(
         std::swap(prevPageRouterStack, pageRouterStack_);
         return;
     }
-    stageManager->RemoveSecondaryPagesOfPrimaryHomePage();
+    stageManager->RemoveSecondaryPagesOfPrimaryPage();
 
-    if (DetectPrimaryPage(target, preLastPage)) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as primary page", target.url.c_str());
-        stageManager->OnPrimaryPageDetected(pageNode, pageRouterStack_);
+    if (DetectHomePage(target, preLastPage)) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as home page", target.url.c_str());
+        stageManager->OnHomePageDetected(pageNode, pageRouterStack_);
     }
 
     pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -165,11 +165,11 @@ void ParallelPageRouterManager::LoadPageExtender(
         std::swap(prevPageRouterStack, pageRouterStack_);
         return;
     }
-    stageManager->RemoveSecondaryPagesOfPrimaryHomePage();
+    stageManager->RemoveSecondaryPagesOfPrimaryPage();
 
-    if (DetectPrimaryPage(target, preLastPage)) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as primary page", target.url.c_str());
-        stageManager->OnPrimaryPageDetected(pageNode, pageRouterStack_);
+    if (DetectHomePage(target, preLastPage)) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as home page", target.url.c_str());
+        stageManager->OnHomePageDetected(pageNode, pageRouterStack_);
     }
 
     pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -226,7 +226,7 @@ int32_t ParallelPageRouterManager::GetLastPageIndex()
     return pageRouterStack_.size() - 1;
 }
 
-bool ParallelPageRouterManager::DetectPrimaryPage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage)
+bool ParallelPageRouterManager::DetectHomePage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -238,14 +238,14 @@ bool ParallelPageRouterManager::DetectPrimaryPage(const RouterPageInfo& target, 
         return false;
     }
 
-    if (!ShouldDetectPrimaryPage(context, preLastPage)) {
+    if (!ShouldDetectHomePage(context, preLastPage)) {
         return false;
     }
 
-    return JudgePrimaryPage(target);
+    return JudgeHomePage(target);
 }
  
-bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
+bool ParallelPageRouterManager::JudgeHomePage(const RouterPageInfo& target)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -266,8 +266,8 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
 
     int32_t elementNum = ElementRegister::GetInstance()->GetLatestElementId();
     TAG_LOGI(AceLogTag::ACE_ROUTER,
-        "Judge primary page, url: %{public}s, lastest elementId: %{public}d", target.url.c_str(), elementNum);
-    if (elementNum >= PRIMARY_PAGE_NODE_THRESHOLD) {
+        "Judge home page, url: %{public}s, lastest elementId: %{public}d", target.url.c_str(), elementNum);
+    if (elementNum >= HOME_PAGE_NODE_THRESHOLD) {
         return true;
     }
 
@@ -278,7 +278,7 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
     while (getline(stream, temp, '/')) {
         realPage = temp;
     }
-    for (auto it = PRIMARY_PAGE_PREFIX.begin(); it != PRIMARY_PAGE_PREFIX.end(); it++) {
+    for (auto it = HOME_PAGE_PREFIX.begin(); it != HOME_PAGE_PREFIX.end(); it++) {
         std::string prefix = *it;
         if (realPage.find(prefix) != std::string::npos) {
             return true;
@@ -388,7 +388,7 @@ RefPtr<ResourceWrapper> ParallelPageRouterManager::CreateResourceWrapper()
     return resourceWrapper;
 }
 
-bool ParallelPageRouterManager::ShouldDetectPrimaryPage(
+bool ParallelPageRouterManager::ShouldDetectHomePage(
     const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& preLastPage)
 {
     CHECK_NULL_RETURN(context, false);
@@ -398,8 +398,8 @@ bool ParallelPageRouterManager::ShouldDetectPrimaryPage(
     CHECK_NULL_RETURN(stageNode, false);
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    auto primaryNode = stagePattern->GetPrimaryPage();
-    if (!primaryNode) {
+    auto homePage = stagePattern->GetHomePage();
+    if (!homePage) {
         return true;
     }
 
@@ -410,8 +410,8 @@ bool ParallelPageRouterManager::ShouldDetectPrimaryPage(
     CHECK_NULL_RETURN(preLastPage, false);
     auto preLastPattern = preLastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(preLastPattern, false);
-    if (preLastPattern->GetPageType() == RouterPageType::PRIMARY_PAGE) {
-        // we need to detect new primary page when replace top primarypage.
+    if (preLastPattern->GetPageType() == RouterPageType::HOME_PAGE) {
+        // we need to detect new home page when replace top home page.
         return true;
     }
 
@@ -472,8 +472,15 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
     if (preTopPage) {
         auto preTopPagePattern = preTopPage->GetPattern<ParallelPagePattern>();
         CHECK_NULL_RETURN(preTopPagePattern, false);
-        auto needClearSecondaryPage = isPush && RouterPageType::SECONDARY_PAGE == preTopPagePattern->GetPageType()
-            && stageManager->GetPrimaryPageTouched();
+        auto forceSplitMgr = pipelineContext->GetForceSplitManager();
+        auto needClearSecondaryPage = false;
+        if (forceSplitMgr && forceSplitMgr->CanPushPageToPrimary()) {
+            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+                stageManager->GetTouchedPrimaryColumnPage() != nullptr;
+        } else {
+            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+                stageManager->GetHomePageTouched();
+        }
         stageManager->SetNeedClearSecondaryPage(needClearSecondaryPage);
         return needClearSecondaryPage;
     }

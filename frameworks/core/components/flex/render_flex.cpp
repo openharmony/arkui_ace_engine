@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/flex/flex_component.h"
+#include "core/components/box/render_box.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/pipeline/base/position_layout_utils.h"
 

@@ -899,7 +899,8 @@ HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level0)
     textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
     textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
 
-    TextClockModelNG::InitFontDefault(node, textStyle);
+    Color value = Color::BLACK;
+    TextClockModelNG::InitFontDefault(node, textStyle, value);
     EXPECT_EQ(layoutProperty->GetFontSizeValue(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);

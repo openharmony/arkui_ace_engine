@@ -32,6 +32,8 @@ public:
         int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const override;
     void SetCustomCursor(
         int32_t windowId, int32_t focusX, int32_t focusY, std::shared_ptr<Media::PixelMap> pixelMap) const override;
+    void SetUeaCustomCursor(int32_t realHostWindowId, RefPtr<PixelMap> pixelMap, int32_t focusX,
+        int32_t focusY) const override;
     void SetPointerVisible(MouseFormat pointerStyle) const override;
 };
 

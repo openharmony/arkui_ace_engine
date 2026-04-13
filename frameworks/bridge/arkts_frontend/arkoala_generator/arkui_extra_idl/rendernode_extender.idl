@@ -63,7 +63,7 @@ interface RenderNodeExtender {
   static void setPivot(RenderNode peer, Vector2 pivot);
   static void setScale(RenderNode peer, Vector2 scale);
   static void setTranslation(RenderNode peer, Vector2 translation);
-  static void setRotation(RenderNode peer, Vector3 rotation, i32 unitValue);
+  static void setRotation(RenderNode peer, Vector3 rotation);
   static void setTransform(RenderNode peer, Matrix4 transform);
   static void setShadowColor(RenderNode peer, i32 shadowColor);
   static void setShadowOffset(RenderNode peer, Vector2 shadowOffset, i32 unitValue);

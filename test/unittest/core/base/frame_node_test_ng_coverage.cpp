@@ -25,6 +25,9 @@
 #include "core/components_ng/property/grid_property.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#if defined(OHOS_PLATFORM)
+#include <unistd.h>
+#endif
 
 using namespace testing;
 using namespace testing::ext;
@@ -2638,6 +2641,34 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkNeedRender01, TestSize.Level1)
     frameNode->MarkNeedRender(false);
     EXPECT_FALSE(frameNode->isLayoutDirtyMarked_);
     EXPECT_TRUE(frameNode->isRenderDirtyMarked_);
+}
+
+/**
+ * @tc.name: FrameNodeMarkNeedRenderCanvasTid01
+ * @tc.desc: Test canvas node ownedTid initialization and MarkNeedRender with changed tid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkNeedRenderCanvasTid01, TestSize.Level1)
+{
+#if defined(OHOS_PLATFORM)
+    int32_t canvasNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto canvasNode =
+        FrameNode::CreateFrameNode(V2::CANVAS_ETS_TAG, canvasNodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(canvasNode, nullptr);
+    int32_t normalNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto normalNode = FrameNode::CreateFrameNode("framenode", normalNodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(normalNode, nullptr);
+
+    uint64_t currentTid = static_cast<uint64_t>(gettid());
+    EXPECT_EQ(canvasNode->ownedTid_, currentTid);
+    EXPECT_EQ(normalNode->ownedTid_, 0);
+
+    canvasNode->isLayoutDirtyMarked_ = false;
+    canvasNode->isRenderDirtyMarked_ = false;
+    canvasNode->ownedTid_ = currentTid + 1;
+    canvasNode->MarkNeedRender(true);
+    EXPECT_TRUE(canvasNode->isRenderDirtyMarked_);
+#endif
 }
 
 /**

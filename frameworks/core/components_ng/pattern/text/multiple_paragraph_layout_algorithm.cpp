@@ -472,13 +472,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     }
     auto lineHeight = layoutProperty->GetLineHeight();
     if (lineHeight.has_value()) {
-        if (lineHeight->Unit() == DimensionUnit::PERCENT) {
-            modifier->SetLineHeight(lineHeight.value(), textStyle, true);
-        } else {
-            modifier->SetLineHeight(lineHeight.value(), textStyle);
-        }
+        modifier->SetLineHeight(lineHeight.value(), textStyle, lineHeight->Unit() == DimensionUnit::PERCENT);
     } else {
         modifier->SetLineHeight(textStyle.GetLineHeight(), textStyle, true);
+    }
+    auto fontVariations = layoutProperty->GetFontVariations();
+    if (fontVariations.has_value() && !fontVariations.value().empty()) {
+        modifier->SetFontVariations(fontVariations.value());
+    } else {
+        modifier->SetFontVariations(textStyle.GetFontVariations(), true);
     }
 }
 
@@ -667,7 +669,8 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
-        std::optional<float> maxWidth = GetMaxMeasureSize(contentConstraint).Width();
+        // RichEditor may adjust paragraph width later via LayoutPolicy.
+        auto maxWidth = GetCustomSpanMeasureMaxWidth(contentConstraint, layoutWrapper);
         std::optional<LayoutCalPolicy> layoutPolicy;
         auto layoutPolicyValue = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
         if (layoutPolicyValue != LayoutCalPolicy::NO_MATCH) {

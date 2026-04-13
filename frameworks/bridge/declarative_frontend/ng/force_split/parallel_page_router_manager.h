@@ -39,9 +39,9 @@ private:
     void LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
     RefPtr<ResourceWrapper> CreateResourceWrapper();
-    bool DetectPrimaryPage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);
-    bool JudgePrimaryPage(const RouterPageInfo& target);
-    bool ShouldDetectPrimaryPage(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& preLastPage);
+    bool DetectHomePage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);
+    bool JudgeHomePage(const RouterPageInfo& target);
+    bool ShouldDetectHomePage(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& preLastPage);
     void RefreshAllPageIndex();
     bool SetOnKeyEvent(const RefPtr<FrameNode> &pageNode);
     bool CheckSecondaryPageNeedClear(bool isPush);

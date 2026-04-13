@@ -43,7 +43,8 @@ Ark_String GetIdImpl(Ark_EventTargetInfo peer)
 }
 Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->uniqueId);
 }
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()

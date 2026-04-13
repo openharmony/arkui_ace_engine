@@ -63,7 +63,7 @@ namespace {
 static constexpr uint32_t PARAM_SIZE_ONE   = 1;
 static constexpr uint32_t PARAM_SIZE_TWO   = 2;
 static constexpr uint32_t PARAM_SIZE_THREE = 3;
-static constexpr uint32_t PARAM_TRHEE_INDEX = 2;
+static constexpr uint32_t PARAM_THREE_INDEX = 2;
 constexpr int FUNC_SET_CREATE_ARG_LEN = 2;
 using UpdateCallback = std::function<void(const std::string& data)>;
 }
@@ -821,7 +821,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
     filter.SetFilterDepth(depth);
 
     // get inspecotr filter list
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(PARAM_TRHEE_INDEX);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(PARAM_THREE_INDEX);
     if (argc == PARAM_SIZE_THREE) {
         if (!thirdArg->IsArray(vm)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
@@ -1838,6 +1838,57 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> SetCustomCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (vm == nullptr || argc < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    RefPtr<PixelMap> pixelMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    pixelMap = NG::ArkTSUtils::CreatePixelMapFromNapiValue(vm, firstArg);
+#endif
+    if (!pixelMap) {
+        TAG_LOGE(AceLogTag::ACE_MOUSE, "SetCustomCursor: pixelMap is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> secondArg = argc > 1 ? runtimeCallInfo->GetCallArgRef(1) : Local<JSValueRef>();
+    Local<JSValueRef> thirdArg =
+        argc > PARAM_SIZE_TWO ? runtimeCallInfo->GetCallArgRef(PARAM_THREE_INDEX) : Local<JSValueRef>();
+    int32_t focusX = 0;
+    int32_t focusY = 0;
+    if (!secondArg.IsNull() && secondArg->IsNumber()) {
+        focusX = secondArg->Int32Value(vm);
+    }
+    if (!thirdArg.IsNull() && thirdArg->IsNumber()) {
+        focusY = thirdArg->Int32Value(vm);
+    }
+    if (focusX > pixelMap->GetWidth() || focusX < 0) {
+        focusX = 0;
+    }
+    if (focusY > pixelMap->GetHeight() || focusY < 0) {
+        focusY = 0;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, pixelMap, focusX, focusY]() {
+            CustomCursorInfo customCursorInfo { pixelMap, focusX, focusY };
+            pipelineContext->SetCursor(customCursorInfo);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCustomCursor");
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> JSHandleUncaughtException(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2287,6 +2338,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetCursor));
+    cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomCursor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetCustomCursor));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "restoreDefault"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RestoreDefault));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "cursorControl"), cursorControlObj);

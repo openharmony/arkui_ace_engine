@@ -1240,16 +1240,20 @@ void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color selectedColor;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    selectedColor = theme->GetSelectedColor();
-    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
-        // Default setting of 20% opacity
-        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        TextFieldModelNG::ResetSelectedBackgroundColor(frameNode);
+    } else {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+        if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
     }
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);

@@ -25,6 +25,7 @@
 #include "base/i18n/localization.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/connect_server_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"

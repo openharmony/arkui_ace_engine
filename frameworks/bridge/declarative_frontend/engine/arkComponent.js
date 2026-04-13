@@ -2246,6 +2246,19 @@ class OnTouchTestDoneModifier extends ModifierWithKey {
   }
 }
 OnTouchTestDoneModifier.identity = Symbol('onOnTouchTestDone');
+class OnGestureCollectInterceptModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureCollectIntercept(node);
+    } else {
+      getUINativeModule().common.setOnGestureCollectIntercept(node, this.value);
+    }
+  }
+}
+OnGestureCollectInterceptModifier.identity = Symbol('onGestureCollectIntercept');
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4085,6 +4098,11 @@ class ArkComponent {
   onTouchTestDone(callback) {
     this._onTouchTestDone = callback;
     modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
+    return this;
+  }
+  onGestureCollectIntercept(callback) {
+    this._onGestureCollectIntercept = callback;
+    modifierWithKey(this._modifiersWithKeys, OnGestureCollectInterceptModifier.identity, OnGestureCollectInterceptModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback) {
@@ -10526,6 +10544,19 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
+class SpanFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetFontVariations(node);
+    } else {
+      getUINativeModule().span.setFontVariations(node, this.value);
+    }
+  }
+}
+SpanFontVariationsModifier.identity = Symbol('spanFontVariations');
 class SpanInputModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11148,6 +11179,10 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
     return this;
   }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.Span !== undefined) {
@@ -11479,6 +11514,23 @@ class TextFontFeatureModifier extends ModifierWithKey {
   }
 }
 TextFontFeatureModifier.identity = Symbol('textFontFeature');
+
+class TextFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetFontVariations(node);
+    } else {
+      getUINativeModule().text.setFontVariations(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextFontVariationsModifier.identity = Symbol('textFontVariations');
 
 class TextEllipsisModeModifier extends ModifierWithKey {
   constructor(value) {
@@ -12657,6 +12709,10 @@ class ArkTextComponent extends ArkComponent {
   }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
     return this;
   }
   onWillCopy(callback) {
@@ -25687,6 +25743,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
+  aiSessionOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
   enableScrollDirectionalLock(enabled, type) {
     let config = new ArkEnableScrollDirectionalLock();
     config.value = enabled;
@@ -25700,6 +25760,10 @@ class ArkWebComponent extends ArkComponent {
   }
   scrollbarLayoutPolicy(value) {
     modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
     return this;
   }
 }
@@ -27400,6 +27464,21 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey {
 }
 WebOnMicrophoneCaptureStateChangeModifier.identity = Symbol('webOnMicrophoneCaptureStateChangeModifier');
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    }
+    else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+WebOnInputMethodAttachedModifier.identity = Symbol('webOnInputMethodAttachedModifier');
+
 class WebEnableAutoFillModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27441,6 +27520,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
   }
 }
 WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
+
+class WebAiSessionOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
+    }
+  }
+}
+WebAiSessionOptionsModifier.identity = Symbol('webAiSessionOptionsModifier');
 
 class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
   constructor(value) {
@@ -29166,6 +29259,21 @@ class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
 }
 ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
 
+class ListBackPressCloseSwipeActionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+    }
+    else {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+    }
+  }
+}
+ListBackPressCloseSwipeActionModifier.identity = Symbol('listBackPressCloseSwipeAction');
+
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -29381,6 +29489,11 @@ class ArkListComponent extends ArkScrollable {
   }
   supportEmptyBranchInLazyLoading(value) {
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
+    return this;
+  }
+  backPressCloseSwipeAction(value) {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
+      ListBackPressCloseSwipeActionModifier, value);
     return this;
   }
 }

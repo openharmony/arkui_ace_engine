@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <list>
 
+#include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
@@ -63,16 +64,6 @@ public:
     void OnOffscreenProcess(bool recursive) override;
 
     void ProcessShallowBuilder();
-
-    void SetIsOnAnimation(bool isOnAnimation)
-    {
-        isOnAnimation_ = isOnAnimation;
-    }
-
-    bool IsOnAnimation() const
-    {
-        return isOnAnimation_;
-    }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
     
@@ -256,6 +247,14 @@ public:
     {
         return isShowInPrimaryPartition_;
     }
+    ForceSplitPageColumnType GetColumnType() const
+    {
+        return columnType_;
+    }
+    void SetColumnType(ForceSplitPageColumnType type)
+    {
+        columnType_ = type;
+    }
     RefPtr<NavDestinationGroupNode> GetOrCreateProxyNode();
     void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
     {
@@ -281,6 +280,15 @@ public:
         return isTitleConsumedElapsedTime_;
     }
     void ContentChangeReport();
+
+    //-------for force split------- begin------
+    void SplitTransitionPushStart(ForceSplitTransitionType type) override;
+    void SplitTransitionPushEnd(ForceSplitTransitionType type) override;
+    void SplitTransitionPushFinish(int32_t animationId = -1) override;
+    void SplitTransitionPopStart(ForceSplitTransitionType type) override;
+    void SplitTransitionPopEnd(ForceSplitTransitionType type) override;
+    void SplitTransitionPopFinish(int32_t animationId = -1) override;
+    //-------for force split------- end  ------
 
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
@@ -309,7 +317,6 @@ private:
 
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
-    bool isOnAnimation_ = false;
     int32_t index_ = -1;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
@@ -334,6 +341,8 @@ private:
     bool isShowInPrimaryPartition_ = false;
     RefPtr<NavDestinationGroupNode> proxyNode_;
     WeakPtr<NavDestinationGroupNode> primaryNode_;
+
+    ForceSplitPageColumnType columnType_ = ForceSplitPageColumnType::NONE;
 };
 
 } // namespace OHOS::Ace::NG

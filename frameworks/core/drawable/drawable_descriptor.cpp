@@ -18,6 +18,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/pipeline/pipeline_base.h"
 #include "base/error/error_code.h"
 #include "core/common/resource/resource_object.h"
 #include "core/drawable/drawable_descriptor.h"

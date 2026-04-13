@@ -356,6 +356,37 @@ HWTEST_F(ViewAbstractTestNg, SetSystemMaterial002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSystemMaterial003
+ * @tc.desc: Test the SetSystemMaterial function of View_Abstract, use immersive type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterial003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContextOfNode = node->GetRenderContext();
+    ASSERT_NE(renderContextOfNode, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+    /**
+     * @tc.steps: step2. call SetSystemMaterial and get.
+     * @tc.expected: step2. SystemMaterial type value is same with the value set.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::IMMERSIVE);
+    material->SetType(type);
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+    ViewAbstract::SetSystemMaterial(nodePtr, AceType::RawPtr(material));
+    ASSERT_NE(renderContextOfNode->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContextOfNode->GetSystemMaterial()->GetType(), type);
+    ASSERT_NE(renderContextOfNode->GetSystemMaterial()->GetImmersiveOptions(), nullptr);
+}
+
+/**
  * @tc.name: SetSystemMaterialImmediate001
  * @tc.desc: Test the SetSystemMaterialImmediate function of View_Abstract
  * @tc.type: FUNC

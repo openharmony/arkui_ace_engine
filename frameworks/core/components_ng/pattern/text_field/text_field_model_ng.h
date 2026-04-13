@@ -51,6 +51,7 @@ public:
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void ResetSelectedBackgroundColor() override;
     void SetMaxLength(uint32_t value) override;
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
@@ -217,6 +218,7 @@ public:
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetMinLines(FrameNode* frameNode, uint32_t value);

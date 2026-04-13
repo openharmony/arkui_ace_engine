@@ -83,7 +83,8 @@ void ResSchedReport::LoadPageEvent(int32_t value)
 }
 
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
-    const std::string& toPage, const std::string& mode)
+    const std::string& toPage, const std::string& mode,
+    const std::string& fromComponentName, const std::string& toComponentName)
 {}
 
 void ResSchedReport::TriggerModuleSerializer()

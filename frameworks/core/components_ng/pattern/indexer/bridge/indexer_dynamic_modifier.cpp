@@ -492,6 +492,7 @@ void SetPopupBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
         styleOption.blurStyle = static_cast<BlurStyle>(value);
     }
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+    IndexerModelNG::SetPopupBackgroundBlurStyleByUser(frameNode, true);
 }
 void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
 {
@@ -500,6 +501,7 @@ void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
     BlurStyleOption styleOption;
     styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+    IndexerModelNG::SetPopupBackgroundBlurStyleByUser(frameNode, false);
 }
 void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
 {

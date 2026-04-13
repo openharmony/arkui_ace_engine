@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "base/log/dump_log.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -115,6 +116,7 @@ void BubblePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
+    RegisterAvoidInfoChangeListener(pipelineContext);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
@@ -174,6 +176,7 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         popupParam_->SetOnWillDismiss(nullptr);
         popupParam_->SetOnStateChange(nullptr);
     }
+    UnRegisterAvoidInfoChangeListener(frameNode);
 }
 
 void BubblePattern::OnAttachToMainTree()
@@ -1140,5 +1143,64 @@ void BubblePattern::UpdateRadius(const CalcDimension& dimension)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+NG::RectF BubblePattern::GetWindowButtonRect(const RefPtr<FrameNode>& frameNode)
+{
+    NG::RectF buttonRect;
+    CHECK_NULL_RETURN(frameNode, buttonRect);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, buttonRect);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, buttonRect);
+    if (container->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
+        CHECK_NULL_RETURN(subwindow, buttonRect);
+        auto subwindowRect = subwindow->GetWindowRect();
+        auto parentWindowRect = subwindow->GetParentWindowRect();
+        if (!NearEqual(subwindowRect.Left(), parentWindowRect.Left()) ||
+            !NearEqual(subwindowRect.Top(), parentWindowRect.Top())) {
+            return buttonRect;
+        }
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(containerId);
+        CHECK_NULL_RETURN(container, buttonRect);
+        pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(pipelineContext, buttonRect);
+    }
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, buttonRect);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, buttonRect)) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup buttonRect rect is %{public}s",
+            buttonRect.ToString().c_str());
+    }
+    return buttonRect;
+}
+
+void BubblePattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void BubblePattern::RegisterAvoidInfoChangeListener(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void BubblePattern::UnRegisterAvoidInfoChangeListener(FrameNode* hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
 
 } // namespace OHOS::Ace::NG

@@ -69,6 +69,8 @@ class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
 class UiMaterial;
+struct ImmersiveOptions;
+struct ImmersiveMaterialConfig;
 }
 
 namespace OHOS::Ace::NG {
@@ -410,6 +412,7 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetOnGestureRecognizerJudgeBegin(
@@ -1069,6 +1072,7 @@ public:
     static float GetAspectRatio(FrameNode* frameNode);
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
+    static void SetOnGestureCollectIntercept(FrameNode* frameNode, NG::OnGestureCollectInterceptFunc&& func);
     static float GetLayoutWeight(FrameNode* frameNode);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
@@ -1196,6 +1200,15 @@ private:
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static void ResetBorderAndBackgroundEffect(
+        FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void SetImmersiveOptions(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void SetImmersiveConfigs(
+        const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config);
+    static void ResetImmersiveShadowToDefault(
+        const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

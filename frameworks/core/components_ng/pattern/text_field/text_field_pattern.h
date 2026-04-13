@@ -1520,17 +1520,7 @@ public:
         return isTransparent_;
     }
 
-    RefPtr<Clipboard> GetClipboard() override
-    {
-        if (!clipboard_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, clipboard_);
-            auto context = host->GetContext();
-            CHECK_NULL_RETURN(context, clipboard_);
-            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-        }
-        return clipboard_;
-    }
+    RefPtr<Clipboard> GetClipboard() override;
 
     const Dimension& GetAvoidSoftKeyboardOffset() const override;
 
@@ -2001,6 +1991,8 @@ protected:
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool OnThemeScopeUpdateColor(RefPtr<TextFieldLayoutProperty> textFieldLayoutProperty,
+    RefPtr<TextFieldPaintProperty> paintProperty, RefPtr<TextFieldTheme> textFieldTheme);
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

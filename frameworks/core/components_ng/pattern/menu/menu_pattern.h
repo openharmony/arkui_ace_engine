@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -682,6 +682,8 @@ public:
     RefPtr<FrameNode> GetFirstMenuItem();
     RefPtr<FrameNode> GetLastMenuItem();
     std::pair<float, float> GetPreviewPositionY();
+    bool UpdateMenuBackBlurStyle();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     float GetTranslateYForStack()
     {
@@ -752,6 +754,11 @@ public:
         return scrollBar_;
     }
 
+    void SetColorMode(bool isColorModeFollowTarget)
+    {
+        isColorModeFollowTarget_ = isColorModeFollowTarget;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -783,7 +790,6 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
@@ -902,6 +908,7 @@ private:
     bool buildDividerTaskAdded_ = false;
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
+    bool isColorModeFollowTarget_ = true;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

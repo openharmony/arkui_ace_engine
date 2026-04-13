@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H
 #define FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H
 
+#include <memory>
+#include <mutex>
+
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
@@ -108,7 +111,12 @@ public:
      * @description: register a callback when get inspector tree
      * @param eventCallback callback to be performed
      */
-    void RegisterGetInspectorTreeCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
+    bool RegisterGetInspectorTreeCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
+
+    /**
+     * @description: unregister get inspector tree callback
+     */
+    void UnregisterGetInspectorTreeCallback();
 
     /**
      * @description: register a callback when get inspector tree
@@ -255,7 +263,13 @@ public:
     void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
+    void SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler);
+
+    void PostGetInspectorTreeCallbackRemoveTask(int32_t timeout);
+
 private:
+    void HandleInspectorTreeCallbackTimeout();
+    void CancelGetInspectorTreeCallbackTimeoutTaskLocked();
     void OnGetWebInfoByRequestInner(MessageParcel& data);
 
     EventCallback clickEventCallback_;
@@ -271,6 +285,7 @@ private:
     EventCallback selectTextEventCallback_;
     std::function<void(std::vector<std::pair<float, float>>)> getSpecifiedContentOffsets_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
+    std::mutex inspectorTreeCallbackMutex_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
@@ -284,6 +299,8 @@ private:
     std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
 
     GetWebInfoByRequestCallback getWebInfoByRequestCallback_;
+
+    std::weak_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

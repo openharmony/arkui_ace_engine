@@ -91,6 +91,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
@@ -6185,14 +6186,16 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
     int32_t resId = -1;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSVal> resIdJsValue;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
     std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue)
 {
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType)
@@ -6200,7 +6203,17 @@ void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj,
     std::string bundleName;
     std::string moduleName;
     JSRef<JSVal> resIdJsValue;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
+}
+
+void JSViewAbstract::CompleteResourceObjectWithResIdTypeGetter(
+    JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType, bool& hasGetter)
+{
+    std::string bundleName;
+    std::string moduleName;
+    JSRef<JSVal> resIdJsValue;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue)
@@ -6214,7 +6227,7 @@ void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<J
 }
 
 void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
-    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId)
+    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId, bool& hasGetter)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
@@ -6223,7 +6236,8 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
     std::string targetModule;
     std::string resName;
     JSRef<JSVal> type;
-    if (jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID))) {
+    hasGetter = jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID));
+    if (hasGetter) {
         resIdValue = UNKNOWN_RESOURCE_ID;
         GetResourceObjectType(jsObj, type, resTypeValue);
         CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
@@ -6284,12 +6298,13 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         int32_t resIdNum = UNKNOWN_RESOURCE_ID;
         int32_t resType = UNKNOWN_RESOURCE_TYPE;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+        bool hasGetter = false;
+        CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
         if (resType == UNKNOWN_RESOURCE_TYPE) {
             return false;
         }
-        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-            GetResourceObjectByBundleAndModule(jsObj);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                         : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         if (!resourceWrapper) {
             return false;
@@ -6439,9 +6454,10 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -6703,7 +6719,8 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (jsObj->IsEmpty()) {
         return false;
     }
@@ -6711,8 +6728,8 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return false;
     }
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -6841,9 +6858,10 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type, hasGetter);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -6863,9 +6881,10 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type, hasGetter);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -6878,15 +6897,14 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     return ok;
 }
 
-bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject>& jsObj, Color& result,
+    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
+    if (!jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::ID))) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -6937,15 +6955,14 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
-bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(
-    const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(const JSRef<JSObject>& jsObj, Color& result,
+    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
+    if (!jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::ID))) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7196,8 +7213,9 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
-    auto resourceObject = GetResourceObject(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
+    auto resourceObject = GetResourceObjectWithId(jsObj, hasGetter);
     CHECK_NULL_VOID(resourceObject);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
@@ -7246,8 +7264,9 @@ bool JSViewAbstract::ParseJsSymbolId(
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
-    auto resourceObject = GetResourceObject(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
+    auto resourceObject = GetResourceObjectWithId(jsObj, hasGetter);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
     if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resIdNum, symbolId)) {
@@ -7301,7 +7320,14 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         } else if (value->IsString()) {
             Color::ParseColorString(value->ToString(), color);
         } else {
-            ParseJsColorFromResource(value, color, resObj);
+            auto obj = JSRef<JSObject>::Cast(value);
+            auto toNumericProp = obj->GetProperty("toNumeric");
+            auto colorSpaceProp = obj->GetProperty("getColorSpace");
+            if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
+                ParseColorMetricsToColor(value, color, resObj);
+            } else {
+                ParseJsColorFromResource(value, color, resObj);
+            }
         }
 
         result.emplace_back(color);
@@ -7334,10 +7360,11 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7369,7 +7396,8 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -7377,8 +7405,8 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     if (!args->IsArray()) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7650,13 +7678,14 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7741,12 +7770,13 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7819,12 +7849,13 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -10021,6 +10052,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
     JSClass<JSViewAbstract>::StaticMethod(
+        "onGestureCollectIntercept", &JSViewAbstract::JsOnGestureCollectIntercept);
+    JSClass<JSViewAbstract>::StaticMethod(
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
@@ -11454,6 +11487,34 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
         return NG::HitTestMode::HTMDEFAULT;
     };
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
+}
+
+void JSViewAbstract::JsOnGestureCollectIntercept(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(nullptr);
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnGestureCollectInterceptFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnGestureCollectInterceptFunc->IsEmpty()) {
+        return;
+    }
+    auto jsFuncLocalHandle = jsOnGestureCollectInterceptFunc->GetLocalHandle();
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onGestureCollectInterceptFunc =
+        [vm, execCtx = info.GetExecutionContext(),
+            func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> NG::GestureCollectIntervention {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::GestureCollectIntervention::CONTINUE);
+        ACE_SCORING_EVENT("onGestureCollectIntercept");
+        PipelineContext::SetCallBackNode(node);
+        return NG::CommonBridge::ProcessOnGestureCollectIntercept(vm, func.ToLocal(), recognizers, touchRecognizers);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(std::move(onGestureCollectInterceptFunc));
 }
 
 void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info)

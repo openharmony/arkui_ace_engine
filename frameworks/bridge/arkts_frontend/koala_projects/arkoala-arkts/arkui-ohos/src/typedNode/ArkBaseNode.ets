@@ -26,7 +26,7 @@ import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, M
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
 import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
 import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
-import { TouchTestInfo, TouchTestDoneCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
+import { TouchTestInfo, TouchTestDoneCallback, GestureCollectInterceptCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../component/common';
 import { OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode } from '../component/common';
@@ -228,6 +228,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
         this.getPeer().setOnTouchTestDoneAttribute(value);
+        return this
+    }
+    public onGestureCollectIntercept(value: GestureCollectInterceptCallback): this {
+        this.getPeer().setOnGestureCollectInterceptAttribute(value);
         return this
     }
     public onKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {

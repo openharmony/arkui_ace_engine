@@ -55,6 +55,7 @@ template("ace_capability_ohos_source_set") {
       "ipc:ipc_core",
       "libxml2:libxml2",
       "preferences:native_preferences",
+      "udmf:udmf_client",
     ]
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {

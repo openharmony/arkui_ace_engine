@@ -43,6 +43,7 @@ ohos_unittest("ui_content_stub_unittest") {
 
   deps = [
     "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils",
+    "$ace_root/test/mock/ohos_mock/eventhandler:mock_eventhandler",
     "$ace_root/test/mock/ohos_mock/ipc_single:mock_ipc_single",
     "$ace_root/test/unittest:ace_unittest_log",
   ]

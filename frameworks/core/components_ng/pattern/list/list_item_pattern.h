@@ -181,8 +181,8 @@ public:
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
-    void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
-    void CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback);
+    bool CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+    bool CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback);
 
     void ExpandSwipeAction(ListItemSwipeActionDirection direction);
     void ExpandSwipeActionWithAnimate(ListItemSwipeIndex index);

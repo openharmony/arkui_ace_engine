@@ -335,6 +335,7 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRadialGradientStyleAccessor* GetRadialGradientStyleAccessor();
+const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor();
 const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor();
@@ -682,6 +683,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPromptActionExtenderAccessor,
         GetPulseSymbolEffectAccessor,
         GetRadialGradientStyleAccessor,
+        GetRawInputEventWrapperAccessor,
         GetRenderingContextSettingsAccessor,
         GetRenderNodeExtenderAccessor,
         GetRenderServiceNodeAccessor,

@@ -1015,6 +1015,27 @@ ArkUINodeHandle GetListController(ArkUINodeHandle node)
     auto controller = ListModelNG::GetOrCreateController(frameNode);
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
 }
+
+void SetBackPressCloseSwipeAction(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, closeSwipeAction);
+}
+
+void ResetBackPressCloseSwipeAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, true);
+}
+
+ArkUI_Bool GetBackPressCloseSwipeAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ListModelNG::GetBackPressCloseSwipeAction(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1166,6 +1187,9 @@ const ArkUIListModifier* GetListModifier()
         .getSupportEmptyBranchInLazyLoading = GetSupportEmptyBranchInLazyLoading,
         .setScrollBarProxy = SetListScrollBarProxy,
         .getController = GetListController,
+        .setBackPressCloseSwipeAction = SetBackPressCloseSwipeAction,
+        .resetBackPressCloseSwipeAction = ResetBackPressCloseSwipeAction,
+        .getBackPressCloseSwipeAction = GetBackPressCloseSwipeAction,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

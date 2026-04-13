@@ -424,6 +424,7 @@ public:
     }
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
+    void ColorToRSColorHDR(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
     void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
@@ -580,6 +581,9 @@ public:
     void UpdateDistortionParam(const DistortionParam& param) override;
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
+
+    void SetMaterialWithQualityLevel(
+        const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -819,6 +823,7 @@ protected:
 #endif
     void DetachModifiers();
     void MarkNeedDrawNode(bool condition);
+    void RemoveTransparencyCallback();
 
     void OnEmitterPropertyUpdate();
 
