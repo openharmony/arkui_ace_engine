@@ -237,6 +237,8 @@ struct CJBottomTabBarStyle {
 
 CJ_EXPORT void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, int32_t index);
 CJ_EXPORT void FfiOHOSAceFrameworkTabsPop();
+CJ_EXPORT void FfiOHOSAceFrameworkTabsSetHeight(double height, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTabsSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTabsSetBarWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTabsSetBarHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTabsSetBarMode(int32_t barMode);
