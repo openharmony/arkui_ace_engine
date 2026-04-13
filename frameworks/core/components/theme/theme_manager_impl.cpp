@@ -109,6 +109,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/data_panel/data_panel_theme_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_theme_wrapper.h"
 #include "core/components_ng/pattern/indexer/indexer_theme_wrapper.h"
 #include "core/components_ng/pattern/swiper/swiper_theme_wrapper.h"
@@ -228,6 +229,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
         { CalendarTheme::TypeId(), &ThemeWrapperBuildFunc<CalendarThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
+        { DataPanelTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DataPanelThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },
         { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
         { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
