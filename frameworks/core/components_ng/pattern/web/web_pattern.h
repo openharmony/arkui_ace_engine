@@ -929,8 +929,6 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
-    void OnLanguageConfigurationUpdate() override;
-    void OnDirectionConfigurationUpdate() override;
     void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
@@ -1100,8 +1098,6 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
-    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
-    void SetIsSystemRtlEnable(bool enable);
     void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -1721,6 +1717,8 @@ private:
     bool isDirectionalLockEnabled_ = true;
     ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
     ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    bool scrollbarLayoutPolicyChanged_ = false;
+    bool isLanguageRtl_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
