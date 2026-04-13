@@ -21,9 +21,13 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #undef private
 #undef protected
 

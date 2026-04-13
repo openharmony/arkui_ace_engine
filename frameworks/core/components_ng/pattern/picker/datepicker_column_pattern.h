@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_paint_method.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"

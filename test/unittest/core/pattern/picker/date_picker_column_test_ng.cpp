@@ -28,6 +28,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
