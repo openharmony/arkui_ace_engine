@@ -121,7 +121,7 @@ constexpr float MAX_ANGLE = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
-const Opt_Union_MenuPreviewMode_CustomNodeBuilder defaultPreview = {
+const Opt_Union_MenuPreviewMode_CustomBuilder defaultPreview = {
     INTEROP_TAG_INT32,
     {
         0,
