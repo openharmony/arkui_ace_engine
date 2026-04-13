@@ -1308,6 +1308,18 @@ void BaseTextSelectOverlay::UpdateHandleColor()
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
+void BaseTextSelectOverlay::UpdateMenuFromThemeChange(int32_t themeScopeId)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto selectOverlayNode = manager->GetSelectOverlayNode();
+    CHECK_NULL_VOID(selectOverlayNode);
+    selectOverlayNode->SetThemeScopeId(themeScopeId);
+    selectOverlayNode->UpdateThemeScopeUpdate(themeScopeId);
+}
+
 bool BaseTextSelectOverlay::IsNeedMenuTranslate()
 {
     auto translation = GetSelectedText();

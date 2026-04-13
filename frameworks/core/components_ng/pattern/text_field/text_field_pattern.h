@@ -48,6 +48,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -736,6 +737,13 @@ public:
     bool IsUsingMouse() const
     {
         return selectOverlay_->IsUsingMouse();
+    }
+
+    void UpdateSelectionMenu(int32_t themeScopeId)
+    {
+        if (selectOverlay_) {
+            selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
+        }
     }
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove, bool skipNewLineChar = true);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);

@@ -3471,6 +3471,7 @@
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::NG::AtomicServicePattern::*;
       OHOS::Ace::NG::BaseTextSelectOverlay::GetGlobalPointsWithTransform*;
+      OHOS::Ace::NG::BaseTextSelectOverlay::UpdateMenuFromThemeChange*;
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::BuildMenuBarRow*;
       OHOS::Ace::NG::BuildTitleNodeForCj*;
