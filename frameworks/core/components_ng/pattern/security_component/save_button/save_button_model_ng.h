@@ -44,6 +44,16 @@ public:
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static bool InitSaveButton(FrameNode* frameNode, const SaveButtonStyle& style, bool isArkuiComponent);
+    static void SetSymbolIconColor(const std::vector<Color>& colors);
+    static void SetSymbolIconColor(FrameNode* frameNode, const std::optional<std::vector<Color>>& colors);
+    static void SetSymbolFontFamilies(const std::vector<std::string>& familyNames);
+    static void SetSymbolFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue);
+    static void SetSymbolType(const SymbolType value);
+    static void SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue);
+    static void SetSymbolRenderingStrategy(const uint32_t renderingStrategy);
+    static void SetSymbolRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
+    static void SetSymbolFontWeight(const FontWeight& value);
+    static void SetSymbolFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& optValue);
 private:
     static std::unique_ptr<SaveButtonModelNG> instance_;
     static std::mutex mutex_;

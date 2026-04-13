@@ -49,6 +49,7 @@ public:
         ResetBackgroundColor();
         ResetBackgroundBorderColor();
         ResetBackgroundBorderStyle();
+        ResetSymbolIconColor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_RENDER);

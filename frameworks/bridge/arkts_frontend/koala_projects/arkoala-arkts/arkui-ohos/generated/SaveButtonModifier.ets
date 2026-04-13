@@ -26,8 +26,10 @@ import { ModifierState } from './CommonModifier'
 import { SecurityComponentMethod } from './component/securityComponent'
 import { ClickEvent } from './component/common'
 import { BusinessError } from '@ohos.base'
-import { Resource as arkui_component_units_Resource, Dimension, SizeOptions, BorderRadiuses } from './component/units'
+import { Resource as arkui_component_units_Resource, Dimension, SizeOptions, BorderRadiuses, ResourceColor } from './component/units'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { Color as arkui_component_enums_Color, FontWeight } from './component/enums'
+import { SymbolRenderingStrategy } from './component/symbolglyph'
 export class SaveButtonModifier extends SecurityComponentMethodModifier implements SaveButtonAttribute,AttributeModifier<SaveButtonAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
@@ -53,6 +55,9 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     public _iconBorderRadius_0_0value?: Dimension | BorderRadiuses | undefined
     public _stateEffect_0_0value?: boolean | undefined
     public _userCancelEvent_0_0value?: boolean | undefined
+    public _symbolIconColor_0_0value?: Array<ResourceColor> | undefined
+    public _symbolRenderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
+    public _symbolFontWeight_0_0value?: int32 | FontWeight | string | arkui_component_units_Resource | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -180,6 +185,57 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
                 }
             }
         }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setSymbolIconColorAttribute((this._symbolIconColor_0_0value as Array<ResourceColor> | undefined));
+                    flagArray[7] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[7] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[7] = 0;
+                    peer.setSymbolIconColorAttribute((undefined as Array<ResourceColor> | undefined));
+                }
+            }
+        }
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
+                    peer.setSymbolRenderingStrategyAttribute((this._symbolRenderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
+                    flagArray[8] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[8] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[8] = 0;
+                    peer.setSymbolRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
+                }
+            }
+        }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
+                    peer.setSymbolFontWeightAttribute((this._symbolFontWeight_0_0value as int32 | FontWeight | string | arkui_component_units_Resource | undefined));
+                    flagArray[9] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[9] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[9] = 0;
+                    peer.setSymbolFontWeightAttribute((undefined as int32 | FontWeight | string | arkui_component_units_Resource | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SaveButtonModifier): void {
         super.mergeModifier(modifier)
@@ -272,6 +328,42 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
                 }
             }
         }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
+                    this.symbolIconColor((modifier._symbolIconColor_0_0value as Array<ResourceColor> | undefined));
+                    break;
+                }
+                default: {
+                    this.symbolIconColor((undefined as Array<ResourceColor> | undefined));
+                }
+            }
+        }
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
+                    this.symbolRenderingStrategy((modifier._symbolRenderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
+                    break;
+                }
+                default: {
+                    this.symbolRenderingStrategy((undefined as SymbolRenderingStrategy | undefined));
+                }
+            }
+        }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
+                    this.symbolFontWeight((modifier._symbolFontWeight_0_0value as int32 | FontWeight | string | arkui_component_units_Resource | undefined));
+                    break;
+                }
+                default: {
+                    this.symbolFontWeight((undefined as int32 | FontWeight | string | arkui_component_units_Resource | undefined));
+                }
+            }
+        }
     }
     onClick(value: SaveButtonCallback | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -340,6 +432,36 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
             this._state.fireChange()
         } else {
             this._flagArray[6] = 3
+        }
+        return this
+    }
+    symbolIconColor(value: Array<ResourceColor> | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
+            this._symbolIconColor_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[7] = 3
+        }
+        return this
+    }
+    symbolRenderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
+            this._symbolRenderingStrategy_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[8] = 3
+        }
+        return this
+    }
+    symbolFontWeight(value: int32 | FontWeight | string | arkui_component_units_Resource | undefined): this {
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
+            this._symbolFontWeight_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }

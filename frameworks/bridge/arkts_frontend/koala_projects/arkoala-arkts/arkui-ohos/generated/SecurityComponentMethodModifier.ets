@@ -1361,10 +1361,10 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod 
         }
         return this
     }
-    id(description: string | undefined): this {
-        if (((this._flagArray[25]) == (0)) || ((this._id_0_0value) !== (description))) {
+    id(id: string | undefined): this {
+        if (((this._flagArray[25]) == (0)) || ((this._id_0_0value) !== (id))) {
             this._flagArray[25] = 1
-            this._id_0_0value = description
+            this._id_0_0value = id
             this._state.fireChange()
         } else {
             this._flagArray[25] = 3

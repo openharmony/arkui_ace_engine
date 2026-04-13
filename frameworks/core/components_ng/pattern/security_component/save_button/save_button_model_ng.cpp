@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 namespace OHOS::Ace::NG {
 std::unique_ptr<SaveButtonModelNG> SaveButtonModelNG::instance_ = nullptr;
@@ -114,5 +115,73 @@ bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
     };
     return SecurityComponentModelNG::InitSecurityComponent(frameNode, secCompStyle, isArkuiComponent,
         SaveButtonModelNG::GetIconResourceStatic, SaveButtonModelNG::GetTextResourceStatic);
+}
+
+void SaveButtonModelNG::SetSymbolIconColor(const std::vector<Color>& colors)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, SymbolIconColor, colors);
+}
+
+void SaveButtonModelNG::SetSymbolIconColor(FrameNode* frameNode, const std::optional<std::vector<Color>>& colors)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (colors) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, SymbolIconColor, colors.value(), frameNode);
+    }
+}
+
+void SaveButtonModelNG::SetSymbolFontFamilies(const std::vector<std::string>& familyNames)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolFontFamilies, familyNames);
+}
+
+void SaveButtonModelNG::SetSymbolFontFamilies(FrameNode* frameNode,
+    const std::optional<std::vector<std::string>>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontFamily, optValue.value(), frameNode);
+    }
+}
+
+void SaveButtonModelNG::SetSymbolType(const SymbolType value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolType, value);
+}
+
+void SaveButtonModelNG::SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolType, optValue.value(), frameNode);
+    }
+}
+
+void SaveButtonModelNG::SetSymbolRenderingStrategy(const uint32_t renderingStrategy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolRenderingStrategy, renderingStrategy);
+}
+
+void SaveButtonModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode,
+    const std::optional<uint32_t>& renderingStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (renderingStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolRenderingStrategy,
+            renderingStrategy.value(), frameNode);
+    }
+}
+
+void SaveButtonModelNG::SetSymbolFontWeight(const FontWeight& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolFontWeight, value);
+}
+
+void SaveButtonModelNG::SetSymbolFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolFontWeight, optValue.value(), frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG
