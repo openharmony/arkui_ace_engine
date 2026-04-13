@@ -2006,6 +2006,11 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
+    if (selectIcon->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        selectIcon->SetThemeScopeId(host->GetThemeScopeId());
+    }
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
@@ -2046,7 +2051,9 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
     CHECK_NULL_VOID(props);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto selectTheme = selectIcon->GetTheme<SelectTheme>(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty()) {

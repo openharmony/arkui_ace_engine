@@ -54,6 +54,7 @@ public:
             SetButtonBackgroundColor(colors->CompBackgroundTertiary());
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 SetMenuFontColor(colors->FontPrimary());
+                SetMenuIconColor(colors->IconPrimary());
             }
         }
     }

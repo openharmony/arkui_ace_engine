@@ -1084,6 +1084,11 @@ public:
         return menuIconColor_;
     }
 
+    void SetMenuIconColor(const Color& value)
+    {
+        menuIconColor_ = value;
+    }
+
     const Color& GetLineColor() const
     {
         return lineColor_;
@@ -1136,9 +1141,6 @@ public:
 
     void SetMenuFontColor(const Color& value)
     {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-            return;
-        }
         menuFontColor_ = value;
     }
 
