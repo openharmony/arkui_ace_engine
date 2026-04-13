@@ -15,6 +15,7 @@
 
 #include "node_model.h"
 #include "gesture_impl.h"
+#include "interfaces/native/error_message_macros.h"
 
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
@@ -407,6 +408,7 @@ void* OH_ArkUI_ParallelInnerGestureEvent_GetUserData(ArkUI_ParallelInnerGestureE
 void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
     return event->interruptData.customUserData;
@@ -431,9 +433,8 @@ int32_t OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(
     ArkUI_GestureRecognizer* recognizer, ArkUI_GestureRecognizerDisposeNotifyCallback callback, void* userData)
 {
     auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
-    if (!gestureRecognizer || gestureRecognizer->capi) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE((gestureRecognizer && !gestureRecognizer->capi),
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "gestureRecognizer is null and capi is true");
     auto disposeCallback = reinterpret_cast<void (*)(ArkUIGestureRecognizer * recognizer, void* userData)>(callback);
     OHOS::Ace::NodeModel::GetFullImpl()
         ->getNodeModifiers()
@@ -675,39 +676,33 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
 ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
     ArkUI_GestureRecognizer* recognizer, double allowableMovement)
 {
-    if (!recognizer) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(recognizer,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "recognizer is null");
     auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
-    if (!gesture) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    if (recognizer->type == LONG_PRESS_GESTURE) {
-        return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()
-                ->getNodeModifiers()
-                ->getGestureModifier()
-                ->setLongPressGestureAllowableMovement(gesture, allowableMovement));
-    }
-    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+    CHECK_NULL_RETURN_WITH_MESSAGE(gesture,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "gesture is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(recognizer->type == LONG_PRESS_GESTURE,
+        ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED, __FUNCTION__, "recognizer type not supported");
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()
+            ->getNodeModifiers()
+            ->getGestureModifier()
+            ->setLongPressGestureAllowableMovement(gesture, allowableMovement));
 }
 
 ArkUI_ErrorCode OH_ArkUI_LongPressGesture_GetAllowableMovement(
     ArkUI_GestureRecognizer* recognizer, double* allowableMovement)
 {
-    if (!recognizer || !allowableMovement) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(recognizer && allowableMovement,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "null params");
     auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
-    if (!gesture) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    if (recognizer->type == LONG_PRESS_GESTURE) {
-        return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()
+    CHECK_NULL_RETURN_WITH_MESSAGE(gesture,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "gesture is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(recognizer->type == LONG_PRESS_GESTURE,
+        ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED, __FUNCTION__, "recognizer type not supported");
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()
             ->getNodeModifiers()
             ->getGestureModifier()
             ->getLongPressGestureAllowableMovement(gesture, allowableMovement));
-    }
-    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
 }
 
 ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
