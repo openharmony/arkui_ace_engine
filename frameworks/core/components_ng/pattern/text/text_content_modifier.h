@@ -69,6 +69,7 @@ public:
     void SetTextDecorationColor(const Color& value, bool isReset = false);
     void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetLineHeight(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetFontVariations(const FONT_VARIATIONS_LIST& fontVariations, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 
@@ -139,6 +140,7 @@ private:
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
     void SetDefaultLineHeight(const TextStyle& textStyle);
+    void SetDefaultFontVariations(const TextStyle& textStyle);
     float GetTextRacePercent();
     TextDirection GetTextRaceDirection() const;
     TextDirection GetTextRaceDirectionByContent() const;
@@ -162,6 +164,7 @@ private:
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void ModifyBaselineOffsetInTextStyle(TextStyle& textStyle);
     void ModifyLineHeightInTextStyle(TextStyle& textStyle);
+    void ModifyFontVariationsInTextStyle(TextStyle& textStyle);
 
     void UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag);
     void UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag);
@@ -173,6 +176,7 @@ private:
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
     void UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateFontVariationsMeasureFlag(PropertyChangeFlag& flag);
     bool CheckNeedMeasure(float finalValue, float lastValue, float currentValue);
 
     void ChangeParagraphColor(const RefPtr<Paragraph>& paragraph);
@@ -240,6 +244,7 @@ private:
         RefPtr<AnimatablePropertyColor> color;
     };
     std::vector<ShadowProp> shadows_;
+    std::map<std::string, RefPtr<AnimatablePropertyFloat>> fontVariations_;
 
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;
@@ -255,6 +260,9 @@ private:
     std::optional<Dimension> lineHeight_;
     RefPtr<AnimatablePropertyFloat> lineHeightFloat_;
     float lastLineHeight_ = 0.0f;
+
+    std::map<std::string, float> fontVariationMeasureValues_;
+    std::map<std::string, float> lastFontVariationMeasureValues_;
 
     WeakPtr<Pattern> pattern_;
 

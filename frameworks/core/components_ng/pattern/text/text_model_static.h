@@ -32,6 +32,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);
     static void SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value);
     static void SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetFontVariations(FrameNode* frameNode, const std::optional<FONT_VARIATIONS_LIST>& value);
+    static void ResetFontVariations(FrameNode* frameNode);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);

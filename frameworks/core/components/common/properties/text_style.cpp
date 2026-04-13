@@ -167,6 +167,7 @@ TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSi
 bool TextStyle::operator==(const TextStyle& rhs) const
 {
     return propFontFamilies_ == rhs.propFontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
+           fontVariations_ == rhs.fontVariations_ &&
            propTextDecorationStyle_ == rhs.propTextDecorationStyle_ && preferFontSizes_ == rhs.preferFontSizes_ &&
            fontSize_.value == rhs.fontSize_.value && adaptMinFontSize_.value == rhs.adaptMinFontSize_.value &&
            adaptMaxFontSize_.value == rhs.adaptMaxFontSize_.value &&

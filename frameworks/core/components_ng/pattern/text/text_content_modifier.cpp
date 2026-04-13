@@ -122,6 +122,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
     SetDefaultLineHeight(textStyle);
+    SetDefaultFontVariations(textStyle);
 }
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -258,6 +259,18 @@ void TextContentModifier::SetDefaultLineHeight(const TextStyle& textStyle)
 
     lineHeightFloat_ = MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
     AttachProperty(lineHeightFloat_);
+}
+
+void TextContentModifier::SetDefaultFontVariations(const TextStyle& textStyle)
+{
+    FONT_VARIATIONS_LIST fontVariations = textStyle.GetFontVariations();
+    for (const auto& fontVariation : fontVariations) {
+        double value = fontVariation.value;
+        auto valueProperty = MakeRefPtr<AnimatablePropertyFloat>(value);
+        AttachProperty(valueProperty);
+        fontVariations_[fontVariation.axis] = valueProperty;
+        fontVariationMeasureValues_[fontVariation.axis] = fontVariation.value;
+    }
 }
 
 void TextContentModifier::SetClip(bool clip)
@@ -900,6 +913,21 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
+{
+    auto fontVariations = textStyle.GetFontVariations();
+    for (auto& item : fontVariations) {
+        auto iter = fontVariations_.find(item.axis);
+        if (iter == fontVariations_.end()) {
+            continue;
+        }
+        auto fontVariation = iter->second;
+        CHECK_NULL_VOID(fontVariation);
+        item.value = fontVariation->Get();
+    }
+    textStyle.SetFontVariations(fontVariations);
+}
+
 void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor)
 {
     ModifyFontSizeInTextStyle(textStyle);
@@ -912,6 +940,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor
     ModifyDecorationInTextStyle(textStyle);
     ModifyBaselineOffsetInTextStyle(textStyle);
     ModifyLineHeightInTextStyle(textStyle);
+    ModifyFontVariationsInTextStyle(textStyle);
 }
 
 bool TextContentModifier::CheckNeedMeasure(float finalValue, float lastValue, float currentValue)
@@ -1108,6 +1137,25 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     }
 }
 
+void TextContentModifier::UpdateFontVariationsMeasureFlag(PropertyChangeFlag& flag)
+{
+    for (const auto& item : fontVariations_) {
+        const auto& axis = item.first;
+        const auto& property = item.second;
+        CHECK_NULL_VOID(property);
+        auto valueIter = fontVariationMeasureValues_.find(axis);
+        if (valueIter == fontVariationMeasureValues_.end()) {
+            continue;
+        }
+        auto lastIter = lastFontVariationMeasureValues_.find(axis);
+        float lastValue = lastIter != lastFontVariationMeasureValues_.end() ? lastIter->second : 0.0f;
+        if (CheckNeedMeasure(valueIter->second, lastValue, property->Get())) {
+            flag |= PROPERTY_UPDATE_MEASURE;
+            lastFontVariationMeasureValues_[axis] = property->Get();
+        }
+    }
+}
+
 bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
@@ -1119,6 +1167,7 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateTextDecorationMeasureFlag(flag);
     UpdateBaselineOffsetMeasureFlag(flag);
     UpdateLineHeightMeasureFlag(flag);
+    UpdateFontVariationsMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     if (flag) {
         onlyTextColorAnimation_ = false;
@@ -1306,6 +1355,25 @@ void TextContentModifier::SetLineHeight(const Dimension& value, const TextStyle&
     }
     CHECK_NULL_VOID(lineHeightFloat_);
     lineHeightFloat_->Set(lineHeightValue);
+}
+
+void TextContentModifier::SetFontVariations(const FONT_VARIATIONS_LIST& fontVariations, bool isReset)
+{
+    if (!isReset) {
+        for (const auto& item : fontVariations) {
+            auto iter = fontVariations_.find(item.axis);
+            if (iter == fontVariations_.end()) {
+                continue;
+            }
+            auto fontVariation = iter->second;
+            CHECK_NULL_VOID(fontVariation);
+            fontVariation->Set(item.value);
+            fontVariationMeasureValues_[item.axis] = item.value;
+        }
+    } else {
+        fontVariationMeasureValues_.clear();
+        lastFontVariationMeasureValues_.clear();
+    }
 }
 
 void TextContentModifier::SetContentOffset(OffsetF& value)

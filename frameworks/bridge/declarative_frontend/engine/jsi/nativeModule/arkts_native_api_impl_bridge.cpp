@@ -6178,6 +6178,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFeature));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontFeature));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontVariations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontVariations));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontVariations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontVariations));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextForegroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetForegroundColor));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextForegroundColor"),
@@ -6378,6 +6382,10 @@ void ArkUINativeModule::RegisterSpanAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFont));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFont));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontVariations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontVariations));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontVariations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontVariations));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextBackgroundStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetTextBackgroundStyle));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextBackgroundStyle"),

@@ -1046,6 +1046,26 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanUpdateFontVariations001
+ * @tc.desc: test span fontVariations property update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, SpanUpdateFontVariations001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    spanModelNG.SetFontVariations(FONT_VARIATIONS_VALUE);
+    EXPECT_TRUE(spanNode->HasFontVariations());
+    EXPECT_EQ(spanNode->GetFontVariationsValue({}), FONT_VARIATIONS_VALUE);
+
+    SpanModelNG::SetFontVariations(AceType::RawPtr(spanNode), {});
+    EXPECT_EQ(spanNode->GetFontVariationsValue(FONT_VARIATIONS_VALUE), FONT_VARIATIONS_LIST {});
+}
+
+/**
  * @tc.name: EncodeTlv002
  * @tc.desc: test span_node.cpp EncodeTlv function
  * @tc.type: FUNC

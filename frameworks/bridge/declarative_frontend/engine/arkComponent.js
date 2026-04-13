@@ -10526,6 +10526,19 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
+class SpanFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetFontVariations(node);
+    } else {
+      getUINativeModule().span.setFontVariations(node, this.value);
+    }
+  }
+}
+SpanFontVariationsModifier.identity = Symbol('spanFontVariations');
 class SpanInputModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11148,6 +11161,10 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
     return this;
   }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.Span !== undefined) {
@@ -11479,6 +11496,23 @@ class TextFontFeatureModifier extends ModifierWithKey {
   }
 }
 TextFontFeatureModifier.identity = Symbol('textFontFeature');
+
+class TextFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetFontVariations(node);
+    } else {
+      getUINativeModule().text.setFontVariations(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextFontVariationsModifier.identity = Symbol('textFontVariations');
 
 class TextEllipsisModeModifier extends ModifierWithKey {
   constructor(value) {
@@ -12657,6 +12691,10 @@ class ArkTextComponent extends ArkComponent {
   }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
     return this;
   }
   onWillCopy(callback) {

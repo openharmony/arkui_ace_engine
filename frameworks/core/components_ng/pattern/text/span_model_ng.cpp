@@ -212,6 +212,16 @@ void SpanModelNG::SetTextDecorationColor(const Color& value)
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
 }
 
+void SpanModelNG::SetFontVariations(const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(FontVariations, value);
+}
+
+void SpanModelNG::ResetFontVariations()
+{
+    ACE_RESET_SPAN_PROPERTY(FontVariations);
+}
+
 void SpanModelNG::SetLineThicknessScale(float value)
 {
     ACE_UPDATE_SPAN_PROPERTY(LineThicknessScale, value);
@@ -525,6 +535,18 @@ void SpanModelNG::SetTextDecorationColor(UINode* uiNode, const Color& value)
 void SpanModelNG::ResetTextDecorationColor(UINode *uiNode)
 {
     ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
+}
+
+void SpanModelNG::SetFontVariations(UINode* uiNode, const FONT_VARIATIONS_LIST& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateFontVariations(value);
+}
+
+void SpanModelNG::ResetFontVariations(UINode* uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(FontVariations, uiNode);
 }
 
 void SpanModelNG::SetLineThicknessScale(UINode *uiNode, float value)

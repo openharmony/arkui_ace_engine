@@ -54,6 +54,7 @@ struct Font {
     std::optional<Color> strokeColor;
     std::optional<SuperscriptStyle> superscript;
     std::optional<double> fontSizeScale;
+    std::optional<FONT_VARIATIONS_LIST> fontVariations;
 
     RefPtr<ResourceObject> fontColorResObj;
     RefPtr<ResourceObject> strokeColorResObj;
@@ -69,7 +70,7 @@ struct Font {
                     strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
                     superscript == other.superscript && variableFontWeight == other.variableFontWeight &&
                     enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory &&
-                    isFontSizeScaleEqual;
+                    isFontSizeScaleEqual && fontVariations == other.fontVariations;
         if (!flag) {
             return false;
         }
@@ -151,6 +152,11 @@ struct Font {
     std::optional<uint32_t> GetVariableFontWeight() const
     {
         return variableFontWeight;
+    }
+
+    std::optional<FONT_VARIATIONS_LIST> GetFontVariations() const
+    {
+        return fontVariations;
     }
 };
 

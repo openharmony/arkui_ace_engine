@@ -2875,6 +2875,29 @@ void SetStyledString(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* 
     CHECK_NULL_VOID(spanStringRawPtr);
     TextModelNG::SetStyledString(frameNode, spanStringRawPtr);
 }
+
+void SetFontVariations(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FONT_VARIATIONS_LIST fontVariations;
+    for (int32_t i = 0; i < length; i++) {
+        ArkUIFontVariation fontVariation = value[i];
+        std::optional<bool> isNormalized;
+        if (fontVariation.isNormalized.isSet) {
+            isNormalized = fontVariation.isNormalized.value;
+        }
+        fontVariations.push_back({ fontVariation.axis ? fontVariation.axis : "", fontVariation.value, isNormalized });
+    }
+    TextModelNG::SetFontVariations(frameNode, fontVariations);
+}
+
+void ResetFontVariations(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetFontVariations(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -3086,6 +3109,8 @@ const ArkUITextModifier* GetTextModifier()
         .getGlyphRangeForCharacterRange = GetGlyphRangeForCharacterRange,
         .getCharacterRangeForGlyphRange = GetCharacterRangeForGlyphRange,
         .setStyledString = SetStyledString,
+        .setFontVariations = SetFontVariations,
+        .resetFontVariations = ResetFontVariations,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

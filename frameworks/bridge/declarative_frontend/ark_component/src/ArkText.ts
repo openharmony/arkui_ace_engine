@@ -14,6 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
+type TextFontVariation = { axis: string; value: number; isNormalized?: boolean };
+
 class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -761,6 +763,23 @@ class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextFontVariationsModifier extends ModifierWithKey<Array<TextFontVariation>> {
+  constructor(value: Array<TextFontVariation>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textFontVariations');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetFontVariations(node);
+    } else {
+      getUINativeModule().text.setFontVariations(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextContentModifier extends ModifierWithKey<string | Resource> {
   constructor(value: string | Resource) {
     super(value);
@@ -1295,6 +1314,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   optimizeTrailingSpace(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
+    return this;
+  }
+  fontVariations(value: Array<TextFontVariation>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
     return this;
   }
   compressLeadingPunctuation(value: boolean): this {

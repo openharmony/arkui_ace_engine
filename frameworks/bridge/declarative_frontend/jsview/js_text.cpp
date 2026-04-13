@@ -102,6 +102,33 @@ void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
         }
     }
 }
+
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto array = JSRef<JSArray>::Cast(jsValue);
+    for (uint32_t i = 0; i < array->Length(); ++i) {
+        auto item = array->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObj = JSRef<JSObject>::Cast(item);
+        auto axis = itemObj->GetProperty("axis");
+        auto value = itemObj->GetProperty("value");
+        auto isNormalized = itemObj->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return !fontVariations.empty();
+}
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -1254,6 +1281,18 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
+void JSText::SetFontVariations(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    FONT_VARIATIONS_LIST fontVariations;
+    if (!ParseJsFontVariations(info[0], fontVariations)) {
+        TextModel::GetInstance()->ResetFontVariations();
+    }
+    TextModel::GetInstance()->SetFontVariations(fontVariations);
+}
+
 void JSText::JsResponseRegion(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsResponseRegion(info);
@@ -1478,6 +1517,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
+    JSClass<JSText>::StaticMethod("fontVariations", &JSText::SetFontVariations);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::StaticMethod("orphanCharOptimization", &JSText::SetOrphanCharOptimization);

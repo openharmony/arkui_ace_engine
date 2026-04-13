@@ -718,6 +718,11 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     fontFamily(value: string | Resource): SpanAttribute;
     letterSpacing(value: number | string): SpanAttribute;
     textCase(value: TextCase): SpanAttribute;
+    fontVariations(value: Array<{
+        axis: string;
+        value: number;
+        isNormalized?: boolean;
+    }>): SpanAttribute;
 }
 declare class ArkSideBarContainerComponent extends ArkComponent implements SideBarContainerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -783,6 +788,11 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     textIndent(value: Length): TextAttribute;
     wordBreak(value: WordBreak): TextAttribute;
     lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
+    fontVariations(value: Array<{
+        axis: string;
+        value: number;
+        isNormalized?: boolean;
+    }>): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
     textSelectable(value: TextSelectableMode): TextAttribute;

@@ -37,8 +37,10 @@ import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
-import { TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle } from './textCommon'
+import { TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation } from './textCommon'
 import { CustomSpanWrapper, CustomSpanWrapper_serializer } from './idlize'
+import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
+import { default as text } from '@ohos.graphics.text'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { GestureEvent, GestureEvent_serializer } from './gesture'
@@ -1165,6 +1167,7 @@ export class TextStyle implements MaterializedBase {
     public readonly superscript?: SuperscriptStyle | undefined
     public readonly strokeWidth?: double | undefined
     public readonly strokeColor?: ResourceColor | undefined
+    public readonly fontVariations?: Array<FontVariation> | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextStyle.getFinalizer())
         this.fontColor = this.getFontColor()
@@ -1176,6 +1179,7 @@ export class TextStyle implements MaterializedBase {
         this.superscript = this.getSuperscript()
         this.strokeWidth = this.getStrokeWidth()
         this.strokeColor = this.getStrokeColor()
+        this.fontVariations = this.getFontVariations()
     }
     constructor(value?: TextStyleInterface) {
         this(MaterializedBaseTag.NOP, TextStyle.construct(value))
@@ -1188,6 +1192,7 @@ export class TextStyle implements MaterializedBase {
         this.superscript = this.getSuperscript()
         this.strokeWidth = this.getStrokeWidth()
         this.strokeColor = this.getStrokeColor()
+        this.fontVariations = this.getFontVariations()
     }
     static construct(value?: TextStyleInterface): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1231,6 +1236,9 @@ export class TextStyle implements MaterializedBase {
     }
     private getStrokeColor(): ResourceColor | undefined {
         return this.getStrokeColor_serialize()
+    }
+    private getFontVariations(): Array<FontVariation> | undefined {
+        return this.getFontVariations_serialize()
     }
     private getFontColor_serialize(): ResourceColor | undefined {
         const retval = ArkUIGeneratedNativeModule._TextStyle_getFontColor(this.peer!.ptr)
@@ -1366,6 +1374,22 @@ export class TextStyle implements MaterializedBase {
         retvalDeserializer.dispose()
         return returnResult
     }
+    private getFontVariations_serialize(): Array<FontVariation> | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextStyle_getFontVariations(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<FontVariation> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<FontVariation> = new Array<FontVariation>(bufferOptLength, (arg0: int32):FontVariation => {
+            return text_FontVariation_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<FontVariation> | undefined = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
 }
 export class UrlStyleInternal {
     public static fromPtr(ptr: KPointer): UrlStyle {
@@ -1429,6 +1453,7 @@ export interface TextStyleInterface {
     superscript?: SuperscriptStyle;
     strokeWidth?: arkui_component_units_LengthMetrics;
     strokeColor?: ResourceColor;
+    fontVariations?: Array<FontVariation>;
 }
 export interface DecorationStyleInterface {
     type: TextDecorationType | undefined;
@@ -2307,6 +2332,18 @@ export class TextStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForFontVariations = value.fontVariations
+        if (valueHolderForFontVariations !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontVariationsTmpValue = valueHolderForFontVariations!
+            valueSerializer.writeInt32((valueHolderForFontVariationsTmpValue.length).toInt())
+            for (let valueHolderForFontVariationsTmpValueCounterI = 0; valueHolderForFontVariationsTmpValueCounterI < valueHolderForFontVariationsTmpValue.length; valueHolderForFontVariationsTmpValueCounterI++) {
+                const valueHolderForFontVariationsTmpValueTmpElement: FontVariation = valueHolderForFontVariationsTmpValue[valueHolderForFontVariationsTmpValueCounterI]
+                text_FontVariation_serializer.write(valueSerializer, valueHolderForFontVariationsTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextStyleInterface {
         let valueDeserializer: DeserializerBase = buffer
@@ -2410,7 +2447,17 @@ export class TextStyleInterface_serializer {
             strokeColorTmpBuf = (strokeColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const strokeColorTmpResult: ResourceColor | undefined = strokeColorTmpBuf
-        let value: TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, fontConfigs: fontConfigsTmpResult, superscript: superscriptTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as TextStyleInterface)
+        const fontVariationsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let fontVariationsTmpBuf: Array<FontVariation> | undefined = undefined
+        if ((fontVariationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontVariationsTmpBufOptLength: int32 = valueDeserializer.readInt32()
+            const fontVariationsTmpBufOpt: Array<FontVariation> = new Array<FontVariation>(fontVariationsTmpBufOptLength, (arg0: int32):FontVariation => {
+            return text_FontVariation_serializer.read(valueDeserializer);
+        })
+            fontVariationsTmpBuf = fontVariationsTmpBufOpt
+        }
+        const fontVariationsTmpResult: Array<FontVariation> | undefined = fontVariationsTmpBuf
+        let value: TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, fontConfigs: fontConfigsTmpResult, superscript: superscriptTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult, fontVariations: fontVariationsTmpResult} as TextStyleInterface)
         return value
     }
 }

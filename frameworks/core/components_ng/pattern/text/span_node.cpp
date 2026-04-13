@@ -79,6 +79,21 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
     }
     return jsonShadows;
 }
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
+}
 } // namespace
 
 std::string SpanItem::GetFont() const
@@ -131,6 +146,8 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("variableFontWeight",
         std::to_string(fontStyle->GetVariableFontWeight().value_or(0)).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        fontStyle->GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr(
@@ -866,6 +883,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, Superscript, Superscript);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, FontVariations, FontVariations);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
@@ -1246,6 +1264,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, FontVariations, UpdateFontVariations);
     COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
     COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
     COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
