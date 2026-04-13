@@ -437,6 +437,8 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
+    static void SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISessionCallback&& onCreateAISession,
+        AISessionCallback&& onExecuteAIAction, AISessionCallback&& onDestroyAISession);
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type);
     static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
     static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);

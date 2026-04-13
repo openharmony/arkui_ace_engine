@@ -21,6 +21,9 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_web.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
@@ -4256,6 +4259,118 @@ ArkUINativeModuleValue WebBridge::ResetEnableDefaultContextMenu(ArkUIRuntimeCall
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetEnableDefaultContextMenu(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetAiSessionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsUndefined() || secondArg->IsNull() || !secondArg->IsArray(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetAiSessionOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+
+    auto array = panda::Local<panda::ArrayRef>(secondArg);
+    int32_t length = static_cast<int32_t>(array->Length(vm));
+    if (length <= 0) {
+        GetArkUINodeModifiers()->getWebModifier()->resetAiSessionOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto runtime = Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    auto arkRuntime = std::static_pointer_cast<Framework::ArkJSRuntime>(runtime);
+
+    auto aiSessionEvents = std::make_unique<ArkUIAISessionEventStruct[]>(length);
+    std::vector<std::shared_ptr<AISessionCallback>> callbacks;
+
+    // Helper lambda to create AISessionCallback from object property
+    auto createAISessionCallback = [vm, weak = AceType::WeakClaim(frameNode), arkRuntime](
+                                       panda::Local<panda::ObjectRef> obj,
+                                       const char* propName) -> std::shared_ptr<AISessionCallback> {
+        auto key = panda::StringRef::NewFromUtf8(vm, propName);
+        if (!obj->Has(vm, key) || !obj->Get(vm, key)->IsFunction(vm)) {
+            return nullptr;
+        }
+        panda::Local<panda::FunctionRef> funcVal = obj->Get(vm, key)->ToObject(vm);
+        return std::make_shared<AISessionCallback>(
+            [vm, weak, arkRuntime, func = panda::CopyableGlobal(vm, funcVal)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& result) -> bool {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(weak);
+            auto resultAdapter = arkRuntime->NewFunction(
+                [result = std::move(result)](std::shared_ptr<Framework::JsRuntime> runtime,
+                    std::shared_ptr<Framework::JsValue> thisObj,
+                    const std::vector<std::shared_ptr<Framework::JsValue>>& args,
+                    int32_t argc) -> std::shared_ptr<Framework::JsValue> {
+                    if (argc >= 2) {
+                        auto state = args[0]->ToInt32(runtime);
+                        auto content = args[1]->ToString(runtime);
+                        result(static_cast<uint32_t>(state), content);
+                    }
+                    return runtime->NewUndefined();
+                });
+            auto resultValue = std::static_pointer_cast<Framework::ArkJSValue>(resultAdapter)->GetValue(arkRuntime);
+            panda::Local<panda::JSValueRef> callParams[3] = {
+                panda::StringRef::NewFromUtf8(vm, id.c_str()),
+                panda::StringRef::NewFromUtf8(vm, params.c_str()),
+                resultValue
+            };
+            auto ret = func->Call(vm, func.ToLocal(), callParams, 3);
+            return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
+        });
+    };
+
+    for (int32_t i = 0; i < length; i++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (!item->IsObject(vm)) {
+            continue;
+        }
+        auto obj = item->ToObject(vm);
+        // Get aiSessionType
+        auto typeKey = panda::StringRef::NewFromUtf8(vm, "aiSessionType");
+        if (obj->Has(vm, typeKey) && obj->Get(vm, typeKey)->IsNumber()) {
+            aiSessionEvents[i].aiSessionType = obj->Get(vm, typeKey)->Int32Value(vm);
+        }
+        // Get callback functions
+        if (auto callback = createAISessionCallback(obj, "onCreateAISession")) {
+            callbacks.push_back(callback);
+            aiSessionEvents[i].onCreateAISession = callback.get();
+        }
+        if (auto callback = createAISessionCallback(obj, "onExecuteAIAction")) {
+            callbacks.push_back(callback);
+            aiSessionEvents[i].onExecuteAIAction = callback.get();
+        }
+        if (auto callback = createAISessionCallback(obj, "onDestroyAISession")) {
+            callbacks.push_back(callback);
+            aiSessionEvents[i].onDestroyAISession = callback.get();
+        }
+    }
+
+    GetArkUINodeModifiers()->getWebModifier()->setAiSessionOptions(nativeNode, aiSessionEvents.get(), length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetAiSessionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetAiSessionOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

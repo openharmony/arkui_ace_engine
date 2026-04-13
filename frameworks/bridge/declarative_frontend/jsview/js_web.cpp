@@ -4336,6 +4336,9 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
 void JSWeb::AISessionOptions(const JSCallbackInfo& args)
 {
     if (!args[0]->IsArray()) {
+        for (uint32_t type = 1; type <= MAX_AI_SESSION_TYPE; type++) {
+            WebModel::GetInstance()->SetAISessionOptions(type - 1, nullptr, nullptr, nullptr);
+        }
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
