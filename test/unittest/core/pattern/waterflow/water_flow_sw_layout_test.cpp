@@ -2578,6 +2578,48 @@ HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FooterFlashOnScrollToIndex001
+ * @tc.desc: Verify targetIndex_ early-return path deactivates stale footer in sliding window layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, FooterFlashOnScrollToIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with footer in SLIDING_WINDOW mode and scroll to bottom.
+     * @tc.expected: Footer is active and layout info is valid.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(50);
+    CreateDone();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+
+    auto footer = GetChildFrameNode(frameNode_, 0);
+    ASSERT_TRUE(footer);
+    ASSERT_TRUE(footer->IsActive());
+    ASSERT_EQ(info_->footerIndex_, 0);
+    ASSERT_TRUE(info_->isDataValid_);
+    ASSERT_FALSE(info_->lanes_.empty());
+
+    /**
+     * @tc.steps: step2. Simulate a host-driven targetIndex_ measure-only frame with a stale active footer.
+     * @tc.expected: The normal flush path reaches Layout() early-return and deactivates the footer.
+     */
+    info_->itemEnd_ = false;
+    EXPECT_FALSE(info_->itemEnd_);
+    info_->targetIndex_ = 0;
+    footer->SetActive(true);
+    ASSERT_TRUE(footer->IsActive());
+    ASSERT_TRUE(info_->targetIndex_.has_value());
+    FlushUITasks(frameNode_);
+
+    EXPECT_FALSE(footer->IsActive());
+    EXPECT_FALSE(info_->targetIndex_.has_value());
+}
+
+/**
  * @tc.name: TrailingCallbackClamp001
  * @tc.desc: When scrolled to bottom (offsetEnd_ && !itemStart_) and TopFinalPos is negative,
  *           trailing callback should return >= 1.0 to prevent false top-overscroll detection.
