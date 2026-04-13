@@ -86,6 +86,11 @@ enum class MenuKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE = 1,
 };
 
+enum class AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1,
+};
+
 struct ACE_FORCE_EXPORT MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -145,6 +150,7 @@ struct ACE_FORCE_EXPORT MenuParam {
     bool isDarkMode = false;
     bool isWithTheme = false;
     bool reuse = true;
+    bool isColorModeFollowTarget = true;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, MenuParam&)> updateFunc;

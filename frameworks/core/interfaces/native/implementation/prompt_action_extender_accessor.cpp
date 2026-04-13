@@ -346,6 +346,12 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
     Validator::ValidateNonNegative(maxHeightOpt);
     menuParam.maxHeight = maxHeightOpt;
+    auto colorModeOpt = GetOpt(menuOptions.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            menuParam.isColorModeFollowTarget = false;
+        }
+    }
     g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 

@@ -754,6 +754,11 @@ public:
         return scrollBar_;
     }
 
+    void SetColorMode(bool isColorModeFollowTarget)
+    {
+        isColorModeFollowTarget_ = isColorModeFollowTarget;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -903,6 +908,7 @@ private:
     bool buildDividerTaskAdded_ = false;
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
+    bool isColorModeFollowTarget_ = true;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

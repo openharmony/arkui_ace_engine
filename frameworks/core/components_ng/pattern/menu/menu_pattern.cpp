@@ -2523,10 +2523,12 @@ bool MenuPattern::UpdateMenuBackBlurStyle()
     auto menuParams = wrapperPattern->GetMenuParam();
     if (renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
-        if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-        } else if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+        if (isColorModeFollowTarget_) {
+            if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
+                styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+            } else if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
+                styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+            }
         }
         if (menuTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuNormalBackgroundBlurStyle());
