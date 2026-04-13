@@ -5408,6 +5408,7 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     if (!handler) {
         TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewEventToJSValue handler is nullptr");
+        napi_close_handle_scope(env, scope);
         return JSRef<JSVal>::Cast(obj);
     }
     handler->SetEvent(eventInfo);
@@ -5443,6 +5444,7 @@ JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     if (!handler) {
         TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewExtEventToJSValue handler is nullptr");
+        napi_close_handle_scope(env, scope);
         return JSRef<JSVal>::Cast(obj);
     }
     handler->SetEvent(eventInfo);
