@@ -19,7 +19,10 @@
 #include "interfaces/inner_api/ace/stylus/stylus_detector_interface.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/render/paragraph.h"
+
+namespace OHOS::Ace::NG {
+struct PositionWithAffinity;
+}
 
 namespace OHOS::Ace {
 class StylusDetectorCallBack : public OHOS::Ace::IStylusDetectorCallback {

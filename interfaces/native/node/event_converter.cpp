@@ -35,6 +35,7 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN = 2;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE = 7;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD = 9;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK = 10;
+constexpr int32_t ORIGIN_MOUSE_ACTION_UNKNOWN = 0;
 constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
@@ -1127,6 +1128,44 @@ int32_t ConvertToOriginMouseButtonType(int32_t buttonType)
             break;
     }
     return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_NONE);
+}
+
+int32_t ConvertToOriginMouseActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_MOUSE_EVENT_ACTION_UNKNOWN:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_UNKNOWN);
+        case UI_MOUSE_EVENT_ACTION_PRESS:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_PRESS);
+        case UI_MOUSE_EVENT_ACTION_RELEASE:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_RELEASE);
+        case UI_MOUSE_EVENT_ACTION_MOVE:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_MOVE);
+        case UI_MOUSE_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_MOUSE_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
+}
+
+int32_t ConvertToOriginAxisActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_AXIS_EVENT_ACTION_NONE:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_NONE);
+        case UI_AXIS_EVENT_ACTION_BEGIN:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_BEGIN);
+        case UI_AXIS_EVENT_ACTION_UPDATE:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_UPDATE);
+        case UI_AXIS_EVENT_ACTION_END:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_END);
+        case UI_AXIS_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_AXIS_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
 }
 
 int32_t ConvertToCAxisActionType(int32_t originActionType)

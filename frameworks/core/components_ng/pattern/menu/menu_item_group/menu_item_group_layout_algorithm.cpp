@@ -189,7 +189,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     RecordItemsAndGroups(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     SizeF menuItemGroupSize;
     float maxChildrenWidth = 0.0f;
@@ -254,7 +254,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto headerHeight = wrapper->GetGeometryNode()->GetFrameSize().Height();
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
@@ -277,7 +277,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
@@ -369,7 +369,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto iconWidth = selectTheme->GetIconSideLength();
     auto iconContentPadding = selectTheme->GetIconContentPadding();

@@ -31,6 +31,7 @@ ohos_unittest("ui_input_event_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_error_message_manager.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -50,6 +51,7 @@ ohos_unittest("ui_input_event_test") {
     "oh_arkui_pointerevent_createclonedevent_test.cpp",
     "oh_arkui_pointerevent_destroyclonedevent_test.cpp",
     "oh_arkui_pointerevent_getdisplayx_test.cpp",
+    "oh_arkui_pointerevent_tdd_test.cpp",
     "oh_arkui_touchtestinfo_test.cpp",
   ]
 

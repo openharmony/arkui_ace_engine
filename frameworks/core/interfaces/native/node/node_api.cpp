@@ -69,6 +69,7 @@
 #include "core/interfaces/native/runtime/runtime_init.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
+#include "interfaces/native/error_message_macros.h"
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -1995,14 +1996,18 @@ int32_t GetContextByNode(ArkUINodeHandle node)
 }
 
 ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
-    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData), void* errorInfoPtr)
 {
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
+        SetErrorInfoFromErrorInfoPtr(
+            ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, errorInfoPtr, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, errorInfoPtr, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
@@ -2014,14 +2019,18 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
 }
 
 ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
-    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData), void* errorInfoPtr)
 {
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
+        SetErrorInfoFromErrorInfoPtr(
+            ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, errorInfoPtr, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, errorInfoPtr, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onidleCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {

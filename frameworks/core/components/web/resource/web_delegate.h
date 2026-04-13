@@ -1394,6 +1394,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnMicrophoneCaptureStateChanged(int originalState, int newState);
+    void OnInputMethodAttached();
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1722,6 +1723,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
     EventCallbackV2 onCameraCaptureStateChangedV2_;
     EventCallbackV2 onMicrophoneCaptureStateChangedV2_;
+    EventCallbackV2 onInputMethodAttachedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

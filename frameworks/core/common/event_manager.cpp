@@ -44,6 +44,19 @@ constexpr int32_t COUNT_PARAM_SIZE = 3;
 constexpr int32_t EVENT_HANDLE = 100000;
 constexpr int32_t POST_ONCE = 1;
 
+std::list<FingerInfo> BuildTouchFingerList(const TouchEvent& touchEvent, const WeakPtr<NG::FrameNode>& weakNode)
+{
+    std::list<FingerInfo> fingerList;
+    for (const auto& point : touchEvent.pointers) {
+        NG::PointF localPoint(point.x, point.y);
+        NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
+        fingerList.emplace_back(FingerInfo { point.originalId, point.operatingHand, Offset(point.x, point.y),
+            Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
+            Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool });
+    }
+    return fingerList;
+}
+
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
@@ -133,10 +146,8 @@ void EventManager::ProcessTouchTestWithReferee(const TouchEvent& touchPoint, con
 {
     auto currentReferee = refereeNG_;
     int32_t eventHandleId = touchPoint.eventHandleId;
-    if (eventHandleId / EVENT_HANDLE > 0) {
-        currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
-        CHECK_NULL_VOID(currentReferee);
-    }
+    currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
+    CHECK_NULL_VOID(currentReferee);
     currentReferee->AddGestureToScope(touchPoint.id, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 
@@ -557,7 +568,7 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
         currentReferee = postEventRefereeWithStrategyNG_[key];
     } else {
         // Post once use referee with refereeNG_, use upper-level referee more than once.
-        if (key == POST_ONCE) {
+        if (key == POST_ONCE || key == 0) {
             postEventRefereeWithStrategyNG_[key] = refereeNG_;
         } else {
             currentReferee = postEventRefereeWithStrategyNG_[key - 1];
@@ -596,16 +607,7 @@ void EventManager::ExecuteTouchTestDoneCallback(
         info->SetForce(touchEvent.force);
         auto getEventTargetImpl = gestureEventHub->CreateGetEventTargetImpl();
         info->SetTarget(getEventTargetImpl ? getEventTargetImpl().value_or(EventTarget()) : EventTarget());
-        std::list<FingerInfo> fingerList;
-        for (const auto& point : touchEvent.pointers) {
-            NG::PointF localPoint(point.x, point.y);
-            NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
-            FingerInfo fingerInfo = { point.originalId, point.operatingHand, Offset(point.x, point.y),
-                Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
-                Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool };
-            fingerList.emplace_back(fingerInfo);
-        }
-        info->SetFingerList(fingerList);
+        info->SetFingerList(BuildTouchFingerList(touchEvent, weakNode));
         if (touchEvent.tiltX.has_value()) {
             info->SetTiltX(touchEvent.tiltX.value());
         }
@@ -1365,6 +1367,20 @@ void EventManager::CleanHoverStatusForDragBegin()
     TouchTestResult testResult;
     falsifyEvent.action = MouseAction::CANCEL;
     falsifyEvent.isFalsifyCancel = true;
+    int32_t falsifyEventId = falsifyEvent.id;
+    int32_t falsifyEventHanleId = falsifyEvent.eventHandleId;
+    for (const auto& iter : mouseTestResults_) {
+        if (iter.first >= EVENT_HANDLE) {
+            falsifyEvent.id = iter.first - MOUSE_BASE_ID - static_cast<int32_t>(MouseButton::LEFT_BUTTON);
+            falsifyEvent.eventHandleId = falsifyEvent.id;
+            UpdateHoverNode(falsifyEvent, testResult);
+            DispatchMouseEventNG(falsifyEvent);
+            DispatchMouseHoverEventNG(falsifyEvent);
+            DispatchMouseHoverAnimationNG(falsifyEvent);
+        }
+    }
+    falsifyEvent.id = falsifyEventId;
+    falsifyEvent.eventHandleId = falsifyEventHanleId;
     UpdateHoverNode(falsifyEvent, testResult);
     DispatchMouseEventNG(falsifyEvent);
     DispatchMouseHoverEventNG(falsifyEvent);
@@ -2308,6 +2324,7 @@ EventManager::EventManager()
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    inputMonitorManager_ = AceType::MakeRefPtr<InputEventMonitorManager>();
     InitCoastingAxisEventGenerator();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
@@ -2912,7 +2929,15 @@ void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoi
 bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
 {
     if (event.eventType == UIInputEventType::KEY) {
-        return OnKeyEvent(static_cast<const KeyEvent&>(event));
+        const auto& keyEvent = static_cast<const KeyEvent&>(event);
+        KeyEvent interceptEvent(keyEvent);
+        if (inputMonitorManager_ && inputMonitorManager_->ProcessKeyEvent(interceptEvent)) {
+            if (interceptEvent.isFalsifyCancel) {
+                return OnKeyEvent(interceptEvent);
+            }
+            return true;
+        }
+        return OnKeyEvent(keyEvent);
     } else if (event.eventType == UIInputEventType::FOCUS_AXIS) {
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     } else if (event.eventType == UIInputEventType::CROWN) {

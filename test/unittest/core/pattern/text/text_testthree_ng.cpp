@@ -976,6 +976,29 @@ HWTEST_F(TextTestThreeNg, UpdateFontFeature001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateFontVariations001
+ * @tc.desc: test fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateFontVariations001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    textModelNG.SetFontVariations(FONT_VARIATIONS_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontVariations(), FONT_VARIATIONS_VALUE);
+
+    FONT_VARIATIONS_LIST newFontVariations = { { "opsz", 14.0f } };
+    textLayoutProperty->UpdateFontVariations(newFontVariations);
+    TextModelNG::SetFontVariations(frameNode, FONT_VARIATIONS_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontVariations(), FONT_VARIATIONS_VALUE);
+}
+
+/**
  * @tc.name: UpdateMarqueeOptions001
  * @tc.desc: test MarqueeOptions.
  * @tc.type: FUNC

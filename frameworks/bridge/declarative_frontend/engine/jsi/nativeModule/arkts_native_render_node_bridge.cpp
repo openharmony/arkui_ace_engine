@@ -377,28 +377,23 @@ ArkUINativeModuleValue RenderNodeBridge::SetRotation(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(4);
-    double rotationX = 0.0;
-    double rotationY = 0.0;
-    double rotationZ = 0.0;
-    int32_t unit = 0;
+    ArkUI_Float32 rotationX = 0.0;
+    ArkUI_Float32 rotationY = 0.0;
+    ArkUI_Float32 rotationZ = 0.0;
     if (secondArg->IsNumber()) {
-        rotationX = secondArg->ToNumber(vm)->Value();
+        rotationX = static_cast<ArkUI_Float32>(secondArg->ToNumber(vm)->Value());
     }
     if (thirdArg->IsNumber()) {
-        rotationY = thirdArg->ToNumber(vm)->Value();
+        rotationY = static_cast<ArkUI_Float32>(thirdArg->ToNumber(vm)->Value());
     }
     if (fourthArg->IsNumber()) {
-        rotationZ = fourthArg->ToNumber(vm)->Value();
+        rotationZ = static_cast<ArkUI_Float32>(fourthArg->ToNumber(vm)->Value());
     }
-    if (fifthArg->IsNumber()) {
-        unit = fifthArg->Int32Value(vm);
-    }
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setRotation(nativeNode, rotationX, rotationY, rotationZ, unit);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRotation(nativeNode, rotationX, rotationY, rotationZ);
     return panda::JSValueRef::Undefined(vm);
 }
 

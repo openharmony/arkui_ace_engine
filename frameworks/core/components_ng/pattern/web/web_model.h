@@ -258,6 +258,7 @@ public:
     virtual void SetEnableDefaultContextMenu(bool isEnabled) {}
     virtual void SetEnableScrollDirectionalLock(bool enabled, int32_t type) {}
     virtual void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy) {}
+    virtual void SetInputMethodAttachedId(std::function<void()> && jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

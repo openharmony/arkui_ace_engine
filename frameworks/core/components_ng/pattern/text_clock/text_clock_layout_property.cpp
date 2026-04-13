@@ -89,9 +89,7 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(theme);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str(), filter);
@@ -102,8 +100,8 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         std::to_string(propHoursWest_.value_or(GetSystemTimeZone())).c_str(), filter);
     json->PutExtAttr(
         "fontSize", GetFontSize().value_or(theme->GetTextStyle().GetFontSize()).ToString().c_str(), filter);
-    json->PutExtAttr(
-        "fontColor", GetTextColor().value_or(theme->GetTextStyle().GetTextColor()).ColorToString().c_str(), filter);
+    json->PutExtAttr("fontColor",
+        GetTextColor().value_or(theme->GetTextClockFontColor()).ColorToString().c_str(), filter);
     json->PutExtAttr("fontWeight",
         V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(),
         filter);

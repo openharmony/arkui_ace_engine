@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@ constexpr float PROGRSS_MAX_VALUE = 100.f;
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(progressTheme);
 
     json->PutExtAttr("constructor", ProgressOptions().c_str(), filter);
@@ -46,6 +46,8 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         defaultBackgroundColor = progressTheme->GetCapsuleBgColor();
     } else if (progressType == ProgressType::RING) {
         defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
+    } else if (progressType == ProgressType::SCALE) {
+        defaultColor = progressTheme->GetScaleTrackSelectedColor();
     }
     json->PutExtAttr("color", (GetColor().value_or(defaultColor)).ColorToString().c_str(), filter);
     json->PutExtAttr("backgroundColor",
@@ -71,9 +73,10 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
     if (propGradientColor_.has_value()) {
         colors = propGradientColor_.value();
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, "");
-        auto theme = pipelineContext->GetTheme<ProgressTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        auto theme = host->GetTheme<ProgressTheme>(true);
+        CHECK_NULL_RETURN(theme, "");
         auto endColor = theme->GetRingProgressEndSideColor();
         auto beginColor = theme->GetRingProgressBeginSideColor();
         GradientColor gradientColorEnd;

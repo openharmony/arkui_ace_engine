@@ -996,6 +996,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrco
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_raw_input_event_wrapper.cpp @ArkUI_Event
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_raw_input_event_wrapper.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.cpp @arkuiscroll
@@ -1890,6 +1892,8 @@ frameworks/core/common/frontend.h @arkui_framework_xnode
 frameworks/core/common/hdc_register.cpp @arkui_framework_xnode
 frameworks/core/common/hdc_register.h @arkui_framework_xnode
 frameworks/core/common/ime/ @huawei_g_five
+frameworks/core/common/input_event_monitor_manager.cpp @ArkUI_Event
+frameworks/core/common/input_event_monitor_manager.h @ArkUI_Event
 frameworks/core/common/interaction/ @ArkUI_Event
 frameworks/core/common/js_message_dispatcher.h @arkui_framework_xnode
 frameworks/core/common/layout_inspector.h @ArkUI_ability_group
@@ -3269,6 +3273,7 @@ frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_E
 frameworks/core/interfaces/native/implementation/accessibility_hover_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/image_modifier_peer.h @arkui001
+frameworks/core/interfaces/native/implementation/raw_input_event_wrapper_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @ArkUI_Event
@@ -3539,6 +3544,7 @@ test/mock/core/common/mock_data_detector_adapter.cpp @huawei_g_five
 test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/ohos_mock/ @arkui_framework_xnode
+test/mock/interfaces/native/mock_error_message_manager.cpp @arkui_framework_xnode
 
 test/mock/core/render/mock_font_collection.cpp @huawei_g_five
 test/mock/interfaces/ @arkui_architecture

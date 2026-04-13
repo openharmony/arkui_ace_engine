@@ -38,7 +38,7 @@ void SearchElement::LocalizedUpdate()
 bool SearchElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if ((keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER) &&
-        keyEvent.action == KeyAction::UP) {
+        (keyEvent.action == KeyAction::UP || keyEvent.action == KeyAction::CANCEL)) {
         const auto& search = AceType::DynamicCast<RenderSearch>(renderNode_);
         if (search) {
             if (!search->HandleEnterEvent()) {

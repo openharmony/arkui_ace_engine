@@ -129,6 +129,12 @@ protected:
     {
         return width;
     }
+    // Allow derived classes to align custom span maxWidth with their own paragraph width policy.
+    virtual std::optional<float> GetCustomSpanMeasureMaxWidth(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) const
+    {
+        return GetMaxMeasureSize(contentConstraint).Width();
+    }
     virtual void MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper) {}
     virtual void MeasureHeightLayoutCalPolicy(LayoutWrapper* layoutWrapper) {}
 

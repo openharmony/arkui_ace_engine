@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT  TextPaintMethod : public NodePaintMethod {

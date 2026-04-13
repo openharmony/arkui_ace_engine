@@ -167,6 +167,21 @@ void BuildConfigParams(const RefPtr<NavDestinationNodeBase>& node, PageViewportC
     params.statusBarAnimation = statusBarAnimated;
     params.enableNavIndicator = enableNavIndicator;
 }
+
+void CollectJsViewName(const RefPtr<UINode>& uiNode, std::string& jsViewNames)
+{
+    auto customNode = AceType::DynamicCast<CustomNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    std::string jsViewName = customNode->GetJSViewName();
+    if (jsViewName.empty()) {
+        return;
+    }
+    if (!jsViewNames.empty()) {
+        jsViewNames += "/";
+    }
+    jsViewNames += jsViewName;
+}
 } // namespace
 
 void NavigationPattern::ReplaceNodeWithProxyNodeIfNeeded(
@@ -1385,6 +1400,12 @@ void NavigationPattern::RefreshNavDestination()
     isBackPage_ = newTopNavPath.has_value() ?
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
+    if (IsForceSplitSupported(pipeline)) {
+        BackupPrimaryNodes();
+        RecognizeHomePageIfNeeded();
+        AdjustNodeForStackSync(preTopNavPath, newTopNavPath);
+        SetPrimaryNodesToBeRemoved(hostNode->TakePrimaryNodesToBeRemoved());
+    }
     if (topFromSingletonMoved_) {
         FireOnNewParam(newTopNavPath.has_value() ? newTopNavPath->second : nullptr);
     }
@@ -3856,6 +3877,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
 
     std::string fromNavDestinationName = "";
     std::string toNavDestinationName = "";
+    std::string fromComponentName = "";
+    std::string toComponentName = "";
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
         auto preDestinationPattern = preDestination->GetPattern<NavDestinationPattern>();
@@ -3869,10 +3892,12 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
              */
             preDestination->SetIsAnimated(false);
         }
+        fromComponentName = GetNavDestinationJsViewName(preDestinationPattern->GetCustomNode());
     } else if (GetHomeDestinationName(hostNode, fromNavDestinationName)) {
         fromPathInfo += ", navDesitinationName: " + fromNavDestinationName;
     } else {
         fromPathInfo = hostNode->GetNavigationPathInfo();
+        fromNavDestinationName = "navBar";
     }
     if (topDestination) {
         toPathInfo = topDestination->GetNavDestinationPathInfo();
@@ -3880,16 +3905,19 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(topDestinationPattern);
         toNavDestinationName = topDestinationPattern->GetName();
         toPathInfo += ", navDesitinationName: " + toNavDestinationName;
+        toComponentName = GetNavDestinationJsViewName(topDestinationPattern->GetCustomNode());
     } else if (GetHomeDestinationName(hostNode, toNavDestinationName)) {
         toPathInfo += ", navDesitinationName: " + toNavDestinationName;
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
+        toNavDestinationName = "navBar";
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
-    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
+    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation",
+        fromComponentName, toComponentName);
     UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
@@ -5691,7 +5719,7 @@ void NavigationPattern::TryForceSplitIfNeeded()
     forceSplitSuccess_ = forceSplitSuccess;
     forceSplitUseNavBar_ = forceSplitUseNavBar;
     context->SetIsCurrentInForceSplitMode(forceSplitSuccess_);
-    SwapNavDestinationAndProxyNode(true);
+    AdjustNodeForLayout();
 }
 
 bool NavigationPattern::IsNavBarValid()
@@ -6574,5 +6602,125 @@ void NavigationPattern::FireRelatedDestinationLifecycleInner(bool isOnShow, bool
         isFromWindow ? NavDestVisibilityChangeReason::APP_STATE : NavDestVisibilityChangeReason::TRANSITION);
     relatedPattern->SetIsOnShow(false);
     NavigationPattern::FireNavigationChange(relatedDest, false, false, isFromWindow);
+}
+
+bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
+    const RefPtr<NavDestinationGroupNode>& preTopDest,
+    const RefPtr<NavDestinationGroupNode>& curTopDest)
+{
+    CHECK_NULL_RETURN(preTopDest, false);
+    CHECK_NULL_RETURN(curTopDest, false);
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
+        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
+        // In navigation displace mode, treat dialog destinations as transPages by default even
+        // when developers do not configure them explicitly. This prevents dialog push/pop from
+        // being misidentified as secondary-push-primary transitions.
+        return false;
+    }
+    auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(preTopPattern, false);
+    auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(curTopPattern, false);
+    auto from = preTopPattern->GetName();
+    auto to = curTopPattern->GetName();
+    return forceSplitMgr->IsTransitionShouldMovePageToPrimary(from, to);
+}
+
+void NavigationPattern::ResetSecondaryPushPrimarySceneState()
+{
+    isSecondaryPushToPrimaryScene_ = false;
+    isPrimaryPopToSecondaryScene_ = false;
+    splitPushExitNode_ = nullptr;
+    splitPushMoveNode_ = nullptr;
+    splitPushEnterNode_ = nullptr;
+    splitPopExitNode_ = nullptr;
+    splitPopMoveNode_ = nullptr;
+    splitPopEnterNode_ = nullptr;
+}
+
+void NavigationPattern::AdjustNodeForLayout()
+{
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navNode);
+    auto context = navNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->CanPushPageToPrimary()) {
+        SwapNavDestinationAndProxyNode(true);
+        return;
+    }
+    if (forceSplitSuccess_) {
+        AdjustNodeForSplitDisplayReconfigure();
+    } else {
+        AdjustNodeForStackDisplayReconfigure();
+    }
+}
+
+void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackDisplayReconfigure()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSyncWhenSplitDisplay(
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+    std::optional<std::pair<std::string, RefPtr<UINode>>> curTop)
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSyncWhenStackDisplay()
+{
+}
+
+void NavigationPattern::AdjustNodeForStackSync(
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+    std::optional<std::pair<std::string, RefPtr<UINode>>> curTop)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->CanPushPageToPrimary()) {
+        SwapNavDestinationAndProxyNode(false);
+        return;
+    }
+    if (forceSplitSuccess_) {
+        AdjustNodeForStackSyncWhenSplitDisplay(preTop, curTop);
+    } else {
+        AdjustNodeForStackSyncWhenStackDisplay();
+    }
+}
+
+std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode)
+{
+    std::string jsViewName{};
+    while (uiNode) {
+        if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            // this is a navDestination node
+            return jsViewName;
+        }
+        if (uiNode->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            // this is a jsView node
+            CollectJsViewName(uiNode, jsViewName);
+        }
+        // this is an UINode, go deep further for navDestination node
+        auto children = uiNode->GetChildren();
+        if (children.empty()) {
+            return "";
+        }
+        uiNode = children.front();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
+    return "";
 }
 } // namespace OHOS::Ace::NG

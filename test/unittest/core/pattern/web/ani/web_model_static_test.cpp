@@ -3355,4 +3355,32 @@ HWTEST_F(WebModelStaticTest, SetScrollbarLayoutPolicy001, TestSize.Level1)
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::SYSTEM);
 #endif
 }
+
+/**
+ * @tc.name: SetInputMethodAttachedId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetInputMethodAttachedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelStatic::SetInputMethodAttachedId(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled]() { callbackCalled = true; });
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->FireOnInputMethodAttachedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
 } // namespace OHOS::Ace::NG

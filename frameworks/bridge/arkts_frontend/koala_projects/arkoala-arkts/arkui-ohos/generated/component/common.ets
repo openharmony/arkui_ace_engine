@@ -27,14 +27,14 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
 import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
-import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
+import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { TouchEventProxy, TouchEventProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilderT } from './idlize'
 import { TextRange_serializer, TextRange } from './textCommon'
 import { StyledString, StyledStringInternal, StyledString_serializer, ImageAttachment, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, StyledStringMarshallingValue, UserDataSpan, StyledStringUnmarshallCallback } from './styledString'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilderT } from './idlize'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 import { ResizableOptions_serializer, ResizableOptions } from './image'
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_HdrBrightnessBlender_serializer, uiEffect_BrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
@@ -1837,6 +1837,110 @@ export class ProgressMask implements MaterializedBase {
     }
     private enableBreathingAnimation_serialize(value: boolean): void {
         ArkUIGeneratedNativeModule._ProgressMask_enableBreathingAnimation(this.peer!.ptr, value ? true : false)
+    }
+}
+export class RawInputEventWrapperInternal {
+    public static fromPtr(ptr: KPointer): RawInputEventWrapper {
+        return new RawInputEventWrapper(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class RawInputEventWrapper implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, RawInputEventWrapper.getFinalizer())
+    }
+    constructor(event: MouseEvent | TouchEvent | KeyEvent) {
+        this(MaterializedBaseTag.NOP, RawInputEventWrapper.construct(event))
+    }
+    static construct(event: MouseEvent | TouchEvent | KeyEvent): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (event instanceof MouseEvent) {
+            thisSerializer.writeInt8((0).toByte())
+            const eventForIdx0 = event as MouseEvent
+            MouseEvent_serializer.write(thisSerializer, eventForIdx0)
+        } else if (event instanceof TouchEvent) {
+            thisSerializer.writeInt8((1).toByte())
+            const eventForIdx1 = event as TouchEvent
+            const eventForIdx1Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventForIdx1)
+            TouchEventProxy_serializer.write(thisSerializer, eventForIdx1Transformed)
+        } else if (event instanceof KeyEvent) {
+            thisSerializer.writeInt8((2).toByte())
+            const eventForIdx2 = event as KeyEvent
+            KeyEvent_serializer.write(thisSerializer, eventForIdx2)
+        }
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._RawInputEventWrapper_getFinalizer()
+    }
+    public isMouseEvent(): boolean {
+        return this.isMouseEvent_serialize()
+    }
+    public isTouchEvent(): boolean {
+        return this.isTouchEvent_serialize()
+    }
+    public isKeyEvent(): boolean {
+        return this.isKeyEvent_serialize()
+    }
+    public asMouseEvent(): MouseEvent | null {
+        return this.asMouseEvent_serialize()
+    }
+    public asTouchEvent(): TouchEvent | null {
+        return this.asTouchEvent_serialize()
+    }
+    public asKeyEvent(): KeyEvent | null {
+        return this.asKeyEvent_serialize()
+    }
+    private isMouseEvent_serialize(): boolean {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_isMouseEvent(this.peer!.ptr)
+        return retval
+    }
+    private isTouchEvent_serialize(): boolean {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_isTouchEvent(this.peer!.ptr)
+        return retval
+    }
+    private isKeyEvent_serialize(): boolean {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_isKeyEvent(this.peer!.ptr)
+        return retval
+    }
+    private asMouseEvent_serialize(): MouseEvent | null {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_asMouseEvent(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: MouseEvent | null = null
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (MouseEvent_serializer.read(retvalDeserializer) as MouseEvent)
+        }
+        const returnResult: MouseEvent | null = buffer
+        return returnResult
+    }
+    private asTouchEvent_serialize(): TouchEvent | null {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_asTouchEvent(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: TouchEvent | null = null
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(retvalDeserializer)
+            buffer = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(bufferOptDeserialized)
+        }
+        const returnResult: TouchEvent | null = buffer
+        return returnResult
+    }
+    private asKeyEvent_serialize(): KeyEvent | null {
+        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_asKeyEvent(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: KeyEvent | null = null
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (KeyEvent_serializer.read(retvalDeserializer) as KeyEvent)
+        }
+        const returnResult: KeyEvent | null = buffer
+        return returnResult
     }
 }
 export class ScrollResultInternal {
@@ -10798,6 +10902,12 @@ export interface Bindable<T> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
+export interface InputEventInterceptResult {
+    action: InputEventInterceptAction;
+}
+export interface InputEventMonitor {
+}
+export type InputEventListener = (event: RawInputEventWrapper) => InputEventInterceptResult;
 export interface AreaChangeOptions {
     expectedUpdateInterval?: int32;
 }
@@ -12336,6 +12446,27 @@ export class HoverEvent_serializer {
         return HoverEventInternal.fromPtr(ptr)
     }
 }
+export class InputEventInterceptResult_serializer {
+    public static write(buffer: SerializerBase, value: InputEventInterceptResult): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAction = value.action
+        valueSerializer.writeInt32(valueHolderForAction.valueOf())
+    }
+    public static read(buffer: DeserializerBase): InputEventInterceptResult {
+        let valueDeserializer: DeserializerBase = buffer
+        const actionTmpResult: InputEventInterceptAction = InputEventInterceptAction.fromValue(valueDeserializer.readInt32())
+        let value: InputEventInterceptResult = ({action: actionTmpResult} as InputEventInterceptResult)
+        return value
+    }
+}
+export class InputEventMonitor_serializer {
+    public static write(buffer: SerializerBase, value: InputEventMonitor): void {
+    }
+    public static read(buffer: DeserializerBase): InputEventMonitor {
+        let value: InputEventMonitor = ({} as InputEventMonitor)
+        return value
+    }
+}
 export class InvertOptions_serializer {
     public static write(buffer: SerializerBase, value: InvertOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -12531,6 +12662,17 @@ export class ProgressMask_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return ProgressMaskInternal.fromPtr(ptr)
+    }
+}
+export class RawInputEventWrapper_serializer {
+    public static write(buffer: SerializerBase, value: RawInputEventWrapper): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): RawInputEventWrapper {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return RawInputEventWrapperInternal.fromPtr(ptr)
     }
 }
 export class RectResult_serializer {
@@ -23410,7 +23552,9 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue = valueHolderForDetents!
-            if (valueHolderForDetentsTmpValue instanceof SingleLengthDetent) {
+            // instructive change start
+            if (valueHolderForDetentsTmpValue instanceof SingleLengthDetent && valueHolderForDetentsTmpValue.length === 1) {
+            // instructive change end
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDetentsTmpValueForIdx0 = valueHolderForDetentsTmpValue as SingleLengthDetent
                 const valueHolderForDetentsTmpValueForIdx0_0 = valueHolderForDetentsTmpValueForIdx0[0]
@@ -23435,7 +23579,9 @@ export class SheetOptions_serializer {
                         global_resource_Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
                     }
                 }
-            } else if (valueHolderForDetentsTmpValue instanceof DoubleLengthDetents) {
+            // instructive change start
+            } else if (valueHolderForDetentsTmpValue instanceof DoubleLengthDetents && valueHolderForDetentsTmpValue.length === 2) {
+            // instructive change end
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDetentsTmpValueForIdx1 = valueHolderForDetentsTmpValue as DoubleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx1_0 = valueHolderForDetentsTmpValueForIdx1[0]
@@ -23488,7 +23634,9 @@ export class SheetOptions_serializer {
                 } else {
                     valueSerializer.writeInt8(RuntimeType.UNDEFINED)
                 }
-            } else if (valueHolderForDetentsTmpValue instanceof TripleLengthDetents) {
+            // instructive change start
+            } else if (valueHolderForDetentsTmpValue instanceof TripleLengthDetents && valueHolderForDetentsTmpValue.length === 3) {
+            // instructive change end
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDetentsTmpValueForIdx2 = valueHolderForDetentsTmpValue as TripleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx2_0 = valueHolderForDetentsTmpValueForIdx2[0]

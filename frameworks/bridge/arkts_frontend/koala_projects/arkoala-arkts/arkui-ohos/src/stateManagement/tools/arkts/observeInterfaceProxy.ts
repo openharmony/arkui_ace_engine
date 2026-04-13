@@ -16,15 +16,17 @@
 import { WatchIdType, ISubscribedWatches } from '../../decorator';
 import { IObservedObject, RenderIdType } from '../../decorator';
 import { SubscribedWatches } from '../../decoratorImpl/decoratorWatch';
-import { IMutableStateMeta } from '../../decorator';
+import { IMutableStateMeta, IMutableKeyedStateMeta } from '../../decorator';
 import { STATE_MGMT_FACTORY } from '../../decorator';
 import { OBSERVE } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
+import { FactoryInternal } from '../../base/iFactoryInternal';
 
 export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches {
-    private readonly __meta: IMutableStateMeta;
+    private __meta: IMutableStateMeta | undefined;
+    private __keyedMeta: IMutableKeyedStateMeta | undefined;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
@@ -34,8 +36,13 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         this._target = target;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
-        this.__meta = STATE_MGMT_FACTORY.makeMutableStateMeta(this,
-            this.allowDeep_ ? '__metaInterfaceMakeObserved_' : '__metaInterfaceV1_');
+        if (this.isAPI_) {
+            this.__keyedMeta = FactoryInternal.mkMutableKeyedStateMeta(
+                '__metaInterfaceMakeObserved_', this);
+        } else {
+            this.__meta = STATE_MGMT_FACTORY.makeMutableStateMeta(this,
+                this.allowDeep_ ? '__metaInterfaceMakeObserved_' : '__metaInterfaceV1_');
+        }
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
         this.subscribedWatches.addWatchSubscriber(watchId);
@@ -54,14 +61,18 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     }
     get(target: Object, method: reflect.InstanceMethod): Any {
         const value = method.invoke(this._target);
+        const varName = method.getName().substring(6);
         if (typeof value !== 'function' && this.shouldAddRef()) {
-            this.__meta.addRef();
+            if (this.isAPI_) {
+                this.__keyedMeta!.addRef(varName);
+            } else {
+                this.__meta!.addRef();
+            }
         }
         const makeObserved = uiUtils.makeObservedEntrance(value, this.allowDeep_, this.isAPI_);
         if (makeObserved === value) {
             return value;
         }
-        const varName = method.getName().substring(6);
         const SETTER_PREFIX = '%%set-';
         const targetType = Class.of(this._target);
         try {
@@ -82,7 +93,11 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
             const getter = targetType.getInstanceMethod(GETTER_PREFIX + varName);
             if (getter && getter.invoke(this._target, []) !== newValue) {
                 method.invoke(this._target, [newValue]);
-                this.__meta.fireChange();
+                if (this.isAPI_) {
+                    this.__keyedMeta!.fireChange(varName);
+                } else {
+                    this.__meta!.fireChange();
+                }
                 this.executeOnSubscribingWatches(varName);
             }
         } catch (e) {

@@ -210,6 +210,8 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
             resolvedKey = '__metaBuiltInV2Key_';
         } else if (info.startsWith('__metaBuiltInMakeObserved_')) {
             resolvedKey = '__metaMakeObservedKey_';
+        } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
+            resolvedKey = '__metaInterfaceMakeObservedKey_';
         }
         observedInfo.setType(resolvedKey);
     }

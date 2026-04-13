@@ -6192,6 +6192,12 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
             area->OnThemeScopeUpdate(textFieldTheme);
         }
     }
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (selectOverlay_) {
+            selectOverlay_->UpdateHandleColor();
+        }
+    }
     return updateFlag;
 }
 
@@ -11028,6 +11034,18 @@ void TextFieldPattern::SetThemeAttr()
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
     inlineFocusState_ = false;
+}
+
+RefPtr<Clipboard> TextFieldPattern::GetClipboard()
+{
+    if (!clipboard_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, clipboard_);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, clipboard_);
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    }
+    return clipboard_;
 }
 
 const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const

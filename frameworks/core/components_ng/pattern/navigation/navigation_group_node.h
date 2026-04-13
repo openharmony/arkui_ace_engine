@@ -388,6 +388,11 @@ public:
         return isStaticPlaceholder_;
     }
 
+    std::vector<RefPtr<NavDestinationGroupNode>> TakePrimaryNodesToBeRemoved()
+    {
+        return std::move(primaryNodesToBeRemoved_);
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

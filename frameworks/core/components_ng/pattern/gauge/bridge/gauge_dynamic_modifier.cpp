@@ -14,7 +14,6 @@
  */
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/bridge/gauge_model_impl.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"

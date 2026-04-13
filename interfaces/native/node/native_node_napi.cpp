@@ -15,12 +15,14 @@
 
 #include "native_node_napi.h"
 
+#include <memory>
 #include "napi/native_node_api.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
 #include "core/components_ng/base/frame_node.h"
+#include "error_message_macros.h"
 
 extern "C" {
 void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
@@ -52,6 +54,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env, &scope);
     if (status != napi_ok) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to open napi handle scope");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     bool hasProperty = false;
@@ -62,6 +65,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         auto result = napi_get_named_property(env, value, "nodePtr_", &frameNodePtr);
         if (result != napi_ok) {
             LOGE("fail to get nodePtr");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get nodePtr property");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
@@ -70,6 +74,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         result = napi_get_value_external(env, frameNodePtr, &nativePtr);
         if (result != napi_ok || nativePtr == nullptr) {
             LOGE("fail to get nodePtr external value");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+                "Failed to get nodePtr external value");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
@@ -99,6 +105,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         auto result = napi_get_named_property(env, value, "builderNode_", &builderNode);
         if (result != napi_ok) {
             LOGE("fail to get builderNode");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get builderNode property");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
@@ -106,6 +113,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         result = napi_get_named_property(env, builderNode, "nodePtr_", &nodePtr);
         if (result != napi_ok) {
             LOGE("fail to get nodePtr in builderNode");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+                "Failed to get nodePtr property in builderNode");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
@@ -113,6 +122,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         result = napi_get_value_external(env, nodePtr, &nativePtr);
         if (result != napi_ok) {
             LOGE("fail to get nodePtr external value in builderNode");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+                "Failed to get nodePtr external value in builderNode");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
@@ -120,12 +131,16 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         OHOS::Ace::NG::FrameNode* frameNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(uiNode);
         if (frameNode == nullptr) {
             LOGE("fail to get frameNode value in builderNode");
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+                "Failed to get frameNode value in builderNode");
             napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         if (frameNode->GetTag() == "BuilderProxyNode") {
             // need to get the really frameNode.
             if (!impl) {
+                SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+                    __FUNCTION__, "Native module not initialized");
                 napi_close_handle_scope(env, scope);
                 return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
             }
@@ -133,6 +148,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
                 reinterpret_cast<ArkUINodeHandle>(frameNode), 0, true);
             if (!child) {
                 LOGE("fail to get child in BuilderProxyNode");
+                SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+                    "Failed to get child node in BuilderProxyNode");
                 napi_close_handle_scope(env, scope);
                 return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
             }
@@ -150,6 +167,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
     napi_close_handle_scope(env, scope);
+    SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get node handle from napi value");
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
@@ -159,25 +177,30 @@ int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_C
     auto result = napi_has_named_property(env, value, "instanceId_", &hasProperty);
     if (result != napi_ok || !hasProperty) {
         LOGE("fail to get Context value");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get context value");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
     napi_value contextPtr = nullptr;
     result = napi_get_named_property(env, value, "instanceId_", &contextPtr);
     if (result != napi_ok) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get instanceId property");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
     napi_valuetype valuetype;
     if (napi_typeof(env, contextPtr, &valuetype) != napi_ok) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get instanceId value type");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (valuetype != napi_number) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "InstanceId value type is not number");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     int32_t instanceId = -1;
     result = napi_get_value_int32(env, contextPtr, &instanceId);
     if (result != napi_ok) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get instanceId value");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *context = new ArkUI_Context({ .id = instanceId });
@@ -190,18 +213,21 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
     auto result = napi_has_named_property(env, value, "nativePtr_", &hasProperty);
     if (result != napi_ok || !hasProperty) {
         LOGE("fail to get native content value");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get native content value");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     napi_value nativeContent = nullptr;
     result = napi_get_named_property(env, value, "nativePtr_", &nativeContent);
     if (result != napi_ok) {
         LOGE("fail to get native content");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get native content property");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     void* nativePtr = nullptr;
     result = napi_get_value_external(env, nativeContent, &nativePtr);
     if (result != napi_ok) {
         LOGE("fail to get native content ptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get native content pointer");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *content = reinterpret_cast<ArkUI_NodeContentHandle>(nativePtr);
@@ -210,8 +236,10 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
 
 ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
 {
-    CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Failed to initialize native module");
     auto callback = [](const char* moduleName) -> bool {
         const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext", "arkui.observer",
             "arkui.inspector", "font", "arkui.uicontext", "arkui.components.arkgauge", "arkui.components.arkcheckbox",
@@ -241,6 +269,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
     });
     if (ret != napi_ok) {
         LOGE("fail to set module validate callback");
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to set module validate callback");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -502,17 +531,26 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
 int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
 {
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        callback, ARKUI_ERROR_CODE_CALLBACK_INVALID, __FUNCTION__, "Callback parameter is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto basicAPI = fullImpl->getBasicAPI();
-    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Basic API is not initialized");
     auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
     auto id = context->id;
-    auto ret = basicAPI->postFrameCallback(id, userData, callback);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto ret = basicAPI->postFrameCallback(id, userData, callback, reinterpret_cast<void*>(&errorInfoPtr));
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
         LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
+    }
+    if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }
@@ -520,17 +558,26 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
 int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
 {
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        callback, ARKUI_ERROR_CODE_CALLBACK_INVALID, __FUNCTION__, "Callback parameter is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto basicAPI = fullImpl->getBasicAPI();
-    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Basic API is not initialized");
     auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
     auto id = context->id;
-    auto ret = basicAPI->postIdleCallback(id, userData, callback);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto ret = basicAPI->postIdleCallback(id, userData, callback, reinterpret_cast<void*>(&errorInfoPtr));
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
         LOGF_ABORT("OH_ArkUI_PostIdleCallback doesn't run on UI thread!");
+    }
+    if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }

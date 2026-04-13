@@ -227,6 +227,7 @@ namespace OHOS::Ace::NG {
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
+class TextPattern;
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -327,8 +328,11 @@ public:
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+        const RefPtr<TextPattern>& textPattern) const;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
+    std::string GetFontWeightConfigs() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
@@ -796,6 +800,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontVariations, FONT_VARIATIONS_LIST, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);

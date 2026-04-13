@@ -424,7 +424,7 @@ export function GetObservedTypeInfo(info: string): ObservedType {
         return ObservedType.TRACE;
     } else if (info.startsWith('__metaInterfaceV1_')) {
         return ObservedType.INTERFACE_V1;
-    } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
+    } else if (info.startsWith('__metaInterfaceMakeObservedKey_') || info.startsWith('__metaInterfaceMakeObserved_')) {
         return ObservedType.INTERFACE_MAKEOBSERVED;
     } else if (info.startsWith('__metaBuiltInV1Key_') || info.startsWith('__metaBuiltInV1_')) {
         return ObservedType.BUILTIN_V1;
@@ -824,7 +824,7 @@ function determineVariableNameByType(observedType: ObservedType, info: string): 
         }
         return info;
     } else if (observedType === ObservedType.INTERFACE_MAKEOBSERVED) {
-        return 'Any Object Literal Property';
+        return info;
     } else {
         return 'Unknown Variable Name';
     }
@@ -859,14 +859,17 @@ function extractMetaInfos(objectInfo: ObservedObjectInfo, observedType: Observed
     if (mutableStateMetas && mutableStateMetas.size > 0) {
         mutableStateMetas.forEach((meta: MutableStateMeta) => {
             const info = StateMgmtDFX.extractDecoratorInfoFromMutableStateMeta(meta);
-            if (info) {
-                info.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
-                info.stateVariableName = determineVariableNameByType(observedType, meta.info_);
-                info.owningComponentId = -1;
-                info.owningComponentOrClassName = determineClassName(observedType, obj);
-                metaInfos.push(info);
-                elementsCount += info.dependentInfo.length;
+            if (!info) {
+                return;
             }
+            info.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
+            info.stateVariableName = determineVariableNameByType(observedType, meta.info_);
+            info.owningComponentId = -1;
+            info.owningComponentOrClassName = determineClassName(observedType, obj);
+            if (!(info.owningComponentOrClassName === 'Date' && info.stateVariableName === '__OB_DATE' && info.dependentInfo.length === 0)) {
+                metaInfos.push(info);
+            }
+            elementsCount += info.dependentInfo.length;
         });
     }
 

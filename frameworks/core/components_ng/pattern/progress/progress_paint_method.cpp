@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 
 namespace OHOS::Ace::NG {
-void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
+void ProgressPaintMethod::GetThemeData(PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+    CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     if (progressType_ == ProgressType::CAPSULE) {
@@ -149,16 +153,5 @@ void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
     auto borderRadius = static_cast<float>(
         paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
     progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
-}
-
-int32_t ProgressPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
-{
-    const int32_t defaultValue = 0;
-    CHECK_NULL_RETURN(paintWrapper, defaultValue);
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultValue);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_RETURN(host, defaultValue);
-    return host->GetThemeScopeId();
 }
 } // namespace OHOS::Ace::NG

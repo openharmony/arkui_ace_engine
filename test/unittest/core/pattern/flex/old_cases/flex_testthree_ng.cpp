@@ -1271,8 +1271,14 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest013, TestSize.Level0)
     rowLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
+    /**
+     * @tc.expected: firstLayoutWrapper has correct Size
+     */
     EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(),
         SizeF(CONTAINER_SIZE.Width() - PADDING_FIVE * DOUBLE - SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT));
+    /**
+     * @tc.expected: firstLayoutWrapper has correct offset
+     */
     EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(PADDING_FIVE, PADDING_FIVE));
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameOffset(),

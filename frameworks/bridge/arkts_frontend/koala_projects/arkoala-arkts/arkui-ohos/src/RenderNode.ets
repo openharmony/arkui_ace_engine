@@ -510,8 +510,7 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private setRotation(rotation: Vector3): void {
-        const lengthMetricsUnitValue = this.lengthMetricsUnitValue;
-        RenderNodeExtender.setRotation(this, rotation, lengthMetricsUnitValue)
+        RenderNodeExtender.setRotation(this, rotation)
         return
     }
     private setTransform(transform: Matrix4): void {

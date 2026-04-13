@@ -61,6 +61,7 @@ import { int32, int64 } from "@koalaui/common";
 import { KPointer, KSerializerBuffer, KBuffer, DeserializerBase, nullptr, wrapSystemCallback } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { InputEventListener, InputEventMonitor } from 'arkui/component/common';
 import { TextLayoutOptions, Paragraph, StyledString, ContextMenu, FrameNodeExtender, AnimationExtender, AlertDialog, ActionSheet, DialogExtender } from 'arkui/framework';
 import { InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, UIContextGetInfo, SystemOps } from 'arkui/component/idlize';
 import { BusinessError } from "@ohos.base"
@@ -738,6 +739,18 @@ export class UIContext {
         // IUIContext.setCustomKeyboardContinueFeature(feature);
         // instructive change end
         ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    public addLocalInputEventMonitor(eventMask: int32, listener: InputEventListener): InputEventMonitor {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const monitor = IUIContext.addLocalInputEventMonitor(eventMask as int32, listener);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return monitor;
+    }
+
+    public removeLocalInputEventMonitor(monitor: InputEventMonitor): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.removeLocalInputEventMonitor(monitor);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
     public getMaxFontScale() : number {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -1625,6 +1638,27 @@ export class UIObserver {
         }
     }
 
+    public onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(callback);
+        }
+    }
+    public offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(callback);
+        }
+    }
+    public onSwiperContentUpdate(config: uiObserver.ObserverOptions, callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(config, callback);
+        }
+    }
+    public offSwiperContentUpdate(config: uiObserver.ObserverOptions, callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(config, callback);
+        }
+    }
+
     public onBeforePanStart(callback: PanListenerCallback): void {
         let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_.toInt(), callback);
         ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanStart', callback);
@@ -1724,6 +1758,28 @@ export interface PageInfo {
         navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 export interface ContentCoverController {}
+
+export interface SwiperContentInfo {
+    id: string;
+    uniqueId: int;
+    swiperItemInfos: Array<SwiperItemInfo>;
+}
+
+export interface SwiperItemInfo {
+    uniqueId: int;
+    index: int;
+}
+
+export class SwiperContentInfoImpl implements SwiperContentInfo {
+    id: string = '';
+    uniqueId: int = -1;
+    swiperItemInfos: Array<SwiperItemInfo> = new Array<SwiperItemInfo>();
+}
+
+export class SwiperItemInfoImpl implements SwiperItemInfo {
+    uniqueId: int = -1;
+    index: int = -1;
+}
 
 export class Magnifier {
     bind(id: string): void {}

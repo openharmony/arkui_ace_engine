@@ -47,11 +47,13 @@ public:
     bool IsPageOverflowEnabled();
     bool IsDialogCorrectionEnabled();
     bool IsRnOverflowEnable();
+    bool IsSmartLayoutEnabled() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
     void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
     std::string GetArkWebAutoLayoutConfig();
     void ParseArkUICorrectionConfigFromUIContent();
     void ParseArkWebAutoLayoutConfigFromUIContent();
+    void SetSmartLayoutEnabled(bool enabled);
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
@@ -75,6 +77,7 @@ private:
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
     bool rnOverflowEnabled_ = false;
+    bool smartlayoutEnabled_ = false;
 
     std::optional<bool> pageOverflowEnabledFromCloud_;
     std::optional<bool> dialogCorrectionEnabledFromCloud_;

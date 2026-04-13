@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 

@@ -2673,6 +2673,27 @@ void ResetOnMicrophoneCaptureStateChanged(ArkUINodeHandle node)
     WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, nullptr);
 }
 
+void SetOnInputMethodAttached(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onInputMethodAttachedCallBackPtr = reinterpret_cast<std::function<void()>*>(extraParam);
+        CHECK_NULL_VOID(onInputMethodAttachedCallBackPtr);
+        auto onInputMethodAttachedCallBack = *onInputMethodAttachedCallBackPtr;
+        WebModelNG::SetInputMethodAttachedId(frameNode, std::move(onInputMethodAttachedCallBack));
+    } else {
+        WebModelNG::SetInputMethodAttachedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnInputMethodAttached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetInputMethodAttachedId(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2926,6 +2947,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableDrag = ResetEnableDrag,
         .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
         .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
+        .setOnInputMethodAttached = SetOnInputMethodAttached,
+        .resetOnInputMethodAttached = ResetOnInputMethodAttached,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3183,6 +3206,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableDrag = ResetEnableDrag,
         .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
         .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
+        .setOnInputMethodAttached = SetOnInputMethodAttached,
+        .resetOnInputMethodAttached = ResetOnInputMethodAttached,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

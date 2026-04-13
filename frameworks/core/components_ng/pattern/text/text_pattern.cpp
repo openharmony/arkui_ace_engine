@@ -36,6 +36,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
@@ -1071,6 +1072,7 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
     fontStyle.UpdateEnableVariableFontWeight(textStyle->GetEnableVariableFontWeight());
     fontStyle.UpdateFontFamily(textStyle->GetFontFamilies());
     fontStyle.UpdateFontFeature(textStyle->GetFontFeatures());
+    fontStyle.UpdateFontVariations(textStyle->GetFontVariations());
     fontStyle.UpdateTextDecoration(textStyle->GetTextDecoration());
     fontStyle.UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
     fontStyle.UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());

@@ -171,6 +171,16 @@ void FeatureParamManager::SetUiCorrectionRnEnableParam(bool rnOverflowEnabled)
     rnOverflowEnabled_ = rnOverflowEnabled;
 }
 
+bool FeatureParamManager::IsSmartLayoutEnabled() const
+{
+    return smartlayoutEnabled_;
+}
+
+void FeatureParamManager::SetSmartLayoutEnabled(bool enabled)
+{
+    smartlayoutEnabled_ = enabled;
+}
+
 uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const
 {
     return syncloadResponseDeadline_;

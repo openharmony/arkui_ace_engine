@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 const char KEY_METHOD[] = "method";
 const char KEY_PARAMS[] = "params";
+const char KEY_PARAM_NEED_FREE_NODES[] = "isNeedFreeNodes";
 
 const uint32_t INSPECTOR_INVALID_WINDOW_ID = 0;
 const int32_t INVALID_METHOD_ID = -1;
@@ -74,6 +75,8 @@ public:
     static std::pair<uint32_t, int32_t> ParseWindowIdFromMsg(const std::string& message);
     static RefPtr<UINode> GetInspectorByKey(
         const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false);
+    static bool ParseNeedFreeNodes(const std::string& message);
+    static std::string GetFreeNodesInspector();
 private:
     static RefPtr<RecNode> AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes);
     static void GetInspectorTreeInfo(

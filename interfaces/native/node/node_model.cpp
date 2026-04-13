@@ -15,6 +15,7 @@
 
 #include "node_model.h"
 
+#include <memory>
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
@@ -25,6 +26,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -660,6 +662,8 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         if (it != eventHandlers.end()) {
             it->second(uiEvent, innerEvent);
             uiEvent.apiVersion = innerEvent->apiVersion;
+            uiEvent.nodeId = innerEvent->nodeId;
+            uiEvent.usePXUnit = UsePXUnit(nodePtr);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
@@ -839,6 +843,8 @@ void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent)
         if (it != eventHandlers.end()) {
             it->second(uiEvent, innerEvent);
             uiEvent.apiVersion = innerEvent->apiVersion;
+            uiEvent.nodeId = innerEvent->nodeId;
+            uiEvent.usePXUnit = UsePXUnit(nodePtr);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
@@ -1683,37 +1689,70 @@ extern "C" {
 int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    return impl->getNodeModifiers()->getNodeContentModifier()->addChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+        __FUNCTION__, "Native module not initialized");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNodeContentModifier()->addChild(
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node, int32_t position)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    return impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+        __FUNCTION__, "Native module not initialized");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position,
+        reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    return impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+        __FUNCTION__, "Native module not initialized");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, ArkUI_NodeContentCallback callback)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+        __FUNCTION__, "Native module not initialized");
     auto innerCallback = reinterpret_cast<void (*)(ArkUINodeContentEvent* event)>(callback);
-    return impl->getNodeModifiers()->getNodeContentModifier()->registerEvent(
-        reinterpret_cast<ArkUINodeContentHandle>(content), nullptr, innerCallback);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNodeContentModifier()->registerEvent(
+        reinterpret_cast<ArkUINodeContentHandle>(content), nullptr, innerCallback,
+        reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event)
@@ -1733,9 +1772,16 @@ ArkUI_NodeContentHandle OH_ArkUI_NodeContentEvent_GetNodeContentHandle(ArkUI_Nod
 int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* userData)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
-    return impl->getNodeModifiers()->getNodeContentModifier()->setUserData(
-        reinterpret_cast<ArkUINodeContentHandle>(content), userData);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
+        __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNodeContentModifier()->setUserData(
+        reinterpret_cast<ArkUINodeContentHandle>(content), userData, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 void* OH_ArkUI_NodeContent_GetUserData(ArkUI_NodeContentHandle content)

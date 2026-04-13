@@ -191,13 +191,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     } else if (hasChanged) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
-
-    if (pattern->IsForceSplitSupported(context)) {
-        pattern->BackupPrimaryNodes();
-        pattern->RecognizeHomePageIfNeeded();
-        pattern->SwapNavDestinationAndProxyNode(false);
-        pattern->SetPrimaryNodesToBeRemoved(std::move(primaryNodesToBeRemoved_));
-    }
 }
 
 bool NavigationGroupNode::ReorderNavDestination(

@@ -16,6 +16,7 @@
 #include "core/components_v2/inspector/panel_composed_element.h"
 
 #include "base/log/dump_log.h"
+#include "core/components/display/render_display.h"
 #include "core/components/panel/render_sliding_panel.h"
 
 namespace OHOS::Ace::V2 {

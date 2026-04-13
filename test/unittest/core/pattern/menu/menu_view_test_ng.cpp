@@ -1756,4 +1756,35 @@ HWTEST_F(MenuViewTestNg, GetMenuPixelMap002, TestSize.Level1)
     MenuView::GetMenuPixelMap(targetNode, menuParam, menuWrapperNode);
     EXPECT_NE(menuWrapperNode, nullptr);
 }
+
+/**
+ * @tc.name: UpdateMenuScrollBarAndMaxHeight001
+ * @tc.desc: Verify UpdateMenuScrollBarAndMaxHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuScrollBarAndMaxHeight001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.scrollBar = DisplayMode::OFF;
+    menuParam.maxHeight = Dimension(75.0, DimensionUnit::VP);
+    
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(menuNode);
+
+    MenuView::UpdateMenuScrollBarAndMaxHeight(menuNode, menuParam);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->GetScrollBar().value(), DisplayMode::OFF);
+
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_EQ(menuProperty->GetMenuMaxHeight().value(), Dimension(75.0, DimensionUnit::VP));
+}
 } // namespace OHOS::Ace::NG

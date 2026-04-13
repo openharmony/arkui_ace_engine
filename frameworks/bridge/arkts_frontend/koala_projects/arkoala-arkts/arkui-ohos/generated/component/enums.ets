@@ -129,7 +129,8 @@ export enum PlayMode {
 }
 export enum KeyType {
     Down = 0,
-    Up = 1
+    Up = 1,
+    CANCEL = 3
 }
 export enum KeySource {
     Unknown = 0,
@@ -647,4 +648,23 @@ export enum SystemProperties {
     WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px',
     WINDOW_SIZE = 'system.window.size',
     WINDOW_SIZE_PX = 'system.window.size.px'
+}
+export enum InputEventSubTypeMask {
+    LEFT_MOUSE_DOWN = 1 << 0,
+    LEFT_MOUSE_UP = 1 << 1,
+    RIGHT_MOUSE_DOWN = 1 << 2,
+    RIGHT_MOUSE_UP = 1 << 3,
+    MIDDLE_MOUSE_DOWN = 1 << 4,
+    MIDDLE_MOUSE_UP = 1 << 5,
+    LEFT_MOUSE_DRAGGING = 1 << 6,
+    RIGHT_MOUSE_DRAGGING = 1 << 7,
+    MIDDLE_MOUSE_DRAGGING = 1 << 8,
+    TOUCH_DOWN = 1 << 9,
+    TOUCH_UP = 1 << 10,
+    KEY_DOWN = 1 << 11,
+    KEY_UP = 1 << 12
+}
+export enum InputEventInterceptAction {
+    CONTINUE = 0,
+    BLOCK = 1
 }

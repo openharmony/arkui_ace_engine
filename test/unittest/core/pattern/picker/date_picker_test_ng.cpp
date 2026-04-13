@@ -23,6 +23,7 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
@@ -74,7 +75,8 @@ const int SMALL_SHOWCOUNT = 3;
 const vector<int> DEFAULT_DATE = { 1999, 9, 9 };
 const std::string CONNECTER = "-";
 const std::vector<int> DEFAULT_VALUE = { 1970, 1971, 1972 };
-const SizeF TEST_FRAME_SIZE1 { 20, 50 };
+const SizeF TEST_FRAME_PORTRAIT { 20, 50 };
+const SizeF TEST_FRAME_LANDSCAPE { 20, 30 };
 const SizeF TEST_FRAME_SIZE2 { 0, 0 };
 const std::string SELECTED_DATE_STRING = R"({"year":2000,"month":5,"day":6,"hour":1,"minute":1,"status":-1})";
 const std::string AM = "AM ";
@@ -2582,4 +2584,74 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternOnThemeScopeUpdateTest002, TestSize.
     EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
 }
 
+/**
+ * @tc.name: DatePickerAlgorithmTest001
+ * @tc.desc: Test DatePickerColumnLayoutAlgorithm Measure with LANDSCAPE orientation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.parentIdealSize.SetWidth(20);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_TRUE(datePickerPattern);
+    
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_TRUE(stackNode);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_TRUE(blendNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_TRUE(columnNode);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_TRUE(columnPattern);
+    
+    auto blendLayoutProperty = blendNode->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subTwoLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
+
+    /**
+     * @tc.step: step2. initialize DatePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    datePickerPattern->isWindowFullscreen_ = false;
+    datePickerPattern->SetColumn(columnNode);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    datePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    datePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    auto frameSize = layoutWrapper.geometryNode_->GetFrameSize();
+    EXPECT_EQ(frameSize, TEST_FRAME_PORTRAIT);
+
+    /**
+     * @tc.step: step3. set SetDeviceOrientation and call Measure.
+     * @tc.expected: call Measure and frameSize values meet expectation.
+     */
+    datePickerPattern->isWindowFullscreen_ = true;
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    datePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    datePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    frameSize = layoutWrapper.geometryNode_->GetFrameSize();
+    EXPECT_EQ(frameSize, TEST_FRAME_LANDSCAPE);
+}
 } // namespace OHOS::Ace::NG

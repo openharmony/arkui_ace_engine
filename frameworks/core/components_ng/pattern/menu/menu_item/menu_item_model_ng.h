@@ -76,6 +76,7 @@ public:
         MenuItemStringType type);
     static void CreateWithMediaResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         const MenuItemIconType type);
+    static void UpdateLabelFontColorSetByUser(bool setByUser);
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
     static void SetupMenuItemProperties(const RefPtr<FrameNode>& menuItem, const RefPtr<SelectTheme>& theme);

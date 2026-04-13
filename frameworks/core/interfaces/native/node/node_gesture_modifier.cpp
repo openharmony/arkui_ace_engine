@@ -322,12 +322,14 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
         ConvertTouchPointsToPointsWithEmptyEvent(info, points);
         touchEvent.touchPointes = &(points[0]);
         touchEvent.touchPointSize = info.GetFingerList().size();
-        touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
-        touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
-        touchEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
-        touchEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+        touchEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
+        touchEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
+        touchEvent.actionTouchPoint.globalDisplayX =
+            fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetX();
+        touchEvent.actionTouchPoint.globalDisplayY =
+            fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetY();
         touchEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
-        touchEvent.actionTouchPoint.operatingHand = info.GetOperatingHand();
+        touchEvent.actionTouchPoint.operatingHand = fingureBegin == fingureEnd ? 0.0f : fingureBegin->operatingHand_;
     }
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
     const auto& targetOrigin = info.GetTarget().origin;
@@ -504,6 +506,8 @@ void GetUniqueGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, GestureTypeName 
 
 void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent)
 {
+    auto fingureBegin = std::begin(info.GetFingerList());
+    auto fingureEnd = std::end(info.GetFingerList());
     if (info.GetPointerEvent()) {
         MouseEvent tempMouseEvent;
         NG::ConvertToMouseEvent(tempMouseEvent, info.GetPointerEvent());
@@ -519,14 +523,14 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
         mouseEvent.action = info.GetLastAction().value_or(0);
         mouseEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
         mouseEvent.timeStamp = info.GetTimeStamp().time_since_epoch().count();
-        mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
-        mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
-        mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
-        mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+        mouseEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
+        mouseEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
+        mouseEvent.actionTouchPoint.globalDisplayX =
+            fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetX();
+        mouseEvent.actionTouchPoint.globalDisplayY =
+            fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetY();
         mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
     }
-    auto fingureBegin = std::begin(info.GetFingerList());
-    auto fingureEnd = std::end(info.GetFingerList());
     const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
     const auto& targetOrigin = info.GetTarget().origin;
     // width height x y globalx globaly

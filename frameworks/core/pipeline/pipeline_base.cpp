@@ -23,6 +23,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"

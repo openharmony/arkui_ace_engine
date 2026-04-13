@@ -101,6 +101,9 @@ void DatePickerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -415,6 +418,14 @@ void DatePickerPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
+
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -452,6 +463,11 @@ void DatePickerPattern::OnModifyDone()
             refPtr->ShowTitle(titleId);
         }
     });
+    InitFocusAndSelector();
+}
+
+void DatePickerPattern::InitFocusAndSelector()
+{
     InitFocusKeyEvent();
     SetDefaultFocus();
     InitFocusEvent();
@@ -3442,6 +3458,7 @@ bool DatePickerPattern::IsNotSetStartEndDate()
     auto endDate = LunarToSolar(dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDefaultDateSolar_)));
     return startDate == startDefaultDateSolar_ && endDate == endDefaultDateSolar_;
 }
+
 int32_t DatePickerPattern::OnInjectionEvent(const std::string& command)
 {
     if (GetIsShowInDialog()) {
@@ -3742,5 +3759,31 @@ bool DatePickerPattern::CheckDialogParamDataValid(const std::unique_ptr<JsonValu
         return false;
     }
     return true;
+}
+
+void DatePickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool oldFullscreen = isWindowFullscreen_;
+    switch (type) {
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+            isWindowFullscreen_ = true;
+            break;
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+            isWindowFullscreen_ = false;
+            break;
+        default:
+            break;
+    }
+    if (oldFullscreen != isWindowFullscreen_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto& column : datePickerColumns_) {
+            auto columnNode = column.Upgrade();
+            CHECK_NULL_VOID(columnNode);
+            columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

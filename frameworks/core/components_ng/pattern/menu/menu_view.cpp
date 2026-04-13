@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,6 +169,13 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto menuNode = FrameNode::CreateFrameNode(
         MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
     ACE_UINODE_TRACE(menuNode);
+    if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto targetNode = FrameNode::GetFrameNodeOnly(targetTag, targetId);
+        if (targetNode != nullptr) {
+            menuNode->AllowUseParentTheme(false);
+            menuNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+        }
+    }
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
@@ -176,7 +183,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         if (!pipeLineContext) {
             return { wrapperNode, menuNode };
         }
-        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        auto selectTheme = menuNode->GetTheme<SelectTheme>(true);
         if (!selectTheme) {
             return { wrapperNode, menuNode };
         }
@@ -202,10 +209,10 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(textNode);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
-
-    auto pipeline = textNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textNode->SetThemeScopeId(column->GetThemeScopeId());
+    }
+    auto theme = textNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto padding = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     PaddingProperty textPadding;
@@ -1117,15 +1124,17 @@ MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
 void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(menuNode);
+    bool isSetMenuSystemMaterial = false;
     if (menuParam.systemMaterial && MaterialUtils::CheckMaterialValid(menuParam.systemMaterial->GetType())) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, true, menuNode);
+        isSetMenuSystemMaterial = true;
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
-    } else {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(MenuPaintProperty, IsUserSetMaterial, false, menuNode);
     }
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIsUserSetMaterial(isSetMenuSystemMaterial);
 }
 
 void MenuView::ShowMenuTargetScaleToOrigin(
@@ -1371,6 +1380,19 @@ void MenuView::GetMenuPixelMap(
     MountTextNode(wrapperNode, nullptr);
 }
 
+int32_t MenuView::UpdateNodeThemeScopeId(const RefPtr<FrameNode> &node, int32_t targetId, const std::string& targetTag)
+{
+    CHECK_NULL_RETURN(node, 0);
+    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return 0;
+    }
+    auto targetNode = FrameNode::GetFrameNodeOnly(targetTag, targetId);
+    CHECK_NULL_RETURN(targetNode, 0);
+    auto themeScopeId = targetNode->GetThemeScopeId();
+    node->UpdateThemeScopeId(themeScopeId);
+    return themeScopeId;
+}
+
 // create menu with MenuElement array
 RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
     MenuType type, const MenuParam& menuParam)
@@ -1381,13 +1403,14 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto themeScopeId = UpdateNodeThemeScopeId(column, targetId, targetTag);
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    MountOptionToColumn(params, menuNode, menuParam, column);
+    MountOptionToColumn(params, menuNode, menuParam, column, themeScopeId);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
@@ -1523,10 +1546,17 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CHECK_NULL_RETURN(scroll, nullptr);
     MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
-
+    UpdateMenuScrollBarAndMaxHeight(menuNode, menuParam);
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
+        if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            auto targetNode = FrameNode::GetFrameNodeOnly(targetTag, targetId);
+            if (targetNode != nullptr && targetNode->GetThemeScopeId() !=0) {
+                menuNode->AllowUseParentTheme(false);
+                menuNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+            }
+        }
         return menuNode;
     }
     if (type == MenuType::CONTEXT_MENU) {
@@ -1618,6 +1648,24 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
     }
 }
 
+void MenuView::UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    if (menuParam.scrollBar.has_value()) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->SetScrollBar(menuParam.scrollBar);
+            menuPattern->ApplyScrollBarToScrollNode();
+        }
+    }
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        if (menuParam.maxHeight.has_value()) {
+            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
+        }
+    }
+}
+
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
@@ -1632,13 +1680,6 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     SetMenuSystemMaterial(menuNode, menuParam);
     menuNode->MarkModifyDone();
 
-    if (menuParam.scrollBar.has_value()) {
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        if (menuPattern) {
-            menuPattern->SetScrollBar(menuParam.scrollBar);
-            menuPattern->ApplyScrollBarToScrollNode();
-        }
-    }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1647,9 +1688,6 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        if (menuParam.maxHeight.has_value()) {
-            menuProperty->UpdateMenuMaxHeight(menuParam.maxHeight.value());
-        }
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
             if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {
@@ -1707,6 +1745,9 @@ RefPtr<FrameNode> MenuView::Create(
             auto focusHub = optionNode->GetOrCreateFocusHub();
             CHECK_NULL_RETURN(focusHub, nullptr);
             focusHub->SetIsDefaultFocus(true);
+        }
+        if (optionNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            optionNode->SetThemeScopeId(menuNode->GetThemeScopeId());
         }
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);
@@ -1805,6 +1846,40 @@ void MenuView::UpdateMenuBorderEffect(
     }
 }
 
+void MenuView::UpdateStyleOptionColorMode(const PipelineContext* pipeLineContext, BlurStyleOption& styleOption)
+{
+    CHECK_NULL_VOID(pipeLineContext);
+    if (pipeLineContext->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    }
+    if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    }
+}
+
+void MenuView::UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    if (!menuParam.effectOption.has_value()) {
+        return;
+    }
+    auto pipeLineContext = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuNodeRenderContext);
+    if (menuParam.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+    } else {
+        pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+    }
+    if (menuNodeRenderContext->GetBackBlurStyle().has_value()) {
+        menuNodeRenderContext->UpdateBackBlurStyle(std::nullopt);
+    }
+    menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
+}
+
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
@@ -1812,7 +1887,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         menuNodeRenderContext->IsUniRenderEnabled()) {
         auto pipeLineContext = menuNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeLineContext);
-        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        auto selectTheme = menuNode->GetTheme<SelectTheme>(true);
         CHECK_NULL_VOID(selectTheme);
         BlurStyleOption styleOption;
         if (menuParam.blurStyleOption.has_value()) {
@@ -1838,19 +1913,10 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
+        UpdateStyleOptionColorMode(pipeLineContext, styleOption);
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
-        if (menuParam.effectOption.has_value()) {
-            if (menuParam.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
-            } else {
-                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
-            }
-            if (menuNodeRenderContext->GetBackBlurStyle().has_value()) {
-                menuNodeRenderContext->UpdateBackBlurStyle(std::nullopt);
-            }
-            menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
-        }
+        UpdateMenuEffectOption(menuNode, menuParam);
         UpdateMenuBackgroundStyleOption(menuNode, menuParam);
     } else {
         UpdateMenuBackgroundStyleSub(menuNode, menuParam);
@@ -1862,7 +1928,7 @@ void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, c
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
-    auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+    auto selectTheme = menuNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     menuNodeRenderContext->UpdateBackgroundColor(
         menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor()));
@@ -1921,6 +1987,10 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
         pattern->SetIconNode(iconNode);
         pattern->SetIcon(icon);
     }
+    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto themeScopeId = option->GetThemeScopeId();
+        row->SetThemeScopeId(themeScopeId);
+    }
     auto textNode = CreateText(value.content, row, false, value.isAIMenuOption);
     row->MountToParent(option);
     row->MarkModifyDone();
@@ -1931,10 +2001,14 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
     eventHub->SetMenuOnClick(onClickFunc);
 }
 
-RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index)
+RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
+    int32_t themeScopeId)
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
+    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        option->SetThemeScopeId(themeScopeId);
+    }
     auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
@@ -1963,10 +2037,13 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
 }
 
 RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
-    const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
+    const std::function<void()>& onClickFunc, int32_t index, int32_t themeScopeId, const std::string& icon)
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
+    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        option->SetThemeScopeId(themeScopeId);
+    }
     auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
@@ -1997,8 +2074,17 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
     return option;
 }
 
+static void NodeThemeScopeIdUpdate(const RefPtr<FrameNode>& node, int32_t themeScopeId)
+{
+    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    node->AllowUseParentTheme(false);
+    node->UpdateThemeScopeId(themeScopeId);
+}
+
 void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-    const MenuParam& menuParam, RefPtr<FrameNode> column)
+    const MenuParam& menuParam, RefPtr<FrameNode> column, int32_t themeScopeId)
 {
     bool optionsHasIcon = GetHasIcon(params);
     bool optionsHasSymbol = GetHasSymbol(params);
@@ -2006,13 +2092,13 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
         if (params[i].symbol != nullptr) {
-            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
+            optionNode = CreateMenuOption(optionsHasSymbol, params, i, themeScopeId);
         } else {
             optionNode = CreateMenuOption(
                 { .optionsHasIcon = optionsHasIcon, .content = params[i].value,
                   .isPasteOption = params[i].isPasteOption,
                   .isAIMenuOption = (params[i].isAIMenuOption || params[i].isAskCeliaOption) },
-                params[i].action, i, params[i].icon);
+                params[i].action, i, themeScopeId, params[i].icon);
             if (optionNode) {
                 auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
                 optionPattern->SetBlockClick(params[i].disableSystemClick);
@@ -2042,9 +2128,11 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         if (optionsHasIcon) {
             props->UpdateHasIcon(true);
         }
+        NodeThemeScopeIdUpdate(optionNode, themeScopeId);
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
     }
+    NodeThemeScopeIdUpdate(menuNode, themeScopeId);
 }
 
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
@@ -2111,7 +2199,7 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     CHECK_NULL_RETURN(parent, nullptr);
     auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = parent->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     props->UpdateFontSize(theme->GetEndIconWidth());
     props->UpdateSymbolColorList({theme->GetMenuIconColor()});
@@ -2148,7 +2236,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     CHECK_NULL_RETURN(parent, nullptr);
     auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = parent->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
     if (!autoWrapFlag) {
@@ -2175,7 +2263,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
     textProperty->UpdateAlignment(convertValue);
     textProperty->UpdateWordBreak(theme->GetWordBreak());
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    auto textOverlayTheme = parent->GetTheme<TextOverlayTheme>(true);
     if (isAIMenuOption && textOverlayTheme) {
         auto textStyle = theme->GetOptionTextStyle();
         auto textSize = MeasureUtil::MeasureTextSize(textStyle, value);

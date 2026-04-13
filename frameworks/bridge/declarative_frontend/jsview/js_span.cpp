@@ -80,6 +80,34 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const int32_t NUM_1 = 1;
 const int32_t NUM_2 = 2;
+
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto jsArray = JSRef<JSArray>::Cast(jsValue);
+    auto length = jsArray->Length();
+    for (uint32_t i = 0; i < length; ++i) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto axis = itemObject->GetProperty("axis");
+        auto value = itemObject->GetProperty("value");
+        auto isNormalized = itemObject->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return !fontVariations.empty();
+}
 } // namespace
 
 void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
@@ -566,6 +594,18 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     ParseTextShadowFromShadowObject(info[0], shadows);
     SpanModel::GetInstance()->SetTextShadow(shadows);
 }
+
+void JSSpan::SetFontVariations(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    FONT_VARIATIONS_LIST fontVariations;
+    if (!ParseJsFontVariations(info[0], fontVariations)) {
+        SpanModel::GetInstance()->ResetFontVariations();
+    }
+    SpanModel::GetInstance()->SetFontVariations(fontVariations);
+}
  
 
 void JSSpan::SetAccessibilityText(const JSCallbackInfo& info)
@@ -631,6 +671,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("baselineOffset", &JSSpan::SetBaselineOffset, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
     JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
+    JSClass<JSSpan>::StaticMethod("fontVariations", &JSSpan::SetFontVariations, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSpan>::StaticMethod("onHover", &JSSpan::SetOnHover);

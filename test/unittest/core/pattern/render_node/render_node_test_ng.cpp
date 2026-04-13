@@ -152,6 +152,26 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithm001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RenderNodeModifierSetRotation001
+ * @tc.desc: Verify RenderContext::SetRotation keeps the three-parameter signature and can be invoked safely.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeModifierSetRotation001, TestSize.Level1)
+{
+    using SetRotationMethod = void (RenderContext::*)(float, float, float);
+    SetRotationMethod setRotation = &RenderContext::SetRotation;
+
+    auto frameNode = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* renderContextPtr = AceType::RawPtr(renderContext);
+    ASSERT_NE(renderContextPtr, nullptr);
+    (renderContextPtr->*setRotation)(-45.5f, 30.25f, 0.75f);
+    SUCCEED();
+}
+
+/**
  * @tc.name: RenderNodeLayoutAlgorithmTest001
  * @tc.desc: RenderNodeLayoutAlgorithm.
  * @tc.type: FUNC

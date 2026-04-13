@@ -76,6 +76,7 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    static RefPtr<Theme> CreateTheme(ThemeType type);
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -89,6 +90,29 @@ void OverlayManagerTwoTestNg::TearDown()
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
 }
 
+RefPtr<Theme> OverlayManagerTwoTestNg::CreateTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 void OverlayManagerTwoTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -100,6 +124,9 @@ void OverlayManagerTwoTestNg::SetUpTestSuite()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return CreateTheme(type);
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DragBarTheme::TypeId()) {
             return AceType::MakeRefPtr<DragBarTheme>();

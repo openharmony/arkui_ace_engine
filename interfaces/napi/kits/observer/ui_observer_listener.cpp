@@ -22,6 +22,7 @@ namespace OHOS::Ace::Napi {
 namespace {
 constexpr char NAV_BAR[] = "navBar";
 constexpr char GET_MODIFIER_KEY_STATE[] = "getModifierKeyState";
+constexpr char GET_CURRENT_LOCAL_POSITION[] = "getCurrentLocalPosition";
 constexpr int32_t PARAM_SIZE_ONE = 1;
 constexpr int32_t PARAM_SIZE_TWO = 2;
 constexpr int32_t PARAM_SIZE_THREE = 3;
@@ -181,6 +182,180 @@ static napi_value GetModifierKeyState(napi_env env, napi_callback_info info)
     checkRet = CheckKeysPressed(pressedKeyCodes, checkedKeyCodes);
     napi_value result = nullptr;
     napi_get_boolean(env, checkRet, &result);
+    napi_value newResult = nullptr;
+    napi_escape_handle(env, scope, result, &newResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return newResult;
+}
+
+bool SetCurrentLocalLocationForFingerInfo(napi_env env, napi_value result, const FingerInfo& fingerInfo)
+{
+    FingerInfo* copyFingerInfo = nullptr;
+    copyFingerInfo = new FingerInfo(fingerInfo);
+    auto status = napi_wrap(
+        env, result, copyFingerInfo,
+        [](napi_env env, void* data, void* hint) {
+            auto* current = static_cast<FingerInfo*>(data);
+            if (current) {
+                delete current;
+                current = nullptr;
+            }
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        LOGE("Failed to wrap native object");
+        delete copyFingerInfo;
+        return false;
+    }
+    return true;
+}
+
+bool SetCurrentLocalLocationForClickEvent(napi_env env, napi_value result, const ClickInfo& clickInfo)
+{
+    ClickInfo* copyClickInfo = nullptr;
+    copyClickInfo = new ClickInfo(clickInfo);
+    auto status = napi_wrap(
+        env, result, copyClickInfo,
+        [](napi_env env, void* data, void* hint) {
+            auto* current = static_cast<ClickInfo*>(data);
+            if (current) {
+                delete current;
+                current = nullptr;
+            }
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        LOGE("Failed to wrap native object");
+        delete copyClickInfo;
+        return false;
+    }
+    return true;
+}
+
+bool SetCurrentLocalLocationForGestureEvent(napi_env env, napi_value result, const GestureEvent& gestureEventInfo)
+{
+    GestureEvent* copyGestureEvent = nullptr;
+    copyGestureEvent = new GestureEvent(gestureEventInfo);
+    auto status = napi_wrap(
+        env, result, copyGestureEvent,
+        [](napi_env env, void* data, void* hint) {
+            auto* current = static_cast<GestureEvent*>(data);
+            if (current) {
+                delete current;
+                current = nullptr;
+            }
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        LOGE("Failed to wrap native object");
+        delete copyGestureEvent;
+        return false;
+    }
+    return true;
+}
+
+static napi_value GetCurrentLocalPositionForTapLocation(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    napi_value thisArg;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
+    GestureEvent* wrapper = nullptr;
+    auto status = napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
+    if (status != napi_ok || !wrapper) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    Offset offset = wrapper->GetCurrentLocalLocation();
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value x = nullptr;
+    napi_value y = nullptr;
+    napi_create_double(env, offset.GetX(), &x);
+    napi_create_double(env, offset.GetY(), &y);
+    napi_set_named_property(env, result, "x", x);
+    napi_set_named_property(env, result, "y", y);
+    napi_value newResult = nullptr;
+    napi_escape_handle(env, scope, result, &newResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return newResult;
+}
+
+static napi_value GetCurrentLocalPositionForFingerInfo(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    napi_value thisArg;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
+    FingerInfo* wrapper = nullptr;
+    auto status = napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
+    if (status != napi_ok || !wrapper || !wrapper->currentLocalLocation_) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    Offset offset = wrapper->currentLocalLocation_();
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value x = nullptr;
+    napi_value y = nullptr;
+    napi_create_double(env, offset.GetX(), &x);
+    napi_create_double(env, offset.GetY(), &y);
+    napi_set_named_property(env, result, "x", x);
+    napi_set_named_property(env, result, "y", y);
+    napi_value newResult = nullptr;
+    napi_escape_handle(env, scope, result, &newResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return newResult;
+}
+
+static napi_value GetCurrentLocalPositionForClickEvent(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    napi_value thisArg;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
+    ClickInfo* wrapper = nullptr;
+    auto status = napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
+    if (status != napi_ok || !wrapper) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    Offset offset = wrapper->GetCurrentLocalLocation();
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value x = nullptr;
+    napi_value y = nullptr;
+    napi_create_double(env, offset.GetX(), &x);
+    napi_create_double(env, offset.GetY(), &y);
+    napi_set_named_property(env, result, "x", x);
+    napi_set_named_property(env, result, "y", y);
+    napi_value newResult = nullptr;
+    napi_escape_handle(env, scope, result, &newResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return newResult;
+}
+
+static napi_value GetCurrentLocalPositionForGestureEvent(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    napi_value thisArg;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
+    GestureEvent* wrapper = nullptr;
+    auto status = napi_unwrap(env, thisArg, reinterpret_cast<void**>(&wrapper));
+    if (status != napi_ok || !wrapper) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    Offset offset = wrapper->GetCurrentLocalLocation();
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value x = nullptr;
+    napi_value y = nullptr;
+    napi_create_double(env, offset.GetX(), &x);
+    napi_create_double(env, offset.GetY(), &y);
+    napi_set_named_property(env, result, "x", x);
+    napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
     napi_escape_handle(env, scope, result, &newResult);
     napi_close_escapable_handle_scope(env, scope);
@@ -900,6 +1075,14 @@ void UIObserverListener::AddGestureEventInfoOne(napi_value objValueEvent, const 
         napi_create_double(env_, gestureEventInfo.GetSpeed(), &napiSpeed);
         napi_set_named_property(env_, objValueEvent, "speed", napiSpeed);
     }
+    napi_value napiGetCurrentLocalPosition = GetNamedProperty(env_, objValueEvent, GET_CURRENT_LOCAL_POSITION);
+    if (GetValueType(env_, napiGetCurrentLocalPosition) == napi_null &&
+        SetCurrentLocalLocationForGestureEvent(env_, objValueEvent, gestureEventInfo)) {
+        napi_value funcValue = nullptr;
+        napi_create_function(
+            env_, GET_CURRENT_LOCAL_POSITION, 0, GetCurrentLocalPositionForGestureEvent, nullptr, &funcValue);
+        napi_set_named_property(env_, objValueEvent, GET_CURRENT_LOCAL_POSITION, funcValue);
+    }
     napi_close_handle_scope(env_, scope);
 }
 
@@ -1051,6 +1234,12 @@ void UIObserverListener::AddTapLocationInfo(napi_value objTapGestureEventInfo, c
     napi_value napiGlobalDisplayY = nullptr;
     napi_create_double(env_, globalDisplayLocation.GetY() / scale, &napiGlobalDisplayY);
     napi_set_named_property(env_, tapLocation, "globalDisplayY", napiGlobalDisplayY);
+    if (SetCurrentLocalLocationForGestureEvent(env_, tapLocation, gestureEventInfo)) {
+        napi_value funcValue = nullptr;
+        napi_create_function(
+            env_, GET_CURRENT_LOCAL_POSITION, 0, GetCurrentLocalPositionForTapLocation, nullptr, &funcValue);
+        napi_set_named_property(env_, tapLocation, GET_CURRENT_LOCAL_POSITION, funcValue);
+    }
     napi_set_named_property(env_, objTapGestureEventInfo, "tapLocation", tapLocation);
     napi_close_handle_scope(env_, scope);
 }
@@ -1152,6 +1341,12 @@ void UIObserverListener::AddFingerObjectInfo(napi_value napiFinger, const Finger
     napi_value napiGlobalDisplayY = nullptr;
     napi_create_double(env_, globalDisplayLocaltion.GetY() / scale, &napiGlobalDisplayY);
     napi_set_named_property(env_, napiFinger, "globalDisplayY", napiGlobalDisplayY);
+    if (SetCurrentLocalLocationForFingerInfo(env_, napiFinger, finger)) {
+        napi_value funcValue = nullptr;
+        napi_create_function(
+            env_, GET_CURRENT_LOCAL_POSITION, 0, GetCurrentLocalPositionForFingerInfo, nullptr, &funcValue);
+        napi_set_named_property(env_, napiFinger, GET_CURRENT_LOCAL_POSITION, funcValue);
+    }
 }
 
 void UIObserverListener::AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo)
@@ -1235,6 +1430,14 @@ void UIObserverListener::AddClickEventInfoTwo(napi_value objValueClickEvent, con
     if (GetValueType(env_, napiY) != napi_null) {
         napi_create_double(env_, localOffset.GetY() / scale, &napiY);
         napi_set_named_property(env_, objValueClickEvent, "y", napiY);
+    }
+    napi_value napiGetCurrentLocalPosition = GetNamedProperty(env_, objValueClickEvent, GET_CURRENT_LOCAL_POSITION);
+    if (GetValueType(env_, napiGetCurrentLocalPosition) != napi_null &&
+        SetCurrentLocalLocationForClickEvent(env_, objValueClickEvent, clickInfo)) {
+        napi_value funcValue = nullptr;
+        napi_create_function(
+            env_, GET_CURRENT_LOCAL_POSITION, 0, GetCurrentLocalPositionForClickEvent, nullptr, &funcValue);
+        napi_set_named_property(env_, objValueClickEvent, GET_CURRENT_LOCAL_POSITION, funcValue);
     }
     AddTargetObject(objValueClickEvent, clickInfo);
     napi_close_handle_scope(env_, scope);

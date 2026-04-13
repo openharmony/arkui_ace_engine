@@ -20,6 +20,7 @@ interface LayoutConstraint {
 
 interface CrossLanguageOptions {
   attributeSetting?: boolean;
+  treeOperating?: boolean;
 }
 
 interface InteractionEventBindingInfo {
@@ -363,7 +364,8 @@ class FrameNode {
     if (node === undefined || node === null) {
       return;
     }
-    if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
+    if ((node.getType() === 'ProxyFrameNode' &&
+      (!getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(node.nodePtr_))) || !this.checkValid(node)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -412,7 +414,8 @@ class FrameNode {
     if (child === undefined || child === null) {
       return;
     }
-    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+    if ((child.getType() === 'ProxyFrameNode' &&
+      !(getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(child.nodePtr_))) || !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let flag = 0;
@@ -685,7 +688,14 @@ class FrameNode {
     if (key === undefined) {
       return undefined;
     }
-    let value = __getCustomProperty__(this._nodeId, key);
+    let nodeId = this._nodeId;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const commonViewParentId = getUINativeModule().frameNode.getCommonViewParentId(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    if (commonViewParentId !== -1 && commonViewParentId !== undefined) {
+      nodeId = commonViewParentId;
+    }
+    let value = __getCustomProperty__(nodeId, key);
     if (value === undefined) {
       const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
       value = valueStr === undefined ? undefined : valueStr;
@@ -727,7 +737,7 @@ class FrameNode {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false, options.treeOperating);
     __JSScopeUtil__.restoreInstanceId();
     if (result !== 0) {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
@@ -737,8 +747,9 @@ class FrameNode {
   getCrossLanguageOptions(): CrossLanguageOptions {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+    const treeOperating = getUINativeModule().frameNode.getCrossLanguageTreeOperating(this.getNodePtr());
     __JSScopeUtil__.restoreInstanceId();
-    return { attributeSetting: attributeSetting ?? false };
+    return { attributeSetting: attributeSetting ?? false, treeOperating: treeOperating ?? false };
   }
 
   checkIfCanCrossLanguageAttributeSetting(): boolean {
@@ -996,15 +1007,27 @@ class ImmutableFrameNode extends FrameNode {
     return;
   }
   appendChild(node: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.appendChild(node);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.insertChildAfter(child, sibling);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   removeChild(node: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.removeChild(node);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   clearChildren(): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.clearChildren();
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   get commonAttribute(): ArkComponent {

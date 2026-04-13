@@ -83,6 +83,7 @@
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
@@ -2636,6 +2637,32 @@ void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
     }
 }
 
+void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    for (const auto& child : node->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(frameNode);
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            pattern->OnInActive();
+            continue;
+        }
+        auto layoutProperty = GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+            NotifyLazyChildrenOnInActive(child);
+        }
+    }
+}
+
+void FrameNode::NotifyLazyChildren()
+{
+    auto layoutProperty = GetLayoutProperty();
+    if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+        NotifyLazyChildrenOnInActive(Claim(this));
+    }
+}
+
 void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
     bool activeChanged = false;
@@ -2653,6 +2680,7 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         isActive_ = false;
         activeChanged = true;
         ClearCachedGlobalOffset();
+        NotifyLazyChildren();
     }
     CHECK_NULL_VOID(activeChanged);
 
@@ -6938,6 +6966,15 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
+    auto frameNodeWeak = WeakClaim(this);
+    auto currentGlobalOffset = Offset(touchEvent.x, touchEvent.y);
+    auto localOffset = Offset(localX, localY);
+    changedInfo.SetCurrentLocalLocationGetter([frameNodeWeak, currentGlobalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, false, 0);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     changedInfo.SetLocalLocation(Offset(localX, localY));
     SetChangeInfo(touchEvent, changedInfo);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
@@ -6968,6 +7005,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
 
 void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)
 {
+    auto frameNodeWeak = WeakClaim(this);
     // all fingers collection
     for (const auto& item : touchEvent.pointers) {
         float globalX = item.x;
@@ -6981,6 +7019,14 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo info("onTouch", item.originalId);
+        auto currentGlobalOffset = Offset(globalX, globalY);
+        auto localOffset = Offset(localX, localY);
+        info.SetCurrentLocalLocationGetter([frameNodeWeak, currentGlobalOffset, localOffset]() {
+            CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+            PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+            NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, false, 0);
+            return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+        });
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));

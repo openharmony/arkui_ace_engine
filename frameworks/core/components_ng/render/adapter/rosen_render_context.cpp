@@ -1049,12 +1049,38 @@ void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsCo
     rsColor.SetColorSpace(colorSpace);
 }
 
+void RosenRenderContext::ColorToRSColorHDR(const Color& color, Rosen::RSColor& rsColor)
+{
+    auto colorWithHeadRoomOptional = color.GetHeadRoomColor();
+    if (colorWithHeadRoomOptional.has_value()) {
+        auto colorWithHeadRoom = colorWithHeadRoomOptional.value();
+        GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+        if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
+            colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+        }
+        if (ColorSpace::BT2020 == color.GetColorSpace()) {
+            colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_BT2020;
+        }
+        rsColor = Rosen::RSColor(colorWithHeadRoom.red, colorWithHeadRoom.green, colorWithHeadRoom.blue,
+            colorWithHeadRoom.alpha, colorSpace, colorWithHeadRoom.headRoom);
+        return;
+    }
+    rsColor = ACE_UNLIKELY(color.IsPlaceholder())
+                  ? Rosen::RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()))
+                  : Rosen::RSColor::FromArgbInt(color.GetValue());
+    GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
+        colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
+    }
+    rsColor.SetColorSpace(colorSpace);
+}
+
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundColorUpdate, value);
     CHECK_NULL_VOID(rsNode_);
     OHOS::Rosen::RSColor rsColor;
-    ColorToRSColor(value, rsColor);
+    ColorToRSColorHDR(value, rsColor);
     rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }

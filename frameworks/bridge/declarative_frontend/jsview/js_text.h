@@ -98,6 +98,7 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
+    static void SetFontVariations(const JSCallbackInfo& info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
     static void SetOrphanCharOptimization(const JSCallbackInfo& info);

@@ -606,8 +606,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
-        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    bool ChangeMouseStyle(int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> format, int32_t windowId = 0,
+        bool isByPass = false, MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -875,7 +875,7 @@ public:
     std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
-    void SetCursor(int32_t cursorValue) override;
+    void SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) override;
 
     void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) override;
 

@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/event_dump.h"
+#include "core/common/input_event_monitor_manager.h"
 #include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event_hub.h"
@@ -214,6 +215,11 @@ public:
     }
 
     const RefPtr<NG::GestureDebugBoundaryManager>& GetGestureDebugBoundaryManager();
+
+    RefPtr<InputEventMonitorManager> GetInputMonitorManager() const
+    {
+        return inputMonitorManager_;
+    }
 
     void FlushCursorStyleRequests()
     {
@@ -560,6 +566,7 @@ private:
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
     RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
+    RefPtr<InputEventMonitorManager> inputMonitorManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;

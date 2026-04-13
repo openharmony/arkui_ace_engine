@@ -573,6 +573,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    for (const auto& variation : textStyle.GetFontVariations()) {
+        if (!variation.axis.empty()) {
+            txtStyle.fontVariations.SetAxisValue(
+                variation.axis, variation.value, variation.isNormalized.value_or(false));
+        }
+    }
     // Font size must be px when transferring to Rosen::TextStyle
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());

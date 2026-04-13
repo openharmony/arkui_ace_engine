@@ -50,6 +50,15 @@ public:
     RefPtr<UINode> GetNavigationNode() override;
 
     std::string ToDumpString();
+
+    //-------for force split------- begin------
+    void SplitTransitionPushStart(ForceSplitTransitionType type) override;
+    void SplitTransitionPushEnd(ForceSplitTransitionType type) override;
+    void SplitTransitionPushFinish(int32_t animationId = -1) override;
+    void SplitTransitionPopStart(ForceSplitTransitionType type) override;
+    void SplitTransitionPopEnd(ForceSplitTransitionType type) override;
+    void SplitTransitionPopFinish(int32_t animationId = -1) override;
+    //-------for force split------- end  ------
 };
 
 } // namespace OHOS::Ace::NG

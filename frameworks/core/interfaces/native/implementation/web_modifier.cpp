@@ -3123,6 +3123,26 @@ void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
     WebModelStatic::SetCameraCaptureStateChangedId(frameNode, onCameraCaptureStateChange);
 #endif // WEB_SUPPORTED
 }
+
+void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                  const Opt_OnInputmethodAttachedCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onInputMethodAttached = [callback = CallbackHelper(*optValue), weakNode, instanceId]() {
+        OnInputmethodAttached(callback, weakNode, instanceId, nullptr);
+    };
+    WebModelStatic::SetInputMethodAttachedId(frameNode, std::move(onInputMethodAttached));
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -3280,6 +3300,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
+        WebAttributeModifier::SetOnInputmethodAttachedImpl,
     };
     return &ArkUIWebModifierImpl;
 }

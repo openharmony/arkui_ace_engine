@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {

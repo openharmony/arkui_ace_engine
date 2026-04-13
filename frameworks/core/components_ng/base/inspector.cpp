@@ -203,6 +203,12 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
+void GetAllPageNodes(std::vector<RefPtr<NG::UINode>>& children,
+    const RefPtr<NG::UINode>& lastPage)
+{
+    return;
+}
+
 #else
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children,
     int32_t pageId, bool isLayoutInspector = false, bool needHandleInternal = false)
@@ -232,6 +238,26 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
     }
     for (const auto& frameChild : uiNode->GetChildren()) {
         GetFrameNodeChildren(frameChild, children, pageId, isLayoutInspector, needHandleInternal);
+    }
+}
+
+void GetAllPageNodes(std::vector<RefPtr<NG::UINode>>& children,
+    const RefPtr<NG::UINode>& lastPage)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    for (const auto& item : stageNode->GetChildren()) {
+        if (item != nullptr && lastPage == item) {
+            continue;
+        }
+        for (const auto& pageChildrenNode : item->GetChildren()) {
+            CHECK_NULL_CONTINUE(pageChildrenNode);
+            GetFrameNodeChildren(pageChildrenNode, children, item->GetPageId(), true);
+        }
     }
 }
 
@@ -515,6 +541,55 @@ void GetContextInfo(const RefPtr<PipelineContext>& context, std::unique_ptr<Json
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
 }
+struct RootComp {
+    bool operator()(const RefPtr<UINode>& a1, const RefPtr<UINode>& a2) const
+    {
+        return a1->GetId() == a2->GetId() ? AceType::RawPtr(a1) < AceType::RawPtr(a2) : a1->GetId() < a2->GetId();
+    }
+};
+RefPtr<UINode> GetRoot(const RefPtr<UINode>& uiNode)
+{
+    if (uiNode == nullptr) {
+        return uiNode;
+    }
+    if (const auto& parent = uiNode->GetParent()) {
+        if (parent->GetChildIndex(uiNode) == -1) {
+            LOGW("parent [%{public}d %{public}s] do not contain child [%{public}d %{public}s]",
+                parent->GetId(), parent->GetTag().c_str(), uiNode->GetId(), uiNode->GetTag().c_str());
+            return uiNode;
+        }
+        return GetRoot(parent);
+    }
+    return uiNode;
+}
+std::set<RefPtr<UINode>, RootComp> GetAllRoots()
+{
+    std::set<RefPtr<UINode>, RootComp> roots;
+    ElementRegister::GetInstance()->IterateElements([&roots](auto id, auto& element) {
+        if (const auto& uiNode = AceType::DynamicCast<UINode>(element)) {
+            roots.emplace(GetRoot(uiNode));
+        }
+        return false;
+    });
+    return roots;
+}
+void GetFreeNodeContent(const std::unique_ptr<JsonValue>& jsonTree, const RefPtr<UINode>& currentRoot,
+    InspectorChildrenParameters inspectorParameters)
+{
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (auto& uiNode : GetAllRoots()) {
+        if (currentRoot == nullptr || uiNode == nullptr) {
+            continue;
+        }
+        if (uiNode->GetId() == currentRoot->GetId()) {
+            continue;
+        }
+        GetInspectorChildren(uiNode, jsonNodeArray, inspectorParameters);
+    }
+    if (jsonNodeArray->GetArraySize()) {
+        jsonTree->PutRef("other_contents", std::move(jsonNodeArray));
+    }
+}
 
 std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t pageId,
     std::unique_ptr<JsonValue> jsonRoot, bool isLayoutInspector, const InspectorFilter& filter = InspectorFilter())
@@ -540,6 +615,9 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
             jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
             jsonTree->Put("ProcessID", getpid());
             jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+            if (filter.IsFreeNodesEnabled()) {
+                GetFreeNodeContent(jsonTree, pipeline->GetRootElement(), inspectorParameters);
+            }
         }
         return jsonTree->ToString();
     }
@@ -685,6 +763,13 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.translate.z = translate.z.ConvertToVp();
 }
 
+std::string Inspector::GetFreeNodesInspector()
+{
+    InspectorFilter filter;
+    filter.EnableFreeNodes();
+    bool needThrow = false;
+    return GetInspector(true, filter, needThrow);
+}
 std::string Inspector::GetInspector(bool isLayoutInspector)
 {
     InspectorFilter filter;
@@ -725,6 +810,9 @@ std::string Inspector::GetInspector(bool isLayoutInspector, const InspectorFilte
     if (key.empty()) {
         for (const auto& item : pageRootNode->GetChildren()) {
             GetFrameNodeChildren(item, children, pageId, isLayoutInspector);
+        }
+        if (filter.IsFreeNodesEnabled()) {
+            GetAllPageNodes(children, pageRootNode);
         }
         auto overlayNode = GetOverlayNode(pageRootNode);
         if (overlayNode) {
@@ -1080,8 +1168,23 @@ std::pair<uint32_t, int32_t> Inspector::ParseWindowIdFromMsg(const std::string& 
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message params is invalid");
         return {windowId, methodIndex};
     }
-    windowId = StringUtils::StringToUint(paramObj->GetString("windowId"));
+    windowId = StringUtils::StringToUint(paramObj->GetString("windowId"), INSPECTOR_INVALID_WINDOW_ID);
     return {windowId, methodIndex};
+}
+
+bool Inspector::ParseNeedFreeNodes(const std::string& message)
+{
+    auto json = JsonUtil::ParseJsonString(message);
+    if (json == nullptr || !json->IsValid() || !json->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message is invalid");
+        return false;
+    }
+    auto paramObj = json->GetObject(KEY_PARAMS);
+    if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message params is invalid");
+        return false;
+    }
+    return paramObj->GetBool(KEY_PARAM_NEED_FREE_NODES, false);
 }
 
 void InspectorOffscreenNodesMgr::AddOffscreenNode(RefPtr<FrameNode> node)

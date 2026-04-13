@@ -348,6 +348,7 @@ void InputEventActuator::OnCollectAxisEvent(
         axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
     }
 
+    axisEventTarget_->AttachFrameNode(frameNode);
     axisEventTarget_->SetOnAxisCallback(onAxisCallback);
     axisEventTarget_->SetCoordinateOffset(coordinateOffset);
     axisEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);

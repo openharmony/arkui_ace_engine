@@ -2140,6 +2140,30 @@ void deserializeAndCallSyncCallback_IMEClient_Void(Ark_VMContext vmContext, KSer
     Ark_IMEClient data = static_cast<Ark_IMEClient>(IMEClient_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, data);
 }
+void deserializeAndCallCallback_InputEventInterceptResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+        thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+            getManagedCallbackCaller(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID))));
+    thisDeserializer.readPointer();
+    Ark_InputEventInterceptResult value = InputEventInterceptResult_serializer::read(thisDeserializer);
+    call(resourceId, value);
+}
+void deserializeAndCallSyncCallback_InputEventInterceptResult_Void(
+    Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void (*)(
+        Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+        thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+            getManagedCallbackCallerSync(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID))));
+    Ark_InputEventInterceptResult value = InputEventInterceptResult_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, value);
+}
 void deserializeAndCallCallback_InsertValue_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7168,6 +7192,49 @@ void deserializeAndCallSyncImageOnCompleteCallback(Ark_VMContext vmContext, KSer
     Opt_ImageCompleteEvent loadEvent = loadEventTmpBuf;
     callSyncMethod(vmContext, resourceId, loadEvent);
 }
+void deserializeAndCallInputEventListener(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_RawInputEventWrapper event,
+        const Callback_InputEventInterceptResult_Void continuation)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_INPUTEVENTLISTENER))));
+    thisDeserializer.readPointer();
+    Ark_RawInputEventWrapper event =
+        static_cast<Ark_RawInputEventWrapper>(RawInputEventWrapper_serializer::read(thisDeserializer));
+    Callback_InputEventInterceptResult_Void continuationResult = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCaller(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID)))),
+        reinterpret_cast<void (*)(
+            Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCallerSync(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID)))) };
+    call(resourceId, event, continuationResult);
+}
+void deserializeAndCallSyncInputEventListener(
+    Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId,
+        const Ark_RawInputEventWrapper event, const Callback_InputEventInterceptResult_Void continuation)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_INPUTEVENTLISTENER))));
+    Ark_RawInputEventWrapper event =
+        static_cast<Ark_RawInputEventWrapper>(RawInputEventWrapper_serializer::read(thisDeserializer));
+    Callback_InputEventInterceptResult_Void continuationResult = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCaller(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID)))),
+        reinterpret_cast<void (*)(
+            Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)>(
+            thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                getManagedCallbackCallerSync(KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID)))) };
+    callSyncMethod(vmContext, resourceId, event, continuationResult);
+}
 void deserializeAndCallInterceptionCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -8556,6 +8623,27 @@ void deserializeAndCallSyncOnHoverStatusChangeCallback(Ark_VMContext vmContext, 
             reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONHOVERSTATUSCHANGECALLBACK))));
     Ark_HoverEventParam param = HoverEventParam_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, param);
+}
+void deserializeAndCallOnInputmethodAttachedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ONINPUTMETHODATTACHEDCALLBACK))));
+    thisDeserializer.readPointer();
+    call(resourceId);
+}
+void deserializeAndCallSyncOnInputmethodAttachedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray,
+                                                         Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_ONINPUTMETHODATTACHEDCALLBACK))));
+    callSyncMethod(vmContext, resourceId);
 }
 void deserializeAndCallOnIntelligentTrackingPreventionCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -12546,6 +12634,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallCallback_I64_Void(thisArray, thisLength);
     case KIND_CALLBACK_IMECLIENT_VOID:
         return deserializeAndCallCallback_IMEClient_Void(thisArray, thisLength);
+    case KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID:
+        return deserializeAndCallCallback_InputEventInterceptResult_Void(thisArray, thisLength);
     case KIND_CALLBACK_INSERTVALUE_BOOLEAN:
         return deserializeAndCallCallback_InsertValue_Boolean(thisArray, thisLength);
     case KIND_CALLBACK_INSERTVALUE_VOID:
@@ -12847,6 +12937,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallImageErrorCallback(thisArray, thisLength);
     case KIND_IMAGEONCOMPLETECALLBACK:
         return deserializeAndCallImageOnCompleteCallback(thisArray, thisLength);
+    case KIND_INPUTEVENTLISTENER:
+        return deserializeAndCallInputEventListener(thisArray, thisLength);
     case KIND_INTERCEPTIONCALLBACK:
         return deserializeAndCallInterceptionCallback(thisArray, thisLength);
     case KIND_INTERCEPTIONMODECALLBACK:
@@ -12923,6 +13015,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallOnHoverCallback(thisArray, thisLength);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return deserializeAndCallOnHoverStatusChangeCallback(thisArray, thisLength);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return deserializeAndCallOnInputmethodAttachedCallback(thisArray, thisLength);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisArray, thisLength);
     case KIND_ONITEMDRAGSTARTCALLBACK:
@@ -13284,6 +13378,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncCallback_I64_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_IMECLIENT_VOID:
         return deserializeAndCallSyncCallback_IMEClient_Void(vmContext, thisArray, thisLength);
+    case KIND_CALLBACK_INPUTEVENTINTERCEPTRESULT_VOID:
+        return deserializeAndCallSyncCallback_InputEventInterceptResult_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_INSERTVALUE_BOOLEAN:
         return deserializeAndCallSyncCallback_InsertValue_Boolean(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_INSERTVALUE_VOID:
@@ -13588,6 +13684,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncImageErrorCallback(vmContext, thisArray, thisLength);
     case KIND_IMAGEONCOMPLETECALLBACK:
         return deserializeAndCallSyncImageOnCompleteCallback(vmContext, thisArray, thisLength);
+    case KIND_INPUTEVENTLISTENER:
+        return deserializeAndCallSyncInputEventListener(vmContext, thisArray, thisLength);
     case KIND_INTERCEPTIONCALLBACK:
         return deserializeAndCallSyncInterceptionCallback(vmContext, thisArray, thisLength);
     case KIND_INTERCEPTIONMODECALLBACK:
@@ -13664,6 +13762,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncOnHoverCallback(vmContext, thisArray, thisLength);
     case KIND_ONHOVERSTATUSCHANGECALLBACK:
         return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
+    case KIND_ONINPUTMETHODATTACHEDCALLBACK:
+        return deserializeAndCallSyncOnInputmethodAttachedCallback(vmContext, thisArray, thisLength);
     case KIND_ONINTELLIGENTTRACKINGPREVENTIONCALLBACK:
         return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
     case KIND_ONITEMDRAGSTARTCALLBACK:

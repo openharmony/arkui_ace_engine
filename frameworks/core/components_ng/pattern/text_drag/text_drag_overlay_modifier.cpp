@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/text/text_theme.h"

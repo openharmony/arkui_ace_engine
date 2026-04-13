@@ -392,6 +392,8 @@ public:
     static void CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
         std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue);
     static void CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType);
+    static void CompleteResourceObjectWithResIdTypeGetter(
+        JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType, bool& hasGetter);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
         std::string& resName, bool isParseType);
@@ -437,10 +439,10 @@ public:
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorFromResourceForMaterial(
         const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
-    static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-        RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
-    static bool ParseJsObjColorFromResourceForMaterial(
-        const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
+    static bool ParseJsObjColorFromResource(const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj,
+        int32_t& resIdNum, int32_t& type, bool& hasGetter);
+    static bool ParseJsObjColorFromResourceForMaterial(const JSRef<JSObject>& jsObj, Color& result,
+        RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         RefPtr<ResourceObject>& resObj);
@@ -780,13 +782,14 @@ public:
         int32_t resIdNum = -1;
         int32_t resType = -1;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+        bool hasGetter = false;
+        CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
         if (resType == -1) {
             return false;
         }
 
-        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-            GetResourceObjectByBundleAndModule(jsObj);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                         : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
@@ -960,7 +963,7 @@ private:
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
     static void CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName,
-        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId);
+        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId, bool& hasGetter);
     static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
         const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);

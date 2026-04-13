@@ -1813,4 +1813,12 @@ void WebClientImpl::OnMediaCastEnter()
     CHECK_NULL_VOID(delegate);
     delegate->OnMediaCastEnter();
 }
+
+void WebClientImpl::OnInputMethodAttached()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnInputMethodAttached();
+}
 } // namespace OHOS::Ace

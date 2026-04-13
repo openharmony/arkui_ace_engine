@@ -14,10 +14,13 @@
  */
 
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.h"
-#include "core/components_ng/manager/force_split/force_split_manager.h"
+
+#include <algorithm>
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
@@ -25,6 +28,221 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension DIVIDER_WIDTH = 1.0_px;
+
+bool IsVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    return forceSplitMgr->CanPushPageToPrimary();
+}
+}
+
+float ParallelStageLayoutAlgorithm::GetDividerOffsetX() const
+{
+    auto rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    // In RTL, secondary column is laid out on the physical left side, so divider follows secondary width.
+    return rtl ? secondarySize_.Width() : primarySize_.Width();
+}
+
+OffsetF ParallelStageLayoutAlgorithm::GetPrimarySlotOffset(float pageWidth) const
+{
+    auto rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (!rtl) {
+        return OffsetF(std::max(0.0f, primarySize_.Width() - pageWidth), 0.0f);
+    }
+    return OffsetF(
+        secondarySize_.Width() + dividerSize_.Width() + std::max(0.0f, primarySize_.Width() - pageWidth), 0.0f);
+}
+
+OffsetF ParallelStageLayoutAlgorithm::GetSecondarySlotOffset() const
+{
+    auto rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (rtl) {
+        return OffsetF(0.0f, 0.0f);
+    }
+    return OffsetF(primarySize_.Width() + dividerSize_.Width(), 0.0f);
+}
+
+ForceSplitPageColumnType ParallelStageLayoutAlgorithm::GetPageLayoutColumnType(
+    const RefPtr<FrameNode>& pageNode, int32_t pageIndex) const
+{
+    CHECK_NULL_RETURN(pageNode, ForceSplitPageColumnType::NONE);
+    auto pattern = pageNode->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_RETURN(pattern, ForceSplitPageColumnType::NONE);
+    if (!pattern->IsInSplitTransitionLayout()) {
+        auto layoutProperty = pageNode->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+            return ForceSplitPageColumnType::NONE;
+        }
+    }
+    auto pageType = pattern->GetPageType();
+    if (pageType == RouterPageType::PLACEHOLDER_PAGE || pageType == RouterPageType::RELATED_PAGE) {
+        return pageIndex == secondaryIndex_ ? ForceSplitPageColumnType::SECONDARY : ForceSplitPageColumnType::NONE;
+    }
+    if (pattern->IsInSplitTransitionLayout()) {
+        return pattern->GetSplitTransitionColumnType();
+    }
+    if (pageIndex == primaryIndex_) {
+        return ForceSplitPageColumnType::PRIMARY;
+    }
+    if (pageIndex == secondaryIndex_) {
+        return ForceSplitPageColumnType::SECONDARY;
+    }
+    return ForceSplitPageColumnType::NONE;
+}
+
+void ParallelStageLayoutAlgorithm::MeasureInNewRouterSplitFlow(
+    const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper, const RefPtr<ParallelStagePattern>& stagePattern)
+{
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(stagePattern);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipeline->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
+    auto stageSize = static_cast<int32_t>(hostNode->GetChildren().size());
+    if (stageSize <= 0) {
+        return;
+    }
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    SizeCalculationForForceSplit(hostNode, frameSize);
+    primaryIndex_ = -1;
+    secondaryIndex_ = -1;
+    auto resolveIndex = [&hostNode](const RefPtr<FrameNode>& node) -> int32_t {
+        CHECK_NULL_RETURN(node, -1);
+        return hostNode->GetChildIndex(node);
+    };
+    // Only use the stable visible result calculated by manager:
+    // primary comes from the current primary column, and secondary falls back to placeholder/related page.
+    auto primaryNode = stageManager->GetTopPrimaryColumnPage();
+    auto secondaryNode = stageManager->GetTopSecondaryColumnPage();
+    if (!secondaryNode || resolveIndex(secondaryNode) < 0) {
+        secondaryNode = stageManager->GetRelatedOrPlaceHolderPage();
+    }
+    primaryIndex_ = resolveIndex(primaryNode);
+    secondaryIndex_ = resolveIndex(secondaryNode);
+    if (primaryIndex_ < 0) {
+        return;
+    }
+    if (primaryIndex_ == secondaryIndex_) {
+        secondaryIndex_ = -1;
+    }
+    // layout divider node
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(dividerWrapper);
+    auto dividerProperty = dividerWrapper->GetLayoutProperty();
+    auto dividerConstraint = dividerProperty->CreateChildConstraint();
+    dividerConstraint.selfIdealSize.SetSize(dividerSize_);
+    dividerWrapper->Measure(dividerConstraint);
+    MeasureRouterSplitPages(hostNode, layoutWrapper);
+}
+
+void ParallelStageLayoutAlgorithm::LayoutInNewRouterSplitFlow(
+    const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper, const RefPtr<ParallelStagePattern>& stagePattern)
+{
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(stagePattern);
+    // layout divider
+    auto dividerOffset = GetDividerOffsetX();
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(dividerWrapper);
+    auto dividerGeometry = dividerWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(dividerGeometry);
+    OffsetF dividerOffsetF;
+    dividerOffsetF.SetX(dividerOffset);
+    dividerOffsetF.SetY(0.0f);
+    dividerGeometry->SetMarginFrameOffset(dividerOffsetF);
+    dividerWrapper->Layout();
+    LayoutRouterSplitPages(hostNode, layoutWrapper);
+}
+
+void ParallelStageLayoutAlgorithm::MeasurePageInColumn(
+    const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType)
+{
+    switch (columnType) {
+        case ForceSplitPageColumnType::PRIMARY:
+            MeasurePage(layoutWrapper, primarySize_);
+            return;
+        case ForceSplitPageColumnType::SECONDARY:
+            MeasurePage(layoutWrapper, secondarySize_);
+            return;
+        default:
+            return;
+    }
+}
+
+void ParallelStageLayoutAlgorithm::MeasureRouterSplitPages(
+    const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(layoutWrapper);
+    auto stageSize = static_cast<int32_t>(hostNode->GetChildren().size());
+    for (int32_t index = 0; index < stageSize; ++index) {
+        if (index == 0) {
+            continue;
+        }
+        auto pageNode = AceType::DynamicCast<FrameNode>(hostNode->GetChildAtIndex(index));
+        if (!pageNode || pageNode->GetTag() != V2::PAGE_ETS_TAG) {
+            continue;
+        }
+        auto columnType = GetPageLayoutColumnType(pageNode, index);
+        if (columnType == ForceSplitPageColumnType::NONE) {
+            continue;
+        }
+        auto pageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(pageWrapper);
+        MeasurePageInColumn(pageWrapper, columnType);
+    }
+}
+
+void ParallelStageLayoutAlgorithm::LayoutPageInColumn(
+    const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    OffsetF offset;
+    switch (columnType) {
+        case ForceSplitPageColumnType::PRIMARY:
+            offset = GetPrimarySlotOffset(geometryNode->GetFrameSize().Width());
+            break;
+        case ForceSplitPageColumnType::SECONDARY:
+            offset = GetSecondarySlotOffset();
+            break;
+        default:
+            return;
+    }
+    geometryNode->SetMarginFrameOffset(offset);
+    layoutWrapper->Layout();
+}
+
+void ParallelStageLayoutAlgorithm::LayoutRouterSplitPages(
+    const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(layoutWrapper);
+    auto stageSize = static_cast<int32_t>(hostNode->GetChildren().size());
+    for (int32_t index = 0; index < stageSize; ++index) {
+        if (index == 0) {
+            continue;
+        }
+        auto pageNode = AceType::DynamicCast<FrameNode>(hostNode->GetChildAtIndex(index));
+        if (!pageNode || pageNode->GetTag() != V2::PAGE_ETS_TAG) {
+            continue;
+        }
+        auto columnType = GetPageLayoutColumnType(pageNode, index);
+        if (columnType == ForceSplitPageColumnType::NONE) {
+            continue;
+        }
+        auto pageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(pageWrapper);
+        LayoutPageInColumn(pageWrapper, columnType);
+    }
 }
 
 void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -46,9 +264,14 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    auto primaryNode = stagePattern->GetPrimaryPage();
-    if (primaryNode) {
-        primaryIndex_ = hostNode->GetChildIndex(primaryNode);
+    if (IsVirtualStackBasedSplit(hostNode)) {
+        MeasureInNewRouterSplitFlow(hostNode, layoutWrapper, stagePattern);
+        return;
+    }
+
+    auto homePage = stagePattern->GetHomePage();
+    if (homePage) {
+        primaryIndex_ = hostNode->GetChildIndex(homePage);
     } else {
         primaryIndex_ = -1;
     }
@@ -57,7 +280,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     if (primaryIndex_ == -1) {
-        // if primary page is not set, layout page in center position
+        // Legacy split behavior keeps the single router page centered until home page is identified.
         MeasureDetailPage(layoutWrapper->GetOrCreateChildByIndex(stageSize - 1));
         return;
     }
@@ -96,10 +319,22 @@ void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(layoutWrapper);
     auto stageSize = static_cast<int32_t>(hostNode->GetChildren().size());
     if (stageSize <= 0) {
         return;
     }
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(stagePattern);
+    if (IsVirtualStackBasedSplit(hostNode)) {
+        if (primaryIndex_ < 0) {
+            return;
+        }
+        LayoutInNewRouterSplitFlow(hostNode, layoutWrapper, stagePattern);
+        return;
+    }
+
     auto stageWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     if (primaryIndex_ == -1) {
         auto pageWrapper = layoutWrapper->GetOrCreateChildByIndex(stageSize - 1);

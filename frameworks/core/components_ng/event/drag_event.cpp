@@ -358,6 +358,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+        CHECK_NULL_VOID(prepareDragFrameNode);
         if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
             (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
             info.GetSourceDevice() != SourceType::MOUSE && !actuator->isForDragDrop_)) {
@@ -949,20 +950,16 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto parent = frameNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent && parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-    }
-    if (!parent) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
-            frameNode->GetTag().c_str(), frameNode->GetDepth());
-        return;
-    }
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto rootNode = manager->GetRootNode().Upgrade();
+    if (!rootNode) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
+            frameNode->GetTag().c_str(), frameNode->GetDepth());
+        return;
+    }
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
 #ifdef WEB_SUPPORTED
@@ -990,11 +987,11 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             auto windowScene = manager->FindWindowScene(frameNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
         } else {
-            columnNode->MountToParent(parent);
+            columnNode->MountToParent(rootNode);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
             manager->SetFilterColumnNode(columnNode);
-            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         AnimationOption option;
         BlurStyleOption styleOption;
@@ -1157,8 +1154,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imagePattern->SetSyncLoad(true);
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProps);
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
@@ -1298,6 +1297,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto props = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(props);
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
     BindClickEvent(columnNode);
@@ -1444,10 +1444,48 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 
 void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode)
 {
-    auto preDragFrameNode =
-        frameNode ? frameNode : DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_VOID(preDragFrameNode);
-    auto instanceId = preDragFrameNode->GetInstanceId();
+    auto targetInstanceId = -1;
+    if (frameNode) {
+        targetInstanceId = frameNode->GetInstanceId();
+    } else {
+        targetInstanceId = DragDropGlobalController::GetInstance().GetPrepareDragFrameNodeId();
+    }
+
+    if (targetInstanceId == -1) {
+        return;
+    }
+
+    auto currentInstanceId = Container::CurrentId();
+    if (targetInstanceId == currentInstanceId) {
+        auto prepareDragFrameNode = frameNode ? frameNode :
+            DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+        if (prepareDragFrameNode) {
+            ExecutePreDragActionWithFrameNode(preDragStatus, prepareDragFrameNode);
+        }
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetContextByContainerId(targetInstanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [preDragStatus, targetInstanceId]() {
+            ContainerScope scope(targetInstanceId);
+            auto frameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
+            if (frameNode) {
+                ExecutePreDragActionWithFrameNode(preDragStatus, frameNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+}
+
+void DragEventActuator::ExecutePreDragActionWithFrameNode(
+    const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto instanceId = frameNode->GetInstanceId();
     ContainerScope scope(instanceId);
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
@@ -1456,7 +1494,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
-    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1482,7 +1520,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         }
     }
 
-    ExecutePreDragFunc(preDragFrameNode, preDragStatus, onPreDragStatus);
+    ExecutePreDragFunc(frameNode, preDragStatus, onPreDragStatus);
 }
 
 void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
@@ -1493,19 +1531,7 @@ void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
     CHECK_NULL_VOID(eventHub);
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
-    if (preDragStatus == PreDragStatus::PREVIEW_LIFT_FINISHED ||
-        preDragStatus == PreDragStatus::PREVIEW_LANDING_FINISHED) {
-        auto mainPipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_VOID(mainPipeline);
-        auto taskScheduler = mainPipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask(
-            [onPreDragStatus, callback = onPreDragFunc]() {
-                CHECK_NULL_VOID(callback);
-                callback(onPreDragStatus);
-            },
-            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
-    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+    if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
         onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
@@ -1656,7 +1682,9 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         pattern->ShowAIEntityMenuForCancel();
         return;
     }
-    auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
+    auto geometryNode = dragNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto dragFrame = geometryNode->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();
     auto pixelMap = gestureHub->GetPixelMap();

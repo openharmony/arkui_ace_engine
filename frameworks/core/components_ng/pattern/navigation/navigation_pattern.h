@@ -674,6 +674,22 @@ public:
         isSplitDisplay_ = isSplit;
     }
     void UpdateForceSplitHomeDestVisibility();
+    bool IsSecondaryPushToPrimaryScene() const
+    {
+        return isSecondaryPushToPrimaryScene_;
+    }
+    void SetIsSecondaryPushToPrimaryScene(bool isPush)
+    {
+        isSecondaryPushToPrimaryScene_ = isPush;
+    }
+    bool IsPrimaryPopToSecondaryScene() const
+    {
+        return isPrimaryPopToSecondaryScene_;
+    }
+    void SetIsPrimaryPopToSecondaryScene(bool isPop)
+    {
+        isPrimaryPopToSecondaryScene_ = isPop;
+    }
     //-------for force split------- end------
 
 private:
@@ -863,6 +879,7 @@ private:
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
+    static std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -884,6 +901,23 @@ private:
     void ProcessHideNavBarChangeInForceSplit();
     void ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop);
     void ReportTopDestinationInForceSplit();
+
+    void ResetSecondaryPushPrimarySceneState();
+    void AdjustNodeForStackSync(
+        std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+        std::optional<std::pair<std::string, RefPtr<UINode>>> curTop);
+    void AdjustNodeForStackSyncWhenSplitDisplay(
+        std::optional<std::pair<std::string, RefPtr<UINode>>> preTop,
+        std::optional<std::pair<std::string, RefPtr<UINode>>> curTop);
+    void AdjustNodeForStackSyncWhenStackDisplay();
+
+    void AdjustNodeForLayout();
+    void AdjustNodeForSplitDisplayReconfigure();
+    void AdjustNodeForStackDisplayReconfigure();
+
+    bool IsTransitionShouldMovePageToPrimary(
+        const RefPtr<NavDestinationGroupNode>& preTopDest,
+        const RefPtr<NavDestinationGroupNode>& curTopDest);
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -967,7 +1001,16 @@ private:
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    std::vector<WeakPtr<NavDestinationGroupNode>> secondaryNodes_;
     bool isSplitDisplay_ = false;
+    bool isSecondaryPushToPrimaryScene_ = false;
+    WeakPtr<NavDestinationNodeBase> splitPushExitNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPushMoveNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPushEnterNode_ = nullptr;
+    bool isPrimaryPopToSecondaryScene_ = false;
+    WeakPtr<NavDestinationNodeBase> splitPopExitNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPopMoveNode_ = nullptr;
+    WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
     //-------for force split------- end  ------
 };
 

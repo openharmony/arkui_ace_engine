@@ -47,6 +47,8 @@ public:
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
+    void SetFontVariations(const FONT_VARIATIONS_LIST& value) override;
+    void ResetFontVariations() override;
     void SetTextCase(TextCase value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -87,6 +89,8 @@ public:
     static void ResetTextDecorationStyle(UINode* uiNode);
     static void SetTextDecorationColor(UINode* uiNode, const Color& value);
     static void ResetTextDecorationColor(UINode* uiNode);
+    static void SetFontVariations(UINode* uiNode, const FONT_VARIATIONS_LIST& value);
+    static void ResetFontVariations(UINode* uiNode);
     static void SetTextColor(UINode* uiNode, const Color& value);
     static void ResetTextColor(UINode* uiNode);
     static void SetLetterSpacing(UINode* uiNode, const Dimension& value);

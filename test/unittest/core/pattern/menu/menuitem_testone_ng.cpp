@@ -120,6 +120,7 @@ void MenuItemTestOneNg::SetUp()
     menuItemLayoutAlgorithm_ = AceType::MakeRefPtr<MenuItemLayoutAlgorithm>();
     MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 

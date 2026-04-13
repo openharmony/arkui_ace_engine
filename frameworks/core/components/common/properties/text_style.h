@@ -59,6 +59,19 @@ struct DimensionWithActual {
     float actualValue = 0.0f;
 };
 
+struct FontVariation {
+    std::string axis;
+    float value = 0.0f;
+    std::optional<bool> isNormalized;
+
+    bool operator==(const FontVariation& rhs) const
+    {
+        return axis == rhs.axis && NearEqual(value, rhs.value) && isNormalized == rhs.isNormalized;
+    }
+};
+
+using FONT_VARIATIONS_LIST = std::vector<FontVariation>;
+
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
     uint32_t maxLines = INT32_MAX;
@@ -748,6 +761,27 @@ public:
         }
     }
 
+    const FONT_VARIATIONS_LIST& GetFontVariations() const
+    {
+        return fontVariations_;
+    }
+
+    void SetFontVariations(const FONT_VARIATIONS_LIST& fontVariations)
+    {
+        if (fontVariations == fontVariations_) {
+            return;
+        }
+        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_VARIATIONS));
+        fontVariations_ = fontVariations;
+    }
+
+    void SetFontVariations(const std::optional<FONT_VARIATIONS_LIST>& fontVariations)
+    {
+        if (fontVariations.has_value()) {
+            SetFontVariations(fontVariations.value());
+        }
+    }
+
     const Dimension& GetLineHeight() const
     {
         return lineHeight_.value;
@@ -1056,6 +1090,7 @@ private:
     int32_t textStyleUid_ = 0;
     int32_t symbolUid_ = 0;
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
+    FONT_VARIATIONS_LIST fontVariations_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     // use 14px for normal font size.

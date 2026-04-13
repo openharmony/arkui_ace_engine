@@ -58,4 +58,9 @@ std::string FeatureParam::GetArkWebAutoLayoutConfig()
 {
     return FeatureParamManager::GetInstance().GetArkWebAutoLayoutConfig();
 }
+
+bool FeatureParam::IsSmartLayoutEnabled()
+{
+    return FeatureParamManager::GetInstance().IsSmartLayoutEnabled();
+}
 } // OHOS::Ace

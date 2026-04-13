@@ -49,6 +49,21 @@ std::unique_ptr<JsonValue> CovertShadowsToJson(const std::vector<Shadow>& shadow
     }
     return jsonShadows;
 }
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
+}
 } // namespace
 
 std::string TextLayoutProperty::GetCopyOptionString() const
@@ -142,6 +157,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("fontWeight",
         GetFontWeightInJson(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);

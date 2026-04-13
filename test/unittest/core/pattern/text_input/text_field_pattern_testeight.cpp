@@ -18,6 +18,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/task_executor_impl.h"
 #include "test/mock/frameworks/core/common/mock_font_manager.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"

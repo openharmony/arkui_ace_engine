@@ -2422,6 +2422,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     auto lastIter = pageRouterStack_.erase(iter);
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
     popNode->MovePosition(GetLastPageIndex());
+    stageManager->OnStageNodeStructureChanged();
     for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
         auto page = iter->Upgrade();
         if (!page) {

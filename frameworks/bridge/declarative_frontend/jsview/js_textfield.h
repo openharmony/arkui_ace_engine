@@ -17,18 +17,16 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTFIELD_H
 
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/compatible/components/text_field/text_field_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/compatible/components/text_field/text_field_controller.h"
-#include "frameworks/core/components/text_field/textfield_theme.h"
-#include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
+
+class JSTextEditableController;
 
 class JSTextField : public JSViewAbstract {
 public:

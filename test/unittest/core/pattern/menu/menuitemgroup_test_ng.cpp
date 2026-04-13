@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,12 @@ void MenuItemGroupTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([menuTheme_](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == MenuTheme::TypeId()) {
+            return menuTheme_;
+        }
+        return AceType::MakeRefPtr<SelectTheme>();
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
         if (type == MenuTheme::TypeId()) {
             return menuTheme_;
@@ -896,6 +902,9 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern004, TestSize.Level1)
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     selectTheme->menuHeaderFontWeight_ = FontWeight::MEDIUM;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return selectTheme;
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
         return selectTheme;
     });
@@ -1474,5 +1483,65 @@ HWTEST_F(MenuItemGroupTestNg, AttachBottomDivider002, TestSize.Level1)
     ASSERT_NE(parent, nullptr);
     menuItemGroupPattern.AttachBottomDivider();
     EXPECT_EQ(parent->GetChildIndex(node), 0);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: MenuView OnThemeScopeUpdate. when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+        // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    auto ret = menuItemGroupPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId());
+    EXPECT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: MenuView OnThemeScopeUpdate. when version is 20.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    auto ret = menuItemGroupPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId());
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

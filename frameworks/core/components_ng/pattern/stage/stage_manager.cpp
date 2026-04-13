@@ -711,6 +711,7 @@ void StageManager::AbortAnimation()
         }
         popAnimations_.clear();
     }
+    OnAbortAnimation();
 }
 
 std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)

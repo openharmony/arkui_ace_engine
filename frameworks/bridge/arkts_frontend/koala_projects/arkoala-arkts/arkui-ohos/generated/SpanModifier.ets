@@ -28,7 +28,8 @@ import { Resource as global_resource_Resource } from 'global.resource'
 import { DecorationStyleInterface } from './component/styledString'
 import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from './component/common'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
-import { FontConfigs, FontWeightConfigs } from './component/textCommon'
+import { FontVariation, FontConfigs, FontWeightConfigs } from './component/textCommon'
+import { default as text } from '@ohos.graphics.text'
 export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
@@ -61,6 +62,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     public _id_0_0value?: string | undefined
     public _onClick_0_0value?: ((event: ClickEvent) => void) | undefined
     public _onHover_0_0value?: HoverCallback | undefined
+    public _fontVariations_0_0value?: Array<FontVariation> | undefined
     public _font_0_0value?: arkui_component_units_Font | undefined
     public _font_0_1value?: FontConfigs | undefined
     public _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
@@ -334,7 +336,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         if (flagArray[15] != 0) {
             switch (flagArray[15]) {
                 case 1: {
-                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined), (this._font_0_1value as FontConfigs | undefined));
+                    peer.setFontVariationsAttribute((this._fontVariations_0_0value as Array<FontVariation> | undefined));
                     flagArray[15] = 2;
                     break;
                 }
@@ -344,14 +346,14 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
                 default: {
                     flagArray[15] = 0;
-                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined), (undefined as FontConfigs | undefined));
+                    peer.setFontVariationsAttribute((undefined as Array<FontVariation> | undefined));
                 }
             }
         }
         if (flagArray[16] != 0) {
             switch (flagArray[16]) {
                 case 1: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (this._fontWeight_0_1value as FontWeightConfigs | undefined));
+                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined), (this._font_0_1value as FontConfigs | undefined));
                     flagArray[16] = 2;
                     break;
                 }
@@ -361,14 +363,14 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
                 default: {
                     flagArray[16] = 0;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontWeightConfigs | undefined));
+                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined), (undefined as FontConfigs | undefined));
                 }
             }
         }
         if (flagArray[17] != 0) {
             switch (flagArray[17]) {
                 case 1: {
-                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (this._fontWeight_0_1value as FontWeightConfigs | undefined));
                     flagArray[17] = 2;
                     break;
                 }
@@ -378,14 +380,14 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
                 default: {
                     flagArray[17] = 0;
-                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontWeightConfigs | undefined));
                 }
             }
         }
         if (flagArray[18] != 0) {
             switch (flagArray[18]) {
                 case 1: {
-                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
                     flagArray[18] = 2;
                     break;
                 }
@@ -395,6 +397,23 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
                 default: {
                     flagArray[18] = 0;
+                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[19] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[19] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[19] = 0;
                 }
             }
         }
@@ -589,6 +608,18 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
             switch (flagArray[15]) {
                 case 1:
                 case 3: {
+                    this.fontVariations((modifier._fontVariations_0_0value as Array<FontVariation> | undefined));
+                    break;
+                }
+                default: {
+                    this.fontVariations((undefined as Array<FontVariation> | undefined));
+                }
+            }
+        }
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
                     this.font((modifier._font_0_0value as arkui_component_units_Font | undefined), (modifier._font_0_1value as FontConfigs | undefined));
                     break;
                 }
@@ -597,8 +628,8 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (flagArray[16] != 0) {
-            switch (flagArray[16]) {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
                 case 1:
                 case 3: {
                     this.fontWeight((modifier._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (modifier._fontWeight_0_1value as FontWeightConfigs | undefined));
@@ -609,8 +640,8 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (flagArray[17] != 0) {
-            switch (flagArray[17]) {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
                 case 1:
                 case 3: {
                     this.onClick((modifier._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (modifier._onClick_1_1value as double | undefined));
@@ -621,8 +652,8 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (flagArray[18] != 0) {
-            switch (flagArray[18]) {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
                 case 1:
                 case 3: {
                     this.debugLine((modifier._debugLine_0_0value as string), (modifier._debugLine_0_1value as string | undefined));
@@ -783,47 +814,57 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         }
         return this
     }
-    font(value: arkui_component_units_Font | undefined, fontConfigs?: FontConfigs): this {
-        if (((this._flagArray[15]) == (0)) || (true) || (true)) {
+    fontVariations(value: Array<FontVariation> | undefined): this {
+        if (((this._flagArray[15]) == (0)) || (true)) {
             this._flagArray[15] = 1
-            this._font_0_0value = value
-            this._font_0_1value = fontConfigs
+            this._fontVariations_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[15] = 3
         }
         return this
     }
-    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+    font(value: arkui_component_units_Font | undefined, fontConfigs?: FontConfigs): this {
         if (((this._flagArray[16]) == (0)) || (true) || (true)) {
             this._flagArray[16] = 1
-            this._fontWeight_0_0value = weight
-            this._fontWeight_0_1value = fontWeightConfigs
+            this._font_0_0value = value
+            this._font_0_1value = fontConfigs
             this._state.fireChange()
         } else {
             this._flagArray[16] = 3
         }
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
-        if (((this._flagArray[17]) == (0)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold))) {
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        if (((this._flagArray[17]) == (0)) || (true) || (true)) {
             this._flagArray[17] = 1
-            this._onClick_1_0value = event
-            this._onClick_1_1value = distanceThreshold
+            this._fontWeight_0_0value = weight
+            this._fontWeight_0_1value = fontWeightConfigs
             this._state.fireChange()
         } else {
             this._flagArray[17] = 3
         }
         return this
     }
-    debugLine(sourceLine: string, moduleName?: string): this {
-        if (((this._flagArray[18]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (((this._flagArray[18]) == (0)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold))) {
             this._flagArray[18] = 1
+            this._onClick_1_0value = event
+            this._onClick_1_1value = distanceThreshold
+            this._state.fireChange()
+        } else {
+            this._flagArray[18] = 3
+        }
+        return this
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[19]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName))) {
+            this._flagArray[19] = 1
             this._debugLine_0_0value = sourceLine
             this._debugLine_0_1value = moduleName
             this._state.fireChange()
         } else {
-            this._flagArray[18] = 3
+            this._flagArray[19] = 3
         }
         return this
     }
