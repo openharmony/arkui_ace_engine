@@ -393,12 +393,14 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
     listItemEventHub->SetOnOffsetChangeOffset(std::move(offsetChangeCallback));
 }
 
-void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
+bool ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
 {
     auto host = GetHost();
+    bool shouldSkipClose =
+        !host || !host->IsOnMainTree() || !host->IsActive() || GetSwipeActionState() == SwipeActionState::COLLAPSED;
     onFinishEvent_ = std::move(onFinishCallback);
-    FREE_NODE_CHECK(host, CloseSwipeAction, std::move(onFinishEvent_));
     ResetSwipeStatus(true);
+    return shouldSkipClose;
 }
 
 void ListItemPattern::ExpandSwipeAction(ListItemSwipeActionDirection direction)

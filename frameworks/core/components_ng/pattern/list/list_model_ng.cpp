@@ -1656,6 +1656,30 @@ void ListModelNG::SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch);
 }
 
+void ListModelNG::SetBackPressCloseSwipeAction(bool closeSwipeAction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBackPressCloseSwipeAction(frameNode, closeSwipeAction);
+}
+
+void ListModelNG::SetBackPressCloseSwipeAction(FrameNode* frameNode, bool closeSwipeAction)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBackPressCloseSwipeAction(closeSwipeAction);
+    pattern->UpdateBackPressCloseSwipeActionCallback();
+}
+
+bool ListModelNG::GetBackPressCloseSwipeAction(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetBackPressCloseSwipeAction();
+}
+
 void ListModelNG::SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool supportEmptyBranch)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch, frameNode);

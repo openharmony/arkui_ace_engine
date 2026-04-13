@@ -2432,6 +2432,8 @@ typedef struct Ark_LinearGradientOptions Ark_LinearGradientOptions;
 typedef struct Opt_LinearGradientOptions Opt_LinearGradientOptions;
 typedef struct Ark_LineSpacingOptions Ark_LineSpacingOptions;
 typedef struct Opt_LineSpacingOptions Opt_LineSpacingOptions;
+typedef struct Ark_ListBackPressBehavior Ark_ListBackPressBehavior;
+typedef struct Opt_ListBackPressBehavior Opt_ListBackPressBehavior;
 typedef struct Ark_ListItemGroupOptions Ark_ListItemGroupOptions;
 typedef struct Opt_ListItemGroupOptions Opt_ListItemGroupOptions;
 typedef struct Ark_ListItemOptions Ark_ListItemOptions;
@@ -16375,6 +16377,14 @@ typedef struct Opt_LineSpacingOptions {
     Ark_Tag tag;
     Ark_LineSpacingOptions value;
 } Opt_LineSpacingOptions;
+typedef struct Ark_ListBackPressBehavior {
+    /* kind: Interface */
+    Opt_Boolean closeSwipeAction;
+} Ark_ListBackPressBehavior;
+typedef struct Opt_ListBackPressBehavior {
+    Ark_Tag tag;
+    Ark_ListBackPressBehavior value;
+} Opt_ListBackPressBehavior;
 typedef struct Ark_ListItemGroupOptions {
     /* kind: Interface */
     Opt_CustomNodeBuilder header;
@@ -25176,6 +25186,8 @@ typedef struct GENERATED_ArkUIListModifier {
                         const Opt_Boolean* value);
     void (*setScrollSnapAnimationSpeed)(Ark_NativePointer node,
                                         const Opt_ScrollSnapAnimationSpeed* value);
+    void (*setBackPressBehavior)(Ark_NativePointer node,
+                                 const Opt_ListBackPressBehavior* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
                              const Opt_Callback_I32_I32_I32_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,

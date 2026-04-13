@@ -96,6 +96,7 @@ class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
+class BackPressHandlerManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -523,6 +524,8 @@ public:
     {
         return sharedTransitionManager_;
     }
+
+    const RefPtr<BackPressHandlerManager>& GetBackPressHandlerManager();
 
     RefPtr<FrameNode> GetPageRootNode();
     // Helper functions for in-order traversal of UINode children
@@ -1744,6 +1747,7 @@ private:
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
     CompatibleManager compatibleManager_;
     std::list<TouchEvent> compatibleTouchEvents_;
+    RefPtr<BackPressHandlerManager> backPressHandlerManager_;
 };
 
 /**

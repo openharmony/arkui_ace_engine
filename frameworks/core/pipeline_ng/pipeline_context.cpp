@@ -50,6 +50,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
+#include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
 #include "core/common/ime/input_method_manager.h"
@@ -2001,6 +2002,14 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
+const RefPtr<BackPressHandlerManager>& PipelineContext::GetBackPressHandlerManager()
+{
+    if (!backPressHandlerManager_) {
+        backPressHandlerManager_ = MakeRefPtr<BackPressHandlerManager>();
+    }
+    return backPressHandlerManager_;
+}
+
 bool PipelineContext::FlushSafeArea(
     int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas)
 {
@@ -3280,6 +3289,12 @@ bool PipelineContext::OnBackPressed()
     auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     if (textfieldManager && textfieldManager->OnBackPressed()) {
         LOGI("textfield consumed backpressed event");
+        return true;
+    }
+
+    auto backPressHandlerManager = backPressHandlerManager_;
+    if (backPressHandlerManager && backPressHandlerManager->OnBackPressed(taskExecutor_)) {
+        LOGI("BackPressHandlerManager consumed backpressed event");
         return true;
     }
 

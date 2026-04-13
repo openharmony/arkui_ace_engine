@@ -3970,6 +3970,8 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetOnListReachEnd));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportEmptyBranchInLazyLoading"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSupportEmptyBranchInLazyLoading));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackPressCloseSwipeAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetBackPressCloseSwipeAction));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
 }
 

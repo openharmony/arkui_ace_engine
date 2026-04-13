@@ -7301,6 +7301,19 @@ typedef enum {
     NODE_LIST_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1003019,
 
     /**
+     * @brief Sets the back button behavior for the List component. Attribute setting, resetting, and obtaining APIs are supported.
+     *
+     * The parameter format for setting properties using {@link ArkUI_AttributeItem} is as follows:
+     * .value[0].i32: Whether to collapse the scroll menu when the back button is clicked. 0: no; 1: yes. Default value: 1.
+     *
+     * The parameter format for obtaining properties using {@link ArkUI_AttributeItem} is as follows:
+     * .value[0].i32: Whether to collapse the scroll menu when the back button is clicked. 0: no; 1: yes.
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_BACK_PRESS_BEHAVIOR = 1003020,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
