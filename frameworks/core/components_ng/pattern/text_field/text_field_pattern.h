@@ -1991,6 +1991,8 @@ protected:
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool OnThemeScopeUpdateColor(RefPtr<TextFieldLayoutProperty> textFieldLayoutProperty,
+    RefPtr<TextFieldPaintProperty> paintProperty, RefPtr<TextFieldTheme> textFieldTheme);
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

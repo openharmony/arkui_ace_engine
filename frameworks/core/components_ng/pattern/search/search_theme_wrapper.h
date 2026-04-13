@@ -48,12 +48,16 @@ public:
     {
         if (const auto& colors = theme.Colors(); colors) {
             textColor_ = colors->FontPrimary();
+            focusTextColor_ = colors->FontPrimary();
             placeholderColor_ = colors->FontSecondary();
-            searchIconColor_ = colors->IconSecondary();
-            symbolIconColor_ = colors->FontSecondary();
+            focusPlaceholderColor_ = colors->FontSecondary();
+            searchIconColor_ = colors->FontSecondary();
             focusIconColor_ = colors->FontSecondary();
+            symbolIconColor_ = colors->FontSecondary();
+            searchDividerColor_ = colors->CompDivider();
             searchButtonTextColor_ = colors->FontEmphasize();
-
+            hoverColor_ = colors->InteractiveHover();
+            touchColor_ = colors->InteractiveClick();
             textStyle_.SetTextColor(textColor_);
         }
     }

@@ -606,11 +606,18 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     UnRegisterResource("selectedBackgroundColor");
     if (!ParseJsColor(info[0], selectedColor, resourceObject)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedColor();
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            TextFieldModel::GetInstance()->ResetSelectedBackgroundColor();
+            return;
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+            CHECK_NULL_VOID(theme);
+            selectedColor = theme->GetSelectedColor();
+        }
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<Color>("selectedBackgroundColor", resourceObject, selectedColor);

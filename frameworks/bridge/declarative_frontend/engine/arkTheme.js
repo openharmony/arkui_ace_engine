@@ -1165,6 +1165,7 @@ ArkThemeWhiteList.whiteList = [
     'LoadingProgress',
     'Progress',
     'Scroll',
+    'JSSearch',
     'Swiper',
     'Text',
     'TextPicker',

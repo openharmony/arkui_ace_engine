@@ -211,11 +211,11 @@ protected:
     TextTheme() = default;
     TextStyle textStyle_;
     Color textClockFontColor_ = Color::BLACK;
+    Color dragBackgroundColor_ = Color::WHITE;
 
 private:
     Color caretColor_;
     Color selectedColor_;
-    Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
