@@ -1386,6 +1386,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     auto dayString = (json->GetUInt("day") < 10 ? "0" : "") + std::to_string(json->GetUInt("day"));
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    SetSelectedType(selected_);
     UpdateAccessibilityText();
     FlushAddAndSubButton();
 }
