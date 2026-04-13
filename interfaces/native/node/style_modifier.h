@@ -23,11 +23,12 @@ namespace OHOS::Ace::NodeModel {
 
 [[deprecated]] void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value);
 
-int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item);
+int32_t SetNodeAttribute(
+    ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item, void* errorInfoPtr = nullptr);
 
 const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
 
-int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
+int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, void* errorInfoPtr = nullptr);
 
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_STYLE_MODIFIER_H
