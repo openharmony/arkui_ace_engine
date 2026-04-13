@@ -3700,7 +3700,7 @@ bool DynamicKeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason,
     int32_t instanceId,
     const RefPtr<PipelineBase>& pipelineContext,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction, 
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);

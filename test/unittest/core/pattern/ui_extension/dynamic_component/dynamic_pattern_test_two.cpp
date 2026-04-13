@@ -835,12 +835,14 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest004, TestSize.L
     // allowOccupied_ is false
     safeManager->aliveDynamics_.try_emplace(dynamicNodeId, dynamicPattern);
 
-    bool result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
+    bool result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline,
+        OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
     EXPECT_FALSE(result);
     
     // allowOccupied_ is true
     dynamicPattern->SetAllowOccupied(true);
-    result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
+    result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline,
+        OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
     // Since mock host wouldn't have proper focus setup, it continues and returns false
     EXPECT_FALSE(result);
 #endif

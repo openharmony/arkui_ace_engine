@@ -1855,7 +1855,7 @@ void NG::PipelineContext::SetDynamicComponentSafeManager(const RefPtr<NG::Dynami
 
 RefPtr<NG::DynamicComponentSafeManager> NG::PipelineContext::GetDynamicComponentSafeManager()
 {
-    if(!dynamicComponentSafeManager_) {
+    if (!dynamicComponentSafeManager_) {
         dynamicComponentSafeManager_ = AceType::MakeRefPtr<NG::DynamicComponentSafeManager>();
     }
     return dynamicComponentSafeManager_;

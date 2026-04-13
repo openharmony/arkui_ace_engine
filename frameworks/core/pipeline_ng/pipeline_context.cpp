@@ -7960,7 +7960,7 @@ void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicCompone
 
 RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeManager()
 {
-    if(!dynamicComponentSafeManager_) {
+    if (!dynamicComponentSafeManager_) {
         dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     }
     return dynamicComponentSafeManager_;
