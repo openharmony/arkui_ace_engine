@@ -855,8 +855,9 @@ std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<L
 {
     std::vector<Color> colors;
     for (auto color : colorList) {
-        colors.emplace_back(Color(color.GetValue()));
-        colors.back().SetPlaceholder(color.GetPlaceholder());
+        auto convertedColor = color.ToColorWithColorSpace();
+        convertedColor.SetPlaceholder(color.GetPlaceholder());
+        colors.emplace_back(convertedColor);
     }
     return colors;
 }

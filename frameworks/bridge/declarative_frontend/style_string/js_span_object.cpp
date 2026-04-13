@@ -1589,6 +1589,7 @@ JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
     : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
 {
+    CHECK_NULL_VOID(!customSpanObj.IsEmpty());
     auto type = customSpanObj->Unwrap<AceType>();
     CHECK_NULL_VOID(type);
     auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
@@ -1609,8 +1610,10 @@ RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
     if (end - start > 1) {
         return nullptr;
     }
+    auto jsCustomSpanObject = customSpanObj_.Lock();
+    CHECK_NULL_RETURN(!jsCustomSpanObject->IsEmpty(), nullptr);
     RefPtr<SpanBase> spanBase =
-        MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(), GetOnMeasure(), GetOnDraw(), start, end);
+        MakeRefPtr<JSCustomSpan>(jsCustomSpanObject, GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 

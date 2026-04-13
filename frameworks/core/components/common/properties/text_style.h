@@ -1135,6 +1135,8 @@ ACE_FORCE_EXPORT std::string ToString(const FontWeight& fontWeight);
 
 ACE_FORCE_EXPORT std::string SymbolColorListToString(const std::vector<Color>& colorList);
 
+ACE_FORCE_EXPORT std::string SymbolColorListToJsonString(const std::vector<Color>& colorList);
+
 ACE_FORCE_EXPORT std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList);
 } // namespace StringUtils
 } // namespace OHOS::Ace

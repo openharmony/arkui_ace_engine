@@ -9829,6 +9829,15 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     auto pageNodeRect = geometryNode->GetFrameRect();
     pageNodeRect.SetLeft(offsetToWindow.GetX());
     pageNodeRect.SetTop(offsetToWindow.GetY());
+    auto pipeline = host->GetContextRefPtr();
+    auto windowManager = pipeline ? pipeline->GetWindowManager() : nullptr;
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        pageNodeRect = pageNodeRect * windowScale;
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
+            "windowScale:%{public}f rect:%{public}s", windowScale, pageNodeRect.ToString().c_str());
+    }
     info->SetPageNodeRect(pageNodeRect);
     info->SetIsFocus(HasFocus());
     viewDataWrap->AddPageNodeInfoWrap(info);

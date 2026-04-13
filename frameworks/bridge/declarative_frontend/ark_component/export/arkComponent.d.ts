@@ -2164,7 +2164,7 @@ declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor 
 
 declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    fontColor(value: ResourceColor[]): SymbolGlyphAttribute;
+    fontColor(value: Array<ResourceColor | ColorMetrics> | undefined): SymbolGlyphAttribute;
     fontSize(value: number | string | Resource): SymbolGlyphAttribute;
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
