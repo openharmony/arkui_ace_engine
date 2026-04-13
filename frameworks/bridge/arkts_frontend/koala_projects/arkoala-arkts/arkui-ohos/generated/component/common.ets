@@ -10933,10 +10933,6 @@ export interface InputEventInterceptResult {
 export interface InputEventMonitor {
 }
 export type InputEventListener = (event: RawInputEventWrapper) => InputEventInterceptResult;
-export interface AreaChangeOptions {
-    expectedUpdateInterval?: int32;
-}
-export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
