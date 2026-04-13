@@ -1672,8 +1672,8 @@ function getNumberByResourceId(resourceId: number, defaultValue: number, allowZe
       systemConfiguration.deviceType = currentDeviceType;
     }
     let sourceValue: number = resourceManager.getSystemResourceManager()
-      .getOverrideResourceManager(systemConfiguration)
-      .getNumber(resourceId);
+      ?.getOverrideResourceManager(systemConfiguration)
+      ?.getNumber(resourceId);
     if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
