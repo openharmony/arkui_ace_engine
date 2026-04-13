@@ -121,7 +121,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest001, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -154,7 +154,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -192,7 +192,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -320,7 +320,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest007, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -347,7 +347,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
  * @tc.desc: Test function RequestNextFrame
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a frameNode ande update renderContext.
@@ -446,7 +446,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest011, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -481,7 +481,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -512,7 +512,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
  * @tc.desc: Test cast to RequestNextFrameMultiThread
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread001, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -553,7 +553,7 @@ HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread001, TestSize.Level1)
  * @tc.desc: Test cast to RequestNextFrameMultiThread
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread002, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
