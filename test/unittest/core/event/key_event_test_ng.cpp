@@ -15,11 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "core/event/key_event.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
