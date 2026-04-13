@@ -154,6 +154,23 @@ std::optional<float> ParseDimensionToPx(
     return ConvertToPx(calcLengthOfDimension, scaleProperty, percentReference, calcRpnexp);
 }
 
+template<typename RegionList>
+void AppendConvertedResponseRegions(const RegionList& regions, const ScaleProperty& scaleProperty,
+    const RectF& rect, std::vector<RectF>& responseRegionList)
+{
+    for (const auto& region : regions) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+            continue;
+        }
+        responseRegionList.emplace_back(
+            rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+    }
+}
+
 void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4033,47 +4050,33 @@ std::vector<RectF> FrameNode::GetResponseRegionListRaw(const RectF& rect, int32_
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }
-    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
-    bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
-    if (isMouseEvent) {
-        if (gestureHub->GetResponseRegion().empty() && (gestureHub->GetMouseResponseRegion().empty())) {
-            responseRegionList.emplace_back(rect);
-            return responseRegionList;
-        }
-    } else {
-        if (gestureHub->GetResponseRegion().empty()) {
-            responseRegionList.emplace_back(rect);
-            return responseRegionList;
-        }
+    auto defaultRect = rect;
+    if (pattern_ && pattern_->IsDefaultResponseRegionExpandingNeeded(static_cast<SourceType>(sourceType))) {
+        defaultRect = pattern_->ExpandDefaultResponseRegion(defaultRect);
     }
-
-    if (isMouseEvent && (!gestureHub->GetMouseResponseRegion().empty())) {
-        for (const auto& region : gestureHub->GetMouseResponseRegion()) {
-            auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
-            auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
-            auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
-            auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-            if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
-                continue;
-            }
-            RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(),
-                height.value());
-            responseRegionList.emplace_back(mouseRegion);
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
+    const bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
+    const bool noTouchRegion = gestureHub->GetResponseRegion().empty();
+    const bool noMouseRegion = gestureHub->GetMouseResponseRegion().empty();
+    const bool hasTouchRegionConfig = gestureHub->HasTouchResponseRegionConfig();
+    if (isMouseEvent) {
+        if (noTouchRegion && noMouseRegion) {
+            responseRegionList.emplace_back(rect);
+            return responseRegionList;
         }
+        if (!noMouseRegion) {
+            AppendConvertedResponseRegions(
+                gestureHub->GetMouseResponseRegion(), scaleProperty, rect, responseRegionList);
+            return responseRegionList;
+        }
+        AppendConvertedResponseRegions(gestureHub->GetResponseRegion(), scaleProperty, rect, responseRegionList);
         return responseRegionList;
     }
-    for (const auto& region : gestureHub->GetResponseRegion()) {
-        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
-        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
-        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
-        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
-            continue;
-        }
-        RectF responseRegion(
-            rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
-        responseRegionList.emplace_back(responseRegion);
+    if (noTouchRegion) {
+        responseRegionList.emplace_back(hasTouchRegionConfig ? rect : defaultRect);
+        return responseRegionList;
     }
+    AppendConvertedResponseRegions(gestureHub->GetResponseRegion(), scaleProperty, rect, responseRegionList);
     return responseRegionList;
 }
 

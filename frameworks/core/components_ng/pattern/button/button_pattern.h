@@ -187,6 +187,10 @@ public:
 
     bool IsNeedAdjustByAspectRatio() override;
 
+    bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

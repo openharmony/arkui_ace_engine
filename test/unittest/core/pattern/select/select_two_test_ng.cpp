@@ -1424,6 +1424,90 @@ HWTEST_F(SelectTwoTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded001
+ * @tc.desc: Test SelectPattern::IsDefaultResponseRegionExpandingNeeded with no user-defined size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, IsDefaultResponseRegionExpandingNeeded001, TestSize.Level1)
+{
+    SelectModelNG selectModel;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModel.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize.has_value()) {
+        EXPECT_FALSE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+    }
+
+    EXPECT_FALSE(pattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded002
+ * @tc.desc: Test SelectPattern::IsDefaultResponseRegionExpandingNeeded with user-defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, IsDefaultResponseRegionExpandingNeeded002, TestSize.Level1)
+{
+    SelectModelNG selectModel;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModel.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength("40vp")));
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+
+    EXPECT_FALSE(pattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: Test SelectPattern::ExpandDefaultResponseRegion basic geometry behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+{
+    SelectModelNG selectModel;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModel.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RectF rect(10.0f, 20.0f, 100.0f, 10.0f);
+    auto expandedRect = pattern->ExpandDefaultResponseRegion(rect);
+    EXPECT_EQ(expandedRect.Width(), rect.Width());
+    EXPECT_GT(expandedRect.Height(), rect.Height());
+    EXPECT_LT(expandedRect.GetY(), rect.GetY());
+
+    RectF enoughRect(10.0f, 20.0f, 100.0f, 100.0f);
+    auto unmodifiedRect = pattern->ExpandDefaultResponseRegion(enoughRect);
+    EXPECT_EQ(unmodifiedRect.Height(), enoughRect.Height());
+    EXPECT_EQ(unmodifiedRect.GetY(), enoughRect.GetY());
+}
+
+/**
  * @tc.name: UpdateMenuBorderStyle001
  * @tc.desc: Test UpdateMenuBorderStyle with null menu
  * @tc.type: FUNC

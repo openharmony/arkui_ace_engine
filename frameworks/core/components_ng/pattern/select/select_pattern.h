@@ -176,6 +176,10 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
+    bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
+
     // update selected option props
     void UpdateSelectedProps(int32_t index);
 

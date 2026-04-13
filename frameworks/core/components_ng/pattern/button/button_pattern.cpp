@@ -14,7 +14,9 @@
  */
 
 #include "base/log/dump_log.h"
+#include "base/utils/system_properties.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
@@ -31,6 +33,57 @@ constexpr int32_t TYPE_CANCEL = 2;
 constexpr float NORMAL_SCALE = 1.0f;
 constexpr float MINFONTSCALE = 0.85f;
 constexpr float MAXFONTSCALE = 3.20f;
+constexpr Dimension MIN_HOT_ZONE_HEIGHT = 32.0_vp;
+
+RectF ExpandRectHeightToMinimum(RectF rect, float minHeight)
+{
+    if (GreatOrEqual(rect.Height(), minHeight)) {
+        return rect;
+    }
+    auto expandHeight = (minHeight - rect.Height()) / 2.0f;
+    rect.SetOffset(OffsetF(rect.GetX(), rect.GetY() - expandHeight));
+    rect.SetHeight(minHeight);
+    return rect;
+}
+
+bool HasUserDefinedHeight(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->HasUserDefinedHeightConfig()) {
+        return true;
+    }
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!calcLayoutConstraint || !calcLayoutConstraint->selfIdealSize.has_value()) {
+        return false;
+    }
+    return calcLayoutConstraint->selfIdealSize->Height().has_value();
+}
+
+std::optional<float> GetExpectedButtonHeight(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto* context = host->GetContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    if (host->GetTag() == V2::TOGGLE_ETS_TAG) {
+        auto toggleTheme = context->GetTheme<ToggleTheme>();
+        CHECK_NULL_RETURN(toggleTheme, std::nullopt);
+        return static_cast<float>(toggleTheme->GetButtonHeight().ConvertToPx());
+    }
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, std::nullopt);
+    auto controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    return static_cast<float>(buttonTheme->GetHeight(controlSize).ConvertToPx());
+}
+
+bool IsActualHeightLowerThanExpected(const RefPtr<FrameNode>& host, const RectF& rect)
+{
+    auto expectedHeight = GetExpectedButtonHeight(host);
+    return expectedHeight.has_value() && !GreatOrEqual(rect.Height(), expectedHeight.value());
+}
 
 inline std::string ToString(const ButtonType& type)
 {
@@ -114,6 +167,27 @@ bool ButtonPattern::IsNeedAdjustByAspectRatio()
                         layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
 
     return isNeedAdjust;
+}
+
+bool ButtonPattern::IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const
+{
+    if (sourceType != SourceType::TOUCH) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), false);
+    return !HasUserDefinedHeight(host);
+}
+
+RectF ButtonPattern::ExpandDefaultResponseRegion(RectF& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rect);
+    if (IsActualHeightLowerThanExpected(host, rect)) {
+        return rect;
+    }
+    return ExpandRectHeightToMinimum(rect, MIN_HOT_ZONE_HEIGHT.ConvertToPx());
 }
 
 void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

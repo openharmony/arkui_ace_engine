@@ -656,6 +656,11 @@ public:
         return false;
     }
 
+    virtual bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const
+    {
+        return false;
+    }
+
     virtual RectF ExpandDefaultResponseRegion(RectF& rect)
     {
         return RectF();

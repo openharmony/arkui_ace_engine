@@ -184,6 +184,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->MarkUserDefinedHeightConfigured();
     // get previously user defined ideal width
     std::optional<CalcLength> width = std::nullopt;
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
@@ -265,6 +266,9 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (!isWidth) {
+        layoutProperty->MarkUserDefinedHeightConfigured();
+    }
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -2927,6 +2931,9 @@ void ViewAbstract::SetResponseRegionList(
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegionMap.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
@@ -2934,6 +2941,9 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegion.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -6813,6 +6823,7 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->MarkUserDefinedHeightConfigured();
     std::optional<CalcLength> width = std::nullopt;
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
@@ -6872,6 +6883,9 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (!isWidth) {
+        layoutProperty->MarkUserDefinedHeightConfigured();
+    }
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -8533,6 +8547,9 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegionMap.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
@@ -8561,6 +8578,9 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegion.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegion(responseRegion);
 }
 
