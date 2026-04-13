@@ -125,6 +125,7 @@ private:
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
     bool needAdaptForceSplitMode_ = false;
+    float forceSplitRatio_ = 0.5f;
     float dialogMaxHeight_ = 0.0f;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;

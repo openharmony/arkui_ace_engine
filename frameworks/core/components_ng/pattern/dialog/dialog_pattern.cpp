@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -2503,6 +2504,7 @@ void DialogPattern::OnAttachToMainTree()
 void DialogPattern::OnAttachToMainTreeImpl()
 {
     AddFollowParentWindowLayoutNode();
+    AddForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -2532,6 +2534,7 @@ void DialogPattern::OnDetachFromMainTreeImpl()
         dialogProperties_.destroyCallback(customNode_);
     }
     RemoveFollowParentWindowLayoutNode();
+    RemoveForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2603,6 +2606,33 @@ void DialogPattern::RemoveFollowParentWindowLayoutNode()
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
     CHECK_NULL_VOID(subwindow);
     subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
+}
+
+void DialogPattern::AddForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->AddForceSplitRatioListener(
+        host->GetId(), [weakHost = AceType::WeakClaim(AceType::RawPtr(host))](float splitRatio) {
+        auto host = weakHost.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    });
+}
+
+void DialogPattern::RemoveForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->RemoveForceSplitRatioListener(host->GetId());
 }
 
 int32_t DialogPattern::OnInjectionEvent(const std::string& command)

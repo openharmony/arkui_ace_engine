@@ -243,6 +243,8 @@ public:
     // if return false, then this event needs platform to handle it.
     bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
+    void ProcessCommand(const std::string& command);
+
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
 
@@ -1448,6 +1450,7 @@ private:
     void FlushCompatibleTouchEvents();
     void FlushWindowPatternInfo();
     void FlushFocusView();
+    void FlushRelaxedInteraction();
     void FlushFocusScroll();
     void FlushZindexUpdate();
 

@@ -923,6 +923,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
+#ifdef RELAXED_INTERACTION_SUPPORT
+    FlushRelaxedInteraction();
+#endif
     FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
@@ -7931,4 +7934,19 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
     return recycleManager_;
 }
 
+void PipelineContext::ProcessCommand(const std::string& command)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->ProcessCommand(command, [this]() { RequestFrame(); });
+#endif
+}
+
+void PipelineContext::FlushRelaxedInteraction()
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,8 @@
             "TextAreaModifier.ets",
             "TextInputModifier.ets",
             "RichEditorModifier.ets",
-            "SearchModifier.ets"
+            "SearchModifier.ets",
+            "FormLinkModifier.ets"
         ]
     },
     "native": [

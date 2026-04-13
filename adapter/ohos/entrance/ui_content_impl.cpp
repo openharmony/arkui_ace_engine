@@ -5974,6 +5974,27 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
+void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    auto relaxedCommandCallback = [weakTaskExecutor = taskExecutor](const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [command]() {
+                auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+                if (pipelineContext == nullptr) {
+                    LOGE("Failed to process relaxed command because pipelineContext is nullptr");
+                    return;
+                }
+                pipelineContext->ProcessCommand(command);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
+    };
+    UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
+#endif
+}
+
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 1500;
@@ -6012,6 +6033,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
+    RelaxedCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
     SaveGetHitTestInfoCallback(taskExecutor);
