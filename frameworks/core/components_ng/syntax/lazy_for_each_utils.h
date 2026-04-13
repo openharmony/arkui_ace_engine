@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
-/**
- * @file image_pattern_test_image_loading.cpp
- * @brief TDD test coverage for ImagePattern image loading flow
- */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_UTILS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_UTILS_H
 
-#include "image_base.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 
-class ImagePatternImageLoadingTestNg : public ImageBases {};
+class ACE_EXPORT LazyForEachUtils {
+public:
+    
+    static void SetEnableCustomComponentFreeze(bool enableCustomComponentFreeze);
+
+    static bool GetEnableCustomComponentFreeze();
+
+private:
+    static bool enableCustomComponentFreeze_;
+};
 
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_UTILS_H

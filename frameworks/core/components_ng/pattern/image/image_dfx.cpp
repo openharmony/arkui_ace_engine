@@ -17,6 +17,14 @@
 
 namespace OHOS::Ace::NG {
 
+ImageDfxConfig::ImageDfxConfig(
+    const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc, bool isTrimMemRecycle)
+    : nodeInfo_(nodeInfo), srcType_(srcType), imageSrc_(std::move(imageSrc)), isTrimMemRecycle_(isTrimMemRecycle)
+{
+    InitToStringWithoutSrc();
+    InitToStringWithSrc();
+}
+
 void ImageDfxConfig::InitToStringWithoutSrc()
 {
     withoutSrcInfo_ = std::string("[")
@@ -77,6 +85,67 @@ std::string RenderedImageInfo::ToString() const
         .append(dstRectInfo)
         .append(" }");
     return result;
+}
+
+std::string ImageDfxConfig::ToStringWithoutSrc() const
+{
+    return withoutSrcInfo_;
+}
+
+std::string ImageDfxConfig::ToStringWithSrc() const
+{
+    return withSrcInfo_;
+}
+
+bool ImageDfxConfig::GetIsTrimMemRecycle() const
+{
+    return isTrimMemRecycle_;
+}
+
+void ImageDfxConfig::SetAutoResize(bool autoResize)
+{
+    autoResize_ = autoResize;
+}
+
+bool ImageDfxConfig::GetAutoResize() const
+{
+    return autoResize_;
+}
+
+int32_t ImageDfxConfig::GetNodeId() const
+{
+    return nodeInfo_.nodeId_;
+}
+
+int64_t ImageDfxConfig::GetAccessibilityId() const
+{
+    return nodeInfo_.accessibilityId_;
+}
+
+std::string ImageDfxConfig::GetImageSrc() const
+{
+    return imageSrc_;
+}
+
+void ImageDfxConfig::SetFrameSize(float width, float height)
+{
+    frameSizeWidth_ = width;
+    frameSizeHeight_ = height;
+}
+
+float ImageDfxConfig::GetFrameSizeWidth() const
+{
+    return frameSizeWidth_;
+}
+
+float ImageDfxConfig::GetFrameSizeHeight() const
+{
+    return frameSizeHeight_;
+}
+
+int32_t ImageDfxConfig::GetSrcType() const
+{
+    return srcType_;
 }
 
 } // namespace OHOS::Ace::NG

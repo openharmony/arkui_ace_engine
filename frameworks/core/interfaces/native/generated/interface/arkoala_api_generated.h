@@ -2431,6 +2431,8 @@ typedef struct Ark_LargestContentfulPaint Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint Opt_LargestContentfulPaint;
 typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
 typedef struct Opt_LayoutConstraint Opt_LayoutConstraint;
+typedef struct Ark_LazyForEachOptions Ark_LazyForEachOptions;
+typedef struct Opt_LazyForEachOptions Opt_LazyForEachOptions;
 typedef struct Ark_LeadingMarginSpanDrawInfo Ark_LeadingMarginSpanDrawInfo;
 typedef struct Opt_LeadingMarginSpanDrawInfo Opt_LeadingMarginSpanDrawInfo;
 typedef struct Ark_LengthMetrics Ark_LengthMetrics;
@@ -4596,6 +4598,18 @@ typedef struct Opt_CustomKeyboardContinueFeature {
     Ark_Tag tag;
     Ark_CustomKeyboardContinueFeature value;
 } Opt_CustomKeyboardContinueFeature;
+typedef enum Ark_DataOperationType {
+ARK_DATA_OPERATION_TYPE_ADD,
+ARK_DATA_OPERATION_TYPE_DELETE,
+ARK_DATA_OPERATION_TYPE_EXCHANGE,
+ARK_DATA_OPERATION_TYPE_MOVE,
+ARK_DATA_OPERATION_TYPE_CHANGE,
+ARK_DATA_OPERATION_TYPE_RELOAD,
+} Ark_DataOperationType;
+typedef struct Opt_DataOperationType {
+Ark_Tag tag;
+Ark_DataOperationType value;
+} Opt_DataOperationType;
 typedef enum Ark_DataPanelType {
     ARK_DATA_PANEL_TYPE_LINE = 0,
     ARK_DATA_PANEL_TYPE_CIRCLE = 1,
@@ -5618,6 +5632,23 @@ typedef struct Opt_LayoutStyle {
     Ark_Tag tag;
     Ark_LayoutStyle value;
 } Opt_LayoutStyle;
+typedef enum Ark_LazyForEachCustomComponentFreezeMode {
+    ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_AUTO = 0,
+    ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_DISABLED = 1,
+    ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_ENABLED = 2,
+} Ark_LazyForEachCustomComponentFreezeMode;
+typedef struct Opt_LazyForEachCustomComponentFreezeMode {
+    Ark_Tag tag;
+    Ark_LazyForEachCustomComponentFreezeMode value;
+} Opt_LazyForEachCustomComponentFreezeMode;
+typedef enum Ark_LazyForEachReleaseStrategy {
+    ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_BATCH = 0,
+    ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_PROGRESSIVE = 1,
+} Ark_LazyForEachReleaseStrategy;
+typedef struct Opt_LazyForEachReleaseStrategy {
+    Ark_Tag tag;
+    Ark_LazyForEachReleaseStrategy value;
+} Opt_LazyForEachReleaseStrategy;
 typedef enum Ark_LengthMetricsUnit {
     ARK_LENGTH_METRICS_UNIT_DEFAULT = 0,
     ARK_LENGTH_METRICS_UNIT_PX = 1,
@@ -16441,6 +16472,15 @@ typedef struct Opt_LayoutConstraint {
     Ark_Tag tag;
     Ark_LayoutConstraint value;
 } Opt_LayoutConstraint;
+typedef struct Ark_LazyForEachOptions {
+    /* kind: Interface */
+    Opt_LazyForEachCustomComponentFreezeMode customComponentFreezeMode;
+    Opt_LazyForEachReleaseStrategy releaseStrategy;
+} Ark_LazyForEachOptions;
+typedef struct Opt_LazyForEachOptions {
+    Ark_Tag tag;
+    Ark_LazyForEachOptions value;
+} Opt_LazyForEachOptions;
 typedef struct Ark_LeadingMarginSpanDrawInfo {
     /* kind: Interface */
     Ark_Float64 x;
@@ -29846,6 +29886,8 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                           const Callback_OnMoveFromTo* onMoveFromToOps,
                           const Opt_OnMoveHandler* onMoveOps,
                           const Opt_ItemDragEventHandler* onMoveDragEventOps);
+    void (*SetOptions)(Ark_NativePointer node,
+                       const Ark_LazyForEachOptions* options);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUILeadingMarginSpanAccessor {

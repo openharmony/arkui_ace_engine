@@ -56,16 +56,7 @@ public:
         return repeat_;
     }
 
-    bool operator==(const BorderImageEdge& borderImageEdge) const
-    {
-        return NearEqual(borderImageEdge.GetBorderImageSlice().Value(), borderImageSlice_.Value())
-               && (borderImageEdge.GetBorderImageSlice().Unit() == borderImageSlice_.Unit())
-               && NearEqual(borderImageEdge.GetBorderImageOutset().Value(), borderImageOutset_.Value())
-               && (borderImageEdge.GetBorderImageOutset().Unit() == borderImageOutset_.Unit())
-               && NearEqual(borderImageEdge.GetBorderImageWidth().Value(), borderImageWidth_.Value())
-               && (borderImageEdge.GetBorderImageWidth().Unit() == borderImageWidth_.Unit())
-               && (borderImageEdge.GetBorderImageRepeat() == repeat_);
-    }
+    bool operator==(const BorderImageEdge& borderImageEdge) const;
 
     void SetBorderImageSlice(const Dimension& slice)
     {
@@ -87,11 +78,7 @@ public:
         repeat_ = repeat;
     }
 
-    std::string ToString()
-    {
-        return borderImageOutset_.ToString() + ", "+borderImageSlice_.ToString() +
-            ", "+borderImageWidth_.ToString();
-    }
+    std::string ToString();
 
 private:
     Dimension borderImageSlice_;

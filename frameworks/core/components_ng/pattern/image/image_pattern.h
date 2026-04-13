@@ -65,10 +65,7 @@ public:
     ImagePattern();
     ~ImagePattern() override;
 
-    std::optional<RenderContext::ContextParam> GetContextParam() const override
-    {
-        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS, .surfaceName = std::nullopt };
-    }
+    std::optional<RenderContext::ContextParam> GetContextParam() const override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
@@ -81,25 +78,10 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
-    const RefPtr<CanvasImage>& GetCanvasImage()
-    {
-        return image_;
-    }
-
-    const RefPtr<CanvasImage>& GetAltCanvasImage()
-    {
-        return altImage_;
-    }
-
-    RefPtr<FrameNode> GetClientHost() const override
-    {
-        return GetHost();
-    }
-
-    bool IsEnableMatchParent() override
-    {
-        return true;
-    }
+    const RefPtr<CanvasImage>& GetCanvasImage();
+    const RefPtr<CanvasImage>& GetAltCanvasImage();
+    RefPtr<FrameNode> GetClientHost() const override;
+    bool IsEnableMatchParent() override;
 
     bool IsEnableFix() override
     {
@@ -139,41 +121,19 @@ public:
         return true;
     }
 
-    void SetImageQuality(AIImageQuality imageQuality)
-    {
-        isImageReloadNeeded_ = isImageReloadNeeded_ | (imageQuality_ != imageQuality);
-        imageQuality_ = imageQuality;
-    }
+    void SetImageQuality(AIImageQuality imageQuality);
 
-    void SetOrientation(ImageRotateOrientation orientation)
-    {
-        isOrientationChange_ = (userOrientation_ != orientation);
-        userOrientation_ = orientation;
-    }
-
-    ImageRotateOrientation GetOrientation()
-    {
-        return userOrientation_;
-    }
+    void SetOrientation(ImageRotateOrientation orientation);
+    ImageRotateOrientation GetOrientation();
 
     void UpdateOrientation();
 
     void PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host);
 
-    AIImageQuality GetImageQuality()
-    {
-        return imageQuality_;
-    }
+    AIImageQuality GetImageQuality();
 
-    void SetCopyOption(CopyOptions value)
-    {
-        copyOption_ = value;
-    }
-
-    CopyOptions GetCopyOption()
-    {
-        return copyOption_;
-    }
+    void SetCopyOption(CopyOptions value);
+    CopyOptions GetCopyOption();
 
     std::string GetImageFitStr(ImageFit value);
 
@@ -183,20 +143,10 @@ public:
 
     std::string GetSrcTypeToString(SrcType srcType);
 
-    void SetSyncLoad(bool value)
-    {
-        syncLoad_ = value;
-    }
+    void SetSyncLoad(bool value);
+    bool GetSyncLoad() const;
 
-    bool GetSyncLoad() const
-    {
-        return syncLoad_;
-    }
-
-    void SetNeedBorderRadius(bool needBorderRadius)
-    {
-        needBorderRadius_ = needBorderRadius;
-    }
+    void SetNeedBorderRadius(bool needBorderRadius);
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
@@ -231,15 +181,8 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSvgInfo();
-    WeakPtr<ImageLoadingContext> GetImageLoadingContext()
-    {
-        return WeakClaim(AceType::RawPtr(loadingCtx_));
-    }
-
-    WeakPtr<ImageLoadingContext> GetAltImageLoadingContext()
-    {
-        return WeakClaim(AceType::RawPtr(altLoadingCtx_));
-    }
+    WeakPtr<ImageLoadingContext> GetImageLoadingContext();
+    WeakPtr<ImageLoadingContext> GetAltImageLoadingContext();
     void EnableAnalyzer(bool value);
     bool IsEnableAnalyzer() const;
     bool hasSceneChanged();
@@ -249,71 +192,34 @@ public:
     void ResetImageAndAlt();
     void ResetAltImageError();
 
-    bool IsAtomicNode() const override
-    {
-        return true;
-    }
+    bool IsAtomicNode() const override;
 
     bool AllowVisibleAreaCheck() const override;
-    void SetImageAnimator(bool isImageAnimator)
-    {
-        isImageAnimator_ = isImageAnimator;
-    }
-
-    bool GetNeedLoadAlt()
-    {
-        return needLoadAlt_;
-    }
-
-    void SetNeedLoadAlt(bool needLoadAlt)
-    {
-        needLoadAlt_ = needLoadAlt;
-    }
+    void SetImageAnimator(bool isImageAnimator);
+    bool GetNeedLoadAlt();
+    void SetNeedLoadAlt(bool needLoadAlt);
 
     // Public method for ImageAnimator to trigger theme updates
     void TriggerThemeUpdate(int32_t themeScopeId);
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
-    SizeF GetRawImageSize()
-    {
-        if (!loadingCtx_) {
-            return SizeF(-1.0, -1.0);
-        }
-        return loadingCtx_->GetImageSize();
-    }
+    SizeF GetRawImageSize();
 
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
-    bool GetDefaultAutoResize()
-    {
-        return autoResizeDefault_;
-    }
-
-    ImageInterpolation GetDefaultInterpolation()
-    {
-        return interpolationDefault_;
-    }
+    bool GetDefaultAutoResize();
+    ImageInterpolation GetDefaultInterpolation();
     void InitOnKeyEvent();
 
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
-    {
-        isComponentSnapshotNode_ = isComponentSnapshotNode;
-    }
-
-    void SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo)
-    {
-        renderedImageInfo_ = renderedImageInfo;
-    }
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode);
+    void SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo);
 
     // Sets the decoding format for the external domain.
     // Note: Only NV21, RGBA_8888, RGBA_1010102, YCBCR_P010, YCRCB_P010 format is supported at this time.
     void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
 
-    PixelFormat GetExternalDecodeFormat()
-    {
-        return externalDecodeFormat_;
-    }
+    PixelFormat GetExternalDecodeFormat();
     void AddPixelMapToUiManager();
 
     // this method for measure content

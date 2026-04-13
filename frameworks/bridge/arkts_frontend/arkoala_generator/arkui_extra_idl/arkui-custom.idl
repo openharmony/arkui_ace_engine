@@ -20,6 +20,7 @@ import arkui.Graphics.Frame as Frame;
 import global.resource.Resource as Resource; 
 import ohos.arkui.observer.default as observer;
 import arkui.component.gesture.GestureEvent as GestureEvent;
+import arkui.component.lazyForEach.LazyForEachOptions as LazyForEachOptions;
 
 callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
 callback Callback_CreateItem = pointer (i32 index);
@@ -38,6 +39,7 @@ interface LazyForEachOps {
     static void Sync(pointer node, i32 totalCount, Callback_CreateItem creator, Callback_RangeUpdate updater);
     static void SyncOnMoveOps(pointer node, Callback_OnMoveFromTo onMoveFromToOps,
         (OnMoveHandler or undefined) onMoveOps, (ItemDragEventHandler or undefined) onMoveDragEventOps);
+    static void SetOptions(pointer node, LazyForEachOptions options);
 };
 
 [Entity=Class]

@@ -298,7 +298,7 @@ function virtualRender<T>(
         }
     };
     LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_,
-        attributes.onMove_, attributes.itemDragEvent_, true);
+        attributes.onMove_, attributes.itemDragEvent_, undefined, true);
 }
 
 /** @memo */

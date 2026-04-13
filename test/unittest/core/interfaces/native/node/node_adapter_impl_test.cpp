@@ -16,7 +16,6 @@
 #include <optional>
 
 #include "gtest/gtest.h"
-#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.cpp"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/ui_node.h"

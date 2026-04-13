@@ -739,6 +739,98 @@ void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
     }
 }
 
+void ImagePattern::SetImageQuality(AIImageQuality imageQuality)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (imageQuality_ != imageQuality);
+    imageQuality_ = imageQuality;
+}
+
+void ImagePattern::SetOrientation(ImageRotateOrientation orientation)
+{
+    isOrientationChange_ = (userOrientation_ != orientation);
+    userOrientation_ = orientation;
+}
+
+ImageRotateOrientation ImagePattern::GetOrientation()
+{
+    return userOrientation_;
+}
+
+AIImageQuality ImagePattern::GetImageQuality()
+{
+    return imageQuality_;
+}
+
+void ImagePattern::SetCopyOption(CopyOptions value)
+{
+    copyOption_ = value;
+}
+
+CopyOptions ImagePattern::GetCopyOption()
+{
+    return copyOption_;
+}
+
+void ImagePattern::SetSyncLoad(bool value)
+{
+    syncLoad_ = value;
+}
+
+bool ImagePattern::GetSyncLoad() const
+{
+    return syncLoad_;
+}
+
+void ImagePattern::SetNeedBorderRadius(bool needBorderRadius)
+{
+    needBorderRadius_ = needBorderRadius;
+}
+
+bool ImagePattern::IsAtomicNode() const
+{
+    return true;
+}
+
+void ImagePattern::SetImageAnimator(bool isImageAnimator)
+{
+    isImageAnimator_ = isImageAnimator;
+}
+
+bool ImagePattern::GetNeedLoadAlt()
+{
+    return needLoadAlt_;
+}
+
+void ImagePattern::SetNeedLoadAlt(bool needLoadAlt)
+{
+    needLoadAlt_ = needLoadAlt;
+}
+
+bool ImagePattern::GetDefaultAutoResize()
+{
+    return autoResizeDefault_;
+}
+
+ImageInterpolation ImagePattern::GetDefaultInterpolation()
+{
+    return interpolationDefault_;
+}
+
+void ImagePattern::SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
+{
+    isComponentSnapshotNode_ = isComponentSnapshotNode;
+}
+
+void ImagePattern::SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo)
+{
+    renderedImageInfo_ = renderedImageInfo;
+}
+
+PixelFormat ImagePattern::GetExternalDecodeFormat()
+{
+    return externalDecodeFormat_;
+}
+
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
     // if layout size has not decided yet, resize target can not be calculated
@@ -2954,4 +3046,48 @@ void ImagePattern::ResetAltImageError()
         imagePaintMethod_ = nullptr;
     }
 }
+
+SizeF ImagePattern::GetRawImageSize()
+{
+    if (!loadingCtx_) {
+        return SizeF(-1.0, -1.0);
+    }
+    return loadingCtx_->GetImageSize();
+}
+
+WeakPtr<ImageLoadingContext> ImagePattern::GetImageLoadingContext()
+{
+    return WeakClaim(AceType::RawPtr(loadingCtx_));
+}
+
+WeakPtr<ImageLoadingContext> ImagePattern::GetAltImageLoadingContext()
+{
+    return WeakClaim(AceType::RawPtr(altLoadingCtx_));
+}
+
+std::optional<RenderContext::ContextParam> ImagePattern::GetContextParam() const
+{
+    return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS, .surfaceName = std::nullopt };
+}
+
+const RefPtr<CanvasImage>& ImagePattern::GetCanvasImage()
+{
+    return image_;
+}
+
+const RefPtr<CanvasImage>& ImagePattern::GetAltCanvasImage()
+{
+    return altImage_;
+}
+
+RefPtr<FrameNode> ImagePattern::GetClientHost() const
+{
+    return GetHost();
+}
+
+bool ImagePattern::IsEnableMatchParent()
+{
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

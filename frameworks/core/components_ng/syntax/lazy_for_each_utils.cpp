@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-/**
- * @file image_pattern_test_image_loading.cpp
- * @brief TDD test coverage for ImagePattern image loading flow
- */
-
-#include "image_base.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 
 namespace OHOS::Ace::NG {
 
-class ImagePatternImageLoadingTestNg : public ImageBases {};
+bool LazyForEachUtils::enableCustomComponentFreeze_ = false;
+
+void LazyForEachUtils::SetEnableCustomComponentFreeze(bool enableCustomComponentFreeze)
+{
+    enableCustomComponentFreeze_ = enableCustomComponentFreeze;
+}
+
+bool LazyForEachUtils::GetEnableCustomComponentFreeze()
+{
+    return enableCustomComponentFreeze_;
+}
 
 } // namespace OHOS::Ace::NG
