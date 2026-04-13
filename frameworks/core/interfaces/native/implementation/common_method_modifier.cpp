@@ -121,6 +121,15 @@ constexpr float MAX_ANGLE = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
+const Opt_Union_MenuPreviewMode_CustomBuilder defaultPreview = {
+    INTEROP_TAG_INT32,
+    {
+        0,
+        {
+            .value0 = Ark_MenuPreviewMode::ARK_MENU_PREVIEW_MODE_NONE
+        }
+    }
+};
 enum class PixelroundRule {
     NO_FORCE_ROUND,
     FORCE_FLOOR,
@@ -6178,8 +6187,8 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
-    Converter::VisitUnion(menuOption->preview,
+    // menuOption: Null point verification is not required. Otherwise, subsequent code functions are affected
+    Converter::VisitUnion(menuOption ? menuOption->preview : defaultPreview,
         [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
             if (mode && mode.value() == MenuPreviewMode::IMAGE) {
@@ -6240,10 +6249,10 @@ void BindContextMenuBoth(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null point verification is not required. Otherwise, subsequent code functions are affected
     for (auto& type : responseTypeArray) {
         auto triggerMenuParam = menuParam;
-        Converter::VisitUnion(menuOption->preview,
+        Converter::VisitUnion(menuOption ? menuOption->preview : defaultPreview,
             [&triggerMenuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
                 auto mode = Converter::OptConvert<MenuPreviewMode>(value);
                 if (mode && mode.value() == MenuPreviewMode::IMAGE) {
