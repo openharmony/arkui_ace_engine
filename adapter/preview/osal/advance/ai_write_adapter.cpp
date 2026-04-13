@@ -14,6 +14,10 @@
  */
 
 #include "core/common/ai/ai_write_adapter.h"
+#include "base/memory/ace_type.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace {
 bool AIWriteAdapter::IsSentenceBoundary(const char16_t value) { return false; }
