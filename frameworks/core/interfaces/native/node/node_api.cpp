@@ -356,30 +356,42 @@ void DumpTreeNode(ArkUINodeHandle node)
     DumpTree(node, 0);
 }
 
-ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
+ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child, void* errorInfoPtr)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::AddChild(parent, child);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
+ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position, void* errorInfoPtr)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAt(parent, child, position);
@@ -391,15 +403,22 @@ void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     ViewModel::RemoveChild(parent, child);
 }
 
-ArkUI_Int32 InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildAfter(
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAfter(parent, child, sibling);
@@ -417,15 +436,22 @@ ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUn
     return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
 }
 
-ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildBefore(
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildBefore(parent, child, sibling);
