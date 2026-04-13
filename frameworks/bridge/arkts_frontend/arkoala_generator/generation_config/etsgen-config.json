@@ -3,7 +3,6 @@
         "arkui.component.interop",
         "arkui.component.customComponent",
         "arkui.component.repeat",
-        "arkui.component.lazyForEach",
         "arkui.component.repeat",
         "ohos.buffer",
         "ohos.util.ArrayList",

@@ -30,6 +30,23 @@
 
 namespace OHOS::Ace::Framework {
 
+// LazyForEachReleaseStrategy enum
+enum class LazyForEachReleaseStrategy {
+    BATCH = 0,
+    PROGRESSIVE = 1,
+};
+
+enum class LazyForEachCustomComponentFreezeMode {
+    AUTO = 0,
+    DISABLED = 1,
+    ENABLED = 2,
+};
+
+struct LazyForEachOptions {
+    LazyForEachCustomComponentFreezeMode enableCustomComponentFreeze = LazyForEachCustomComponentFreezeMode::AUTO;
+    LazyForEachReleaseStrategy releaseStrategy = LazyForEachReleaseStrategy::BATCH;
+};
+
 using ItemKeyGenerator = std::function<std::string(const JSRef<JSVal>&, size_t)>;
 
 template<class... T>
@@ -158,6 +175,16 @@ public:
         }
     }
 
+    void SetOptions(const LazyForEachOptions& options)
+    {
+        options_ = options;
+    }
+
+    LazyForEachOptions GetOptions() const
+    {
+        return options_;
+    }
+
 private:
     inline JSRef<JSFunc> GetFunctionFromObject(const JSRef<JSObject>& obj, const char* funcName)
     {
@@ -179,6 +206,7 @@ protected:
     JSRef<JSFunc> itemGenFunc_;
     ItemKeyGenerator keyGenFunc_;
     bool updateChangedNodeFlag_ = false;
+    LazyForEachOptions options_;
 
     JSWeak<JSObject> listenerProxyObj_;
     WeakPtr<JSDataChangeListener> listenerProxy_;

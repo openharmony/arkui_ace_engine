@@ -234,6 +234,16 @@ public:
         return info;
     }
 
+    NG::LazyForEachCustomComponentFreezeMode GetEnableCustomComponentFreeze() const override
+    {
+        return static_cast<NG::LazyForEachCustomComponentFreezeMode>(options_.enableCustomComponentFreeze);
+    }
+
+    NG::LazyForEachReleaseStrategy GetLazyForEachReleaseStrategy() const override
+    {
+        return static_cast<NG::LazyForEachReleaseStrategy>(options_.releaseStrategy);
+    }
+
     void ReleaseChildGroupById(const std::string& id) override
     {
         JSLazyForEachActuator::ReleaseChildGroupByComposedId(id);

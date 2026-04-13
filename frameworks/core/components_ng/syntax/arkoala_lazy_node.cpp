@@ -16,6 +16,7 @@
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
@@ -81,14 +82,48 @@ void ArkoalaLazyNode::RebuildCache()
         }
     }
 
-    node4Index_.RemoveIf([weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
-        auto arkoalaLazyNode = weak.Upgrade();
-        CHECK_NULL_RETURN(arkoalaLazyNode, false);
-        const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(static_cast<int32_t>(k));
-        return !arkoalaLazyNode->IsInCacheRange(indexMapped, arkoalaLazyNode->activeRangeParam_);
-    });
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "RebuildCache DONE. Cache nodes count: %{public}zu", node4Index_.Size());
     RequestSyncTree(); // order a resync from layout
+}
+
+void ArkoalaLazyNode::PurgeNode()
+{
+    std::vector<int32_t> removingIndex;
+    for (const auto& [index, node] : node4Index_) {
+        const auto indexMapped = ConvertFromToIndexRevert(index);
+        if (!IsInCacheRange(indexMapped, activeRangeParam_)) {
+            removingIndex.emplace_back(index);
+            if (!isRepeat_ && options_.releaseStrategy == LazyForEachReleaseStrategy::PROGRESSIVE) {
+                removingNodeList_.push_back(node);
+            }
+        }
+    }
+    for (auto i: removingIndex) {
+        node4Index_.Remove(i);
+    }
+}
+
+void ArkoalaLazyNode::RemovingExpiringItem(int64_t deadline)
+{
+    // step 1: check removingNodeList_ if empty
+    if (removingNodeList_.empty()) {
+        return;
+    }
+    // step 2: release nodes while enough time for average release
+    int64_t startTimeStamp = 0;
+    int64_t endTimeStamp = 0;
+    int64_t averageTime = 0;
+    int64_t totalTime = 0;
+    int32_t count = 0;
+    do {
+        startTimeStamp = GetSysTimestamp();
+        auto ite = removingNodeList_.begin();
+        removingNodeList_.erase(ite);
+        endTimeStamp = GetSysTimestamp();
+        count++;
+        totalTime += endTimeStamp - startTimeStamp;
+        averageTime = totalTime / count;
+    } while (!removingNodeList_.empty() && deadline - endTimeStamp > averageTime);
 }
 
 void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger)
@@ -153,7 +188,13 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
         child->SetJSViewActive(false, !isRepeat_);
         if (!isRepeat_) {
             child->SetParent(WeakClaim(this));
-            return child->GetFrameChildByIndex(0, needBuild);
+            bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
+            if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::DISABLED) {
+                enableCustomComponentFreeze = false;
+            } else if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::ENABLED) {
+                enableCustomComponentFreeze = true;
+            }
+            return child->GetFrameChildByIndex(0, needBuild, enableCustomComponentFreeze);
         }
     } else if (addToRenderTree) {
         child->SetActive(true);
@@ -290,13 +331,18 @@ void ArkoalaLazyNode::PostIdleTask()
     CHECK_NULL_VOID(context);
 
     context->AddPredictTask(
-        [weak = AceType::WeakClaim(this)](int64_t /* deadline */, bool /* canUseLongPredictTask */) {
+        [weak = AceType::WeakClaim(this)](int64_t deadline, bool /* canUseLongPredictTask */) {
         ACE_SCOPED_TRACE("ArkoalaLazyNode.IdleTask");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "idle task calls GetChildren");
         node->GetChildren();
+        node->PurgeNode();
+        node->RemovingExpiringItem(deadline);
+        if (!node->removingNodeList_.empty()) {
+            node->PostIdleTask();
+        }
     });
 }
 

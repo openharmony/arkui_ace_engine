@@ -75,6 +75,7 @@ import { default as text } from '@ohos.graphics.text'
 import { TabsController, TabsControllerInternal } from './tabs'
 import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from './scroll'
 import { CustomKeyboardContinueFeature, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
+import { LazyForEachOptions_serializer, LazyForEachOptions } from './lazyForEach'
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from './navigation'
 import { TargetInfo_serializer } from './../framework/ohos.arkui.UIContext'
 import { common2D_Rect_serializer } from './../framework/ohos.graphics.common2D'
@@ -3901,6 +3902,12 @@ export class LazyForEachOps {
         LazyForEachOps.SyncOnMoveOps_serialize(node_casted, onMoveFromToOps_casted, onMoveOps_casted, onMoveDragEventOps_casted)
         return
     }
+    public static SetOptions(node: KPointer, options: LazyForEachOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (LazyForEachOptions)
+        LazyForEachOps.SetOptions_serialize(node_casted, options_casted)
+        return
+    }
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
     }
@@ -3929,6 +3936,12 @@ export class LazyForEachOps {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LazyForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static SetOptions_serialize(node: KPointer, options: LazyForEachOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        LazyForEachOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._LazyForEachOps_SetOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -6360,7 +6373,6 @@ export class TouchEventExtender {
         ArkUIGeneratedNativeModule._TouchEventExtender_preventDefault(ptr)
     }
 }
-
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
@@ -10506,7 +10518,6 @@ export class TouchEventProxy_serializer {
         const sourceToolTmpResult: SourceTool = SourceTool.fromValue(valueDeserializer.readInt32())
         const getModifierKeyStateTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let getModifierKeyStateTmpBuf: ModifierKeyStateGetter | undefined = undefined
-        
         if ((getModifierKeyStateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const getModifierKeyStateTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
             const getModifierKeyStateTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()

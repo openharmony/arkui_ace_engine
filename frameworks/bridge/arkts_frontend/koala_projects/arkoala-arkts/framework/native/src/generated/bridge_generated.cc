@@ -36000,6 +36000,12 @@ void impl_LazyForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer
         GetAccessors()->getLazyForEachOpsAccessor()->SyncOnMoveOps(node, static_cast<Callback_OnMoveFromTo*>(&onMoveFromToOpsValueTemp), static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(LazyForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_LazyForEachOps_SetOptions(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_LazyForEachOptions optionsValueTemp = LazyForEachOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getLazyForEachOpsAccessor()->SetOptions(node, static_cast<Ark_LazyForEachOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(LazyForEachOps_SetOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_LeadingMarginSpan_construct() {
         return GetAccessors()->getLeadingMarginSpanAccessor()->construct();
 }

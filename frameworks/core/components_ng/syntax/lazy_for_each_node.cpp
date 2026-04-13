@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -132,6 +133,9 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
             } else {
                 node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
+            }
+            if (!node->builder_->removingNodeList_.empty()) {
+                node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
             }
             ACE_SCOPED_TRACE("LazyForEach predict finish: %s", node->builder_->DumpHashKey().c_str());
         }
@@ -403,7 +407,14 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         child.second->SetJSViewActive(false, true);
-        auto childNode = child.second->GetFrameChildByIndex(0, needBuild);
+        bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
+        auto optionsFreeze = GetEnableCustomComponentFreeze();
+        if (optionsFreeze == LazyForEachCustomComponentFreezeMode::DISABLED) {
+            enableCustomComponentFreeze = false;
+        } else if (optionsFreeze == LazyForEachCustomComponentFreezeMode::ENABLED) {
+            enableCustomComponentFreeze = true;
+        }
+        auto childNode = child.second->GetFrameChildByIndex(0, needBuild, enableCustomComponentFreeze);
         builder_->ProcessOffscreenNode(childNode, false);
         return childNode;
     }

@@ -785,6 +785,10 @@ namespace OHOS::Ace::NG {
         if (!result) {
             expiringItem_.swap(cache);
             ProcessOffscreenNodesNotInExpiring(cache);
+            if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
+                CollectNodesForDelayedRelease(cache);
+                RemovingExpiringItem(deadline);
+            }
             return result;
         }
 
@@ -796,6 +800,10 @@ namespace OHOS::Ace::NG {
         }
         expiringItem_.swap(cache);
         ProcessOffscreenNodesNotInExpiring(cache);
+        if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
+            CollectNodesForDelayedRelease(cache);
+            RemovingExpiringItem(deadline);
+        }
         return result;
     }
 
@@ -805,6 +813,16 @@ namespace OHOS::Ace::NG {
         for (const auto& [key, node] : cache) {
             if (expiringItem_.find(key) == expiringItem_.end()) {
                 ProcessOffscreenNode(node.second, true);
+            }
+        }
+    }
+
+    void LazyForEachBuilder::CollectNodesForDelayedRelease(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) == expiringItem_.end()) {
+                removingNodeList_[node.second->GetId()] = node.second;
             }
         }
     }
@@ -1217,6 +1235,28 @@ namespace OHOS::Ace::NG {
                 node.second.second->SetDestroying(isDestroying, cleanStatus);
             }
         }
+    }
+
+    void LazyForEachBuilder::RemovingExpiringItem(int64_t deadline)
+    {
+        if (removingNodeList_.empty()) {
+            return;
+        }
+        // step 2: release nodes while enough time for average release
+        int64_t startTimeStamp = 0;
+        int64_t endTimeStamp = 0;
+        int64_t averageTime = 0;
+        int64_t totalTime = 0;
+        int32_t count = 0;
+        do {
+            startTimeStamp = GetSysTimestamp();
+            auto ite = removingNodeList_.begin();
+            removingNodeList_.erase(ite);
+            endTimeStamp = GetSysTimestamp();
+            count++;
+            totalTime += endTimeStamp - startTimeStamp;
+            averageTime = totalTime / count;
+        } while (!removingNodeList_.empty() && deadline - endTimeStamp > averageTime);
     }
 
     std::string LazyForEachBuilder::DumpHashKey()
