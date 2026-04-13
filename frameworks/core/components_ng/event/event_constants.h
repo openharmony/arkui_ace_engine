@@ -94,6 +94,21 @@ enum class HitTestResult {
     SELF_TRANSPARENT,
     // Blocks all lower priority siblings and parents node.
     BLOCK_HIERARCHY,
+    // Stops sibling traversal but allows ancestor collection (no preventBubbling).
+    STOP_SIBLINGS,
+};
+
+enum class GestureCollectIntervention {
+    // No intervention, continue normal collection flow.
+    CONTINUE = 0,
+    // Prevent bubbling: stop collecting ancestors (set preventBubbling = true).
+    DISCARD_LOWER = 1,
+    // Discard all collected targets (including self): clear newComingTargets.
+    DISCARD_HIGHER = 2,
+    // Discard self targets but keep child results: restore childSnapshot.
+    DISCARD_SELF = 3,
+    // Stop lower priority siblings but continue ancestor collection.
+    DISCARD_LOWER_PRIORITY_SIBLINGS = 4,
 };
 
 enum class DragFuncType {

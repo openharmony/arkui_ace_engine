@@ -456,6 +456,22 @@
         "name": "OH_ArkUI_PointerEvent_GetYByIndex"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalX"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalY"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetWindowXByIndex"
     },
@@ -6590,6 +6606,34 @@
  	{
  	    "first_introduced": "24",
  	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TouchRecognizer_IsHostBelongsTo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureRecognizer_IsHostBelongsTo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GetGestureBindNodeUniqueId"
     },
     {
         "first_introduced": "26",

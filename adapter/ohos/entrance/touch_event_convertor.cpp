@@ -42,14 +42,44 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     Platform::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
 }
 
+void SetClonedMousePointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    Platform::SetClonedMousePointerEvent(pointerEvent, arkUIMouseEventCloned);
+}
+
+void SetClonedAxisPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    Platform::SetClonedAxisPointerEvent(pointerEvent, arkUIAxisEventCloned);
+}
+
 void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
     Platform::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
 }
 
+void SetPostMousePointerEvent(MouseEvent& mouseEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    Platform::SetPostMousePointerEvent(mouseEvent, arkUIMouseEventCloned);
+}
+
+void SetPostAxisPointerEvent(AxisEvent& axisEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    Platform::SetPostAxisPointerEvent(axisEvent, arkUIAxisEventCloned);
+}
+
 void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
 {
     Platform::DestroyRawPointerEvent(arkUITouchEvent);
+}
+
+void DestroyMouseRawPointerEvent(ArkUIMouseEvent* arkUIMouseEvent)
+{
+    Platform::DestroyMouseRawPointerEvent(arkUIMouseEvent);
+}
+
+void DestroyAxisRawPointerEvent(ArkUIAxisEvent* arkUIAxisEvent)
+{
+    Platform::DestroyAxisRawPointerEvent(arkUIAxisEvent);
 }
 
 TouchType GetTouchEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

@@ -19,8 +19,16 @@
 
 #include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "interfaces/inner_api/ui_session/ui_content_errors.h"
 
 namespace {
+constexpr char GET_INSPECTOR_TREE_CALLBACK_TIMEOUT[] = "GetInspectorTreeCallbackTimeout";
+
+inline int32_t NormalizeCallbackTimeout(int32_t timeout)
+{
+    return timeout > 0 ? timeout : OHOS::Ace::DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS;
+}
+
 void AddArkUIImagesByIds(OHOS::MessageParcel& data,
     std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& componentImages)
 {
@@ -71,6 +79,7 @@ void AddArkWebImagesByIds(OHOS::MessageParcel& data,
 } // namespace
 
 namespace OHOS::Ace {
+
 int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -321,9 +330,19 @@ void UiReportStub::ReportSearchEvent(const std::string& data)
 
 void UiReportStub::ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart)
 {
-    if (inspectorTreeCallback_ != nullptr) {
-        inspectorTreeCallback_(data, partNum, isLastPart);
+    std::function<void(std::string, int32_t, bool)> inspectorTreeCallback;
+    {
+        std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
+        if (inspectorTreeCallback_ == nullptr) {
+            return;
+        }
+        inspectorTreeCallback = inspectorTreeCallback_;
+        if (isLastPart) {
+            CancelGetInspectorTreeCallbackTimeoutTaskLocked();
+            inspectorTreeCallback_ = nullptr;
+        }
     }
+    inspectorTreeCallback(data, partNum, isLastPart);
 }
 
 void UiReportStub::ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart)
@@ -391,10 +410,65 @@ void UiReportStub::RegisterClickEventCallback(const EventCallback& eventCallback
     clickEventCallback_ = std::move(eventCallback);
 }
 
-void UiReportStub::RegisterGetInspectorTreeCallback(
+void UiReportStub::UnregisterGetInspectorTreeCallback()
+{
+    std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
+    inspectorTreeCallback_ = nullptr;
+}
+
+void UiReportStub::PostGetInspectorTreeCallbackRemoveTask(int32_t timeout)
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("PostGetInspectorTreeCallbackRemoveTask eventHandler is null");
+        return;
+    }
+    wptr<UiReportStub> weakThis = this;
+    bool postTaskSuccess = eventHandler->PostTask([weakThis]() {
+        auto uiReportStub = weakThis.promote();
+        if (uiReportStub == nullptr) {
+            LOGE("PostGetInspectorTreeCallbackRemoveTask uiReportStub is null");
+            return;
+        }
+        uiReportStub->HandleInspectorTreeCallbackTimeout();
+    }, GET_INSPECTOR_TREE_CALLBACK_TIMEOUT, NormalizeCallbackTimeout(timeout));
+    if (!postTaskSuccess) {
+        LOGW("Post GetInspectorTree timeout task failed");
+        inspectorTreeCallback_ = nullptr;
+    }
+}
+
+bool UiReportStub::RegisterGetInspectorTreeCallback(
     const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
-    inspectorTreeCallback_ = std::move(eventCallback);
+    std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
+    if (inspectorTreeCallback_ != nullptr) {
+        return false;
+    }
+    inspectorTreeCallback_ = eventCallback;
+    return true;
+}
+
+void UiReportStub::HandleInspectorTreeCallbackTimeout()
+{
+    std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
+    LOGW("GetInspectorTree callback timeout, clear pending callback");
+    inspectorTreeCallback_ = nullptr;
+}
+
+void UiReportStub::SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
+{
+    eventHandler_ = eventHandler;
+}
+
+void UiReportStub::CancelGetInspectorTreeCallbackTimeoutTaskLocked()
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("CancelGetInspectorTreeCallbackTimeoutTaskLocked eventHandler is null");
+        return;
+    }
+    eventHandler->RemoveTask(GET_INSPECTOR_TREE_CALLBACK_TIMEOUT);
 }
 
 void UiReportStub::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)

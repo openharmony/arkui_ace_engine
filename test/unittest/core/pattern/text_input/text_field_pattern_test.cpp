@@ -2007,7 +2007,13 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
+    /**
+     * @tc.step: step7. AddTouchLocationInfo
+     */
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    /**
+     * @tc.step: step8. AddChangedTouchLocationInfo
+     */
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(controller->GetShowMagnifier());

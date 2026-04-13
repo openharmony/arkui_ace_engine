@@ -99,11 +99,9 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = frameNode->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(theme);
-    TextClockModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
+    TextClockModelNG::SetFontColor(frameNode, theme->GetTextClockFontColor());
     if (SystemProperties::ConfigChangePerform()) {
         TextClockModelNG::SetFontColorByUser(frameNode, false);
         TextClockModelNG::CreateWithTextColorResourceObj(frameNode, nullptr);
@@ -495,11 +493,11 @@ void SetFontColorResImpl(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontCol
 
 void ResetFontColorImpl(ArkUINodeHandle node)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    auto theme = frameNode->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(theme);
-    GetTextClockImpl()->SetTextColor(theme->GetTextStyle().GetTextColor());
+    GetTextClockImpl()->SetTextColor(theme->GetTextClockFontColor());
 }
 
 void SetFontSizeImpl(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit)

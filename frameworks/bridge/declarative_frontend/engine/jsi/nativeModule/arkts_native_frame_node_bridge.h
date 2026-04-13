@@ -146,6 +146,8 @@ public:
     static ArkUINativeModuleValue SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CheckIfCanCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CancelAnimations(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNodePropertyValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -175,6 +177,7 @@ public:
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetCommonViewParentId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTsCard start
     static ArkUINativeModuleValue CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -86,6 +86,7 @@ const SizeT<float> LARGE_SIZE = SizeT<float>(10000.0f, 1000.0f);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+const FONT_VARIATIONS_LIST FONT_VARIATIONS_VALUE = { { "wght", 450.0f }, { "wdth", 120.0f } };
 const Ace::TextAlign TEXT_ALIGN_VALUE = Ace::TextAlign::CENTER;
 const Ace::TextOverflow TEXT_OVERFLOW_VALUE = Ace::TextOverflow::CLIP;
 const uint32_t MAX_LINES_VALUE = 10;

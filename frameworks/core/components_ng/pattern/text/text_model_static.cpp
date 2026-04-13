@@ -88,6 +88,16 @@ void TextModelStatic::SetEnableVariableFontWeight(FrameNode* frameNode, const st
     }
 }
 
+void TextModelStatic::SetFontVariations(FrameNode* frameNode, const std::optional<FONT_VARIATIONS_LIST>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetFontVariations(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 void TextModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value)
 {
     if (value.has_value()) {

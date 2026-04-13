@@ -22,7 +22,7 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
@@ -3694,10 +3694,27 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
+    public static addLocalInputEventMonitor(eventMask: int32, listener: InputEventListener): InputEventMonitor {
+        const eventMask_casted = eventMask as (int32)
+        const listener_casted = listener as (InputEventListener)
+        return IUIContext.addLocalInputEventMonitor_serialize(eventMask_casted, listener_casted)
+    }
+    public static removeLocalInputEventMonitor(monitor: InputEventMonitor): void {
+        const monitor_casted = monitor as (InputEventMonitor)
+        IUIContext.removeLocalInputEventMonitor_serialize(monitor_casted)
+        return
+    }
     public static enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
         const enabled_casted = enabled as (boolean | undefined)
         const eventType_casted = eventType as (RawInputEventType)
         IUIContext.enableEventPassthrough_serialize(enabled_casted, eventType_casted)
+        return
+    }
+    public static setCustomCursor(value: image.PixelMap, focusX?: int32, focusY?: int32): void {
+        const value_casted = value as (image.PixelMap)
+        const focusX_casted = focusX as (int32 | undefined)
+        const focusY_casted = focusY as (int32 | undefined)
+        IUIContext.setCustomCursor_serialize(value_casted, focusX_casted, focusY_casted)
         return
     }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
@@ -3779,6 +3796,21 @@ export class IUIContext {
     private static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
         ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
     }
+    private static addLocalInputEventMonitor_serialize(eventMask: int32, listener: InputEventListener): InputEventMonitor {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(listener)
+        const retval = ArkUIGeneratedNativeModule._IUIContext_addLocalInputEventMonitor(eventMask, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: InputEventMonitor = InputEventMonitor_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private static removeLocalInputEventMonitor_serialize(monitor: InputEventMonitor): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        InputEventMonitor_serializer.write(thisSerializer, monitor)
+        ArkUIGeneratedNativeModule._IUIContext_removeLocalInputEventMonitor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     private static enableEventPassthrough_serialize(enabled: boolean | undefined, eventType: RawInputEventType): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (enabled !== undefined) {
@@ -3789,6 +3821,25 @@ export class IUIContext {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IUIContext_enableEventPassthrough(thisSerializer.asBuffer(), thisSerializer.length(), eventType.valueOf())
+        thisSerializer.release()
+    }
+    private static setCustomCursor_serialize(value: image.PixelMap, focusX?: int32, focusY?: int32): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (focusX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const focusXTmpValue = focusX!
+            thisSerializer.writeInt32(focusXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (focusY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const focusYTmpValue = focusY!
+            thisSerializer.writeInt32(focusYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._IUIContext_setCustomCursor(extractors.toImagePixelMapPtr(value), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

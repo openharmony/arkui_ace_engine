@@ -43,6 +43,8 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
     void SetEnableVariableFontWeight(bool value) override;
+    void SetFontVariations(const FONT_VARIATIONS_LIST& value) override;
+    void ResetFontVariations() override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -126,6 +128,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
     static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
+    static void SetFontVariations(FrameNode* frameNode, const FONT_VARIATIONS_LIST& value);
+    static void ResetFontVariations(FrameNode* frameNode);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
@@ -226,6 +230,7 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static FONT_VARIATIONS_LIST GetFontVariations(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
     static void ResetCaretColor(FrameNode* frameNode);

@@ -21,6 +21,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
+#include "core/common/back_press_handler_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -147,6 +149,22 @@ void ListPattern::OnModifyDone()
     if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+void ListPattern::OnDetachFromMainTree()
+{
+    ScrollablePattern::OnDetachFromMainTree();
+    if (!hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    if (!pipeline || !host) {
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(AceType::WeakClaim(AceType::RawPtr(host)));
+    hasBackPressHandlerRegistered_ = false;
 }
 
 bool ListPattern::GetIsAllowMouse() const
@@ -3072,6 +3090,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         canReplaceSwiperItem_ = false;
     }
     FireAndCleanScrollingListener();
+    UpdateBackPressCloseSwipeActionCallback();
 }
 
 WeakPtr<ListItemPattern> ListPattern::GetSwiperItem()
@@ -3110,6 +3129,41 @@ bool ListPattern::CanReplaceSwiperItem()
         return canReplaceSwiperItem_;
     }
     return canReplaceSwiperItem_;
+}
+
+void ListPattern::UpdateBackPressCloseSwipeActionCallback()
+{
+    bool needRegister = GetBackPressCloseSwipeAction() && GetSwiperItem().Upgrade();
+    if (needRegister == hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(host);
+    auto weakHost = AceType::WeakClaim(AceType::RawPtr(host));
+    if (!needRegister) {
+        pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(weakHost);
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    auto weak = AceType::WeakClaim(this);
+    pipeline->GetBackPressHandlerManager()->AddBackPressHandler(weakHost, [weak]() -> bool {
+        auto listPattern = weak.Upgrade();
+        if (!listPattern) {
+            return false;
+        }
+        listPattern->hasBackPressHandlerRegistered_ = false;
+        if (!listPattern->GetBackPressCloseSwipeAction()) {
+            return false;
+        }
+        auto swiperItem = listPattern->GetSwiperItem().Upgrade();
+        if (!swiperItem) {
+            return false;
+        }
+        return !swiperItem->CloseSwipeAction(nullptr);
+    });
+    hasBackPressHandlerRegistered_ = true;
 }
 
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
@@ -3280,7 +3334,7 @@ void ListPattern::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
 {
     auto item = swiperItem_.Upgrade();
     if (item) {
-        return item->CloseSwipeAction(std::move(onFinishCallback));
+        item->CloseSwipeAction(std::move(onFinishCallback));
     }
 }
 

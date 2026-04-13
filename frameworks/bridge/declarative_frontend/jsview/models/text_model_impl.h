@@ -42,6 +42,8 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override {};
     void SetEnableVariableFontWeight(bool value) override {};
+    void SetFontVariations(const FONT_VARIATIONS_LIST& value) override {};
+    void ResetFontVariations() override {};
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;

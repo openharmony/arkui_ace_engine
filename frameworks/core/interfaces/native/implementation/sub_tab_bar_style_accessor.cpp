@@ -43,6 +43,7 @@ bool ParseImageInfoConfig(const Ark_DrawableTabBarIndicator& src, ImageInfoConfi
         return false;
     }
     auto desc = Converter::Convert<DrawableDescriptor*>(src.drawable.value);
+    CHECK_NULL_RETURN(desc, false);
     auto drawableType = desc->GetDrawableType();
     config.type = ConvertToImageType(drawableType);
     if (config.type == ImageType::ANIMATED_DRAWABLE) {

@@ -54,6 +54,10 @@ struct ArkUI_GestureInterruptInfo {
     ArkUIGestureInterruptInfo interruptData;
 };
 
+struct ArkUI_GestureCollectInterceptInfo {
+    ArkUIGestureCollectInterceptInfo interceptData;
+};
+
 struct ArkUI_ParallelInnerGestureEvent {
     ArkUIGestureRecognizer* current = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;

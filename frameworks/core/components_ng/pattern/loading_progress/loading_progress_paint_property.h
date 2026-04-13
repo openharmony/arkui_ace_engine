@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,10 +67,8 @@ public:
             return;
         }
         auto host = GetHost();
-        auto themeScopeId = host ? host->GetThemeScopeId() : 0;
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+        CHECK_NULL_VOID(host);
+        auto progressTheme = host->GetTheme<ProgressTheme>(true);
         CHECK_NULL_VOID(progressTheme);
 
         json->PutExtAttr("color",

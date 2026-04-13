@@ -249,6 +249,18 @@ RefPtr<Container> Container::GetFocused()
     return focusContainer;
 }
 
+RefPtr<Container> Container::GetNormalFocused()
+{
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->IsWindowFocused()) {
+            focusContainer = container;
+        }
+    });
+    return focusContainer;
+}
+
 bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
 {
     return false;

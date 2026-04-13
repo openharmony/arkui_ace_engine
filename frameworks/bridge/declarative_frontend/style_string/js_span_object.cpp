@@ -152,6 +152,8 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
     JSClass<JSFontSpan>::CustomProperty("superscript", &JSFontSpan::GetSuperscript, &JSFontSpan::SetSuperscript);
     JSClass<JSFontSpan>::CustomProperty("fontConfigs", &JSFontSpan::GetFontConfigs, &JSFontSpan::SetFontConfigs);
+    JSClass<JSFontSpan>::CustomProperty(
+        "fontVariations", &JSFontSpan::GetFontVariations, &JSFontSpan::SetFontVariations);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
 }
 
@@ -193,6 +195,7 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsStrokeColor(obj, font);
     ParseJsSuperscript(obj, font);
     ParseJsFontConfigs(obj, font);
+    ParseJsFontVariations(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -453,6 +456,40 @@ void JSFontSpan::ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font)
     ParseFontWeightConfigs(fontConfigsObj, font);
 }
 
+void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
+{
+    if (!obj->HasProperty("fontVariations")) {
+        return;
+    }
+    auto fontVariationsValue = obj->GetProperty("fontVariations");
+    if (fontVariationsValue->IsUndefined() || fontVariationsValue->IsNull() || !fontVariationsValue->IsArray()) {
+        return;
+    }
+    auto fontVariationsArray = JSRef<JSArray>::Cast(fontVariationsValue);
+    FONT_VARIATIONS_LIST fontVariations;
+    for (uint32_t i = 0; i < fontVariationsArray->Length(); ++i) {
+        auto item = fontVariationsArray->GetValueAt(i);
+        if (item->IsUndefined() || item->IsNull() || !item->IsObject()) {
+            continue;
+        }
+        auto fontVariationObject = JSRef<JSObject>::Cast(item);
+        auto axis = fontVariationObject->GetProperty("axis");
+        auto value = fontVariationObject->GetProperty("value");
+        auto isNormalized = fontVariationObject->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    if (!fontVariations.empty()) {
+        font.fontVariations = fontVariations;
+    }
+}
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -576,6 +613,28 @@ void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}
+
+void JSFontSpan::GetFontVariations(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().fontVariations.has_value()) {
+        return;
+    }
+    auto fontVariations = fontSpan_->GetFont().fontVariations.value();
+    auto fontVariationsArray = JSRef<JSArray>::New();
+    for (uint32_t i = 0; i < fontVariations.size(); ++i) {
+        auto fontVariationObject = JSRef<JSObject>::New();
+        fontVariationObject->SetProperty<std::string>("axis", fontVariations[i].axis);
+        fontVariationObject->SetProperty<double>("value", fontVariations[i].value);
+        if (fontVariations[i].isNormalized.has_value()) {
+            fontVariationObject->SetProperty<bool>("isNormalized", fontVariations[i].isNormalized.value());
+        }
+        fontVariationsArray->SetValueAt(i, fontVariationObject);
+    }
+    info.SetReturnValue(JSRef<JSVal>::Cast(fontVariationsArray));
+}
+
+void JSFontSpan::SetFontVariations(const JSCallbackInfo& info) {}
 
 const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
@@ -1530,6 +1589,7 @@ JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
     : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
 {
+    CHECK_NULL_VOID(!customSpanObj.IsEmpty());
     auto type = customSpanObj->Unwrap<AceType>();
     CHECK_NULL_VOID(type);
     auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
@@ -1550,8 +1610,10 @@ RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
     if (end - start > 1) {
         return nullptr;
     }
+    auto jsCustomSpanObject = customSpanObj_.Lock();
+    CHECK_NULL_RETURN(!jsCustomSpanObject->IsEmpty(), nullptr);
     RefPtr<SpanBase> spanBase =
-        MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(), GetOnMeasure(), GetOnDraw(), start, end);
+        MakeRefPtr<JSCustomSpan>(jsCustomSpanObject, GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 

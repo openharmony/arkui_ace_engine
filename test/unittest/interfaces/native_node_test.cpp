@@ -13641,6 +13641,24 @@ HWTEST_F(NativeNodeTest, SwiperDigitIndicatorCreate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OH_ArkUI_NativeModule_GetErrorMessage001
+ * @tc.desc: Test OH_ArkUI_NativeModule_GetErrorMessage returns the latest native error message.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_GetErrorMessage001, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NativeModule_InvalidateAttributes(nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_NativeModule_InvalidateAttributes"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node parameter is null"), std::string::npos);
+}
+
+/**
  * @tc.name: SwiperDigitIndicatorSetGet001
  * @tc.desc: Test OH_ArkUI_SwiperDigitIndicator setter and getter functions
  * @tc.type: FUNC

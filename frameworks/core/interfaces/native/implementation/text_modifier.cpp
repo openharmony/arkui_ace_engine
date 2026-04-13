@@ -973,6 +973,26 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
         }, node);
 }
+void SetFontVariationsImpl(Ark_NativePointer node, const Opt_Array_text_FontVariation* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<FONT_VARIATIONS_LIST> fontVariations = std::nullopt;
+    auto optValue = Converter::GetOptPtr(value);
+    if (optValue.has_value() && optValue->length != 0) {
+        fontVariations = FONT_VARIATIONS_LIST {};
+        fontVariations->reserve(optValue->length);
+        for (Ark_Int32 i = 0; i < optValue->length; ++i) {
+            const auto& item = optValue->array[i];
+            fontVariations->push_back({
+                Converter::Convert<std::string>(item.axis),
+                static_cast<float>(item.value),
+                Converter::OptConvert<bool>(item.isNormalized)
+            });
+        }
+    }
+    TextModelStatic::SetFontVariations(frameNode, fontVariations);
+}
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
 {
@@ -1040,6 +1060,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
         TextAttributeModifier::SetOrphanCharOptimizationImpl,
+        TextAttributeModifier::SetFontVariationsImpl,
     };
     return &ArkUITextModifierImpl;
 }

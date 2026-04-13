@@ -210,6 +210,51 @@ typedef enum {
 } ArkUI_GestureRecognizerType;
 
 /**
+ * @brief Defines the intervention types for gesture and event collection.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * @brief Continues the normal gesture and event collection process. No intervention is performed.
+     * @since 26.0.0
+     */
+    OH_ARKUI_GESTURE_COLLECT_INTERVENTION_CONTINUE = 0,
+
+    /**
+     * @brief Discards all pending low-priority gestures and events. \n
+     * The gestures of the left sibling component and ancestor nodes (parent nodes and above) are discarded. \n
+     * Only the gestures already collected on the current node and higher-priority nodes are retained.
+     * @since 26.0.0
+     */
+    OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER = 1,
+
+    /**
+     * @brief Discards all collected high-priority gestures and events. \n
+     * The gestures of the right sibling component and the current node are discarded. \n
+     * Continues processing the collection flow for lower-priority gestures (left sibling and ancestor nodes).
+     * @since 26.0.0
+     */
+    OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER = 2,
+
+    /**
+     * @brief Discards the gestures and events of the current node. \n
+     * The gestures and events of the current node are excluded from the gesture tree. \n
+     * The gestures of the sibling components (left and right) and the ancestor node are still collected.
+     * @since 26.0.0
+     */
+    OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_SELF = 3,
+
+    /**
+     * @brief Discards the gestures and events to be collected from the left sibling component. \n
+     * The gestures and events of the current node and the right sibling component are retained. \n
+     * Continues the collection flow for the parent and ancestor nodes.
+     * @since 26.0.0
+     */
+    OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS = 4,
+} OH_ArkUI_GestureCollectIntervention;
+
+/**
  * @brief Enumerates gesture interruption results.
  *
  * @since 12
@@ -1219,6 +1264,77 @@ typedef struct {
 * @since 18
 */
 void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event);
+
+/**
+ * @brief Obtains the gesture recognizer from the gesture collection interception information.
+ *
+ * @param info Pointer to the gesture collection interception information.
+ * @param array Pointer to the gesture recognizer array.
+ * @param size Size of the gesture recognizer array.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(
+    const ArkUI_GestureCollectInterceptInfo* info, ArkUI_GestureRecognizerHandleArray* array, int32_t* size);
+
+/**
+ * @brief Obtains the handle to touch recognizer from the gesture collection interception information.
+ *
+ * @param info Pointer to the gesture collection interception information.
+ * @param recognizers Pointer to the array of handles to touch recognizers.
+ * @param size Size of the recognizers array.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(const ArkUI_GestureCollectInterceptInfo* info,
+    ArkUI_TouchRecognizerHandleArray* recognizers, int32_t* size);
+
+/**
+ * @brief Sets the gesture collection intervention mode.
+ * @param info Pointer to the gesture collection interception information.
+ * @param intervention Gesture collection intervention mode, which is of
+ *        type {@link OH_ArkUI_GestureCollectIntervention}.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 26.0.0
+*/
+ArkUI_ErrorCode OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+    ArkUI_GestureCollectInterceptInfo* info, OH_ArkUI_GestureCollectIntervention intervention);
+
+/**
+ * @brief Obtains the unique ID of the component linked to a gesture recognizer.
+ *
+ * @param recognizer Pointer to the gesture recognizer.
+ * @param uniqueId Unique ID of the component linked to a gesture recognizer.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_GetGestureBindNodeUniqueId(const ArkUI_GestureRecognizer* recognizer, int32_t* uniqueId);
+
+/**
+ * @brief Checks whether the node linked to the gesture is a child node of the passed component.
+ *
+ * @param recognizer Handle to the touch recognizer.
+ * @param uniqueId Unique ID of the component.
+ * @return Returns <b>true</b> if the node linked to the gesture is a child node of the passed component.
+ *         Returns <b>false</b> otherwise.
+ * @since 26.0.0
+ */
+bool OH_ArkUI_TouchRecognizer_IsHostBelongsTo(const ArkUI_TouchRecognizerHandle recognizer, int32_t uniqueId);
+
+/**
+ * @brief Checks whether the node linked to the gesture is a child node of the passed component.
+ *
+ * @param recognizer Pointer to the gesture recognizer.
+ * @param uniqueId Unique ID of the component.
+ * @return Returns <b>true</b> if the node linked to the gesture is a child node of the passed component.
+ *         Returns <b>false</b> otherwise.
+ * @since 26.0.0
+ */
+bool OH_ArkUI_GestureRecognizer_IsHostBelongsTo(const ArkUI_GestureRecognizer* recognizer, int32_t uniqueId);
 
 #ifdef __cplusplus
 };

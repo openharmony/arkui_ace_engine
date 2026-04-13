@@ -2264,6 +2264,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_TouchTestDoneCallback* value)
     {
     }
+    void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                          const GestureCollectInterceptCallback* value)
+    {
+    }
     void SetSystemMaterialImpl(Ark_NativePointer node,
                                const Opt_uiMaterial_Material* value)
     {
@@ -9173,6 +9177,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetOnGestureCollectInterceptImpl,
             CommonMethodModifier::SetSystemMaterialImpl,
             CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -10196,6 +10201,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
             SaveButtonAttributeModifier::SetStateEffectImpl,
             SaveButtonAttributeModifier::SetUserCancelEventImpl,
+            SaveButtonAttributeModifier::SetSymbolIconColorImpl,
+            SaveButtonAttributeModifier::SetSymbolRenderingStrategyImpl,
+            SaveButtonAttributeModifier::SetSymbolFontWeightImpl,
         };
         return &ArkUISaveButtonModifierImpl;
     }
@@ -14351,6 +14359,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+    {
+        return {};
+    }
     } // EventTargetInfoAccessor
     namespace FileSelectorParamAccessor {
     void DestroyPeerImpl(Ark_FileSelectorParam peer)
@@ -15187,6 +15199,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PreventBeginImpl(Ark_GestureRecognizer peer)
     {
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        return {};
+    }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
     void DestroyPeerImpl(Ark_GestureStyle peer)
@@ -15684,8 +15701,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
     }
+    Ark_InputEventMonitor AddLocalInputEventMonitorImpl(Ark_Int32 eventMask, const InputEventListener* listener)
+    {
+        return {};
+    }
+    void RemoveLocalInputEventMonitorImpl(const Ark_InputEventMonitor* monitor) {}
     void EnableEventPassthroughImpl(const Opt_Boolean* enabled,
                                     Ark_RawInputEventType eventType)
+    {
+    }
+    void SetCustomCursorImpl(Ark_image_PixelMap value,
+                             const Opt_Int32* focusX,
+                             const Opt_Int32* focusY)
     {
     }
     } // IUIContextAccessor
@@ -17944,6 +17971,47 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RadialGradientStyleAccessor
+    namespace RawInputEventWrapperAccessor {
+    void DestroyPeerImpl(Ark_RawInputEventWrapper peer)
+    {
+        auto peerImpl = reinterpret_cast<RawInputEventWrapperPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_RawInputEventWrapper ConstructImpl(const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent* event)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_Boolean IsMouseEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsTouchEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsKeyEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    Opt_MouseEvent AsMouseEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    Opt_TouchEventProxy AsTouchEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    Opt_KeyEvent AsKeyEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        return {};
+    }
+    } // RawInputEventWrapperAccessor
     namespace RenderingContextSettingsAccessor {
     void DestroyPeerImpl(Ark_RenderingContextSettings peer)
     {
@@ -20262,6 +20330,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CancelTouchImpl(Ark_TouchRecognizer peer)
     {
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        return {};
+    }
     } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
@@ -22399,6 +22472,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::ConstructImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::GetUniqueIdImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -22671,6 +22745,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
             GestureRecognizerAccessor::PreventBeginImpl,
+            GestureRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -22928,7 +23003,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::AddLocalInputEventMonitorImpl,
+            IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
             IUIContextAccessor::EnableEventPassthroughImpl,
+            IUIContextAccessor::SetCustomCursorImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -23873,6 +23951,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct RadialGradientStylePeer {
         virtual ~RadialGradientStylePeer() = default;
+    };
+    const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor()
+    {
+        static const GENERATED_ArkUIRawInputEventWrapperAccessor RawInputEventWrapperAccessorImpl {
+            RawInputEventWrapperAccessor::DestroyPeerImpl,
+            RawInputEventWrapperAccessor::ConstructImpl,
+            RawInputEventWrapperAccessor::GetFinalizerImpl,
+            RawInputEventWrapperAccessor::IsMouseEventImpl,
+            RawInputEventWrapperAccessor::IsTouchEventImpl,
+            RawInputEventWrapperAccessor::IsKeyEventImpl,
+            RawInputEventWrapperAccessor::AsMouseEventImpl,
+            RawInputEventWrapperAccessor::AsTouchEventImpl,
+            RawInputEventWrapperAccessor::AsKeyEventImpl,
+        };
+        return &RawInputEventWrapperAccessorImpl;
+    }
+
+    struct RawInputEventWrapperPeer {
+        virtual ~RawInputEventWrapperPeer() = default;
     };
     const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor()
     {
@@ -24878,6 +24975,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchRecognizerAccessor::GetFinalizerImpl,
             TouchRecognizerAccessor::GetEventTargetInfoImpl,
             TouchRecognizerAccessor::CancelTouchImpl,
+            TouchRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &TouchRecognizerAccessorImpl;
     }
@@ -25469,6 +25567,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRadialGradientStyleAccessor,
+            GetRawInputEventWrapperAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderNodeExtenderAccessor,
             GetRenderServiceNodeAccessor,

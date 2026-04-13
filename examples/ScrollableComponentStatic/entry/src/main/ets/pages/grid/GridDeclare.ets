@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,20 @@ struct GridDeclare {
     this.items = [];
     for (let i: number = 0; i < 40; i++) {
       this.items.push(i);
+    }
+  }
+
+  onDidBuild(): void {
+    if (this.defaultScroller.getFrameNode() != undefined) {
+      console.log('defaultScroller getFrameNode is not empty, the nodeType is ' + this.defaultScroller.getFrameNode()?.getNodeType());
+    } else {
+      console.log('defaultScroller getFrameNode is empty');
+    }
+
+    if (this.dynamicScroller.getFrameNode() != undefined) {
+      console.log('dynamicScroller getFrameNode is not empty, the nodeType is ' + this.dynamicScroller.getFrameNode()?.getNodeType());
+    } else {
+      console.log('dynamicScroller getFrameNode is empty');
     }
   }
 

@@ -226,6 +226,16 @@ public:
 
     void UpdateUserDefinedIdealSize(const CalcSize& value);
 
+    void MarkUserDefinedHeightConfigured()
+    {
+        userDefinedHeightConfigured_ = true;
+    }
+
+    bool HasUserDefinedHeightConfig() const
+    {
+        return userDefinedHeightConfigured_;
+    }
+
     void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
 
     bool UpdateLayoutPolicyWithCheck(const LayoutCalPolicy layoutPolicy, bool isWidth);
@@ -557,6 +567,7 @@ private:
     bool isUserSetVisibility_ = false;
 
     bool isUserSetBackgroundColor_ = false;
+    bool userDefinedHeightConfigured_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

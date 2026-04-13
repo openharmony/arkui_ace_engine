@@ -45,7 +45,7 @@ bool OptionElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
     FocusGroup::OnKeyEvent(keyEvent);
     if (!((keyEvent.code == KeyCode::KEY_BACK || keyEvent.code == KeyCode::KEY_ESCAPE) &&
-        keyEvent.action == KeyAction::UP)) {
+        (keyEvent.action == KeyAction::UP || keyEvent.action == KeyAction::CANCEL))) {
         return false;
     }
 

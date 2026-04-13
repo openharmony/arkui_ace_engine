@@ -80,7 +80,7 @@ RefPtr<RenderNode> TextOverlayComponent::CreateRenderNode()
 
 void TextOverlayComponent::InitThemeStyle(const RefPtr<ThemeManager>& themeManager)
 {
-    theme_ = themeManager->GetTheme<TextOverlayTheme>();
+    theme_ = themeManager->GetTheme<TextOverlayTheme>(true);
     if (!theme_) {
         return;
     }

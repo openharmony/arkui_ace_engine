@@ -28,9 +28,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -48,6 +50,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/event/mouse_event.h"
@@ -59,6 +62,7 @@ constexpr int32_t TOTAL_NUMBER = 1000;
 constexpr double PERCENT_100 = 100.0;
 constexpr int32_t MODE_SEVEN = 6; // items is divided into 6 groups in (7 + #) mode
 constexpr int32_t MODE_FIVE = 4; // items is divided into 4 groups in (5 + #) mode
+constexpr int32_t UI_MATERIAL_LEVEL_LOW = 2;
 }
 void IndexerPattern::OnModifyDone()
 {
@@ -1084,20 +1088,68 @@ void IndexerPattern::UpdateBubbleBackgroundView()
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
+        auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         auto indexerTheme = host->GetTheme<IndexerTheme>(true);
         CHECK_NULL_VOID(indexerTheme);
-        BlurStyleOption styleOption;
-        if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
-            styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
+
+        bool isPopupBackgroundSetByUser = layoutProperty->GetSetPopupBackgroundColorByUserValue(false);
+        bool isPopupBackgroundBlurStyleSetByUser = layoutProperty->GetSetPopupBackgroundBlurStyleByUserValue(false);
+        if ((isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser) ||
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), nullptr);
+            BlurStyleOption styleOption;
+            if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
+                styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
+            } else {
+                styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+            }
+            auto bubbleRenderContext = popupNode_->GetRenderContext();
+            CHECK_NULL_VOID(bubbleRenderContext);
+            bubbleRenderContext->UpdateBackBlurStyle(styleOption);
+            bubbleRenderContext->UpdateBackgroundColor(
+                paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
         } else {
-            styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+            ApplyPopupSystemMaterial();
         }
-        auto bubbleRenderContext = popupNode_->GetRenderContext();
-        CHECK_NULL_VOID(bubbleRenderContext);
-        bubbleRenderContext->UpdateBackBlurStyle(styleOption);
-        bubbleRenderContext->UpdateBackgroundColor(
-            paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
     }
+}
+
+void IndexerPattern::ApplyPopupSystemMaterial()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto bubbleRenderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(bubbleRenderContext);
+    bubbleRenderContext->UpdateBackBlurStyle(std::nullopt);
+
+    if (static_cast<int32_t>(SystemProperties::GetUiMaterialLevel()) != UI_MATERIAL_LEVEL_LOW) {
+        bubbleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+        auto material = AceType::MakeRefPtr<UiMaterial>();
+        material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+        ImmersiveOptions options;
+        options.style = UiMaterialStyle::THICK;
+        material->SetImmersiveOptions(options);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), AceType::RawPtr(material));
+    } else {
+        auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(host->GetThemeScopeId());
+        if (!tokenTheme) {
+            tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+        }
+        if (tokenTheme) {
+            auto colors = tokenTheme->Colors();
+            if (colors) {
+                bubbleRenderContext->UpdateBackgroundColor(colors->CompBackgroundPrimary());
+            }
+        }
+    }
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dipScale = pipelineContext->GetDipScale();
+    auto shadow = MaterialUtils::GetImmersiveShadow(dipScale);
+    bubbleRenderContext->UpdateBackShadow(shadow);
 }
 
 void IndexerPattern::UpdateBubbleSize()

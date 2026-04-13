@@ -58,6 +58,8 @@ public:
     std::string GetFilterID(void) const;
     void SetFilterDepth(size_t depth);
     size_t GetFilterDepth() const;
+    void EnableFreeNodes();
+    bool IsFreeNodesEnabled() const;
 
 private:
     bool FilterEmpty() const;
@@ -65,6 +67,7 @@ private:
     uint32_t filterDepth = 0;
     uint64_t filterFixed = 0;
     std::vector<std::string> filterExt;
+    bool isFreeNodesEnable = false;
 };
 
 struct InspectorConfig {

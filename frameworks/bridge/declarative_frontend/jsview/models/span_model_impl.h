@@ -43,6 +43,8 @@ public:
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
+    void SetFontVariations(const FONT_VARIATIONS_LIST& value) override {};
+    void ResetFontVariations() override {};
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetBaselineOffset(const Dimension& baselineOffset) override;

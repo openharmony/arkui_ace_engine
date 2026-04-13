@@ -37,6 +37,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/base/thread/mock_background_task_executor.cpp",
     "$ace_root/frameworks/base/thread/task_executor.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
 
     "$ace_root/test/mock/frameworks/core/accessibility/accessibility_manager_ng.cpp",
 
@@ -185,6 +186,7 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
 
+    "$ace_root/frameworks/core/common/back_press_handler_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",

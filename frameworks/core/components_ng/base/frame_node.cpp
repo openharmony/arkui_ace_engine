@@ -16,7 +16,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include <cinttypes>
 #include <unordered_set>
+#if defined(OHOS_PLATFORM)
+#include <unistd.h>
+#endif
 
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/ui_node.h"
@@ -152,6 +156,23 @@ std::optional<float> ParseDimensionToPx(
     auto calcLengthOfDimension = NG::CalcLength(dimension.CalcValue());
     StringExpression::ConvertDal2Rpn(calcLengthOfDimension.CalcValue(), calcRpnexp);
     return ConvertToPx(calcLengthOfDimension, scaleProperty, percentReference, calcRpnexp);
+}
+
+template<typename RegionList>
+void AppendConvertedResponseRegions(const RegionList& regions, const ScaleProperty& scaleProperty,
+    const RectF& rect, std::vector<RectF>& responseRegionList)
+{
+    for (const auto& region : regions) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+            continue;
+        }
+        responseRegionList.emplace_back(
+            rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+    }
 }
 
 void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
@@ -566,6 +587,10 @@ FrameNode::FrameNode(
 
     if (IsThreadSafeNode()) {
         MultiThreadBuildManager::CheckTag(tag);
+    } else if (tag == V2::CANVAS_ETS_TAG) {
+#if defined(OHOS_PLATFORM)
+        ownedTid_ = static_cast<uint64_t>(gettid());
+#endif
     }
 }
 
@@ -3341,17 +3366,19 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        auto pattern = AceType::DynamicCast<CanvasPattern>(GetPattern());
-        if (pattern) {
-            int32_t id = pattern->GetPatternInstanceId();
-            int32_t contextInstanceId = context->GetInstanceId();
-            if (id != INSTANCE_ID_UNDEFINED && id != contextInstanceId) {
+#if defined(OHOS_PLATFORM)
+        if (ownedTid_ != 0) {
+            uint64_t currentTid = static_cast<uint64_t>(gettid());
+            if (ownedTid_ != currentTid) {
+                int32_t contextInstanceId = context->GetInstanceId();
                 TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN,
-                    "MarkNeedRender GetPatternInstanceId:%{public}d, ContextInstanceId:%{public}d"
-                    "FrameNodeInstanceId:%{public}d", id, contextInstanceId, GetInstanceId());
+                    "MarkNeedRender OwnedTid:%{public}" PRIu64 " ContextInstanceId:%{public}d "
+                    "FrameNodeInstanceId:%{public}d",
+                    ownedTid_, contextInstanceId, GetInstanceId());
                 LogBacktrace();
             }
         }
+#endif
         context->AddDirtyRenderNode(Claim(this));
         return;
     }
@@ -3706,6 +3733,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
     bool blockHierarchy = false;
+    bool stopSiblings = false;
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.)
     // based on the gesture attributes set by the current parent node (high and low priority, parallel gestures,
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
@@ -3756,6 +3784,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 consumed = true;
             }
 
+            if (hitResult == HitTestResult::STOP_SIBLINGS) {
+                consumed = true;
+                stopSiblings = true;
+            }
+
             if (hitResult == HitTestResult::BUBBLING) {
                 consumed = true;
             }
@@ -3763,6 +3796,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        if (stopSiblings) {
+            break;
+        }
         if (GetHitTestMode() == HitTestMode::HTMBLOCK || GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
             break;
         }
@@ -3803,6 +3839,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
         if (childHitResult == HitTestResult::BLOCK_HIERARCHY) {
             blockHierarchy = true;
+            consumed = true;
+            break;
+        }
+
+        // STOP_SIBLINGS: stop sibling iteration but don't prevent bubbling
+        if (childHitResult == HitTestResult::STOP_SIBLINGS) {
             consumed = true;
             break;
         }
@@ -3855,14 +3897,24 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
             auto gestureHub = GetOrCreateGestureEventHub();
             if (gestureHub) {
+                TouchTestResult childSnapshot(newComingTargets);
+                auto responseLinkSnapshotSize = responseLinkResult.size();
+                auto testResultBeforeSelf = testResult;
+                auto preventBubblingBeforeSelf = preventBubbling;
+                auto blockHierarchyBeforeSelf = blockHierarchy;
                 TouchTestResult finalResult;
                 ResponseLinkResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
                     finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
                 newComingTargets.swap(finalResult);
-                TriggerShouldParallelInnerWith(newComingResponseLinkTargets, responseLinkResult);
-                responseLinkResult.splice(responseLinkResult.end(), std::move(newComingResponseLinkTargets));
+                // Trigger onGestureCollectIntercept callback
+                auto intervention = gestureHub->TriggerOnGestureCollectIntercept(newComingTargets, responseLinkResult);
+                GestureCollectInterventionContext context { newComingTargets, responseLinkResult,
+                    newComingResponseLinkTargets, childSnapshot, responseLinkSnapshotSize, testResultBeforeSelf,
+                    preventBubblingBeforeSelf, blockHierarchyBeforeSelf, preventBubbling, blockHierarchy,
+                    consumed, testResult };
+                gestureHub->HandleGestureCollectIntervention(intervention, context);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
             preventBubbling = ProcessMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
@@ -4033,47 +4085,33 @@ std::vector<RectF> FrameNode::GetResponseRegionListRaw(const RectF& rect, int32_
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }
-    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
-    bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
-    if (isMouseEvent) {
-        if (gestureHub->GetResponseRegion().empty() && (gestureHub->GetMouseResponseRegion().empty())) {
-            responseRegionList.emplace_back(rect);
-            return responseRegionList;
-        }
-    } else {
-        if (gestureHub->GetResponseRegion().empty()) {
-            responseRegionList.emplace_back(rect);
-            return responseRegionList;
-        }
+    auto defaultRect = rect;
+    if (pattern_ && pattern_->IsDefaultResponseRegionExpandingNeeded(static_cast<SourceType>(sourceType))) {
+        defaultRect = pattern_->ExpandDefaultResponseRegion(defaultRect);
     }
-
-    if (isMouseEvent && (!gestureHub->GetMouseResponseRegion().empty())) {
-        for (const auto& region : gestureHub->GetMouseResponseRegion()) {
-            auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
-            auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
-            auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
-            auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-            if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
-                continue;
-            }
-            RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(),
-                height.value());
-            responseRegionList.emplace_back(mouseRegion);
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
+    const bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
+    const bool noTouchRegion = gestureHub->GetResponseRegion().empty();
+    const bool noMouseRegion = gestureHub->GetMouseResponseRegion().empty();
+    const bool hasTouchRegionConfig = gestureHub->HasTouchResponseRegionConfig();
+    if (isMouseEvent) {
+        if (noTouchRegion && noMouseRegion) {
+            responseRegionList.emplace_back(rect);
+            return responseRegionList;
         }
+        if (!noMouseRegion) {
+            AppendConvertedResponseRegions(
+                gestureHub->GetMouseResponseRegion(), scaleProperty, rect, responseRegionList);
+            return responseRegionList;
+        }
+        AppendConvertedResponseRegions(gestureHub->GetResponseRegion(), scaleProperty, rect, responseRegionList);
         return responseRegionList;
     }
-    for (const auto& region : gestureHub->GetResponseRegion()) {
-        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
-        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
-        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
-        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
-            continue;
-        }
-        RectF responseRegion(
-            rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
-        responseRegionList.emplace_back(responseRegion);
+    if (noTouchRegion) {
+        responseRegionList.emplace_back(hasTouchRegionConfig ? rect : defaultRect);
+        return responseRegionList;
     }
+    AppendConvertedResponseRegions(gestureHub->GetResponseRegion(), scaleProperty, rect, responseRegionList);
     return responseRegionList;
 }
 
@@ -6966,6 +7004,15 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
+    auto frameNodeWeak = WeakClaim(this);
+    auto currentGlobalOffset = Offset(touchEvent.x, touchEvent.y);
+    auto localOffset = Offset(localX, localY);
+    changedInfo.SetCurrentLocalLocationGetter([frameNodeWeak, currentGlobalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, false, 0);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     changedInfo.SetLocalLocation(Offset(localX, localY));
     SetChangeInfo(touchEvent, changedInfo);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
@@ -6996,6 +7043,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
 
 void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)
 {
+    auto frameNodeWeak = WeakClaim(this);
     // all fingers collection
     for (const auto& item : touchEvent.pointers) {
         float globalX = item.x;
@@ -7009,6 +7057,14 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo info("onTouch", item.originalId);
+        auto currentGlobalOffset = Offset(globalX, globalY);
+        auto localOffset = Offset(localX, localY);
+        info.SetCurrentLocalLocationGetter([frameNodeWeak, currentGlobalOffset, localOffset]() {
+            CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+            PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
+            NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, false, 0);
+            return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+        });
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
@@ -7518,51 +7574,6 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
         }
     }
     return total;
-}
-
-void FrameNode::TriggerShouldParallelInnerWith(
-    const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
-{
-    auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
-    CHECK_NULL_VOID(gestureHub);
-    auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
-    CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
-    std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
-
-    for (const auto& item : responseLinkRecognizers) {
-        if (item.Invalid()) {
-            continue;
-        }
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item.Upgrade());
-        if (!recognizer) {
-            continue;
-        }
-        auto type = recognizer->GetRecognizerType();
-        sortedResponseLinkRecognizers[type].emplace_back(recognizer);
-    }
-
-    for (const auto& item : currentRecognizers) {
-        if (item.Invalid()) {
-            continue;
-        }
-        auto recognizer = item.Upgrade();
-        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
-            continue;
-        }
-        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
-        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
-            continue;
-        }
-        auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
-        if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
-            continue;
-        }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
-        if (result && item != result) {
-            recognizer->SetBridgeMode(true);
-            result->AddBridgeObj(item);
-        }
-    }
 }
 
 void FrameNode::GetInspectorValue()

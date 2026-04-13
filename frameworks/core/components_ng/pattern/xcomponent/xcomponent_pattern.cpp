@@ -1402,7 +1402,7 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
         CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
         auto event = touchEvent.ConvertToTouchEvent();
         ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event, false,
-            Container::GetCurrentApiTargetVersion() };
+            Container::GetCurrentApiTargetVersion(), hostNode->GetId(), .usePXUnit = true };
         return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
     });
 }
@@ -1538,7 +1538,7 @@ void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
     const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
     CHECK_NULL_VOID(callback);
     ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID, axisEvent, false,
-        Container::GetCurrentApiTargetVersion() };
+        Container::GetCurrentApiTargetVersion(), GetHost()->GetId(), .usePXUnit = true };
     callback(nativeXComponent_.get(), &uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 

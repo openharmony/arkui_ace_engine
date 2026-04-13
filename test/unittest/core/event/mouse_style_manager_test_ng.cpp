@@ -89,7 +89,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager001, TestSize.Level0)
             mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i].expectMouseFormat);
     }
 }
@@ -141,7 +141,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager002, TestSize.Level1)
             mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i].expectMouseFormat);
     }
 }
@@ -185,7 +185,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager003, TestSize.Level0)
             mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i].expectMouseFormat);
     }
 }
@@ -242,7 +242,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager004, TestSize.Level1)
             mockMouseFormatCases[i + 1].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i + 1].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i + 1].expectMouseFormat);
     }
 }
@@ -296,7 +296,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager005, TestSize.Level0)
             mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i].expectMouseFormat);
     }
 }
@@ -343,7 +343,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager006, TestSize.Level1)
             mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_,
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_),
             mockMouseFormatCases[i].expectMouseFormat);
     }
 }
@@ -456,7 +456,122 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager007, TestSize.Level0)
             mockMouseFormatCases[i].mouseFormat, mockMouseFormatCases[i].isByPass, mockMouseFormatCases[i].reason);
         EXPECT_EQ(result, mockMouseFormatCases[i].expectSetResult);
         mouseStyleManager->VsyncMouseFormat();
-        EXPECT_EQ(mouseStyleManager->mouseFormat_, mockMouseFormatCases[i].expectMouseFormat);
+        EXPECT_EQ(std::get<MouseFormat>(mouseStyleManager->mouseFormat_), mockMouseFormatCases[i].expectMouseFormat);
     }
+}
+
+/**
+ * @tc.name: MouseStyleManager008
+ * @tc.desc: Test case with custom cursor info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager008, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    std::variant<MouseFormat, CustomCursorInfo> customCursorInfo =
+        CustomCursorInfo { .pixelMap = pixelMap, .focusX = 16, .focusY = 16 };
+    mouseStyleManager->SetUserSetCursor(true);
+    auto result =
+        mouseStyleManager->SetMouseFormat(1, 1, customCursorInfo, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+
+    EXPECT_TRUE(result);
+    mouseStyleManager->VsyncMouseFormat();
+    EXPECT_TRUE(std::holds_alternative<CustomCursorInfo>(mouseStyleManager->mouseFormat_));
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).pixelMap, pixelMap);
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusX, 16);
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusY, 16);
+}
+
+/**
+ * @tc.name: MouseStyleManager009
+ * @tc.desc: Test case switching between normal mouse format and custom cursor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager009, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    std::variant<MouseFormat, CustomCursorInfo> customCursorInfo =
+        CustomCursorInfo { .pixelMap = pixelMap, .focusX = 16, .focusY = 16 };
+    mouseStyleManager->SetUserSetCursor(true);
+
+    auto result1 =
+        mouseStyleManager->SetMouseFormat(1, 1, MouseFormat::EAST, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result1);
+    mouseStyleManager->VsyncMouseFormat();
+    EXPECT_EQ(mouseStyleManager->GetCurrentMouseStyle(), MouseFormat::EAST);
+    EXPECT_FALSE(std::holds_alternative<CustomCursorInfo>(mouseStyleManager->mouseFormat_));
+    auto result2 =
+        mouseStyleManager->SetMouseFormat(1, 1, customCursorInfo, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result2);
+    mouseStyleManager->VsyncMouseFormat();
+    EXPECT_TRUE(std::holds_alternative<CustomCursorInfo>(mouseStyleManager->mouseFormat_));
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).pixelMap, pixelMap);
+}
+
+/**
+ * @tc.name: MouseStyleManager010
+ * @tc.desc: Test case with custom cursor info and different reasons.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager010, TestSize.Level1)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    std::variant<MouseFormat, CustomCursorInfo> customCursorInfo =
+        CustomCursorInfo { .pixelMap = pixelMap, .focusX = 16, .focusY = 16 };
+    std::vector<MouseStyleChangeReason> reasons = { MouseStyleChangeReason::USER_SET_MOUSESTYLE,
+        MouseStyleChangeReason::CONTAINER_DESTROY_RESET_MOUSESTYLE,
+        MouseStyleChangeReason::WINDOW_LOST_FOCUS_RESET_MOUSESTYLE,
+        MouseStyleChangeReason::WINDOW_SCENE_LOST_FOCUS_RESET_MOUSESTYLE };
+    for (auto reason : reasons) {
+        mouseStyleManager->mouseFormat_ = MouseFormat::DEFAULT;
+        mouseStyleManager->SetUserSetCursor(true);
+
+        auto result = mouseStyleManager->SetMouseFormat(1, 1, customCursorInfo, false, reason);
+
+        EXPECT_TRUE(result);
+        mouseStyleManager->VsyncMouseFormat();
+        EXPECT_TRUE(std::holds_alternative<CustomCursorInfo>(mouseStyleManager->mouseFormat_));
+        EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusX, 16);
+        EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusY, 16);
+    }
+}
+
+/**
+ * @tc.name: MouseStyleManager011
+ * @tc.desc: Test case mouse style change log with custom cursor info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager011, TestSize.Level1)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    auto pixelMap1 = AceType::MakeRefPtr<MockPixelMap>();
+    std::variant<MouseFormat, CustomCursorInfo> customCursorInfo1 =
+        CustomCursorInfo { .pixelMap = pixelMap1, .focusX = 16, .focusY = 16 };
+    auto pixelMap2 = AceType::MakeRefPtr<MockPixelMap>();
+    std::variant<MouseFormat, CustomCursorInfo> customCursorInfo2 =
+        CustomCursorInfo { .pixelMap = pixelMap2, .focusX = 32, .focusY = 32 };
+    mouseStyleManager->SetUserSetCursor(true);
+
+    auto result1 =
+        mouseStyleManager->SetMouseFormat(1, 1, customCursorInfo1, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result1);
+
+    auto result2 =
+        mouseStyleManager->SetMouseFormat(1, 1, customCursorInfo2, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result2);
+
+    mouseStyleManager->VsyncMouseFormat();
+
+    EXPECT_TRUE(std::holds_alternative<CustomCursorInfo>(mouseStyleManager->mouseFormat_));
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).pixelMap, pixelMap2);
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusX, 32);
+    EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusY, 32);
 }
 } // namespace OHOS::Ace::NG

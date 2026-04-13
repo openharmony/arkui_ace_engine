@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/event_dump.h"
+#include "core/common/input_event_monitor_manager.h"
 #include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event_hub.h"
@@ -48,6 +49,9 @@ class FrameNode;
 class GestureDebugBoundaryManager;
 class SelectOverlayManager;
 class ResponseCtrl;
+#ifdef RELAXED_INTERACTION_SUPPORT
+class RelaxedInteractionManager;
+#endif
 class TouchDelegate : public virtual AceType {
     DECLARE_ACE_TYPE(TouchDelegate, AceType);
 public:
@@ -214,6 +218,11 @@ public:
     }
 
     const RefPtr<NG::GestureDebugBoundaryManager>& GetGestureDebugBoundaryManager();
+
+    RefPtr<InputEventMonitorManager> GetInputMonitorManager() const
+    {
+        return inputMonitorManager_;
+    }
 
     void FlushCursorStyleRequests()
     {
@@ -468,6 +477,9 @@ public:
     void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
     void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
     void NotifyTouchpadInteraction();
+    void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
+    void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -518,6 +530,10 @@ private:
     void AxisTouchTestResultsClear(int32_t eventHandleId);
     void TouchTestResultsClear(int32_t eventHandleId);
     void DownFingerIdsClear(int32_t eventHandleId);
+#ifdef RELAXED_INTERACTION_SUPPORT
+    RefPtr<NG::RelaxedInteractionManager> GetOrCreateRelaxedInteractionManager();
+#endif
+
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;
@@ -560,6 +576,7 @@ private:
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
     RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
+    RefPtr<InputEventMonitorManager> inputMonitorManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
@@ -595,6 +612,9 @@ private:
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
     std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
+#ifdef RELAXED_INTERACTION_SUPPORT
+    RefPtr<NG::RelaxedInteractionManager> relaxedInteractionManager_;
+#endif
 };
 
 } // namespace OHOS::Ace

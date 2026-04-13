@@ -639,6 +639,7 @@ let KeyType;
   KeyType[KeyType.Down = 0] = 'Down';
   KeyType[KeyType.Up = 1] = 'Up';
   KeyType[KeyType.LongPress = 2] = 'LongPress';
+  KeyType[KeyType.CANCEL = 3] = 'CANCEL';
 })(KeyType || (KeyType = {}));
 
 let GestureMode;
@@ -680,6 +681,15 @@ let GestureMask;
   GestureMask[GestureMask.Normal = 0] = 'Normal';
   GestureMask[GestureMask.IgnoreInternal = 1] = 'IgnoreInternal';
 })(GestureMask || (GestureMask = {}));
+
+let GestureCollectIntervention;
+(function (GestureCollectIntervention) {
+  GestureCollectIntervention[GestureCollectIntervention.CONTINUE = 0] = 'CONTINUE';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER = 1] = 'DISCARD_LOWER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_HIGHER = 2] = 'DISCARD_HIGHER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_SELF = 3] = 'DISCARD_SELF';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER_PRIORITY_SIBLINGS = 4] = 'DISCARD_LOWER_PRIORITY_SIBLINGS';
+})(GestureCollectIntervention || (GestureCollectIntervention = {}));
 
 let GesturePriority;
 (function (GesturePriority) {
@@ -5287,3 +5297,26 @@ let MicrophoneCaptureState;
   MicrophoneCaptureState[MicrophoneCaptureState.PAUSED = 1] = 'PAUSED';
   MicrophoneCaptureState[MicrophoneCaptureState.ACTIVE = 2] = 'ACTIVE';
 })(MicrophoneCaptureState || (MicrophoneCaptureState = {}));
+
+let InputEventSubTypeMask;
+(function (InputEventSubTypeMask) {
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_DOWN = 1 << 0] = 'LEFT_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_UP = 1 << 1] = 'LEFT_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_DOWN = 1 << 2] = 'RIGHT_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_UP = 1 << 3] = 'RIGHT_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_DOWN = 1 << 4] = 'MIDDLE_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_UP = 1 << 5] = 'MIDDLE_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_DRAGGING = 1 << 6] = 'LEFT_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_DRAGGING = 1 << 7] = 'RIGHT_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_DRAGGING = 1 << 8] = 'MIDDLE_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.TOUCH_DOWN = 1 << 9] = 'TOUCH_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.TOUCH_UP = 1 << 10] = 'TOUCH_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.KEY_DOWN = 1 << 11] = 'KEY_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.KEY_UP = 1 << 12] = 'KEY_UP';
+})(InputEventSubTypeMask || (InputEventSubTypeMask = {}));
+
+let InputEventInterceptAction;
+(function (InputEventInterceptAction) {
+  InputEventInterceptAction[InputEventInterceptAction.CONTINUE = 0] = 'CONTINUE';
+  InputEventInterceptAction[InputEventInterceptAction.BLOCK = 1] = 'BLOCK';
+})(InputEventInterceptAction || (InputEventInterceptAction = {}));

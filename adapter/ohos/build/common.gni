@@ -97,6 +97,7 @@ window_scene_support = true
 dynamic_component_support = true
 vsync_timeout_check = true
 state_mgmt_use_aot = true
+relaxed_interaction_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -213,6 +214,10 @@ if (vsync_timeout_check) {
 
 if (defined(state_mgmt_use_aot) && state_mgmt_use_aot) {
   defines += [ "STATE_MGMT_USE_AOT" ]
+}
+
+if (defined(relaxed_interaction_support) && relaxed_interaction_support) {
+  defines += [ "RELAXED_INTERACTION_SUPPORT" ]
 }
 
 cflags_cc = [

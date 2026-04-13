@@ -29,20 +29,21 @@ CanvasDrawFunction MenuPaintMethod::GetContentDrawFunction(PaintWrapper* paintWr
         if (!props->GetEnableArrow().has_value() || !props->GetEnableArrow().value()) {
             return;
         }
-#if defined(ENABLE_ROSEN_BACKEND)
-        if (props->GetIsUserSetMaterial().value_or(false)) {
-            return;
-        }
-#endif
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         auto clipPath = props->GetClipPath().value_or("");
         if (clipPath == "") {
             return;
         }
+#if defined(ENABLE_ROSEN_BACKEND)
+        if (props->GetIsUserSetMaterial().value_or(false)) {
+            renderContext->SetShadowPath(clipPath);
+            return;
+        }
+#endif
         auto path = AceType::MakeRefPtr<Path>();
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
-        auto renderContext = paintWrapper->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipShape(path);
     };
 }

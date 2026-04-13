@@ -1409,7 +1409,7 @@ public:
     }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
-    virtual void SetCursor(int32_t cursorValue) {}
+    virtual void SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) {}
 
     virtual void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) {}
 

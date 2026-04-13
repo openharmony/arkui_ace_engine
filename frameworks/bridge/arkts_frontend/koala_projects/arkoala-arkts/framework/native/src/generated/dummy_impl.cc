@@ -4061,6 +4061,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                          const GestureCollectInterceptCallback* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnGestureCollectIntercept(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetSystemMaterialImpl(Ark_NativePointer node,
                                const Opt_uiMaterial_Material* value)
     {
@@ -21720,6 +21731,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetOnGestureCollectInterceptImpl,
             CommonMethodModifier::SetSystemMaterialImpl,
             CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -22742,6 +22754,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
             SaveButtonAttributeModifier::SetStateEffectImpl,
             SaveButtonAttributeModifier::SetUserCancelEventImpl,
+            SaveButtonAttributeModifier::SetSymbolIconColorImpl,
+            SaveButtonAttributeModifier::SetSymbolRenderingStrategyImpl,
+            SaveButtonAttributeModifier::SetSymbolFontWeightImpl,
         };
         return &ArkUISaveButtonModifierImpl;
     }
@@ -30949,6 +30964,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return { .chars="", .length=0 };
     }
+    Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getUniqueId(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // EventTargetInfoAccessor
     namespace FileSelectorParamAccessor {
     void DestroyPeerImpl(Ark_FileSelectorParam peer)
@@ -33133,6 +33159,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isHostBelongsTo(");
+        WriteToString(&out, uniqueId);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
     void DestroyPeerImpl(Ark_GestureStyle peer)
@@ -34384,6 +34423,47 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, enabled);
         out.append(", ");
         WriteToString(&out, eventType);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCustomCursorImpl(Ark_image_PixelMap value,
+                             const Opt_Int32* focusX,
+                             const Opt_Int32* focusY)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setCustomCursor(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, focusX);
+        out.append(", ");
+        WriteToString(&out, focusY);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_InputEventMonitor AddLocalInputEventMonitorImpl(Ark_Int32 eventMask,
+                                                        const InputEventListener* listener)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("addLocalInputEventMonitor(");
+        WriteToString(&out, eventMask);
+        out.append(", ");
+        WriteToString(&out, listener);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void RemoveLocalInputEventMonitorImpl(const Ark_InputEventMonitor* monitor)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("removeLocalInputEventMonitor(");
+        WriteToString(&out, monitor);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -39908,6 +39988,106 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RadialGradientStyleAccessor
+    namespace RawInputEventWrapperAccessor {
+    void DestroyPeerImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_RawInputEventWrapper ConstructImpl(const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent* event)
+    {
+        if (!needGroupedLog(1)) {
+            return reinterpret_cast<Ark_RawInputEventWrapper>(100);
+        }
+        string out("new RawInputEventWrapper(");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_RawInputEventWrapper>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_RawInputEventWrapper>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1)) {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_Boolean IsMouseEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isMouseEvent(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean IsTouchEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isTouchEvent(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean IsKeyEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isKeyEvent(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Opt_MouseEvent AsMouseEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag = INTEROP_TAG_UNDEFINED };
+        }
+        string out("asMouseEvent(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag = INTEROP_TAG_UNDEFINED };
+    }
+    Opt_TouchEventProxy AsTouchEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag = INTEROP_TAG_UNDEFINED };
+        }
+        string out("asTouchEvent(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag = INTEROP_TAG_UNDEFINED };
+    }
+    Opt_KeyEvent AsKeyEventImpl(Ark_RawInputEventWrapper peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag = INTEROP_TAG_UNDEFINED };
+        }
+        string out("asKeyEvent(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag = INTEROP_TAG_UNDEFINED };
+    }
+    } // namespace RawInputEventWrapperAccessor
     namespace RenderingContextSettingsAccessor {
     void DestroyPeerImpl(Ark_RenderingContextSettings peer)
     {
@@ -45559,6 +45739,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isHostBelongsTo(");
+        WriteToString(&out, uniqueId);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
@@ -49139,6 +49332,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::ConstructImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::GetUniqueIdImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -49411,6 +49605,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
             GestureRecognizerAccessor::PreventBeginImpl,
+            GestureRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -49668,7 +49863,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::AddLocalInputEventMonitorImpl,
+            IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
             IUIContextAccessor::EnableEventPassthroughImpl,
+            IUIContextAccessor::SetCustomCursorImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -50613,6 +50811,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct RadialGradientStylePeer {
         virtual ~RadialGradientStylePeer() = default;
+    };
+    const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor()
+    {
+        static const GENERATED_ArkUIRawInputEventWrapperAccessor RawInputEventWrapperAccessorImpl {
+            RawInputEventWrapperAccessor::DestroyPeerImpl,
+            RawInputEventWrapperAccessor::ConstructImpl,
+            RawInputEventWrapperAccessor::GetFinalizerImpl,
+            RawInputEventWrapperAccessor::IsMouseEventImpl,
+            RawInputEventWrapperAccessor::IsTouchEventImpl,
+            RawInputEventWrapperAccessor::IsKeyEventImpl,
+            RawInputEventWrapperAccessor::AsMouseEventImpl,
+            RawInputEventWrapperAccessor::AsTouchEventImpl,
+            RawInputEventWrapperAccessor::AsKeyEventImpl,
+        };
+        return &RawInputEventWrapperAccessorImpl;
+    }
+
+    struct RawInputEventWrapperPeer {
+        virtual ~RawInputEventWrapperPeer() = default;
     };
     const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor()
     {
@@ -51618,6 +51835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchRecognizerAccessor::GetFinalizerImpl,
             TouchRecognizerAccessor::GetEventTargetInfoImpl,
             TouchRecognizerAccessor::CancelTouchImpl,
+            TouchRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &TouchRecognizerAccessorImpl;
     }
@@ -52209,6 +52427,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRadialGradientStyleAccessor,
+            GetRawInputEventWrapperAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderNodeExtenderAccessor,
             GetRenderServiceNodeAccessor,

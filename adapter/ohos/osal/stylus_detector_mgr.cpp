@@ -27,6 +27,27 @@ const static std::unordered_set<std::string> TEXT_FIELD_COMPONENT_TAGS = {
     V2::SEARCH_Field_ETS_TAG,
 };
 
+namespace {
+bool IsHitVisibleResponseArea(const NG::PointF& point, const RefPtr<NG::TextInputResponseArea>& responseArea,
+    uint64_t nanoTimestamp)
+{
+    CHECK_NULL_RETURN(responseArea, false);
+    auto cleanLikeResponseArea = AceType::DynamicCast<NG::CleanNodeResponseArea>(responseArea);
+    CHECK_NULL_RETURN(cleanLikeResponseArea, false);
+    if (!cleanLikeResponseArea->IsShow()) {
+        return false;
+    }
+
+    auto responseFrameNode = cleanLikeResponseArea->GetFrameNode();
+    CHECK_NULL_RETURN(responseFrameNode, false);
+    auto responseGeometryNode = responseFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(responseGeometryNode, false);
+    auto globalFrameRect = responseGeometryNode->GetFrameRect();
+    globalFrameRect.SetOffset(responseFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
+    return globalFrameRect.IsInRegion(point);
+}
+} // namespace
+
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
     static StylusDetectorMgr instance;
@@ -196,26 +217,15 @@ bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
     const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp)
 {
     CHECK_NULL_RETURN(frameNode, false);
-    if (frameNode->GetTag() != V2::TEXTINPUT_ETS_TAG) {
-        return false;
-    }
-
     auto textFieldPattern = frameNode->GetPattern<NG::TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, false);
-    auto responseArea = textFieldPattern->GetCleanNodeResponseArea();
-    CHECK_NULL_RETURN(responseArea, false);
-    auto cleanNodeResponseArea = AceType::DynamicCast<NG::CleanNodeResponseArea>(responseArea);
-    if (!cleanNodeResponseArea->IsShow()) {
-        return false;
+
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG &&
+        IsHitVisibleResponseArea(point, textFieldPattern->GetCleanNodeResponseArea(), nanoTimestamp)) {
+        return true;
     }
 
-    auto cleanNodeFrameNode = cleanNodeResponseArea->GetFrameNode();
-    CHECK_NULL_RETURN(cleanNodeFrameNode, false);
-    auto cleanNodeGeometryNode = cleanNodeFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
-    auto globalFrameRect = cleanNodeGeometryNode->GetFrameRect();
-    globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
-    return globalFrameRect.IsInRegion(point);
+    return IsHitVisibleResponseArea(point, textFieldPattern->GetVoiceResponseArea(), nanoTimestamp);
 }
 
 bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)

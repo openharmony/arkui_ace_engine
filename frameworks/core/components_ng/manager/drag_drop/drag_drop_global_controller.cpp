@@ -121,12 +121,24 @@ void DragDropGlobalController::SetPrepareDragFrameNode(const WeakPtr<FrameNode>&
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     prepareDragFrameNode_ = prepareDragFrameNode;
+    auto frameNode = prepareDragFrameNode.Upgrade();
+    if (frameNode) {
+        prepareDragFrameNodeId_ = frameNode->GetInstanceId();
+    } else {
+        prepareDragFrameNodeId_ = -1;
+    }
 }
 
 const WeakPtr<FrameNode> DragDropGlobalController::GetPrepareDragFrameNode() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return prepareDragFrameNode_;
+}
+
+int32_t DragDropGlobalController::GetPrepareDragFrameNodeId() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return prepareDragFrameNodeId_;
 }
 
 void DragDropGlobalController::SetPreDragStatus(PreDragStatus preDragStatus)

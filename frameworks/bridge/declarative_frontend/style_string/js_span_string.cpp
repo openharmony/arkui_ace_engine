@@ -291,7 +291,11 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
                 spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(tempSpan));
             }
         } else {
-            spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+            auto jsSanBaseObject = CreateJsSpanBaseObject(spanObject);
+            if (jsSanBaseObject.IsEmpty()) {
+                continue;
+            }
+            spanObjectArray->SetValueAt(idx++, jsSanBaseObject);
         }
     }
     info.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
@@ -304,6 +308,10 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
     resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
     JSRef<JSObject> obj = CreateJsSpanObject(spanObject);
+    if (obj->IsEmpty()) {
+        resultObj.Reset();
+        return resultObj;
+    }
     resultObj->SetPropertyObject("styledValue", obj);
     return resultObj;
 }
@@ -623,9 +631,11 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
 
     // store custom spanobj in spanstring
     auto thisObj = args.This();
-    auto newIndex = customSpanStoreIndex_.fetch_add(1);
-    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), styleStringValue);
+    if (!thisObj->IsEmpty()) {
+        auto newIndex = customSpanStoreIndex_.fetch_add(1);
+        std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), styleStringValue);
+    }
 
     auto spanBase = AceType::MakeRefPtr<JSCustomSpan>(JSRef<JSObject>(styleStringValue), args);
     spanBase->UpdateStartIndex(start);
@@ -747,9 +757,11 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
 {
     // store custom spanobj in spanstring
     auto thisObj = args.This();
-    auto newIndex = customSpanStoreIndex_.fetch_add(1);
-    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), args[0]);
+    if (!thisObj->IsEmpty()) {
+        auto newIndex = customSpanStoreIndex_.fetch_add(1);
+        std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), args[0]);
+    }
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 

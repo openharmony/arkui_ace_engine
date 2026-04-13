@@ -25,8 +25,14 @@ namespace OHOS::Ace::NG {
     void ConvertToMouseEvent(MouseEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
     void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
     void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
+    void SetClonedMousePointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIMouseEvent* arkUIMouseEventCloned);
+    void SetClonedAxisPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIAxisEvent* arkUIAxisEventCloned);
     void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned);
+    void SetPostMousePointerEvent(MouseEvent& mouseEvent, ArkUIMouseEvent* arkUIMouseEventCloned);
+    void SetPostAxisPointerEvent(AxisEvent& axisEvent, ArkUIAxisEvent* arkUIAxisEventCloned);
     void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent);
+    void DestroyMouseRawPointerEvent(ArkUIMouseEvent* arkUIMouseEvent);
+    void DestroyAxisRawPointerEvent(ArkUIAxisEvent* arkUIAxisEvent);
     TouchType GetTouchEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     AxisAction GetAxisEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     MouseAction GetMouseEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

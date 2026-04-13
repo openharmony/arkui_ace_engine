@@ -88,7 +88,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/FlowItemModifier.ets",
   "arkui-preprocessed/arkui/FolderStackModifier.ets",
   "arkui-preprocessed/arkui/FormComponentModifier.ets",
-  "arkui-preprocessed/arkui/FormLinkModifier.ets",
   "arkui-preprocessed/arkui/FrameNode.ets",
   "arkui-preprocessed/arkui/GaugeModifier.ets",
   "arkui-preprocessed/arkui/Graphics.ets",

@@ -644,6 +644,7 @@ export type RectWidthStyle = text.RectWidthStyle;
 export type RectHeightStyle = text.RectHeightStyle;
 export type TextBox = text.TextBox;
 export type Paragraph = text.Paragraph;
+export type FontVariation = text.FontVariation;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;

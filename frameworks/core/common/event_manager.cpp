@@ -30,6 +30,10 @@
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
+#ifdef RELAXED_INTERACTION_SUPPORT
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/relaxed_interaction/relaxed_interaction_manager.h"
+#endif
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
@@ -43,6 +47,19 @@ constexpr int32_t MIN_PARAM_SIZE = 1;
 constexpr int32_t COUNT_PARAM_SIZE = 3;
 constexpr int32_t EVENT_HANDLE = 100000;
 constexpr int32_t POST_ONCE = 1;
+
+std::list<FingerInfo> BuildTouchFingerList(const TouchEvent& touchEvent, const WeakPtr<NG::FrameNode>& weakNode)
+{
+    std::list<FingerInfo> fingerList;
+    for (const auto& point : touchEvent.pointers) {
+        NG::PointF localPoint(point.x, point.y);
+        NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
+        fingerList.emplace_back(FingerInfo { point.originalId, point.operatingHand, Offset(point.x, point.y),
+            Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
+            Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool });
+    }
+    return fingerList;
+}
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
@@ -133,10 +150,8 @@ void EventManager::ProcessTouchTestWithReferee(const TouchEvent& touchPoint, con
 {
     auto currentReferee = refereeNG_;
     int32_t eventHandleId = touchPoint.eventHandleId;
-    if (eventHandleId / EVENT_HANDLE > 0) {
-        currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
-        CHECK_NULL_VOID(currentReferee);
-    }
+    currentReferee = GetCurrentReferee(touchPoint.isNewReferee, eventHandleId);
+    CHECK_NULL_VOID(currentReferee);
     currentReferee->AddGestureToScope(touchPoint.id, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 
@@ -557,7 +572,7 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
         currentReferee = postEventRefereeWithStrategyNG_[key];
     } else {
         // Post once use referee with refereeNG_, use upper-level referee more than once.
-        if (key == POST_ONCE) {
+        if (key == POST_ONCE || key == 0) {
             postEventRefereeWithStrategyNG_[key] = refereeNG_;
         } else {
             currentReferee = postEventRefereeWithStrategyNG_[key - 1];
@@ -596,16 +611,7 @@ void EventManager::ExecuteTouchTestDoneCallback(
         info->SetForce(touchEvent.force);
         auto getEventTargetImpl = gestureEventHub->CreateGetEventTargetImpl();
         info->SetTarget(getEventTargetImpl ? getEventTargetImpl().value_or(EventTarget()) : EventTarget());
-        std::list<FingerInfo> fingerList;
-        for (const auto& point : touchEvent.pointers) {
-            NG::PointF localPoint(point.x, point.y);
-            NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
-            FingerInfo fingerInfo = { point.originalId, point.operatingHand, Offset(point.x, point.y),
-                Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
-                Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool };
-            fingerList.emplace_back(fingerInfo);
-        }
-        info->SetFingerList(fingerList);
+        info->SetFingerList(BuildTouchFingerList(touchEvent, weakNode));
         if (touchEvent.tiltX.has_value()) {
             info->SetTiltX(touchEvent.tiltX.value());
         }
@@ -2322,6 +2328,7 @@ EventManager::EventManager()
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    inputMonitorManager_ = AceType::MakeRefPtr<InputEventMonitorManager>();
     InitCoastingAxisEventGenerator();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
@@ -2926,7 +2933,15 @@ void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoi
 bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
 {
     if (event.eventType == UIInputEventType::KEY) {
-        return OnKeyEvent(static_cast<const KeyEvent&>(event));
+        const auto& keyEvent = static_cast<const KeyEvent&>(event);
+        KeyEvent interceptEvent(keyEvent);
+        if (inputMonitorManager_ && inputMonitorManager_->ProcessKeyEvent(interceptEvent)) {
+            if (interceptEvent.isFalsifyCancel) {
+                return OnKeyEvent(interceptEvent);
+            }
+            return true;
+        }
+        return OnKeyEvent(keyEvent);
     } else if (event.eventType == UIInputEventType::FOCUS_AXIS) {
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     } else if (event.eventType == UIInputEventType::CROWN) {
@@ -3309,4 +3324,47 @@ void EventManager::NotifyTouchpadInteraction()
         }
     }
 }
+
+void EventManager::ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    auto relaxedInteractionManager = GetOrCreateRelaxedInteractionManager();
+    if (!relaxedInteractionManager) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "RelaxedInteractionManager is null.");
+        return;
+    }
+    auto result = relaxedInteractionManager->ProcessCommand(command);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "ProcessCommand result: %{public}d.", static_cast<int>(result));
+    if (result == NG::ProcessResult::SUCCESS) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+void EventManager::FlushRelaxedInteraction(std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(relaxedInteractionManager_);
+    auto state = relaxedInteractionManager_->ExecuteNextStep();
+    if (state == NG::ExecutionState::RUNNING) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+#ifdef RELAXED_INTERACTION_SUPPORT
+RefPtr<NG::RelaxedInteractionManager> EventManager::GetOrCreateRelaxedInteractionManager()
+{
+    if (relaxedInteractionManager_) {
+        return relaxedInteractionManager_;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    relaxedInteractionManager_ = AceType::MakeRefPtr<NG::RelaxedInteractionManager>(pipelineContext);
+    return relaxedInteractionManager_;
+}
+#endif
 } // namespace OHOS::Ace

@@ -90,6 +90,13 @@ typedef struct ArkUI_Node* ArkUI_NodeHandle;
 typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
 
 /**
+ * @brief Defines information about gesture collection interception.
+ *
+ * @since 26.0.0
+ */
+typedef struct ArkUI_GestureCollectInterceptInfo ArkUI_GestureCollectInterceptInfo;
+
+/**
  * @brief Defines the return value structure for the <b>onGetIrregularSizeByIndex</b> callback
  * in <b>Grid</b> layout options.
  *

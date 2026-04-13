@@ -472,6 +472,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         CreateMulti(theme, optionsAttr, param);
     }
     theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
@@ -1227,6 +1228,9 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        JSTextPickerTheme::ObtainTextStyle(textStyle);
+    }
     if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }

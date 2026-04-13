@@ -23,8 +23,8 @@ RefPtr<MouseStyle> MouseStyle::CreateMouseStyle()
     static RefPtr<MouseStyle> mouseStyle = AceType::MakeRefPtr<MockMouseStyle>();
     return mouseStyle;
 }
-bool MouseStyleManager::SetMouseFormat(
-    int32_t windowId, int32_t nodeId, MouseFormat mouseFormat, bool isByPass, MouseStyleChangeReason reason)
+bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId,
+    std::variant<MouseFormat, CustomCursorInfo> mouseFormat, bool isByPass, MouseStyleChangeReason reason)
 {
     (void)windowId;
     (void)nodeId;

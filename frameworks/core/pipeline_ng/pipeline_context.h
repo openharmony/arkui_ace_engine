@@ -96,6 +96,7 @@ class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
+class BackPressHandlerManager;
 class DynamicComponentSafeManager;
 
 enum class MockFlushEventType : int32_t {
@@ -242,6 +243,8 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnNonPointerEvent(const NonPointerEvent& event) override;
+
+    void ProcessCommand(const std::string& command);
 
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
@@ -525,6 +528,8 @@ public:
         return sharedTransitionManager_;
     }
 
+    const RefPtr<BackPressHandlerManager>& GetBackPressHandlerManager();
+
     RefPtr<FrameNode> GetPageRootNode();
     // Helper functions for in-order traversal of UINode children
     RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
@@ -607,8 +612,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
-        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    bool ChangeMouseStyle(int32_t nodeId, std::variant<MouseFormat, CustomCursorInfo> format, int32_t windowId = 0,
+        bool isByPass = false, MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -876,7 +881,7 @@ public:
     std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
-    void SetCursor(int32_t cursorValue) override;
+    void SetCursor(std::variant<int32_t, CustomCursorInfo> cursorValue) override;
 
     void RestoreDefault(int32_t windowId, MouseStyleChangeReason reason) override;
 
@@ -1447,6 +1452,7 @@ private:
     void FlushCompatibleTouchEvents();
     void FlushWindowPatternInfo();
     void FlushFocusView();
+    void FlushRelaxedInteraction();
     void FlushFocusScroll();
     void FlushZindexUpdate();
 
@@ -1746,6 +1752,7 @@ private:
     std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
     CompatibleManager compatibleManager_;
     std::list<TouchEvent> compatibleTouchEvents_;
+    RefPtr<BackPressHandlerManager> backPressHandlerManager_;
     RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
 };
 

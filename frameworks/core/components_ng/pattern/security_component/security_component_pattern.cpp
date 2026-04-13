@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/common/layout/constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
@@ -48,6 +49,8 @@ constexpr float MIN_FONT_SCALE = 0.85f;
 constexpr float MAX_FONT_SCALE = 3.20f;
 constexpr float FLOAT_ZERO = 0.0;
 constexpr int HANDLE_RES_ERROR = 1;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
 }
 SecurityComponentPattern::SecurityComponentPattern()
 {
@@ -424,6 +427,19 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
     }
 }
 
+std::string SecurityComponentPattern::GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value) const
+{
+    std::string text;
+    if (value == RENDERINGSTRATEGY_MULTIPLE_COLOR) {
+        text = "SymbolRenderingStrategy.MULTIPLE_COLOR";
+    } else if (value == RENDERINGSTRATEGY_MULTIPLE_OPACITY) {
+        text = "SymbolRenderingStrategy.MULTIPLE_OPACITY";
+    } else {
+        text = "SymbolRenderingStrategy.SINGLE";
+    }
+    return text;
+}
+
 void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json,
     const RefPtr<FrameNode>& symbolIconNode, const InspectorFilter& filter) const
 {
@@ -432,8 +448,17 @@ void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonVal
     CHECK_NULL_VOID(iconProp);
     json->PutExtAttr("iconSize",
         iconProp->GetFontSize().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+
+    const std::optional<std::vector<Color>>& colorListOptional = iconProp->GetSymbolColorList();
+    auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+    json->PutExtAttr("symbolIconColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+
     json->PutExtAttr("iconColor",
         V2::ConvertSymbolColorToString(iconProp->GetSymbolColorListValue({})).c_str(), filter);
+    json->PutExtAttr("SymbolRenderingStrategy",
+        GetSymbolRenderingStrategyInJson(iconProp->GetSymbolRenderingStrategy()).c_str(), filter);
+    json->PutExtAttr("SymbolFontWeight",
+        V2::ConvertWrapFontWeightToStirng(iconProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
 }
 
 void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
@@ -636,17 +661,40 @@ void SecurityComponentPattern::UpdateSymbolProperty(const RefPtr<FrameNode>& scN
     CHECK_NULL_VOID(symbolProp);
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(scLayoutProp);
+    if (scLayoutProp->GetSymbolSourceInfo().has_value()) {
+        auto symbolSourceInfo = scLayoutProp->GetSymbolSourceInfo().value();
+        symbolProp->UpdateSymbolSourceInfo(symbolSourceInfo);
+    }
     if (scLayoutProp->GetIconSize().has_value()) {
-        auto iconSize = scLayoutProp->GetIconSize().value();
-        symbolProp->UpdateFontSize(iconSize);
+        auto symbolSize = scLayoutProp->GetIconSize().value();
+        symbolProp->UpdateFontSize(symbolSize);
+    }
+    if (scLayoutProp->GetSymbolFontWeight().has_value()) {
+        auto symbolFontWeight = scLayoutProp->GetSymbolFontWeight().value();
+        symbolProp->UpdateFontWeight(symbolFontWeight);
+    }
+    if (scLayoutProp->GetSymbolRenderingStrategy().has_value()) {
+        auto symbolRenderingStrategy = scLayoutProp->GetSymbolRenderingStrategy().value();
+        symbolProp->UpdateSymbolRenderingStrategy(symbolRenderingStrategy);
+    }
+    if (scLayoutProp->GetSymbolFontFamilies().has_value()) {
+        auto symbolFontFamily = scLayoutProp->GetSymbolFontFamilies().value();
+        symbolProp->UpdateFontFamily(symbolFontFamily);
+    }
+    if (scLayoutProp->GetSymbolType().has_value()) {
+        auto symbolType = scLayoutProp->GetSymbolType().value();
+        symbolProp->UpdateSymbolType(symbolType);
     }
 
     auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(scPaintProp);
     if (scPaintProp->GetIconColor().has_value() && symbolProp->GetSymbolSourceInfo().has_value()) {
         symbolProp->UpdateSymbolColorList({scPaintProp->GetIconColor().value()});
-        auto iconSrcInfo = symbolProp->GetSymbolSourceInfo().value();
-        symbolProp->UpdateSymbolSourceInfo(iconSrcInfo);
+        SC_LOG_INFO("icon color list is set");
+    }
+    if (scPaintProp->GetSymbolIconColor().has_value() && symbolProp->GetSymbolSourceInfo().has_value()) {
+        symbolProp->UpdateSymbolColorList({scPaintProp->GetSymbolIconColor().value()});
+        SC_LOG_INFO("symbol color list is set");
     }
 }
 

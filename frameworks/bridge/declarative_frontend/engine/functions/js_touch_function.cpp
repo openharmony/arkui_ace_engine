@@ -54,6 +54,8 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetWidth()));
     touchInfoObj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetHeight()));
     touchInfoObj->SetProperty<int32_t>("hand", touchInfo.GetOperatingHand());
+    touchInfoObj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }

@@ -241,7 +241,8 @@ void ParseSelectedDateTimeObject(ArkUIRuntimeCallInfo* runtimeCallInfo, const pa
     }
     panda::Local<panda::FunctionRef> func = changeEventVal->ToObject(vm);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo*)> changeEvent = [vm, func = panda::CopyableGlobal(vm, func),
+        node = targetNode](const BaseEventInfo* info) {
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);

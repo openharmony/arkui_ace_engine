@@ -23,6 +23,7 @@ ace_unittest("custom_test_ng") {
     "custom_node_static_test.cpp",
     "custom_test_ng_first_part.cpp",
     "custom_test_ng_second_part.cpp",
+    "get_common_view_parent_id_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

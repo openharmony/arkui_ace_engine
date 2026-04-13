@@ -491,6 +491,8 @@ private:
     void OnDetachFromMainTreeImpl();
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void AddForceSplitRatioListener();
+    void RemoveForceSplitRatioListener();
     void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode);
     bool InvertShadowColor();

@@ -90,26 +90,29 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        Color defaultDisappearColor = Color::BLACK;
-        Color defaultNormalColor = Color::BLACK;
-        Color defaultSelectColor = Color::BLACK;
         Color defaultSelectedBgColor = Color(0x0C182431);
         Dimension defaultSelectedBorderRadius = 24.0_vp;
         Dimension defaultGradientHeight = 36.0_vp;
         ItemDivider defaultDivider;
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
         auto pipeline = PipelineBase::GetCurrentContext();
         auto frameNode = GetHost();
         if (pipeline && frameNode) {
             auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
             if (pickerTheme) {
-                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
-                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
-                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
                 defaultSelectedBgColor = pickerTheme->GetSelectedBackgroundColor();
                 defaultSelectedBorderRadius = *pickerTheme->GetSelectedBorderRadius().radiusTopLeft;
                 defaultGradientHeight = pickerTheme->GetGradientHeight();
                 defaultDivider.strokeWidth = pickerTheme->GetDividerThickness();
                 defaultDivider.color = pickerTheme->GetDividerColor();
+                auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+                auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+                auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+                defaultDisappearColor = disappearStyle.GetTextColor();
+                defaultNormalColor = normalStyle.GetTextColor();
+                defaultSelectColor = selectedStyle.GetTextColor();
             }
         }
         json->PutExtAttr("defaultPickerItemHeight",

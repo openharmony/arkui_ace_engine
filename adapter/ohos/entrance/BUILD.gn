@@ -166,6 +166,7 @@ template("ace_ohos_standard_source_set") {
       "resource_management:global_resmgr",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",

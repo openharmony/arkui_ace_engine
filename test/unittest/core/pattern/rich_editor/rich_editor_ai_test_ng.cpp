@@ -434,10 +434,16 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo002, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, CanStartAITask001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
+    /**
+     * @tc.steps: step2. set richEditor enable data detect
+     */
     richEditorPattern->textDetectEnable_ = true;
     bool ret = false;
     ret = richEditorPattern->CanStartAITask();

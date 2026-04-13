@@ -16,6 +16,9 @@
 #include "ui_input_event_test.h"
 
 #include "node_model.h"
+#include "native_interface.h"
+
+#include "core/components_ng/base/ui_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,6 +38,67 @@ constexpr int32_t ARKUI_SOURCETYPE = 1;
 constexpr int32_t ARKUI_TOOLTYPE = 7;
 constexpr ArkUI_Uint64 ARKUI_MODIFIERKEYSTATE = 1;
 constexpr ArkUI_Uint32 ARKUI_POINTERCOUNTER = 2;
+constexpr float CURRENT_LOCAL_WINDOW_X = 21.0f;
+constexpr float CURRENT_LOCAL_WINDOW_Y = 31.0f;
+constexpr float CURRENT_LOCAL_FALLBACK_X = 4.0f;
+constexpr float CURRENT_LOCAL_FALLBACK_Y = 6.0f;
+constexpr float CURRENT_LOCAL_POINTER_X = 8.0f;
+constexpr float CURRENT_LOCAL_POINTER_Y = 10.0f;
+constexpr int32_t INVALID_NODE_ID = -1;
+
+class ScopedCurrentLocalNode final {
+public:
+    ScopedCurrentLocalNode()
+    {
+        nodeApi_ = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+            OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+        node_ = nodeApi_ ? nodeApi_->createNode(ARKUI_NODE_STACK) : nullptr;
+        auto* uiNode = node_ ? reinterpret_cast<NG::UINode*>(node_->uiNodeHandle) : nullptr;
+        nodeId_ = uiNode ? uiNode->GetId() : INVALID_NODE_ID;
+    }
+
+    ~ScopedCurrentLocalNode()
+    {
+        if (nodeApi_ && node_) {
+            nodeApi_->disposeNode(node_);
+        }
+    }
+
+    bool IsValid() const
+    {
+        return nodeApi_ && node_ && nodeId_ != INVALID_NODE_ID;
+    }
+
+    int32_t GetId() const
+    {
+        return nodeId_;
+    }
+
+private:
+    ArkUI_NativeNodeAPI_1* nodeApi_ = nullptr;
+    ArkUI_NodeHandle node_ = nullptr;
+    int32_t nodeId_ = INVALID_NODE_ID;
+};
+
+ArkUITouchPoint MakeTouchPoint(float nodeX, float nodeY, float windowX, float windowY)
+{
+    ArkUITouchPoint point {};
+    point.nodeX = nodeX;
+    point.nodeY = nodeY;
+    point.windowX = windowX;
+    point.windowY = windowY;
+    return point;
+}
+
+ArkUI_UIInputEvent MakeUiInputEvent(void* inputEvent, ArkUIEventTypeId eventTypeId, int32_t nodeId)
+{
+    ArkUI_UIInputEvent uiInputEvent {};
+    uiInputEvent.inputEvent = inputEvent;
+    uiInputEvent.eventTypeId = eventTypeId;
+    uiInputEvent.nodeId = nodeId;
+    uiInputEvent.usePXUnit = true;
+    return uiInputEvent;
+}
 } // namespace
 /**
  * @tc.name: UIInputEventTest001
@@ -800,6 +864,134 @@ HWTEST_F(UIInputEventTest, CapiInputTest011, TestSize.Level1)
      */
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest001
+ * @tc.desc: Test current local fallback for click event without valid node id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest001, TestSize.Level1)
+{
+    ArkUIClickEvent clickEvent {};
+    clickEvent.localX = CURRENT_LOCAL_FALLBACK_X;
+    clickEvent.localY = CURRENT_LOCAL_FALLBACK_Y;
+    clickEvent.windowX = CURRENT_LOCAL_WINDOW_X;
+    clickEvent.windowY = CURRENT_LOCAL_WINDOW_Y;
+    auto uiInputEvent = MakeUiInputEvent(&clickEvent, C_CLICK_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest002
+ * @tc.desc: Test current local transforms to window coordinates when node id is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest002, TestSize.Level1)
+{
+    ScopedCurrentLocalNode node;
+    ASSERT_TRUE(node.IsValid());
+    ArkUIClickEvent clickEvent {};
+    clickEvent.localX = CURRENT_LOCAL_FALLBACK_X;
+    clickEvent.localY = CURRENT_LOCAL_FALLBACK_Y;
+    clickEvent.windowX = CURRENT_LOCAL_WINDOW_X;
+    clickEvent.windowY = CURRENT_LOCAL_WINDOW_Y;
+    auto uiInputEvent = MakeUiInputEvent(&clickEvent, C_CLICK_EVENT_ID, node.GetId());
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), CURRENT_LOCAL_WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), CURRENT_LOCAL_WINDOW_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest003
+ * @tc.desc: Test current local fallback for touch action point without valid node id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest003, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent {};
+    touchEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), CURRENT_LOCAL_FALLBACK_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), CURRENT_LOCAL_FALLBACK_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest004
+ * @tc.desc: Test current local fallback for indexed touch points without valid node id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest004, TestSize.Level1)
+{
+    ArkUITouchPoint points[] = {
+        MakeTouchPoint(CURRENT_LOCAL_POINTER_X, CURRENT_LOCAL_POINTER_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y)
+    };
+    ArkUITouchEvent touchEvent {};
+    touchEvent.touchPointes = points;
+    touchEvent.touchPointSize = 1;
+    auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_POINTER_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_POINTER_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest005
+ * @tc.desc: Test hover move current local uses current transform when node id is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest005, TestSize.Level1)
+{
+    ScopedCurrentLocalNode node;
+    ASSERT_TRUE(node.IsValid());
+    ArkUITouchEvent touchEvent {};
+    touchEvent.subKind = ON_HOVER_MOVE;
+    touchEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, node.GetId());
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest006
+ * @tc.desc: Test mouse current local by index uses current transform when node id is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest006, TestSize.Level1)
+{
+    ScopedCurrentLocalNode node;
+    ASSERT_TRUE(node.IsValid());
+    ArkUIMouseEvent mouseEvent {};
+    mouseEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&mouseEvent, C_MOUSE_EVENT_ID, node.GetId());
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest007
+ * @tc.desc: Test axis current local by index uses current transform when node id is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest007, TestSize.Level1)
+{
+    ScopedCurrentLocalNode node;
+    ASSERT_TRUE(node.IsValid());
+    ArkUIAxisEvent axisEvent {};
+    axisEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&axisEvent, C_AXIS_EVENT_ID, node.GetId());
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_Y);
 }
 
 /**

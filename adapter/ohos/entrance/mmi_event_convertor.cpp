@@ -352,6 +352,22 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     }
 }
 
+void SetClonedMousePointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIMouseEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
+void SetClonedAxisPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIAxisEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
 void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
@@ -363,9 +379,49 @@ void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEven
     touchEvent.SetPointerEvent(pointer);
 }
 
+void SetPostMousePointerEvent(MouseEvent& mouseEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIMouseEventCloned->rawPointerEvent = clonedEvent;
+    }
+    std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
+    mouseEvent.SetPointerEvent(pointer);
+}
+
+void SetPostAxisPointerEvent(AxisEvent& axisEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIAxisEventCloned->rawPointerEvent = clonedEvent;
+    }
+    std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
+    axisEvent.SetPointerEvent(pointer);
+}
+
 void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
 {
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
+}
+
+void DestroyMouseRawPointerEvent(ArkUIMouseEvent* arkUIMouseEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
+}
+
+void DestroyAxisRawPointerEvent(ArkUIAxisEvent* arkUIAxisEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEvent->rawPointerEvent);
     if (pointerEvent) {
         delete pointerEvent;
         pointerEvent = nullptr;

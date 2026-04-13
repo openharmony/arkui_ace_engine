@@ -176,6 +176,45 @@ void DataPanelPattern::OnColorModeChange(uint32_t colorMode)
     }
 }
 
+bool DataPanelPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+    auto dataPanelTheme = host->GetTheme<DataPanelTheme>(true);
+    CHECK_NULL_RETURN(dataPanelTheme, result);
+
+    if (!paintProperty->GetTrackBackgroundSetByUser().value_or(false)) {
+        UpdateTrackBackground(dataPanelTheme->GetBackgroundColor(), true);
+        result = true;
+    }
+    if (!paintProperty->GetValueColorsSetByUser().value_or(false)) {
+        auto themeColors = dataPanelTheme->GetColorsArray();
+        std::vector<OHOS::Ace::NG::Gradient> colors;
+        for (const auto& item : themeColors) {
+            OHOS::Ace::NG::Gradient gradient;
+            OHOS::Ace::NG::GradientColor gradientColorStart;
+            gradientColorStart.SetLinearColor(LinearColor(item.first));
+            gradientColorStart.SetDimension(Dimension(0.0));
+            gradient.AddColor(gradientColorStart);
+            OHOS::Ace::NG::GradientColor gradientColorEnd;
+            gradientColorEnd.SetLinearColor(LinearColor(item.second));
+            gradientColorEnd.SetDimension(Dimension(1.0));
+            gradient.AddColor(gradientColorEnd);
+            colors.emplace_back(gradient);
+        }
+        paintProperty->UpdateValueColors(colors);
+        result = true;
+    }
+    return result;
+}
 
 void DataPanelPattern::OnColorConfigurationUpdate()
 {
@@ -184,9 +223,8 @@ void DataPanelPattern::OnColorConfigurationUpdate()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dataPanelTheme = pipeline->GetTheme<DataPanelTheme>();
+
+    auto dataPanelTheme = host->GetTheme<DataPanelTheme>(true);
     CHECK_NULL_VOID(dataPanelTheme);
     auto paintProperty = GetPaintProperty<DataPanelPaintProperty>();
     CHECK_NULL_VOID(paintProperty);

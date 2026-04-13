@@ -15,6 +15,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +49,21 @@ std::unique_ptr<JsonValue> CovertShadowsToJson(const std::vector<Shadow>& shadow
         jsonShadows->Put(CovertShadowToJson(shadow));
     }
     return jsonShadows;
+}
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
 }
 } // namespace
 
@@ -130,7 +146,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
         const std::optional<std::vector<Color>>& colorListOptional = GetSymbolColorList();
         if (colorListOptional.has_value()) {
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value())
+            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToJsonString(colorListOptional.value())
                 .c_str(), filter);
         } else {
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>()).c_str(), filter);
@@ -142,6 +158,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("fontWeight",
         GetFontWeightInJson(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
@@ -243,3 +261,4 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     LayoutProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG
+

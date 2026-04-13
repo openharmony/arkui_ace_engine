@@ -107,6 +107,7 @@ public:
     static void SetItemBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle);
+    static void SetPopupBackgroundBlurStyleByUser(FrameNode* frameNode, bool isByUser);
     static void SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetAutoCollapse(FrameNode* frameNode, bool autoCollapse);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);

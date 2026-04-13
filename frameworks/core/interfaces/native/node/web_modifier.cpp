@@ -2673,6 +2673,46 @@ void ResetOnMicrophoneCaptureStateChanged(ArkUINodeHandle node)
     WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, nullptr);
 }
 
+void SetAiSessionOptions(
+    ArkUINodeHandle node, const struct ArkUIAISessionEventStruct* aiSessionEvents, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(aiSessionEvents);
+    if (length <= 0) {
+        return;
+    }
+
+    for (int32_t i = 0; i < length; i++) {
+        auto& event = aiSessionEvents[i];
+        uint32_t type = static_cast<uint32_t>(event.aiSessionType);
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        auto onCreate = event.onCreateAISession
+            ? *static_cast<AISessionCallback*>(event.onCreateAISession)
+            : nullptr;
+        auto onExecute = event.onExecuteAIAction
+            ? *static_cast<AISessionCallback*>(event.onExecuteAIAction)
+            : nullptr;
+        auto onDestroy = event.onDestroyAISession
+            ? *static_cast<AISessionCallback*>(event.onDestroyAISession)
+            : nullptr;
+        WebModelNG::SetAiSessionOptions(frameNode, type - 1,
+            std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    }
+}
+
+void ResetAiSessionOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // Reset all AI session types by passing empty callbacks
+    for (uint32_t type = 1; type <= MAX_AI_SESSION_TYPE; type++) {
+        WebModelNG::SetAiSessionOptions(frameNode, type - 1, nullptr, nullptr, nullptr);
+    }
+}
+
 void SetOnInputMethodAttached(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2937,6 +2977,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setAiSessionOptions = SetAiSessionOptions,
+        .resetAiSessionOptions = ResetAiSessionOptions,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
         .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
@@ -3196,6 +3238,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setAiSessionOptions = SetAiSessionOptions,
+        .resetAiSessionOptions = ResetAiSessionOptions,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
         .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,

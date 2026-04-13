@@ -1982,7 +1982,7 @@ void VideoElement::Dump()
 
 bool VideoElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::UP && keyEvent.action != KeyAction::CANCEL) {
         return false;
     }
     switch (keyEvent.code) {

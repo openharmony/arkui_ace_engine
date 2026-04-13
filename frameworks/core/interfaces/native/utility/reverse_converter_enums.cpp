@@ -1122,6 +1122,7 @@ void AssignArkValue(Ark_KeyType& dst, const KeyAction& src)
     switch (src) {
         case KeyAction::DOWN: dst = Ark_KeyType::ARK_KEY_TYPE_DOWN; break;
         case KeyAction::UP: dst = Ark_KeyType::ARK_KEY_TYPE_UP; break;
+        case KeyAction::CANCEL: dst = Ark_KeyType::ARK_KEY_TYPE_CANCEL; break;
         default: dst = static_cast<Ark_KeyType>(-1);
             LOGE("Unexpected enum value in KeyAction: %{public}d", src);
     }

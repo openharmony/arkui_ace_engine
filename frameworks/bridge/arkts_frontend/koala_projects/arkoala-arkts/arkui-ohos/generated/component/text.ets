@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, ShaderStyle_serializer, ContentTransition_serializer, SelectedDragPreviewStyle_serializer, FontSettingOptions_serializer, LineSpacingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontSettingOptions, LineSpacingOptions, MenuType } from './textCommon'
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, ShaderStyle_serializer, ContentTransition_serializer, SelectedDragPreviewStyle_serializer, FontSettingOptions_serializer, LineSpacingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontVariation, FontSettingOptions, LineSpacingOptions, MenuType } from './textCommon'
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from './styledString'
@@ -26,6 +26,7 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, Font as arkui_component_units_Font, ResourceStr, VoidCallback } from './units'
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from './richEditor'
 import { ComponentBase } from './../ComponentBase'
@@ -34,6 +35,7 @@ import { Color as arkui_component_enums_Color, FontStyle, TextAlign, TextCase, C
 import { Resource as global_resource_Resource } from 'global.resource'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
 import { AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
+import { default as text } from '@ohos.graphics.text'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -1008,6 +1010,22 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFontVariationsAttribute(value: Array<FontVariation> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: FontVariation = valueTmpValue[valueTmpValueCounterI]
+                text_FontVariation_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setFontVariations(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1310,6 +1328,9 @@ export interface TextAttribute extends CommonMethod {
     }
     orphanCharOptimization(value: boolean | undefined): this {
         throw new Error("Unimplemented method orphanCharOptimization")
+    }
+    fontVariations(value: Array<FontVariation> | undefined): this {
+        throw new Error('Unimplemented method fontVariations')
     }
     font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
         throw new Error('Unimplemented method font')
@@ -1659,6 +1680,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public orphanCharOptimization(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
+        return this
+    }
+    public fontVariations(value: Array<FontVariation> | undefined): this {
+        const value_casted = value as (Array<FontVariation> | undefined)
+        this.getPeer()?.setFontVariationsAttribute(value_casted)
         return this
     }
     public font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {

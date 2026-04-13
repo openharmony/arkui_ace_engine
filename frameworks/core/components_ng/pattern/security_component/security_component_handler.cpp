@@ -857,7 +857,13 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto instanceId = pipeline->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
     if (window) {
-        buttonInfo.crossAxisState_ = static_cast<CrossAxisState>(window->GetCrossAxisState());
+        auto windowType = window->GetRootHostWindowType();
+        if (windowType == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
+            SC_LOG_WARN("Current window type: %{public}d", windowType);
+            buttonInfo.crossAxisState_ = CrossAxisState::STATE_CROSS;
+        } else {
+            buttonInfo.crossAxisState_ = static_cast<CrossAxisState>(window->GetCrossAxisState());
+        }
     }
     uint64_t displayId = container->GetDisplayId();
     if (displayId == Rosen::DISPLAY_ID_INVALID) {

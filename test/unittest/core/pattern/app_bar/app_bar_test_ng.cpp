@@ -83,6 +83,7 @@ void AppBarTestNg::TearDownTestSuite()
     MockContainer::Current()->pipelineContext_ = nullptr;
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**

@@ -16,6 +16,8 @@
 #ifndef ARKUI_ERROR_MESSAGE_MACROS_H
 #define ARKUI_ERROR_MESSAGE_MACROS_H
 
+#include <memory>
+
 #include "error_message_manager.h"
 
 #define CHECK_NULL_RETURN_WITH_MESSAGE(ptr, errorCode, functionName, errorMessage) \
@@ -32,5 +34,18 @@
         OHOS::Ace::ErrorMessageManager::GetInstance().SetLastError(    \
             ArkUIErrorInfo { errorCode, functionName, errorMessage }); \
     } while (0)
+
+namespace OHOS::Ace {
+inline void SetErrorInfoFromErrorInfoPtr(ArkUI_Int32 errorCode, void* errorInfoPtr, const char* errorMessage)
+{
+    auto* realPtr = reinterpret_cast<std::shared_ptr<ArkUIErrorInfo>*>(errorInfoPtr);
+    if (!realPtr || !(*realPtr)) {
+        return;
+    }
+    auto& errorInfo = *realPtr;
+    errorInfo->errorCode = errorCode;
+    errorInfo->errorMessage = (errorMessage != nullptr ? errorMessage : "");
+}
+} // namespace OHOS::Ace
 
 #endif // ARKUI_ERROR_MESSAGE_MACROS_H

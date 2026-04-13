@@ -75,6 +75,10 @@ import {
 import i18n from '@ohos.i18n';
 import util from '@ohos.util';
 import uiMaterial from '@ohos.arkui.uiMaterial';
+import { EnvironmentCallback } from '@kit.AbilityKit';
+import deviceInfo from '@ohos.deviceInfo';
+import { Configuration } from '@ohos.app.ability.Configuration';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -1157,6 +1161,20 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 }
 
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
+  private segmentButtonV2ItemContent: SegmentButtonV2ItemContent;
+
+  constructor(segmentButtonV2ItemContent: SegmentButtonV2ItemContent) {
+    this.segmentButtonV2ItemContent = segmentButtonV2ItemContent;
+  }
+
+  onConfigurationUpdated(config: Configuration) {
+    this.segmentButtonV2ItemContent.updateLanguageLineHeight();
+  }
+
+  onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
+}
+
 @ComponentV2
 struct SegmentButtonV2ItemContent {
   @Require @Param hasHybrid: boolean;
@@ -1180,6 +1198,42 @@ struct SegmentButtonV2ItemContent {
   @Require @Param itemMinHeight?: LengthMetrics = undefined;
   @Require @Param itemPadding?: LocalizedPadding = undefined;
   @Require @Param languageDirection?: Direction = undefined;
+  @Local useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: int;
+ 	private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButtonV2] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButtonV2] failed to get text_fallback_line_spacing resource`);
+    }
+  }
+
+  aboutToAppear(): void {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
 
   build() {
     Column({ space: 2 } as ColumnOptions) {
@@ -1210,6 +1264,8 @@ struct SegmentButtonV2ItemContent {
           .maxFontScale(this.getItemMaxFontScale())
           .minFontScale(this.getItemMinFontScale())
           .attributeModifier(this.item.textModifier)
+          .includeFontPadding(this.useAdaptiveLineHeight)
+ 	        .fallbackLineSpacing(this.useAdaptiveLineHeight)
       }
     }
     .constraintSize({ minHeight: this.getItemMinHeight(), minWidth: '100%' })

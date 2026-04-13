@@ -1367,6 +1367,19 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostMouseEventWithStrategy001
+ * @tc.desc: test PostMouseEventWithStrategy with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventWithStrategy001, TestSize.Level1)
+{
+    Init();
+    MouseEvent mouseEvent;
+    auto result = postEventManager_->PostMouseEventWithStrategy(nullptr, std::move(mouseEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: PostMouseEventTest004
  * @tc.desc: test PostMouseEvent with non-FrameNode
  * @tc.type: FUNC

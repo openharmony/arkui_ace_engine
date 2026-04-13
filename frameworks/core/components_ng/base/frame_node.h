@@ -1628,9 +1628,6 @@ private:
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
-    void TriggerShouldParallelInnerWith(
-        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
-
     void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
@@ -1855,6 +1852,7 @@ private:
     std::shared_ptr<AICallerHelper> aiCallerHelper_;
 
     std::unordered_set<LpxAttribute> lpxAttributes_;
+    uint64_t ownedTid_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

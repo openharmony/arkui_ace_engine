@@ -163,6 +163,7 @@ public:
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
         switchModifier_->SetDragOffsetX(dragOffsetX_);
         switchModifier_->SetIsDragEvent(isDragEvent_);
+        switchModifier_->SetHasSystemMaterial(hasSystemMaterial_);
         switchModifier_->SetShowHoverEffect(showHoverEffect_);
         auto actualTrackRadius = 0.0;
         if (GreatOrEqual(trackRadius, 0.0) && LessOrEqual(trackRadius, std::min(size.Width(), size.Height()) / 2.0)) {
@@ -219,6 +220,25 @@ public:
         isDragEvent_ = isDragEvent;
     }
 
+    void SetPointAlpha(float alpha)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetPointAlpha(alpha);
+        }
+    }
+
+    void SetPointScale(float scale)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetPointScale(scale);
+        }
+    }
+
+    void SetHasSystemMaterial(bool has)
+    {
+        hasSystemMaterial_ = has;
+    }
+
     void SetShowHoverEffect(bool showHoverEffect)
     {
         showHoverEffect_ = showHoverEffect;
@@ -257,6 +277,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     TextDirection direction_ = TextDirection::AUTO;
     bool isDragEvent_ = false;
+    bool hasSystemMaterial_ = false;
 
     RefPtr<SwitchModifier> switchModifier_;
 

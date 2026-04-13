@@ -18,6 +18,8 @@ import util from '@ohos.util';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 import uiMaterial from '@ohos.arkui.uiMaterial';
+import { EnvironmentCallback } from '@kit.AbilityKit';
+import deviceInfo from '@ohos.deviceInfo';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -603,8 +605,30 @@ struct SegmentButtonItem {
   @Prop isSegmentFocusStyleCustomized: boolean;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
+  @State useAdaptiveLineHeight: boolean = false;
   private groupId: string = ''
   @Prop @Watch('onFocusIndex') hover: boolean;
+  private environmentCallbackID?: number = undefined;
+  private environmentCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (configuration) => {
+      this.updateLanguageLineHeight();
+    },
+    onMemoryLevel() {
+    }
+  };
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
+  }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
@@ -646,6 +670,23 @@ struct SegmentButtonItem {
 
   aboutToAppear(): void {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
 
   isDefaultSelectedFontColor(): boolean {
@@ -708,6 +749,8 @@ struct SegmentButtonItem {
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+          .fallbackLineSpacing(this.useAdaptiveLineHeight)
       }
     }
     .direction(this.options.direction)

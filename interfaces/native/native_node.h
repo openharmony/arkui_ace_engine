@@ -7301,6 +7301,19 @@ typedef enum {
     NODE_LIST_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1003019,
 
     /**
+     * @brief Sets the back button behavior for the List component. Attribute setting, resetting, and obtaining APIs are supported.
+     *
+     * The parameter format for setting properties using {@link ArkUI_AttributeItem} is as follows:
+     * .value[0].i32: Whether to collapse the scroll menu when the back button is clicked. 0: no; 1: yes. Default value: 1.
+     *
+     * The parameter format for obtaining properties using {@link ArkUI_AttributeItem} is as follows:
+     * .value[0].i32: Whether to collapse the scroll menu when the back button is clicked. 0: no; 1: yes.
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_BACK_PRESS_BEHAVIOR = 1003020,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -9320,6 +9333,17 @@ typedef enum {
     * The flag of whether need soft keyboard can be configured by {@link OH_ArkUI_NodeEvent_SetOnNeedSoftkeyboardFlag}. \n
     */
     NODE_ON_NEED_SOFTKEYBOARD = 36,
+
+    /**
+     * @brief This callback is invoked when the events and gestures on this node and
+     * higher-priority nodes are collected. \n
+     * This callback is used to intervene in the collection result of events and gestures. \n
+     * 
+     * When the event callback occurs, the {@link ArkUI_GestureCollectInterceptInfo} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     * @since 26.0.0
+     */
+    NODE_ON_GESTURE_COLLECT_INTERCEPT = 37,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
@@ -12994,6 +13018,18 @@ int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
  * @since 24
  */
 int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
+
+/**
+ * @brief Obtains the <b>ArkUI_GestureCollectInterceptInfo</b> object from a specified <b>ArkUI_NodeEvent</b> object.
+ *
+ * @param nodeEvent Pointer to the <b>ArkUI_NodeEvent</b> object.
+ * @return Returns the pointer to the <b>ArkUI_GestureCollectInterceptInfo</b> object.
+ *         It is valid only during callback and does not need to be released.
+ *         Returns <b>null</b> if the input parameter is invalid or the
+ *         information is not gesture collection interception information.
+ * @since 26.0.0
+ */
+ArkUI_GestureCollectInterceptInfo* OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo(ArkUI_NodeEvent* nodeEvent);
 
 /**
  * @brief Retrieves the latest error message, which includes the error code, method name, and error cause.

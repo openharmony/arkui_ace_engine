@@ -2192,4 +2192,1033 @@ HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest005, TestSize.Level1)
     navigationEventHub->FireNavBarStateChangeEvent(false);
     EXPECT_EQ(navigationEventHub->isVisible_, false);
 }
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible001
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when forceSplitSuccess_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = false;
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible002
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when host node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = true;
+    EXPECT_FALSE(pattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible003
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when navBarIsHome_ is true and index < 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    navigationNode->lastStandardIndex_ = -1;
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible004
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when navBarIsHome_ is true and index >= 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    navigationNode->lastStandardIndex_ = 0;
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible005
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when forceSplitHomeDest exists and index >= homeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible005, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    auto homeDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    homeDest->index_ = 2;
+    navigationPattern->forceSplitHomeDest_ = AceType::WeakClaim(AceType::RawPtr(homeDest));
+    navigationNode->lastStandardIndex_ = 1;
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible006
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when forceSplitHomeDest exists and index < homeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible006, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    auto homeDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    homeDest->index_ = 0;
+    navigationPattern->forceSplitHomeDest_ = AceType::WeakClaim(AceType::RawPtr(homeDest));
+    navigationNode->lastStandardIndex_ = 2;
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationShouldVisible007
+ * @tc.desc: Test IsRelatedDestinationShouldVisible when no forceSplitHomeDest and navBarIsHome_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationShouldVisible007, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationShouldVisible());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop001
+ * @tc.desc: Test IsRelatedDestinationAtTop when forceSplitSuccess_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = false;
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop002
+ * @tc.desc: Test IsRelatedDestinationAtTop when navigationStack_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->forceSplitSuccess_ = true;
+    pattern->navigationStack_ = nullptr;
+    EXPECT_FALSE(pattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop003
+ * @tc.desc: Test IsRelatedDestinationAtTop when navigationStack is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationStack->navPathList_.clear();
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop004
+ * @tc.desc: Test IsRelatedDestinationAtTop when navBarIsHome_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.push_back({ "Page01", destNode });
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop005
+ * @tc.desc: Test IsRelatedDestinationAtTop when forceSplitHomeDest equals topDest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop005, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    auto homeDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->forceSplitHomeDest_ = AceType::WeakClaim(AceType::RawPtr(homeDest));
+    navigationStack->navPathList_.push_back({ "Page01", homeDest });
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop006
+ * @tc.desc: Test IsRelatedDestinationAtTop when forceSplitHomeDest does not equal topDest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop006, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    auto homeDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->forceSplitHomeDest_ = AceType::WeakClaim(AceType::RawPtr(homeDest));
+    auto otherDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.push_back({ "Page01", otherDest });
+    EXPECT_FALSE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: IsRelatedDestinationAtTop007
+ * @tc.desc: Test IsRelatedDestinationAtTop when no forceSplitHomeDest and navBarIsHome_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, IsRelatedDestinationAtTop007, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.push_back({ "Page01", destNode });
+    EXPECT_TRUE(navigationPattern->IsRelatedDestinationAtTop());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition001
+ * @tc.desc: Test FireRelatedDestinationLifecycleForTransition when host node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_HIDE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition002
+ * @tc.desc: Test FireRelatedDestinationLifecycleForTransition when relatedDest is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationNode->SetRelatedPageDestNode(nullptr);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_HIDE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition003
+ * @tc.desc: Test FireRelatedDestinationLifecycleForTransition when relatedPattern is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedNode = FrameNode::GetOrCreateFrameNode(V2::JS_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navigationNode->SetRelatedPageDestNode(relatedNode);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_HIDE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition004
+ * @tc.desc: ON_WILL_HIDE with isOnShow=true and shouldVisible=false, NotifyDestinationLifecycle called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = false;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_HIDE);
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition005
+ * @tc.desc: ON_WILL_HIDE with isOnShow=false, shouldVisible=false, NotifyDestinationLifecycle not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition005, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = false;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_HIDE);
+    EXPECT_FALSE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition007
+ * @tc.desc: ON_WILL_SHOW with isOnShow=true, NotifyDestinationLifecycle not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition007, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_WILL_SHOW);
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition008
+ * @tc.desc: ON_ACTIVE with isActive=false, shouldVisible=true, atTop=true, NotifyDestinationLifecycle called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition008, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsActive(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_ACTIVE);
+    EXPECT_TRUE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition009
+ * @tc.desc: ON_ACTIVE with isActive=true, NotifyDestinationLifecycle not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition009, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsActive(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_ACTIVE);
+    EXPECT_TRUE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition010
+ * @tc.desc: ON_INACTIVE with isActive=true, atTop=false, NotifyDestinationLifecycle called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition010, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsActive(true);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.push_back({ "Page01", destNode });
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_INACTIVE);
+    EXPECT_FALSE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForTransition011
+ * @tc.desc: ON_INACTIVE with isActive=false, NotifyDestinationLifecycle not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForTransition011, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsActive(false);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.push_back({ "Page01", destNode });
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle::ON_INACTIVE);
+    EXPECT_FALSE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForModeChange001
+ * @tc.desc: Test FireRelatedDestinationLifecycleForModeChange when host node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForModeChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->FireRelatedDestinationLifecycleForModeChange();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForModeChange002
+ * @tc.desc: Test FireRelatedDestinationLifecycleForModeChange when relatedDest is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForModeChange002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationNode->SetRelatedPageDestNode(nullptr);
+    navigationPattern->FireRelatedDestinationLifecycleForModeChange();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForModeChange003
+ * @tc.desc: shouldVisible=true, fires ON_SHOW and ON_ACTIVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForModeChange003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = false;
+    navigationPattern->forceSplitHomeDest_ = nullptr;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(false);
+    relatedPattern->SetIsActive(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForModeChange();
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+    EXPECT_TRUE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleForModeChange004
+ * @tc.desc: shouldVisible=false, fires ON_INACTIVE and ON_HIDE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleForModeChange004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationPattern->forceSplitSuccess_ = false;
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsActive(true);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleForModeChange();
+    EXPECT_FALSE(relatedPattern->IsActive());
+    EXPECT_FALSE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner001
+ * @tc.desc: Test FireRelatedDestinationLifecycleInner when host node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->FireRelatedDestinationLifecycleInner(true, false);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner002
+ * @tc.desc: Test FireRelatedDestinationLifecycleInner when relatedDest is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner002, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    navigationNode->SetRelatedPageDestNode(nullptr);
+    navigationPattern->FireRelatedDestinationLifecycleInner(true, false);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner003
+ * @tc.desc: visibility != VISIBLE, return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    auto layoutProperty = relatedDest->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navigationPattern->FireRelatedDestinationLifecycleInner(true, false);
+    EXPECT_FALSE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner004
+ * @tc.desc: isOnShow_ == isOnShow (same state), return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    navigationPattern->FireRelatedDestinationLifecycleInner(true, false);
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner006
+ * @tc.desc: isOnShow=true, isFromWindow=true, fires shown with APP_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner006, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleInner(true, true);
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner007
+ * @tc.desc: isOnShow=true, isFromWindow=false, fires shown with TRANSITION
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner007, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(false);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleInner(true, false);
+    EXPECT_TRUE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner008
+ * @tc.desc: isOnShow=false, isFromWindow=true, fires hidden with APP_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner008, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleInner(false, true);
+    EXPECT_FALSE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: FireRelatedDestinationLifecycleInner009
+ * @tc.desc: isOnShow=false, isFromWindow=false, fires hidden with TRANSITION
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, FireRelatedDestinationLifecycleInner009, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto relatedDest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetIsOnShow(true);
+    navigationNode->SetRelatedPageDestNode(relatedDest);
+    relatedDest->AttachToMainTree(false);
+    navigationPattern->FireRelatedDestinationLifecycleInner(false, false);
+    EXPECT_FALSE(relatedPattern->GetIsOnShow());
+}
+
+/**
+ * @tc.name: HideSystemBarIfNeeded001
+ * @tc.desc: IsPageLevelConfigEnabled is false, return directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    navigationPattern->HideSystemBarIfNeeded();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: HideSystemBarIfNeeded002
+ * @tc.desc: IsPageLevelConfigEnabled is true, lastNode is null, return directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+    navigationPattern->isFullPageNavigation_ = true;
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navigationPattern->pageNode_ = pageNode;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() { return false; };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    auto isFullScreen = []() { return true; };
+    manager->SetIsFullScreenWindowCallback(std::move(isFullScreen));
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockContainer, IsMainWindow()).WillRepeatedly(Return(true));
+    navigationNode->lastStandardIndex_ = 100;
+    navigationPattern->HideSystemBarIfNeeded();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: HideSystemBarIfNeeded003
+ * @tc.desc: lastNode exists but IsSizeMatchNavigation is false, return directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+    navigationPattern->isFullPageNavigation_ = true;
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navigationPattern->pageNode_ = pageNode;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() { return false; };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    auto isFullScreen = []() { return true; };
+    manager->SetIsFullScreenWindowCallback(std::move(isFullScreen));
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockContainer, IsMainWindow()).WillRepeatedly(Return(true));
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode("NavDest",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestNode->SetIsSizeMatchNavigation(false);
+    navigationNode->AddChild(navDestNode);
+    navigationPattern->HideSystemBarIfNeeded();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: HideSystemBarIfNeeded004
+ * @tc.desc: statusBarConfig has value and !first, calls SetWindowSystemBarEnabled for STATUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+    navigationPattern->isFullPageNavigation_ = true;
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navigationPattern->pageNode_ = pageNode;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() { return false; };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    auto isFullScreen = []() { return true; };
+    manager->SetIsFullScreenWindowCallback(std::move(isFullScreen));
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockContainer, IsMainWindow()).WillRepeatedly(Return(true));
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode("NavDest",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestNode->SetIsSizeMatchNavigation(true);
+    navDestNode->SetStatusBarConfig(std::make_optional(std::make_pair(false, true)));
+    navigationNode->AddChild(navDestNode);
+    navigationPattern->HideSystemBarIfNeeded();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: HideSystemBarIfNeeded005
+ * @tc.desc: navIndicatorConfig has value and value=false, calls SetWindowSystemBarEnabled for INDICATOR
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+    navigationPattern->isFullPageNavigation_ = true;
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navigationPattern->pageNode_ = pageNode;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() { return false; };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    auto isFullScreen = []() { return true; };
+    manager->SetIsFullScreenWindowCallback(std::move(isFullScreen));
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockContainer, IsMainWindow()).WillRepeatedly(Return(true));
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode("NavDest",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestNode->SetIsSizeMatchNavigation(true);
+    navDestNode->SetNavigationIndicatorConfig(std::make_optional(false));
+    navigationNode->AddChild(navDestNode);
+    navigationPattern->HideSystemBarIfNeeded();
+    SUCCEED();
+}
 } // namespace OHOS::Ace::NG

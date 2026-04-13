@@ -25,12 +25,15 @@ RefPtr<Modifier> DataPanelPaintMethod::GetContentModifier(PaintWrapper* paintWra
 
 void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(paintWrapper);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(dataPanelModifier_);
     auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+    auto theme = host->GetTheme<DataPanelTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto values_ = paintProperty->GetValues().value();
