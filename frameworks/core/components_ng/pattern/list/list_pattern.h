@@ -132,6 +132,10 @@ public:
     {
         return isScrollable_;
     }
+    bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    void PerformScroll(const ScrollingConfig& config) override;
 
     void SetMaintainVisibleContentPosition(bool enabled)
     {
@@ -285,9 +289,9 @@ public:
 
     bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
 
-    int32_t GetEndIndexExcludeEndOffset();
+    int32_t GetEndIndexExcludeEndOffset() const;
 
-    int32_t GetStartIndexExcludeStartOffset();
+    int32_t GetStartIndexExcludeStartOffset() const;
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
@@ -514,6 +518,9 @@ protected:
     void SetLayoutAlgorithmParams(
         const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
     bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
+    std::optional<ScrollingConfig> CreateScrollingConfig(
+        SmartGestureDirection direction, double distance) const;
+    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const;
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -555,6 +562,9 @@ protected:
     bool isStackFromEnd_ = true;
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
+    std::optional<int32_t> GetDefaultScrollTargetIndex(
+        SmartGestureDirection direction, ScrollAlign align, int32_t anchorIndex) const;
+    double GetAverageScrollingDistance() const;
     float GetListCrossAxisSize() const;
     int32_t CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const;
     void CalculateCrossAxisPosition(int32_t lane, float listCrossSize, float& crossPos, float& crossSize) const;
@@ -568,7 +578,7 @@ private:
     void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);
-    float CalculateTargetPos(float startPos, float endPos);
+    float CalculateTargetPos(float startPos, float endPos) const;
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -600,11 +610,11 @@ private:
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetInitialScrollAlign() const;
-    bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
+    bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos) const;
     bool GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
-        ScrollAlign align, float& targetPos);
+        ScrollAlign align, float& targetPos) const;
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
-        ScrollAlign align, float& targetPos);
+        ScrollAlign align, float& targetPos) const;
 
     // multiSelectable
     void ClearMultiSelect() override;

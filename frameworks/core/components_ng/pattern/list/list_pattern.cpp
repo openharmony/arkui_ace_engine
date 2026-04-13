@@ -438,7 +438,7 @@ ScrollAlign ListPattern::GetInitialScrollAlign() const
     return ScrollAlign::START;
 }
 
-float ListPattern::CalculateTargetPos(float startPos, float endPos)
+float ListPattern::CalculateTargetPos(float startPos, float endPos) const
 {
     float topOffset = startPos;
     float bottomOffset = endPos - contentMainSize_;
@@ -1021,6 +1021,79 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
+bool ListPattern::IsScrollAble(SmartGestureDirection direction) const
+{
+    if (!IsScrollable()) {
+        return false;
+    }
+    if (direction == SmartGestureDirection::FORWARD) {
+        return !IsAtBottom();
+    }
+    if (direction == SmartGestureDirection::BACKWARD) {
+        return !IsAtTop();
+    }
+    return false;
+}
+
+std::optional<ScrollingConfig> ListPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    if (!IsScrollAble(direction)) {
+        return std::nullopt;
+    }
+    if (itemPosition_.empty() || maxListItemIndex_ < 0) {
+        return std::nullopt;
+    }
+    auto snapAlign = GetScrollSnapAlign();
+    if (snapAlign != ScrollSnapAlign::NONE) {
+        ScrollAlign align = ScrollAlign::START;
+        int32_t anchorIndex = startIndex_;
+        switch (snapAlign) {
+            case ScrollSnapAlign::START:
+                align = ScrollAlign::START;
+                anchorIndex = GetStartIndexExcludeStartOffset();
+                break;
+            case ScrollSnapAlign::CENTER:
+                align = ScrollAlign::CENTER;
+                anchorIndex = centerIndex_;
+                break;
+            case ScrollSnapAlign::END:
+                align = ScrollAlign::END;
+                anchorIndex = GetEndIndexExcludeEndOffset();
+                break;
+            default:
+                break;
+        }
+        auto targetIndex = GetDefaultScrollTargetIndex(direction, align, anchorIndex);
+        if (targetIndex.has_value()) {
+            float targetPos = 0.0f;
+            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos) && !NearZero(targetPos)) {
+                return CreateScrollingConfig(direction, std::abs(targetPos));
+            }
+        }
+        return std::nullopt;
+    }
+    return CreateScrollingConfig(direction, GetAverageScrollingDistance());
+}
+
+void ListPattern::PerformScroll(const ScrollingConfig& config)
+{
+    if (!config.distance.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("List PerformScroll direction:%d, requestDistance:%f, id:%d, tag:%s",
+        static_cast<int32_t>(config.direction), static_cast<float>(config.distance.value()),
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    auto distance = config.direction == SmartGestureDirection::FORWARD ?
+        config.distance.value() : -config.distance.value();
+    if (NearZero(distance)) {
+        return;
+    }
+    SetIsOverScroll(false);
+    AnimateTo(currentOffset_ - distance, -1, nullptr, true, false, false);
+}
+
 void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
 {
     if (itemPosition_.empty()) {
@@ -1336,7 +1409,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
     return true;
 }
 
-int32_t ListPattern::GetEndIndexExcludeEndOffset()
+int32_t ListPattern::GetEndIndexExcludeEndOffset() const
 {
     auto endPos = contentMainSize_ - contentEndOffset_;
     auto iter = itemPosition_.rbegin();
@@ -1346,7 +1419,7 @@ int32_t ListPattern::GetEndIndexExcludeEndOffset()
     return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
-int32_t ListPattern::GetStartIndexExcludeStartOffset()
+int32_t ListPattern::GetStartIndexExcludeStartOffset() const
 {
     auto iter = itemPosition_.begin();
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
@@ -2006,7 +2079,7 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
     FireAndCleanScrollingListener();
 }
 
-bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos)
+bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos) const
 {
     switch (align) {
         case ScrollAlign::START:
@@ -2033,7 +2106,7 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
 }
 
 bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(
-    int32_t index, float startPos, float endPos, ScrollAlign align, float& targetPos)
+    int32_t index, float startPos, float endPos, ScrollAlign align, float& targetPos) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2085,7 +2158,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(
 }
 
 bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
-    int32_t index, int32_t indexInGroup, float startPos, ScrollAlign align, float& targetPos)
+    int32_t index, int32_t indexInGroup, float startPos, ScrollAlign align, float& targetPos) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2218,6 +2291,76 @@ void ListPattern::ScrollBy(float offset)
     SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     isScrollEnd_ = true;
+}
+
+std::optional<ScrollingConfig> ListPattern::CreateScrollingConfig(
+    SmartGestureDirection direction, double distance) const
+{
+    if (LessOrEqual(distance, 0.0)) {
+        return std::nullopt;
+    }
+    return ScrollingConfig { .distance = distance, .direction = direction };
+}
+
+bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const
+{
+    auto iter = itemPosition_.find(index);
+    if (iter == itemPosition_.end()) {
+        return false;
+    }
+    if (iter->second.isGroup) {
+        return GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos, iter->second.endPos,
+            align, targetPos);
+    }
+    return GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+}
+
+std::optional<int32_t> ListPattern::GetDefaultScrollTargetIndex(
+    SmartGestureDirection direction, ScrollAlign align, int32_t anchorIndex) const
+{
+    if (anchorIndex < 0 || anchorIndex > maxListItemIndex_) {
+        return std::nullopt;
+    }
+    auto iter = itemPosition_.find(anchorIndex);
+    if (iter == itemPosition_.end()) {
+        return std::nullopt;
+    }
+
+    int32_t targetIndex = anchorIndex;
+    if (direction == SmartGestureDirection::FORWARD) {
+        if (align == ScrollAlign::START) {
+            targetIndex = anchorIndex + 1;
+        } else if (align == ScrollAlign::END) {
+            auto isAligned = LessOrEqual(iter->second.endPos, contentMainSize_ - contentEndOffset_);
+            targetIndex = isAligned ? anchorIndex + 1 : anchorIndex;
+        } else {
+            auto itemCenterPos = (iter->second.startPos + iter->second.endPos) / 2.0f;
+            targetIndex = LessOrEqual(itemCenterPos, contentMainSize_ / 2.0f) ? anchorIndex + 1 : anchorIndex;
+        }
+    } else if (direction == SmartGestureDirection::BACKWARD) {
+        if (align == ScrollAlign::START) {
+            auto isAligned = GreatOrEqual(iter->second.startPos, contentStartOffset_);
+            targetIndex = isAligned ? anchorIndex - 1 : anchorIndex;
+        } else if (align == ScrollAlign::END) {
+            targetIndex = anchorIndex - 1;
+        } else {
+            auto itemCenterPos = (iter->second.startPos + iter->second.endPos) / 2.0f;
+            targetIndex = GreatOrEqual(itemCenterPos, contentMainSize_ / 2.0f) ? anchorIndex - 1 : anchorIndex;
+        }
+    } else {
+        return std::nullopt;
+    }
+
+    return std::clamp(targetIndex, 0, maxListItemIndex_);
+}
+
+double ListPattern::GetAverageScrollingDistance() const
+{
+    if (itemPosition_.empty()) {
+        return 0.0;
+    }
+    float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
+    return (itemsSize + spaceWidth_) / itemPosition_.size();
 }
 
 Offset ListPattern::GetCurrentOffset() const
