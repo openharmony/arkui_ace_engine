@@ -15,10 +15,13 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_DFX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_DFX_H
+
 #include <string>
 
 #include "base/image/pixel_map.h"
+
 namespace OHOS::Ace::NG {
+
 struct ImageNodeId {
     ImageNodeId(int32_t nodeId, int64_t accessibilityId, uint64_t canvasNodeId)
         : nodeId_(nodeId), accessibilityId_(accessibilityId), canvasNodeId_(canvasNodeId)
@@ -28,86 +31,42 @@ struct ImageNodeId {
     int64_t accessibilityId_ = -1;
     uint64_t canvasNodeId_ = -1;
 };
+
 class ImageDfxConfig {
 public:
     ImageDfxConfig(
-        const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc, bool isTrimMemRecycle = false)
-        : nodeInfo_(nodeInfo), srcType_(srcType), imageSrc_(imageSrc), isTrimMemRecycle_(isTrimMemRecycle)
-    {
-        InitToStringWithoutSrc();
-        InitToStringWithSrc();
-    }
+        const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc, bool isTrimMemRecycle = false);
     ImageDfxConfig() = default;
+
     // Used in tracing functions, does not include image source information (sensitive data)
-    std::string ToStringWithoutSrc() const
-    {
-        return withoutSrcInfo_;
-    }
+    std::string ToStringWithoutSrc() const;
 
     // Includes image source, but as the image source may be sensitive, use with caution
-    std::string ToStringWithSrc() const
-    {
-        return withSrcInfo_;
-    }
+    std::string ToStringWithSrc() const;
 
-    bool GetIsTrimMemRecycle() const
-    {
-        return isTrimMemRecycle_;
-    }
+    bool GetIsTrimMemRecycle() const;
 
-    void SetAutoResize(bool autoResize)
-    {
-        autoResize_ = autoResize;
-    }
+    void SetAutoResize(bool autoResize);
+    bool GetAutoResize() const;
 
-    bool GetAutoResize() const
-    {
-        return autoResize_;
-    }
+    int32_t GetNodeId() const;
+    int64_t GetAccessibilityId() const;
 
-    int32_t GetNodeId() const
-    {
-        return nodeInfo_.nodeId_;
-    }
+    std::string GetImageSrc() const;
 
-    int64_t GetAccessibilityId() const
-    {
-        return nodeInfo_.accessibilityId_;
-    }
+    void SetFrameSize(float width, float height);
+    float GetFrameSizeWidth() const;
+    float GetFrameSizeHeight() const;
 
-    std::string GetImageSrc() const
-    {
-        return imageSrc_;
-    }
-
-    void SetFrameSize(float width, float height)
-    {
-        frameSizeWidth_ = width;
-        frameSizeHeight_ = height;
-    }
-
-    float GetFrameSizeWidth() const
-    {
-        return frameSizeWidth_;
-    }
-
-    float GetFrameSizeHeight() const
-    {
-        return frameSizeHeight_;
-    }
-
-    int32_t GetSrcType() const
-    {
-        return srcType_;
-    }
+    int32_t GetSrcType() const;
 
 private:
     ImageNodeId nodeInfo_ = ImageNodeId();
     int32_t srcType_ = -1;
     std::string imageSrc_;
     bool isTrimMemRecycle_ = false;
-    std::string withoutSrcInfo_ = "";
-    std::string withSrcInfo_ = "";
+    std::string withoutSrcInfo_;
+    std::string withSrcInfo_;
     float frameSizeWidth_ = 0.0f;
     float frameSizeHeight_ = 0.0f;
     bool autoResize_ = false;
@@ -135,5 +94,6 @@ struct RenderedImageInfo {
 
     std::string ToString() const;
 };
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_DFX_H

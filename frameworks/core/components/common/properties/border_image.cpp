@@ -19,6 +19,114 @@
 
 namespace OHOS::Ace {
 
+BorderImage::BorderImage(const std::string& src)
+{
+    src_ = src;
+}
+
+const std::string& BorderImage::GetSrc() const
+{
+    return src_;
+}
+
+void BorderImage::SetSrc(const std::string& src)
+{
+    src_ = src;
+}
+
+const std::string& BorderImage::GetBundleName()
+{
+    return bundleName_;
+}
+
+void BorderImage::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+const std::string& BorderImage::GetModuleName()
+{
+    return moduleName_;
+}
+
+void BorderImage::SetModuleName(const std::string& moduleName)
+{
+    moduleName_ = moduleName;
+}
+
+std::string BorderImage::SliceToString()
+{
+    std::string str;
+    if (borderImageLeft_.GetBorderImageSlice() == borderImageRight_.GetBorderImageSlice() &&
+        borderImageRight_.GetBorderImageSlice() == borderImageTop_.GetBorderImageSlice() &&
+        borderImageTop_.GetBorderImageSlice() == borderImageBottom_.GetBorderImageSlice()) {
+        str.append(borderImageLeft_.GetBorderImageSlice().ToString());
+    } else {
+        str.append("left: [").append(borderImageLeft_.GetBorderImageSlice().ToString()).append("] ");
+        str.append("right: [").append(borderImageRight_.GetBorderImageSlice().ToString()).append("] ");
+        str.append("top: [").append(borderImageTop_.GetBorderImageSlice().ToString()).append("] ");
+        str.append("bottom: [").append(borderImageBottom_.GetBorderImageSlice().ToString()).append("]");
+    }
+    return str;
+}
+
+std::string BorderImage::OutsetToString()
+{
+    std::string str;
+    if (borderImageLeft_.GetBorderImageOutset() == borderImageRight_.GetBorderImageOutset() &&
+        borderImageRight_.GetBorderImageOutset() == borderImageTop_.GetBorderImageOutset() &&
+        borderImageTop_.GetBorderImageOutset() == borderImageBottom_.GetBorderImageOutset()) {
+        str.append(borderImageLeft_.GetBorderImageOutset().ToString());
+    } else {
+        str.append("left: [").append(borderImageLeft_.GetBorderImageOutset().ToString()).append("] ");
+        str.append("right: [").append(borderImageRight_.GetBorderImageOutset().ToString()).append("] ");
+        str.append("top: [").append(borderImageTop_.GetBorderImageOutset().ToString()).append("] ");
+        str.append("bottom: [").append(borderImageBottom_.GetBorderImageOutset().ToString()).append("]");
+    }
+    return str;
+}
+
+std::string BorderImage::WidthToString()
+{
+    std::string str;
+    if (borderImageLeft_.GetBorderImageWidth() == borderImageRight_.GetBorderImageWidth() &&
+        borderImageRight_.GetBorderImageWidth() == borderImageTop_.GetBorderImageWidth() &&
+        borderImageTop_.GetBorderImageWidth() == borderImageBottom_.GetBorderImageWidth()) {
+        str.append(borderImageLeft_.GetBorderImageWidth().ToString());
+    } else {
+        str.append("left: [").append(borderImageLeft_.GetBorderImageWidth().ToString()).append("] ");
+        str.append("right: [").append(borderImageRight_.GetBorderImageWidth().ToString()).append("] ");
+        str.append("top: [").append(borderImageTop_.GetBorderImageWidth().ToString()).append("] ");
+        str.append("bottom: [").append(borderImageBottom_.GetBorderImageWidth().ToString()).append("]");
+    }
+    return str;
+}
+
+void BorderImage::SetRepeatMode(BorderImageRepeat repeatMode)
+{
+    repeatMode_ = repeatMode;
+}
+
+BorderImageRepeat BorderImage::GetRepeatMode()
+{
+    return repeatMode_;
+}
+
+void BorderImage::SetNeedFillCenter(bool needFillCenter)
+{
+    needFillCenter_ = needFillCenter;
+}
+
+bool BorderImage::GetNeedFillCenter() const
+{
+    return needFillCenter_;
+}
+
+bool BorderImage::HasBorderImageWidth() const
+{
+    return hasBorderImageWidth_;
+}
+
 void BorderImage::SetEdgeSlice(BorderImageDirection direction, const Dimension& sliceDimension)
 {
     switch (direction) {
@@ -134,4 +242,5 @@ BorderImageEdge& BorderImage::GetBorderImageEdge(BorderImageDirection direction)
             return borderImageLeft_;
     }
 }
-}
+
+} // namespace OHOS::Ace

@@ -151,7 +151,6 @@ ace_unittest("dynamic_pattern_test_two") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
-    "$ace_root/test/mock/frameworks/core/common/mock_frontend.cpp",
     "dynamic_pattern_test_two.cpp",
   ]
   if (is_ohos_standard_system) {

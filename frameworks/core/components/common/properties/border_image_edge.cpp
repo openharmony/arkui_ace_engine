@@ -21,4 +21,21 @@ namespace OHOS::Ace {
         : borderImageSlice_(slice), borderImageOutset_(outset),
         borderImageWidth_(width), repeat_(repeat)
     {}
+
+    bool BorderImageEdge::operator==(const BorderImageEdge& borderImageEdge) const
+    {
+        return NearEqual(borderImageEdge.GetBorderImageSlice().Value(), borderImageSlice_.Value())
+               && (borderImageEdge.GetBorderImageSlice().Unit() == borderImageSlice_.Unit())
+               && NearEqual(borderImageEdge.GetBorderImageOutset().Value(), borderImageOutset_.Value())
+               && (borderImageEdge.GetBorderImageOutset().Unit() == borderImageOutset_.Unit())
+               && NearEqual(borderImageEdge.GetBorderImageWidth().Value(), borderImageWidth_.Value())
+               && (borderImageEdge.GetBorderImageWidth().Unit() == borderImageWidth_.Unit())
+               && (borderImageEdge.GetBorderImageRepeat() == repeat_);
+    }
+
+    std::string BorderImageEdge::ToString()
+    {
+        return borderImageOutset_.ToString() + ", "+borderImageSlice_.ToString() +
+            ", "+borderImageWidth_.ToString();
+    }
 } // namespace OHOS::Ace
