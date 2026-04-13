@@ -736,6 +736,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
         case CHILD_TOUCH_TEST_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchTestInfo.subKind);
             break;
+        case GESTURE_COLLECT_INTERCEPT_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->gestureCollectInterceptInfo.subKind);
+            break;
         case DIGITAL_CROWN_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->crownEvent.subKind);
             break;

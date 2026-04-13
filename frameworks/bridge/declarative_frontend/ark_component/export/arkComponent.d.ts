@@ -57,6 +57,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     initialize(...args: Object[]);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
+    onGestureCollectIntercept(callback: (recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention): this;
     outline(value: OutlineOptions): this;
     outlineColor(value: ResourceColor | EdgeColors): this;
     outlineRadius(value: Dimension | OutlineRadiuses): this;

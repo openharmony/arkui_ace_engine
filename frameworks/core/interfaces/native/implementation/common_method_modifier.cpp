@@ -5384,6 +5384,55 @@ void SetOnTouchTestDoneImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnTouchTestDone(frameNode, std::move(onTouchTestDoneFunc));
 }
+void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                      const GestureCollectInterceptCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || !CallbackHelper(*value).IsValid()) {
+        ViewAbstract::SetOnGestureCollectIntercept(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onGestureCollectInterceptFunc = [callback = CallbackHelper(*value), node = weakNode](
+                                            const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+                                            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+        -> GestureCollectIntervention {
+        PipelineContext::SetCallBackNode(node);
+        auto arkValRecognizers = CreateArkGestureRecognizerArray(recognizers);
+        std::vector<Ark_TouchRecognizer> arkTouchRecognizers;
+        arkTouchRecognizers.reserve(touchRecognizers.size());
+        for (const auto& touchRecognizer : touchRecognizers) {
+            if (!touchRecognizer) {
+                continue;
+            }
+            auto touchRecognizerPeer = PeerUtils::CreatePeer<TouchRecognizerPeer>();
+            if (!touchRecognizerPeer) {
+                continue;
+            }
+            touchRecognizerPeer->SetTouchData(WeakPtr<TouchEventTarget>(touchRecognizer), {});
+            arkTouchRecognizers.push_back(touchRecognizerPeer);
+        }
+        auto arkValTouchRecognizers =
+            Converter::ArkValue<Opt_Array_TouchRecognizer>(arkTouchRecognizers, Converter::FC);
+        auto result = callback.InvokeWithObtainResult<Ark_GestureCollectIntervention,
+            Callback_GestureCollectIntervention_Void>(arkValRecognizers, arkValTouchRecognizers);
+        switch (result) {
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER:
+                return GestureCollectIntervention::DISCARD_LOWER;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER:
+                return GestureCollectIntervention::DISCARD_HIGHER;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_SELF:
+                return GestureCollectIntervention::DISCARD_SELF;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS:
+                return GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS;
+            case ARK_GESTURE_COLLECT_INTERVENTION_CONTINUE:
+            default:
+                return GestureCollectIntervention::CONTINUE;
+        }
+    };
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, std::move(onGestureCollectInterceptFunc));
+}
 void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6937,6 +6986,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetOnTouchTestDoneImpl,
+        CommonMethodModifier::SetOnGestureCollectInterceptImpl,
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,

@@ -1486,6 +1486,8 @@ typedef struct Callback_FormCallbackInfo_Void Callback_FormCallbackInfo_Void;
 typedef struct Opt_Callback_FormCallbackInfo_Void Opt_Callback_FormCallbackInfo_Void;
 typedef struct Callback_FullscreenInfo_Void Callback_FullscreenInfo_Void;
 typedef struct Opt_Callback_FullscreenInfo_Void Opt_Callback_FullscreenInfo_Void;
+typedef struct Callback_GestureCollectIntervention_Void Callback_GestureCollectIntervention_Void;
+typedef struct Opt_Callback_GestureCollectIntervention_Void Opt_Callback_GestureCollectIntervention_Void;
 typedef struct Callback_GestureEvent_Void Callback_GestureEvent_Void;
 typedef struct Opt_Callback_GestureEvent_Void Opt_Callback_GestureEvent_Void;
 typedef struct Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult;
@@ -1796,6 +1798,8 @@ typedef struct ErrorCallback_BusinessErrorInterface_Void ErrorCallback_BusinessE
 typedef struct Opt_ErrorCallback_BusinessErrorInterface_Void Opt_ErrorCallback_BusinessErrorInterface_Void;
 typedef struct GaugeModifierBuilder GaugeModifierBuilder;
 typedef struct Opt_GaugeModifierBuilder Opt_GaugeModifierBuilder;
+typedef struct GestureCollectInterceptCallback GestureCollectInterceptCallback;
+typedef struct Opt_GestureCollectInterceptCallback Opt_GestureCollectInterceptCallback;
 typedef struct GestureEventHandler GestureEventHandler;
 typedef struct Opt_GestureEventHandler Opt_GestureEventHandler;
 typedef struct GestureRecognizerJudgeBeginCallback GestureRecognizerJudgeBeginCallback;
@@ -5034,6 +5038,17 @@ typedef struct Opt_GestureActionPhase {
     Ark_Tag tag;
     Ark_GestureActionPhase value;
 } Opt_GestureActionPhase;
+typedef enum Ark_GestureCollectIntervention {
+    ARK_GESTURE_COLLECT_INTERVENTION_CONTINUE = 0,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER = 1,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER = 2,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_SELF = 3,
+    ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS = 4,
+} Ark_GestureCollectIntervention;
+typedef struct Opt_GestureCollectIntervention {
+    Ark_Tag tag;
+    Ark_GestureCollectIntervention value;
+} Opt_GestureCollectIntervention;
 typedef enum Ark_GestureControl_GestureType {
     ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE = 0,
     ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE = 1,
@@ -11625,6 +11640,16 @@ typedef struct Opt_Callback_FullscreenInfo_Void {
     Ark_Tag tag;
     Callback_FullscreenInfo_Void value;
 } Opt_Callback_FullscreenInfo_Void;
+typedef struct Callback_GestureCollectIntervention_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_GestureCollectIntervention value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_GestureCollectIntervention value);
+} Callback_GestureCollectIntervention_Void;
+typedef struct Opt_Callback_GestureCollectIntervention_Void {
+    Ark_Tag tag;
+    Callback_GestureCollectIntervention_Void value;
+} Opt_Callback_GestureCollectIntervention_Void;
 typedef struct Callback_GestureEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13175,6 +13200,16 @@ typedef struct Opt_GaugeModifierBuilder {
     Ark_Tag tag;
     GaugeModifierBuilder value;
 } Opt_GaugeModifierBuilder;
+typedef struct GestureCollectInterceptCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_GestureRecognizer recognizers, const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureCollectIntervention_Void continuation);
+} GestureCollectInterceptCallback;
+typedef struct Opt_GestureCollectInterceptCallback {
+    Ark_Tag tag;
+    GestureCollectInterceptCallback value;
+} Opt_GestureCollectInterceptCallback;
 typedef struct GestureEventHandler {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24427,6 +24462,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                            const Opt_FocusDrawLevel* value);
     void (*setOnTouchTestDone)(Ark_NativePointer node,
                                const Opt_TouchTestDoneCallback* value);
+    void (*setOnGestureCollectIntercept)(Ark_NativePointer node,
+                                         const GestureCollectInterceptCallback* value);
     void (*setSystemMaterial)(Ark_NativePointer node,
                               const Opt_uiMaterial_Material* value);
     void (*setOnNeedSoftkeyboard)(Ark_NativePointer node,
@@ -28940,6 +28977,7 @@ typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
     Ark_EventTargetInfo (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getId)(Ark_EventTargetInfo peer);
+    Ark_Int32 (*getUniqueId)(Ark_EventTargetInfo peer);
 } GENERATED_ArkUIEventTargetInfoAccessor;
 
 typedef struct GENERATED_ArkUIFileSelectorParamAccessor {
@@ -29241,6 +29279,8 @@ typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     Ark_Int32 (*getFingerCount)(Ark_GestureRecognizer peer);
     Ark_Boolean (*isFingerCountLimit)(Ark_GestureRecognizer peer);
     void (*preventBegin)(Ark_GestureRecognizer peer);
+    Ark_Boolean (*isHostBelongsTo)(Ark_GestureRecognizer peer,
+                                   Ark_Int32 uniqueId);
 } GENERATED_ArkUIGestureRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIGestureStyleAccessor {
@@ -31354,6 +31394,8 @@ typedef struct GENERATED_ArkUITouchRecognizerAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_EventTargetInfo (*getEventTargetInfo)(Ark_TouchRecognizer peer);
     void (*cancelTouch)(Ark_TouchRecognizer peer);
+    Ark_Boolean (*isHostBelongsTo)(Ark_TouchRecognizer peer,
+                                   Ark_Int32 uniqueId);
 } GENERATED_ArkUITouchRecognizerAccessor;
 
 typedef struct GENERATED_ArkUITransitionEffectAccessor {

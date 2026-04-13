@@ -349,6 +349,7 @@ public:
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
+    static void JsOnGestureCollectIntercept(const JSCallbackInfo& info);
     static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsOnTouchTestDone(const JSCallbackInfo& info);

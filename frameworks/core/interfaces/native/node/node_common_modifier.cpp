@@ -156,6 +156,16 @@ enum TransitionEffectType {
     TRANSITION_EFFECT_ASYMMETRIC,
 };
 
+struct GestureCollectTouchRecognizerHandle {
+    TouchEventTarget* target = nullptr;
+};
+
+struct GestureCollectTouchRecognizerData {
+    std::vector<std::unique_ptr<GestureCollectTouchRecognizerHandle>> storage;
+    std::unique_ptr<void*[]> handles;
+    int32_t count = 0;
+};
+
 const std::vector<AnimationDirection> DIRECTION_LIST = {
     AnimationDirection::NORMAL,
     AnimationDirection::REVERSE,
@@ -12781,6 +12791,91 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
 }
 
+std::vector<ArkUIGestureRecognizer*> CollectResponseRecognizers(
+    const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
+{
+    std::vector<ArkUIGestureRecognizer*> responseRecognizers;
+    responseRecognizers.reserve(recognizers.size());
+    for (const auto& recognizer : recognizers) {
+        if (!recognizer) {
+            continue;
+        }
+        auto gestureInfo = recognizer->GetGestureInfo();
+        if (gestureInfo && gestureInfo->GetDisposeTag()) {
+            continue;
+        }
+        auto* arkRecognizer = NodeModifier::CreateGestureRecognizer(recognizer);
+        if (arkRecognizer) {
+            responseRecognizers.emplace_back(arkRecognizer);
+        }
+    }
+    return responseRecognizers;
+}
+
+GestureCollectTouchRecognizerData CollectTouchRecognizers(const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+{
+    GestureCollectTouchRecognizerData data;
+    data.storage.reserve(touchRecognizers.size());
+    if (!touchRecognizers.empty()) {
+        data.handles = std::make_unique<void*[]>(touchRecognizers.size());
+    }
+    for (const auto& touchRecognizer : touchRecognizers) {
+        if (!touchRecognizer) {
+            continue;
+        }
+        auto handle = std::make_unique<GestureCollectTouchRecognizerHandle>();
+        handle->target = AceType::RawPtr(touchRecognizer);
+        data.handles[data.count++] = handle.get();
+        data.storage.emplace_back(std::move(handle));
+    }
+    return data;
+}
+
+GestureCollectIntervention NormalizeGestureCollectIntervention(int32_t intervention)
+{
+    if (intervention < static_cast<int32_t>(GestureCollectIntervention::CONTINUE) ||
+        intervention > static_cast<int32_t>(GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS)) {
+        return GestureCollectIntervention::CONTINUE;
+    }
+    return static_cast<GestureCollectIntervention>(intervention);
+}
+
+void SetOnGestureCollectIntercept(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onGestureCollectIntercept =
+        [frameNode, nodeId, extraParam](const std::vector<RefPtr<NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> GestureCollectIntervention {
+        ArkUINodeEvent event;
+        event.kind = GESTURE_COLLECT_INTERCEPT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+
+        auto responseRecognizers = CollectResponseRecognizers(recognizers);
+        auto touchRecognizerData = CollectTouchRecognizers(touchRecognizers);
+
+        ArkUIGestureCollectInterceptInfo gestureCollectInterceptInfo;
+        gestureCollectInterceptInfo.subKind = ON_GESTURE_COLLECT_INTERCEPT;
+        gestureCollectInterceptInfo.responseLinkRecognizer =
+            responseRecognizers.empty() ? nullptr : responseRecognizers.data();
+        gestureCollectInterceptInfo.count = static_cast<int32_t>(responseRecognizers.size());
+        gestureCollectInterceptInfo.touchRecognizers =
+            touchRecognizerData.count == 0 ? nullptr : touchRecognizerData.handles.get();
+        gestureCollectInterceptInfo.touchRecognizerCnt = touchRecognizerData.count;
+        gestureCollectInterceptInfo.intervention = static_cast<int32_t>(GestureCollectIntervention::CONTINUE);
+        event.gestureCollectInterceptInfo = gestureCollectInterceptInfo;
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+
+        return NormalizeGestureCollectIntervention(event.gestureCollectInterceptInfo.intervention);
+    };
+
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, std::move(onGestureCollectIntercept));
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 ArkUI_CrownAction ToArkUICrownAction(CrownAction action)
 {
@@ -13492,6 +13587,13 @@ void ResetOnChildTouchTest(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
+}
+
+void ResetOnGestureCollectIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, nullptr);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

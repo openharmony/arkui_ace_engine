@@ -668,3 +668,10 @@ export enum InputEventInterceptAction {
     CONTINUE = 0,
     BLOCK = 1
 }
+export enum GestureCollectIntervention {
+    CONTINUE = 0,
+    DISCARD_LOWER = 1,
+    DISCARD_HIGHER = 2,
+    DISCARD_SELF = 3,
+    DISCARD_LOWER_PRIORITY_SIBLINGS = 4
+}

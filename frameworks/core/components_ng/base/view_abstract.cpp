@@ -2580,6 +2580,13 @@ void ViewAbstract::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
 }
 
+void ViewAbstract::SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureCollectInterceptFunc(std::move(func));
+}
+
 void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
 {
@@ -10107,6 +10114,13 @@ void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
+void ViewAbstract::SetOnGestureCollectIntercept(FrameNode* frameNode, NG::OnGestureCollectInterceptFunc&& func)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureCollectInterceptFunc(std::move(func));
 }
 
 float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)

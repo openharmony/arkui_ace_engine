@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
+import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, GestureCollectInterceptCallback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
 import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
 import { extractors } from '#handwritten'
@@ -86,7 +86,7 @@ import { CallbackTransformer } from './../../CallbackTransformer'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { default as dragController } from '@ohos.arkui.dragController'
 import { DrawContext as arkui_Graphics_DrawContext, LengthMetrics as arkui_Graphics_LengthMetrics, Size } from 'arkui.Graphics'
-import { HitTestMode, ResponseType, Edge, ScrollSource } from './../../component/enums'
+import { GestureCollectIntervention, HitTestMode, ResponseType, Edge, ScrollSource } from './../../component/enums'
 import { MarqueeState } from './../../component/text'
 import { CustomBuilder } from './../../component/builder'
 import { RefreshStatus } from './../../component/refresh'
@@ -598,6 +598,12 @@ export function deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer:
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<FullscreenInfo, void>)
     let data: FullscreenInfo = FullscreenInfo_serializer.read(thisDeserializer)
     call(data)
+}
+export function deserializeAndCallCallback_GestureCollectIntervention_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as ((value: GestureCollectIntervention) => void))
+    let value: GestureCollectIntervention = GestureCollectIntervention.fromValue(thisDeserializer.readInt32())
+    call(value)
 }
 export function deserializeAndCallCallback_GestureEvent_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -2382,6 +2388,42 @@ export function deserializeAndCallGaugeModifierBuilder(thisDeserializer: Deseria
     resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
     let continuationResult: ((value: KPointer) => void) = continuationBufferClosure
     const callResult = call(parentNode, config)
+    continuationResult(callResult)
+}
+export function deserializeAndCallGestureCollectInterceptCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as GestureCollectInterceptCallback)
+    const recognizersTmpBufLength: int32 = thisDeserializer.readInt32()
+    const recognizersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizersTmpBufLength, (arg0: int32):GestureRecognizer => {
+        return (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer);
+    })
+    let recognizers: Array<GestureRecognizer> = recognizersTmpBuf
+    const touchRecognizersTmpBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
+    let touchRecognizersTmpBuf: Array<TouchRecognizer> | undefined = undefined
+    if ((touchRecognizersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        const touchRecognizersTmpBufOptLength: int32 = thisDeserializer.readInt32()
+        const touchRecognizersTmpBufOpt: Array<TouchRecognizer> = new Array<TouchRecognizer>(touchRecognizersTmpBufOptLength, (arg0: int32):TouchRecognizer => {
+        return (TouchRecognizer_serializer.read(thisDeserializer) as TouchRecognizer);
+    })
+        touchRecognizersTmpBuf = touchRecognizersTmpBufOpt
+    }
+    let touchRecognizers: Array<TouchRecognizer> | undefined = touchRecognizersTmpBuf
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (value: GestureCollectIntervention):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeInt32(value.valueOf());
+        InteropNativeModule._CallCallbackSync(10, 1903754355, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((value: GestureCollectIntervention) => void) = continuationBufferClosure
+    const callResult = call(recognizers, touchRecognizers)
     continuationResult(callResult)
 }
 export function deserializeAndCallGestureEventHandler(thisDeserializer: DeserializerBase): void {
@@ -4428,6 +4470,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_FOCUSAXISEVENT_VOID: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_FORMCALLBACKINFO_VOID: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_FULLSCREENINFO_VOID: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_GESTURECOLLECTINTERVENTION_VOID: return deserializeAndCallCallback_GestureCollectIntervention_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_GESTUREEVENT_VOID: return deserializeAndCallCallback_GestureEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_GESTUREINFO_BASEGESTUREEVENT_GESTUREJUDGERESULT: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_GESTUREJUDGERESULT_VOID: return deserializeAndCallCallback_GestureJudgeResult_Void(thisDeserializer);
@@ -4587,6 +4630,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_EDITABLETEXTONCHANGECALLBACK: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ERRORCALLBACK_BUSINESSERRORINTERFACE_VOID: return deserializeAndCallErrorCallback_BusinessErrorInterface_Void(thisDeserializer);
         case CallbackKind.KIND_GAUGEMODIFIERBUILDER: return deserializeAndCallGaugeModifierBuilder(thisDeserializer);
+        case CallbackKind.KIND_GESTURECOLLECTINTERCEPTCALLBACK: return deserializeAndCallGestureCollectInterceptCallback(thisDeserializer);
         case CallbackKind.KIND_GESTUREEVENTHANDLER: return deserializeAndCallGestureEventHandler(thisDeserializer);
         case CallbackKind.KIND_GESTURERECOGNIZERJUDGEBEGINCALLBACK: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);
         case CallbackKind.KIND_GESTURESWIPEHANDLER: return deserializeAndCallGestureSwipeHandler(thisDeserializer);

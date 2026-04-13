@@ -3733,6 +3733,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
     bool blockHierarchy = false;
+    bool stopSiblings = false;
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.)
     // based on the gesture attributes set by the current parent node (high and low priority, parallel gestures,
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
@@ -3783,6 +3784,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 consumed = true;
             }
 
+            if (hitResult == HitTestResult::STOP_SIBLINGS) {
+                consumed = true;
+                stopSiblings = true;
+            }
+
             if (hitResult == HitTestResult::BUBBLING) {
                 consumed = true;
             }
@@ -3790,6 +3796,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        if (stopSiblings) {
+            break;
+        }
         if (GetHitTestMode() == HitTestMode::HTMBLOCK || GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
             break;
         }
@@ -3830,6 +3839,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
         if (childHitResult == HitTestResult::BLOCK_HIERARCHY) {
             blockHierarchy = true;
+            consumed = true;
+            break;
+        }
+
+        // STOP_SIBLINGS: stop sibling iteration but don't prevent bubbling
+        if (childHitResult == HitTestResult::STOP_SIBLINGS) {
             consumed = true;
             break;
         }
@@ -3882,14 +3897,24 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
             auto gestureHub = GetOrCreateGestureEventHub();
             if (gestureHub) {
+                TouchTestResult childSnapshot(newComingTargets);
+                auto responseLinkSnapshotSize = responseLinkResult.size();
+                auto testResultBeforeSelf = testResult;
+                auto preventBubblingBeforeSelf = preventBubbling;
+                auto blockHierarchyBeforeSelf = blockHierarchy;
                 TouchTestResult finalResult;
                 ResponseLinkResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
                     finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
                 newComingTargets.swap(finalResult);
-                TriggerShouldParallelInnerWith(newComingResponseLinkTargets, responseLinkResult);
-                responseLinkResult.splice(responseLinkResult.end(), std::move(newComingResponseLinkTargets));
+                // Trigger onGestureCollectIntercept callback
+                auto intervention = gestureHub->TriggerOnGestureCollectIntercept(newComingTargets, responseLinkResult);
+                GestureCollectInterventionContext context { newComingTargets, responseLinkResult,
+                    newComingResponseLinkTargets, childSnapshot, responseLinkSnapshotSize, testResultBeforeSelf,
+                    preventBubblingBeforeSelf, blockHierarchyBeforeSelf, preventBubbling, blockHierarchy,
+                    consumed, testResult };
+                gestureHub->HandleGestureCollectIntervention(intervention, context);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
             preventBubbling = ProcessMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
@@ -7549,51 +7574,6 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
         }
     }
     return total;
-}
-
-void FrameNode::TriggerShouldParallelInnerWith(
-    const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
-{
-    auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
-    CHECK_NULL_VOID(gestureHub);
-    auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
-    CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
-    std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
-
-    for (const auto& item : responseLinkRecognizers) {
-        if (item.Invalid()) {
-            continue;
-        }
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item.Upgrade());
-        if (!recognizer) {
-            continue;
-        }
-        auto type = recognizer->GetRecognizerType();
-        sortedResponseLinkRecognizers[type].emplace_back(recognizer);
-    }
-
-    for (const auto& item : currentRecognizers) {
-        if (item.Invalid()) {
-            continue;
-        }
-        auto recognizer = item.Upgrade();
-        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
-            continue;
-        }
-        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
-        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
-            continue;
-        }
-        auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
-        if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
-            continue;
-        }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
-        if (result && item != result) {
-            recognizer->SetBridgeMode(true);
-            result->AddBridgeObj(item);
-        }
-    }
 }
 
 void FrameNode::GetInspectorValue()

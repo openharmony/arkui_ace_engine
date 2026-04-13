@@ -10052,6 +10052,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
     JSClass<JSViewAbstract>::StaticMethod(
+        "onGestureCollectIntercept", &JSViewAbstract::JsOnGestureCollectIntercept);
+    JSClass<JSViewAbstract>::StaticMethod(
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
@@ -11485,6 +11487,34 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
         return NG::HitTestMode::HTMDEFAULT;
     };
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
+}
+
+void JSViewAbstract::JsOnGestureCollectIntercept(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(nullptr);
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnGestureCollectInterceptFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnGestureCollectInterceptFunc->IsEmpty()) {
+        return;
+    }
+    auto jsFuncLocalHandle = jsOnGestureCollectInterceptFunc->GetLocalHandle();
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onGestureCollectInterceptFunc =
+        [vm, execCtx = info.GetExecutionContext(),
+            func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> NG::GestureCollectIntervention {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::GestureCollectIntervention::CONTINUE);
+        ACE_SCORING_EVENT("onGestureCollectIntercept");
+        PipelineContext::SetCallBackNode(node);
+        return NG::CommonBridge::ProcessOnGestureCollectIntercept(vm, func.ToLocal(), recognizers, touchRecognizers);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(std::move(onGestureCollectInterceptFunc));
 }
 
 void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info)

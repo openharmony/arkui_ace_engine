@@ -4061,6 +4061,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                          const GestureCollectInterceptCallback* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnGestureCollectIntercept(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetSystemMaterialImpl(Ark_NativePointer node,
                                const Opt_uiMaterial_Material* value)
     {
@@ -21720,6 +21731,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetOnGestureCollectInterceptImpl,
             CommonMethodModifier::SetSystemMaterialImpl,
             CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -30952,6 +30964,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return { .chars="", .length=0 };
     }
+    Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getUniqueId(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // EventTargetInfoAccessor
     namespace FileSelectorParamAccessor {
     void DestroyPeerImpl(Ark_FileSelectorParam peer)
@@ -33135,6 +33158,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         string out("preventBegin(");
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isHostBelongsTo(");
+        WriteToString(&out, uniqueId);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
     }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
@@ -45703,6 +45739,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Boolean IsHostBelongsToImpl(Ark_TouchRecognizer peer,
+                                    Ark_Int32 uniqueId)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("isHostBelongsTo(");
+        WriteToString(&out, uniqueId);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
@@ -49283,6 +49332,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::ConstructImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::GetUniqueIdImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -49555,6 +49605,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
             GestureRecognizerAccessor::PreventBeginImpl,
+            GestureRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -51784,6 +51835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchRecognizerAccessor::GetFinalizerImpl,
             TouchRecognizerAccessor::GetEventTargetInfoImpl,
             TouchRecognizerAccessor::CancelTouchImpl,
+            TouchRecognizerAccessor::IsHostBelongsToImpl,
         };
         return &TouchRecognizerAccessorImpl;
     }

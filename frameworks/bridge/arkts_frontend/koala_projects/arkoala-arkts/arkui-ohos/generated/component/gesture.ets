@@ -54,12 +54,19 @@ export class EventTargetInfo implements MaterializedBase {
     public getId(): string {
         return this.getId_serialize()
     }
+    public getUniqueId(): int32 {
+        return this.getUniqueId_serialize()
+    }
     private getId_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._EventTargetInfo_getId(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
         return returnResult
+    }
+    private getUniqueId_serialize(): int32 {
+        const retval = ArkUIGeneratedNativeModule._EventTargetInfo_getUniqueId(this.peer!.ptr)
+        return retval
     }
 }
 export class GestureRecognizerInternal {
@@ -121,6 +128,10 @@ export class GestureRecognizer implements MaterializedBase {
         this.preventBegin_serialize()
         return
     }
+    public isHostBelongsTo(uniqueId: int32): boolean {
+        const uniqueId_casted = uniqueId as (int32)
+        return this.isHostBelongsTo_serialize(uniqueId_casted)
+    }
     private getTag_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getTag(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -172,6 +183,10 @@ export class GestureRecognizer implements MaterializedBase {
     }
     private preventBegin_serialize(): void {
         ArkUIGeneratedNativeModule._GestureRecognizer_preventBegin(this.peer!.ptr)
+    }
+    private isHostBelongsTo_serialize(uniqueId: int32): boolean {
+        const retval = ArkUIGeneratedNativeModule._GestureRecognizer_isHostBelongsTo(this.peer!.ptr, uniqueId)
+        return retval
     }
 }
 export class PanGestureOptionsInternal {
@@ -299,6 +314,10 @@ export class TouchRecognizer implements MaterializedBase {
         this.cancelTouch_serialize()
         return
     }
+    public isHostBelongsTo(uniqueId: int32): boolean {
+        const uniqueId_casted = uniqueId as (int32)
+        return this.isHostBelongsTo_serialize(uniqueId_casted)
+    }
     private getEventTargetInfo_serialize(): EventTargetInfo {
         const retval = ArkUIGeneratedNativeModule._TouchRecognizer_getEventTargetInfo(this.peer!.ptr)
         const obj: EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
@@ -306,6 +325,10 @@ export class TouchRecognizer implements MaterializedBase {
     }
     private cancelTouch_serialize(): void {
         ArkUIGeneratedNativeModule._TouchRecognizer_cancelTouch(this.peer!.ptr)
+    }
+    private isHostBelongsTo_serialize(uniqueId: int32): boolean {
+        const retval = ArkUIGeneratedNativeModule._TouchRecognizer_isHostBelongsTo(this.peer!.ptr, uniqueId)
+        return retval
     }
 }
 export enum PanDirection {

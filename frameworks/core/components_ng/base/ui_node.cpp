@@ -1687,6 +1687,10 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
+        if (hitResult == HitTestResult::STOP_SIBLINGS) {
+            hitTestResult = HitTestResult::BUBBLING;
+            break;
+        }
         if (hitResult == HitTestResult::BUBBLING) {
             hitTestResult = HitTestResult::BUBBLING;
         }

@@ -30,5 +30,6 @@ public:
         return AceType::RawPtr(peer);
     }
     std::string id;
+    int32_t uniqueId = 0;
     bool isScrollableComponent_ = true;
 };
