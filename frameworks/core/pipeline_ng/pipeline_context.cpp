@@ -6392,11 +6392,11 @@ void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorVa
 {
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
-    mouseStyleManager->SetUserSetCursor(true);
     const auto windowId = GetFocusWindowId();
     if (std::holds_alternative<int32_t>(cursorValue)) {
         int32_t cursorInt = std::get<int32_t>(cursorValue);
         if (cursorInt >= 0 && cursorInt <= static_cast<int32_t>(MouseFormat::LASER_CURSOR_DOT_RED)) {
+            mouseStyleManager->SetUserSetCursor(true);
             ChangeMouseStyle(
                 -1, static_cast<MouseFormat>(cursorInt), windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
         }
@@ -6405,6 +6405,7 @@ void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorVa
         if (!customCursorInfo.pixelMap) {
             return;
         }
+        mouseStyleManager->SetUserSetCursor(true);
         ChangeMouseStyle(-1, customCursorInfo, windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
