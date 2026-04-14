@@ -1501,4 +1501,160 @@ HWTEST_F(IndexerPatternTestThreeNg, IndexerPatternTestThreeNg029, TestSize.Level
     EXPECT_EQ(pattern_->lastFireSelectIndex_, 1);
     EXPECT_FALSE(pattern_->lastIndexFromPress_);
 }
+
+/**
+ * @tc.name: ApplyPopupSystemMaterialTest001
+ * @tc.desc: Test UpdateBubbleBackgroundView with API version less than VERSION_TWELVE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, ApplyPopupSystemMaterialTest001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    bubbleRenderContext->UpdateBackgroundColor(Color::RED);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), Color::RED);
+
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+}
+
+/**
+ * @tc.name: ApplyPopupSystemMaterialTest002
+ * @tc.desc: Test ApplyPopupSystemMaterial LOW branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, ApplyPopupSystemMaterialTest002, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    EXPECT_FALSE(layoutProperty_->GetSetPopupBackgroundColorByUserValue(false));
+    EXPECT_FALSE(layoutProperty_->GetSetPopupBackgroundBlurStyleByUserValue(false));
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    // mock GetUiMaterialLevel returns DEFAULT(=SMOOTH=2=LOW), 走 LOW 分支
+    EXPECT_FALSE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupLowMaterialBgColor());
+
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest001
+ * @tc.desc: Test UpdateBubbleBackgroundView with popupNode_ nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    pattern_->popupNode_ = nullptr;
+
+    pattern_->UpdateBubbleBackgroundView();
+    EXPECT_EQ(pattern_->popupNode_, nullptr);
+
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest002
+ * @tc.desc: Test UpdateBubbleBackgroundView with API >= VERSION_TWENTY_SIX but user set both color and blurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest002, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    layoutProperty_->UpdateSetPopupBackgroundColorByUser(true);
+    paintProperty_->UpdatePopupBackground(Color::GREEN);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THIN;
+    paintProperty_->UpdatePopupBackgroundBlurStyle(styleOption);
+    layoutProperty_->UpdateSetPopupBackgroundBlurStyleByUser(true);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_TRUE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THIN);
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), Color::GREEN);
+
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest003
+ * @tc.desc: Test UpdateBubbleBackgroundView with API >= VERSION_TWENTY_SIX and only user set blurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest003, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    layoutProperty_->UpdateSetPopupBackgroundBlurStyleByUser(true);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    paintProperty_->UpdatePopupBackgroundBlurStyle(styleOption);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_TRUE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupBackgroundColor());
+
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
 } // namespace OHOS::Ace::NG
