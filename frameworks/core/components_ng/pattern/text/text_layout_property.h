@@ -161,6 +161,8 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
+    void UpdateEnableSmallLanguageTruncation(const bool& value);
+
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
@@ -224,6 +226,7 @@ public:
         TextMarqueeOptions, TextMarqueeSpacing, CalcDimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnableSmallLanguageTruncation, bool);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
@@ -365,6 +368,8 @@ protected:
     }
 
 private:
+    void OnEnableSmallLanguageTruncationUpdate(bool value);
+
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
     bool isLoopAnimation_ = false;

@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
+class TextLayoutProperty;
+
 enum class MenuHoverScaleStatus {
     DISABLE = 0,
     NONE,
@@ -71,6 +73,7 @@ public:
         const MenuParam& menuParam, const MenuType& type);
 
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
+    static void SetTextTruncationAndWrap(const RefPtr<TextLayoutProperty>& textProperty, bool autoWrapFlag);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
         const RefPtr<FrameNode>& child = nullptr);
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent,

@@ -53,6 +53,7 @@ void BadgePattern::OnModifyDone()
 
     auto textLayoutProperty = lastFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();

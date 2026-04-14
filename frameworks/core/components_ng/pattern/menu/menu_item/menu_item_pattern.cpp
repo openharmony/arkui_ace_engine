@@ -2471,6 +2471,24 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
     }
 }
 
+void MenuItemPattern::UpdateTextAlignment(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme)
+{
+    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
+    if (layoutDirection == TextDirection::RTL) {
+        if (textAlign == TextAlign::LEFT) {
+            textAlign = TextAlign::RIGHT;
+        } else if (textAlign == TextAlign::RIGHT) {
+            textAlign = TextAlign::LEFT;
+        } else if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+    textProperty->UpdateTextAlign(textAlign);
+}
+
 void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel)
 {
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
@@ -2492,25 +2510,13 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     CHECK_NULL_VOID(node);
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);
     auto theme = GetCurrentSelectTheme();
     CHECK_NULL_VOID(theme);
-    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
-    TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
-    if (layoutDirection == TextDirection::RTL) {
-        if (textAlign == TextAlign::LEFT) {
-            textAlign = TextAlign::RIGHT;
-        } else if (textAlign == TextAlign::RIGHT) {
-            textAlign = TextAlign::LEFT;
-        } else if (textAlign == TextAlign::START) {
-            textAlign = TextAlign::END;
-        } else if (textAlign == TextAlign::END) {
-            textAlign = TextAlign::START;
-        }
-    }
-    textProperty->UpdateTextAlign(textAlign);
+    UpdateTextAlignment(textProperty, theme);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);
@@ -2532,6 +2538,10 @@ void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textPropert
             textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
             textProperty->UpdateMaxLines(1);
         } else {
+            auto host = textProperty->GetHost();
+            if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textProperty->UpdateOrphanCharOptimization(true);
+            }
             textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
         }
     } else {

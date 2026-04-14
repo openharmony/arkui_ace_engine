@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+
+#include "base/utils/utf_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -85,6 +87,35 @@ std::string TextLayoutProperty::GetCopyOptionString() const
             break;
     }
     return copyOptionString;
+}
+
+void TextLayoutProperty::UpdateEnableSmallLanguageTruncation(const bool& value)
+{
+    auto host = GetHost();
+    if (!host || !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    if (propEnableSmallLanguageTruncation_.has_value() &&
+        NearEqual(propEnableSmallLanguageTruncation_.value(), value)) {
+        return;
+    }
+    propEnableSmallLanguageTruncation_ = value;
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    propNeedReCreateParagraph_ = true;
+    OnEnableSmallLanguageTruncationUpdate(value);
+}
+
+void TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool value)
+{
+    if (!value) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto flag = textPattern->GetFallbackLineSpacingStyleOptimizeFlag();
+    textPattern->SetFallbackLineSpacingAndIncludeFontPadding(flag);
 }
 
 std::string TextLayoutProperty::GetTextMarqueeOptionsString() const

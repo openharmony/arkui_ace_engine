@@ -1668,6 +1668,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());

@@ -304,6 +304,27 @@ HWTEST_F(OverlayTestUpdate, ToastTest001, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
+HWTEST_F(OverlayTestUpdate, ToastTextProperty001, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    textNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    std::optional<Color> textColor = std::nullopt;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t backupContextApiVersion = context->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    context->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetOrphanCharOptimizationValue(false));
+    context->SetApiTargetVersion(backupContextApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: ToastTest002
  * @tc.desc: Test OverlayManager::ToastView.UpdateTextLayoutPropertyChangeValue.

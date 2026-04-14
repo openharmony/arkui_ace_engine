@@ -792,6 +792,11 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+        textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);
+    }
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());

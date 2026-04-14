@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class TextLayoutProperty;
 
 enum class DialogContentNode {
     TITLE = 0,
@@ -437,6 +438,8 @@ private:
     // update wrapperNode background style
     void UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, const RefPtr<DialogTheme>& dialogTheme);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
+    void UpdateContentTextProperty(
+        const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);
 

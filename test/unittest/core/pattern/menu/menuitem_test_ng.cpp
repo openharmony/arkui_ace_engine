@@ -889,6 +889,28 @@ HWTEST_F(MenuItemTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 }
 
+HWTEST_F(MenuItemTestNg, MenuItemTextProperty001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    menuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto itemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->OnModifyDone();
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetOrphanCharOptimizationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: MenuItemTestNgText001
  * @tc.desc: Verify UpdateNeedDivider.

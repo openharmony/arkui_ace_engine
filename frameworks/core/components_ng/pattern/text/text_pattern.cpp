@@ -129,6 +129,24 @@ void TextPattern::OnWindowShow()
     ResumeSymbolAnimation();
 }
 
+void TextPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->GetEnableSmallLanguageTruncationValue(false)) {
+        return;
+    }
+    auto flag = GetFallbackLineSpacingStyleOptimizeFlag();
+    if (SetFallbackLineSpacingAndIncludeFontPadding(flag)) {
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void TextPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -5560,6 +5578,8 @@ void TextPattern::DumpTextStyleInfo5()
     auto& dumpLog = DumpLog::GetInstance();
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
+    auto hasIncludeFontPadding = textLayoutProp->GetIncludeFontPaddingValue(false) ? "true" : "false";
+    auto hasFallbackLineSpacing = textLayoutProp->GetFallbackLineSpacingValue(false) ? "true" : "false";
     if (textStyle_.has_value()) {
         dumpLog.AddDesc(
             std::string("Decoration: ")
@@ -5580,7 +5600,15 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(" ")
                 .append(textLayoutProp->HasTextDecorationColor()
                             ? textLayoutProp->GetTextDecorationColorValue(Color::BLACK).ColorToString()
-                            : "Na"));
+                            : "Na")
+                .append(" IncludeFontPadding: ")
+                .append(textStyle_->GetIncludeFontPadding() ? "true" : "false")
+                .append(" prop: ")
+                .append(textLayoutProp->HasIncludeFontPadding() ? hasIncludeFontPadding : "Na")
+                .append(" FallbackLineSpacing: ")
+                .append(textStyle_->GetFallbackLineSpacing() ? "true" : "false")
+                .append(" prop: ")
+                .append(textLayoutProp->HasFallbackLineSpacing() ? hasFallbackLineSpacing : "Na"));
     }
     DumpInfoRes();
 }
@@ -7846,12 +7874,18 @@ bool TextPattern::GetFallbackLineSpacingStyleOptimizeFlag()
     return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
 }
 
-void TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
+bool TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto includeFontPaddingChanged = textLayoutProperty->GetIncludeFontPaddingValue(false) != flag;
+    auto fallbackLineSpacingChanged = textLayoutProperty->GetFallbackLineSpacingValue(false) != flag;
+    if (!includeFontPaddingChanged && !fallbackLineSpacingChanged) {
+        return false;
+    }
     textLayoutProperty->UpdateIncludeFontPadding(flag);
     textLayoutProperty->UpdateFallbackLineSpacing(flag);
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

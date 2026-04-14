@@ -1175,7 +1175,10 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetApplyShadow(false);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFrameNode);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());

@@ -75,6 +75,10 @@ void HyperlinkModelNG::SetTextStyle(
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto textStyle = textTheme->GetTextStyle();
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (hyperlinkNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+    }
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();

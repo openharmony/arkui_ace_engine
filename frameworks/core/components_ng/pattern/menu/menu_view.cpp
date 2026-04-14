@@ -101,6 +101,12 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+    }
     textNode->MountToParent(wrapperNode);
     textNode->MarkModifyDone();
 }
@@ -213,6 +219,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(textNode);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textNode->SetThemeScopeId(column->GetThemeScopeId());
     }
@@ -2233,6 +2240,21 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     return iconNode;
 }
 
+void MenuView::SetTextTruncationAndWrap(const RefPtr<TextLayoutProperty>& textProperty, bool autoWrapFlag)
+{
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (!autoWrapFlag) {
+        textProperty->UpdateMaxLines(1);
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    } else {
+        textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        auto host = textProperty->GetHost();
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            textProperty->UpdateOrphanCharOptimization(true);
+        }
+    }
+}
+
 RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
                                        bool autoWrapFlag, bool isAIMenuOption)
 {
@@ -2243,6 +2265,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
+    SetTextTruncationAndWrap(textProperty, autoWrapFlag);
 
     CHECK_NULL_RETURN(parent, nullptr);
     auto pipeline = parent->GetContext();
@@ -2250,12 +2273,6 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto theme = parent->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
-    if (!autoWrapFlag) {
-        textProperty->UpdateMaxLines(1);
-        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    } else {
-        textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
-    }
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(theme->GetMenuFontWeight());
     textProperty->UpdateTextColor(theme->GetMenuFontColor());

@@ -1467,6 +1467,25 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
     }
 }
 
+HWTEST_F(SliderPatternTestNg, SliderTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    RefPtr<FrameNode> frameNode;
+    auto sliderPattern = AccessibilityInit(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    sliderPattern->UpdateStepAccessibilityVirtualNode();
+    for (const auto& node : sliderPattern->pointAccessibilityNodeVec_) {
+        ASSERT_NE(node, nullptr);
+        auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(pointNodeProperty, nullptr);
+        EXPECT_TRUE(pointNodeProperty->GetEnableSmallLanguageTruncationValue(false));
+    }
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: ParseCommand001
  * @tc.desc: Test SliderPattern ParseCommand.

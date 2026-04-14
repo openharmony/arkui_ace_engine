@@ -1005,6 +1005,24 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButto
     ASSERT_NE(buttonNode, nullptr);
 }
 
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButtonTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto buttonNode = pattern->CreateButtonText(TITLE, "");
+    ASSERT_NE(buttonNode, nullptr);
+    auto textLayoutProperty = buttonNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: DialogPatternAdditionalTestNgBuildMenu001
  * @tc.desc: Test DialogPattern BuildMenu

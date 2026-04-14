@@ -2363,6 +2363,29 @@ HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest001, TestSize.Level
     EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
 }
 
+HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest003, TestSize.Level1)
+{
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    auto lastPlatformVersion = mockContainer->GetApiTargetVersion();
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    pattern->UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
+}
+
 /**
  * @tc.name: UpdateTextLayoutPropertyTest002
  * @tc.desc: Test UpdateTextLayoutProperty with empty font family
