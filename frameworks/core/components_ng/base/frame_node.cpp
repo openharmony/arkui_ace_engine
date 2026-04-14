@@ -28,7 +28,9 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#endif
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -1956,6 +1958,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         if (safeAreaManager) {
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
         }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
         if (SystemProperties::GetGestureDebugBoundaryEnabled()) {
             const auto& eventManager = context->GetEventManager();
             CHECK_NULL_VOID(eventManager);
@@ -1964,6 +1967,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
                 gestureDebugMgr->ClearNode(GetId());
             }
         }
+#endif
 
         if (!lpxAttributes_.empty()) {
             context->UnRegisterLpxDirtyNode(WeakClaim(this));

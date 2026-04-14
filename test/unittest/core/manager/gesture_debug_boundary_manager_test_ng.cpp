@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+
 #include "gtest/gtest.h"
 
 #define private public
@@ -27,7 +29,6 @@
 #undef protected
 #undef private
 
-#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
@@ -99,11 +100,11 @@ public:
 };
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest001
+ * @tc.name: HandleGestureAccept001
  * @tc.desc: HandleGestureAccept should return when feature switch is off or node is null.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest001, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, HandleGestureAccept001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create manager and node with default switch disabled.
@@ -129,119 +130,85 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest001, 
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest002
- * @tc.desc: HandleGestureAccept should set active state and schedule delayed branch for tap.
+ * @tc.name: HandleGestureAccept002
+ * @tc.desc: HandleGestureAccept should keep existing node states and record new node state.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest002, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, HandleGestureAccept002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. prepare manager, node and mock task executor.
+     * @tc.steps: step1. prepare manager and two nodes.
      */
     GestureDebugBoundaryManager manager;
     auto node = CreateFrameNode(TEST_NODE_ID);
+    auto anotherNode = CreateFrameNode(TEST_NODE_ID_2);
     ASSERT_NE(node, nullptr);
-
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
+    ASSERT_NE(anotherNode, nullptr);
 
     /**
-     * @tc.steps: step2. enable switch and call HandleGestureAccept for tap gesture.
-     * @tc.expected: step2. tap bit is set and one delayed reset task is scheduled.
+     * @tc.steps: step2. enable switch and accept tap on the first node.
+     * @tc.expected: step2. tap bit is retained on the first node.
      */
     SystemProperties::gestureDebugBoundaryEnabled_ = true;
     manager.HandleGestureAccept(GestureListenerType::TAP, node);
 
-    auto state = manager.GetNodeState(node->GetId());
-    ASSERT_NE(state, nullptr);
-    EXPECT_TRUE(state->activeGestures.test(0));
-    EXPECT_EQ(state->delayedResetTasks.size(), 1);
+    auto stateIter = manager.nodeStates_.find(node->GetId());
+    ASSERT_NE(stateIter, manager.nodeStates_.end());
+    EXPECT_TRUE(stateIter->second.activeGestures.test(0));
+
+    /**
+     * @tc.steps: step3. accept another gesture on a different node.
+     * @tc.expected: step3. old and new node states are both kept.
+     */
+    manager.HandleGestureAccept(GestureListenerType::PAN, anotherNode);
+    auto firstStateIter = manager.nodeStates_.find(node->GetId());
+    ASSERT_NE(firstStateIter, manager.nodeStates_.end());
+    EXPECT_TRUE(firstStateIter->second.activeGestures.test(0));
+    auto anotherStateIter = manager.nodeStates_.find(anotherNode->GetId());
+    ASSERT_NE(anotherStateIter, manager.nodeStates_.end());
+    EXPECT_TRUE(anotherStateIter->second.activeGestures.test(2));
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest003
- * @tc.desc: HandleGestureEnd should cover state-miss, erase-all and keep-active branches.
+ * @tc.name: ResetAllGesturesOnNewRound001
+ * @tc.desc: ResetAllGesturesOnNewRound should clear all tracked states.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest003, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, ResetAllGesturesOnNewRound001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call HandleGestureEnd on an untracked node.
-     * @tc.expected: step1. manager remains empty.
+     * @tc.steps: step1. prepare manager with two tracked nodes.
      */
     GestureDebugBoundaryManager manager;
     auto node = CreateFrameNode(TEST_NODE_ID);
+    auto anotherNode = CreateFrameNode(TEST_NODE_ID_2);
     ASSERT_NE(node, nullptr);
+    ASSERT_NE(anotherNode, nullptr);
 
-    SystemProperties::gestureDebugBoundaryEnabled_ = true;
-    manager.HandleGestureEnd(GestureListenerType::PAN, node);
+    /**
+     * @tc.steps: step2. insert states and reset for a new gesture round.
+     * @tc.expected: step2. all node states are removed.
+     */
+    GestureDebugBoundaryState firstState;
+    firstState.node = WeakPtr<FrameNode>(node);
+    firstState.activeGestures.set(2);
+    manager.nodeStates_[node->GetId()] = firstState;
+
+    GestureDebugBoundaryState secondState;
+    secondState.node = WeakPtr<FrameNode>(anotherNode);
+    secondState.activeGestures.set(5);
+    manager.nodeStates_[anotherNode->GetId()] = secondState;
+
+    manager.ResetAllGesturesOnNewRound();
     EXPECT_TRUE(manager.nodeStates_.empty());
-
-    /**
-     * @tc.steps: step2. prepare state with one active bit and end this gesture.
-     * @tc.expected: step2. node state is erased.
-     */
-    GestureDebugBoundaryState oneActive;
-    oneActive.node = WeakPtr<FrameNode>(node);
-    oneActive.activeGestures.set(2);
-    manager.nodeStates_[node->GetId()] = oneActive;
-    manager.HandleGestureEnd(GestureListenerType::PAN, node);
-    EXPECT_EQ(manager.GetNodeState(node->GetId()), nullptr);
-
-    /**
-     * @tc.steps: step3. prepare state with two active bits and end only tap.
-     * @tc.expected: step3. remaining active bit stays in state.
-     */
-    GestureDebugBoundaryState twoActive;
-    twoActive.node = WeakPtr<FrameNode>(node);
-    twoActive.activeGestures.set(0);
-    twoActive.activeGestures.set(2);
-    manager.nodeStates_[node->GetId()] = twoActive;
-    manager.HandleGestureEnd(GestureListenerType::TAP, node);
-    auto stateAfterEnd = manager.GetNodeState(node->GetId());
-    ASSERT_NE(stateAfterEnd, nullptr);
-    EXPECT_TRUE(stateAfterEnd->activeGestures.test(2));
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest004
- * @tc.desc: HandleGestureEnd should keep node when delayed task remains pending.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. prepare node state with one active bit and one pending delayed task.
-     */
-    GestureDebugBoundaryManager manager;
-    auto node = CreateFrameNode(TEST_NODE_ID);
-    ASSERT_NE(node, nullptr);
-
-    SystemProperties::gestureDebugBoundaryEnabled_ = true;
-    GestureDebugBoundaryState state;
-    state.node = WeakPtr<FrameNode>(node);
-    state.activeGestures.set(0);
-    state.delayedResetTasks[GestureListenerType::SWIPE].Reset([]() {});
-    manager.nodeStates_[node->GetId()] = state;
-
-    /**
-     * @tc.steps: step2. end tap while delayed task still exists.
-     * @tc.expected: step2. node state is kept and active bits become empty.
-     */
-    manager.HandleGestureEnd(GestureListenerType::TAP, node);
-    auto stateAfterEnd = manager.GetNodeState(node->GetId());
-    ASSERT_NE(stateAfterEnd, nullptr);
-    EXPECT_TRUE(stateAfterEnd->activeGestures.none());
-    EXPECT_EQ(stateAfterEnd->delayedResetTasks.size(), 1);
-}
-
-/**
- * @tc.name: GestureDebugBoundaryManagerTest005
+ * @tc.name: ClearNode001
  * @tc.desc: ClearNode should cover missing-node and valid-node branches.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest005, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, ClearNode001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call ClearNode for non-existing node id.
@@ -252,194 +219,65 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest005, 
     EXPECT_TRUE(manager.nodeStates_.empty());
 
     /**
-     * @tc.steps: step2. insert valid node state with one delayed task and clear it.
+     * @tc.steps: step2. insert valid node state with one active gesture and clear it.
      * @tc.expected: step2. node state is removed.
      */
     auto node = CreateFrameNode(TEST_NODE_ID);
     ASSERT_NE(node, nullptr);
     GestureDebugBoundaryState state;
     state.node = WeakPtr<FrameNode>(node);
-    state.delayedResetTasks[GestureListenerType::PAN].Reset([]() {});
+    state.activeGestures.set(2);
     manager.nodeStates_[node->GetId()] = state;
 
     manager.ClearNode(node->GetId());
-    EXPECT_EQ(manager.GetNodeState(node->GetId()), nullptr);
+    EXPECT_EQ(manager.nodeStates_.find(node->GetId()), manager.nodeStates_.end());
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest006
- * @tc.desc: ScheduleDelayReset should cover state-miss and state-hit entry branches.
+ * @tc.name: ResetAllGesturesOnNewRound002
+ * @tc.desc: ResetAllGesturesOnNewRound should clear expired-node state as well.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest006, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, ResetAllGesturesOnNewRound002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call ScheduleDelayReset without pre-created node state.
-     * @tc.expected: step1. function returns at state-miss branch and does not create task/state.
+     * @tc.steps: step1. prepare state with an expired weak node.
      */
     GestureDebugBoundaryManager manager;
-    auto node = CreateFrameNode(TEST_NODE_ID);
-    ASSERT_NE(node, nullptr);
-
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
-
-    manager.ScheduleDelayReset(GestureListenerType::TAP, TEST_NODE_ID, WeakPtr<FrameNode>(node));
-    EXPECT_TRUE(manager.nodeStates_.empty());
-
-    /**
-     * @tc.steps: step2. pre-create node state, then call ScheduleDelayReset again.
-     * @tc.expected: step2. function enters state-hit branch and creates one delayed task.
-     */
     GestureDebugBoundaryState state;
-    state.node = WeakPtr<FrameNode>(node);
-    manager.nodeStates_[node->GetId()] = state;
-    manager.ScheduleDelayReset(GestureListenerType::TAP, node->GetId(), WeakPtr<FrameNode>(node));
-    auto stateAfterSchedule = manager.GetNodeState(node->GetId());
-    ASSERT_NE(stateAfterSchedule, nullptr);
-    EXPECT_EQ(stateAfterSchedule->delayedResetTasks.size(), 1);
-    EXPECT_NE(stateAfterSchedule->delayedResetTasks.find(GestureListenerType::TAP),
-        stateAfterSchedule->delayedResetTasks.end());
-}
-
-/**
- * @tc.name: GestureDebugBoundaryManagerTest007
- * @tc.desc: ScheduleDelayReset should return early when pipeline context is null.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. tear down pipeline and call ScheduleDelayReset.
-     * @tc.expected: step1. function returns early and no delayed task is created.
-     */
-    auto oldPipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(oldPipeline, nullptr);
-
-    MockPipelineContext::TearDown();
-
-    GestureDebugBoundaryManager manager;
-    GestureDebugBoundaryState state;
+    state.activeGestures.set(0);
     manager.nodeStates_[TEST_NODE_ID] = state;
-    manager.ScheduleDelayReset(GestureListenerType::TAP, TEST_NODE_ID, WeakPtr<FrameNode>());
-    auto stateAfterSchedule = manager.GetNodeState(TEST_NODE_ID);
-    ASSERT_NE(stateAfterSchedule, nullptr);
-    EXPECT_TRUE(stateAfterSchedule->delayedResetTasks.empty());
 
     /**
-     * @tc.steps: step2. restore global mock environment.
+     * @tc.steps: step2. reset all gestures on a new round.
+     * @tc.expected: step2. expired node state is removed.
      */
-    MockPipelineContext::SetUp();
-    MockContainer::SetUp();
+    manager.ResetAllGesturesOnNewRound();
+    EXPECT_EQ(manager.nodeStates_.find(TEST_NODE_ID), manager.nodeStates_.end());
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest008
- * @tc.desc: ScheduleDelayReset callback should cover node-null, state-null and keep-state branches.
+ * @tc.name: ResetAllGesturesOnNewRound003
+ * @tc.desc: ResetAllGesturesOnNewRound should keep manager empty when no state exists.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest008, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, ResetAllGesturesOnNewRound003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. schedule delayed reset with empty weak node and execute callback.
-     * @tc.expected: step1. callback goes through ClearNode path and erases state.
-     */
-    auto manager = AceType::MakeRefPtr<GestureDebugBoundaryManager>();
-    auto node = CreateFrameNode(TEST_NODE_ID);
-    ASSERT_NE(node, nullptr);
-
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
-
-    GestureDebugBoundaryState eraseState;
-    eraseState.node = WeakPtr<FrameNode>(node);
-    eraseState.activeGestures.set(0);
-    manager->nodeStates_[node->GetId()] = eraseState;
-    manager->ScheduleDelayReset(GestureListenerType::TAP, node->GetId(), WeakPtr<FrameNode>());
-    auto eraseStateAfterSchedule = manager->GetNodeState(node->GetId());
-    ASSERT_NE(eraseStateAfterSchedule, nullptr);
-    EXPECT_EQ(eraseStateAfterSchedule->delayedResetTasks.size(), 1);
-    auto eraseCallback = eraseStateAfterSchedule->delayedResetTasks[GestureListenerType::TAP];
-    eraseCallback();
-    EXPECT_EQ(manager->GetNodeState(node->GetId()), nullptr);
-
-    /**
-     * @tc.steps: step2. schedule with valid weak node, erase state before callback executes.
-     * @tc.expected: step2. callback hits state-null early-return branch and does not recreate state.
-     */
-    GestureDebugBoundaryState missingStateAfterSchedule;
-    missingStateAfterSchedule.node = WeakPtr<FrameNode>(node);
-    missingStateAfterSchedule.activeGestures.set(0);
-    manager->nodeStates_[node->GetId()] = missingStateAfterSchedule;
-    manager->ScheduleDelayReset(GestureListenerType::TAP, node->GetId(), WeakPtr<FrameNode>(node));
-    auto stateBeforeErase = manager->GetNodeState(node->GetId());
-    ASSERT_NE(stateBeforeErase, nullptr);
-    auto stateNullCallback = stateBeforeErase->delayedResetTasks[GestureListenerType::TAP];
-    manager->EraseNodeState(node->GetId());
-    stateNullCallback();
-    EXPECT_EQ(manager->GetNodeState(node->GetId()), nullptr);
-
-    /**
-     * @tc.steps: step3. schedule delayed reset with two active bits and valid weak node.
-     * @tc.expected: step3. callback clears tap bit and keeps remaining active bit.
-     */
-    GestureDebugBoundaryState keepState;
-    keepState.node = WeakPtr<FrameNode>(node);
-    keepState.activeGestures.set(0);
-    keepState.activeGestures.set(2);
-    manager->nodeStates_[node->GetId()] = keepState;
-    manager->ScheduleDelayReset(GestureListenerType::TAP, node->GetId(), WeakPtr<FrameNode>(node));
-    auto keepStateAfterSchedule = manager->GetNodeState(node->GetId());
-    ASSERT_NE(keepStateAfterSchedule, nullptr);
-    auto keepCallback = keepStateAfterSchedule->delayedResetTasks[GestureListenerType::TAP];
-    keepCallback();
-    auto stateAfterCallback = manager->GetNodeState(node->GetId());
-    ASSERT_NE(stateAfterCallback, nullptr);
-    EXPECT_TRUE(stateAfterCallback->activeGestures.test(2));
-    EXPECT_FALSE(stateAfterCallback->activeGestures.test(0));
-    EXPECT_EQ(stateAfterCallback->delayedResetTasks.size(), 0);
-}
-
-/**
- * @tc.name: GestureDebugBoundaryManagerTest009
- * @tc.desc: CancelDelayReset, GetNodeState and EraseNodeState should cover map hit/miss branches.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call CancelDelayReset for miss/hit branches on delayed task map.
-     * @tc.expected: step1. task map is empty after cancel.
+     * @tc.steps: step1. reset manager without any tracked state.
+     * @tc.expected: step1. manager remains empty.
      */
     GestureDebugBoundaryManager manager;
-    GestureDebugBoundaryState state;
-
-    manager.CancelDelayReset(GestureListenerType::PAN, state);
-    EXPECT_TRUE(state.delayedResetTasks.empty());
-
-    state.delayedResetTasks[GestureListenerType::PAN].Reset([]() {});
-    manager.CancelDelayReset(GestureListenerType::PAN, state);
-    EXPECT_TRUE(state.delayedResetTasks.empty());
-
-    /**
-     * @tc.steps: step2. verify GetNodeState and EraseNodeState on map miss/hit.
-     * @tc.expected: step2. state can be found before erase and becomes null after erase.
-     */
-    EXPECT_EQ(manager.GetNodeState(TEST_NODE_ID), nullptr);
-    manager.nodeStates_[TEST_NODE_ID] = GestureDebugBoundaryState {};
-    EXPECT_NE(manager.GetNodeState(TEST_NODE_ID), nullptr);
-    manager.EraseNodeState(TEST_NODE_ID);
-    EXPECT_EQ(manager.GetNodeState(TEST_NODE_ID), nullptr);
+    manager.ResetAllGesturesOnNewRound();
+    EXPECT_TRUE(manager.nodeStates_.empty());
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest010
+ * @tc.name: BuildRenderInfo001
  * @tc.desc: BuildRenderInfo should cover empty, null-node, null-context and threshold branches.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest010, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, BuildRenderInfo001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. verify BuildRenderInfo for empty state and null node with active state.
@@ -486,11 +324,11 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest010, 
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest011
+ * @tc.name: BuildRenderInfoAndResolveGestureColor001
  * @tc.desc: BuildRenderInfo and ResolveGestureColor should cover normal path and fallback branches.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest011, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, BuildRenderInfoAndResolveGestureColor001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. build render info for node with multiple active gesture bits.
@@ -522,11 +360,11 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest011, 
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest012
+ * @tc.name: NotifyNodeRefresh001
  * @tc.desc: NotifyNodeRefresh should cover null-node, null-render-context and normal branches.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest012, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, NotifyNodeRefresh001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. cover NotifyNodeRefresh null-node and null-render-context branches.
@@ -559,11 +397,11 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest012, 
 }
 
 /**
- * @tc.name: GestureDebugBoundaryManagerTest013
+ * @tc.name: OnDetachFromMainTree001
  * @tc.desc: FrameNode::OnDetachFromMainTree should clear gesture debug node state when switch is enabled.
  * @tc.type: FUNC
  */
-HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest013, TestSize.Level1)
+HWTEST_F(GestureDebugBoundaryManagerTestNg, OnDetachFromMainTree001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. prepare frame node and pipeline context.
@@ -584,7 +422,7 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest013, 
     GestureDebugBoundaryState state;
     state.node = WeakPtr<FrameNode>(node);
     gestureDebugMgr->nodeStates_[node->GetId()] = state;
-    EXPECT_NE(gestureDebugMgr->GetNodeState(node->GetId()), nullptr);
+    EXPECT_NE(gestureDebugMgr->nodeStates_.find(node->GetId()), gestureDebugMgr->nodeStates_.end());
 
     /**
      * @tc.steps: step3. enable switch and call FrameNode::OnDetachFromMainTree.
@@ -592,7 +430,216 @@ HWTEST_F(GestureDebugBoundaryManagerTestNg, GestureDebugBoundaryManagerTest013, 
      */
     SystemProperties::gestureDebugBoundaryEnabled_ = true;
     node->OnDetachFromMainTree(false, AceType::RawPtr(pipeline));
-    EXPECT_EQ(gestureDebugMgr->GetNodeState(node->GetId()), nullptr);
+    EXPECT_EQ(gestureDebugMgr->nodeStates_.find(node->GetId()), gestureDebugMgr->nodeStates_.end());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestResetGestureDebugBoundary001
+ * @tc.desc: EventManager::TouchTest should reset all gesture debug boundaries when down finger count is one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureDebugBoundaryManagerTestNg, EventManagerTouchTestResetGestureDebugBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare EventManager, GestureDebugBoundaryManager and one tracked node state.
+     * @tc.expected: step1. one gesture debug boundary state exists before TouchTest.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto gestureDebugMgr = eventManager->GetGestureDebugBoundaryManager();
+    ASSERT_NE(gestureDebugMgr, nullptr);
+
+    auto node = CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(node, nullptr);
+
+    GestureDebugBoundaryState state;
+    state.node = WeakPtr<FrameNode>(node);
+    state.activeGestures.set(2);
+    gestureDebugMgr->nodeStates_[node->GetId()] = state;
+    ASSERT_FALSE(gestureDebugMgr->nodeStates_.empty());
+
+    /**
+     * @tc.steps: step2. enable gesture debug boundary switch and make downFingerIds_ size equal to one.
+     * @tc.expected: step2. if-condition in EventManager::TouchTest is satisfied.
+     */
+    SystemProperties::gestureDebugBoundaryEnabled_ = true;
+    eventManager->downFingerIds_.clear();
+    eventManager->downFingerIds_[0] = 0;
+
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.x = 0.0f;
+    touchPoint.y = 0.0f;
+
+    /**
+     * @tc.steps: step3. execute EventManager::TouchTest.
+     * @tc.expected: step3. ResetAllGesturesOnNewRound is triggered and node states are cleared.
+     */
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->TouchTest(touchPoint, node, touchRestrict, offset, 0.0f, false);
+    EXPECT_TRUE(gestureDebugMgr->nodeStates_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestResetGestureDebugBoundary002
+ * @tc.desc: EventManager::TouchTest should not reset gesture debug boundaries when down finger count is not one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureDebugBoundaryManagerTestNg, EventManagerTouchTestResetGestureDebugBoundary002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare EventManager, GestureDebugBoundaryManager and one tracked node state.
+     * @tc.expected: step1. one gesture debug boundary state exists before TouchTest.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto gestureDebugMgr = eventManager->GetGestureDebugBoundaryManager();
+    ASSERT_NE(gestureDebugMgr, nullptr);
+
+    auto node = CreateFrameNode(TEST_NODE_ID_2);
+    ASSERT_NE(node, nullptr);
+
+    GestureDebugBoundaryState state;
+    state.node = WeakPtr<FrameNode>(node);
+    state.activeGestures.set(2);
+    gestureDebugMgr->nodeStates_[node->GetId()] = state;
+    ASSERT_FALSE(gestureDebugMgr->nodeStates_.empty());
+
+    /**
+     * @tc.steps: step2. enable gesture debug boundary switch and make downFingerIds_ size greater than one.
+     * @tc.expected: step2. if-condition in EventManager::TouchTest is not satisfied.
+     */
+    SystemProperties::gestureDebugBoundaryEnabled_ = true;
+    eventManager->downFingerIds_.clear();
+    eventManager->downFingerIds_[0] = 0;
+    eventManager->downFingerIds_[1] = 1;
+
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.x = 0.0f;
+    touchPoint.y = 0.0f;
+
+    /**
+     * @tc.steps: step3. execute EventManager::TouchTest.
+     * @tc.expected: step3. ResetAllGesturesOnNewRound is not triggered and node state is retained.
+     */
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->TouchTest(touchPoint, node, touchRestrict, offset, 0.0f, false);
+    EXPECT_NE(gestureDebugMgr->nodeStates_.find(node->GetId()), gestureDebugMgr->nodeStates_.end());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestResetGestureDebugBoundary003
+ * @tc.desc: EventManager::TouchTest should not reset gesture debug boundaries when debug switch is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureDebugBoundaryManagerTestNg, EventManagerTouchTestResetGestureDebugBoundary003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare EventManager, GestureDebugBoundaryManager and one tracked node state.
+     * @tc.expected: step1. one gesture debug boundary state exists before TouchTest.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto gestureDebugMgr = eventManager->GetGestureDebugBoundaryManager();
+    ASSERT_NE(gestureDebugMgr, nullptr);
+
+    auto node = CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(node, nullptr);
+
+    GestureDebugBoundaryState state;
+    state.node = WeakPtr<FrameNode>(node);
+    state.activeGestures.set(2);
+    gestureDebugMgr->nodeStates_[node->GetId()] = state;
+    ASSERT_FALSE(gestureDebugMgr->nodeStates_.empty());
+
+    /**
+     * @tc.steps: step2. disable gesture debug boundary switch and keep downFingerIds_ size equal to one.
+     * @tc.expected: step2. if-condition in EventManager::TouchTest is not satisfied.
+     */
+    SystemProperties::gestureDebugBoundaryEnabled_ = false;
+    eventManager->downFingerIds_.clear();
+    eventManager->downFingerIds_[0] = 0;
+
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.x = 0.0f;
+    touchPoint.y = 0.0f;
+
+    /**
+     * @tc.steps: step3. execute EventManager::TouchTest.
+     * @tc.expected: step3. ResetAllGesturesOnNewRound is not triggered and node state is retained.
+     */
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->TouchTest(touchPoint, node, touchRestrict, offset, 0.0f, false);
+    EXPECT_NE(gestureDebugMgr->nodeStates_.find(node->GetId()), gestureDebugMgr->nodeStates_.end());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestResetGestureDebugBoundary004
+ * @tc.desc: EventManager::TouchTest should not reset gesture debug boundaries when debug switch is disabled and down
+ * finger count is not one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureDebugBoundaryManagerTestNg, EventManagerTouchTestResetGestureDebugBoundary004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare EventManager, GestureDebugBoundaryManager and one tracked node state.
+     * @tc.expected: step1. one gesture debug boundary state exists before TouchTest.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto gestureDebugMgr = eventManager->GetGestureDebugBoundaryManager();
+    ASSERT_NE(gestureDebugMgr, nullptr);
+
+    auto node = CreateFrameNode(TEST_NODE_ID_2);
+    ASSERT_NE(node, nullptr);
+
+    GestureDebugBoundaryState state;
+    state.node = WeakPtr<FrameNode>(node);
+    state.activeGestures.set(2);
+    gestureDebugMgr->nodeStates_[node->GetId()] = state;
+    ASSERT_FALSE(gestureDebugMgr->nodeStates_.empty());
+
+    /**
+     * @tc.steps: step2. disable gesture debug boundary switch and make downFingerIds_ size greater than one.
+     * @tc.expected: step2. if-condition in EventManager::TouchTest is not satisfied.
+     */
+    SystemProperties::gestureDebugBoundaryEnabled_ = false;
+    eventManager->downFingerIds_.clear();
+    eventManager->downFingerIds_[0] = 0;
+    eventManager->downFingerIds_[1] = 1;
+
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.x = 0.0f;
+    touchPoint.y = 0.0f;
+
+    /**
+     * @tc.steps: step3. execute EventManager::TouchTest.
+     * @tc.expected: step3. ResetAllGesturesOnNewRound is not triggered and node state is retained.
+     */
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->TouchTest(touchPoint, node, touchRestrict, offset, 0.0f, false);
+    EXPECT_NE(gestureDebugMgr->nodeStates_.find(node->GetId()), gestureDebugMgr->nodeStates_.end());
 }
 
 } // namespace OHOS::Ace::NG
+
+#endif // GESTURE_DEBUG_BOUNDARY_SUPPORTED

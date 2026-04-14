@@ -51,7 +51,9 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/visual_effect/transparency_utils.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#endif
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
@@ -62,7 +64,9 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"
+#endif
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
@@ -80,7 +84,9 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/render/gesture_debug_boundary_painter.h"
+#endif
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
@@ -987,6 +993,7 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
 
 void RosenRenderContext::PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info)
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     FREE_RS_CONTEXT_CHECK(PaintGestureDebugBoundary, info);
     const bool shouldPaint = info.has_value() && info->gestureMask != 0 && !info->colors.empty();
     if (!shouldPaint && !gestureDebugBoundaryModifier_) {
@@ -1037,6 +1044,7 @@ void RosenRenderContext::PaintGestureDebugBoundary(const std::optional<GestureDe
         UpdateDrawRegion(DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX, drawRect);
         gestureDebugBoundaryModifier_->SetCustomData(info->gestureMask);
     }
+#endif
 }
 
 void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsColor)

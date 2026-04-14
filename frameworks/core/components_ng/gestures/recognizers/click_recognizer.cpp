@@ -604,7 +604,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::TAP);
+#endif
 }
 
 void ClickRecognizer::PlayClickSoundEffect()

@@ -49,7 +49,9 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
+#endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
@@ -115,7 +117,11 @@ bool IsDebugBoundaryEnabled()
 
 bool IsGestureDebugBoundaryEnabled()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
+#else
+    return false;
+#endif
 }
 
 bool IsDownloadByNetworkDisabled()

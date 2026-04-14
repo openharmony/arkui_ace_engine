@@ -92,9 +92,11 @@ void EventManager::ClearRectCallbacks() {}
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     if (!gestureDebugBoundaryManager_) {
         gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
     }
+#endif
     return gestureDebugBoundaryManager_;
 }
 

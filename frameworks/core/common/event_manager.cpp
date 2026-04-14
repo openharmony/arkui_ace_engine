@@ -115,6 +115,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+    // Reset all gesture debug boundaries when a new gesture round starts.
+    if (SystemProperties::GetGestureDebugBoundaryEnabled() && downFingerIds_.size() == 1) {
+        auto& gestureDebugBoundaryManager = GetGestureDebugBoundaryManager();
+        CHECK_NULL_VOID(gestureDebugBoundaryManager);
+        gestureDebugBoundaryManager->ResetAllGesturesOnNewRound();
+    }
+#endif
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     NotifyHitTestFrameNodeListener(touchPoint);
@@ -2466,9 +2474,11 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     if (!gestureDebugBoundaryManager_) {
         gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
     }
+#endif
     return gestureDebugBoundaryManager_;
 }
 
