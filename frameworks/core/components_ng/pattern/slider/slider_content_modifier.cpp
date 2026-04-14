@@ -21,9 +21,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float COLOR_ALPHA_DEFAULT_VALUE = 1.0f;
+constexpr float COLOR_DEFAULT_MAX = 1.0f;
 constexpr float COLOR_HEAD_ROOM_DEFAULT_VALUE = 1.0f;
-constexpr float COLOR_FLOAT_TO_UINT8_SCALE = 255.0f;
 constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
@@ -185,15 +184,15 @@ RSColor4f GetHDRColor4fByHeadRoom(const ColorWithHeadRoom& colorWithHeadRoom)
     auto hr = colorWithHeadRoom.headRoom;
     return GreatNotEqual(hr, COLOR_HEAD_ROOM_DEFAULT_VALUE) ?
         RSColor4f {
-            static_cast<float>(std::clamp(colorWithHeadRoom.red * hr, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.green * hr, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.blue * hr, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_ALPHA_DEFAULT_VALUE)) } :
+            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) } :
         RSColor4f {
-            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_FLOAT_TO_UINT8_SCALE)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_ALPHA_DEFAULT_VALUE)) };
+            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) };
 }
 
 void GetRSColorSpaceByGradientColors(
@@ -203,12 +202,10 @@ void GetRSColorSpaceByGradientColors(
         ColorSpace::SRGB : gradientColors.back().GetColor().GetColorSpace();
     RSCMSMatrixType matrixType;
     switch (colorSpaceType) {
-        case ColorSpace::DISPLAY_P3:
-            matrixType = RSCMSMatrixType::DCIP3;
-            break;
         case ColorSpace::BT2020:
             matrixType = RSCMSMatrixType::REC2020;
             break;
+        case ColorSpace::DISPLAY_P3:
         case ColorSpace::SRGB:
         default:
             matrixType = RSCMSMatrixType::SRGB;
