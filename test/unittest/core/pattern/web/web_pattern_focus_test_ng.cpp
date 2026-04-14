@@ -962,6 +962,36 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityChildTreeDeregister, TestSize.Lev
 }
 
 /**
+ * @tc.name: OnAccessibilityChildTreeDeregister_TreeIdZero
+ * @tc.desc: OnAccessibilityChildTreeDeregister returns true when treeId is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, OnAccessibilityChildTreeDeregister_TreeIdZero, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MockPipelineContext::SetUp();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    ASSERT_NE(accessibilityManager, nullptr);
+    EXPECT_EQ(webPattern->treeId_, 0);
+    EXPECT_TRUE(webPattern->OnAccessibilityChildTreeDeregister());
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
  * @tc.name: ClearDragData_001
  * @tc.desc: ClearDragData.
  * @tc.type: FUNC
