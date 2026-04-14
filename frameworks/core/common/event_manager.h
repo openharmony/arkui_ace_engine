@@ -507,6 +507,7 @@ private:
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
+    void EraseEventRefereeWithStrategy(const TouchEvent& point);
     void DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo);
     bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
     bool DispatchMouseEventInLessAPI13(const MouseEvent& event);

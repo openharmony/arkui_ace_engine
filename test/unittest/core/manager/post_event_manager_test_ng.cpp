@@ -903,6 +903,19 @@ HWTEST_F(PostEventManagerTestNg, PostAxisEventWithStrategy001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostAxisEventWithStrategy002
+ * @tc.desc: test PostAxisEventWithStrategy with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventWithStrategy002, TestSize.Level1)
+{
+    Init();
+    AxisEvent axisEvent;
+    auto result = postEventManager_->PostAxisEventWithStrategy(nullptr, std::move(axisEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: PostAxisEventTest001
  * @tc.desc: test PostAxisEvent func.
  * @tc.type: FUNC
