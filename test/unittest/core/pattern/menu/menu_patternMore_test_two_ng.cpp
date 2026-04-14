@@ -1438,6 +1438,56 @@ HWTEST_F(MenuPattern2TwoTestNg, OnThemeScopeUpdate005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMenuBackBlurStyle001
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init pipeline and create menu.
+     * @tc.expected: step1. All pointers non-null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = menuNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+    theme->menuFontColor_ = Color::RED;
+    theme->menuBlendBgColor_ = true;
+    theme->backgroundColor_ = Color::RED;
+
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: MenuItemModelNgCreateTest001
  * @tc.desc: Verify MenuItemModelNG::Create when version is 26.
  * @tc.type: FUNC
@@ -1515,42 +1565,23 @@ HWTEST_F(MenuPattern2TwoTestNg, MenuModelNgCreateTest001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateStyleOptionColorModeTest001
- * @tc.desc: Verify UpdateStyleOptionColorMode when version 26.
+ * @tc.desc: Verify UpdateStyleOptionColorMode.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest001, TestSize.Level0)
 {
     BlurStyleOption styleOption = {};
-    auto menuNode = CreateTargetNode();
-    ASSERT_NE(menuNode, nullptr);
-    auto pipelineContext = menuNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
-    pipelineContext->SetLocalColorMode(OHOS::Ace::ColorMode::LIGHT);
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, ThemeColorMode::LIGHT);
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::DARK, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::DARK);
+ 
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::LIGHT, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::LIGHT);
 
-    pipelineContext->SetLocalColorMode(OHOS::Ace::ColorMode::DARK);
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, ThemeColorMode::DARK);
-}
-
-/**
- * @tc.name: UpdateStyleOptionColorModeTest002
- * @tc.desc: Verify UpdateStyleOptionColorMode when version less 26.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest002, TestSize.Level0)
-{
-    auto menuNode = CreateTargetNode();
-    ASSERT_NE(menuNode, nullptr);
-    auto pipelineContext = menuNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
-    BlurStyleOption styleOption = {};
-    auto colorMode = styleOption.colorMode;
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, colorMode);
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::COLOR_MODE_UNDEFINED, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::SYSTEM);
 }
 
 /**

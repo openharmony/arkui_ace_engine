@@ -2508,7 +2508,7 @@ void MenuPattern::OnColorConfigurationUpdate()
     }
 }
 
-bool MenuPattern::UpdateMenuBackBlurStyle()
+bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2521,15 +2521,10 @@ bool MenuPattern::UpdateMenuBackBlurStyle()
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     auto menuParams = wrapperPattern->GetMenuParam();
-    if (renderContext->IsUniRenderEnabled()) {
+ 
+    if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor)) {
         BlurStyleOption styleOption;
-        if (isColorModeFollowTarget_) {
-            if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
-                styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-            } else if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
-                styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
-            }
-        }
+        MenuView::UpdateStyleOptionColorMode(host->GetLocalColorMode(), styleOption, isColorModeFollowTarget_);
         if (menuTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuNormalBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
@@ -2572,8 +2567,8 @@ bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         menuLayoutProperty->UpdateFontColor(themeFontColor);
         menuLayoutProperty->UpdateFontColorSetByUser(false);
     }
-    auto ret = UpdateMenuBackBlurStyle();
-    host->MarkModifyDone();
+    auto userSetBgColor = menuLayoutProperty->GetIsUserSetBackgroundColor();
+    auto ret = UpdateMenuBackBlurStyle(userSetBgColor);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return ret;
 }

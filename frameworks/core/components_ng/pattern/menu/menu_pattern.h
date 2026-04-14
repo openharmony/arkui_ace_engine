@@ -682,7 +682,7 @@ public:
     RefPtr<FrameNode> GetFirstMenuItem();
     RefPtr<FrameNode> GetLastMenuItem();
     std::pair<float, float> GetPreviewPositionY();
-    bool UpdateMenuBackBlurStyle();
+    bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     float GetTranslateYForStack()

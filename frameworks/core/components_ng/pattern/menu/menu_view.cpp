@@ -1851,20 +1851,18 @@ void MenuView::UpdateMenuBorderEffect(
     }
 }
 
-void MenuView::UpdateStyleOptionColorMode(
-    const PipelineContext* pipeLineContext, BlurStyleOption& styleOption, bool isColorModeFollowTarget)
+void MenuView::UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
+    bool isColorModeFollowTarget)
 {
-    CHECK_NULL_VOID(pipeLineContext);
-    if (pipeLineContext->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!isColorModeFollowTarget) {
         return;
     }
-    if (isColorModeFollowTarget) {
-        if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-        }
-        if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
-        }
+    if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    } else if (colorMode == OHOS::Ace::ColorMode::DARK) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    } else {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
     }
 }
 
@@ -1921,7 +1919,9 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
-        UpdateStyleOptionColorMode(pipeLineContext, styleOption, menuParam.isColorModeFollowTarget);
+        if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, true);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
         UpdateMenuEffectOption(menuNode, menuParam);

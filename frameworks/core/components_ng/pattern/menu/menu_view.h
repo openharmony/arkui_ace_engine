@@ -100,6 +100,8 @@ public:
     static void RemoveMenuHoverScaleStatus(int32_t targetId);
     static MenuHoverScaleStatus GetMenuHoverScaleStatus(int32_t targetId);
     static void SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
+        bool isColorModeFollowTarget = true);
 
 private:
     static void UpdateMenuPaintProperty(
@@ -143,8 +145,6 @@ private:
     static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
-    static void UpdateStyleOptionColorMode(const PipelineContext* pipeLineContext, BlurStyleOption& styleOption,
-        bool isColorModeFollowTarget = true);
     static void UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static int32_t UpdateNodeThemeScopeId(const RefPtr<FrameNode> &node, int32_t targetId,
         const std::string& targetTag, bool isColorModeFollowTarget = true);

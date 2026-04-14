@@ -1627,4 +1627,32 @@ HWTEST_F(SelectTestNg, SetMenuOutlineReloadResources001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(resMgr->ReloadResources());
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: SelectTestNg
+ * @tc.desc: Test SetMenuFontColor001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetMenuFontColor001, TestSize.Level1)
+{
+    Color fontColor = Color::BLUE;
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuFontColor_ = Color::RED;
+    theme->SetMenuFontColor(fontColor);
+    EXPECT_EQ(theme->GetMenuFontColor(), fontColor);
+}
+
+/**
+ * @tc.name: SelectTestNg
+ * @tc.desc: Test SetMenuIconColor001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetMenuIconColor001, TestSize.Level1)
+{
+    Color iconColor = Color::BLUE;
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuIconColor_ = Color::RED;
+    theme->SetMenuIconColor(iconColor);
+    EXPECT_EQ(theme->GetMenuIconColor(), iconColor);
+}
 } // namespace OHOS::Ace::NG
