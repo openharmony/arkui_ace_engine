@@ -17,6 +17,7 @@
 #include "gesture_impl.h"
 #include "interfaces/native/error_message_macros.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
@@ -985,6 +986,7 @@ void HandleGestureEvent(ArkUINodeEvent* event)
         ArkUI_GestureRecognizer* recognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(extraData->gesture);
         gestureEvent->attachNode = recognizer->attachNode;
     }
+    LOG_CALLBACK(extraData->targetReceiver);
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete uiEvent;
     uiEvent = nullptr;
