@@ -64,4 +64,23 @@ Alignment StackModelNG::GetAlignment(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty->GetPositionProperty(), Alignment::CENTER);
     return layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
 }
+
+void StackModelNG::SetSyncLoad(bool enable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(StackLayoutProperty, SyncLoad, enable);
+}
+
+void StackModelNG::SetSyncLoad(FrameNode* frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(StackLayoutProperty, SyncLoad, enable, frameNode);
+}
+
+bool StackModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    auto value = layoutProperty->GetSyncLoad().value_or(true);
+    return value;
+}
 } // namespace OHOS::Ace::NG

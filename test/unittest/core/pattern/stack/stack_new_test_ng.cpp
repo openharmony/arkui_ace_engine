@@ -1034,4 +1034,149 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
 }
 
+/**
+ * @tc.name: IsAsyncLoadAvailable001
+ * @tc.desc: Test IsAsyncLoadAvailable when layoutProperty is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create StackLayoutAlgorithm and FrameNode with null layoutProperty.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<StackPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call IsAsyncLoadAvailable with null layoutProperty.
+     * @tc.expected: step2. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable002
+ * @tc.desc: Test IsAsyncLoadAvailable when selfIdealSize is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack without setting width/height and create LayoutWrapper.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set layout constraint with invalid selfIdealSize.
+     * @tc.expected: step2. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.Reset();
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step3. Call IsAsyncLoadAvailable with invalid selfIdealSize.
+     * @tc.expected: step3. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable003
+ * @tc.desc: Test IsAsyncLoadAvailable when syncLoad is true with valid selfIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack with width and height.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set syncLoad to true.
+     * @tc.expected: step2. Set successfully.
+     */
+    auto stackLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(true);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with valid selfIdealSize.
+     * @tc.expected: step3. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(100.0f, 100.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step4. Call IsAsyncLoadAvailable with syncLoad true.
+     * @tc.expected: step4. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable004
+ * @tc.desc: Test IsAsyncLoadAvailable when syncLoad is false with valid selfIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack with width and height.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set syncLoad to false.
+     * @tc.expected: step2. Set successfully.
+     */
+    auto stackLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(false);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with valid selfIdealSize.
+     * @tc.expected: step3. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(100.0f, 100.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step4. Call IsAsyncLoadAvailable with syncLoad false.
+     * @tc.expected: step4. Return true.
+     */
+    EXPECT_TRUE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
 } // namespace OHOS::Ace::NG

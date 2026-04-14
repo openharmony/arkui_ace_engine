@@ -71,6 +71,29 @@ public:
         return true;
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        if (config.skipMeasure && config.skipLayout) {
+            return false;
+        }
+        auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+        CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+        auto stackLayoutAlgorithm = DynamicCast<StackLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        CHECK_NULL_RETURN(stackLayoutAlgorithm, false);
+        if (stackLayoutAlgorithm->MeasureInNextFrame()) {
+            ACE_SCOPED_TRACE("Stack MeasureInNextFrame");
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+        return true;
+    }
+
+    bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override
+    {
+        return false;
+    }
 
     RefPtr<EventHub> CreateEventHub() override;
 

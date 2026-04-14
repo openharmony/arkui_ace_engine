@@ -32,6 +32,9 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    bool IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper) override;
+
+    bool MeasureInNextFrame() const override;
 private:
     // calculate stack alignment
     static NG::OffsetF CalculateStackAlignment(

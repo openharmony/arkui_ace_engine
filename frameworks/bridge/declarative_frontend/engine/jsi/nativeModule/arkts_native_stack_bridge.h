@@ -23,6 +23,8 @@ class StackBridge {
 public:
     static ArkUINativeModuleValue SetAlignContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAlignContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 
