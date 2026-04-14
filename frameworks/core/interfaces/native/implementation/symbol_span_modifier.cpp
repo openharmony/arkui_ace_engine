@@ -122,6 +122,16 @@ void SetIdImpl(Ark_NativePointer node,
     auto id = Converter::OptConvertPtr<std::string>(value);
     ViewAbstract::SetInspectorId(frameNode, *id);
 }
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // SymbolSpanModelNG::SetSetDebugLine(frameNode, convValue);
+}
 } // SymbolSpanAttributeModifier
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 {
@@ -135,6 +145,7 @@ const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
         SymbolSpanAttributeModifier::SetKeyImpl,
         SymbolSpanAttributeModifier::SetIdImpl,
+        SymbolSpanAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUISymbolSpanModifierImpl;
 }

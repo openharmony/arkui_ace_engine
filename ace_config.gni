@@ -388,3 +388,7 @@ if (ace_engine_feature_enable_static_instructive_code) {
 if (ace_engine_feature_enable_default_click_sound) {
     ace_common_defines += [ "ENABLE_DEFAULT_CLICK_SOUND" ]
 }
+
+# Define output path for generated code
+idlize_gen_output_path = "$root_gen_dir/foundation/arkui/ace_engine/idlize_gen"
+idlize_gen_bridges_output_path = "$idlize_gen_output_path/sig/arkoala-arkts/framework/native/src/generated"

@@ -1138,12 +1138,12 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetTextDirectionImpl,
         TextAreaAttributeModifier::SetVoiceButtonImpl,
         TextAreaAttributeModifier::SetHorizontalScrollingImpl,
+        TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetMaxLinesImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,
         TextAreaAttributeModifier::SetLineSpacingImpl,
-        TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

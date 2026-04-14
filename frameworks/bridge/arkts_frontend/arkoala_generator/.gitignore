@@ -1,4 +1,5 @@
 out/
+sdk-patched/
 node_modules/
 libarkts/
 package-lock.json

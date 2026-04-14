@@ -1,0 +1,140 @@
+diff --git a/api/arkui/component/lazyForEach.d.ets b/api/arkui/component/lazyForEach.d.ets
+index 6282cf6..f298d39 100644
+--- a/api/arkui/component/lazyForEach.d.ets
++++ b/api/arkui/component/lazyForEach.d.ets
+@@ -73,6 +73,117 @@ export enum DataOperationType {
+     RELOAD = 'reload'
+ }
+ 
++ /**
++* Enumerates the release strategies for LazyForEach discarded nodes.
++*
++* @syscap SystemCapability.ArkUI.ArkUI.Full
++* @stagemodelonly
++* @atomicservice
++* @since 26.0.0 dynamic
++*/
++export declare enum LazyForEachReleaseStrategy {
++  /**
++  * Release all discarded nodes during the next idle period.
++  *
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  BATCH = 0,
++
++  /**
++  * Release discarded nodes one by one during the next idle period based on the
++  * remaining time of the current frame. Unreleased nodes will continue to be
++  * released in subsequent idle periods based on the available idle time.
++  *
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  PROGRESSIVE = 1
++}
++
++/**
++* Enumerates the freeze modes for cached custom nodes that have been removed
++* from the component tree in LazyForEach.
++*
++* @syscap SystemCapability.ArkUI.ArkUI.Full
++* @stagemodelonly
++* @atomicservice
++* @since 26.0.0 dynamic
++*/
++export declare enum LazyForEachCustomComponentFreezeMode {
++  /**
++  * Follow the enableCustomComponentFreeze field in Metadata to determine
++  * whether freezing takes effect.
++  *
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  AUTO = 0,
++
++  /**
++  * Freezing is disabled for cached custom nodes removed from the component tree.
++  *
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  DISABLED = 1,
++
++  /**
++  * Freezing is enabled for cached custom nodes removed from the component tree.
++  * State updates of cached custom components will be frozen.
++  *
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  ENABLED = 2
++}
++
++/**
++* Defines the options for LazyForEach.
++*
++* @interface LazyForEachOptions
++* @syscap SystemCapability.ArkUI.ArkUI.Full
++* @stagemodelonly
++* @crossplatform
++* @atomicservice
++* @since 26.0.0 dynamic
++*/
++export declare interface LazyForEachOptions {
++  /**
++  * Freeze mode for cached custom nodes that have been removed from the
++  * component tree. Default value: LazyForEachCustomComponentFreezeMode.AUTO.
++  *
++  * @default LazyForEachCustomComponentFreezeMode.AUTO
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  customComponentFreezeMode?: LazyForEachCustomComponentFreezeMode;
++
++  /**
++  * Resource release strategy for LazyForEach discarded nodes.
++  * Default value: LazyForEachReleaseStrategy.BATCH.
++  *
++  * @default LazyForEachReleaseStrategy.BATCH
++  * @syscap SystemCapability.ArkUI.ArkUI.Full
++  * @stagemodelonly
++  * @atomicservice
++  * @since 26.0.0 dynamic
++  */
++  releaseStrategy?: LazyForEachReleaseStrategy;
++} 
++
+ /**
+  * Defines add operation.
+  *
+@@ -80,7 +191,7 @@ export enum DataOperationType {
+  * @syscap SystemCapability.ArkUI.ArkUI.Full
+  * @since 23
+  */
+-export interface DataAddOperation {
++export declare interface DataAddOperation {
+     /**
+      * How to operate added data.
+      *
+@@ -124,7 +235,7 @@ export interface DataAddOperation {
+  * @syscap SystemCapability.ArkUI.ArkUI.Full
+  * @since 23
+  */
+-export interface DataDeleteOperation {
++export declare interface DataDeleteOperation {
+     /**
+      * How to operate deleted data.
+      *

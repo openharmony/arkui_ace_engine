@@ -25,7 +25,7 @@
 #include "interop-logging.h"
 
 #include "arkoala_api_generated.h"
-#include "Serializers.h"
+#include "DeserializerBase.h"
 
 const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result = nullptr);
 
