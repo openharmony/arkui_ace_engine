@@ -553,6 +553,11 @@ public:
 
     void UpdateSelectIndex(int32_t index);
 
+    bool TextMenuOnThemeScopeUpdate(int32_t themeScopeId)
+    {
+        return OnThemeScopeUpdate(themeScopeId);
+    }
+
     void SetSelectProperties(const std::vector<SelectParam>& params)
     {
         auto list = selectProperties_;
