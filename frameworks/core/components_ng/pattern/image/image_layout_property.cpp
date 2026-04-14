@@ -19,6 +19,38 @@
 
 namespace OHOS::Ace::NG {
 
+void ImageSizeStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
+    json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("autoResize", propAutoResize.value_or(false) ? "true" : "false", filter);
+}
+
+RefPtr<LayoutProperty> ImageLayoutProperty::Clone() const
+{
+    auto value = MakeRefPtr<ImageLayoutProperty>();
+    value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+    value->propImageSourceInfo_ = CloneImageSourceInfo();
+    value->propAlt_ = CloneAlt();
+    value->propImageFit_ = CloneImageFit();
+    value->propImageSizeStyle_ = CloneImageSizeStyle();
+    value->propVerticalAlign_ = CloneVerticalAlign();
+    return value;
+}
+
+void ImageLayoutProperty::Reset()
+{
+    LayoutProperty::Reset();
+    ResetImageSourceInfo();
+    ResetAlt();
+    ResetImageFit();
+    ResetImageSizeStyle();
+    ResetVerticalAlign();
+}
+
 void ImageLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);

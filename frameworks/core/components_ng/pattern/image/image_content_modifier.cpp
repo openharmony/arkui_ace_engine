@@ -84,4 +84,23 @@ ContentTransitionType ImageContentModifier::GetContentTransitionParam()
     CHECK_NULL_RETURN(pattern, ContentTransitionType::IDENTITY);
     return pattern->GetContentTransitionParam();
 }
+
+void ImageContentModifier::SetSensitive(bool sensitive)
+{
+    CHECK_NULL_VOID(sensitive_);
+    sensitive_->Set(sensitive);
+}
+
+void ImageContentModifier::SetSize(const SizeF& size)
+{
+    CHECK_NULL_VOID(size_);
+    size_->Set(size);
+}
+
+void ImageContentModifier::SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper)
+{
+    CHECK_NULL_VOID(canvasImageWrapper_);
+    canvasImageWrapper_->Set(wrapper);
+}
+
 } // namespace OHOS::Ace::NG

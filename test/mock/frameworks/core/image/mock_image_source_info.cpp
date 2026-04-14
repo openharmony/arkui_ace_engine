@@ -319,9 +319,29 @@ bool ImageSourceInfo::IsImageHdr() const
     return isHdr_;
 }
 
+void ImageSourceInfo::SetNeedCache(bool needCache)
+{
+    needCache_ = needCache;
+}
+
+void ImageSourceInfo::SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
+{
+    imageDfxConfig_ = imageDfxConfig;
+}
+
+NG::ImageDfxConfig ImageSourceInfo::GetImageDfxConfig() const
+{
+    return imageDfxConfig_;
+}
+
 bool ImageSourceInfo::SupportObjCache() const
 {
     return false;
+}
+
+bool ImageSourceInfo::IsSurportCachePixelmap() const
+{
+    return srcType_ == SrcType::NETWORK || srcType_ == SrcType::RESOURCE;
 }
 
 const std::string& ImageSourceInfo::GetBundleName() const
@@ -344,9 +364,44 @@ void ImageSourceInfo::SetModuleName(const std::string& moduleName)
     moduleName_ = moduleName;
 }
 
+void ImageSourceInfo::SetIsUriPureNumber(bool isUriPureNumber)
+{
+    isUriPureNumber_ = isUriPureNumber;
+}
+
+bool ImageSourceInfo::GetIsUriPureNumber() const
+{
+    return isUriPureNumber_;
+}
+
 void ImageSourceInfo::GenerateCacheKey() {}
 
 void ImageSourceInfo::UpdateLocalColorMode(ColorMode localColorMode) {}
+
+ColorMode ImageSourceInfo::GetLocalColorMode() const
+{
+    return localColorMode_;
+}
+
+bool ImageSourceInfo::IsFromReset() const
+{
+    return isFromReset_;
+}
+
+void ImageSourceInfo::SetIsFromReset(bool isFromReset)
+{
+    isFromReset_ = isFromReset;
+}
+
+void ImageSourceInfo::SetSupportSvg2(bool enable)
+{
+    supportSvg2_ = enable;
+}
+
+bool ImageSourceInfo::IsSupportSvg2() const
+{
+    return supportSvg2_;
+}
 
 ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
 {
