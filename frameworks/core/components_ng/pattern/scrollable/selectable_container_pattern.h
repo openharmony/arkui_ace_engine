@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SELECTABLE_CONTAINER_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SELECTABLE_CONTAINER_EVENT_HUB_H
 
+#include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -55,7 +56,71 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void MarkSelectedItems();
+    bool ShouldSelectScrollBeStopped();
+    void UpdateMouseStart(float offset);
+
+protected:
+    struct ItemSelectedStatus {
+        std::function<void(bool)> onSelected;
+        std::function<void(bool)> selectChangeEvent;
+        RectF rect;
+        bool selected = false;
+        void FireSelectChangeEvent(bool isSelected)
+        {
+            if (selected == isSelected) {
+                return;
+            }
+            selected = isSelected;
+            if (onSelected) {
+                onSelected(isSelected);
+            }
+            if (selectChangeEvent) {
+                selectChangeEvent(isSelected);
+            }
+        }
+    };
+    void InitMouseEvent();
+    void UninitMouseEvent();
+    void DrawSelectedZone(const RectF& selectedZone);
+    void ClearSelectedZone();
+    bool multiSelectable_ = false;
+    bool isMouseEventInit_ = false;
+    OffsetF mouseStartOffset_;
+    float selectScrollOffset_ = 0.0f;
+    float totalOffsetOfMousePressed_ = 0.0f;
+    std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
+
 private:
+    virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+    virtual void ClearMultiSelect() {};
+    virtual bool IsItemSelected(float offsetX, float offsetY)
+    {
+        return false;
+    }
+    void ClearInvisibleItemsSelectedStatus();
+    void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd();
+    void SelectWithScroll();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    float GetOutOfScrollableOffset() const;
+    virtual float GetOffsetWithLimit(float offset) const;
+    void LimitMouseEndOffset();
+    void UpdateMouseStartOffset();
+
+    enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
+    SelectDirection selectDirection_ = SELECT_NONE;
+    bool mousePressed_ = false;
+    bool canMultiSelect_ = false;
+    OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
+    OffsetF lastMouseStart_;
+    GestureEvent lastMouseMove_;
+    RefPtr<SelectMotion> selectMotion_;
+    RefPtr<PanEvent> boxSelectPanEvent_;
+
     EditModeOptions editModeOptions_;
 };
 } // namespace OHOS::Ace::NG

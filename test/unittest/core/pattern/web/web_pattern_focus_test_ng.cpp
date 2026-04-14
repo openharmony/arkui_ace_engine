@@ -377,17 +377,6 @@ protected:
 
 private:
     void OnScrollEndCallback() override {};
-
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override {}
-    void ClearMultiSelect() override {}
-    bool IsItemSelected(float xOffset, float yOffset)
-    {
-        return false;
-    }
-    float GetOffsetWithLimit(float offset) const override
-    {
-        return 0.0f;
-    }
 };
 
 class WebPatternFocusTestNg : public testing::Test {
