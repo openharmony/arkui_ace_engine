@@ -16,6 +16,7 @@
 #include "compatible/components/swiper/rosen_render_swiper.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 namespace {
