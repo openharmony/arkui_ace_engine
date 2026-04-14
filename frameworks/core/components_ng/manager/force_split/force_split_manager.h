@@ -101,7 +101,7 @@ public:
         splitDividerColorDark_ = dark;
     }
  
-    std::pair<std::optional<Color>, std::optional<Color>> GetSplitDividerColor()
+    std::pair<std::optional<Color>, std::optional<Color>> GetSplitDividerColor() const
     {
         return { splitDividerColorLight_, splitDividerColorDark_ };
     }
@@ -128,12 +128,12 @@ public:
 
     void SetDialogSupportSplit(bool dialogSupportSplit)
     {
-        dialogSuppotSplit_ = dialogSupportSplit;
+        dialogSupportSplit_ = dialogSupportSplit;
     }
 
-    bool GetDialogSupportSplit()
+    bool GetDialogSupportSplit() const
     {
-        return dialogSuppotSplit_;
+        return dialogSupportSplit_;
     }
 
     void SetWideSplitRatio(const std::optional<float> ratio)
@@ -188,7 +188,7 @@ private:
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     bool isRouter_ = false;
-    bool dialogSuppotSplit_ = true;
+    bool dialogSupportSplit_ = true;
     std::unordered_set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
