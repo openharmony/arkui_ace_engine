@@ -15,7 +15,7 @@
 
 """
 Patch management script for applying and creating patches between directory trees.
-Uses git for cross-platform compatibility (Windows, macOS, Linux).
+Uses Python's standard difflib module — no external tools required.
 
 Patches are stored as individual .patch files, one per changed source file,
 organized in a directory structure that mirrors the source tree.
@@ -34,74 +34,175 @@ Commands:
     apply          Copy input directory to output and apply per-file patches.
     create-patch   Find differences between input and output directories and
                    save as per-file patches.
+
+Notes:
+    Files without a trailing newline are normalized to end with a newline
+    when patches are generated and applied. Binary files are skipped.
 """
 
 import argparse
+import difflib
 import os
+import re
 import shutil
-import subprocess
 import sys
-import tempfile
 
 
-def run_git(git_args, cwd=None, check=True):
-    """Run a git command and return the CompletedProcess."""
-    return subprocess.run(
-        ['git'] + git_args,
-        cwd=cwd,
-        check=check,
-        capture_output=True,
-        text=True,
-    )
+HUNK_HEADER_RE = re.compile(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
 
 
-def check_git_available():
-    """Verify that git is installed and accessible."""
+def list_relative_files(directory):
+    """Return a set of forward-slash relative paths of all files under directory."""
+    result = set()
+    for root, _dirs, fnames in os.walk(directory):
+        for fname in fnames:
+            abs_path = os.path.join(root, fname)
+            rel = os.path.relpath(abs_path, directory).replace(os.sep, '/')
+            result.add(rel)
+    return result
+
+
+def read_text_lines(path):
+    """Read file as text lines, preserving newlines. Returns None for binary files.
+
+    Ensures the last line ends with '\\n' so that generated diffs are well-formed
+    even for files that were missing a trailing newline.
+    """
     try:
-        subprocess.run(
-            ['git', '--version'],
-            capture_output=True,
-            check=True,
-        )
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        with open(path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except UnicodeDecodeError:
+        return None
+    if lines and not lines[-1].endswith('\n'):
+        lines[-1] = lines[-1] + '\n'
+    return lines
+
+
+def files_equal(path_a, path_b):
+    """Byte-compare two files."""
+    try:
+        with open(path_a, 'rb') as fa, open(path_b, 'rb') as fb:
+            while True:
+                ba = fa.read(65536)
+                bb = fb.read(65536)
+                if ba != bb:
+                    return False
+                if not ba:
+                    return True
+    except IOError:
         return False
-
-
-def find_rej_files(directory):
-    """Find all .rej files under a directory, returning relative paths."""
-    rej_files = []
-    for root, dirs, files in os.walk(directory):
-        for f in files:
-            if f.endswith('.rej'):
-                rel = os.path.relpath(os.path.join(root, f), directory)
-                rej_files.append(str(rel).replace('\\', '/'))
-    return sorted(rej_files)
 
 
 def collect_patch_files(patch_dir):
     """Collect all .patch files in a directory, returning (rel_path, abs_path) pairs."""
     patch_abs = os.path.abspath(patch_dir)
     patch_files = []
-    for root, dirs, files in os.walk(patch_abs):
+    for root, _dirs, files in os.walk(patch_abs):
         for f in files:
             if f.endswith('.patch'):
                 abs_path = os.path.join(root, f)
-                rel = os.path.relpath(abs_path, patch_abs)
+                rel = os.path.relpath(abs_path, patch_abs).replace(os.sep, '/')
                 patch_files.append((rel, abs_path))
     return sorted(patch_files)
 
 
-def is_deletion_patch(patch_path):
-    """Check if a patch file represents a file deletion (targets /dev/null)."""
-    try:
-        with open(patch_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.startswith('+++ /dev/null'):
-                    return True
-    except (IOError, UnicodeDecodeError):
-        pass
-    return False
+def parse_patch(patch_text):
+    """Parse a unified diff. Returns dict with from_file, to_file, hunks."""
+    lines = patch_text.splitlines(keepends=True)
+    from_file = None
+    to_file = None
+    hunks = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith('--- '):
+            from_file = line[4:].rstrip('\r\n').split('\t', 1)[0]
+            i += 1
+            continue
+        if line.startswith('+++ '):
+            to_file = line[4:].rstrip('\r\n').split('\t', 1)[0]
+            i += 1
+            continue
+        m = HUNK_HEADER_RE.match(line)
+        if m:
+            hunk = {
+                'old_start': int(m.group(1)),
+                'old_count': int(m.group(2)) if m.group(2) is not None else 1,
+                'new_start': int(m.group(3)),
+                'new_count': int(m.group(4)) if m.group(4) is not None else 1,
+                'lines': [],
+            }
+            i += 1
+            while i < len(lines):
+                hl = lines[i]
+                if hl.startswith('@@') or hl.startswith('--- ') or hl.startswith('+++ '):
+                    break
+                if hl and hl[0] in ' +-\\':
+                    hunk['lines'].append(hl)
+                    i += 1
+                    continue
+                break
+            hunks.append(hunk)
+            continue
+        i += 1
+    return {'from_file': from_file, 'to_file': to_file, 'hunks': hunks}
+
+
+def lines_match(source_line, patch_line):
+    """Return True if a source line matches a patch context/removed line."""
+    if source_line == patch_line:
+        return True
+    return source_line.rstrip('\r\n') == patch_line.rstrip('\r\n')
+
+
+def apply_hunks_to_lines(source_lines, hunks):
+    """Apply hunks to source lines. Returns new lines list, or None on failure."""
+    result = []
+    src_idx = 0  # 0-based index into source_lines
+
+    for hunk in hunks:
+        if hunk['old_count'] == 0:
+            # Pure insertion. With "@@ -X,0 +..." insert before source index X
+            # (i.e., after 1-based line X). For new files, X is 0.
+            target_idx = hunk['old_start']
+        else:
+            target_idx = hunk['old_start'] - 1
+
+        if target_idx < src_idx or target_idx > len(source_lines):
+            return None
+
+        result.extend(source_lines[src_idx:target_idx])
+        src_idx = target_idx
+
+        for hl in hunk['lines']:
+            if not hl:
+                continue
+            tag = hl[0]
+            if tag == '\\':
+                # "\ No newline at end of file" — strip trailing newline
+                # from the most recently emitted line if present.
+                if result and result[-1].endswith('\n'):
+                    result[-1] = result[-1].rstrip('\r\n')
+                continue
+            content = hl[1:]
+            if tag == ' ':
+                if src_idx >= len(source_lines):
+                    return None
+                if not lines_match(source_lines[src_idx], content):
+                    return None
+                result.append(source_lines[src_idx])
+                src_idx += 1
+            elif tag == '-':
+                if src_idx >= len(source_lines):
+                    return None
+                if not lines_match(source_lines[src_idx], content):
+                    return None
+                src_idx += 1
+            elif tag == '+':
+                result.append(content)
+
+    result.extend(source_lines[src_idx:])
+    return result
 
 
 def format_create_patch_cmd(input_abs, output_abs, patch_abs):
@@ -123,10 +224,6 @@ def apply_patch(input_path, output_path, patch_dir):
     The directory structure mirrors the source tree with '.patch' appended
     to filenames.
 
-    If a patch does not apply cleanly, falls back to ``git apply --reject``
-    which applies as many hunks as possible and writes rejected hunks to
-    ``.rej`` files alongside the affected files.
-
     Args:
         input_path: Source directory to copy from.
         output_path: Destination directory to copy to and apply patches in.
@@ -147,15 +244,12 @@ def apply_patch(input_path, output_path, patch_dir):
         print(f"Error: Patch directory does not exist: {patch_abs}")
         return False
 
-    # Collect all .patch files in the patch directory
     patch_files = collect_patch_files(patch_abs)
 
-    # Remove output directory if it exists
     if os.path.exists(output_abs):
         print(f"Removing existing output directory: {output_abs}")
         shutil.rmtree(output_abs)
 
-    # Copy input to output
     print(f"Copying {input_abs} -> {output_abs}")
     shutil.copytree(input_abs, output_abs)
 
@@ -163,21 +257,96 @@ def apply_patch(input_path, output_path, patch_dir):
         print("No patch files found. Output is a copy of input without changes.")
         return True
 
-    # Apply each patch file individually
     failed = []
-    for rel_path, abs_path in sorted(patch_files):
-        if os.path.getsize(abs_path) == 0:
-            print(f"Skipping empty patch: {rel_path}")
+    missing_in_source = []
+    delete_conflicts = []
+
+    for rel_patch, abs_patch in patch_files:
+        if os.path.getsize(abs_patch) == 0:
+            print(f"Skipping empty patch: {rel_patch}")
             continue
 
-        print(f"Applying patch: {rel_path}")
+        print(f"Applying patch: {rel_patch}")
+
         try:
-            run_git(['apply', '-p1', abs_path], cwd=output_abs)
-        except subprocess.CalledProcessError:
-            # Clean apply failed — attempt partial apply with .rej files
-            print("  Clean apply failed. Attempting partial apply with conflict markers...")
-            run_git(['apply', '-p1', '--reject', abs_path], cwd=output_abs, check=False)
-            failed.append(rel_path)
+            with open(abs_patch, 'r', encoding='utf-8') as f:
+                patch_text = f.read()
+        except (IOError, UnicodeDecodeError) as exc:
+            print(f"  Failed to read patch: {exc}")
+            failed.append(rel_patch)
+            continue
+
+        parsed = parse_patch(patch_text)
+        from_file = parsed['from_file']
+        to_file = parsed['to_file']
+        hunks = parsed['hunks']
+
+        if not rel_patch.endswith('.patch'):
+            print(f"  Skipping non-patch file: {rel_patch}")
+            continue
+
+        source_rel = rel_patch[:-len('.patch')]
+        source_abs = os.path.join(output_abs, source_rel)
+
+        is_new = (from_file == '/dev/null')
+        is_delete = (to_file == '/dev/null')
+
+        if is_delete:
+            if not os.path.isfile(source_abs):
+                print("  Conflict: target file to delete does not exist")
+                delete_conflicts.append(source_rel)
+                failed.append(rel_patch)
+                continue
+            if not files_equal_to_patch_source(source_abs, hunks):
+                print("  Conflict: file changed in source, cannot cleanly delete")
+                delete_conflicts.append(source_rel)
+                failed.append(rel_patch)
+                continue
+            os.remove(source_abs)
+            continue
+
+        if is_new:
+            if os.path.isfile(source_abs):
+                print("  Conflict: file already exists for new-file patch")
+                failed.append(rel_patch)
+                continue
+            new_lines = []
+            for hunk in hunks:
+                for hl in hunk['lines']:
+                    if not hl:
+                        continue
+                    if hl[0] == '+':
+                        new_lines.append(hl[1:])
+                    elif hl[0] == '\\':
+                        if new_lines and new_lines[-1].endswith('\n'):
+                            new_lines[-1] = new_lines[-1].rstrip('\r\n')
+            parent = os.path.dirname(source_abs)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            with open(source_abs, 'w', encoding='utf-8') as f:
+                f.writelines(new_lines)
+            continue
+
+        if not os.path.isfile(source_abs):
+            print("  Conflict: source file missing for modification patch")
+            missing_in_source.append(source_rel)
+            failed.append(rel_patch)
+            continue
+
+        source_lines = read_text_lines(source_abs)
+        if source_lines is None:
+            print("  Failed to read source: not a text file")
+            failed.append(rel_patch)
+            continue
+
+        new_lines = apply_hunks_to_lines(source_lines, hunks)
+        if new_lines is None:
+            print("  Failed to apply patch (context mismatch)")
+            failed.append(rel_patch)
+            continue
+
+        with open(source_abs, 'w', encoding='utf-8') as f:
+            f.writelines(new_lines)
 
     if not failed:
         print("All patches applied successfully.")
@@ -189,22 +358,6 @@ def apply_patch(input_path, output_path, patch_dir):
         print(f"    {format_create_patch_cmd(input_abs, output_abs, patch_abs)}")
         print()
         return True
-
-    # Detect structural conflicts that don't produce .rej files
-    missing_in_source = []    # patch modifies file deleted in source
-    delete_conflicts = []     # patch deletes file changed in source
-    for rel_path in failed:
-        patch_file_abs = os.path.join(patch_abs, rel_path)
-        source_rel = rel_path[:-6]  # strip '.patch' suffix
-        source_abs = os.path.join(output_abs, source_rel)
-        if is_deletion_patch(patch_file_abs):
-            if os.path.isfile(source_abs):
-                delete_conflicts.append(source_rel)
-        else:
-            if not os.path.isfile(source_abs):
-                missing_in_source.append(source_rel)
-
-    rej_files = find_rej_files(output_abs)
 
     print()
     print(f"Failed to apply {len(failed)} patch(es):")
@@ -223,21 +376,12 @@ def apply_patch(input_path, output_path, patch_dir):
         for f in delete_conflicts:
             print(f"  {f}")
 
-    if rej_files:
-        print()
-        print(f"Rejected hunks saved in {len(rej_files)} .rej file(s):")
-        for f in rej_files:
-            print(f"  {f}")
-
     print()
     print("Partial changes (if any) have been written to the output directory.")
-    print("Rejected hunks are saved in corresponding .rej files.")
     print()
     print("To resolve conflicts:")
-    print("  1. Review the .rej files in the output directory and manually")
-    print("     apply the rejected changes to the corresponding source files.")
-    print("  2. Delete all .rej files after resolving.")
-    print("  3. Regenerate patches with the resolved output:")
+    print("  1. Manually edit the affected files in the output directory.")
+    print("  2. Regenerate patches with the resolved output:")
     print()
     print(f"    {format_create_patch_cmd(input_abs, output_abs, patch_abs)}")
     print()
@@ -245,15 +389,33 @@ def apply_patch(input_path, output_path, patch_dir):
     return False
 
 
+def files_equal_to_patch_source(source_abs, hunks):
+    """Verify the source file matches the '-' / context lines of a deletion patch."""
+    source_lines = read_text_lines(source_abs)
+    if source_lines is None:
+        return False
+    expected = []
+    for hunk in hunks:
+        for hl in hunk['lines']:
+            if not hl:
+                continue
+            tag = hl[0]
+            if tag in (' ', '-'):
+                expected.append(hl[1:])
+    if len(expected) != len(source_lines):
+        return False
+    for src, exp in zip(source_lines, expected):
+        if not lines_match(src, exp):
+            return False
+    return True
+
+
 def create_patch(input_path, output_path, patch_dir):
     """Find differences between input and output and save as per-file patches.
 
-    Uses a temporary git repository to produce reliable unified diffs that
-    capture file additions, modifications, and deletions.
-
-    Each changed file gets its own ``.patch`` file in the patch directory,
-    mirroring the source directory structure with ``.patch`` appended to the
-    filename.
+    Uses ``difflib.unified_diff`` to produce standard unified diffs. Each changed
+    file gets its own ``.patch`` file in the patch directory, mirroring the
+    source directory structure with ``.patch`` appended to the filename.
 
     Args:
         input_path: Original (unmodified) directory.
@@ -275,71 +437,72 @@ def create_patch(input_path, output_path, patch_dir):
         print(f"Error: Output directory does not exist: {output_abs}")
         return False
 
-    # Clean and recreate patch directory
     if os.path.exists(patch_abs):
         shutil.rmtree(patch_abs)
     os.makedirs(patch_abs, exist_ok=True)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Initialize a bare git repo for diffing purposes
-        print("Creating temporary git repository for diff...")
-        run_git(['init'], cwd=tmpdir)
-        run_git(['config', 'user.email', 'patch@tool.local'], cwd=tmpdir)
-        run_git(['config', 'user.name', 'Patch Tool'], cwd=tmpdir)
+    input_files = list_relative_files(input_abs)
+    output_files = list_relative_files(output_abs)
+    all_files = sorted(input_files | output_files)
 
-        # Copy input files as the base commit
-        print(f"Staging input files from {input_abs}")
-        shutil.copytree(input_abs, tmpdir, dirs_exist_ok=True)
-        run_git(['add', '-A'], cwd=tmpdir)
-        run_git(['commit', '-m', 'base'], cwd=tmpdir)
+    skipped_binary = []
+    changed = []
 
-        # Remove all tracked content (keep .git directory)
-        for item in os.listdir(tmpdir):
-            if item == '.git':
-                continue
-            item_path = os.path.join(tmpdir, item)
-            if os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-            else:
-                os.remove(item_path)
+    for rel in all_files:
+        in_input = rel in input_files
+        in_output = rel in output_files
+        in_path = os.path.join(input_abs, rel) if in_input else None
+        out_path = os.path.join(output_abs, rel) if in_output else None
 
-        # Copy output files as the modified state
-        print(f"Staging output files from {output_abs}")
-        shutil.copytree(output_abs, tmpdir, dirs_exist_ok=True)
-        run_git(['add', '-A'], cwd=tmpdir)
+        if in_input and in_output and files_equal(in_path, out_path):
+            continue
 
-        # Get list of changed files
-        name_result = run_git(['diff', '--cached', '--name-only', 'HEAD'], cwd=tmpdir)
-        changed_files = [f for f in name_result.stdout.strip().split('\n') if f]
+        from_lines = read_text_lines(in_path) if in_input else []
+        to_lines = read_text_lines(out_path) if in_output else []
 
-        if not changed_files:
-            print(f"No differences found. Empty patch directory at {patch_abs}")
-            return True
+        if from_lines is None or to_lines is None:
+            skipped_binary.append(rel)
+            continue
 
-        # Generate per-file patches
-        print(f"Generating patches for {len(changed_files)} file(s)...")
-        for file_path in changed_files:
-            result = run_git(['diff', '--cached', 'HEAD', '--', file_path], cwd=tmpdir)
-            patch_file = os.path.join(patch_abs, file_path + '.patch')
-            patch_subdir = os.path.dirname(patch_file)
-            if patch_subdir:
-                os.makedirs(patch_subdir, exist_ok=True)
-            with open(patch_file, 'w', encoding='utf-8') as f:
-                f.write(result.stdout)
+        from_label = 'a/' + rel if in_input else '/dev/null'
+        to_label = 'b/' + rel if in_output else '/dev/null'
 
-        print(f"Patches saved to {patch_abs}")
-        for file_path in sorted(changed_files):
-            print(f"  {file_path}.patch")
+        diff = list(difflib.unified_diff(
+            from_lines, to_lines,
+            fromfile=from_label, tofile=to_label,
+        ))
+        if not diff:
+            continue
 
+        patch_text = ''.join(diff)
+        if not patch_text.endswith('\n'):
+            patch_text += '\n'
+
+        patch_file = os.path.join(patch_abs, rel + '.patch')
+        parent = os.path.dirname(patch_file)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        with open(patch_file, 'w', encoding='utf-8') as f:
+            f.write(patch_text)
+        changed.append(rel)
+
+    if skipped_binary:
+        print(f"Skipped {len(skipped_binary)} binary file(s):")
+        for f in skipped_binary:
+            print(f"  {f}")
+
+    if not changed:
+        print(f"No textual differences found. Empty patch directory at {patch_abs}")
+        return True
+
+    print(f"Generated patches for {len(changed)} file(s):")
+    for rel in changed:
+        print(f"  {rel}.patch")
+    print(f"Patches saved to {patch_abs}")
     return True
 
 
 def main():
-    if not check_git_available():
-        print("Error: git is required but not found in PATH.")
-        print("Please install git and ensure it is accessible from the command line.")
-        return 1
-
     parser = argparse.ArgumentParser(
         description='Apply or create per-file patches between directory trees',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -347,45 +510,29 @@ def main():
 
     subparsers = parser.add_subparsers(dest='command', required=True)
 
-    # apply subcommand
     apply_parser = subparsers.add_parser(
         'apply',
         help='Copy input directory to output and apply per-file patches',
     )
-    apply_parser.add_argument(
-        '--input', required=True,
-        help='Source directory to copy from',
-    )
-    apply_parser.add_argument(
-        '--output', required=True,
-        help='Destination directory to copy to and apply patches in',
-    )
-    apply_parser.add_argument(
-        '--patch', required=True,
-        help='Directory containing per-file patches',
-    )
-    apply_parser.add_argument(
-        '--stamp',
-        help='Create an empty stamp file at this path on success',
-    )
+    apply_parser.add_argument('--input', required=True,
+                              help='Source directory to copy from')
+    apply_parser.add_argument('--output', required=True,
+                              help='Destination directory to copy to and apply patches in')
+    apply_parser.add_argument('--patch', required=True,
+                              help='Directory containing per-file patches')
+    apply_parser.add_argument('--stamp',
+                              help='Create an empty stamp file at this path on success')
 
-    # create-patch subcommand
     create_parser = subparsers.add_parser(
         'create-patch',
         help='Create per-file patches from differences between two directories',
     )
-    create_parser.add_argument(
-        '--input', required=True,
-        help='Original (unmodified) directory',
-    )
-    create_parser.add_argument(
-        '--output', required=True,
-        help='Modified directory',
-    )
-    create_parser.add_argument(
-        '--patch', required=True,
-        help='Directory to save per-file patches into',
-    )
+    create_parser.add_argument('--input', required=True,
+                               help='Original (unmodified) directory')
+    create_parser.add_argument('--output', required=True,
+                               help='Modified directory')
+    create_parser.add_argument('--patch', required=True,
+                               help='Directory to save per-file patches into')
 
     args = parser.parse_args()
 
@@ -396,7 +543,7 @@ def main():
             stamp_dir = os.path.dirname(stamp_abs)
             if stamp_dir:
                 os.makedirs(stamp_dir, exist_ok=True)
-            with open(stamp_abs, 'w') as f:
+            with open(stamp_abs, 'w'):
                 pass
     elif args.command == 'create-patch':
         success = create_patch(args.input, args.output, args.patch)

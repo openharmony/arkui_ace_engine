@@ -32,6 +32,7 @@ Ignore format (relative paths from source directory):
 """
 
 import argparse
+import difflib
 import json
 import shutil
 import glob
@@ -175,6 +176,37 @@ def copy_modifier_files(src_dir, dst_dir, include_list, ignore_list):
 
     return True
 
+def log_file_diff(src, dst):
+    """Print unified diff between src (from) and dst (to) files."""
+    try:
+        src_lines = src.read_text(encoding='utf-8').splitlines(keepends=True)
+    except OSError as e:
+        print(f"  Diff: failed to read source {src}: {e}")
+        return
+
+    if not dst.exists():
+        print(f"  Diff for {src.name}: destination does not exist, {len(src_lines)} new lines")
+        return
+
+    try:
+        dst_lines = dst.read_text(encoding='utf-8').splitlines(keepends=True)
+    except OSError as e:
+        print(f"  Diff: failed to read destination {dst}: {e}")
+        return
+
+    diff = list(difflib.unified_diff(
+        dst_lines, src_lines,
+        fromfile=f"to/{dst}", tofile=f"from/{src}",
+    ))
+    if not diff:
+        print(f"  Diff for {src.name}: no changes")
+        return
+
+    print(f"  Diff for {src.name} (from -> to):")
+    for line in diff:
+        print(line.rstrip('\n'))
+
+
 def copy_native_files(out_dir, config_dir, native_list):
     """
     Copy native (C/C++) files from generator output to ace_engine tree.
@@ -192,6 +224,9 @@ def copy_native_files(out_dir, config_dir, native_list):
         if not src.exists():
             print(f"  Skipped (not found): {entry['from']}")
             continue
+
+        if src.name == 'arkoala_api_generated.h':
+            log_file_diff(src, dst)
 
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
