@@ -237,7 +237,7 @@ public:
 
     RectT Constrain(const RectT& other) const
     {
-        RectT rect(other);
+        RectT rect(*this);
         rect.ConstrainInplace(other);
         return rect;
     }
