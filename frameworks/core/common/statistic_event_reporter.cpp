@@ -154,6 +154,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "CLICK_AI_MENU", "ASK_CELIA" };
         case StatisticEventType::NAVIGATION_HOME_DESTINATION:
             return { "NAVIGATION", "HOME_DESTINATION" };
+        case StatisticEventType::SHEETPAGE_ATTACH_ERR:
+            return { "SHEETPAGE", "ATTACH_ERR" };
         default:
             return { "", "" };
     }
