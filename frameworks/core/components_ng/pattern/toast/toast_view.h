@@ -34,6 +34,7 @@ private:
         const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft,
         const std::optional<Color>& textColor);
     static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
+    static void SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo);
 };
 } // namespace OHOS::Ace::NG
 
