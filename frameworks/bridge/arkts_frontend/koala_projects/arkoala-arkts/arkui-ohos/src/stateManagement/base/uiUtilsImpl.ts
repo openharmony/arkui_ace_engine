@@ -174,7 +174,7 @@ export class UIUtilsImpl {
         return value;
     }
 
-    public makeObserved<T>(value: T): T {
+    public makeObserved<T extends Object>(value: T): T {
         if (!value || typeof value !== 'object') {
             return value as T;
         }
@@ -201,7 +201,7 @@ export class UIUtilsImpl {
         return value instanceof Array || value instanceof Map || value instanceof Set || value instanceof Date;
     }
 
-    public getTarget<T>(source: T): T {
+    public getTarget<T extends Object>(source: T): T {
         if (!source || typeof source !== 'object') {
             return source;
         }

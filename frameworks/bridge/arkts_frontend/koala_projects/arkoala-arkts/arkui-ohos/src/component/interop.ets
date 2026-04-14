@@ -322,8 +322,8 @@ export function registerCreateWatchFuncCallback(): void {
 }
 
 export function registerCreateStaticObservedCallback(): void {
-    const makeObservedcallback = (value: Object): Object => {
-        return uiUtils.makeV1Observed(value) as Object;
+    const makeObservedcallback = (value: Any): Any => {
+        return uiUtils.makeV1Observed(value);
     }
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
@@ -554,9 +554,6 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
                 if (handler instanceof InteropBuilderLiteralProxyHandler) {
                     state = handler!.state;
                 }
-            } else if (args instanceof InteropTransferMutableBinding || args instanceof InteropTransferBinding) {
-                state = GlobalStateManager.instance.mutableState<int32>(0, true);
-                args.interopAddState(state);
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
@@ -1150,7 +1147,7 @@ export function staticStateBindObservedObject<T>(
         ESValue.wrap(value),
         ESValue.wrap(onPropertyChange),
         ESValue.wrap(onTrackPropertyRead),
-        ESValue.wrap(onTrackPropertyChange)) as Object as T;
+        ESValue.wrap(onTrackPropertyChange)) as T;
 }
 
 function registerLocalStorageSetProxy(): void {
