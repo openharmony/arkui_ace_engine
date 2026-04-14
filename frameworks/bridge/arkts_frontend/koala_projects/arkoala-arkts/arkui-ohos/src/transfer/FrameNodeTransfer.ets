@@ -91,53 +91,53 @@ export class TransFrameNode extends FrameNode {
         return true;
     }
     public getRenderNode(): RenderNode | null {
-        const error = Error('frameNode created by transferStatic not support getRenderNode');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support getRenderNode');
+        throw new BusinessError(100031, error);
     }
     public getCustomProperty(name: string): CustomProperty {
-        const error = Error('frameNode created by transferStatic not support getCustomProperty');
+        const error = Error('FrameNode created by transferStatic not support getCustomProperty');
 
-        throw new BusinessError(100021, error);
+        throw new BusinessError(100031, error);
     }
     get commonAttribute(): CommonMethod {
-        const error = Error('frameNode created by transferStatic not support commonAttribute');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support commonAttribute');
+        throw new BusinessError(100031, error);
     }
     get commonEvent(): UICommonEvent {
-        const error = Error('frameNode created by transferStatic not support commonEvent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support commonEvent');
+        throw new BusinessError(100031, error);
     }
     get gestureEvent(): UIGestureEvent {
-        const error = Error('frameNode created by transferStatic not support gestureEvent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support gestureEvent');
+        throw new BusinessError(100031, error);
     }
     public setMeasuredSize(size: Size): void {
-        const error = Error('frameNode created by transferStatic not support setMeasuredSize');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setMeasuredSize');
+        throw new BusinessError(100031, error);
     }
     public setLayoutPosition(position: Position): void {
-        const error = Error('frameNode created by transferStatic not support setLayoutPosition');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setLayoutPosition');
+        throw new BusinessError(100031, error);
     }
     public measure(constraint: LayoutConstraint): void {
-        const error = Error('frameNode created by transferStatic not support measure');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support measure');
+        throw new BusinessError(100031, error);
     }
     public layout(position: Position): void {
-        const error = Error('frameNode created by transferStatic not support layout');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support layout');
+        throw new BusinessError(100031, error);
     }
     public setNeedsLayout(): void {
-        const error = Error('frameNode created by transferStatic not support setNeedsLayout');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setNeedsLayout');
+        throw new BusinessError(100031, error);
     }
     public invalidate(): void {
-        const error = Error('frameNode created by transferStatic not support invalidate');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support invalidate');
+        throw new BusinessError(100031, error);
     }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
-        const error = Error('frameNode created by transferStatic not support addComponentContent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support addComponentContent');
+        throw new BusinessError(100031, error);
     }
     final onDraw(context: DrawContext): void {}
     final onMeasure(constraint: LayoutConstraint): void {

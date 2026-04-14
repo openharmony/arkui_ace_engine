@@ -116,6 +116,11 @@ class ComponentContentCommonBase extends Content {
     let jsBuilderNode = JSBuilderNode.createForTrans(uiContext, nodePtr, frameNodePtr);
     this.builderNode_ = new BuilderNode(uiContext, {}, jsBuilderNode);
   }
+
+  protected createReactiveBuilderNode(uiContext: UIContext, nodePtr: number, frameNodePtr: number): void {
+    let jsBuilderNode = JSBuilderNode.createForTrans(uiContext, nodePtr, frameNodePtr);
+    this.builderNode_ = new ReactiveBuilderNode(uiContext, {}, jsBuilderNode);
+  }
 }
 
 class ComponentContent extends ComponentContentCommonBase {
@@ -133,9 +138,12 @@ class ComponentContent extends ComponentContentCommonBase {
 class ReactiveComponentContent extends ComponentContentCommonBase {
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, options?: BuildOptions, ...params: Object[]) {
     super();
-    let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
-    this.builderNode_ = reactiveBuilderNode;
-    this.builderNode_.build(builder, options, ...params);
+    this.instanceId_ = uiContext.instanceId_;
+    if (this.isTransferred() === false) {
+      let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
+      this.builderNode_ = reactiveBuilderNode;
+      this.builderNode_.build(builder, options, ...params);
+    }
   }
   public flushState(): void {
     if (this.builderNode_ instanceof ReactiveBuilderNode) {
