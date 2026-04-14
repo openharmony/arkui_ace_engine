@@ -428,8 +428,7 @@ public:
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
     int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end);
     void ReportCommandExecution(int32_t nodeId, const std::string& command);
     void ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position);
     void ReportRichEditorRequestKeyboardEvent(int32_t nodeId);
@@ -1421,6 +1420,7 @@ private:
     std::optional<float> lastCaretPos_ = std::nullopt;
     std::unordered_set<int32_t> touchedFingers_;
     bool isSingleLineMode_ = false;
+    std::string lastReportSelectionText_ = "";
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

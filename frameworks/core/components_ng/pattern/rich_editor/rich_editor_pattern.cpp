@@ -1464,11 +1464,13 @@ void RichEditorPattern::ReportCommandExecution(int32_t nodeId, const std::string
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
-void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str,
-    const std::string& value, int32_t start, int32_t end)
+void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end)
 {
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
+    std::string value = selectOverlay_->GetSelectedText();
+    CHECK_NULL_VOID(lastReportSelectionText_ != value);
+    lastReportSelectionText_ = value;
     eventObj->Put("event", str.c_str());
     eventObj->Put("value", value.c_str());
     eventObj->Put("start", start);
@@ -1523,7 +1525,7 @@ bool RichEditorPattern::HandleSetCaretPositionCommand(int32_t position, int32_t 
     SetCaretPosition(position);
     MoveCaretToContentRect();
     ReportCaretPositionChangeEvent(hostId, position);
-    ReportSelectionChangeEvent(hostId, "selectionChange", "", position, position);
+    ReportSelectionChangeEvent(hostId, "selectionChange", position, position);
     return true;
 }
 
@@ -3640,8 +3642,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleSingleClick");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info));
-    CHECK_NULL_VOID(!HandleUrlSpanClickEvent(info));
+    CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info) && !HandleUrlSpanClickEvent(info));
 
     bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
     auto localOffset = info.GetLocalLocation();
@@ -3649,7 +3650,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
  
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
-
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->HideMenu());
         return;
@@ -3680,6 +3680,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
             IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true, info.GetSourceDevice());
         }
+        lastReportSelectionText_ = "";
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(localOffset);
@@ -4537,8 +4538,7 @@ void RichEditorPattern::HandleDoubleClickEditLogic(GestureEvent& info, int32_t s
     RequestKeyboard(false, true, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto value = selectOverlay_->GetSelectedText();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", value, selectStart, selectEnd);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::StartVibratorByLongPress()
@@ -4607,10 +4607,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
             }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
     }
     MarkContentNodeForRender();
-    std::u16string selectTextContent;
-    GetContentBySpans(selectTextContent);
-    std::string selectData = StringUtils::Str16ToStr8(selectTextContent);
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, 0, textSize);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, textSize);
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -7704,6 +7701,9 @@ void RichEditorPattern::HandleOnSelectAll()
     MoveCaretToContentRect();
     IF_TRUE(IsSelected(), StopTwinkling());
     MarkContentNodeForRender();
+    auto host = GetHost();
+ 	CHECK_NULL_VOID(host);
+ 	ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, newPos);
 }
 
 int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
@@ -7817,9 +7817,17 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     auto action = keyEvent.action;
     bool isShiftPressed = hasKeyShift &&
         (action == KeyAction::DOWN || action == KeyAction::UP || action == KeyAction::CANCEL);
+    bool shiftOldFlag = shiftFlag_;
     if (isShiftPressed != shiftFlag_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
         shiftFlag_ = isShiftPressed;
+        if (shiftOldFlag && !shiftFlag_) {
+            auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+            auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
+        }
     }
 }
 
@@ -8546,8 +8554,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::string selectData = selectOverlay_->GetSelectedText();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchCancelAfterLongPress()
@@ -8848,6 +8855,9 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     if (selectStart != selectEnd && isMousePressed_ && oldMouseStatus == MouseStatus::MOVE) {
         FireOnSelect(selectStart, selectEnd);
+        auto host = GetHost();
+ 	    CHECK_NULL_VOID(host);
+ 	    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
     }
     StopAutoScroll();
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
@@ -10359,8 +10369,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        std::string selectData = selectOverlay_->GetSelectedText();
-        ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, start, end);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", start, end);
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     MoveCaretToContentRect();
