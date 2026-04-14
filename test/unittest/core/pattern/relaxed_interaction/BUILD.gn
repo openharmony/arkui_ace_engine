@@ -32,4 +32,8 @@ ace_unittest("relaxed_interaction_manager_test_ng") {
   } else {
     sources += [ "relaxed_interaction_manager_test_core.cpp" ]
   }
+
+  external_deps = [
+    "hilog:libhilog"
+  ]
 }
