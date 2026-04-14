@@ -137,7 +137,7 @@ action("runner_gen_code") {
   ]
 }
 
-if (!build_ohos_sdk) {
+if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
   config("idlize_gen_config") {
     include_dirs = [
       "$idlize_gen_bridges_output_path",
@@ -175,7 +175,7 @@ if (!build_ohos_sdk) {
 
 source_set("idlize_gen") {
   public_deps = [ ":idlize_install" ]
-  if (!build_ohos_sdk) {
+  if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
     public_configs = [ ":idlize_gen_config" ]
   }
 }
