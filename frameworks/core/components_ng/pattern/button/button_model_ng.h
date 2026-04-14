@@ -19,7 +19,10 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/button/button_model.h"
-#include "core/components/button/button_theme.h"
+
+namespace OHOS::Ace {
+class ButtonTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class ButtonConfiguration : public CommonConfiguration {

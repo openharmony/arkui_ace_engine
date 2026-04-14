@@ -15,9 +15,11 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components/theme/shadow_theme.h"

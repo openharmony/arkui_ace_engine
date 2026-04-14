@@ -29,9 +29,9 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
+class OverlayManager;
 enum class TouchingBoundaryType {
     NotTouchBoundary = 0,
     TouchBottomBoundary,

@@ -19,7 +19,7 @@
 #include <string>
 
 #include "base/memory/referenced.h"
-#include "core/components/dialog/dialog_theme.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {

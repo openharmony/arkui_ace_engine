@@ -22,8 +22,10 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/render/node_paint_method.h"
+
+namespace OHOS::Ace::NG {
+class Pattern;
+}
 
 namespace OHOS::Ace::NG {
 class SelectOverlayModifier : public OverlayModifier {

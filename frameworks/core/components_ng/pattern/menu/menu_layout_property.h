@@ -19,14 +19,13 @@
 #include <string>
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class FrameNode;
 
 enum class SubMenuExpandingMode { SIDE, EMBEDDED, STACK };
 

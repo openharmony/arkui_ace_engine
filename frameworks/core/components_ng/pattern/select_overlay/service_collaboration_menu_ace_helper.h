@@ -20,7 +20,6 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
-#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
 
 enum ServiceCollaborationCode {

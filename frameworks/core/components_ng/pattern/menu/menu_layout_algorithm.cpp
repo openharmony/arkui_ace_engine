@@ -17,6 +17,8 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"

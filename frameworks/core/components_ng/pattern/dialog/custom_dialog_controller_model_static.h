@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_STATIC_H
 
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "base/thread/task_executor.h"
+
 namespace OHOS::Ace::NG {
+class OverlayManager;
+class UINode;
+
 class ACE_EXPORT CustomDialogControllerModelStatic {
 public:
     static void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,

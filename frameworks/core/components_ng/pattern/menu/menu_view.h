@@ -18,14 +18,20 @@
 
 #include <string>
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/menu_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
+namespace OHOS::Ace {
+class PipelineContext;
+}
+
 namespace OHOS::Ace::NG {
+class FrameNode;
+class MenuPreviewPattern;
+class MenuWrapperPattern;
+class RenderContext;
+class UINode;
 
 class TextLayoutProperty;
 
