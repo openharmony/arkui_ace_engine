@@ -17,11 +17,13 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+using ::OHOS::Ace::PickerDate;
 namespace CalendarPickerDialogAccessor {
 void BuildDialogPropertiesCallbacks(const Ark_CalendarDialogOptions options, DialogProperties& dialogProps)
 {

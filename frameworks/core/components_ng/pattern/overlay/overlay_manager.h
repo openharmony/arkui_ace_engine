@@ -33,13 +33,11 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -49,6 +47,7 @@
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
+struct CalendarSettingData;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,

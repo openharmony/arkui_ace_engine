@@ -22,12 +22,14 @@
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 
 namespace OHOS::Ace::NG {
+using ::OHOS::Ace::PickerDate;
 class ButtonLayoutProperty;
 class TextLayoutProperty;
 class PipelineContext;
+struct CalendarSettingData;
 
 class ACE_EXPORT CalendarDialogView {
 public:
