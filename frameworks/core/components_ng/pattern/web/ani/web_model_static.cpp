@@ -475,6 +475,18 @@ void WebModelStatic::SetKeyboardAvoidMode(FrameNode* frameNode, const std::optio
     }
 }
 
+void WebModelStatic::SetKeyboardAppearance(FrameNode* frameNode, const std::optional<WebKeyboardAppearanceMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (mode) {
+        webPatternStatic->UpdateKeyboardAppearanceMode(mode.value());
+    } else {
+        webPatternStatic->ResetKeyboardAppearanceMode();
+    }
+}
+
 void WebModelStatic::SetAudioResumeInterval(FrameNode* frameNode, const std::optional<int32_t>& resumeInterval)
 {
     CHECK_NULL_VOID(frameNode);

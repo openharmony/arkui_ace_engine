@@ -1411,6 +1411,18 @@ void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardA
 }
 
 template<>
+void AssignCast(std::optional<WebKeyboardAppearanceMode>& dst, const Ark_WebKeyboardAppearanceMode& src)
+{
+    switch (src) {
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_NONE_IMMERSIVE: dst = WebKeyboardAppearanceMode::NONE_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_IMMERSIVE: dst = WebKeyboardAppearanceMode::IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_LIGHT_IMMERSIVE: dst = WebKeyboardAppearanceMode::LIGHT_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_DARK_IMMERSIVE: dst = WebKeyboardAppearanceMode::DARK_IMMERSIVE; break;
+        default: LOGE("Unexpected enum value in Ark_WebKeyboardAppearanceMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src)
 {
     switch (src) {

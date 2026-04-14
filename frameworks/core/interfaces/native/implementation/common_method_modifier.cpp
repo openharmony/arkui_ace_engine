@@ -6030,6 +6030,9 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
                 [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender) {
                     LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrBrightnessBlender");
                 },
+                [frameNode](const Ark_uiEffect_HdrDarkenBlender& blender) {
+                    LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrDarkenBlender");
+                },
                 [frameNode]() {
                     ViewAbstractModelStatic::SetBlendMode(frameNode, BlendMode::NONE);
                     ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
@@ -7013,6 +7016,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemBarEffectImpl,
         CommonMethodModifier::SetUseEffect1Impl,
         CommonMethodModifier::SetBackdropBlurImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
@@ -7038,7 +7042,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
-        CommonMethodModifier::SetOnAreaChange1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

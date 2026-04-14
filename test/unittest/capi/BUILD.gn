@@ -238,6 +238,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   deps = [
     ":capi_qrcode_dep",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "../../../frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen"
   ]
 
   external_deps = [

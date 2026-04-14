@@ -1475,11 +1475,26 @@ void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
     webPattern->UpdateKeyboardAvoidMode(mode);
 }
 
+void WebModelNG::SetKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAppearanceMode(mode);
+}
+
 void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnabledHapticFeedback(isEnabled);
+}
+
+void WebModelNG::SetKeyboardAppearanceMode(FrameNode* frameNode, const WebKeyboardAppearanceMode& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAppearanceMode(mode);
 }
 
 void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)

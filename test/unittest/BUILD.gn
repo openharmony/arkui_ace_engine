@@ -1701,7 +1701,9 @@ ohos_source_set("ace_components_pattern") {
     ]
   }
 
-  deps = []
+  deps = [
+    "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
+  ]
   external_deps = [
     "bounds_checking_function:libsec_static",
     "hilog:libhilog",

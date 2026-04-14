@@ -2470,6 +2470,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
+    JSClass<JSWeb>::StaticMethod("keyboardAppearance", &JSWeb::KeyboardAppearance);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
@@ -7322,6 +7323,17 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
     }
     WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
     WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
+}
+
+void JSWeb::KeyboardAppearance(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAppearanceMode::NONE_IMMERSIVE) ||
+        mode > static_cast<int32_t>(WebKeyboardAppearanceMode::DARK_IMMERSIVE)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAppearance param err");
+        return;
+    }
+    WebKeyboardAppearanceMode appearanceMode = static_cast<WebKeyboardAppearanceMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAppearanceMode(appearanceMode);
 }
 
 void JSWeb::EditMenuOptions(const JSCallbackInfo& info)

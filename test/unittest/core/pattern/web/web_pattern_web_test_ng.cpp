@@ -1689,4 +1689,28 @@ HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate, TestSize.Level1)
     EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
 #endif
 }
+
+/**
+ * @tc.name: OnKeyboardAppearanceModeUpdate
+ * @tc.desc: OnKeyboardAppearanceModeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnKeyboardAppearanceModeUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->OnKeyboardAppearanceModeUpdate(WebKeyboardAppearanceMode::DARK_IMMERSIVE);
+#endif
+}
 } // namespace OHOS::Ace::NG

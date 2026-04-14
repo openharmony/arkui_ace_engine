@@ -4714,6 +4714,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInputMethodAttached));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInputMethodAttached"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInputMethodAttached));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyboardAppearance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetKeyboardAppearance));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAppearance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetKeyboardAppearance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

@@ -224,6 +224,7 @@ public:
     static void OnAdsBlocked(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
+    static void KeyboardAppearance(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);

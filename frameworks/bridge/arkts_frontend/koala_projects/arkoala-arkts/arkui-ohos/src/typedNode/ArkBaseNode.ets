@@ -14,7 +14,7 @@
  */
 
 import { ComponentBase } from "./../ComponentBase";
-import { AccessibilityCallback, AccessibilityRoleType, AlignRuleOption, AnimatableArithmetic, AnimateParam, AttributeModifier } from '../component/common';
+import { AccessibilityCallback, AccessibilityRoleType, AlignRuleOption, AnimatableArithmetic, AnimateParam, AttributeModifier, AreaChangeCallback, AreaChangeOptions } from '../component/common';
 import { Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType } from '../component/common';
 import { BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions } from '../component/common';
 import { ContextMenuOptions, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo } from '../component/common';
@@ -701,6 +701,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        return this
+    }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        this.getPeer().setOnAreaChange1Attribute(event, options);
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {

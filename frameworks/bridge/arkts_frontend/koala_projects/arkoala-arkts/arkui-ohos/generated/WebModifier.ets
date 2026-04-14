@@ -20,7 +20,7 @@ import { CommonMethodModifier } from './CommonMethodModifier'
 import { AttributeModifier } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, AISessionEvent, ScrollbarLayoutPolicy, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt, ScrollDirectionalLockType, OnInputmethodAttachedCallback } from './component/web'
+import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnVerifyPinCallback, VerifyPinEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, OnOverrideErrorPageCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, WebRotateEffect, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, OnFirstScreenPaintCallback, FirstScreenPaint, TextSelectionChangeCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, AISessionEvent, ScrollbarLayoutPolicy, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt, ScrollDirectionalLockType, OnInputmethodAttachedCallback, WebKeyboardAppearanceMode } from './component/web'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions } from './component/common'
@@ -194,6 +194,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     public _enableDrag_0_0value?: boolean | undefined
     public _aiSessionOptions_0_0value?: Array<AISessionEvent> | undefined
     public _scrollbarLayoutPolicy_0_0value?: ScrollbarLayoutPolicy | undefined
+    public _keyboardAppearance_0_0value?: WebKeyboardAppearanceMode | undefined
     public _registerNativeEmbedRule_0_0value?: string | undefined
     public _registerNativeEmbedRule_0_1value?: string | undefined
     public _bindSelectionMenu_0_0value?: WebElementType | undefined
@@ -2816,6 +2817,23 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (flagArray[152] != 0) {
+            switch (flagArray[152]) {
+                case 1: {
+                    peer.setKeyboardAppearanceAttribute((this._keyboardAppearance_0_0value as WebKeyboardAppearanceMode | undefined));
+                    flagArray[152] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[152] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[152] = 0;
+                    peer.setKeyboardAppearanceAttribute((undefined as WebKeyboardAppearanceMode | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: WebModifier): void {
         super.mergeModifier(modifier)
@@ -4669,6 +4687,18 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (flagArray[152] != 0) {
+            switch (flagArray[152]) {
+                case 1:
+                case 3: {
+                    this.keyboardAppearance((modifier._keyboardAppearance_0_0value as WebKeyboardAppearanceMode | undefined));
+                    break;
+                }
+                default: {
+                    this.keyboardAppearance((undefined as WebKeyboardAppearanceMode | undefined));
+                }
+            }
+        }
     }
     javaScriptAccess(value: boolean | undefined): this {
         if (((this._flagArray[0]) == (0)) || ((this._javaScriptAccess_0_0value) !== (value))) {
@@ -6195,6 +6225,16 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
+    keyboardAppearance(value: WebKeyboardAppearanceMode | undefined): this {
+        if (((this._flagArray[152]) == (0)) || (true)) {
+            this._flagArray[152] = 1
+            this._keyboardAppearance_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[152] = 3
+        }
+        return this
+    }    
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Not implemented')
     }

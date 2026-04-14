@@ -2506,6 +2506,20 @@ void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEv
     }
 #endif // WEB_SUPPORTED
 }
+
+void SetKeyboardAppearanceImpl(Ark_NativePointer node, const Opt_WebKeyboardAppearanceMode* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<WebKeyboardAppearanceMode>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetKeyboardAppearance(frameNode, convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -3297,10 +3311,11 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableDragImpl,
         WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
         WebAttributeModifier::SetAiSessionOptionsImpl,
+        WebAttributeModifier::SetKeyboardAppearanceImpl,
+        WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
-        WebAttributeModifier::SetOnInputmethodAttachedImpl,
     };
     return &ArkUIWebModifierImpl;
 }

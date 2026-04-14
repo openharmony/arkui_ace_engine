@@ -338,6 +338,9 @@ template("declarative_js_engine_ark") {
       deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
                 "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics" ]
     }
+    deps += [
+      "../../../arkts_frontend/arkoala_generator:idlize_gen"
+    ]
     external_deps = [ 
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client"

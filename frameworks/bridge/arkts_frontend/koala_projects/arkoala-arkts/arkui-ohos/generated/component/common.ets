@@ -5619,6 +5619,19 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBackdropBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(event)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSharedTransitionAttribute(id: string | undefined, options?: sharedTransitionOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (id !== undefined) {
@@ -6289,19 +6302,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue = options!
-            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -10305,6 +10305,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method backdropBlur')
     }
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method onAreaChange')
+    }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10617,18 +10629,6 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
     }
-    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
-        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
-        if (commonStyle) {
-            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
-            return this;
-        } else {
-            if (this.__is_CustomComponent__Internal()) {
-                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
-            }
-        }
-        throw new Error('Unimplemented method onAreaChange')
-    }
     applyAttributesFinish(): void {
     }
 }
@@ -10731,6 +10731,10 @@ export interface RectResult {
     width: double;
     height: double;
 }
+export interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
+export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export interface CaretOffset {
     index: int32;
     x: int32;
@@ -10929,10 +10933,6 @@ export interface InputEventInterceptResult {
 export interface InputEventMonitor {
 }
 export type InputEventListener = (event: RawInputEventWrapper) => InputEventInterceptResult;
-export interface AreaChangeOptions {
-    expectedUpdateInterval?: int32;
-}
-export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -11926,6 +11926,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setBackdropBlurAttribute(radius_casted, options_casted, sysOptions_casted)
         return this
     }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const event_casted = event as (AreaChangeCallback)
+        const options_casted = options as (AreaChangeOptions | undefined)
+        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
+        return this
+    }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         const id_casted = id as (string | undefined)
         const options_casted = options as (sharedTransitionOptions | undefined)
@@ -12088,12 +12094,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
             return this
         }
-        return this
-    }
-    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
-        const event_casted = event as (AreaChangeCallback)
-        const options_casted = options as (AreaChangeOptions | undefined)
-        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
@@ -12337,9 +12337,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
-}
-export function postCardAction(component: Object, action: Object): void {
-    GlobalScope.postCardAction(component, action)
 }
 export function $r(value: string, params: Array<RecordData>): global_resource_Resource {
     return GlobalScope.$r(value, params)
@@ -27310,149 +27307,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
-export interface TouchEvent extends BaseEvent {
-    type: TouchType
-    touches: Array<TouchObject>
-    changedTouches: Array<TouchObject>
-    stopPropagation(): void
-    getHistoricalPoints(): Array<HistoricalPoint> | undefined
-    preventDefault(): void
-}
-export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
-    public type: TouchType
-    public touches: Array<TouchObject>
-    public changedTouches: Array<TouchObject>
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        super(tag, peerPtr)
-        this.type = this.getType()
-        this.touches = this.getTouches()
-        this.changedTouches = this.getChangedTouches()
-    }
-    constructor() {
-        this(MaterializedBaseTag.NOP, TouchEventInternal.construct())
-        this.type = this.getType()
-        this.touches = this.getTouches()
-        this.changedTouches = this.getChangedTouches()
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._TouchEvent_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): TouchEventInternal {
-        return new TouchEventInternal(MaterializedBaseTag.NOP, ptr)
-    }
-    public stopPropagation(): void {
-        this.stopPropagation_serialize()
-        return
-    }
-    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
-        return this.getHistoricalPoints_serialize()
-    }
-    public preventDefault(): void {
-        // instructive change start
-        ArkUIAniModule._TouchEvent_preventDefault(this!.peer!.ptr);
-        // instructive change end
-        return
-    }
-    private getType(): TouchType {
-        return this.getType_serialize()
-    }
-    private setType(type: TouchType): void {
-        const type_casted = type as (TouchType)
-        this.setType_serialize(type_casted)
-        return
-    }
-    private getTouches(): Array<TouchObject> {
-        return this.getTouches_serialize()
-    }
-    private setTouches(touches: Array<TouchObject>): void {
-        const touches_casted = touches as (Array<TouchObject>)
-        this.setTouches_serialize(touches_casted)
-        return
-    }
-    private getChangedTouches(): Array<TouchObject> {
-        return this.getChangedTouches_serialize()
-    }
-    private setChangedTouches(changedTouches: Array<TouchObject>): void {
-        const changedTouches_casted = changedTouches as (Array<TouchObject>)
-        this.setChangedTouches_serialize(changedTouches_casted)
-        return
-    }
-    private stopPropagation_serialize(): void {
-        ArkUIGeneratedNativeModule._TouchEvent_stopPropagation(this.peer!.ptr)
-    }
-    private getHistoricalPoints_serialize(): Array<HistoricalPoint> | undefined {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
-        let buffer: Array<HistoricalPoint> | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            const bufferOpt: Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferOptLength, (arg0: int32):HistoricalPoint => {
-            return HistoricalPoint_serializer.read(retvalDeserializer);
-        })
-            buffer = bufferOpt
-        }
-        const returnResult: Array<HistoricalPoint> | undefined = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private preventDefault_serialize(): void {
-        ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
-    }
-    private getType_serialize(): TouchType {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getType(this.peer!.ptr)
-        return TouchType.fromValue(retval)
-    }
-    private setType_serialize(type: TouchType): void {
-        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, type.valueOf())
-    }
-    private getTouches_serialize(): Array<TouchObject> {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength: int32 = retvalDeserializer.readInt32()
-        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(retvalDeserializer);
-        })
-        const returnResult: Array<TouchObject> = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private setTouches_serialize(touches: Array<TouchObject>): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.writeInt32((touches.length).toInt())
-        for (let touchesCounterI = 0; touchesCounterI < touches.length; touchesCounterI++) {
-            const touchesTmpElement: TouchObject = touches[touchesCounterI]
-            TouchObject_serializer.write(thisSerializer, touchesTmpElement)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getChangedTouches_serialize(): Array<TouchObject> {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength: int32 = retvalDeserializer.readInt32()
-        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(retvalDeserializer);
-        })
-        const returnResult: Array<TouchObject> = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private setChangedTouches_serialize(changedTouches: Array<TouchObject>): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.writeInt32((changedTouches.length).toInt())
-        for (let changedTouchesCounterI = 0; changedTouchesCounterI < changedTouches.length; changedTouchesCounterI++) {
-            const changedTouchesTmpElement: TouchObject = changedTouches[changedTouchesCounterI]
-            TouchObject_serializer.write(thisSerializer, changedTouchesTmpElement)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

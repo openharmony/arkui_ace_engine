@@ -33,6 +33,7 @@ constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
 constexpr WebKeyboardAvoidMode DEFAULT_KEYBOARD_AVOID_MODE = WebKeyboardAvoidMode::RESIZE_VISUAL;
+constexpr WebKeyboardAppearanceMode DEFAULT_KEYBOARD_APPEARANCE_MODE = WebKeyboardAppearanceMode::NONE_IMMERSIVE;
 constexpr bool DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
@@ -247,6 +248,25 @@ void ResetKeyboardAvoidMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOARD_AVOID_MODE);
+}
+
+void SetKeyboardAppearance(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value < static_cast<int32_t>(WebKeyboardAppearanceMode::NONE_IMMERSIVE) ||
+    value > static_cast<int32_t>(WebKeyboardAppearanceMode::DARK_IMMERSIVE)) {
+    TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAppearance param err");
+    return;
+    }
+    WebModelNG::SetKeyboardAppearanceMode(frameNode, WebKeyboardAppearanceMode(value));
+}
+
+void ResetKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetKeyboardAppearanceMode(frameNode, DEFAULT_KEYBOARD_APPEARANCE_MODE);
 }
 
 void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
@@ -2765,6 +2785,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
         .setKeyboardAvoidMode = SetKeyboardAvoidMode,
         .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setKeyboardAppearance = SetKeyboardAppearance,
+        .resetKeyboardAppearance = ResetKeyboardAppearance,
         .setOnControllerAttached = SetOnControllerAttached,
         .resetOnControllerAttached = ResetOnControllerAttached,
         .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,
@@ -3026,6 +3048,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
         .setKeyboardAvoidMode = SetKeyboardAvoidMode,
         .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setKeyboardAppearance = SetKeyboardAppearance,
+        .resetKeyboardAppearance = ResetKeyboardAppearance,
         .setOnControllerAttached = SetOnControllerAttached,
         .resetOnControllerAttached = ResetOnControllerAttached,
         .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,

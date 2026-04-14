@@ -1466,6 +1466,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode);
+
     std::string GetCurrentLanguage();
     void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
         std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,

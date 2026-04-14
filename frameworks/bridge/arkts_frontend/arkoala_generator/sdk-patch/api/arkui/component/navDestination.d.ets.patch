@@ -1,0 +1,28 @@
+diff --git a/api/arkui/component/navDestination.d.ets b/api/arkui/component/navDestination.d.ets
+index 5c91580..1bfe5a9 100644
+--- a/api/arkui/component/navDestination.d.ets
++++ b/api/arkui/component/navDestination.d.ets
+@@ -445,6 +445,13 @@ export declare interface NavDestinationTransition {
+     event: VoidCallback;
+ }
+ 
++// instructive change start
++export declare interface NavDestinationModuleInfo {
++    moduleName: string;
++    pagePath: string;
++}
++// instructive change end
++
+ /**
+  * The attribute function of NavDestination
+  *
+@@ -454,6 +461,9 @@ export declare interface NavDestinationTransition {
+  * @noninterop
+  */
+ export declare interface NavDestinationAttribute extends CommonMethod {
++    // instructive change start
++    setNavDestinationOptions(moduleInfo: NavDestinationModuleInfo | undefined): this;
++    // instructive change end
+     /**
+      * NavDestination title bar
+      *

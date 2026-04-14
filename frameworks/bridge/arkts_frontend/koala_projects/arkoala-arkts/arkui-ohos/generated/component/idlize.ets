@@ -22,7 +22,7 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
@@ -2917,11 +2917,11 @@ export class FrameNodeExtender {
         return retval
     }
     private static getFrameNodeById_serialize(id: number): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById0(id)
         return retval
     }
     private static getFrameNodeByUniqueId_serialize(id: int32): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId0(id)
         return retval
     }
     private static reuse_serialize(peer: FrameNode): void {
@@ -3087,7 +3087,7 @@ export class FrameNodeExtender {
             const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
             thisSerializer.writePointer(ptrsTmpElement)
         }
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodesByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodeByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -3106,7 +3106,7 @@ export class FrameNodeExtender {
             const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
             thisSerializer.writePointer(ptrsTmpElement)
         }
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdsByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()

@@ -1,0 +1,32 @@
+diff --git a/api/arkui/component/common.d.ets b/api/arkui/component/common.d.ets
+index a34cbc0..3e76922 100644
+--- a/api/arkui/component/common.d.ets
++++ b/api/arkui/component/common.d.ets
+@@ -4921,17 +4921,6 @@ export declare interface TouchObject {
+      * @since 24
+      */
+     globalDisplayY?: double;
+-
+- 	/**
+- 	 * Gets the coordinates of the top-left corner of the current component based on its real-time position.
+- 	 *
+- 	 * @returns { Coordinate2D } - return the coordinates of the top-left corner of the current component based on its
+- 	 * real-time position.
+- 	 * @syscap SystemCapability.ArkUI.ArkUI.Full
+- 	 * @stagemodelonly
+- 	 * @since 26.0.0
+- 	 */
+- 	default getCurrentLocalPosition(): Coordinate2D;
+ }
+ /**
+  * TouchObject getHistoricalPoints Function Parameters
+@@ -12108,7 +12097,8 @@ export declare interface CommonMethod {
+      * @stagemodelonly
+      * @since 26.0.0
+      */
+-    default spatialEffect(params: SpatialEffectParams | undefined): this;
++    // not implemented in arkui
++    // default spatialEffect(params: SpatialEffectParams | undefined): this;
+ 
+     /**
+      * Applies a pixel stretch effect to the component.
