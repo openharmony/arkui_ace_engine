@@ -6618,6 +6618,27 @@ void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
     ExecuteUITask(std::move(task), "ArkUISetXComponentDisplayConstraintEnabled");
 }
 
+void UIContentImpl::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RegisterTouchTimingCallback(std::move(callback));
+}
+
+void UIContentImpl::UnregisterTouchTimingCallback()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->UnregisterTouchTimingCallback();
+}
+
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,

@@ -7935,6 +7935,19 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
     return recycleManager_;
 }
 
+void PipelineContext::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->RegisterTouchTimingCallback(std::move(callback));
+}
+void PipelineContext::UnregisterTouchTimingCallback()
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->UnregisterTouchTimingCallback();
+}
+
 void PipelineContext::ProcessCommand(const std::string& command)
 {
 #ifdef RELAXED_INTERACTION_SUPPORT

@@ -660,6 +660,11 @@ public:
         return nullptr;
     }
 
+    virtual void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) {};
+    virtual void UnregisterTouchTimingCallback() {};
+
 private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;

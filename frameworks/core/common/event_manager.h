@@ -477,6 +477,16 @@ public:
     void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
     void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
     void NotifyTouchpadInteraction();
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback)
+    {
+        touchTimingCallback_ = std::move(callback);
+    }
+    void UnregisterTouchTimingCallback()
+    {
+        touchTimingCallback_ = nullptr;
+    }
     void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
     void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
 
@@ -613,6 +623,8 @@ private:
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
     std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
+    std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>
+        touchTimingCallback_;
 #ifdef RELAXED_INTERACTION_SUPPORT
     RefPtr<NG::RelaxedInteractionManager> relaxedInteractionManager_;
 #endif
