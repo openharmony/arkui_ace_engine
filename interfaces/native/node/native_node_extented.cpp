@@ -1972,8 +1972,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* glyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
+    CHECK_NULL_RETURN(glyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
     ArkUI_Boundary* actualCharRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
+    CHECK_NULL_RETURN(actualCharRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(actualCharRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1996,8 +1998,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* charRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
+    CHECK_NULL_RETURN(charRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
     ArkUI_Boundary* actualGlyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
+    CHECK_NULL_RETURN(actualGlyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(actualGlyphRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
