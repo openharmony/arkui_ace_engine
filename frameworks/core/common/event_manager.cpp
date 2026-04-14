@@ -565,7 +565,9 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
     auto currentReferee = refereeNG_;
     auto key = eventHandleId / EVENT_HANDLE;
     if (isNewReferee) {
-        if (postEventRefereeWithStrategyNG_.find(key) == postEventRefereeWithStrategyNG_.end()) {
+        auto iter = postEventRefereeWithStrategyNG_.find(key);
+        if (iter == postEventRefereeWithStrategyNG_.end() || (iter != postEventRefereeWithStrategyNG_.end() &&
+            !postEventRefereeWithStrategyNG_[key])) {
             auto gestureReferee = AceType::MakeRefPtr<NG::GestureReferee>();
             postEventRefereeWithStrategyNG_[key] = gestureReferee;
         }
@@ -1210,10 +1212,26 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
                     isRefereeEmpty = false;
                 }
             }
-            auto key = point.eventHandleId / EVENT_HANDLE;
-            if (postEventRefereeWithStrategyNG_.find(key) != postEventRefereeWithStrategyNG_.end() && isRefereeEmpty) {
-                postEventRefereeWithStrategyNG_.erase(key);
+            if (isRefereeEmpty) {
+                EraseEventRefereeWithStrategy(point);
             }
+        }
+    }
+}
+
+void EventManager::EraseEventRefereeWithStrategy(const TouchEvent& point)
+{
+    auto key = point.eventHandleId / EVENT_HANDLE;
+    auto iter = postEventRefereeWithStrategyNG_.find(key);
+    if (iter == postEventRefereeWithStrategyNG_.end()) {
+        return;
+    }
+    auto currentReferee = iter->second;
+    for (auto it = postEventRefereeWithStrategyNG_.begin(); it != postEventRefereeWithStrategyNG_.end();) {
+        if (it->second == currentReferee) {
+            it = postEventRefereeWithStrategyNG_.erase(it);
+        } else {
+            ++it;
         }
     }
 }
