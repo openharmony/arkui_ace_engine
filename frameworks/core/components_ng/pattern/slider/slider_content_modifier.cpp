@@ -21,6 +21,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float COLOR_DEFAULT_MAX = 1.0f;
+constexpr float COLOR_HEAD_ROOM_DEFAULT_VALUE = 1.0f;
 constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
@@ -177,6 +179,60 @@ void SetStartEndPointLocation(Axis& direction, RSRect& trackRect, RSPoint& start
     }
 }
 
+RSColor4f GetHDRColor4fByHeadRoom(const ColorWithHeadRoom& colorWithHeadRoom)
+{
+    auto hr = colorWithHeadRoom.headRoom;
+    return GreatNotEqual(hr, COLOR_HEAD_ROOM_DEFAULT_VALUE) ?
+        RSColor4f {
+            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX) * hr),
+            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) } :
+        RSColor4f {
+            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX)),
+            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) };
+}
+
+void GetRSColorSpaceByGradientColors(
+    const std::vector<GradientColor>& gradientColors, std::shared_ptr<RSColorSpace>& rsColorSpace)
+{
+    ColorSpace colorSpaceType = gradientColors.empty() ?
+        ColorSpace::SRGB : gradientColors.back().GetColor().GetColorSpace();
+    RSCMSMatrixType matrixType;
+    switch (colorSpaceType) {
+        case ColorSpace::BT2020:
+            matrixType = RSCMSMatrixType::REC2020;
+            break;
+        case ColorSpace::DISPLAY_P3:
+        case ColorSpace::SRGB:
+        default:
+            matrixType = RSCMSMatrixType::SRGB;
+            break;
+    }
+    LOGD("GetRSColorSpaceByGradientColors, ColorSpace: %{public}d -> MatrixType: %{public}d",
+        colorSpaceType, matrixType);
+    rsColorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType);
+}
+
+void Get4FColorsByGradientColors(const std::vector<GradientColor>& gradientColors, std::vector<RSColor4f>& resultColors)
+{
+    resultColors.clear();
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        RSColor4f rsColor4f;
+        Color color = gradientColors[index].GetColor();
+        if (color.GetHeadRoomColor().has_value()) {
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            rsColor4f = GetHDRColor4fByHeadRoom(colorWithHeadRoom);
+        } else {
+            uint32_t colorValue = gradientColors[index].GetLinearColor().GetValue();
+            rsColor4f = RSColor(colorValue).GetColor4f();
+        }
+        resultColors.emplace_back(rsColor4f);
+    }
+}
+
 void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -187,10 +243,8 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     CHECK_NULL_VOID(theme);
     scaleValue_ = theme->GetFocusedScaleValue();
     std::vector<GradientColor> gradientColors = GetTrackBackgroundColor();
-    std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     if (sliderMode_->Get() != static_cast<int32_t>(SliderModel::SliderMode::INSET)) {
@@ -201,25 +255,25 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     RSPoint startPoint;
     RSPoint endPoint;
     SetStartEndPointLocation(direction, trackRect, startPoint, endPoint);
+
     RSBrush brush;
     brush.SetAntiAlias(true);
-    if (reverse_) {
+    std::vector<RSColor4f> colors;
+    std::shared_ptr<RSColorSpace> rsColorSpace = nullptr;
+    GetRSColorSpaceByGradientColors(gradientColors, rsColorSpace);
+    Get4FColorsByGradientColors(gradientColors, colors);
+    brush.SetShaderEffect(reverse_ ?
 #ifndef USE_ROSEN_DRAWING
-        brush.SetShaderEffect(
-            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+        RSShaderEffect::CreateLinearGradient(
+            endPoint, startPoint, colors, rsColorSpace, pos, RSTileMode::CLAMP) :
+        RSShaderEffect::CreateLinearGradient(
+            startPoint, endPoint, colors, rsColorSpace, pos, RSTileMode::CLAMP));
 #else
-        brush.SetShaderEffect(
-            RSRecordingShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+        RSRecordingShaderEffect::CreateLinearGradient(
+            endPoint, startPoint, colors, rsColorSpace, pos, RSTileMode::CLAMP) :
+        RSRecordingShaderEffect::CreateLinearGradient(
+            startPoint, endPoint, colors, rsColorSpace, pos, RSTileMode::CLAMP));
 #endif
-    } else {
-#ifndef USE_ROSEN_DRAWING
-        brush.SetShaderEffect(
-            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
-#else
-        brush.SetShaderEffect(
-            RSRecordingShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
-#endif
-    }
     canvas.AttachBrush(brush);
     auto trackRadius = isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius;
     RSRoundRect roundRect(trackRect, trackRadius, trackRadius);
