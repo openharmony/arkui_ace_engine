@@ -832,6 +832,9 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteAdapter001, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -849,6 +852,9 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult001, TestSize.Level2)
     auto replaceSpan = AceType::MakeRefPtr<SpanString>(u"xyz");
     replaceSpan->EncodeTlv(buffer);
 
+    /**
+     * @tc.steps: step2. HandleAIWriteResult
+     */
     pattern->HandleAIWriteResult(start, end, buffer);
     auto styled = pattern->ToStyledString(0, pattern->GetTextContentLength());
     ASSERT_NE(styled, nullptr);
