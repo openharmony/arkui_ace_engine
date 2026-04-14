@@ -21,6 +21,7 @@ ohos_unittest("security_component_test_ng") {
   sources = [
     "security_component_test_ng.cpp",
     "security_component_test_ng_extension.cpp",
+    "security_component_test_ng_supplement.cpp",
   ]
 
   deps = [
