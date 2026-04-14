@@ -468,6 +468,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
     JSClass<JSGrid>::StaticMethod("editModeOptions", &JSGrid::SetEditModeOptions);
+    JSClass<JSGrid>::StaticMethod("enableEditMode", &JSGrid::JsEnableEditMode, opt);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
@@ -567,6 +568,41 @@ void JSGrid::SetEditModeOptions(const JSCallbackInfo& info)
     NG::EditModeOptions options;
     JSScrollable::ParseEditModeOptions(info, options);
     GridModel::GetInstance()->SetEditModeOptions(options);
+}
+
+void JSGrid::JsEnableEditMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool enableEditMode = false;
+    JSRef<JSVal> changeEventVal;
+    auto enableVal = info[0];
+    if (enableVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(enableVal);
+        enableVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (enableVal->IsBoolean()) {
+        enableEditMode = enableVal->ToBoolean();
+    }
+    GridModel::GetInstance()->SetEnableEditMode(enableEditMode);
+
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.EnableEditModeChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
+    }
 }
 
 void JSGrid::SetMaxCount(const JSCallbackInfo& info)

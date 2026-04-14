@@ -35,6 +35,7 @@ using GetPreviewBadge = std::function<PreviewBadge()>;
 struct EditModeOptions {
     bool enableGatherSelectedItemsAnimation = false;
     GetPreviewBadge getPreviewBadge;
+    bool useDefaultMultiSelectStyle = true;
 };
 
 class SelectableContainerPattern : public ScrollablePattern {
@@ -60,7 +61,45 @@ public:
     bool ShouldSelectScrollBeStopped();
     void UpdateMouseStart(float offset);
 
+    void SetEnableEditMode(bool enable);
+    bool GetEnableEditMode() const;
+    void SetEnableEditModeChangeEvent(std::function<void(bool)>&& event)
+    {
+        enableEditModeChangeEvent_ = std::move(event);
+    }
+    void FireEnableEditModeChangeEvent(bool enable) const
+    {
+        if (enableEditModeChangeEvent_) {
+            enableEditModeChangeEvent_(enable);
+        }
+    }
+    bool IsDefaultMultiSelectStyleEnabled() const
+    {
+        return enableEditMode_ && editModeOptions_.useDefaultMultiSelectStyle;
+    }
+
+    void InitSwipeSelectEvent();
+    void UninitSwipeSelectEvent();
+    void HandleSwipeSelectStart(const GestureEvent& info);
+    void HandleSwipeSelectUpdate(const GestureEvent& info);
+    void HandleSwipeSelectEnd();
+    void HandleSwipeSelectCancel();
+    void UpdateSwipeSelection();
+
+    virtual int32_t GetItemAtPosition(float offsetX, float offsetY) const
+    {
+        return -1;
+    }
+
+    virtual void MarkSwipeItemSelected(int32_t index, bool isSelected) {}
+    void SwipeSelectAutoScroll(const PointF& globalPoint);
+    void StopSwipeSelectAutoScroll();
+
+    void ApplyEditModeToVisibleItems();
+    void RemoveEditModeFromItems();
+
 protected:
+    virtual void ApplyEditModeToCachedItems(bool enabled) {}
     struct ItemSelectedStatus {
         std::function<void(bool)> onSelected;
         std::function<void(bool)> selectChangeEvent;
@@ -90,6 +129,7 @@ protected:
     float selectScrollOffset_ = 0.0f;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
+    RefPtr<PanEvent> swipeSelectPanEvent_;
 
 private:
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -122,6 +162,13 @@ private:
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     EditModeOptions editModeOptions_;
+    bool enableEditMode_ = false;
+    std::function<void(bool)> enableEditModeChangeEvent_;
+    enum class SwipeSelectState { INACTIVE, SELECTING, DESELECTING };
+    SwipeSelectState swipeSelectState_ = SwipeSelectState::INACTIVE;
+    int32_t swipeStartIndex_ = -1;
+    int32_t swipeCurrentIndex_ = -1;
+    std::map<int32_t, bool> swipeOriginalStates_;
 };
 } // namespace OHOS::Ace::NG
 

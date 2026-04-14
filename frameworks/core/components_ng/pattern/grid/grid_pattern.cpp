@@ -170,6 +170,20 @@ void GridPattern::OnModifyDone()
         UninitMouseEvent();
     }
 
+    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+        InitSwipeSelectEvent();
+    }
+
+    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+
+    if (IsDefaultMultiSelectStyleEnabled()) {
+        ApplyEditModeToVisibleItems();
+    } else {
+        RemoveEditModeFromItems();
+    }
+
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
@@ -307,6 +321,24 @@ bool GridPattern::IsItemSelected(float offsetX, float offsetY)
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
     return itemPattern->IsSelected();
+}
+
+int32_t GridPattern::GetItemAtPosition(float offsetX, float offsetY) const
+{
+    return GetItemIndex(static_cast<double>(offsetX), static_cast<double>(offsetY));
+}
+
+void GridPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetChildByIndex(index);
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    itemPattern->MarkIsSelected(isSelected);
 }
 
 void GridPattern::FireOnScrollStart(bool withPerfMonitor)
@@ -1990,5 +2022,34 @@ void GridPattern::PostAsyncLoadTask()
             pattern->MarkDirtyNodeSelf();
         }
     });
+}
+
+void GridPattern::ApplyEditModeToCachedItems(bool enabled)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto startIdx = info_.startIndex_;
+    auto endIdx = info_.endIndex_;
+    for (int32_t idx = startIdx - 1; idx >= 0; --idx) {
+        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
+        if (!child) {
+            break;
+        }
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(enabled);
+        }
+    }
+    int32_t total = host->TotalChildCount();
+    for (int32_t idx = endIdx + 1; idx < total; ++idx) {
+        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
+        if (!child) {
+            break;
+        }
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(enabled);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

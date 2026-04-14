@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -296,6 +296,8 @@ public:
 
     int32_t GetFirstIndex() const override;
 
+    void ApplyEditModeToCachedItems(bool enabled) override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -319,6 +321,8 @@ private:
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
+    int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
 

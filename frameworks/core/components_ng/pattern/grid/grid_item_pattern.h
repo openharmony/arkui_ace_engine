@@ -35,9 +35,7 @@ class GridItemEventHub;
 class GridItemLayoutAlgorithm;
 class GridItemLayoutProperty;
 class InspectorFilter;
-class InputEvent;
 class ShallowBuilder;
-class TouchEventImpl;
 
 class ACE_EXPORT GridItemPattern : public SelectableItemPattern {
     DECLARE_ACE_TYPE(GridItemPattern, SelectableItemPattern);
@@ -65,6 +63,7 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
+        SelectableItemPattern::OnDirtyLayoutWrapperSwap(dirty, config);
         return false;
     }
 
@@ -80,16 +79,12 @@ public:
         return forceRebuild_;
     }
 
-    bool Selectable() const
-    {
-        return selectable_;
-    }
-
     FocusPattern GetFocusPattern() const override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void MarkIsSelected(bool isSelected);
+    void MarkIsSelectedWithoutCheckbox(bool isSelected) override;
 
     void SetIrregularItemInfo(GridItemIndexInfo info)
     {
@@ -170,12 +165,7 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
-    bool selectable_ = true;
 
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<TouchEventImpl> touchListener_;
-    bool isHover_ = false;
-    bool isPressed_ = false;
     bool isFocusBorderColorInitialized_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<GridItemIndexInfo> irregularItemInfo_;

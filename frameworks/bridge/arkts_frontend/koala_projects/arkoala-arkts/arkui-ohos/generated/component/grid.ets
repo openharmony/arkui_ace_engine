@@ -21,7 +21,7 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from './scroll'
 import { ItemFillPolicy_serializer, ItemFillPolicy, Length, Resource as arkui_component_units_Resource } from './units'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { NestedScrollOptions_serializer, EditModeOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { NestedScrollOptions_serializer, EditModeOptions_serializer, Bindable_Boolean_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, Bindable, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -476,6 +476,26 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setEditModeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableEditModeAttribute(value: boolean | Bindable<boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setEnableEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -683,6 +703,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     editModeOptions(value: EditModeOptions): this {
         throw new Error('Unimplemented method editModeOptions')
     }
+    enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        throw new Error('Unimplemented method enableEditMode')
+    }
     focusWrapMode(value: FocusWrapMode | undefined): this {
         throw new Error('Unimplemented method focusWrapMode')
     }
@@ -863,6 +886,11 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     public editModeOptions(value: EditModeOptions): this {
         const value_casted = value as (EditModeOptions)
         this.getPeer()?.setEditModeOptionsAttribute(value_casted)
+        return this
+    }
+    public enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        const value_casted = value as (boolean | Bindable<boolean> | undefined)
+        this.getPeer()?.setEnableEditModeAttribute(value_casted)
         return this
     }
     public focusWrapMode(value: FocusWrapMode | undefined): this {

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -35,7 +36,10 @@ void SelectableContainerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, c
     auto editModeOptionsJson = JsonUtil::Create(true);
     editModeOptionsJson->PutExtAttr("enableGatherSelectedItemsAnimation",
         editModeOptions_.enableGatherSelectedItemsAnimation ? "true" : "false", filter);
+    editModeOptionsJson->PutExtAttr("useDefaultMultiSelectStyle",
+        editModeOptions_.useDefaultMultiSelectStyle ? "true" : "false", filter);
     json->PutExtAttr("editModeOptions", editModeOptionsJson, filter);
+    json->PutExtAttr("enableEditMode", enableEditMode_ ? "true" : "false", filter);
 }
 
 void SelectableContainerPattern::UninitMouseEvent()
@@ -92,19 +96,25 @@ void SelectableContainerPattern::InitMouseEvent()
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
     gestureHub->SetExcludedAxisForPanEvent(true);
-    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
-        if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
-            gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
-            return GestureJudgeResult::REJECT;
-        }
-        return GestureJudgeResult::CONTINUE;
-    });
+    if (!swipeSelectPanEvent_) {
+        gestureHub->SetOnGestureJudgeNativeBegin(
+            [](const RefPtr<NG::GestureInfo>& gestureInfo,
+                const std::shared_ptr<BaseGestureEvent>& event) -> GestureJudgeResult {
+                if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+                    gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+                    return GestureJudgeResult::REJECT;
+                }
+                return GestureJudgeResult::CONTINUE;
+            });
+    }
     isMouseEventInit_ = true;
 }
 
 void SelectableContainerPattern::HandleDragStart(const GestureEvent& info)
 {
+    if (swipeSelectPanEvent_ && info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
@@ -127,6 +137,9 @@ void SelectableContainerPattern::HandleDragStart(const GestureEvent& info)
 
 void SelectableContainerPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    if (swipeSelectPanEvent_ && info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+        return;
+    }
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     if (!mousePressed_ || !canMultiSelect_) {
@@ -409,6 +422,261 @@ void SelectableContainerPattern::UpdateMouseStartOffset()
         selectScrollOffset_ = 0.0f;
     }
     UpdateSelectScrollVsync(currentVsync);
+}
+
+void SelectableContainerPattern::SetEnableEditMode(bool enable)
+{
+    bool changed = (enableEditMode_ != enable);
+    enableEditMode_ = enable;
+    if (changed) {
+        FireEnableEditModeChangeEvent(enable);
+    }
+}
+
+bool SelectableContainerPattern::GetEnableEditMode() const
+{
+    return enableEditMode_;
+}
+
+void SelectableContainerPattern::InitSwipeSelectEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (!swipeSelectPanEvent_) {
+        auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleSwipeSelectStart(info);
+        };
+
+        auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleSwipeSelectUpdate(info);
+        };
+
+        auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleSwipeSelectEnd();
+        };
+        GestureEventNoParameter actionCancelTask = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleSwipeSelectCancel();
+        };
+        swipeSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
+    }
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(swipeSelectPanEvent_, panDirection, 1, distanceMap);
+    if (isMouseEventInit_) {
+        gestureHub->SetOnGestureJudgeNativeBegin(nullptr);
+    }
+}
+
+void SelectableContainerPattern::UninitSwipeSelectEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (swipeSelectPanEvent_) {
+        gestureHub->RemovePanEvent(swipeSelectPanEvent_);
+        swipeSelectPanEvent_.Reset();
+    }
+    if (isMouseEventInit_) {
+        gestureHub->SetOnGestureJudgeNativeBegin(
+            [](const RefPtr<NG::GestureInfo>& gestureInfo,
+                const std::shared_ptr<BaseGestureEvent>& event) -> GestureJudgeResult {
+                if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+                    gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+                    return GestureJudgeResult::REJECT;
+                }
+                return GestureJudgeResult::CONTINUE;
+            });
+    }
+}
+
+void SelectableContainerPattern::HandleSwipeSelectStart(const GestureEvent& info)
+{
+    if (multiSelectable_ && info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Swipe select start");
+    swipeStartIndex_ = GetItemAtPosition(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    swipeCurrentIndex_ = swipeStartIndex_;
+    if (swipeStartIndex_ < 0) {
+        swipeSelectState_ = SwipeSelectState::INACTIVE;
+        return;
+    }
+    swipeOriginalStates_.clear();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetChildByIndex(swipeStartIndex_);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = frameNode->GetPattern<SelectableItemPattern>();
+    if (!itemPattern) {
+        swipeSelectState_ = SwipeSelectState::INACTIVE;
+        return;
+    }
+    if (itemPattern->Selectable() && itemPattern->IsSelected()) {
+        swipeSelectState_ = SwipeSelectState::DESELECTING;
+    } else {
+        swipeSelectState_ = SwipeSelectState::SELECTING;
+    }
+    if (itemPattern->Selectable()) {
+        swipeOriginalStates_[swipeStartIndex_] = itemPattern->IsSelected();
+        MarkSwipeItemSelected(swipeStartIndex_, swipeSelectState_ == SwipeSelectState::SELECTING);
+    }
+}
+
+void SelectableContainerPattern::HandleSwipeSelectUpdate(const GestureEvent& info)
+{
+    if (multiSelectable_ && info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        return;
+    }
+    if (swipeSelectState_ == SwipeSelectState::INACTIVE || swipeStartIndex_ < 0) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Swipe select update");
+
+    auto globalPoint = info.GetGlobalLocation();
+    SwipeSelectAutoScroll(PointF(static_cast<float>(globalPoint.GetX()), static_cast<float>(globalPoint.GetY())));
+
+    int32_t newIndex = GetItemAtPosition(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    if (newIndex < 0 || newIndex == swipeCurrentIndex_) {
+        return;
+    }
+    swipeCurrentIndex_ = newIndex;
+    if (swipeOriginalStates_.find(newIndex) == swipeOriginalStates_.end()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto node = host->GetChildByIndex(newIndex);
+        CHECK_NULL_VOID(node);
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode) {
+            auto itemPattern = frameNode->GetPattern<SelectableItemPattern>();
+            if (itemPattern && !itemPattern->Selectable()) {
+                return;
+            }
+            swipeOriginalStates_[newIndex] = itemPattern ? itemPattern->IsSelected() : false;
+        }
+    }
+    UpdateSwipeSelection();
+}
+
+void SelectableContainerPattern::HandleSwipeSelectEnd()
+{
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Swipe select end");
+    StopSwipeSelectAutoScroll();
+    swipeSelectState_ = SwipeSelectState::INACTIVE;
+    swipeOriginalStates_.clear();
+    swipeStartIndex_ = -1;
+    swipeCurrentIndex_ = -1;
+}
+
+void SelectableContainerPattern::HandleSwipeSelectCancel()
+{
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Swipe select cancel");
+    StopSwipeSelectAutoScroll();
+    for (const auto& [index, wasSelected] : swipeOriginalStates_) {
+        MarkSwipeItemSelected(index, wasSelected);
+    }
+    swipeSelectState_ = SwipeSelectState::INACTIVE;
+    swipeOriginalStates_.clear();
+    swipeStartIndex_ = -1;
+    swipeCurrentIndex_ = -1;
+}
+
+void SelectableContainerPattern::UpdateSwipeSelection()
+{
+    int32_t rangeStart = std::min(swipeStartIndex_, swipeCurrentIndex_);
+    int32_t rangeEnd = std::max(swipeStartIndex_, swipeCurrentIndex_);
+    bool isSelected = (swipeSelectState_ == SwipeSelectState::SELECTING);
+    auto host = GetHost();
+    for (int32_t index = rangeStart; index <= rangeEnd; ++index) {
+        if (swipeOriginalStates_.find(index) == swipeOriginalStates_.end() && host) {
+            auto node = host->GetChildByIndex(index);
+            auto frameNode = AceType::DynamicCast<FrameNode>(node);
+            CHECK_NULL_CONTINUE(frameNode);
+            auto itemPattern = frameNode->GetPattern<SelectableItemPattern>();
+            if (itemPattern && !itemPattern->Selectable()) {
+                continue;
+            }
+            swipeOriginalStates_[index] = itemPattern ? itemPattern->IsSelected() : false;
+        }
+        if (swipeOriginalStates_.find(index) != swipeOriginalStates_.end()) {
+            MarkSwipeItemSelected(index, isSelected);
+        }
+    }
+    for (const auto& [index, wasSelected] : swipeOriginalStates_) {
+        if (index < rangeStart || index > rangeEnd) {
+            MarkSwipeItemSelected(index, wasSelected);
+        }
+    }
+}
+
+void SelectableContainerPattern::SwipeSelectAutoScroll(const PointF& globalPoint)
+{
+    float offsetPct = IsInHotZone(globalPoint, true);
+    if (NearZero(offsetPct)) {
+        StopSwipeSelectAutoScroll();
+        return;
+    }
+    if (!GetScrollable() || !IsScrollable()) {
+        return;
+    }
+    SetHotZoneScrollCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->swipeSelectState_ == SwipeSelectState::INACTIVE) {
+            return;
+        }
+        pattern->UpdateSwipeSelection();
+    });
+    HotZoneScroll(offsetPct);
+}
+
+void SelectableContainerPattern::StopSwipeSelectAutoScroll()
+{
+    StopHotzoneScroll();
+    SetHotZoneScrollCallback(nullptr);
+}
+
+void SelectableContainerPattern::ApplyEditModeToVisibleItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(true);
+        }
+    }
+    ApplyEditModeToCachedItems(true);
+}
+
+void SelectableContainerPattern::RemoveEditModeFromItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(false);
+        }
+    }
+    ApplyEditModeToCachedItems(false);
 }
 
 } // namespace OHOS::Ace::NG

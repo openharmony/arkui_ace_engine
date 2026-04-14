@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,11 +138,6 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    bool Selectable() const
-    {
-        return selectable_;
-    }
-
     void SetSelectable(bool selectable)
     {
         selectable_ = selectable;
@@ -250,8 +245,6 @@ protected:
 
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
 
-    bool isHover_ = false;
-    bool isPressed_ = false;
     std::optional<double> enableOpacity_;
 
 private:
@@ -308,14 +301,8 @@ private:
     RefPtr<Animator> springController_;
     RefPtr<SpringMotion> springMotion_;
 
-    // selectable
-    bool selectable_ = true;
-
-    // drag sort
     RefPtr<ListItemDragManager> dragManager_;
 
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<TouchEventImpl> touchListener_;
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
