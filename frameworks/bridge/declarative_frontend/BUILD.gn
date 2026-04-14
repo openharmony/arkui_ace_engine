@@ -354,6 +354,7 @@ template("declarative_js_engine") {
       "jsview/js_content_slot.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_distortion_component.cpp",
+      "jsview/js_depth_component.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
@@ -666,7 +667,23 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+      external_deps += [
+        "graphic_3d:lib3dWidgetAdapter",
+      ]
+
+      if (!build_ohos_sdk) {
+        external_deps += [
+          "graphic_3d:AGPSceneApi",
+          "graphic_3d:AGPMetaApi",
+          "graphic_3d:AGPEcshelperApi",
+          "graphic_3d:AGPBaseApi",
+          "graphic_3d:AGPEngineApi",
+          "graphic_3d:AGP3DApi",
+          "graphic_3d:AGPRenderApi",
+          "graphic_2d:EGL",
+          "graphic_2d:GLESv3",
+        ]
+      }
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -884,6 +901,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_datepicker.cpp",
+      "jsview/js_depth_component.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
@@ -1116,7 +1134,23 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+      external_deps += [
+        "graphic_3d:lib3dWidgetAdapter",
+      ]
+
+      if (!build_ohos_sdk) {
+        external_deps += [
+          "graphic_3d:AGPSceneApi",
+          "graphic_3d:AGPMetaApi",
+          "graphic_3d:AGPEcshelperApi",
+          "graphic_3d:AGPBaseApi",
+          "graphic_3d:AGPEngineApi",
+          "graphic_3d:AGP3DApi",
+          "graphic_3d:AGPRenderApi",
+          "graphic_2d:EGL",
+          "graphic_2d:GLESv3",
+        ]
+      }
     }
 
     if (defined(config.use_build_in_js_engine) &&

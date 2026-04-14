@@ -4784,6 +4784,12 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment.STRETCH = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
+let DepthSpaceType;
+(function (DepthSpaceType) {
+  DepthSpaceType[DepthSpaceType.INSTANCE = 0] = 'INSTANCE';
+  DepthSpaceType[DepthSpaceType.GLOBAL = 1] = 'GLOBAL';
+})(DepthSpaceType || (DepthSpaceType = {}));
+
 let ContentClipMode;
 (function (ContentClipMode) {
   ContentClipMode[ContentClipMode.CONTENT_ONLY = 0] = 'CONTENT_ONLY';
