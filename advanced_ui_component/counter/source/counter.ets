@@ -219,8 +219,8 @@ export struct CounterComponent {
   @State hasFocusText1: boolean = false
   @State hasFocusText2: boolean = false
   @State hasFocusText3: boolean = false
-  @State subBtnFocusWidh: string = '0vp'
-  @State addBtnFocusWidh: string = '0vp'
+  @State subBtnFocusWidth: string = '0vp'
+  @State addBtnFocusWidth: string = '0vp'
   @State value: number = 0;
   @State year: number = 0;
   @State month: number = 0;
@@ -269,6 +269,17 @@ export struct CounterComponent {
     } else {
       return fontSize + 'vp';
     }
+  }
+
+  private getMeasuredTextWidth(): number {
+    let text = this.getValue();
+    let measureUtils = this.getUIContext().getMeasureUtils();
+    let widthPx = measureUtils.measureText({
+      textContent: text,
+      fontSize: this.getTextInputFontSize(),
+      fontWeight: FontWeight.Medium,
+    });
+    return px2vp(widthPx);
   }
 
   getDate(value: string | undefined): string {
@@ -591,6 +602,7 @@ export struct CounterComponent {
   }
 
   private subValue(): void {
+    this.validateInlineInput();
     if (this.subBtnStateEffect) {
       this.value -= this.step;
     }
@@ -628,7 +640,24 @@ export struct CounterComponent {
     }
   }
 
+  private validateInlineInput(): void {
+    if (this.type !== CounterType.INLINE) {
+      return;
+    }
+    if (!this.hasInputText1) {
+      return;
+    }
+    let num = Number(this.inputValue);
+    if (this.inputValue !== '' && !isNaN(num) && Number.isInteger(num) && num <= this.max && num >= this.min) {
+      this.value = num;
+    } else {
+      this.inputValue = this.value.toString();
+    }
+    this.hasInputText1 = false;
+  }
+
   private addValue(): void {
+    this.validateInlineInput();
     if (this.addBtnStateEffect) {
       this.value += this.step;
     }
@@ -1012,7 +1041,7 @@ export struct CounterComponent {
     this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
   }
 
-  private updateInlineEnableSate() {
+  private updateInlineEnableState() {
     if (this.value >= this.max) {
       this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
       this.addBtnStateEffect = false;
@@ -1033,7 +1062,7 @@ export struct CounterComponent {
     }
   }
 
-  private updateDateEnableSate() {
+  private updateDateEnableState() {
     if (this.year === this.maxYear && this.focusText === FocusText.TEXT1) {
       this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
       this.addBtnStateEffect = false;
@@ -1080,12 +1109,12 @@ export struct CounterComponent {
   }
 
   private resetFocusButton() {
-    if (this.addBtnFocusWidh === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
-      this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+    if (this.addBtnFocusWidth === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
       this.onBlurIncrease && this.onBlurIncrease();
     }
-    if (this.subBtnFocusWidh === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
-      this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+    if (this.subBtnFocusWidth === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
       this.onBlurDecrease && this.onBlurDecrease();
     }
   }
@@ -1144,10 +1173,6 @@ export struct CounterComponent {
       this.inputValue = ''
     }
     return this.hasInputText1 ? this.inputValue : this.value.toString();
-  }
-
-  private getValueLength() {
-    return this.getValue().length > 0 ? this.getValue().length : 1;
   }
 
   private getYear() {
@@ -1300,7 +1325,7 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .key('ListSubButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
@@ -1328,7 +1353,7 @@ export struct CounterComponent {
                 this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -1353,7 +1378,7 @@ export struct CounterComponent {
                       this.subValue();
                       this.onChange?.(this.value);
                     }
-                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     try {
@@ -1379,12 +1404,12 @@ export struct CounterComponent {
               })
               .focusable(this.focusEnable)
               .onFocus(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusDecrease && this.onFocusDecrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurDecrease && this.onBlurDecrease();
               })
           }
@@ -1392,7 +1417,7 @@ export struct CounterComponent {
           .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
-          .borderWidth(this.subBtnFocusWidh)
+          .borderWidth(this.subBtnFocusWidth)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .clip(true)
 
@@ -1450,7 +1475,7 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .key('ListAddButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
                 if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
@@ -1478,7 +1503,7 @@ export struct CounterComponent {
                 this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -1503,7 +1528,7 @@ export struct CounterComponent {
                       this.addValue();
                       this.onChange?.(this.value);
                     }
-                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     try {
@@ -1529,12 +1554,12 @@ export struct CounterComponent {
               })
               .focusable(this.focusEnable)
               .onFocus(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusIncrease && this.onFocusIncrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurIncrease && this.onBlurIncrease();
               })
           }
@@ -1542,7 +1567,7 @@ export struct CounterComponent {
           .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
-          .borderWidth(this.addBtnFocusWidh)
+          .borderWidth(this.addBtnFocusWidth)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .clip(true)
         }
@@ -1583,7 +1608,7 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .key('CompactSubButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
                 if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
@@ -1611,7 +1636,7 @@ export struct CounterComponent {
                 this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -1638,7 +1663,7 @@ export struct CounterComponent {
                     }
                     if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
-                      this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                      this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                     }
                   })
                   .onActionEnd(() => {
@@ -1666,19 +1691,19 @@ export struct CounterComponent {
               .focusable(this.focusEnable)
               .groupDefaultFocus(true)
               .onFocus(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusDecrease && this.onFocusDecrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurDecrease && this.onBlurDecrease();
               })
           }
           .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
-          .borderWidth(this.subBtnFocusWidh)
+          .borderWidth(this.subBtnFocusWidth)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .margin({
             start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
@@ -1732,7 +1757,7 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .key('CompactAddButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
                 if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
@@ -1760,7 +1785,7 @@ export struct CounterComponent {
                 this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -1787,7 +1812,7 @@ export struct CounterComponent {
                     }
                     if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
-                      this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                      this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                     }
                   })
                   .onActionEnd(() => {
@@ -1814,12 +1839,12 @@ export struct CounterComponent {
               })
               .focusable(this.focusEnable)
               .onFocus(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusIncrease && this.onFocusIncrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurIncrease && this.onBlurIncrease();
               })
           }
@@ -1827,7 +1852,7 @@ export struct CounterComponent {
           .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
-          .borderWidth(this.addBtnFocusWidh)
+          .borderWidth(this.addBtnFocusWidth)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .margin({
             end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
@@ -1863,7 +1888,7 @@ export struct CounterComponent {
                 center: { anchor: '__container__', align: VerticalAlign.Center },
                 middle: { anchor: '__container__', align: HorizontalAlign.Center }
               })
-              .width(Math.min(this.getValueLength() * 9.6, this.textWidth))
+              .width('100%')
               .height('20vp')
               .padding(0)
               .borderRadius(0)
@@ -1872,9 +1897,9 @@ export struct CounterComponent {
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
-              .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
-              .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+              .backgroundColor(Color.Transparent)
               .key('InlineTextInput' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
@@ -1915,70 +1940,23 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for (let i = 0; i < value.length; i++) {
-                  let c = value[i];
-                  if (c === '+' || c === '*' || c === '#') {
-                    this.value -= 1;
-                    this.value += 1;
-                    this.inputValue = this.value.toString();
-                    return;
-                  }
-                  if (c === '-' && i !== 0) {
-                    this.inputValue = c;
-                    break;
-                  }
-                }
-
                 this.hasInputText1 = true;
                 let c = value[value.length - 1];
                 if (value.length === this.getMaxLength()) {
                   this.inputValue = c;
                 }
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
-                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                  Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue);
-                  this.onChange?.(this.value);
-                  this.hasInputText1 = false;
-                } else {
-                  if (Number(this.inputValue) > this.max ||
-                    (Number(this.inputValue) < this.min &&
-                      this.inputValue.length <= this.min.toString().length)) {
-                    this.inputValue = c;
-                  }
-                  if (value.length < this.getMaxLength()) {
-                    this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                        Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue);
-                        this.onChange?.(this.value);
-                      }
-                      this.inputValue = this.value.toString();
-                      this.hasInputText1 = false;
-                      this.updateInlineEnableSate();
-                    }, 1500);
-                  }
-                }
-                this.updateInlineEnableSate();
+                this.updateInlineEnableState();
               })
               .onSubmit((enterKey: EnterKeyType) => {
-                if (this.timeoutID1 != -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
                 this.hasInputText1 = false;
-                this.value -= 1;
-                if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue);
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = submitNum;
                   this.onChange?.(this.value);
-                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1;
                   this.inputValue = this.value.toString();
                 }
+                this.updateInlineEnableState();
               })
               .focusable(true)
               .focusOnTouch(true)
@@ -1988,6 +1966,13 @@ export struct CounterComponent {
                 this.controller1.caretPosition(this.value.toString().length);
               })
               .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
                 this.focusText = FocusText.NONE;
                 this.hasFocusText1 = false;
               })
@@ -2013,7 +1998,7 @@ export struct CounterComponent {
             })
               .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
               .direction(this.counterDirection)
-              .width(this.getValueLength() * 9.6)
+              .width(this.getMeasuredTextWidth())
               .height('20vp')
               .padding(0)
               .borderRadius(0)
@@ -2022,9 +2007,9 @@ export struct CounterComponent {
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
-              .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
-              .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+              .backgroundColor(Color.Transparent)
               .key('InlineTextInput' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
@@ -2055,70 +2040,23 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for (let i = 0; i < value.length; i++) {
-                  let c = value[i];
-                  if (c === '+' || c === '*' || c === '#') {
-                    this.value -= 1;
-                    this.value += 1;
-                    this.inputValue = this.value.toString();
-                    return;
-                  }
-                  if (c === '-' && i !== 0) {
-                    this.inputValue = c;
-                    break;
-                  }
-                }
-
                 this.hasInputText1 = true;
                 let c = value[value.length -1];
                 if (value.length === this.getMaxLength()) {
                   this.inputValue = c;
                 }
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
-                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                  Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue);
-                  this.onChange?.(this.value);
-                  this.hasInputText1 = false;
-                } else {
-                  if (Number(this.inputValue) > this.max ||
-                    (Number(this.inputValue) < this.min &&
-                      this.inputValue.length <= this.min.toString().length)) {
-                    this.inputValue = c;
-                  }
-                  if (value.length < this.getMaxLength()) {
-                    this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                        Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue);
-                        this.onChange?.(this.value);
-                      }
-                      this.inputValue = this.value.toString()
-                      this.hasInputText1 = false;
-                      this.updateInlineEnableSate();
-                    }, 1500);
-                  }
-                }
-                this.updateInlineEnableSate();
+                this.updateInlineEnableState();
               })
               .onSubmit((enterKey: EnterKeyType) => {
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
                 this.hasInputText1 = false;
-                this.value -= 1;
-                if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue);
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = submitNum;
                   this.onChange?.(this.value);
-                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1;
                   this.inputValue = this.value.toString();
                 }
+                this.updateInlineEnableState();
               })
               .focusable(true)
               .focusOnTouch(true)
@@ -2128,6 +2066,13 @@ export struct CounterComponent {
                 this.controller1.caretPosition(this.value.toString().length);
               })
               .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
                 this.focusText = FocusText.NONE;
                 this.hasFocusText1 = false;
               })
@@ -2156,7 +2101,7 @@ export struct CounterComponent {
                 [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
-              .strokeWidth(this.addBtnFocusWidh)
+              .strokeWidth(this.addBtnFocusWidth)
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(2) })
               .fillOpacity(0)
@@ -2178,9 +2123,10 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.addValue();
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -2204,7 +2150,7 @@ export struct CounterComponent {
                     if (event.repeat) {
                       this.addValue();
                     }
-                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     try {
@@ -2230,11 +2176,11 @@ export struct CounterComponent {
               })
               .focusable(false)
               .onFocus(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusIncrease && this.onFocusIncrease();
               })
               .onBlur(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurIncrease && this.onBlurIncrease();
               })
           }
@@ -2257,7 +2203,7 @@ export struct CounterComponent {
                 [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
                 ['0vp', '0vp']
               ])
-              .strokeWidth(this.subBtnFocusWidh)
+              .strokeWidth(this.subBtnFocusWidth)
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) })
               .fillOpacity(0)
@@ -2278,9 +2224,10 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.subValue();
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
                 try {
                   let eventInfo: accessibility.EventInfo = ({
@@ -2304,7 +2251,7 @@ export struct CounterComponent {
                     if (event.repeat) {
                       this.subValue();
                     }
-                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     try {
@@ -2330,11 +2277,11 @@ export struct CounterComponent {
               })
               .focusable(false)
               .onFocus(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusDecrease && this.onFocusDecrease();
               })
               .onBlur(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurDecrease && this.onBlurDecrease();
               })
           }
@@ -2431,13 +2378,13 @@ export struct CounterComponent {
               this.timeoutID1 = setTimeout(() => {
                 this.hasInputText1 = false;
                 this.inputYear = this.year;
-                this.updateDateEnableSate();
+                this.updateDateEnableState();
                 this.updateDay();
               }, 1500);
 
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
-                this.updateDateEnableSate();
+                this.updateDateEnableState();
                 this.updateDay();
               }
 
@@ -2459,7 +2406,7 @@ export struct CounterComponent {
                 this.year += 1;
                 this.inputYear = this.year;
               }
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.updateDay();
             })
             .tabIndex(0)
@@ -2468,18 +2415,18 @@ export struct CounterComponent {
             .onFocus(() => {
               this.focusText = FocusText.TEXT1;
               this.hasFocusText1 = true;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.controller1.caretPosition(this.getYear().length);
             })
             .onBlur(() => {
               this.focusText = FocusText.NONE;
               this.hasFocusText1 = false;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
             })
             .onClick((event: ClickEvent) => {
               this.focusText = FocusText.TEXT1;
               this.hasFocusText1 = true;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.controller1.caretPosition(this.getYear().length);
             })
           Text('/')
@@ -2779,7 +2726,7 @@ export struct CounterComponent {
                 [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
-              .strokeWidth(this.addBtnFocusWidh)
+              .strokeWidth(this.addBtnFocusWidth)
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(1) })
               .fillOpacity(0)
@@ -2802,7 +2749,7 @@ export struct CounterComponent {
                 this.accessibilityBroadcastAddDate();
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
               })
               .gesture(
@@ -2811,7 +2758,7 @@ export struct CounterComponent {
                     if (event.repeat) {
                       this.addDate();
                     }
-                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     this.accessibilityBroadcastAddDate();
@@ -2823,11 +2770,11 @@ export struct CounterComponent {
               })
               .focusable(false)
               .onFocus(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusIncrease && this.onFocusIncrease();
               })
               .onBlur(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurIncrease && this.onBlurIncrease();
               })
           }
@@ -2849,7 +2796,7 @@ export struct CounterComponent {
                 [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
                 ['0vp', '0vp']
               ])
-              .strokeWidth(this.subBtnFocusWidh)
+              .strokeWidth(this.subBtnFocusWidth)
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) })
               .fillOpacity(0)
@@ -2872,7 +2819,7 @@ export struct CounterComponent {
                 this.accessibilityBroadcastSubDate();
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
               })
               .gesture(
@@ -2881,7 +2828,7 @@ export struct CounterComponent {
                     if (event.repeat) {
                       this.subDate();
                     }
-                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
                   .onActionEnd(() => {
                     this.accessibilityBroadcastSubDate();
@@ -2893,11 +2840,11 @@ export struct CounterComponent {
               })
               .focusable(false)
               .onFocus(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
                 this.onFocusDecrease && this.onFocusDecrease();
               })
               .onBlur(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 this.onBlurDecrease && this.onBlurDecrease();
               })
           }.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
