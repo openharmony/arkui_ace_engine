@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_property.h"
 

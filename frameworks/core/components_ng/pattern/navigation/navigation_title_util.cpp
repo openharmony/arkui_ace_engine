@@ -23,7 +23,6 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
