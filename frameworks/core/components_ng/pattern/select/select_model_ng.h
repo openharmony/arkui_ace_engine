@@ -162,7 +162,7 @@ public:
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
-    static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color, bool isJsView = true);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
     static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);

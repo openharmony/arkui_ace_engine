@@ -2164,8 +2164,9 @@ void SelectPattern::OnColorConfigurationUpdate()
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
     }
-
-    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
+    auto configurationChange = pipeline->GetConfigurationChange();
+    configurationChange.colorModeUpdate = true;
+    UpdateMenuChildColorConfiguration(menuNode, configurationChange);
     auto optionNode = menuModifier->getOptions(menuNode);
     auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto child : optionNode) {
@@ -2283,9 +2284,7 @@ void SelectPattern::UpdateMenuChildColorConfiguration(
     const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = menuNode->GetFirstChild();
-    CHECK_NULL_VOID(scrollNode);
-    scrollNode->UpdateConfigurationUpdate(configurationChange);
+    menuNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
