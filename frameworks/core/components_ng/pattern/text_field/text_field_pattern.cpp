@@ -3518,6 +3518,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
+        UnFocusOnHandleClick_ = true;
     }
     firstGetFocus = firstGetFocus || firstClickAfterLosingFocus_;
     firstClickAfterLosingFocus_ = false;
@@ -3542,6 +3543,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+    UnFocusOnHandleClick_ = false;
 }
 
 bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
@@ -3567,6 +3569,9 @@ bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
 {
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
         CHECK_NULL_RETURN(selectOverlay_, false);
+        if (UnFocusOnHandleClick_ && QuerySmartEdgeState()) {
+            return true;
+        }
         // click selected area to switch show/hide state
         selectOverlay_->ToggleMenu();
         return true;
