@@ -53,7 +53,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ListItemTheme>& theme) const
         {
             if (!themeStyle) {
@@ -80,8 +80,9 @@ public:
             theme->pressColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->disabledAlpha_ = pattern->GetAttr<double>("item_disabled_alpha", 0.0);
             theme->selectedColor_ = pattern->GetAttr<Color>("item_select_color", Color::WHITE);
+            theme->selectedAlpha_ = pattern->GetAttr<double>("item_selected_alpha", SELECTED_ALPHA);
             theme->selectedColorWithAlpha_ =
-                theme->selectedColor_.BlendOpacity(pattern->GetAttr<double>("item_selected_alpha", SELECTED_ALPHA));
+                theme->selectedColor_.BlendOpacity(theme->selectedAlpha_);
             theme->hoverAnimationDuration_ = 250; //250: the duration of hover animation, unit is ms.
             theme->hoverToPressAnimationDuration_ = 100; //100: the duration of hover to press animation, unit is ms.
             theme->clickAlphaBegin_ = pattern->GetAttr<double>("click_alpha_begin", 0.0f);
@@ -272,6 +273,15 @@ public:
 protected:
     ListItemTheme() = default;
 
+    Color defaultColor_;
+    Color itemDefaultColor_;
+    Color focusBorderColor_;
+    Color hoverColor_;
+    Color pressColor_;
+    Color selectedColor_;
+    Color selectedColorWithAlpha_;
+    double selectedAlpha_ = SELECTED_ALPHA;
+
 private:
     Color clickColor_;
     double clickAlphaBegin_ = 1.0;
@@ -296,8 +306,6 @@ private:
     Dimension itemSize_;
     Dimension groupImageSize_;
     Dimension deleteDistance_ = 56.0_vp;
-    Color defaultColor_;
-    Color itemDefaultColor_;
     Dimension defaultHeight_ = 48.0_vp;
     NG::BorderRadiusProperty defaultBorderRadius_;
     NG::BorderRadiusProperty itemBorderRadius_;
@@ -306,15 +314,10 @@ private:
     Dimension itemLeftPadding_;
     Dimension itemRightPadding_;
     Edge defaultPadding_;
-    Color focusBorderColor_;
     Dimension focusBorderWidth_ = 2.0_vp;
-    Color hoverColor_;
-    Color pressColor_;
     int32_t hoverAnimationDuration_ = 0;
     int32_t hoverToPressAnimationDuration_ = 0;
     double disabledAlpha_ = 0.4;
-    Color selectedColor_;
-    Color selectedColorWithAlpha_;
     Dimension borderRadiusValue_;
 };
 

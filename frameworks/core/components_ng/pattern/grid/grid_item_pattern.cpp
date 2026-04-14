@@ -62,9 +62,7 @@ FocusPattern GridItemPattern::GetFocusPattern() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, FocusPattern());
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto theme = pipeline->GetTheme<GridItemTheme>();
+    auto theme = host->GetTheme<GridItemTheme>(true);
     CHECK_NULL_RETURN(theme, FocusPattern());
     auto focusColor = theme->GetGridItemFocusColor();
     FocusPaintParam focusPaintParam;
@@ -122,6 +120,13 @@ void GridItemPattern::OnModifyDone()
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
         InitHoverEvent();
         InitPressEvent();
+    }
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+        CHECK_NULL_VOID(gridItemTheme);
+        std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+        paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+        focusHub->SetFocusPaintParamsPtr(paintParams);
     }
 }
 
@@ -203,9 +208,9 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
 Color GridItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, color);
-    auto theme = pipeline->GetTheme<GridItemTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, color);
+    auto theme = host->GetTheme<GridItemTheme>(true);
     CHECK_NULL_RETURN(theme, color);
     if (isPressed_) {
         color = color.BlendColor(theme->GetGridItemPressColor());

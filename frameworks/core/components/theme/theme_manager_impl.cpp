@@ -47,6 +47,7 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components/scroll/scroll_bar_theme_wrapper.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/semi_modal/semi_modal_theme.h"
@@ -102,6 +103,10 @@
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
+#include "core/components_ng/pattern/list/list_item_theme_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_theme_wrapper.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_theme_wrapper.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_wrapper.h"
 #include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 #include "core/components_ng/pattern/bubble/popup_theme_wrapper.h"
 #include "core/components_ng/pattern/picker/picker_theme_wrapper.h"
@@ -228,6 +233,11 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
         { BadgeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::BadgeThemeWrapper::WrapperBuilder> },
         { CalendarTheme::TypeId(), &ThemeWrapperBuildFunc<CalendarThemeWrapper::WrapperBuilder> },
+        { ListItemTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ListItemThemeWrapper::WrapperBuilder> },
+        { NG::GridItemTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GridItemThemeWrapper::WrapperBuilder> },
+        { ArcListItemTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ArcListItemThemeWrapper::WrapperBuilder> },
+        { NG::RefreshThemeNG::TypeId(), &ThemeWrapperBuildFunc<NG::RefreshThemeWrapper::WrapperBuilder> },
+        { ScrollBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ScrollBarThemeWrapper::WrapperBuilder> },
         { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> },
         { DataPanelTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DataPanelThemeWrapper::WrapperBuilder> },
         { NG::GaugeTheme::TypeId(), &ThemeWrapperBuildFunc<NG::GaugeThemeWrapper::WrapperBuilder> },

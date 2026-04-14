@@ -47,16 +47,21 @@ void GridTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    // Catch-all expectations must be FIRST (GMock checks in REVERSE order)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
+    // Specific expectations take precedence over catch-alls when defined AFTER them
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
     auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
+    EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId(), _)).WillRepeatedly(Return(gridItemTheme));
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshThemeNG::Builder().Build(refreshThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId())).WillRepeatedly(Return(refreshTheme));
+    EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId(), _)).WillRepeatedly(Return(refreshTheme));
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);

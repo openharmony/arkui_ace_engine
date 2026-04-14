@@ -102,17 +102,6 @@ void ListItemPattern::DeInitDragManager()
     }
 }
 
-void ListItemPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    // call OnAttachToFrameNodeMultiThread() by multi thread;
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    CHECK_NULL_VOID(host);
-    if (listItemStyle_ == V2::ListItemStyle::CARD) {
-        SetListItemDefaultAttributes(host);
-    }
-}
-
 void ListItemPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -129,25 +118,20 @@ void ListItemPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(listItemNode);
     auto renderContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = listItemNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemTheme = listItemNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemTheme);
 
     renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
 }
 
-void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
+void ListItemPattern::ApplyListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
 {
     auto renderContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemTheme = listItemNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemTheme);
-
     renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
 
     PaddingProperty itemPadding;
@@ -158,6 +142,47 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(listItemTheme->GetItemDefaultHeight())));
     renderContext->UpdateBorderRadius(listItemTheme->GetItemDefaultBorderRadius());
+    auto focusHub = listItemNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+    paintParams->SetPaintColor(listItemTheme->GetItemFocusBorderColor());
+    paintParams->SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
+    focusHub->SetFocusPaintParamsPtr(paintParams);
+}
+
+bool ListItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = host->GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto listItemTheme = host->GetTheme<ListItemTheme>(true);
+    CHECK_NULL_RETURN(listItemTheme, false);
+
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+        paintParams->SetPaintColor(listItemTheme->GetItemFocusBorderColor());
+        paintParams->SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
+        focusHub->SetFocusPaintParamsPtr(paintParams);
+    }
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
+    }
+
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    if (eventHub && !eventHub->HasStateStyle(UI_STATE_SELECTED)) {
+        renderContext->BlendBgColor(GetBlendGgColor());
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
@@ -1253,7 +1278,7 @@ void ListItemPattern::SetListItemStyle(V2::ListItemStyle style)
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
         listItemStyle_ = style;
-        SetListItemDefaultAttributes(host);
+        ApplyListItemDefaultAttributes(host);
         InitListItemCardStyleForList();
     }
 }
@@ -1272,9 +1297,9 @@ void ListItemPattern::UpdateListItemAlignToCenter()
 Color ListItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, color);
-    auto theme = pipeline->GetTheme<ListItemTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, color);
+    auto theme = host->GetTheme<ListItemTheme>(true);
     CHECK_NULL_RETURN(theme, color);
     if (isSelected_) {
         auto eventHub = GetEventHub<ListItemEventHub>();
@@ -1549,9 +1574,9 @@ bool ListItemPattern::RenderCustomChild(int64_t deadline)
 FocusPattern ListItemPattern::GetFocusPattern() const
 {
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto listItemTheme = host->GetTheme<ListItemTheme>(true);
         CHECK_NULL_RETURN(listItemTheme, FocusPattern());
         FocusPaintParam paintParam;
         paintParam.SetPaintColor(listItemTheme->GetItemFocusBorderColor());

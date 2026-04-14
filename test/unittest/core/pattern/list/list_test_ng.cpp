@@ -46,12 +46,14 @@ void ListTestNg::SetUpTestSuite()
     auto buttonThemeConstants = CreateThemeConstants(THEME_PATTERN_BUTTON);
     auto buttonTheme = ButtonTheme::Builder().Build(buttonThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
     auto listThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST);
     auto listTheme = ListTheme::Builder().Build(listThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ListTheme::TypeId())).WillRepeatedly(Return(listTheme));
     auto listItemThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST_ITEM);
     auto listItemTheme = ListItemTheme::Builder().Build(listItemThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId(), _)).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = ITEM_DEFAULT_COLOR;
     listItemTheme->hoverColor_ = HOVER_COLOR;
     listItemTheme->pressColor_ = PRESS_COLOR;

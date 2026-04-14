@@ -23,12 +23,14 @@ void ArcListTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
 
     auto listTheme = AceType::MakeRefPtr<ArcListTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ArcListTheme::TypeId())).WillRepeatedly(Return(listTheme));
 
     auto listItemTheme = AceType::MakeRefPtr<ArcListItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ArcListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ArcListItemTheme::TypeId(), _)).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = Color::WHITE;
     listItemTheme->hoverColor_ = Color::RED;
     listItemTheme->pressColor_ = Color::BLACK;
