@@ -33,6 +33,9 @@ import { ContextRecord } from "./base/UIContextImpl"
 import { RecordData } from "@ohos.base"
 import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
 import { CustomBuilder } from "./component/builder";
+import { ExtendableComponent } from "./component/extendableComponent";
+import { CustomDelegate } from "./component/customComponent";
+import { LocalStorage, IProvideDecoratedVariable, IProviderDecoratedVariable } from "@ohos.arkui.stateManagement";
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -46,6 +49,7 @@ export interface RenderOptions {
 export interface BuildOptions {
     nestingBuilderSupported?: boolean;
     useParallel?: boolean;
+    localStorage?: LocalStorage;
 }
 
 const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "ForEach", "LazyForEach", "Repeat", "IfElse", "Span", "ContainerSpan", "SymbolSpan"]
@@ -323,6 +327,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __buildOptions: BuildOptions | undefined = undefined
     private __updateUseParallel: boolean = false;
     private __isDisposed: boolean = false;
+    private __extendableComponent?: BuilderNodeExtendableComponent;
+    private __delegate?: BuilderNodeCustomDelegate;
 
     private reset(): void {
         this.__root = undefined;
@@ -362,6 +368,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         uiData.uiContext = uiContext;
         this.__manager!.contextData = uiData;
         this.__frameNode = null;
+        const current = ExtendableComponent.current;
+        ExtendableComponent.current = undefined;
+        this.__extendableComponent = new BuilderNodeExtendableComponent(uiContext as UIContext);
+        ExtendableComponent.current = current;
+        this.__delegate = new BuilderNodeCustomDelegate(uiContext, this.__extendableComponent! as ExtendableComponent);
     }
 
     public buildFunc(): void {
@@ -381,14 +392,14 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 const result = setNeedCreate(true);
                 if (this.__buildOptions?.useParallel) {
                     /** @memo */
-                    const builder = () => {
+                    const builder = (param: undefined) => {
                         this.innerBuildReactive();
                     };
-                    ParallelizeUI({
+                    ParallelizeUI<undefined>({
                         completed: () => {
                             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
                         }
-                    }, builder as () => void);
+                    }, () => { return undefined }, builder);
                 } else {
                     this.innerBuildReactive();
                 }
@@ -459,6 +470,9 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.__frameNode?.setJsBuilderNode(this);
             this.setUpdateConfigurationCallback(this.updateConfiguration);
         }
+        if (this.__extendableComponent && this.__builderRootNode) {
+            this.__extendableComponent!.setPeerNode(this.__builderRootNode!);
+        }
     }
 
     public getNodeWithoutProxy(): pointer | undefined {
@@ -483,6 +497,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder0 = undefined;
         this.__arg = arg;
         this.__buildOptions = options;
+        const storage = options?.localStorage;
+        if (storage) {
+            this.__extendableComponent?.setLocalStorage(storage!);
+        }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.__managerGlobal = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
@@ -497,6 +515,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder = undefined;
         this.__arg = undefined;
         this.__buildOptions = options;
+        const storage = options?.localStorage;
+        if (storage) {
+            this.__extendableComponent?.setLocalStorage(storage!);
+        }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.__managerGlobal = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
@@ -508,33 +530,54 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     /** @memo */
     public innerBuild0(): void {
         const currentStateManager = GlobalStateManager.instance;
+        const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        if (this.__extendableComponent) {
+            this.__extendableComponent!.detachFromParent();
+            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            ExtendableComponent.current = this.__extendableComponent;
+        }
         try {
             this.__builder0?.builder();
         } finally {
             GlobalStateManager.SetLocalManager(currentStateManager);
+            ExtendableComponent.current = currentExtendableComponent;
         }
     }
 
     /** @memo */
     public innerBuildT(params: T): void {
         const currentStateManager = GlobalStateManager.instance;
+        const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        if (this.__extendableComponent) {
+            this.__extendableComponent!.detachFromParent();
+            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            ExtendableComponent.current = this.__extendableComponent;
+        }
         try {
             this.__builder?.builder(params);
         } finally {
             GlobalStateManager.SetLocalManager(currentStateManager);
+            ExtendableComponent.current = currentExtendableComponent;
         }
     }
     
     /** @memo */
     public innerBuildReactive(): void {
         const currentStateManager = GlobalStateManager.instance;
+        const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        if (this.__extendableComponent) {
+            this.__extendableComponent!.detachFromParent();
+            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            ExtendableComponent.current = this.__extendableComponent;
+        }
         try {
             this.__reactiveBuilder?.builder();
         } finally {
             GlobalStateManager.SetLocalManager(currentStateManager);
+            ExtendableComponent.current = currentExtendableComponent;
         }
     }
 
@@ -592,16 +635,14 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public reuse(param?: RecordData): void {
-        if (this.__root) {
-            let node = findPeerNode(this.__root!);
-            node?.onReuse(true, param);
+        if (this.__extendableComponent) {
+            this.__extendableComponent!.triggerReuse(param);
         }
     }
 
     public recycle(): void {
-        if (this.__root) {
-            let node = findPeerNode(this.__root!);
-            node?.onRecycle(true);
+        if (this.__extendableComponent) {
+            this.__extendableComponent!.triggerRecycle();
         }
     }
 
@@ -665,5 +706,92 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
 
     public isDisposed(): boolean {
         return this.__isDisposed;
+    }
+}
+
+class BuilderNodeExtendableComponent extends ExtendableComponent {
+    private uniqueId_: int32;
+    private uiContext_: UIContext;
+    public localStorage_: LocalStorage | undefined;
+
+    constructor(uiContext: UIContext) {
+        super();
+        this.uniqueId_ = -1;
+        this.uiContext_ = uiContext;
+        this.localStorage_ = undefined;
+    }
+
+    setLocalStorage(storage: LocalStorage): void {
+        this.localStorage_ = storage;
+    }
+
+    /** @memo */ build(): void {}
+
+    override __aboutToReuse_Internal(param?: RecordData): void {}
+
+    override __aboutToRecycle_Internal(): void {}
+
+    triggerReuse(param?: RecordData): void {
+        super.__aboutToReuse_Internal(param);
+    }
+
+    triggerRecycle(): void {
+        super.__aboutToRecycle_Internal();
+    }
+
+    override __getLocalStorage__Internal(): LocalStorage {
+        if (this.localStorage_) {
+            return this.localStorage_!;
+        }
+        return super.__getLocalStorage__Internal();
+    }
+
+    override get __localStorage__Internal(): LocalStorage {
+        if (this.localStorage_) {
+            return this.localStorage_!;
+        }
+        return super.__localStorage__Internal;
+    }
+
+    override getUIContext(): UIContext {
+        return this.uiContext_!;
+    }
+
+    override getUniqueId(): int32 {
+        return this.uniqueId_;
+    }
+
+    setUIContext(uiContext: UIContext): void {
+        this.uiContext_ = uiContext;
+    }
+
+    setPeerNode(peerNode: PeerNode): void {
+        this.uniqueId_ =  peerNode.getId();
+    }
+
+    detachFromParent(): void {
+        this.__removeMeFromParent__Internal();
+        this.__setParent__Internal(undefined);
+    }
+
+    attachToParent(parent: ExtendableComponent | undefined): void {
+        if (parent) {
+            this.__setParent__Internal(parent!);
+            parent.__addChild__Internal(this);
+        }
+    }
+}
+
+class BuilderNodeCustomDelegate extends CustomDelegate<BuilderNodeExtendableComponent, undefined> {
+    constructor(uiContext: UIContext | undefined, instance: ExtendableComponent) {
+        super(uiContext, instance, undefined);
+    }
+
+    override aboutToReuse(param: RecordData, initializers?: object): void {
+        return;
+    }
+
+    override aboutToRecycle(): void {
+        return;
     }
 }
