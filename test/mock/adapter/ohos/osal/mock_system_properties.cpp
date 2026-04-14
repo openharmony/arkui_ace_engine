@@ -124,6 +124,7 @@ bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
+UiMaterialLevel g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
@@ -513,6 +514,6 @@ void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 
 UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
-    return UiMaterialLevel::DEFAULT;
+    return g_uiMaterialLevel;
 }
 } // namespace OHOS::Ace
