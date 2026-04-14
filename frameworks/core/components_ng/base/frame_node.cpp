@@ -2230,7 +2230,7 @@ void FrameNode::ProcessThrottledAreaChangeCallback()
 {
     CHECK_NULL_VOID(eventHub_);
 
-    if (throttledAreaChangeCallbackOnTheWay_) {
+    if (throttledAreaChangeCallbackOnTheWay_ || onAreaChangeMinInterval_ == 0) {
         return;
     }
 

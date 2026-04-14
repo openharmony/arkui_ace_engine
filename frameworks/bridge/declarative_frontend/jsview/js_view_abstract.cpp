@@ -357,6 +357,29 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
     return true;
 }
 
+int32_t NormalizeAreaChangeExpectedUpdateInterval(double expectedUpdateInterval)
+{
+    constexpr int32_t expectedUpdateIntervalMax = std::numeric_limits<int32_t>::max();
+    if (IsNaN(expectedUpdateInterval)) {
+        return DEFAULT_DURATION;
+    }
+    if (IsInfinity(expectedUpdateInterval)) {
+        return expectedUpdateInterval > 0 ? expectedUpdateIntervalMax : DEFAULT_DURATION;
+    }
+    if (expectedUpdateInterval < 0.0) {
+        return DEFAULT_DURATION;
+    }
+    if (expectedUpdateInterval > static_cast<double>(expectedUpdateIntervalMax)) {
+        return expectedUpdateIntervalMax;
+    }
+    return static_cast<int32_t>(expectedUpdateInterval);
+}
+
+int32_t ParseAreaChangeExpectedUpdateInterval(const JSRef<JSVal>& jsValue)
+{
+    return NormalizeAreaChangeExpectedUpdateInterval(jsValue->ToNumber<double>());
+}
+
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
     isAuto = false;
@@ -8383,16 +8406,13 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     if (info.Length() > 1) {
         minInterval = DEFAULT_DURATION;
         if (info[1]->IsNumber()) {
-            ParseJsInteger(info[1], minInterval);
+            minInterval = ParseAreaChangeExpectedUpdateInterval(info[1]);
         } else if (info[1]->IsObject()) {
             auto options = JSRef<JSObject>::Cast(info[1]);
             auto intervalVal = options->GetProperty("expectedUpdateInterval");
             if (intervalVal->IsNumber()) {
-                ParseJsInteger(intervalVal, minInterval);
+                minInterval = ParseAreaChangeExpectedUpdateInterval(intervalVal);
             }
-        }
-        if (minInterval < 0) {
-            minInterval = DEFAULT_DURATION;
         }
     }
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
