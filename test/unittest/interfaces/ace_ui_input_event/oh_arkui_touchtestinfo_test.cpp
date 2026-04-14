@@ -54,10 +54,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_NodeEvent_GetTouchTestInfo001, TestSize.Leve
     * @tc.steps: step4. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
 }
 
 /**
@@ -86,10 +86,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_NodeEvent_GetTouchTestInfo002, TestSize.Leve
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
 }
 
 /**
@@ -117,10 +117,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_NodeEvent_GetTouchTestInfo003, TestSize.Leve
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_NodeEvent_GetTouchTestInfo"), std::string::npos);
 }
 
 /**
@@ -416,8 +416,8 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildRect002, TestSize.
     */
     const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildRect"), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildRect"), std::string::npos);
 
     /**
      * @tc.steps: step4. call functions when childRect is nullptr.
@@ -432,8 +432,8 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildRect002, TestSize.
     */
     errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildRect"), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildRect"), std::string::npos);
 }
 
 /**
@@ -486,10 +486,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildId002, TestSize.Le
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
 
     /**
      * @tc.steps: step4. call functions when buffer is nullptr.
@@ -502,10 +502,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildId002, TestSize.Le
     * @tc.steps: step5. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
 
     /**
      * @tc.steps: step6. call functions when bufferSize <= 0.
@@ -518,10 +518,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildId002, TestSize.Le
     * @tc.steps: step7. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
 }
 
 /**
@@ -550,10 +550,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildId003, TestSize.Le
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(OHOS::Ace::ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH);
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(OHOS::Ace::ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH);
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfoItem_GetChildId"), std::string::npos);
 }
 
 /**
@@ -610,10 +610,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultStrategy002, Tes
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"), std::string::npos);
 
     /**
      * @tc.steps: step4. call functions when Strategy is invalid.
@@ -627,10 +627,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultStrategy002, Tes
     * @tc.steps: step5. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"), std::string::npos);
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"), std::string::npos);
 }
 
 /**
@@ -690,10 +690,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultId002, TestSize.
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultId"), std::string::npos);
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultId"), std::string::npos);
 
     /**
      * @tc.steps: step4. call functions when id is nullptr.
@@ -706,10 +706,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultId002, TestSize.
     * @tc.steps: step5. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-	errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
-	errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
-	EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
-	EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultId"), std::string::npos);
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_TouchTestInfo_SetTouchResultId"), std::string::npos);
 }
 
 /**

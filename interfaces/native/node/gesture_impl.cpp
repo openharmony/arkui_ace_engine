@@ -433,8 +433,11 @@ int32_t OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(
     ArkUI_GestureRecognizer* recognizer, ArkUI_GestureRecognizerDisposeNotifyCallback callback, void* userData)
 {
     auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
-    CHECK_NULL_RETURN_WITH_MESSAGE((gestureRecognizer && !gestureRecognizer->capi),
-        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "gestureRecognizer is null and capi is true");
+    CHECK_NULL_RETURN_WITH_MESSAGE(gestureRecognizer,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "gestureRecognizer is null");
+
+    CHECK_NULL_RETURN_WITH_MESSAGE(!(gestureRecognizer->capi),
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "It's not supported for recognizers created from CAPI side.");
     auto disposeCallback = reinterpret_cast<void (*)(ArkUIGestureRecognizer * recognizer, void* userData)>(callback);
     OHOS::Ace::NodeModel::GetFullImpl()
         ->getNodeModifiers()
