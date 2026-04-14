@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ export declare class ArkTabsPeer extends ArkCommonMethodPeer {
     public setBarBackgroundColorAttribute(value: ResourceColor | undefined): void;
     public barGridAlignAttribute(value: BarGridColumnOptions | undefined): void;
     public customContentTransitionAttribute(value: TabsCustomContentTransitionCallback | undefined): void;
-    public setBarBackgroundBlurStyle0Attribute(value: BlurStyle | undefined): void;
+    public setBarBackgroundBlurStyle0Attribute(style: BlurStyle | undefined): void;
     public setBarBackgroundBlurStyle1Attribute(
         style: BlurStyle | undefined,
         options: BackgroundBlurStyleOptions | undefined
