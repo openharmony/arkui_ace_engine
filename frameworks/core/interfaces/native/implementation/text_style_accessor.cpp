@@ -29,26 +29,24 @@ namespace {
 void ProcessFontConfigs(Font& font, const Opt_FontConfigs* fontConfigs, const RefPtr<TextTheme>& theme)
 {
     auto configs = Converter::GetOptPtr(fontConfigs);
-    if (configs && configs->fontWeightConfigs.tag != INTEROP_TAG_UNDEFINED) {
-        const auto& weightConfigs = configs->fontWeightConfigs.value;
-        if (weightConfigs.enableVariableFontWeight.tag != INTEROP_TAG_UNDEFINED) {
-            font.enableVariableFontWeight =
-                Converter::OptConvert<bool>(weightConfigs.enableVariableFontWeight);
-        } else {
-            font.enableVariableFontWeight =
-                theme->GetTextStyle().GetEnableVariableFontWeight();
-        }
-        if (weightConfigs.enableDeviceFontWeightCategory.tag != INTEROP_TAG_UNDEFINED) {
-            font.enableDeviceFontWeightCategory =
-                Converter::OptConvert<bool>(weightConfigs.enableDeviceFontWeightCategory);
-        } else {
-            font.enableDeviceFontWeightCategory =
-                theme->GetTextStyle().GetEnableDeviceFontWeightCategory();
-        }
+    if (!configs) {
+        return;
+    }
+    if (configs->fontWeightConfigs.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    const auto& weightConfigs = configs->fontWeightConfigs.value;
+    if (weightConfigs.enableVariableFontWeight.tag != INTEROP_TAG_UNDEFINED) {
+        font.enableVariableFontWeight =
+            Converter::OptConvert<bool>(weightConfigs.enableVariableFontWeight);
     } else {
-        font.enableVariableFontWeight = theme->GetTextStyle().GetEnableVariableFontWeight();
+        font.enableVariableFontWeight = false;
+    }
+    if (weightConfigs.enableDeviceFontWeightCategory.tag != INTEROP_TAG_UNDEFINED) {
         font.enableDeviceFontWeightCategory =
-            theme->GetTextStyle().GetEnableDeviceFontWeightCategory();
+            Converter::OptConvert<bool>(weightConfigs.enableDeviceFontWeightCategory);
+    } else {
+        font.enableDeviceFontWeightCategory = true;
     }
 }
 void ProcessFontWeight(Font& font, const Opt_Union_I32_FontWeight_String* fontWeight,

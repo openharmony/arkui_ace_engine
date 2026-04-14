@@ -11119,8 +11119,12 @@ class ArkSpanComponent {
   font(value, fontConfigs) {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
-    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontConfigs !== null && fontConfigs !== undefined &&
+        fontConfigs.fontWeightConfigs !== null && fontConfigs.fontWeightConfigs !== undefined &&
+        'fontWeightConfigs' in fontConfigs) {
+      arkFontWeight.enableVariableFontWeight = fontConfigs.fontWeightConfigs?.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontConfigs.fontWeightConfigs?.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
@@ -11150,8 +11154,10 @@ class ArkSpanComponent {
   fontWeight(value, fontWeightConfigs) {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value;
-    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+      arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }

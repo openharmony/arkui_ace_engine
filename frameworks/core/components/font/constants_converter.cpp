@@ -597,15 +597,24 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
-    if (pipelineContext) {
-        if (textStyle.GetEnableDeviceFontWeightCategory()) {
-            fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
-        }
-    }
     if (textStyle.GetEnableVariableFontWeight()) {
         fontWeightValue = textStyle.GetVariableFontWeight();
         if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
             fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
+    }
+    if (pipelineContext) {
+        auto enableDeviceFontWeightCategory = textStyle.GetEnableDeviceFontWeightCategory();
+        if (enableDeviceFontWeightCategory.has_value()) {
+            // Span/styledString组件: 显式设置时根据设置值决定是否缩放
+            if (enableDeviceFontWeightCategory.value()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
+        } else {
+            // Text组件: enableDeviceFontWeightCategory未设置，默认行为是缩放
+            if (!textStyle.GetEnableVariableFontWeight()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
         }
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
