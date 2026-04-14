@@ -34,7 +34,6 @@
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/border.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/blur_style_option.h"
@@ -48,6 +47,7 @@
 
 namespace OHOS::Ace {
 
+class BorderImage;
 class PipelineContext;
 
 constexpr double CENTER_OFFSET = 50.0;
@@ -571,8 +571,8 @@ class Decoration final : public AceType {
     DECLARE_ACE_TYPE(Decoration, AceType);
 
 public:
-    Decoration() = default;
-    ~Decoration() override = default;
+    ACE_FORCE_EXPORT Decoration();
+    ACE_FORCE_EXPORT ~Decoration() override;
 
     ACE_FORCE_EXPORT void SetContextAndCallback(
         const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
@@ -608,10 +608,7 @@ public:
         image_ = image;
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage)
-    {
-        borderImage_ = borderImage;
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage);
 
     void SetHasBorderImageSource(const bool tag)
     {

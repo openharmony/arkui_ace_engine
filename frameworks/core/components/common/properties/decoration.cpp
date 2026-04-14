@@ -15,8 +15,17 @@
 
 #include "core/components/common/properties/decoration.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/pipeline/pipeline_context.h"
 namespace OHOS::Ace {
+
+Decoration::Decoration() = default;
+Decoration::~Decoration() = default;
+
+void Decoration::SetBorderImage(const RefPtr<BorderImage>& borderImage)
+{
+    borderImage_ = borderImage;
+}
 
 void Decoration::SetContextAndCallback(
     const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)

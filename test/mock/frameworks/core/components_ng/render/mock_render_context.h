@@ -21,6 +21,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/render_context.h"
 

@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -1797,6 +1798,28 @@ void ViewAbstractModelNG::ResetKeyboardShortcutAll(FrameNode* frameNode)
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+}
+
+void ViewAbstractModelNG::SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(borderImage);
+    if (bitset & BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(
+            borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
+    }
+    if (bitset & BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(true);
+    }
+    if (bitset & BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(true);
+    }
+    if (bitset & BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(true);
+    }
+    if (bitset & BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(true);
+    }
+    ViewAbstract::SetBorderImage(borderImage);
 }
 
 } // namespace OHOS::Ace::NG

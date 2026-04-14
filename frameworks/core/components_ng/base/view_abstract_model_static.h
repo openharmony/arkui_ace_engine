@@ -30,7 +30,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +46,10 @@
 
 namespace OHOS::Rosen {
     class BrightnessBlender;
+}
+
+namespace OHOS::Ace {
+class BorderImage;
 }
 
 namespace OHOS::Ace::NG {

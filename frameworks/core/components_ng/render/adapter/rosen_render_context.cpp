@@ -42,6 +42,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"

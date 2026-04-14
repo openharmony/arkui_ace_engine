@@ -19,7 +19,7 @@
 
 #define private public
 #define protected public
-
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
