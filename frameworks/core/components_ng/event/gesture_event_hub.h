@@ -186,7 +186,10 @@ constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 constexpr float DEFAULT_PAN_ANGLE = 45.0f;
 
 class EventHub;
+class OverlayManager;
 class PipelineContext;
+class DragDropManager;
+struct DragStartContext;
 
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
@@ -421,9 +424,7 @@ public:
     void SetMouseDragMonitorState(bool state);
     bool ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragDropInfo& dragPreviewInfo,
         const GestureEvent& info);
-    void DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
-        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
-        DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
+    void DoOnDragStartHandling(DragStartContext& ctx);
     void HideMenu();
     const GestureEvent GetGestureEventInfo();
     const ClickInfo GetClickInfo();
@@ -476,6 +477,42 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    bool InitDragStartTargets(const GestureEvent& info, DragStartContext& ctx);
+    void InitDragStartRequestState(const DragStartContext& ctx);
+    bool BuildDragStartRequest(DragStartContext& ctx);
+    void DispatchDragStartByRequestState(const DragStartContext& ctx);
+    std::function<void(DragStartRequestStatus)> CreateAsyncDragEndCallback(const RefPtr<FrameNode>& frameNode);
+    std::function<void()> CreateDelayedDragStartCallback(const DragStartContext& ctx);
+    bool HandleResolvedDragPreview(DragStartContext& ctx);
+    void PrepareFallbackDragPreview(DragStartContext& ctx);
+    bool InitDragStartExecutionContext(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    bool ResolveFrameworkLeaveWindowState(DragStartContext& ctx);
+    bool CheckDragStartResult(DragStartContext& ctx);
+    bool PrepareDragStartPixelMap(DragStartContext& ctx);
+    void UpdateDragStartPreviewState(DragStartContext& ctx);
+    void BuildPreparedDragInfo(DragStartContext& ctx);
+    bool PrepareDragStartSubWindowPreview(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    void UpdateDragPreviewScale(DragStartContext& ctx);
+    bool PrepareDragStartData(DragStartContext& ctx);
+    std::unique_ptr<JsonValue> BuildArkExtraInfoJson(const DragStartContext& ctx);
+    void ResolveDragScreenPosition(const DragStartContext& ctx, float& screenX, float& screenY);
+    DragDataCore CreateDragData(const DragStartContext& ctx, const std::string& extraInfoJson, int32_t windowId,
+        float screenX, float screenY);
+    void ReportDragStartData(const DragStartContext& ctx, const DragDataCore& dragData);
+    bool TryStartSystemDrag(DragStartContext& ctx, int32_t windowId);
+    void HandleStartDragFailure(const DragStartContext& ctx);
+    void BeginSuccessfulDragStart(DragStartContext& ctx);
+    void CompleteSuccessfulDragStart(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    void UpdateDragStartAnimation(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    bool UpdateDragStartManagerState(const DragStartContext& ctx);
+    void ShowSceneBoardTouchDragWindow(DragStartContext& ctx);
+    void PostTouchDragWindowVisibleTask(const RefPtr<PipelineContext>& pipeline);
+    void ResetDragStartOverlay(const DragStartContext& ctx);
+    void TransferTouchDragWindowToFramework(DragStartContext& ctx);
+    void ShowMouseDragWindow(DragStartContext& ctx);
+    void UpdateDragWindowVisibility(DragStartContext& ctx);
+    void NotifyFrameworkDragStart(const DragStartContext& ctx);
+    bool ShouldPerformDragStartAnimation(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
     void PrepareDragStartInfo(
         RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
     void UpdateMenuNode(

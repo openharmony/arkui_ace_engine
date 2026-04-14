@@ -789,12 +789,22 @@ HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_001, TestSize.Level1)
     DragDropInfo dragDropInfo;
     RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     DragDropInfo dragPreviewInfo;
-    guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
-    EXPECT_EQ(dragDropInfo.pixelMap, 0);
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
 
     dragPreviewInfo.pixelMap = pixelMap;
-    guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    guestureEventHub->DoOnDragStartHandling(ctx);
     EXPECT_TRUE(guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info));
+    EXPECT_TRUE(guestureEventHub->HandleResolvedDragPreview(ctx));
 }
 
 /**
@@ -834,14 +844,23 @@ HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_002, TestSize.Level1)
     DragDropInfo dragPreviewInfo;
     guestureEventHub->textDraggable_ = true;
     guestureEventHub->pixelMap_ = pixelMap;
-    guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
-    EXPECT_EQ(dragDropInfo.pixelMap, 0);
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_NE(ctx.dragDropInfo.pixelMap, nullptr);
 
     info.inputEventType_ = InputEventType::MOUSE_BUTTON;
     dragDropInfo.pixelMap = nullptr;
     guestureEventHub->pixelMap_ = nullptr;
-    guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
-    EXPECT_EQ(dragDropInfo.pixelMap, 0);
+    ctx.info = info;
+    ctx.dragDropInfo = dragDropInfo;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
 }
 
 /**
@@ -1893,5 +1912,1292 @@ HWTEST_F(GestureEventHubTestNg, PrepareDragStartInfo_003, TestSize.Level1)
     data.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 200));
     guestureEventHub->PrepareDragStartInfo(pipeline, data, frameNode);
     EXPECT_EQ(data.originPreviewRect.Width(), 100);
+}
+
+/**
+ * @tc.name: InitDragStartTargets_001
+ * @tc.desc: Test InitDragStartTargets - success path where all checks pass
+ * @tc.type: FUNC
+ * @tc.require: Issue the function initialization
+ */
+HWTEST_F(GestureEventHubTestNg, InitDragStartTargets_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call CheckAllowDrag.
+     */
+    GestureEvent info;
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_FALSE(ret);
+
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) -> DragDropInfo {
+        NG::DragDropInfo itemInfo;
+        itemInfo.customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        return itemInfo;
+    };
+    eventHub->SetDefaultOnDragStart(std::move(dragStart));
+    ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_TRUE(ret);
+
+
+    /**
+     * @tc.steps: step4. Call InitDragStartTargets
+     * @tc.expected: Returns true, context is initialized
+     */
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = pipeline;
+    bool result = guestureEventHub->InitDragStartTargets(info, ctx);
+
+    /**
+     * @tc.expected: result is true, context fields are populated
+     */
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: InitDragStartTargets_002
+ * @tc.desc: Test InitDragStartTargets - failure path where GetFrameNode returns null
+ * @tc.type: FUNC
+ * @tc.require: Issue the function null frameNode handling
+ */
+HWTEST_F(GestureEventHubTestNg, InitDragStartTargets_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub without proper host
+     * @tc.expected: gestureEventHub exists but has no valid frameNode
+     */
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create GestureEvent
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::TOUCH_PAD;
+
+    /**
+     * @tc.steps: step3. Call InitDragStartTargets
+     * @tc.expected: Returns false because frameNode is null
+     */
+    DragStartContext ctx;
+    bool result = gestureEventHub->InitDragStartTargets(info, ctx);
+
+    /**
+     * @tc.expected: result is false, HandleNotAllowDrag is called
+     */
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InitDragStartRequestState_001
+ * @tc.desc: Test InitDragStartRequestState - MOUSE_BUTTON event path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function mouse event handling
+ */
+HWTEST_F(GestureEventHubTestNg, InitDragStartRequestState_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with MOUSE_BUTTON event
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call InitDragStartRequestState
+     * @tc.expected: SetMouseDragMonitorState(true) is called
+     */
+    gestureEventHub->InitDragStartRequestState(ctx);
+
+    /**
+     * @tc.expected: Mouse drag monitor state is set
+     */
+    EXPECT_EQ(ctx.info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
+}
+
+/**
+ * @tc.name: InitDragStartRequestState_002
+ * @tc.desc: Test InitDragStartRequestState - TOUCH event path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function touch event handling
+ */
+HWTEST_F(GestureEventHubTestNg, InitDragStartRequestState_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with TOUCH event
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call InitDragStartRequestState
+     * @tc.expected: SetMouseDragMonitorState is NOT called
+     */
+    gestureEventHub->InitDragStartRequestState(ctx);
+
+    /**
+     * @tc.expected: Mouse drag monitor state remains unchanged
+     */
+    EXPECT_EQ(ctx.info.GetInputEventType(), InputEventType::TOUCH_PAD);
+}
+
+/**
+ * @tc.name: BuildDragStartRequest_001
+ * @tc.desc: Test BuildDragStartRequest - success path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function dragDropManager exists
+ */
+HWTEST_F(GestureEventHubTestNg, BuildDragStartRequest_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call BuildDragStartRequest
+     * @tc.expected: Returns true, event and dragDropInfo are initialized
+     */
+    bool result = gestureEventHub->BuildDragStartRequest(ctx);
+
+    /**
+     * @tc.expected: result is true, dragDropManager exists and ResetBundleInfo called
+     */
+    EXPECT_TRUE(result);
+    EXPECT_NE(ctx.event, nullptr);
+}
+
+/**
+ * @tc.name: DispatchDragStartByRequestState_001
+ * @tc.desc: Test DispatchDragStartByRequestState - PENDING status path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag start pended handling
+ */
+HWTEST_F(GestureEventHubTestNg, DispatchDragStartByRequestState_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Set DragStartRequestStatus to WAITING
+     * @tc.expected: Delay callback will be set
+     */
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::WAITING);
+
+    /**
+     * @tc.steps: step4. Call DispatchDragStartByRequestState
+     * @tc.expected: drag start is pended, callbacks are set
+     */
+    gestureEventHub->DispatchDragStartByRequestState(ctx);
+}
+
+/**
+ * @tc.name: HandleResolvedDragPreview_002
+ * @tc.desc: Test HandleResolvedDragPreview - CustomBuilder path fallback
+ * @tc.type: FUNC
+ * @tc.require: Issue the function custom builder handling
+ */
+HWTEST_F(GestureEventHubTestNg, HandleResolvedDragPreview_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context without pixelMap or customNode
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. Call HandleResolvedDragPreview
+     * @tc.expected: Returns false, falls through to PrepareFallbackDragPreview
+     */
+    bool result = gestureEventHub->HandleResolvedDragPreview(ctx);
+
+    /**
+     * @tc.expected: Returns false when no pixelMap or customNode available
+     */
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PrepareFallbackDragPreview_001
+ * @tc.desc: Test PrepareFallbackDragPreview - TextDraggable path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function text draggable handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareFallbackDragPreview_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with TOUCH event and textDraggable
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.dragDropInfo.pixelMap = nullptr;
+    gestureEventHub->textDraggable_ = true;
+    gestureEventHub->pixelMap_ = AceType::MakeRefPtr<MockPixelMap>();
+
+    /**
+     * @tc.steps: step3. Call PrepareFallbackDragPreview
+     * @tc.expected: Uses existing pixelMap_ when textDraggable is true
+     */
+    gestureEventHub->PrepareFallbackDragPreview(ctx);
+
+    /**
+     * @tc.expected: pixelMap is set from pixelMap_
+     */
+    EXPECT_NE(gestureEventHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: PrepareFallbackDragPreview_002
+ * @tc.desc: Test PrepareFallbackDragPreview - GenerateMousePixelMap path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function mouse pixelMap generation
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareFallbackDragPreview_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with TOUCH event but no pixelMap_
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.dragDropInfo.pixelMap = nullptr;
+    gestureEventHub->textDraggable_ = false;
+    gestureEventHub->pixelMap_ = nullptr;
+
+    /**
+     * @tc.steps: step3. Call PrepareFallbackDragPreview
+     * @tc.expected: Calls GenerateMousePixelMap
+     */
+    gestureEventHub->PrepareFallbackDragPreview(ctx);
+
+    /**
+     * @tc.expected: pixelMap is set from pixelMap_
+     */
+    EXPECT_EQ(gestureEventHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: PrepareFallbackDragPreview_003
+ * @tc.desc: Test PrepareFallbackDragPreview - MOUSE_BUTTON final fallback path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function default mouse drag image handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareFallbackDragPreview_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with MOUSE_BUTTON event
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.dragDropInfo.pixelMap = nullptr;
+
+    /**
+     * @tc.steps: step3. Call PrepareFallbackDragPreview
+     * @tc.expected: Uses CreatePixelMapFromString with DEFAULT_MOUSE_DRAG_IMAGE
+     */
+    gestureEventHub->PrepareFallbackDragPreview(ctx);
+    EXPECT_EQ(gestureEventHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: PrepareFallbackDragPreview_004
+ * @tc.desc: Test PrepareFallbackDragPreview - MOUSE_BUTTON final fallback path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function default mouse drag image handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareFallbackDragPreview_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with MOUSE_BUTTON event
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.dragDropInfo.pixelMap = nullptr;
+    gestureEventHub->textDraggable_ = true;
+    gestureEventHub->pixelMap_ = AceType::MakeRefPtr<MockPixelMap>();
+    gestureEventHub->SetTextDraggable(true);
+
+    /**
+     * @tc.steps: step3. Call PrepareFallbackDragPreview
+     * @tc.expected: Uses CreatePixelMapFromString with DEFAULT_MOUSE_DRAG_IMAGE
+     */
+    gestureEventHub->PrepareFallbackDragPreview(ctx);
+    EXPECT_NE(gestureEventHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: CheckDragStartResult_001
+ * @tc.desc: Test CheckDragStartResult - Success path (not FAIL/CANCEL)
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag result success handling
+ */
+HWTEST_F(GestureEventHubTestNg, CheckDragStartResult_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with successful drag event
+     */
+    DragStartContext ctx;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.event->SetResult(DragRet::DRAG_SUCCESS);
+
+    /**
+     * @tc.steps: step3. Call CheckDragStartResult
+     * @tc.expected: Returns true, drag can proceed
+     */
+    bool result = gestureEventHub->CheckDragStartResult(ctx);
+
+    /**
+     * @tc.expected: result is true
+     */
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckDragStartResult_002
+ * @tc.desc: Test CheckDragStartResult - Failure path (DRAG_FAIL)
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag result failure handling
+ */
+HWTEST_F(GestureEventHubTestNg, CheckDragStartResult_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with failed drag event
+     */
+    DragStartContext ctx;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.event->SetResult(DragRet::DRAG_FAIL);
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call CheckDragStartResult
+     * @tc.expected: Returns false, FireCustomerOnDragEnd is called
+     */
+    bool result = gestureEventHub->CheckDragStartResult(ctx);
+
+    /**
+     * @tc.expected: result is false, failure handlers are called
+     */
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckDragStartResult_003
+ * @tc.desc: Test CheckDragStartResult - Cancel path (DRAG_CANCEL) with MOUSE_BUTTON
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag result cancel mouse handling
+ */
+HWTEST_F(GestureEventHubTestNg, CheckDragStartResult_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with cancelled drag event and mouse input
+     */
+    DragStartContext ctx;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.event->SetResult(DragRet::DRAG_CANCEL);
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call CheckDragStartResult
+     * @tc.expected: Returns false, SetMouseDragMonitorState(false) is called
+     */
+    bool result = gestureEventHub->CheckDragStartResult(ctx);
+
+    /**
+     * @tc.expected: result is false, mouse drag monitor is disabled
+     */
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PrepareDragStartPixelMap_001
+ * @tc.desc: Test PrepareDragStartPixelMap - Success path where pixelMap exists
+ * @tc.type: FUNC
+ * @tc.require: Issue the function pixelMap exists handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareDragStartPixelMap_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with valid pixelMap
+     */
+    DragStartContext ctx;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.dragDropInfo.pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call PrepareDragStartPixelMap
+     * @tc.expected: Returns true, SetPixelMap is called
+     */
+    bool result = gestureEventHub->PrepareDragStartPixelMap(ctx);
+
+    /**
+     * @tc.expected: result is true
+     */
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PrepareDragStartPixelMap_002
+ * @tc.desc: Test PrepareDragStartPixelMap - Failure path where pixelMap is null
+ * @tc.type: FUNC
+ * @tc.require: Issue the function null pixelMap handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareDragStartPixelMap_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with null pixelMap
+     */
+    DragStartContext ctx;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.dragDropInfo.pixelMap = nullptr;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step3. Call PrepareDragStartPixelMap
+     * @tc.expected: Returns false, FireCustomerOnDragEnd is called
+     */
+    bool result = gestureEventHub->PrepareDragStartPixelMap(ctx);
+
+    /**
+     * @tc.expected: result is false
+     */
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleStartDragFailure_001
+ * @tc.desc: Test HandleStartDragFailure - with subWindow path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag failure with subwindow
+ */
+HWTEST_F(GestureEventHubTestNg, HandleStartDragFailure_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto pipeline1 = AceType::DynamicCast<PipelineContext>(context);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+
+    /**
+     * @tc.steps: step2. Setup context with subWindow
+     */
+    DragStartContext ctx;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ctx.subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline1 != mainPipeline));
+    ctx.overlayManager = ctx.pipeline->GetOverlayManager();
+    ctx.ret = -1;
+
+    /**
+     * @tc.steps: step3. Call HandleStartDragFailure
+     * @tc.expected: HidePreviewNG and RemovePixelMap are called
+     */
+    gestureEventHub->HandleStartDragFailure(ctx);
+}
+
+/**
+ * @tc.name: HandleStartDragFailure_002
+ * @tc.desc: Test HandleStartDragFailure - without subWindow path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag failure without subwindow
+ */
+HWTEST_F(GestureEventHubTestNg, HandleStartDragFailure_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context without subWindow
+     */
+    DragStartContext ctx;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ctx.subWindow = nullptr;
+    ctx.overlayManager = ctx.pipeline->GetOverlayManager();
+    ctx.ret = -1;
+
+    /**
+     * @tc.steps: step3. Call HandleStartDragFailure
+     * @tc.expected: Only FireCustomerOnDragEnd is called, no HidePreviewNG
+     */
+    gestureEventHub->HandleStartDragFailure(ctx);
+}
+
+/**
+ * @tc.name: UpdateDragStartAnimation_001
+ * @tc.desc: Test UpdateDragStartAnimation - Animation success path with subWindow
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag start animation success
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragStartAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call DoOnDragStartHandling.
+     */
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    GestureEvent info;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto pipeline1 = AceType::DynamicCast<PipelineContext>(context);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    dragPreviewInfo.pixelMap = pixelMap;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.needChangeFwkForLeaveWindow = false;
+    ctx.subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline1 != mainPipeline));;
+    ctx.info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    ctx.isSwitchedToSubWindow = true;
+    ctx.ret = 1;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_TRUE(guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info));
+    EXPECT_TRUE(guestureEventHub->HandleResolvedDragPreview(ctx));
+}
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_001
+ * @tc.desc: Test UpdateDragWindowVisibility - SceneBoard touch drag path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function sceneboard touch drag handling
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    GestureEvent info;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto pipeline1 = AceType::DynamicCast<PipelineContext>(context);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    dragPreviewInfo.pixelMap = pixelMap;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.needChangeFwkForLeaveWindow = true;
+    ctx.subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline1 != mainPipeline));;
+    ctx.info.SetInputEventType(InputEventType::TOUCH_PAD);
+    ctx.isSwitchedToSubWindow = true;
+    ctx.ret = 1;
+    guestureEventHub->DoOnDragStartHandling(ctx);
+    EXPECT_TRUE(guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info));
+    EXPECT_TRUE(guestureEventHub->HandleResolvedDragPreview(ctx));
+}
+
+
+/**
+ * @tc.name: HandleOnDragStart_001
+ * @tc.desc: Test HandleOnDragStart - Complete success flow
+ * @tc.type: FUNC
+ * @tc.require: Issue the function complete drag start flow
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragStart_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup eventHub host
+     */
+    auto event = gestureEventHub->eventHub_.Upgrade();
+    ASSERT_NE(event, nullptr);
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    /**
+     * @tc.steps: step3. Create valid GestureEvent
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::TOUCH_PAD;
+
+    /**
+     * @tc.steps: step4. Call HandleOnDragStart
+     * @tc.expected: Full drag start flow is executed
+     */
+    gestureEventHub->HandleOnDragStart(info);
+}
+
+/**
+ * @tc.name: HandleOnDragStart_002
+ * @tc.desc: Test HandleOnDragStart - Early failure path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function drag start validation failure
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragStart_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub without valid host
+     */
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create GestureEvent
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::TOUCH_PAD;
+
+    /**
+     * @tc.steps: step3. Call HandleOnDragStart
+     * @tc.expected: Returns early due to InitDragStartTargets failure
+     */
+    gestureEventHub->HandleOnDragStart(info);
+}
+
+/**
+ * @tc.name: CreateAsyncDragEndCallback_001
+ * @tc.desc: Test CreateAsyncDragEndCallback - WAITING status path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function async drag end waiting handling
+ */
+HWTEST_F(GestureEventHubTestNg, CreateAsyncDragEndCallback_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create callback with WAITING status
+     */
+    auto callback = gestureEventHub->CreateAsyncDragEndCallback(frameNode);
+
+    /**
+     * @tc.steps: step3. Invoke callback with WAITING status
+     * @tc.expected: FireCustomerOnDragEnd is called
+     */
+    callback(DragStartRequestStatus::WAITING);
+}
+
+/**
+ * @tc.name: CreateAsyncDragEndCallback_002
+ * @tc.desc: Test CreateAsyncDragEndCallback - Non-WAITING status path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function async drag end non-waiting handling
+ */
+HWTEST_F(GestureEventHubTestNg, CreateAsyncDragEndCallback_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create callback
+     */
+    auto callback = gestureEventHub->CreateAsyncDragEndCallback(frameNode);
+
+    /**
+     * @tc.steps: step3. Invoke callback with READY status
+     * @tc.expected: Callback returns early, nothing happens
+     */
+    callback(DragStartRequestStatus::READY);
+}
+
+/**
+ * @tc.name: CreateDelayedDragStartCallback_001
+ * @tc.desc: Test CreateDelayedDragStartCallback - MOUSE_BUTTON path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function delayed drag start mouse handling
+ */
+HWTEST_F(GestureEventHubTestNg, CreateDelayedDragStartCallback_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with MOUSE_BUTTON
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+
+    /**
+     * @tc.steps: step3. Create and invoke delayed callback
+     * @tc.expected: SetMouseDragMonitorState(true) is called before DoOnDragStartHandling
+     */
+    auto callback = gestureEventHub->CreateDelayedDragStartCallback(ctx);
+    callback();
+}
+
+/**
+ * @tc.name: CreateDelayedDragStartCallback_002
+ * @tc.desc: Test CreateDelayedDragStartCallback - TOUCH path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function delayed drag start touch handling
+ */
+HWTEST_F(GestureEventHubTestNg, CreateDelayedDragStartCallback_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with TOUCH
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_PAD;
+
+    /**
+     * @tc.steps: step3. Create and invoke delayed callback
+     * @tc.expected: SetMouseDragMonitorState is NOT called
+     */
+    auto callback = gestureEventHub->CreateDelayedDragStartCallback(ctx);
+    callback();
+}
+
+/**
+ * @tc.name: ShowMouseDragWindow_001
+ * @tc.desc: Test ShowMouseDragWindow - isSwitchedToSubWindow is true path, skip inner block
+ * @tc.type: FUNC
+ * @tc.require: Issue the function mouse drag window showing with subwindow switched
+ */
+HWTEST_F(GestureEventHubTestNg, ShowMouseDragWindow_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with isSwitchedToSubWindow = true
+     * @tc.expected: The inner block of !ctx.isSwitchedToSubWindow will be skipped
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.isSwitchedToSubWindow = true;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(ctx.pipeline, nullptr);
+    ctx.dragDropManager = ctx.pipeline->GetDragDropManager();
+    ASSERT_NE(ctx.dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ShowMouseDragWindow
+     * @tc.expected: The inner block is skipped, only SetIsDragWindowShow(true) is called
+     */
+    gestureEventHub->ShowMouseDragWindow(ctx);
+
+    /**
+     * @tc.expected: dragDropManager's IsDragWindowShow is set to true
+     */
+    // Verified through the call that SetIsDragWindowShow(true) is executed
+    EXPECT_TRUE(ctx.dragDropManager->IsDragWindowShow());
+}
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_004
+ * @tc.desc: Test UpdateDragWindowVisibility - enter needChangeFwkForLeaveWindow branch
+ * @tc.type: FUNC
+ * @tc.require: Issue the function leave window transfer handling
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with TOUCH event and needChangeFwkForLeaveWindow = true
+     * @tc.expected: Enter the branch: ctx.info.GetInputEventType() != MOUSE_BUTTON && ctx.needChangeFwkForLeaveWindow
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::TOUCH_SCREEN;  // Not MOUSE_BUTTON
+    ctx.needChangeFwkForLeaveWindow = true;  // Trigger leave window branch
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(ctx.pipeline, nullptr);
+    ctx.dragDropManager = ctx.pipeline->GetDragDropManager();
+    gestureEventHub->DoOnDragStartHandling(ctx);
+    ASSERT_NE(ctx.dragDropManager, nullptr);
+}
+
+/**
+ * @tc.name: ShowSceneBoardTouchDragWindow_001
+ * @tc.desc: Test ShowSceneBoardTouchDragWindow - isSceneBoardTouchDrag is false path, early return
+ * @tc.type: FUNC
+ * @tc.require: Issue the function sceneboard touch drag window early return handling
+ */
+HWTEST_F(GestureEventHubTestNg, ShowSceneBoardTouchDragWindow_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with isSceneBoardTouchDrag = false
+     * @tc.expected: Enter the !ctx.preparedInfo.isSceneBoardTouchDrag branch and return early
+     */
+    DragStartContext ctx;
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(ctx.pipeline, nullptr);
+    ctx.dragDropManager = ctx.pipeline->GetDragDropManager();
+    gestureEventHub->ShowSceneBoardTouchDragWindow(ctx);
+    ASSERT_NE(ctx.dragDropManager, nullptr);
+}
+
+/**
+ * @tc.name: ShowSceneBoardTouchDragWindow_002
+ * @tc.desc: Test ShowSceneBoardTouchDragWindow - isSceneBoardTouchDrag is false path, early return
+ * @tc.type: FUNC
+ * @tc.require: Issue the function sceneboard touch drag window early return handling
+ */
+HWTEST_F(GestureEventHubTestNg, ShowSceneBoardTouchDragWindow_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with isSceneBoardTouchDrag = false
+     * @tc.expected: Enter the !ctx.preparedInfo.isSceneBoardTouchDrag branch and return early
+     */
+    DragStartContext ctx;
+    ctx.preparedInfo.isSceneBoardTouchDrag = true;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(ctx.pipeline, nullptr);
+    ctx.dragDropManager = ctx.pipeline->GetDragDropManager();
+    gestureEventHub->ShowSceneBoardTouchDragWindow(ctx);
+    ASSERT_NE(ctx.dragDropManager, nullptr);
+}
+
+/**
+ * @tc.name: UpdateDragPreviewScale_001
+ * @tc.desc: Test UpdateDragPreviewScale - isSceneBoardTouchDrag is false path, early return
+ * @tc.type: FUNC
+ * @tc.require: Issue the function sceneboard touch drag window early return handling
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragPreviewScale_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with isSceneBoardTouchDrag = false
+     * @tc.expected: Enter the !ctx.preparedInfo.isSceneBoardTouchDrag branch and return early
+     */
+    DragStartContext ctx;
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(ctx.pipeline, nullptr);
+    ctx.dragDropManager = ctx.pipeline->GetDragDropManager();
+    ctx.preparedInfo.isMenuShow = false;
+    gestureEventHub->UpdateDragPreviewScale(ctx);
+    ASSERT_NE(ctx.dragDropManager, nullptr);
+}
+
+/**
+ * @tc.name: PrepareFallbackDragPreview_005
+ * @tc.desc: Test PrepareFallbackDragPreview - MOUSE_BUTTON final fallback path
+ * @tc.type: FUNC
+ * @tc.require: Issue the function default mouse drag image handling
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareFallbackDragPreview_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and GestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup context with MOUSE_BUTTON event
+     */
+    DragStartContext ctx;
+    ctx.info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    ctx.dragDropInfo.pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+
+    /**
+     * @tc.steps: step3. Call PrepareFallbackDragPreview
+     * @tc.expected: Uses CreatePixelMapFromString with DEFAULT_MOUSE_DRAG_IMAGE
+     */
+    gestureEventHub->PrepareFallbackDragPreview(ctx);
+    EXPECT_EQ(gestureEventHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_002
+ * @tc.desc: Test UpdateDragWindowVisibility - UpdateDragWindowVisibility branch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. Setup context with all required fields initialized.
+     * @tc.expected: All context fields are properly initialized to avoid null pointer access.
+     */
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    // Initialize required fields to avoid null pointer dereference
+    ctx.dragDropManager = pipeline->GetDragDropManager();
+    ctx.overlayManager = pipeline->GetOverlayManager();
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.isSwitchedToSubWindow = false;
+    ctx.info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    ctx.needChangeFwkForLeaveWindow = true;
+    std::cout << "hushijie inputeventtype = " << static_cast<int>(ctx.info.GetInputEventType()) << std::endl;
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    ctx.needChangeFwkForLeaveWindow = false;
+    ctx.isSwitchedToSubWindow = true;
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_003
+ * @tc.desc: Test UpdateDragWindowVisibility - UpdateDragWindowVisibility branch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. Setup context with all required fields initialized.
+     * @tc.expected: All context fields are properly initialized to avoid null pointer access.
+     */
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    // Initialize required fields to avoid null pointer dereference
+    ctx.dragDropManager = pipeline->GetDragDropManager();
+    ctx.overlayManager = pipeline->GetOverlayManager();
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.isSwitchedToSubWindow = false;
+    ctx.info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    ctx.needChangeFwkForLeaveWindow = true;
+
+    /**
+     * @tc.steps: step4. call UpdateDragWindowVisibility.
+     * @tc.expected: Function executes without crashing.
+     */
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+
+    ctx.isSwitchedToSubWindow = true;
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    EXPECT_FALSE(guestureEventHub->HandleResolvedDragPreview(ctx));
+
+    ctx.subWindow = SubwindowManager::GetInstance()->ShowPreviewNG(true);
+    guestureEventHub->HandleStartDragFailure(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+
+    ctx.needChangeFwkForLeaveWindow = false;
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    guestureEventHub->PrepareDragStartSubWindowPreview(ctx, context);
+    guestureEventHub->dragEventActuator_ = nullptr;
+    guestureEventHub->PrepareDragStartData(ctx);
+    EXPECT_FALSE(guestureEventHub->HandleResolvedDragPreview(ctx));
 }
 } // namespace OHOS::Ace::NG
