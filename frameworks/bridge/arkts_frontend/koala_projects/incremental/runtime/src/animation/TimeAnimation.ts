@@ -176,7 +176,7 @@ export function frameAnimation<Value>(frameTime: ReadonlyArray<uint32>, compute:
     if (count < 2) {
         throw new Error('illegal frames count: ' + count)
     }
-    const time = new Array<uint32>(count)
+    const time = Array.create<uint32>(count, 0)
     for (let index = 0; index < count; index++) {
         const value = frameTime[index]
         if (!isFinite(value) || (value < 1)) {
