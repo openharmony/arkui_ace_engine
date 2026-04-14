@@ -14621,11 +14621,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                            Ark_Boolean options)
+                                            Ark_Boolean options,
+                                            const Opt_Boolean* treeOperating)
     {
         return {};
     }
     Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_Boolean GetCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_Boolean CheckIfCanCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -22585,6 +22594,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
             FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
+            FrameNodeExtenderAccessor::GetCrossLanguageTreeOperatingImpl,
+            FrameNodeExtenderAccessor::CheckIfCanCrossLanguageTreeOperatingImpl,
             FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
             FrameNodeExtenderAccessor::SetLayoutPositionImpl,
             FrameNodeExtenderAccessor::MeasureImpl,

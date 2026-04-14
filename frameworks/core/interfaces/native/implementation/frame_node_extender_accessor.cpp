@@ -36,6 +36,8 @@
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -637,27 +639,26 @@ void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
 
     eventHub->RemoveSupportedUIState(static_cast<UIState>(uiStates), false);
 }
-Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
+Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options, const Opt_Boolean* treeOperating)
 {
     CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
-    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
-        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
-        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
-        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
-        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
-        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
-        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
-        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
-        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
-        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
-    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), frameNode->GetTag());
-    if (pos == nodeTypeArray.end()) {
-        return false;
+    bool attributeSetting = static_cast<bool>(options);
+    auto convValue = Converter::OptConvertPtr<bool>(treeOperating);
+    ArkUITreeOperatingStatus treeOperatingStatus = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    if (convValue) {
+        treeOperatingStatus = (*convValue)
+                                ? ARKUI_TREE_OPERATING_STATUS_ENABLE
+                                : ARKUI_TREE_OPERATING_STATUS_DISABLE;
     }
-    frameNode->SetIsCrossLanguageAttributeSetting(options);
-    return true;
+    ArkUICrossLanguageOption option = {
+        .attributeSetting = attributeSetting,
+        .treeOperatingStatus = treeOperatingStatus
+ 	};
+    auto nativeNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(nativeNode, &option);
+    return result == ERROR_CODE_NO_ERROR;
 }
 Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 {
@@ -665,6 +666,22 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->isCrossLanguageAttributeSetting();
+}
+Ark_Boolean GetCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+{
+    CHECK_ON_UI_THREAD_RETURN(false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    return (static_cast<int32_t>(frameNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE);
+}
+Ark_Boolean CheckIfCanCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+{
+    CHECK_ON_UI_THREAD_RETURN(false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    bool result = frameNode->IsCNode() &&
+ 	    (static_cast<int32_t>(frameNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE);
+    return result;
 }
 void SetMeasuredSizeImpl(Ark_FrameNode peer,
                          const Ark_Size* size)
@@ -1579,6 +1596,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
         FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
+        FrameNodeExtenderAccessor::GetCrossLanguageTreeOperatingImpl,
+        FrameNodeExtenderAccessor::CheckIfCanCrossLanguageTreeOperatingImpl,
         FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
         FrameNodeExtenderAccessor::SetLayoutPositionImpl,
         FrameNodeExtenderAccessor::MeasureImpl,

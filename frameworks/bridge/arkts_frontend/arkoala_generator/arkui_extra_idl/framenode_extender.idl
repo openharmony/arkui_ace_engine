@@ -70,8 +70,10 @@ interface FrameNodeExtender {
   static void disposeTree(FrameNode peer);
   static void addSupportedUIStates(FrameNode peer, i32 uiStates, UIStatesChangeHandler statesChangeHandler, boolean excludeInner);
   static void removeSupportedUIStates(FrameNode peer, i32 uiStates);
-  static boolean setCrossLanguageOptions(FrameNode peer, boolean options);
+  static boolean setCrossLanguageOptions(FrameNode peer, boolean options, (boolean or undefined) treeOperating);
   static boolean getCrossLanguageOptions(FrameNode peer);
+  static boolean getCrossLanguageTreeOperating(FrameNode peer);
+  static boolean checkIfCanCrossLanguageTreeOperating(FrameNode peer);
   static void setMeasuredSize(FrameNode peer, Size size);
   static void setLayoutPosition(FrameNode peer, Vector2 position);
   static void measure(FrameNode peer, LayoutConstraint constraint);
