@@ -4448,14 +4448,34 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "initialize subWindow display invalid. window name is %{public}s",
             window->GetWindowName().c_str());
     }
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (defaultDisplay) {
-        auto displayInfo = defaultDisplay->GetDisplayInfo();
-        if (displayInfo) {
-            density = displayInfo->GetDensityInCurResolution();
+    auto needAdaptForceSplitMode = false;
+    auto aceContainer = Platform::AceContainer::GetContainer(instanceId_);
+    if (aceContainer) {
+        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+        if (pipelineContext) {
+            needAdaptForceSplitMode = pipelineContext->IsDisplayInForceSplitMode();
         }
-        deviceWidth = defaultDisplay->GetWidth();
-        deviceHeight = defaultDisplay->GetHeight();
+    }
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (needAdaptForceSplitMode) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+    }
+    if (defaultDisplay) {
+        if (needAdaptForceSplitMode) {
+            auto displayInfoWithCache = defaultDisplay->GetDisplayInfoWithCache();
+            if (displayInfoWithCache) {
+                density = displayInfoWithCache->GetDensityInCurResolution();
+                deviceWidth = displayInfoWithCache->GetWidth();
+                deviceHeight = displayInfoWithCache->GetHeight();
+            }
+        } else {
+            auto displayInfo = defaultDisplay->GetDisplayInfo();
+            if (displayInfo) {
+                density = displayInfo->GetDensityInCurResolution();
+            }
+            deviceWidth = defaultDisplay->GetWidth();
+            deviceHeight = defaultDisplay->GetHeight();
+        }
     }
     SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);

@@ -199,13 +199,31 @@ void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t child
     subSafeAreaManager->SetUseCutout(parentUseCutout);
 }
 
+bool IsDisplayInForceSplitMode(int32_t parentContainerId)
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(parentContainer, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->IsDisplayInForceSplitMode();
+}
+
 Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 {
     auto finalDisplayId = displayId;
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId);
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    CHECK_NULL_RETURN(defaultDisplay, Size());
-
-    auto size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    Size size;
+    if (needAdaptForceSplitMode) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+        CHECK_NULL_RETURN(defaultDisplay, Size());
+        auto info = defaultDisplay->GetDisplayInfoWithCache();
+        CHECK_NULL_RETURN(info, Size());
+        size = Size(info->GetWidth(), info->GetHeight());
+    } else {
+        CHECK_NULL_RETURN(defaultDisplay, Size());
+        size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    }
     if (!SystemProperties::IsSuperFoldDisplayDevice()) {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Not SuperFoldDisplayDevice");
         return size;
@@ -370,14 +388,27 @@ void SubwindowOhos::InitContainer()
             }
         }
         auto displayId = parentContainer->GetCurrentDisplayId();
+        auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+        if (needAdaptForceSplitMode) {
+            defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+        }
         if (!defaultDisplay) {
             TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager failed to getDisplay by id: %{public}u",
                 (uint32_t)displayId);
         }
         CHECK_NULL_VOID(defaultDisplay);
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
-            (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        if (needAdaptForceSplitMode) {
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+                "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+                (uint32_t)displayId, info->GetWidth(), info->GetHeight());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+                "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+                (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        }
         auto windowSize = GetSubWindowSize(parentContainerId_, displayId);
         windowOption->SetWindowRect({ 0, 0, windowSize.Width(), windowSize.Height() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
@@ -1649,17 +1680,29 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get toast dialog window property enter");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
     if (dialogWindow_) {
         auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow_->GetDisplayId());
+        if (needAdaptForceSplitMode) {
+            currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow_->GetDisplayId(), true);
+        }
         defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
     }
 
     if (defaultDisplay) {
         posX = 0;
         posY = 0;
-        width = defaultDisplay->GetWidth();
-        height = defaultDisplay->GetHeight();
-        density = defaultDisplay->GetVirtualPixelRatio();
+        if (needAdaptForceSplitMode) {
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            width = info->GetWidth();
+            height = info->GetHeight();
+            density = info->GetVirtualPixelRatio();
+        } else {
+            width = defaultDisplay->GetWidth();
+            height = defaultDisplay->GetHeight();
+            density = defaultDisplay->GetVirtualPixelRatio();
+        }
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f", posX,
@@ -1721,10 +1764,21 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
     auto focusWindowId = dialogWindow_->GetDisplayId();
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
     auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
-    CHECK_NULL_RETURN(focusDisplayInfo, false);
-    width = focusDisplayInfo->GetWidth();
-    height = focusDisplayInfo->GetHeight();
+    if (needAdaptForceSplitMode) {
+        focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId, true);
+        CHECK_NULL_RETURN(focusDisplayInfo, false);
+        auto info = focusDisplayInfo->GetDisplayInfoWithCache();
+        CHECK_NULL_RETURN(info, false);
+        width = info->GetWidth();
+        height = info->GetHeight();
+    } else {
+        CHECK_NULL_RETURN(focusDisplayInfo, false);
+        width = focusDisplayInfo->GetWidth();
+        height = focusDisplayInfo->GetHeight();
+    }
+    
     dialogWindow_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     return true;
 }
@@ -2554,9 +2608,18 @@ void SubwindowOhos::InitializeSafeArea()
 
     std::optional<NG::RectF> windowRect;
     if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
+        auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
-        CHECK_NULL_VOID(defaultDisplay);
-        windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+        if (needAdaptForceSplitMode) {
+            defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId(), true);
+            CHECK_NULL_VOID(defaultDisplay);
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            windowRect = { 0.0, 0.0, info->GetWidth(), info->GetHeight() };
+        } else {
+            CHECK_NULL_VOID(defaultDisplay);
+            windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+        }
     }
 
     auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);

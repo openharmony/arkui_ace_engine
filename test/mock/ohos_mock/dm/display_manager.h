@@ -60,7 +60,7 @@ public:
      */
     sptr<Display> GetDefaultDisplay();
 
-    sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo = false);
 
     /**
      * @brief Get the default display object by means of sync.
