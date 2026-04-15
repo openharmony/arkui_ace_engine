@@ -818,11 +818,9 @@ bool SecurityComponentHandler::GetSizeWithScale(RefPtr<FrameNode>& node, double&
     return true;
 }
 
-bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+bool SecurityComponentHandler::InitButtonRect(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, false);
-    buttonInfo.nodeId_ = node->GetId();
     if (!GetPaddingInfo(buttonInfo, node)) {
         SC_LOG_WARN("InitBaseInfoWarning: Get padding info failed");
         return false;
@@ -841,6 +839,18 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         SC_LOG_WARN("InitBaseInfoWarning: Get width and height failed");
         return false;
     }
+    return true;
+}
+
+bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    buttonInfo.nodeId_ = node->GetId();
+    if (!InitButtonRect(buttonInfo, node)) {
+        return false;
+    }
+
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();
