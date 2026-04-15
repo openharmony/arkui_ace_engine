@@ -43,7 +43,7 @@ sptr<Display> DisplayManager::GetDefaultDisplay()
     return defaultDisplay_;
 }
 
-sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
+sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
 {
     return defaultDisplay_;
 }
