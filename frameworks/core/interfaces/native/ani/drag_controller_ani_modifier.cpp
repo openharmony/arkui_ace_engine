@@ -535,6 +535,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     
     auto container = Ace::AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
         return false;
     }
@@ -547,13 +548,16 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
-    auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
+        materialInfo.materialId };
+    dragData->isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData->materialFilter = materialInfo.materialFilter;
     return true;
 }
 
@@ -764,6 +768,7 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     
     auto container = Ace::AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
         LOGE("AceDrag, can not find current pointerId or not in press.");
         return false;
@@ -773,13 +778,16 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto windowId = container->GetWindowId();
-    auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
+        materialInfo.materialId };
+    dragData.isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData.materialFilter = materialInfo.materialFilter;
     return true;
 }
 

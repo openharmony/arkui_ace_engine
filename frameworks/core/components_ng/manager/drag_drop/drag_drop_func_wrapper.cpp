@@ -59,6 +59,15 @@ constexpr VisibleType AUTO_HIDE_TARGET_VISIBLE_TYPE = VisibleType::INVISIBLE;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
+
+ColorMode GetColorModeFromPipeline(const RefPtr<PipelineBase>& pipeline)
+{
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipeline);
+    if (pipelineContext) {
+        return MaterialUtils::GetResourceColorMode(AceType::RawPtr(pipelineContext));
+    }
+    return ColorMode::LIGHT;
+}
 }
 
 static bool CheckInternalDragging(const RefPtr<Container>& container)
@@ -226,12 +235,14 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     auto isDragDelay = (dragAction->dataLoadParams != nullptr);
-    auto materialId = DragDropFuncWrapper::ParseUiMaterial(dragAction->previewOption);
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(dragAction->previewOption, pipeline);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
-        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialId };
+        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialInfo.materialId };
+    dragData->isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData->materialFilter = materialInfo.materialFilter;
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -487,11 +498,6 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
         }
     }
     auto material = imageContext->GetSystemMaterial();
-    if (material && Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Not support uiMaterial.");
-        option.options.material = nullptr;
-        return;
-    }
     option.options.material = material;
 }
 
@@ -574,12 +580,83 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
     arkExtraInfoJson->Put("shadow_is_hardwareacceleration", shadow.GetHardwareAcceleration());
 }
 
+DragDropFuncWrapper::DragPreviewMaterialInfo DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+    const DragPreviewOption& option)
+{
+    DragPreviewMaterialInfo materialInfo;
+    auto material = option.options.material;
+    CHECK_NULL_RETURN(material, materialInfo);
+    if (Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
+        return materialInfo;
+    }
+    materialInfo.materialId = MaterialUtils::CallGetMaterialId(AceType::RawPtr(material));
+    return materialInfo;
+}
+
+DragDropFuncWrapper::DragPreviewMaterialInfo DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+    const DragPreviewOption& option, float dipScale, OHOS::Ace::ColorMode colorMode)
+{
+    DragPreviewMaterialInfo materialInfo;
+    auto material = option.options.material;
+    CHECK_NULL_RETURN(material, materialInfo);
+    if (Ace::AceType::TypeId(AceType::RawPtr(material)) != Ace::UiMaterial::TypeId()) {
+        return ParseDragPreviewMaterialInfo(option);
+    }
+    auto uiMaterial = AceType::DynamicCast<UiMaterial>(AceType::RawPtr(material));
+    CHECK_NULL_RETURN(uiMaterial, materialInfo);
+    auto immersiveOptions = uiMaterial->CopyImmersiveOptions();
+    CHECK_NULL_RETURN(immersiveOptions, materialInfo);
+    auto config = MaterialUtils::GetImmersiveMaterialConfig(immersiveOptions, dipScale, colorMode);
+    CHECK_NULL_RETURN(config, materialInfo);
+    materialInfo.materialFilter = MaterialUtils::CreateRosenFilter(*config);
+    return materialInfo;
+}
+
+DragDropFuncWrapper::DragPreviewMaterialInfo DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+    const DragPreviewOption& option, const RefPtr<FrameNode>& frameNode)
+{
+    auto material = option.options.material;
+    if (material && Ace::AceType::TypeId(AceType::RawPtr(material)) != Ace::UiMaterial::TypeId()) {
+        return ParseDragPreviewMaterialInfo(option);
+    }
+    DragPreviewMaterialInfo materialInfo;
+    CHECK_NULL_RETURN(frameNode, materialInfo);
+    auto pipeline = frameNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, materialInfo);
+    auto colorMode = frameNode->GetLocalColorMode();
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = MaterialUtils::GetResourceColorMode(pipeline);
+    }
+    return ParseDragPreviewMaterialInfo(option, pipeline->GetDipScale(), colorMode);
+}
+
+DragDropFuncWrapper::DragPreviewMaterialInfo DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+    const DragPreviewOption& option, const RefPtr<PipelineBase>& pipeline)
+{
+    auto material = option.options.material;
+    if (material && Ace::AceType::TypeId(AceType::RawPtr(material)) != Ace::UiMaterial::TypeId()) {
+        return ParseDragPreviewMaterialInfo(option);
+    }
+    DragPreviewMaterialInfo materialInfo;
+    CHECK_NULL_RETURN(pipeline, materialInfo);
+    return ParseDragPreviewMaterialInfo(option, pipeline->GetDipScale(), GetColorModeFromPipeline(pipeline));
+}
+
 int32_t DragDropFuncWrapper::ParseUiMaterial(const DragPreviewOption& option)
 {
-    int32_t materialId = -1;
-    CHECK_NULL_RETURN(option.options.material, materialId);
-    materialId = MaterialUtils::CallGetMaterialId(AceType::RawPtr(option.options.material));
-    return materialId;
+    return ParseDragPreviewMaterialInfo(option).materialId;
+}
+
+std::shared_ptr<OHOS::Rosen::Filter> DragDropFuncWrapper::CreateMaterialFilter(
+    const DragPreviewOption& option, float dipScale, OHOS::Ace::ColorMode colorMode)
+{
+    return ParseDragPreviewMaterialInfo(option, dipScale, colorMode).materialFilter;
+}
+
+std::shared_ptr<OHOS::Rosen::Filter> DragDropFuncWrapper::CreateMaterialFilter(
+    const DragPreviewOption& option, const RefPtr<FrameNode>& frameNode)
+{
+    return ParseDragPreviewMaterialInfo(option, frameNode).materialFilter;
 }
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()

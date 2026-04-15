@@ -1744,7 +1744,8 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage045
 
     DragPreviewOption option;
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(option.options.material, nullptr);
+    ASSERT_NE(option.options.material, nullptr);
+    EXPECT_EQ(AceType::TypeId(AceType::RawPtr(option.options.material)), UiMaterial::TypeId());
 }
 
 /**
@@ -1766,6 +1767,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage046
     DragPreviewOption option;
     option.options.material = AceType::MakeRefPtr<UiMaterial>();
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(option.options.material, nullptr);
+    ASSERT_NE(option.options.material, nullptr);
+    EXPECT_EQ(AceType::TypeId(AceType::RawPtr(option.options.material)), UiMaterial::TypeId());
 }
 } // namespace OHOS::Ace::NG

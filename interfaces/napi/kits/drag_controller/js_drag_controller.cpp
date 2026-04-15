@@ -915,19 +915,23 @@ std::optional<Msdp::DeviceStatus::DragData> EnvelopedDragData(std::shared_ptr<Dr
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, std::nullopt);
     auto windowId = container->GetWindowId();
+    auto pipeline = container->GetPipelineContext();
     auto arkExtraInfoJson = JsonUtil::Create(true);
     arkExtraInfoJson->Put("scale", asyncCtx->scale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
-    const int32_t materialId = NG::DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
-    return Msdp::DeviceStatus::DragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
+    Msdp::DeviceStatus::DragData dragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dragNumber, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag,
-        materialId };
+        materialInfo.materialId };
+    dragData.isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData.materialFilter = materialInfo.materialFilter;
+    return dragData;
 }
 
 void SetDragSizeAndData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
@@ -1015,7 +1019,8 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId,
         dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
         dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-        dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag };
+        dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag,
+        dragData.materialId, dragData.dragAnimationType, dragData.isSetMaterialFilter, dragData.materialFilter };
     for (const auto& shadowInfo : dragData.shadowInfos) {
         auto pixelMap = shadowInfo.pixelMap;
         if (pixelMap) {

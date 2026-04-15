@@ -16,6 +16,8 @@
 #include "core/components_ng/render/ui_material_filter_creator.h"
 
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_to_para.h"
+#include "render_service_client/core/ui_effect/filter/include/filter.h"
 #include "ui/properties/ui_material_structs.h"
 
 #include "core/components/common/properties/ui_material.h"
@@ -743,5 +745,17 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
     glassFilter->Setter<Rosen::FrostedGlassMaterialColorTag>(rsColor);
     return filter;
 #endif
+}
+
+std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(
+    const ImmersiveMaterialConfig& params)
+{
+    auto filterBase = ConvertToUiMaterialFilter(params);
+    CHECK_NULL_RETURN(filterBase, nullptr);
+    auto para = Rosen::RSNGFilterToParaHelper::ConvertFilterToPara(filterBase);
+    CHECK_NULL_RETURN(para, nullptr);
+    auto rosenFilter = std::make_shared<Rosen::Filter>();
+    rosenFilter->AddPara(para);
+    return rosenFilter;
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
 
 namespace OHOS::Ace {
 const char UI_MATERIAL_EXTENSION_SO_PATH[] = "system/lib64/libhdsmaterialimpl.z.so";
@@ -232,13 +233,25 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     }
     auto pipeline = node->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    ColorMode colorMode = ColorMode::LIGHT;
+    auto colorMode = GetNodeColorMode(node);
+    return GetImmersiveMaterialConfig(options, pipeline->GetDipScale(), colorMode);
+}
+
+std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig(
+    const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode)
+{
+    if (!options) {
+        return std::nullopt;
+    }
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = ColorMode::LIGHT;
+    }
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    ImmersiveMaterialConfig result { .applyShadow = options->applyShadow, .dipScale = pipeline->GetDipScale() };
+    ImmersiveMaterialConfig result { .applyShadow = options->applyShadow, .dipScale = dipScale };
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = GetNodeColorMode(node),
+            .colorMode = colorMode,
         };
         return result;
     }
@@ -246,8 +259,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     bool finalInvertColor = ValidColorInvert(options, materialLevel, static_cast<UiMaterialTransparency>(transparency));
     result.colorInvert = finalInvertColor;
     result.materialColor = options->materialColor;
-    if (!finalInvertColor) {
-        colorMode = GetNodeColorMode(node);
+    if (finalInvertColor) {
+        colorMode = ColorMode::LIGHT;
     }
     result.key = UiMaterialMapKey {
         .level = materialLevel,
@@ -463,5 +476,10 @@ RefPtr<UiMaterial> UiMaterial::CreateEmpty()
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetEmpty(true);
     return material;
+}
+
+std::shared_ptr<Rosen::Filter> MaterialUtils::CreateRosenFilter(const ImmersiveMaterialConfig& params)
+{
+    return NG::UiMaterialFilterCreator::CreateRosenFilter(params);
 }
 } // namespace OHOS::Ace

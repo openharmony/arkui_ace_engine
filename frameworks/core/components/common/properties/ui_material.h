@@ -27,6 +27,7 @@
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Rosen {
+class Filter;
 class RSNGFilterBase;
 }
 
@@ -79,6 +80,8 @@ public:
     static bool CheckMaterialValid(int32_t type);
     static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
         const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node);
+    static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
+        const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode);
     static bool GetUiMaterialFilter(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
     static Shadow GetImmersiveShadow(float dipScale);
@@ -92,6 +95,7 @@ public:
     static RefPtr<UiMaterial> GetInitMaterial(const UiMaterialStyle style);
     static bool IsEnableMaterialParam(const RefPtr<UiMaterial>& material);
     static const UiMaterial* PreProcessMaterial(const UiMaterial* material);
+    static std::shared_ptr<Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
 
 private:
     static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
