@@ -61,7 +61,7 @@ void ListItemGroupModelStatic::SetDividerMultiThread(
 RefPtr<FrameNode> ListItemGroupModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId,
-        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupOptions()));
     return frameNode;
 }
 
@@ -128,5 +128,23 @@ void ListItemGroupModelStatic::SetStyle(FrameNode* frameNode, const std::optiona
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetListItemGroupStyle(style.value_or(V2::ListItemGroupStyle::NONE));
+}
+
+void ListItemGroupModelStatic::SetHeaderStyle(
+    FrameNode* frameNode, const std::optional<V2::ListItemGroupHeaderFooterStyle>& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHeaderStyle(style.value_or(V2::ListItemGroupHeaderFooterStyle::NONE));
+}
+
+void ListItemGroupModelStatic::SetFooterStyle(
+    FrameNode* frameNode, const std::optional<V2::ListItemGroupHeaderFooterStyle>& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFooterStyle(style.value_or(V2::ListItemGroupHeaderFooterStyle::NONE));
 }
 } // namespace OHOS::Ace::NG

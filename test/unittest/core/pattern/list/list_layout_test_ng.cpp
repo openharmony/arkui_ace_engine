@@ -1573,7 +1573,9 @@ HWTEST_F(ListLayoutTestNg, ListItemGroupCreateForCardModeTest001, TestSize.Level
      * @tc.expected: step2. create a card style ListItemGroup success.
      */
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();

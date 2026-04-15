@@ -38,6 +38,8 @@ public:
     static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent = false);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
+    static void SetHeaderStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupHeaderFooterStyle>& style);
+    static void SetFooterStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupHeaderFooterStyle>& style);
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
 };

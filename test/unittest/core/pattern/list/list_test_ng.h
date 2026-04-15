@@ -106,7 +106,9 @@ protected:
         auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
         auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
         ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        V2::ListItemGroupOptions groupOptions;
+        groupOptions.style = V2::ListItemGroupStyle::NONE;
+        groupModel.Create(groupOptions);
         auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
         listItemGroup->SetParent(weakList);
         // 2: each ListItemGroup contains 2 items

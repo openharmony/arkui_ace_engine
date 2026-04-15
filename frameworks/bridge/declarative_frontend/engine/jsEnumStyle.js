@@ -4225,6 +4225,12 @@ let ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle.CARD = 1] = 'CARD';
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
+let ListItemGroupHeaderFooterStyle;
+(function (ListItemGroupHeaderFooterStyle) {
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.NONE = 0] = 'NONE';
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.FLOATING = 1] = 'FLOATING';
+})(ListItemGroupHeaderFooterStyle || (ListItemGroupHeaderFooterStyle = {}));
+
 let ListItemGroupArea;
 (function (ListItemGroupArea) {
   ListItemGroupArea[ListItemGroupArea.NONE = 0] = 'NONE';

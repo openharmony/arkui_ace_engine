@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
-void ListItemGroupModelImpl::Create(V2::ListItemGroupStyle listItemGroupStyle)
+void ListItemGroupModelImpl::Create(const V2::ListItemGroupOptions& options)
 {
     auto listItemGroupComponent = AceType::MakeRefPtr<V2::ListItemGroupComponent>();
     ViewStackProcessor::GetInstance()->Push(listItemGroupComponent);
