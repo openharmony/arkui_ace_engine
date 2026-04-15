@@ -97,6 +97,15 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         return;
     }
     if (info_->targetIndex_) {
+        // During target-position measurement the footer may remain active from the previous frame
+        // or become active before normal footer cleanup runs. Layout is skipped here, so explicitly
+        // deactivate it to avoid a one-frame flash.
+        if (info_->footerIndex_ == 0) {
+            auto child = wrapper_->GetChildByIndex(0);
+            if (child) {
+                child->SetActive(false);
+            }
+        }
         // no item moves during MeasureToTarget tasks
         return;
     }
