@@ -111,8 +111,6 @@ void ResetLastTraceId()
 ResTracer::ResTracer(const char* caller, uint32_t traceType, uint64_t traceId)
 {
     AceSetResTraceId(traceType, traceId, &traceType_, &traceId_);
-    std::clog << __func__ << ": traceType=" << traceType << " traceId=" << traceId
-              << " oldTraceType=" << traceType_ << " oldTraceId=" << traceId_ << " " << caller << std::endl;
 }
 
 ResTracer::~ResTracer()
