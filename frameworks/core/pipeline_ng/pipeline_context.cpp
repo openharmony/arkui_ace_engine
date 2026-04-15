@@ -2835,7 +2835,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
-        MarkDirtyOverlay();
+        OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
@@ -2894,7 +2894,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         if (scrollResult) {
             FlushUITasks();
         }
-        MarkDirtyOverlay();
+        OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
@@ -3037,7 +3037,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (scrollResult) {
             context->FlushUITasks();
         }
-        context->MarkDirtyOverlay();
+        context->OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
@@ -3052,28 +3052,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 #endif
 }
 
-void NotifyDirtyChildren(const RefPtr<UINode>& node)
+void PipelineContext::OnKeyboardAvoidOverlay()
 {
-    CHECK_NULL_VOID(node);
-    auto menuChildrens = node->GetChildren();
-    for (auto child : menuChildrens) {
-        if (child) {
-            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-}
-
-void PipelineContext::MarkDirtyOverlay()
-{
-    CHECK_NULL_VOID(rootNode_);
-    auto childNodes = rootNode_->GetChildren();
-    for (auto child : childNodes) {
-        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
-            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            NotifyDirtyChildren(child);
-        }
-    }
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->OnKeyboardAvoid();
 }
 
 void PipelineContext::FlushDirtyPropertyNodesWhenExist()
@@ -3116,7 +3098,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(float keyboard
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
-        context->MarkDirtyOverlay();
+        context->OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();

@@ -1548,7 +1548,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg176, TestSize.Level1)
     RefPtr<FrameNode> child = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     context_->rootNode_->children_.clear();
     context_->rootNode_->AddChild(child);
-    context_->MarkDirtyOverlay();
+    context_->OnKeyboardAvoidOverlay();
     EXPECT_EQ(context_->rootNode_->GetChildren().size(), 1);
 }
 

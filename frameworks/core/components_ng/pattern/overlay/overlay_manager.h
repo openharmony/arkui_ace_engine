@@ -591,6 +591,7 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
+    void OnKeyboardAvoid();
     float GetRootHeight() const;
     float GetRootWidth() const;
 

@@ -145,7 +145,7 @@ public:
 
     static float GetCurrentRootHeight();
 
-    void MarkDirtyOverlay();
+    void OnKeyboardAvoidOverlay();
 
     void SetupRootElement() override;
 
