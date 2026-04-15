@@ -250,7 +250,7 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
   .wordBreak(WordBreak.HYPHENATION)
-  .optimizeTrailingSpace(true)
+  .orphanCharOptimization(true)
 }
 
 @Extend(Text)
@@ -263,7 +263,7 @@ function primaryTitleStyles(fontStyle: FontStyle) {
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
   .wordBreak(WordBreak.HYPHENATION)
-  .optimizeTrailingSpace(true)
+  .orphanCharOptimization(true)
 }
 
 @Styles
