@@ -2357,6 +2357,47 @@ HWTEST_F(SearchTestNg, testSelectedBackgroundColor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testSelectedBackgroundColor002
+ * @tc.desc: test search selectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testSelectedBackgroundColor002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set selectedBackgroundColor
+     */
+    OHOS::Ace::NG::SearchModelNG::SetSelectedBackgroundColor(frameNode, DEFAULT_SELECTED_BACKFROUND_COLOR_BLUE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::BLUE);
+
+    /**
+     * @tc.step: step3. Set selectedBackgroundColor
+     */
+    paintProperty->UpdateSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR_RED);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+
+    /**
+     * @tc.step: step4. Reset selectedBackgroundColor
+     */
+    OHOS::Ace::NG::SearchModelNG::ResetSelectedBackgroundColor(frameNode);
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColorFlagByUser());
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: testInputFilter001
  * @tc.desc: Test Search input filter
  * @tc.type: FUNC
