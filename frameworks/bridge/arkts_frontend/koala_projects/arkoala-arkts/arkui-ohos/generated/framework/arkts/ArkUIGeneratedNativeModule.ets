@@ -4656,9 +4656,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_removeSupportedUIStates(peer: KPointer, uiStates: KInt): void
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: boolean): boolean
+    native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: boolean, thisArray: KSerializerBuffer, thisLength: KInt): boolean
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCrossLanguageOptions(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_getCrossLanguageTreeOperating(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_checkIfCanCrossLanguageTreeOperating(peer: KPointer): boolean
     @ani.unsafe.Direct
     native static _FrameNodeExtender_setMeasuredSize(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

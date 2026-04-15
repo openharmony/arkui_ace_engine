@@ -31659,7 +31659,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
-                                            Ark_Boolean options)
+                                            Ark_Boolean options,
+                                            const Opt_Boolean* treeOperating)
     {
         if (!needGroupedLog(1)) {
             return 0;
@@ -31679,6 +31680,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return 0;
         }
         string out("getCrossLanguageOptions(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean GetCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getCrossLanguageTreeOperating(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean CheckIfCanCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("checkIfCanCrossLanguageTreeOperating(");
         WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
@@ -49457,6 +49482,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
             FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
+            FrameNodeExtenderAccessor::GetCrossLanguageTreeOperatingImpl,
+            FrameNodeExtenderAccessor::CheckIfCanCrossLanguageTreeOperatingImpl,
             FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
             FrameNodeExtenderAccessor::SetLayoutPositionImpl,
             FrameNodeExtenderAccessor::MeasureImpl,

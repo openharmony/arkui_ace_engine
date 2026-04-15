@@ -2427,14 +2427,23 @@ export class FrameNodeExtender {
         FrameNodeExtender.removeSupportedUIStates_serialize(peer_casted, uiStates_casted)
         return
     }
-    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean, treeOperating: boolean | undefined): boolean {
         const peer_casted = peer as (FrameNode)
         const options_casted = options as (boolean)
-        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
+        const treeOperating_casted = treeOperating as (boolean | undefined)
+        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted, treeOperating_casted)
     }
     public static getCrossLanguageOptions(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCrossLanguageOptions_serialize(peer_casted)
+    }
+    public static getCrossLanguageTreeOperating(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCrossLanguageTreeOperating_serialize(peer_casted)
+    }
+    public static checkIfCanCrossLanguageTreeOperating(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.checkIfCanCrossLanguageTreeOperating_serialize(peer_casted)
     }
     public static setMeasuredSize(peer: FrameNode, size: Size): void {
         const peer_casted = peer as (FrameNode)
@@ -2794,12 +2803,29 @@ export class FrameNodeExtender {
     private static removeSupportedUIStates_serialize(peer: FrameNode, uiStates: int32): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_removeSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates)
     }
-    private static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? true : false)
+    private static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean, treeOperating: boolean | undefined): boolean {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (treeOperating !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const treeOperatingTmpValue = treeOperating!
+            thisSerializer.writeBoolean(treeOperatingTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? true : false, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    private static getCrossLanguageTreeOperating_serialize(peer: FrameNode): boolean {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageTreeOperating(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    private static checkIfCanCrossLanguageTreeOperating_serialize(peer: FrameNode): boolean {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_checkIfCanCrossLanguageTreeOperating(extractors.toFrameNodePtr(peer))
         return retval
     }
     private static setMeasuredSize_serialize(peer: FrameNode, size: Size): void {
