@@ -29,6 +29,7 @@
 #include "base/log/dump_log.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/accessibility_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "js_third_provider_interaction_operation_test.h"

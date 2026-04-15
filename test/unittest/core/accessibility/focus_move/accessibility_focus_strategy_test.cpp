@@ -31,6 +31,7 @@
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;

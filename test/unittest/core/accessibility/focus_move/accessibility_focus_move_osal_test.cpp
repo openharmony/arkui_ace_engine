@@ -36,6 +36,7 @@
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_third_node_utils.h"
 #include "adapter/ohos/osal/js_third_provider_interaction_operation.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 #include "test/unittest/core/accessibility/js_accessibility_manager_test.h"
 #include "test/unittest/core/accessibility/js_third_provider_interaction_operation_test.h"
