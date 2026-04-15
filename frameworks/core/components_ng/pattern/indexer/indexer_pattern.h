@@ -109,6 +109,34 @@ public:
         return selected_;
     }
 
+    int32_t GetCollapsedIndex() const
+    {
+        return collapsedIndex_;
+    }
+
+    bool IsAutoCollapse() const
+    {
+        return autoCollapse_;
+    }
+
+    bool IsCollapsedItem(int32_t index) const
+    {
+        if (index < 0 || index >= static_cast<int32_t>(arrayValue_.size())) {
+            return false;
+        }
+        return arrayValue_[index].second;
+    }
+
+    int32_t GetCollapsedItemCount(int32_t index) const
+    {
+        if (index < 0 || index >= static_cast<int32_t>(collapsedItemNums_.size())) {
+            return 1;
+        }
+        return collapsedItemNums_[index];
+    }
+
+    std::string GetCollapsedItemText(int32_t displayIndex) const;
+
     bool IsMeasureBoundary() const override;
     void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
     void ReportInjectionEvent(bool result, std::string reson);
@@ -118,6 +146,7 @@ public:
 protected:
     void SetAccessibilityAction();
     bool MoveIndexByStep(int32_t step);
+    bool MoveAccessibilityIndexByStep(int32_t step);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void RemoveBubble();
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);

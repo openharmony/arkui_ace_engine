@@ -401,6 +401,23 @@ int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
     return  index;
 }
 
+std::string IndexerPattern::GetCollapsedItemText(int32_t displayIndex) const
+{
+    if (!autoCollapse_ || displayIndex < 0 || displayIndex >= static_cast<int32_t>(arrayValue_.size())) {
+        return "";
+    }
+    if (!arrayValue_[displayIndex].second) {
+        return arrayValue_[displayIndex].first;
+    }
+    auto baseIt = std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_[displayIndex].first);
+    auto baseIndex = static_cast<int32_t>(baseIt - fullArrayValue_.begin());
+    auto actualIndex = baseIndex + collapsedIndex_;
+    if (actualIndex >= 0 && actualIndex < static_cast<int32_t>(fullArrayValue_.size())) {
+        return fullArrayValue_[actualIndex];
+    }
+    return arrayValue_[displayIndex].first;
+}
+
 int32_t IndexerPattern::GetActualIndex(int32_t index)
 {
     auto actualIndex = autoCollapse_ && index > 0 && index < itemCount_ ?
@@ -677,6 +694,49 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     ApplyIndexChanged(true, true);
     OnSelect();
     return nextSelected >= 0;
+}
+
+bool IndexerPattern::MoveAccessibilityIndexByStep(int32_t step)
+{
+    if (autoCollapse_ && selected_ >= 0 && selected_ < static_cast<int32_t>(arrayValue_.size())
+        && arrayValue_[selected_].second) {
+        auto collapsedCount = collapsedItemNums_.size() > static_cast<size_t>(selected_)
+            ? collapsedItemNums_[selected_] : 1;
+        if (step > 0 && collapsedIndex_ < collapsedCount - 1) {
+            collapsedIndex_++;
+            lastCollapsedIndex_ = collapsedIndex_;
+            ResetStatus();
+            ApplyIndexChanged(true, true);
+            OnSelect();
+            return true;
+        }
+        if (step < 0 && collapsedIndex_ > 0) {
+            collapsedIndex_--;
+            lastCollapsedIndex_ = collapsedIndex_;
+            ResetStatus();
+            ApplyIndexChanged(true, true);
+            OnSelect();
+            return true;
+        }
+    }
+    auto nextSelected = GetSkipChildIndex(step);
+    if (selected_ == nextSelected || nextSelected == -1) {
+        return false;
+    }
+    selected_ = nextSelected;
+    if (autoCollapse_ && selected_ >= 0 && selected_ < static_cast<int32_t>(arrayValue_.size())
+        && arrayValue_[selected_].second) {
+        auto collapsedCount = collapsedItemNums_.size() > static_cast<size_t>(selected_)
+            ? collapsedItemNums_[selected_] : 1;
+        collapsedIndex_ = (step > 0) ? 0 : collapsedCount - 1;
+    } else {
+        collapsedIndex_ = 0;
+    }
+    lastCollapsedIndex_ = collapsedIndex_;
+    ResetStatus();
+    ApplyIndexChanged(true, true);
+    OnSelect();
+    return true;
 }
 
 bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
@@ -2062,12 +2122,12 @@ void IndexerPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         auto indexerPattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        indexerPattern->MoveIndexByStep(1);
+        indexerPattern->MoveAccessibilityIndexByStep(1);
     });
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
         auto indexerPattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        indexerPattern->MoveIndexByStep(-1);
+        indexerPattern->MoveAccessibilityIndexByStep(-1);
     });
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
