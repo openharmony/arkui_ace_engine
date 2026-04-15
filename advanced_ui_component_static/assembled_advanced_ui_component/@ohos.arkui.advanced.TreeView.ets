@@ -1409,9 +1409,7 @@ export struct TreeView {
           let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
           eventInfo.customId = `treeView_node_lift${currentItemNodeId}`
           try {
-            waitForCompletion(async () => {
-              await accessibility.sendAccessibilityEvent(eventInfo);
-            });
+            accessibility.sendAccessibilityEvent(eventInfo).awaitSync();
             setTimeout(() => {
               this.accessibilityNodeType = AccessibilityNodeType.TEXT;
             }, ENTER_EXIT_DURATION)
@@ -1651,9 +1649,7 @@ export struct TreeView {
       let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
       eventInfo.customId = `treeView_node${draggingCurrentNodeId}`
       try {
-        waitForCompletion(async () => {
-          await accessibility.sendAccessibilityEvent(eventInfo);
-        });
+        accessibility.sendAccessibilityEvent(eventInfo).awaitSync();
         setTimeout(() => {
           this.accessibilityNodeType = AccessibilityNodeType.TEXT;
         }, ENTER_EXIT_DURATION);
