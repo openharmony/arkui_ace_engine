@@ -181,7 +181,6 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
-    pipeline_->InitManagers();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -283,6 +282,7 @@ void MockPipelineContext::SetContainerModalTitleHeight(int32_t height)
 // pipeline_context ============================================================
 PipelineContext::PipelineContext()
 {
+    InitManagers();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
