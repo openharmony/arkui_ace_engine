@@ -22,8 +22,13 @@ if (ohos_indep_compiler_enable) {
   libarkts_path = "//binarys/developtools/ace_ets2bundle/innerapis/ohos_ets_libarkts_pack_prebuilt/clang_x64/libs/libarkts.tgz"
   pandasdk_path = "//binarys/developtools/ace_ets2bundle/innerapis/panda_sdk/clang_x64/libs/panda_sdk.tgz"
 } else {
-  libarkts_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
-  pandasdk_path = "$root_out_dir/clang_x64/obj/developtools/ace_ets2bundle/ets1.2/libarkts/panda-sdk/panda_sdk.tgz"
+  if (current_os == "linux") {
+    libarkts_root_path = root_out_dir
+  } else {
+    libarkts_root_path = "$root_out_dir/clang_x64"
+  }
+  libarkts_path = "$libarkts_root_path/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
+  pandasdk_path = "$libarkts_root_path/obj/developtools/ace_ets2bundle/ets1.2/libarkts/panda-sdk/panda_sdk.tgz"
 }
 
 template("scan_sources") {
