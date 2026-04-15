@@ -49,9 +49,10 @@
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {

@@ -19,7 +19,7 @@
 #include <string>
 
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/menu/menu_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace {

@@ -24,6 +24,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
@@ -36,6 +37,11 @@ namespace OHOS::Rosen {
     typedef Vector2<float> Vector2f;
 }
 #endif
+
+namespace OHOS::Ace {
+class SelectTheme;
+class GridColumnInfo;
+}
 
 namespace OHOS::Ace::NG {
 struct PreviewMenuParam {
@@ -84,6 +90,7 @@ struct MenuDumpInfo {
 class MenuLayoutProperty;
 class MenuPaintProperty;
 class MenuPattern;
+class SafeAreaManager;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm);
 public:

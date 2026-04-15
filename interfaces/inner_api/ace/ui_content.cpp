@@ -208,18 +208,6 @@ const std::string& UIContent::GetXComponentCompensationAngle()
     return UIContent::angleConfigJson_;
 }
 
-bool UIContent::SetUICorrectionConfig(const std::string& configStr)
-{
-    UIContent::uiCorrectionConfigJson_ = configStr;
-    LOGI("get UI correction config: %{public}s", configStr.c_str());
-    return true;
-}
-
-const std::string& UIContent::GetUICorrectionConfig()
-{
-    return UIContent::uiCorrectionConfigJson_;
-}
-
 std::string UIContent::GetCurrentUIStackInfo()
 {
     LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());

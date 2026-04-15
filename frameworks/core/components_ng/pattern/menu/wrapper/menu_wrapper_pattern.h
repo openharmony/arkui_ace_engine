@@ -23,6 +23,8 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
