@@ -1405,6 +1405,7 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
         .target = Converter::ArkValue<Ark_EventTarget>(touchEventInfo.GetTarget()),
         .timeStamp = Converter::ArkValue<Ark_Int64>(
             static_cast<int64_t>(touchEventInfo.GetTimeStamp().time_since_epoch().count())),
+        .source = Converter::ArkValue<Ark_SourceType>(touchEventInfo.GetSourceDevice()),
         .pressure = Converter::ArkValue<Ark_Float64>(touchEventInfo.GetForce()),
         .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltX().value_or(0))),
         .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltY().value_or(0))),
