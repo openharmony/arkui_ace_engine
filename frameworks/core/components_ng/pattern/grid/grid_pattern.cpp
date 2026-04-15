@@ -696,7 +696,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onJsFrameNodeScrollIndex = gridEventHub->GetJSFrameNodeOnGridScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
-    if (indexChanged) {
+    if (indexChanged && GetScrollSource() != SCROLL_FROM_NONE) {
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
     }
     auto onReachStart = gridEventHub->GetOnReachStart();
