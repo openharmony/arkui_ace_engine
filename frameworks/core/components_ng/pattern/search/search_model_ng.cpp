@@ -532,6 +532,27 @@ void SearchModelNG::ResetTextColor()
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void SearchModelNG::SetBackgroundColor(const Color& color)
+{
+    ViewAbstract::SetBackgroundColor(color);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, BackgroundColor, color);
+}
+
+void SearchModelNG::ResetBackgroundColor()
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SearchLayoutProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
+}
+
 void SearchModelNG::SetInputFilter(
     FrameNode* frameNode, const std::string& value, const std::function<void(const std::u16string&)>& onError)
 {

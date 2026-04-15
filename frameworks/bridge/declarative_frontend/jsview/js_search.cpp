@@ -99,6 +99,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
+    JSClass<JSSearch>::StaticMethod("backgroundColor", &JSSearch::SetBackgroundColor, opt);
     JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
@@ -677,6 +678,19 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
         RegisterResource<Color>("fontColor", resourceObject, colorVal);
     }
     SearchModel::GetInstance()->SetTextColor(colorVal);
+}
+
+void JSSearch::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        SearchModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    SearchModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
 void JSSearch::SetCaret(const JSCallbackInfo& info)

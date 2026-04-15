@@ -54,6 +54,8 @@ public:
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override {}
+    void SetBackgroundColor(const Color& color) override {}
+    void ResetBackgroundColor() override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetFocusable(bool focusable) override;

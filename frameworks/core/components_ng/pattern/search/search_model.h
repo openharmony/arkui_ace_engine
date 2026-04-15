@@ -58,6 +58,8 @@ public:
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetTextColor(const Color& color);
     virtual void ResetTextColor() {};
+    virtual void SetBackgroundColor(const Color& color);
+    virtual void ResetBackgroundColor();
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetFocusable(bool focusable) {};
