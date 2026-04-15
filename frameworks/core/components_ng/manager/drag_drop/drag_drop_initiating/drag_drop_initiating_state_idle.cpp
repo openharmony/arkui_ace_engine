@@ -54,14 +54,18 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
     UnRegisterDragListener();
     if (params.isNeedGather) {
         HideGatherNode();
-        DragDropFuncWrapper::ResetNode(frameNode);
+        // ResetNode has already been called in LIFTING state animation finish callback
+        // when transitioning from MOVING to IDLE, so skip it here to avoid duplicate call
+        if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::MOVING)) {
+            DragDropFuncWrapper::ResetNode(frameNode);
+        }
     }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
         if (gestureHub->GetTextDraggable()) {
             params.preScaledPixelMap = nullptr;
             HideTextAnimation();
         } else {
-            HidePixelMap();
+            HidePixelMap(false, 0, 0, true, currentState);
         }
         HideEventColumn();
     }
