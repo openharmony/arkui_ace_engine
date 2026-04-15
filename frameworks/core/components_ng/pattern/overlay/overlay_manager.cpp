@@ -6971,6 +6971,31 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
     }
 }
 
+void NotifyDirtyChildren(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto childNodes = node->GetChildren();
+    for (auto child : childNodes) {
+        if (child) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+void OverlayManager::OnKeyboardAvoid()
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root);
+    auto childNodes = root->GetChildren();
+    for (auto child : childNodes) {
+        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            NotifyDirtyChildren(child);
+        }
+    }
+}
+
 void OverlayManager::MarkDirtyOverlay()
 {
     auto root = rootNodeWeak_.Upgrade();
