@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 40 L160 40 L160 120 Q160 160 120 160 L40 160Z" fill="#607D8B">
+    <animateTransform attributeName="transform" type="scale" values="1;1.05;1;0.95;1" dur="2s" repeatCount="indefinite"/>
+  </path>
+</svg>
