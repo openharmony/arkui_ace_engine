@@ -49,7 +49,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
@@ -195,6 +194,9 @@
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
+#endif
+#ifndef CROSS_PLATFORM
+#include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -524,6 +526,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     JSFormButton::JSBind(globalObj);
 #endif
+    JSDistortionComponent::JSBind(globalObj);
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
@@ -550,7 +553,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRotationRecognizer::JSBind(globalObj);
     JSTouchRecognizer::JSBind(globalObj);
     JSUnionEffectContainer::JSBind(globalObj);
-    JSDistortionComponent::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
