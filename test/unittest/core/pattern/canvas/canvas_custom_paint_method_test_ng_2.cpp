@@ -197,6 +197,36 @@ HWTEST_F(CanvasCustomPaintMethodTestNg2, CanvasCustomPaintMethodTest041, TestSiz
 }
 
 /**
+ * @tc.name: CanvasCustomPaintMethodTest042
+ * @tc.desc: Test UpdatePaintShader with HDR gradient colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg2, CanvasCustomPaintMethodTest042, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    RSBrush brush(RSColor(0xffffffff));
+    Ace::Gradient gradient;
+    OHOS::Ace::GradientColor startColor(Color::FromFloat(0.8, 0.6, 0.4, 1.0, 2.0));
+    startColor.SetDimension(0.0);
+    OHOS::Ace::GradientColor endColor(Color::FromFloat(0.2, 0.4, 0.9, 1.0, 2.0));
+    endColor.SetDimension(1.0);
+    gradient.AddColor(startColor);
+    gradient.AddColor(endColor);
+
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::LINEAR);
+
+    gradient.type_ = Ace::GradientType::CONIC;
+    gradient.GetConicGradient().centerX = 0.5_pct;
+    gradient.GetConicGradient().centerY = 0.5_pct;
+    gradient.GetConicGradient().startAngle = AnimatableDimension(0.0);
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::CONIC);
+}
+
+/**
  * @tc.name: GetSystemDirectionTest
  * @tc.desc: Test the function 'GetSystemDirection' of the class 'CanvasPaintMethod'.
  * @tc.type: FUNC

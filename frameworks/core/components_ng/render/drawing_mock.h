@@ -97,6 +97,7 @@ using RSEllipsisMode = Testing::EllipsisMode;
 using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
+using RSUIColor = Testing::TestingUIColor;
 using RSPathFillType = Testing::TestingPathFillType;
 using RSParagraph = Testing::TestingTypography;
 using RSTypographyProperties = Testing::TestingTypographyProperties;
