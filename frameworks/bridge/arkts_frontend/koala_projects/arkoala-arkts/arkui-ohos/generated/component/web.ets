@@ -1475,7 +1475,7 @@ export class WebResourceResponse implements MaterializedBase {
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
-    attributeSet?: WebModifier;
+    webAttributeSet?: WebModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

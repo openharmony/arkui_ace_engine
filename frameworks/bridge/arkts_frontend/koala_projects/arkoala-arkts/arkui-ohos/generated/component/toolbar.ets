@@ -35,7 +35,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from "./common"
 
 export class ArkToolBarItemPeer extends ArkCommonMethodPeer {
-    attributeSet?: ToolBarItemModifier;
+    toolBarItemAttributeSet?: ToolBarItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

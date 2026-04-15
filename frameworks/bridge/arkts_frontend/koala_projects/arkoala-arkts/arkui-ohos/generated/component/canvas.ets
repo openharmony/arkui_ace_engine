@@ -639,7 +639,7 @@ export class RenderingContextSettings implements MaterializedBase {
     }
 }
 export class ArkCanvasPeer extends ArkCommonMethodPeer {
-    attributeSet?: CanvasModifier;
+    canvasAttributeSet?: CanvasModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

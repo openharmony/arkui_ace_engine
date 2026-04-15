@@ -294,7 +294,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
 }
 export class ArkSelectPeer extends ArkCommonMethodPeer {
-    attributeSet?: SelectModifier;
+    selectAttributeSet?: SelectModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

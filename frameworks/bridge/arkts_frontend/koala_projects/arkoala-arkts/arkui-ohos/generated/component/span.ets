@@ -43,7 +43,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { SpanModifier } from './../SpanModifier'
 export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
-    attributeSet?: BaseSpanModifier;
+    baseSpanAttributeSet?: BaseSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -80,7 +80,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
     }
 }
 export class ArkSpanPeer extends PeerNode {
-    attributeSet?: SpanModifier;
+    spanAttributeSet?: SpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

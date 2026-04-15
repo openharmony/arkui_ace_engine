@@ -77,7 +77,7 @@ export class ColorMetricsLinearGradient implements MaterializedBase {
     }
 }
 export class ArkSliderPeer extends ArkCommonMethodPeer {
-    attributeSet?: SliderModifier;
+    sliderAttributeSet?: SliderModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

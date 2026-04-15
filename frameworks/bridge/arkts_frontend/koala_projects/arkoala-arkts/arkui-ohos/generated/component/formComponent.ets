@@ -37,7 +37,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { Want_serializer } from './../framework/ohos.app.ability.Want'
 export class ArkFormComponentPeer extends ArkCommonMethodPeer {
-    attributeSet?: FormComponentModifier;
+    formComponentAttributeSet?: FormComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

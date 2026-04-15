@@ -155,7 +155,7 @@ export class CheckBoxGroupConfigurationInternal implements MaterializedBase,Comm
     }
 }
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
-    attributeSet?: CheckboxGroupModifier;
+    checkboxGroupAttributeSet?: CheckboxGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

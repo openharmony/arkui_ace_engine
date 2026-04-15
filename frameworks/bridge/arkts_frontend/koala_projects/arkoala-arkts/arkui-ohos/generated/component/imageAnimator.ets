@@ -37,7 +37,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
-    attributeSet?: ImageAnimatorModifier;
+    imageAnimatorAttributeSet?: ImageAnimatorModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

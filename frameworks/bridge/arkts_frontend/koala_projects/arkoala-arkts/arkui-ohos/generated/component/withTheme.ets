@@ -35,7 +35,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { CustomTheme_serializer } from './../framework/ohos.arkui.theme'
 export class ArkWithThemePeer extends PeerNode {
-    attributeSet?: WithThemeModifier;
+    withThemeAttributeSet?: WithThemeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

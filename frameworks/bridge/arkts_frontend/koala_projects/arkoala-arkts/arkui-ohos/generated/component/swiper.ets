@@ -525,7 +525,7 @@ export class SwiperController implements MaterializedBase {
     }
 }
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
-    attributeSet?: SwiperModifier;
+    swiperAttributeSet?: SwiperModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

@@ -1128,7 +1128,7 @@ export class NavPathStack implements MaterializedBase {
     }
 }
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
-    attributeSet?: NavigationModifier;
+    navigationAttributeSet?: NavigationModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

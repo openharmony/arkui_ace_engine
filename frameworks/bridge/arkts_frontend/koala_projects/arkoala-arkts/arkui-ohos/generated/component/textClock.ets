@@ -76,7 +76,7 @@ export class TextClockController implements MaterializedBase {
     }
 }
 export class ArkTextClockPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextClockModifier;
+    textClockAttributeSet?: TextClockModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

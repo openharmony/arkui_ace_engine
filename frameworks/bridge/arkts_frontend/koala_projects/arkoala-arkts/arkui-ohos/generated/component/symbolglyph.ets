@@ -61,7 +61,7 @@ export class SymbolEffect implements MaterializedBase {
     }
 }
 export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
-    attributeSet?: SymbolGlyphModifier;
+    symbolGlyphAttributeSet?: SymbolGlyphModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

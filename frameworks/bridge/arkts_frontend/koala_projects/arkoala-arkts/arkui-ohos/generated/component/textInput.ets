@@ -99,7 +99,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     }
 }
 export class ArkTextInputPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextInputModifier;
+    textInputAttributeSet?: TextInputModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

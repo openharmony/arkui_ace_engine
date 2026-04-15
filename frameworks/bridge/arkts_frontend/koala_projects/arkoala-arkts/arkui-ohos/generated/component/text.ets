@@ -131,7 +131,7 @@ export class TextController implements MaterializedBase {
     }
 }
 export class ArkTextPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextModifier;
+    textAttributeSet?: TextModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
