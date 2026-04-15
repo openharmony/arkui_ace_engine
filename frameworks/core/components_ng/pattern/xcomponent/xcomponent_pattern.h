@@ -433,6 +433,14 @@ protected:
     bool isNeedSoftKeyboard_ = false;
     std::list<StatisticEventType> statisticEventTypes_;
 
+    std::optional<float> selfIdealSurfaceWidth_;
+    std::optional<float> selfIdealSurfaceHeight_;
+    std::optional<float> selfIdealSurfaceOffsetX_;
+    std::optional<float> selfIdealSurfaceOffsetY_;
+
+    OffsetF globalPosition_;
+    void NativeXComponentOffset(double x, double y);
+
 private:
     void OnAreaChangedInner() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
@@ -442,8 +450,6 @@ private:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
-    void NativeXComponentOffset(double x, double y);
 
     void LoadNative();
     void OnNativeLoad(FrameNode* frameNode);
@@ -536,12 +542,6 @@ private:
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     SizeF initSize_;
-    OffsetF globalPosition_;
-
-    std::optional<float> selfIdealSurfaceWidth_;
-    std::optional<float> selfIdealSurfaceHeight_;
-    std::optional<float> selfIdealSurfaceOffsetX_;
-    std::optional<float> selfIdealSurfaceOffsetY_;
 
     uint32_t windowId_ = 0;
     int32_t treeId_ = 0;

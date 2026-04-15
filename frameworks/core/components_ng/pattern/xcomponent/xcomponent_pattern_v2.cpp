@@ -156,7 +156,7 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
         UpdateAnalyzerUIConfig(geometryNode);
     }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
-    HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
+    HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, config.frameOffsetChange);
     host->MarkNeedSyncRenderTree();
 }
 
@@ -168,8 +168,20 @@ std::pair<bool, bool> XComponentPatternV2::UpdateSurfaceRect()
     auto preSurfaceSize = surfaceSize_;
     auto preSurfaceOffset = surfaceOffset_;
 
-    surfaceSize_ = drawSize_;
-    surfaceOffset_ = localPosition_;
+    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
+        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
+        surfaceOffset_.SetX(selfIdealSurfaceOffsetX_.has_value()
+                                ? selfIdealSurfaceOffsetX_.value()
+                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
+
+        surfaceOffset_.SetY(selfIdealSurfaceOffsetY_.has_value()
+                                ? selfIdealSurfaceOffsetY_.value()
+                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
+        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
+    } else {
+        surfaceSize_ = drawSize_;
+        surfaceOffset_ = localPosition_;
+    }
     auto offsetChanged = preSurfaceOffset != surfaceOffset_;
     auto sizeChanged = preSurfaceSize != surfaceSize_;
     if (offsetChanged || sizeChanged) {
@@ -179,10 +191,15 @@ std::pair<bool, bool> XComponentPatternV2::UpdateSurfaceRect()
     return { offsetChanged, sizeChanged };
 }
 
-void XComponentPatternV2::HandleSurfaceChangeEvent(bool offsetChanged, bool sizeChanged, bool frameOffsetChange)
+void XComponentPatternV2::HandleSurfaceChangeEvent(bool needForceRender,
+    bool offsetChanged, bool sizeChanged, bool frameOffsetChange)
 {
     if (!drawSize_.IsPositive()) {
         return;
+    }
+    if (frameOffsetChange || offsetChanged) {
+        auto offset = globalPosition_ + paintRect_.GetOffset();
+        NativeXComponentOffset(offset.GetX(), offset.GetY());
     }
     if (sizeChanged) {
         XComponentSizeChange(paintRect_);
@@ -194,6 +211,11 @@ void XComponentPatternV2::HandleSurfaceChangeEvent(bool offsetChanged, bool size
     if (renderSurface_) {
         renderSurface_->SetSurfaceDefaultSize(
             static_cast<int32_t>(paintRect_.Width()), static_cast<int32_t>(paintRect_.Height()));
+    }
+    if (needForceRender) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
     }
 }
 
