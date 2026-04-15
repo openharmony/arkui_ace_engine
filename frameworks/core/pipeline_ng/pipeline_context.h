@@ -97,6 +97,7 @@ class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
+class DynamicComponentSafeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1352,7 +1353,8 @@ public:
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void MarkLpxDirtyNodes();
-
+    void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
+    RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1751,6 +1753,7 @@ private:
     CompatibleManager compatibleManager_;
     std::list<TouchEvent> compatibleTouchEvents_;
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
+    RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
 };
 
 /**

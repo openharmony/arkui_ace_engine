@@ -79,6 +79,7 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -219,6 +220,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -250,6 +252,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -276,6 +279,7 @@ PipelineContext::PipelineContext()
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -7949,5 +7953,17 @@ void PipelineContext::FlushRelaxedInteraction()
     CHECK_NULL_VOID(eventManager_);
     eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
 #endif
+}
+void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
+{
+    dynamicComponentSafeManager_ = manager;
+}
+
+RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeManager()
+{
+    if (!dynamicComponentSafeManager_) {
+        dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    }
+    return dynamicComponentSafeManager_;
 }
 } // namespace OHOS::Ace::NG

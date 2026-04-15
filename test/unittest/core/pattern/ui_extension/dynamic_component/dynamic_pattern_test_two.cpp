@@ -23,6 +23,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
@@ -624,5 +625,226 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest013, TestSize.Level1)
      */
     dynamicPattern->SetIsReportFrameEvent(true);
     EXPECT_TRUE(dynamicPattern->hostConfig_.isReportFrameEvent);
+}
+
+
+/**
+ * @tc.name: DynamicPatternTest014
+ * @tc.desc: Test DynamicPattern GetUIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest014, TestSize.Level1)
+{
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
+    EXPECT_NE(dynamicNode, nullptr);
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    auto result1 = dynamicPattern->GetUIContent();
+    EXPECT_EQ(result1, nullptr);
+
+    IsolatedInfo curIsolatedInfo;
+    void* runtime = nullptr;
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(dynamicNode, runtime, curIsolatedInfo);
+    auto result2 = dynamicPattern->GetUIContent();
+    EXPECT_EQ(result2, nullptr);
+}
+
+/**
+ * @tc.name: DynamicPatternTest015
+ * @tc.desc: Test DynamicPattern GetAllowOccupied and SetAllowOccupied
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest015, TestSize.Level1)
+{
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    EXPECT_FALSE(dynamicPattern->GetAllowOccupied());
+    dynamicPattern->SetAllowOccupied(true);
+    EXPECT_TRUE(dynamicPattern->GetAllowOccupied());
+}
+
+
+/**
+ * @tc.name: DynamicPatternTest016
+ * @tc.desc: Test DynamicPattern OnAttachContext and OnDetachContext with SafeManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest016, TestSize.Level1)
+{
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto pipeline = MockPipelineContext::GetCurrent();
+    EXPECT_NE(pipeline, nullptr);
+    auto rawPipeline = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(pipeline));
+    
+    // Attach Context
+    dynamicPattern->OnAttachContext(rawPipeline);
+    auto safeManager = rawPipeline->GetDynamicComponentSafeManager();
+    if (safeManager) {
+        auto host = dynamicPattern->GetHost();
+        EXPECT_TRUE(safeManager->aliveDynamics_.find(host->GetId()) != safeManager->aliveDynamics_.end());
+    }
+    
+    // Detach Context
+    dynamicPattern->OnDetachContext(rawPipeline);
+    if (safeManager) {
+        auto host = dynamicPattern->GetHost();
+        EXPECT_TRUE(safeManager->aliveDynamics_.find(host->GetId()) == safeManager->aliveDynamics_.end());
+    }
+#else
+    EXPECT_TRUE(true);
+#endif
+}
+
+
+/**
+ * @tc.name: DynamicComponentSafeManagerTest001
+ * @tc.desc: Test DynamicComponentSafeManager SetAvoidArea and GetAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest001, TestSize.Level1)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto safeManager = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    EXPECT_NE(safeManager, nullptr);
+
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreas;
+    OHOS::Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = {10, 10, 100, 100};
+    avoidArea.leftRect_ = {20, 20, 200, 200};
+    avoidArea.rightRect_ = {30, 30, 300, 300};
+    avoidArea.bottomRect_ = {40, 40, 400, 400};
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
+
+    safeManager->SetAvoidArea(avoidAreas);
+    auto resultAreas = safeManager->GetAvoidArea();
+
+    EXPECT_EQ(resultAreas.size(), 1);
+    EXPECT_EQ(resultAreas[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM].topRect_.posX_, 10);
+    EXPECT_EQ(resultAreas[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM].leftRect_.posX_, 20);
+    EXPECT_EQ(resultAreas[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM].rightRect_.posX_, 30);
+    EXPECT_EQ(resultAreas[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM].bottomRect_.posX_, 40);
+#endif
+}
+
+/**
+ * @tc.name: DynamicComponentSafeManagerTest002
+ * @tc.desc: Test DynamicComponentSafeManager SetOccupiedAreaChangeInfo and GetOccupiedAreaChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest002, TestSize.Level1)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto safeManager = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    EXPECT_NE(safeManager, nullptr);
+
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OHOS::Rosen::OccupiedAreaChangeInfo();
+    info->type_ = OHOS::Rosen::OccupiedAreaType::TYPE_INPUT;
+    info->safeHeight_ = 100;
+    info->textFieldPositionY_ = 50.0;
+    info->textFieldHeight_ = 20.0;
+    info->rect_ = {10, 20, 30, 40};
+
+    safeManager->SetOccupiedAreaChangeInfo(info);
+    auto resultInfo = safeManager->GetOccupiedAreaChangeInfo();
+
+    EXPECT_NE(resultInfo, nullptr);
+    EXPECT_EQ(resultInfo->type_, OHOS::Rosen::OccupiedAreaType::TYPE_INPUT);
+    EXPECT_EQ(resultInfo->safeHeight_, 100);
+    EXPECT_EQ(resultInfo->textFieldPositionY_, 50.0);
+    EXPECT_EQ(resultInfo->textFieldHeight_, 20.0);
+    EXPECT_EQ(resultInfo->rect_.posX_, 10);
+#endif
+}
+
+/**
+ * @tc.name: DynamicComponentSafeManagerTest003
+ * @tc.desc: Test DynamicComponentSafeManager UpdateAllDCAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest003, TestSize.Level1)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto safeManager = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    EXPECT_NE(safeManager, nullptr);
+
+    OHOS::Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = {10, 10, 100, 100};
+    
+    // Add a mock dynamic pattern
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, dynamicPattern);
+
+    safeManager->UpdateAllDCAvoidArea(1, avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM);
+    auto resultAreas = safeManager->GetAvoidArea();
+    EXPECT_EQ(resultAreas.size(), 1);
+#endif
+}
+
+/**
+ * @tc.name: DynamicComponentSafeManagerTest004
+ * @tc.desc: Test DynamicComponentSafeManager UpdateDynamicKeyBoardAvoid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest004, TestSize.Level1)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto safeManager = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    EXPECT_NE(safeManager, nullptr);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    EXPECT_NE(pipeline, nullptr);
+
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OHOS::Rosen::OccupiedAreaChangeInfo();
+    info->rect_ = {0, 0, 0, 100};
+
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreas;
+    
+    // Add a mock dynamic pattern
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    
+    // allowOccupied_ is false
+    safeManager->aliveDynamics_.try_emplace(dynamicNodeId, dynamicPattern);
+
+    bool result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline,
+        OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
+    EXPECT_FALSE(result);
+    
+    // allowOccupied_ is true
+    dynamicPattern->SetAllowOccupied(true);
+    result = safeManager->UpdateDynamicKeyBoardAvoid(pipeline,
+        OHOS::Rosen::WindowSizeChangeReason::UNDEFINED, info, nullptr, avoidAreas);
+    // Since mock host wouldn't have proper focus setup, it continues and returns false
+    EXPECT_FALSE(result);
+#endif
 }
 } // namespace OHOS::Ace::NG

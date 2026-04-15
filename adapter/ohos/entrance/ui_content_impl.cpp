@@ -91,6 +91,7 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
@@ -137,6 +138,8 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
@@ -558,6 +561,26 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     }
 }
 
+void AvoidAreasUpdateOnDynamicComponent(const RefPtr<NG::PipelineContext>& context,
+    RefPtr<Platform::AceContainer> container,
+    const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& transaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+{
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(context);
+    auto dynamicComponentManager = context->GetDynamicComponentSafeManager();
+    dynamicComponentManager->viewportConfig_ = config;
+    dynamicComponentManager->reason_ = static_cast<OHOS::Ace::WindowSizeChangeReason>(reason);
+    dynamicComponentManager->rsTransaction_ = transaction;
+    dynamicComponentManager->SetOccupiedAreaChangeInfo(info);
+    if (container->IsSceneBoardWindow()) {
+        return;
+    }
+    dynamicComponentManager->SetAvoidArea(avoidAreas);
+}
+
 std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
@@ -621,6 +644,11 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (context) {
+            auto dynamicComponentManager = context->GetDynamicComponentSafeManager();
+            dynamicComponentManager->UpdateAllDCAvoidArea(instanceId_, avoidArea, type);
+        }
         if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
             systemSafeArea_ = ConvertAvoidArea(avoidArea);
         } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
@@ -3674,6 +3702,21 @@ bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
     return false;
 }
 
+bool DynamicKeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason,
+    int32_t instanceId,
+    const RefPtr<PipelineBase>& pipelineContext,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(pipeline, false);
+    ContainerScope scope(instanceId);
+    auto dynamicComponentSafeManager = pipeline->GetDynamicComponentSafeManager();
+    return dynamicComponentSafeManager->UpdateDynamicKeyBoardAvoid(pipelineContext,
+        reason, info, rsTransaction, avoidAreas);
+}
+
 bool UIContentImpl::LaterAvoid(const Rect& keyboardRect, double positionY, double height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3735,12 +3778,17 @@ void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
 
 void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
     const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-    const RefPtr<Platform::AceContainer>& container)
+    const RefPtr<Platform::AceContainer>& container, const ViewportConfig& config,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     CHECK_NULL_VOID(info);
     auto rect = info->rect_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetKeyboardInfo(pipelineContext, keyboardRect.Height());
+    if (DynamicKeyboardAvoid(reason, instanceId, pipelineContext, info, rsTransaction, avoidAreas)) {
+        return;
+    }
     if (UIExtensionKeyboardAvoid(pipelineContext, instanceId, keyboardRect, info)) {
         return;
     }
@@ -3991,13 +4039,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
         taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container] {
+            pipelineContext, info, container, rsTransaction] {
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
                 if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, config,
+                        rsTransaction, avoidAreas);
                 }
             }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
@@ -4006,7 +4055,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
-                    taskId, weak = WeakPtr(viewportConfigMgr_)]() {
+                    taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
@@ -4073,7 +4122,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
         if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
-            KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+            KeyboardAvoid(reason, instanceId, pipelineContext, info, container,
+                beforeConfig, rsTransaction, avoidAreas);
         }
     };
     auto changeBrightnessTask = [container]() {
@@ -4111,6 +4161,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
     viewportConfigMgr_->StoreInfo(info);
     UIExtensionUpdateViewportConfig(config);
+    AvoidAreasUpdateOnDynamicComponent(context, container, config, reason, rsTransaction, avoidAreas, info);
 }
 
 void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config)
