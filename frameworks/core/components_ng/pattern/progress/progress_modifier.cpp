@@ -708,7 +708,7 @@ void ProgressModifier::SetValue(float value)
     CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
     if (smoothEffect_->Get()) {
-        if (isVisible_) {
+        if (inVisibleArea_) {
             auto motion =
                 AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
             option.SetCurve(motion);
