@@ -1527,14 +1527,18 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
 }
 
+// if return true, can not get property from customPropertyMap_
 bool FrameNode::IsJsCustomPropertyUpdated() const
 {
+    if (customPropertyMap_.empty()) {
+        return true;
+    }
     for (const auto& iter : customPropertyMap_) {
-        if (!iter.second.empty() && iter.second[1] == "0") {
-            return false;
+        if (iter.second.size() > 1 && iter.second[1] == "0") {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
