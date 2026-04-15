@@ -1488,6 +1488,153 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMenuBackBlurStyle002
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle002, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = false;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = false;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = true;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle003
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle003, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = false;
+    menuTheme->menuFontColor_ = Color::RED;
+    menuTheme->backgroundColor_ = Color::RED;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle004
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle004, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = false;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = false;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = true;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: MenuItemModelNgCreateTest001
  * @tc.desc: Verify MenuItemModelNG::Create when version is 26.
  * @tc.type: FUNC

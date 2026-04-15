@@ -35,9 +35,17 @@ public:
         CHECK_NULL_VOID(stack);
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
         CHECK_NULL_VOID(frameNode);
-        NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (!frameNode->GetThemeScopeId()) {
+                NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
+            } else {
+                auto selectTheme = frameNode->GetTheme<SelectTheme>(true);
+                CHECK_NULL_VOID(selectTheme);
+                NG::MenuItemModelNG::SetLabelFontColor(frameNode, selectTheme->GetMenuFontColor());
+            }
             NG::MenuItemModelNG::UpdateLabelFontColorSetByUser(false);
+        } else {
+            NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
         }
     }
 };
