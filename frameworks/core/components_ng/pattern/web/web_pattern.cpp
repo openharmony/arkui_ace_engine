@@ -8070,6 +8070,29 @@ bool WebPattern::OnNestedScrollV2(float& x, float& y)
     return isConsumed;
 }
 
+bool WebPattern::OnNestedFling(float& xVelocity, float& yVelocity)
+{
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    if (it == parentsMap_.end()) {
+        return false;
+    }
+    auto parent = it->second.Upgrade();
+    if (!AceType::DynamicCast<SwiperPattern>(parent)) {
+        return false;
+    }
+    float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    float directVelocity = velocity;
+    if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
+        directVelocity = -velocity;
+    }
+    if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
+        return HandleScrollVelocity(parent, directVelocity);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnNestedFling xVelocity=%{public}f, yVelocity=%{public}f", xVelocity,
+        yVelocity);
+    return false;
+}
+
 bool WebPattern::IsRtl()
 {
     auto host = GetHost();
