@@ -2242,4 +2242,25 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentUpdateWMSUIExtPropertyT
     SUCCEED();
 #endif
 }
+
+/**
+ * @tc.name: UIExtensionProxyTest001
+ * @tc.desc: Test UIExtensionProxy SendData
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionProxyTest001, TestSize.Level1)
+{
+    int32_t instanceId = 1;
+    auto pattern = AceType::MakeRefPtr<UIExtensionPattern>();
+    auto sessionWrapper = AceType::MakeRefPtr<SessionWrapperImpl>(pattern, instanceId,
+        1, SessionType::UI_EXTENSION_ABILITY);
+    auto proxy = AceType::MakeRefPtr<UIExtensionProxy>(sessionWrapper, pattern);
+    
+    AAFwk::WantParams wantParams;
+    proxy->SendData(wantParams);
+    
+    AAFwk::WantParams reWantParams;
+    EXPECT_EQ(proxy->SendDataSync(wantParams, reWantParams), 1);
+    EXPECT_NE(proxy->GetPattern(), nullptr);
+}
 } // namespace OHOS::Ace::NG
