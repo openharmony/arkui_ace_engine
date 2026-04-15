@@ -1961,14 +1961,14 @@ void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardI
     needToRequestKeyboardInner_ = needToRequestKeyboardInner;
 }
 
-bool TextFieldPattern::IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager)
+bool TextFieldPattern::IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager)
 {
     bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
-    bool isNoContinueFeatureClose =
-        !continueFeature && (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
-    bool isCloseCustomKeyboard = continueFeature && blurReason_ == BlurReason::WINDOW_BLUR &&
-                                 ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-    return isCloseCustomKeyboard || isNoContinueFeatureClose;
+    if (!continueFeature) {
+        return (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
+    }
+    return (blurReason_ == BlurReason::WINDOW_BLUR || blurReason_ == BlurReason::VIEW_SWITCH ) &&
+           ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
 }
 
 bool TextFieldPattern::QuerySmartEdgeState()
