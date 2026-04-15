@@ -4166,7 +4166,16 @@ function isDefaultFocus(singleButton, isHasDefaultFocus, isAllFocusFalse) {
  */
 function getNumberByResourceId(resourceId, defaultValue, allowZero) {
     try {
-        let sourceValue = resourceManager.getSystemResourceManager().getNumber(resourceId);
+        let currentDeviceType = 
+            resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+        let systemConfiguration =
+            resourceManager.getSystemResourceManager()?.getConfigurationSync();
+        if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+            systemConfiguration.deviceType = currentDeviceType;
+        }
+        let sourceValue = resourceManager.getSystemResourceManager()
+            ?.getOverrideResourceManager(systemConfiguration)
+            ?.getNumber(resourceId);
         if (sourceValue > 0 || allowZero) {
             return sourceValue;
         } else {

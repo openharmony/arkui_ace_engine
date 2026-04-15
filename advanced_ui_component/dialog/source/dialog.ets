@@ -1773,7 +1773,16 @@ function isDefaultFocus(singleButton: ButtonOptions, isHasDefaultFocus: boolean,
  */
 function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
   try {
-    let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    let currentDeviceType: resourceManager.DeviceType | undefined = 
+      resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+    let systemConfiguration: resourceManager.Configuration =
+      resourceManager.getSystemResourceManager()?.getConfigurationSync();
+    if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+      systemConfiguration.deviceType = currentDeviceType;
+    }
+    let sourceValue: number = resourceManager.getSystemResourceManager()
+      ?.getOverrideResourceManager(systemConfiguration)
+      ?.getNumber(resourceId);
     if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
