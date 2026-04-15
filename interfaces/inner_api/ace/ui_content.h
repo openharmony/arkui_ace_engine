@@ -36,6 +36,17 @@
 #include "ui_content_config.h"
 #include "viewport_config.h"
 
+#ifndef FORCE_SPLIT_MODE_DEFINED
+#define FORCE_SPLIT_MODE_DEFINED
+namespace OHOS::Ace {
+enum class ForceSplitMode {
+    NOT_SPLIT = 0,
+    WIDE_SPLIT = 1,
+    SQUARE_SPLIT = 2,
+};
+} // namespace OHOS::Ace
+#endif
+
 namespace OHOS {
 
 namespace AbilityRuntime {

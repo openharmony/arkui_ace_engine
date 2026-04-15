@@ -18,22 +18,16 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 enum class MenuStatus {
