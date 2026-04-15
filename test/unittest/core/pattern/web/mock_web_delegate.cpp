@@ -1401,6 +1401,10 @@ void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
 }
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction)
+{
+    return -1;
+}
 void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
 void WebDelegate::SetTransformHint(uint32_t rotation) {}
 void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,

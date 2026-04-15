@@ -284,7 +284,7 @@ public:
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
-
+    int32_t OnInjectionEvent(const std::string& command) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
     Color GetDefaultBackgroundColor();
@@ -1048,6 +1048,9 @@ public:
     }
 
     bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
+    int SendCommandToNWeb(std::unique_ptr<JsonValue> comJson);
+    int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
+                        const std::string& alignStr, int32_t offsetInt);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();

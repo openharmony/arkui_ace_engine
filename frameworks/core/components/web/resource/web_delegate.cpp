@@ -4931,6 +4931,48 @@ void WebDelegate::LoadUrl()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
 }
 
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& commandAction)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "SendCommandActionToNWeb Context upgrade failed");
+        return static_cast<int>(WebCommandResult::CONTEXT_NULL);
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        return static_cast<int>(WebCommandResult::TASK_EXECUTOR_NULL);
+    }
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+        if (!nweb_) {
+            return static_cast<int>(WebCommandResult::WEB_NWEB_NULL);
+        }
+        return nweb_->SendCommandAction(commandAction);
+    }
+
+    auto promise = std::make_shared<std::promise<int>>();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), commandAction, promise]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                promise->set_value(static_cast<int>(WebCommandResult::DELEGATE_NULL));
+                return;
+            }
+            if (!delegate->nweb_) {
+                promise->set_value(static_cast<int>(WebCommandResult::WEB_NWEB_NULL));
+                return;
+            }
+            promise->set_value(delegate->nweb_->SendCommandAction(commandAction));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendCommandAction");
+
+    auto future = promise->get_future();
+    if (future.wait_for(std::chrono::milliseconds(1000)) == std::future_status::ready) {
+        return future.get();
+    }
+
+    return static_cast<int>(WebCommandResult::WEB_EXECUTE_TIMEOUT);
+}
+
 void WebDelegate::OnInactive()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
