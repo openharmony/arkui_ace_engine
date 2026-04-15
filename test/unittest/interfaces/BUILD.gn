@@ -46,6 +46,7 @@ ohos_unittest("ui_content_test") {
     "googletest:gmock_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "image_framework:image",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -77,20 +78,21 @@ ohos_unittest("ui_content_tdd_test") {
   ]                                                                                                                                                                                   
  
   external_deps = [
-    "ability_runtime:abilitykit_native",                                                                                                                                              
-    "cJSON:cjson",                                                                                                                                                                    
-    "googletest:gmock_main",                                                                                                                                                          
-    "graphic_2d:librender_service_base",                                                                                                                                              
-    "graphic_2d:librender_service_client",                                                                                                                                            
-    "image_framework:image",                                                                                                                                                          
-    "input:libmmi-client",                                                                                                                                                            
-    "ipc:ipc_single",                                                                                                                                                                 
-    "window_manager:libdm",                                                                                                                                                           
-    "window_manager:libwm",                                                                                                                                                           
-    "window_manager:scene_session",                                                                                                                                                   
-    "window_manager:scene_session_manager",                                                                                                                                           
-  ]                                                                                                                                                                                   
- 
+    "ability_runtime:abilitykit_native",
+    "cJSON:cjson",
+    "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 } 
 

@@ -59,7 +59,7 @@ template("arkts_frontend") {
       "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common",
     ]
     
-    if (!build_ohos_sdk) {
+    if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
       deps += [ ":ArkoalaNative_ark" ]
     }
 
