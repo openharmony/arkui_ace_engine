@@ -376,16 +376,39 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
+bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
+{
+    if (dialogProperties.shadow.has_value() || dialogProperties.backgroundColor.has_value() ||
+    dialogProperties.backgroundBlurStyle.has_value() ||
+    dialogProperties.blurStyleOption.has_value() || dialogProperties.effectOption.has_value() ||
+    dialogProperties.borderWidth.has_value() || dialogProperties.borderColor.has_value() ||
+    dialogProperties.borderStyle.has_value()) {
+        return false;
+    }
+    return true;
+}
+
 void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
 {
-    CHECK_NULL_VOID(columnNode);
-    if (dialogProperties.systemMaterial &&
-        MaterialUtils::CheckMaterialValid(dialogProperties.systemMaterial->GetType())) {
-        auto renderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackBlurStyle(std::nullopt);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties.systemMaterial));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
     }
+    CHECK_NULL_VOID(columnNode);
+    if (!MaterialUtils::IsMaterialEnabled() && !CheckIsEnableMaterial(dialogProperties) &&
+        !dialogProperties.systemMaterial) {
+        return;
+    }
+    auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    if (dialogProperties.systemMaterial) {
+        material = dialogProperties.systemMaterial;
+    }
+    if (!MaterialUtils::IsEnableMaterialParam(material)) {
+        return;
+    }
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(material));
 }
 
 void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,

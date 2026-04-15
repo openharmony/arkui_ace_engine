@@ -41,8 +41,11 @@ private:
     static napi_status EnumMaterialTypeInit(napi_env env, napi_value exports);
     static napi_status EnumImmersiveStyleInit(napi_env env, napi_value exports);
     static napi_status EnumImmersiveLevelInit(napi_env env, napi_value exports);
+    static napi_status EnumMaterialStateInit(napi_env env, napi_value exports);
     static napi_status ImmersiveMaterialInit(napi_env env, napi_value exports);
     static napi_value JSGetImmersiveLevel(napi_env env, napi_callback_info info);
+    static napi_value JSGetMaterialInfo(napi_env env, napi_callback_info info);
+    static napi_value JSGetEmpty(napi_env env, napi_callback_info info);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     static int32_t GetCInt32(napi_value value, napi_env env);
     static napi_valuetype GetValueType(napi_env env, napi_value value);

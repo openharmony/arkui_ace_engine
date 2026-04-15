@@ -114,7 +114,7 @@ void SheetPresentationPattern::OnModifyDone()
             options.blurStyle = blurStyle;
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value_or(options));
-        } else if (!sheetStyle.systemMaterial) {
+        } else if (!MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         }
@@ -4774,7 +4774,7 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
 void SheetPresentationPattern::RemoveSheetResourceByMaterial(
     const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle)
 {
-    if (sheetStyle.systemMaterial) {
+    if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
         CHECK_NULL_VOID(sheetNode);
         auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(pattern);

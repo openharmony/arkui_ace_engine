@@ -336,6 +336,26 @@ public:
         return enableCustomComponentCrossAbility_;
     }
 
+    void SetUIMaterialState(const std::string& state)
+    {
+        uiMaterialState_ = state;
+    }
+
+    const std::string& GetUIMaterialState() const
+    {
+        return uiMaterialState_;
+    }
+
+    void SetUIMaterialType(const std::string& type)
+    {
+        uiMaterialType_ = type;
+    }
+
+    const std::string& GetUIMaterialType() const
+    {
+        return uiMaterialType_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -376,6 +396,8 @@ protected:
     bool mouseTransformEnable_ = false;
     bool touchPadIdChanged_ = false;
     bool enableCustomComponentCrossAbility_ = false;
+    std::string uiMaterialState_;
+    std::string uiMaterialType_;
     TextMenuInfo textMenuInfo_;
 };
 

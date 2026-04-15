@@ -177,6 +177,7 @@ RefPtr<UiMaterial> UiMaterial::Copy() const
 void UiMaterial::CopyTo(RefPtr<UiMaterial>& other) const
 {
     other->SetType(type_);
+    other->SetEmpty(isEmpty_);
     if (immersiveOptions_) {
         other->SetImmersiveOptions(*immersiveOptions_);
     }
@@ -368,5 +369,104 @@ Shadow MaterialUtils::GetImmersiveEmptyShadow()
     shadow.SetBlurRadius(-1.0f);
     shadow.SetColor(Color::TRANSPARENT);
     return shadow;
+}
+
+MaterialState MaterialUtils::ParseMaterialState(const std::string& value)
+{
+    if (value == "enable") {
+        return MaterialState::ENABLE;
+    } else if (value == "disable") {
+        return MaterialState::DISABLE;
+    } else if (value.empty() || value == "default") {
+        return MaterialState::DEFAULT;
+    }
+    return MaterialState::DEFAULT;
+}
+
+MaterialType MaterialUtils::ParseMaterialType(const std::string& value)
+{
+    if (value.empty() || value == "immersive") {
+        return MaterialType::IMMERSIVE; // IMMERSIVE
+    }
+    return MaterialType::IMMERSIVE; // IMMERSIVE
+}
+
+MaterialState MaterialUtils::GetConfiguredMaterialState()
+{
+    const auto& rawState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    return ParseMaterialState(rawState);
+}
+
+MaterialType MaterialUtils::GetConfiguredMaterialType()
+{
+    const auto& rawType = AceApplicationInfo::GetInstance().GetUIMaterialType();
+    return ParseMaterialType(rawType);
+}
+
+bool MaterialUtils::IsMaterialDisabled()
+{
+    return GetConfiguredMaterialState() == MaterialState::DISABLE;
+}
+
+bool MaterialUtils::IsMaterialEnabled()
+{
+    return GetConfiguredMaterialState() == MaterialState::ENABLE;
+}
+
+bool MaterialUtils::IsEmptyMaterial(const RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, false);
+    return material->IsEmpty();
+}
+
+RefPtr<UiMaterial> MaterialUtils::GetInitMaterial(const UiMaterialStyle style)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options {};
+    options.style = style;
+    material->SetImmersiveOptions(options);
+    return material;
+}
+
+bool MaterialUtils::IsEnableMaterialParam(const RefPtr<UiMaterial>& material)
+{
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return false;
+    }
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+    CHECK_NULL_RETURN(nativeMaterial, false);
+    return true;
+}
+
+const UiMaterial* MaterialUtils::PreProcessMaterial(const UiMaterial* material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    if (material->IsEmpty() || !MaterialUtils::CheckMaterialValid(material->GetType())) {
+        return nullptr;
+    }
+    return material;
+}
+
+MaterialState UiMaterial::GetConfiguredMaterialState()
+{
+    return MaterialUtils::GetConfiguredMaterialState();
+}
+
+bool UiMaterial::IsMaterialDisabled()
+{
+    return MaterialUtils::IsMaterialDisabled();
+}
+
+bool UiMaterial::IsMaterialEnabled()
+{
+    return MaterialUtils::IsMaterialEnabled();
+}
+
+RefPtr<UiMaterial> UiMaterial::CreateEmpty()
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetEmpty(true);
+    return material;
 }
 } // namespace OHOS::Ace

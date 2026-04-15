@@ -2197,6 +2197,16 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
         });
     AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
+    // Read UIMaterial metadata from entry module only
+    if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
+        for (const auto& metaDataItem : metaData) {
+            if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
+                AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+            } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
+                AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
+            }
+        }
+    }
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d, enableCustomComponentCrossAbility: %{public}d",

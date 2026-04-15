@@ -42,7 +42,7 @@ public:
     ~UiMaterial() override = default;
     bool operator==(const UiMaterial& other) const
     {
-        return type_  == other.type_;
+        return type_  == other.type_ && isEmpty_ == other.isEmpty_;
     }
     void SetType(int32_t type)
     {
@@ -52,6 +52,14 @@ public:
     {
         return type_;
     }
+    void SetEmpty(bool isEmpty)
+    {
+        isEmpty_ = isEmpty;
+    }
+    bool IsEmpty() const
+    {
+        return isEmpty_;
+    }
     void SetImmersiveOptions(const ImmersiveOptions& options);
     const std::shared_ptr<ImmersiveOptions>& GetImmersiveOptions() const;
     // create a copy of immersiveOptions.
@@ -60,11 +68,19 @@ public:
     virtual RefPtr<UiMaterial> Copy() const;
     // return whether contains applyShadow effect.
     virtual bool IsForceShadow() const;
+    // Get material state from application configuration.
+    static MaterialState GetConfiguredMaterialState();
+    // Check if material is disabled (state == DISABLE).
+    static bool IsMaterialDisabled();
+    // Check if material is enabled (state == ENABLE).
+    static bool IsMaterialEnabled();
+    static RefPtr<UiMaterial> CreateEmpty();
 protected:
     // copy member of self.
     virtual void CopyTo(RefPtr<UiMaterial>& other) const;
 
     int32_t type_{0};
+    bool isEmpty_{false};
     std::shared_ptr<ImmersiveOptions> immersiveOptions_;
 };
 
