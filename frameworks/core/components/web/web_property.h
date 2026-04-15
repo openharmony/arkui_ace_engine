@@ -92,6 +92,13 @@ enum class WebKeyboardAvoidMode : int32_t {
     DEFAULT
 };
 
+enum class  WebKeyboardAppearanceMode : int32_t {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 enum class WebElementType : int32_t {
     IMAGE = 1,
     LINK = 2,

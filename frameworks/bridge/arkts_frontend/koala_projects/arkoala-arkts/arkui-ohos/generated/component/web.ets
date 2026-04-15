@@ -3301,6 +3301,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setAiSessionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setKeyboardAppearanceAttribute(value: WebKeyboardAppearanceMode | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as WebKeyboardAppearanceMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3903,6 +3915,12 @@ export enum WebBypassVsyncCondition {
     NONE = 0,
     SCROLLBY_FROM_ZERO_OFFSET = 1
 }
+export enum WebKeyboardAppearanceMode {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+}
 export interface SelectionMenuOptionsExt {
     onAppear?: VoidCallback;
     onDisappear?: VoidCallback;
@@ -4389,6 +4407,9 @@ export interface WebAttribute extends CommonMethod {
     }
     aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
         throw new Error('Unimplemented method aiSessionOptions')
+    }
+    keyboardAppearance(value: WebKeyboardAppearanceMode | undefined): this {
+        throw new Error('Unimplemented method keyboardAppearance')
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
@@ -5243,6 +5264,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
         const value_casted = value as (Array<AISessionEvent> | undefined)
         this.getPeer()?.setAiSessionOptionsAttribute(value_casted)
+        return this
+    }
+    public keyboardAppearance(value: WebKeyboardAppearanceMode | undefined): this {
+        const value_casted = value as (WebKeyboardAppearanceMode | undefined)
+        this.getPeer()?.setKeyboardAppearanceAttribute(value_casted)
         return this
     }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {

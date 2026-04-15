@@ -4266,6 +4266,16 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
     keyBoardAvoidMode_ = mode;
 }
 
+void WebPattern::OnKeyboardAppearanceModeUpdate(const WebKeyboardAppearanceMode& mode)
+{
+    if (!delegate_) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnKeyboardAppearanceModeUpdate mode:%{public}d", mode);
+    delegate_->UpdateKeyboardAppearanceMode(mode);
+}
+
 void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
 {
     isEnabledHapticFeedback_ = enable;
@@ -4651,6 +4661,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(true));
         delegate_->UpdateGestureFocusMode(GetGestureFocusModeValue(GestureFocusMode::DEFAULT));
+        delegate_->UpdateKeyboardAppearanceMode(GetKeyboardAppearanceModeValue(WebKeyboardAppearanceMode::NONE_IMMERSIVE));
+
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }

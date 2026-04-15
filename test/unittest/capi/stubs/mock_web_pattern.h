@@ -79,6 +79,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAppearanceMode, WebKeyboardAppearanceMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
@@ -231,6 +232,7 @@ private:
     void OnOverScrollModeUpdate(int) {}
     void OnCopyOptionModeUpdate(int) {}
     void OnKeyboardAvoidModeUpdate(WebKeyboardAvoidMode const&) {}
+    void OnKeyboardAppearanceModeUpdate(WebKeyboardAppearanceMode const&) {}
     void OnAudioResumeIntervalUpdate(int) {}
     void OnAudioExclusiveUpdate(bool) {}
     void OnTextZoomRatioUpdate(int) {}

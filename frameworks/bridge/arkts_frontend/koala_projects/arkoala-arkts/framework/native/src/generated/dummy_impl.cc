@@ -20780,6 +20780,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                    const Opt_WebKeyboardAppearanceMode* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setKeyboardAppearance(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetEditMenuOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditMenuOptions* value)
     {
@@ -23844,6 +23855,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBindSelectionMenuImpl,
             WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
             WebAttributeModifier::SetOnInputmethodAttachedImpl,
+            WebAttributeModifier::SetKeyboardAppearanceImpl,
         };
         return &ArkUIWebModifierImpl;
     }

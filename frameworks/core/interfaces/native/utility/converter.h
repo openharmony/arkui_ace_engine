@@ -1080,6 +1080,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src);
     template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);
     template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
+    template<> void AssignCast(std::optional<WebKeyboardAppearanceMode>& dst, const Ark_WebKeyboardAppearanceMode& src);
     template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
     template<> void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);

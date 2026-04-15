@@ -8621,6 +8621,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_WebKeyboardAvoidMode* value)
     {
     }
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                  const Opt_WebKeyboardAppearanceMode* value)
+    {
+    }
     void SetEditMenuOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditMenuOptions* value)
     {
@@ -11290,6 +11294,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBindSelectionMenuImpl,
             WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
             WebAttributeModifier::SetOnInputmethodAttachedImpl,
+            WebAttributeModifier::SetKeyboardAppearanceImpl,
         };
         return &ArkUIWebModifierImpl;
     }

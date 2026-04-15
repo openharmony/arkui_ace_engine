@@ -10258,4 +10258,24 @@ void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::st
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
+
+void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetKeyboardImmersiveMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebKeyboardAppearnaceMode");
+}
+
 } // namespace OHOS::Ace

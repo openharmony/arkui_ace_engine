@@ -1764,6 +1764,20 @@ class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
   }
 }
 
+class WebKeyboardAppearanceModifier extends ModifierWithKey<WebKeyboardAppearanceMode> {
+  constructor(value: WebKeyboardAppearanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebKeyboardAppearanceModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAppearance(node);
+    } else {
+      getUINativeModule().web.setKeyboardAppearance(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2372,6 +2386,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onInputmethodAttached(callback: () => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
+    return this;
+  }
+  keyboardAppearance(mode: WebKeyboardAppearanceMode): this {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAppearanceModifier.identity, WebKeyboardAppearanceModifier, mode);
     return this;
   }
 }

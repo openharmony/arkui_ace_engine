@@ -6450,6 +6450,8 @@ struct ArkUIWebModifier {
     void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
     void (*setOnInputMethodAttached)(ArkUINodeHandle node, void* callback);
     void (*resetOnInputMethodAttached)(ArkUINodeHandle node);
+    void (*setKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

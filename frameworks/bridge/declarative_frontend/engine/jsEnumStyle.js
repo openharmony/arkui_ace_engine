@@ -1658,6 +1658,14 @@ let KeyboardAppearance;
   KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
 })(KeyboardAppearance || (KeyboardAppearance = {}));
 
+let WebKeyboardAppearanceMode;
+(function (WebKeyboardAppearanceMode) {
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.IMMERSIVE = 1] = 'IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(WebKeyboardAppearanceMode || (WebKeyboardAppearanceMode = {}));
+
 class SymbolEffect {
 }
 

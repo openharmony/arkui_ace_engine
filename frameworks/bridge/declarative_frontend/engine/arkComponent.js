@@ -25766,6 +25766,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
     return this;
   }
+  keyboardAppearance(mode) {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAppearanceModifier.identity, WebKeyboardAppearanceModifier, mode);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -25782,6 +25786,21 @@ class WebJavaScriptAccessModifier extends ModifierWithKey {
   }
 }
 WebJavaScriptAccessModifier.identity = Symbol('webJavaScriptAccessModifier');
+
+class WebKeyboardAppearanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAppearance(node);
+    }
+    else {
+      getUINativeModule().web.setKeyboardAppearance(node, this.value);
+    }
+  }
+}
+WebKeyboardAppearanceModifier.identity = Symbol('webKeyboardAppearanceModifier');
 
 class WebFileAccessModifier extends ModifierWithKey {
     constructor(value) {

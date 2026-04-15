@@ -2506,14 +2506,20 @@ void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEv
     }
 #endif // WEB_SUPPORTED
 }
-void SetKeyboardAppearanceImpl(Ark_NativePointer node,
-                               const Opt_WebKeyboardAppearanceMode* value)
+
+void SetKeyboardAppearanceImpl(Ark_NativePointer node, const Opt_WebKeyboardAppearanceMode* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetKeyboardAppearance(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WebKeyboardAppearanceMode>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetKeyboardAppearance(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
+
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
