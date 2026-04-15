@@ -573,6 +573,7 @@ void SliderPattern::SetStepPointAccessibilityVirtualNode(
     ACE_UINODE_TRACE(pointNode);
     auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(pointNodeProperty);
+    pointNodeProperty->UpdateEnableSmallLanguageTruncation(true);
     pointNodeProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
     pointNodeProperty->UpdateContent(txt);
     auto pointNodeContext = pointNode->GetRenderContext();

@@ -718,6 +718,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     ACE_UINODE_TRACE(title);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -731,6 +732,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titleProp->UpdateAdaptMinFontSize(ADAPT_TITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (title->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
@@ -783,6 +787,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     ACE_UINODE_TRACE(subtitle);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -794,6 +799,9 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
         titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (subtitle->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
@@ -843,6 +851,17 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     return titleRow;
 }
 
+void DialogPattern::UpdateContentTextProperty(
+    const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
+{
+    contentProp->UpdateEnableSmallLanguageTruncation(true);
+    if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        contentProp->UpdateOrphanCharOptimization(true);
+    }
+    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
+    contentProp->UpdateTextAlign(TextAlign::START);
+}
+
 RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
 {
     // Make Content node
@@ -851,8 +870,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     ACE_UINODE_TRACE(contentNode);
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
-    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
-    contentProp->UpdateTextAlign(TextAlign::START);
+    UpdateContentTextProperty(contentNode, contentProp);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
@@ -1190,6 +1208,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1283,6 +1302,11 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     // update text style
     auto style = dialogTheme_->GetContentTextStyle();
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateEnableSmallLanguageTruncation(true);
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        props->UpdateOrphanCharOptimization(true);
+    }
     props->UpdateContent(title);
     props->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     props->UpdateAdaptMaxFontSize(style.GetFontSize());

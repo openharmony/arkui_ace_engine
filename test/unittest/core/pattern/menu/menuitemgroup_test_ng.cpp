@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -971,6 +972,29 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)
     menuItemPattern->AddFooter(footerNode);
     EXPECT_NE(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
+}
+
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupTextProperty001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemGroupView.SetHeader(std::string("head"));
+    ASSERT_NE(menuItemPattern->headerContent_, nullptr);
+    auto headerLayoutProps = menuItemPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(headerLayoutProps, nullptr);
+    EXPECT_TRUE(headerLayoutProps->GetEnableSmallLanguageTruncationValue(false));
+    menuItemGroupView.SetFooter(std::string("foot"));
+    ASSERT_NE(menuItemPattern->footerContent_, nullptr);
+    auto footerLayoutProps = menuItemPattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(footerLayoutProps, nullptr);
+    EXPECT_TRUE(footerLayoutProps->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

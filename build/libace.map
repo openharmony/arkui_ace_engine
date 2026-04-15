@@ -1926,6 +1926,8 @@
       "OHOS::Ace::NG::TextLayoutAlgorithm::GetTextStyle() const";
       "OHOS::Ace::NG::TextLayoutAlgorithm::TextLayoutAlgorithm(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>>>, OHOS::Ace::RefPtr<OHOS::Ace::NG::ParagraphManager>, bool, OHOS::Ace::TextStyle const&, bool)";
       "OHOS::Ace::NG::TextLayoutProperty::FromJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>> const&)";
+      "OHOS::Ace::NG::TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool)";
+      "OHOS::Ace::NG::TextLayoutProperty::UpdateEnableSmallLanguageTruncation(bool const&)";
       "OHOS::Ace::NG::TextLayoutProperty::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextModelNG::ResetTextColor(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::TextOverlayModifier::ClearSelectedForegroundColorAndRects()";
@@ -2040,6 +2042,7 @@
       "OHOS::Ace::NG::TextPattern::OnHandleAreaChanged()";
       "OHOS::Ace::NG::TextPattern::OnHandleMove(OHOS::Ace::NG::RectT<float> const&, bool)";
       "OHOS::Ace::NG::TextPattern::OnHandleSelectionMenuCallback(OHOS::Ace::NG::SelectionMenuCalblackId, std::__h::shared_ptr<OHOS::Ace::NG::SelectionMenuParams>)";
+      "OHOS::Ace::NG::TextPattern::OnLanguageConfigurationUpdate()";
       "OHOS::Ace::NG::TextPattern::OnModifyDone()";
       "OHOS::Ace::NG::TextPattern::OnSensitiveStyleChange(bool)";
       "OHOS::Ace::NG::TextPattern::OnTextGestureSelectionEnd(OHOS::Ace::TouchLocationInfo const&)";
@@ -3745,6 +3748,7 @@
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnDetachFromMainTree*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnDirtyLayoutWrapperSwap*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnFrameNodeChanged*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnLanguageConfigurationUpdate*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnModifyDone*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnSensitiveStyleChange*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnThemeScopeUpdate*;

@@ -32,6 +32,7 @@ void MarqueeModelNG::Create()
         auto textNode = FrameNode::CreateFrameNode(
             TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
     } else {
@@ -39,6 +40,7 @@ void MarqueeModelNG::Create()
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
@@ -193,28 +195,16 @@ RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
         CHECK_NULL_RETURN(textNode, nullptr);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
         frameNode->AddChild(textNode);
-
-        auto secondChild = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(secondChild, nullptr);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
-        secondLayoutProperty->UpdateMaxLines(1);
-        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_RETURN(textChild, nullptr);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
-
-        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-        CHECK_NULL_RETURN(secondChild, nullptr);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
-        secondLayoutProperty->UpdateMaxLines(1);
     }
     return frameNode;
 }

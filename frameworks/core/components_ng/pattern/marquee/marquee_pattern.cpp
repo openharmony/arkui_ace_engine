@@ -127,6 +127,7 @@ void MarqueePattern::CreateSecondChild()
     CHECK_NULL_VOID(secondChild);
     auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(secondLayoutProperty);
+    secondLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     secondLayoutProperty->UpdateMaxLines(1);
     host->AddChild(secondChild);
 }

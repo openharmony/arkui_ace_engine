@@ -454,6 +454,39 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnModifyDone004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MarqueePattern_OnModifyDone005
+ * @tc.desc: Test OnModifyDone creates second text child with small-language truncation enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnModifyDone005, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMarqueeSpacing(Dimension(10.0));
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    frameNode->paintProperty_ = paintProperty;
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode);
+
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueePattern = AceType::MakeRefPtr<MarqueePattern>();
+    marqueePattern->frameNode_ = hostNode;
+    marqueePattern->OnModifyDone();
+
+    ASSERT_EQ(frameNode->GetChildren().size(), 1);
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(secondChild, nullptr);
+    auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: MarqueePattern_ChangeSecondChildVisibility001
  * @tc.desc: Test ChangeSecondChildVisibility with no second child
  * @tc.type: FUNC
@@ -2053,5 +2086,113 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleTextOffset012, TestSize.L
     auto res = marqueeModel->GetDoubleTextOffset();
     EXPECT_FLOAT_EQ(res.first, 123.5f);
     EXPECT_FLOAT_EQ(res.second, 323.5f);
+}
+
+/**
+* @tc.name: MarqueeCreateFrameNode001
+* @tc.desc: Test MarqueeModelNG::CreateFrameNode with empty children.
+* @tc.type: FUNC
+*/
+HWTEST_F(MarqueeTestNg, MarqueeCreateFrameNode001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Call CreateFrameNode with a valid nodeId.
+    */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+
+    /**
+    * @tc.steps: step2. Check the frameNode is created successfully.
+    * @tc.expected: step2. frameNode is not nullptr.
+    */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::MARQUEE_ETS_TAG);
+    EXPECT_EQ(frameNode->GetId(), nodeId);
+
+    /**
+    * @tc.steps: step3. Check the text child node is created and maxLines is set to 1.
+    * @tc.expected: step3. child count is 1 and text maxLines is 1.
+    */
+    auto& children = frameNode->GetChildren();
+    EXPECT_EQ(children.size(), 1U);
+    auto textChild = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(textChild, nullptr);
+    EXPECT_EQ(textChild->GetTag(), V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto& groupProperty = textLayoutProperty->GetOrCreateTextLineStyle();
+    EXPECT_EQ(groupProperty->GetMaxLinesValue(), 1);
+}
+
+/**
+* @tc.name: MarqueeCreateFrameNode002
+* @tc.desc: Test MarqueeModelNG::CreateFrameNode with existing children.
+* @tc.type: FUNC
+*/
+HWTEST_F(MarqueeTestNg, MarqueeCreateFrameNode002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Pre-create a marquee FrameNode with an existing text child.
+    */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto existNode = FrameNode::CreateFrameNode(
+        V2::MARQUEE_ETS_TAG, nodeId, AceType::MakeRefPtr<MarqueePattern>());
+    ASSERT_NE(existNode, nullptr);
+    auto textChild = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    existNode->AddChild(textChild);
+
+    /**
+    * @tc.steps: step2. Register the existing node and call CreateFrameNode with the same nodeId.
+    */
+    ElementRegister::GetInstance()->AddReferenced(nodeId, existNode);
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+
+    /**
+    * @tc.steps: step3. Check the returned frameNode updates the existing child's maxLines.
+    * @tc.expected: step3. frameNode is not nullptr and child's maxLines is 1.
+    */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetId(), nodeId);
+    auto& children = frameNode->GetChildren();
+    EXPECT_EQ(children.size(), 1U);
+    auto firstChild = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(firstChild, nullptr);
+    auto childTextLayoutProperty = firstChild->GetLayoutProperty<TextLayoutProperty>();
+
+    ASSERT_NE(childTextLayoutProperty, nullptr);
+    auto& groupProperty = childTextLayoutProperty->GetOrCreateTextLineStyle();
+    EXPECT_EQ(groupProperty->GetMaxLinesValue(), 1);
+}
+
+/**
+* @tc.name: MarqueeCreateFrameNode003
+* @tc.desc: Test MarqueeModelNG::CreateFrameNode with different nodeId values.
+* @tc.type: FUNC
+*/
+HWTEST_F(MarqueeTestNg, MarqueeCreateFrameNode003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Call CreateFrameNode with different nodeId and verify basic properties.
+    */
+    int32_t nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode1 = MarqueeModelNG::CreateFrameNode(nodeId1);
+    ASSERT_NE(frameNode1, nullptr);
+    EXPECT_EQ(frameNode1->GetId(), nodeId1);
+
+    int32_t nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode2 = MarqueeModelNG::CreateFrameNode(nodeId2);
+    ASSERT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), nodeId2);
+
+    /**
+    * @tc.steps: step2. Verify both nodes are independent and each has its own text child.
+    */
+    EXPECT_NE(frameNode1->GetId(), frameNode2->GetId());
+    EXPECT_EQ(frameNode1->GetChildren().size(), 1U);
+    EXPECT_EQ(frameNode2->GetChildren().size(), 1U);
 }
 } // namespace OHOS::Ace::NG

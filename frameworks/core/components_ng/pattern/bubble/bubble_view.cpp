@@ -913,6 +913,10 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        layoutProperty->UpdateOrphanCharOptimization(true);
+    }
     layoutProperty->UpdateContent(message);
     auto popupTheme = theme ? theme : GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);

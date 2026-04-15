@@ -596,6 +596,7 @@ friend class ServiceCollaborationMenuAceHelper;
     void HandleOptionFontColor();
     void UpdateOptionStyle();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
+    void UpdateTextAlignment(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
     void OnAttachToMainTree() override;
     void UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuProperty,
         RefPtr<MenuItemLayoutProperty>& itemProperty, RefPtr<SelectTheme> &menuTheme, bool isLabel);

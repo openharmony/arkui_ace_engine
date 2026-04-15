@@ -549,6 +549,29 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate002, TestSize.Level1)
     EXPECT_EQ(textProperty->GetContent().value(), u"Title");
 }
 
+HWTEST_F(MenuTestNg, MenuViewTitleTextProperty001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    std::vector<OptionParam> params { OptionParam("content", std::function<void()>()) };
+    MenuParam menuParam;
+    menuParam.title = "Title";
+    auto wrapperNode = MenuView::Create(std::move(params), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetFirstChild());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto column = menuPattern->GetMenuColumn();
+    ASSERT_NE(column, nullptr);
+    auto titleChild = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    ASSERT_NE(titleChild, nullptr);
+    auto textProperty = titleChild->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_TRUE(textProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
 /**
  * @tc.name: MenuViewTestNgCreate003
  * @tc.desc: Verify Create.

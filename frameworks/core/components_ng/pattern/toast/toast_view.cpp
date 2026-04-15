@@ -92,6 +92,10 @@ void ToastView::UpdateTextLayoutProperty(
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+    }
     textLayoutProperty->UpdateMaxFontScale(std::min(MAX_TOAST_SCALE, context->GetMaxAppFontScale()));
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
